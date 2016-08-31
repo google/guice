@@ -42,6 +42,7 @@ import javax.persistence.EntityManager;
 public class DynamicFinderTest extends TestCase {
   private Injector injector;
 
+  @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit").addFinder(JpaFinder.class));
 
@@ -49,6 +50,7 @@ public class DynamicFinderTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
+  @Override
   public final void tearDown() {
     injector.getInstance(PersistService.class).stop();
   }

@@ -174,6 +174,7 @@ final class Initializer {
      * Reentrant. If {@code instance} was registered for injection at injector-creation time, this
      * method will ensure that all its members have been injected before returning.
      */
+    @Override
     public T get(Errors errors) throws ErrorsException {
       // skipping acquiring lock if initialization is already finished
       if (state == InjectableReferenceState.READY) {

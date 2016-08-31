@@ -66,7 +66,7 @@ public class GuiceObjectFactory extends ObjectFactory {
       @SuppressWarnings({"unchecked"})
       Class<? extends Module> moduleClass =
           (Class<? extends Module>) Class.forName(moduleClassName);
-      this.module = moduleClass.newInstance();
+      this.module = moduleClass.getConstructor().newInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -79,6 +79,7 @@ public class GuiceObjectFactory extends ObjectFactory {
 
   Set<Class<?>> boundClasses = new HashSet<Class<?>>();
 
+  @Override
   public Class getClassInstance(String name) throws ClassNotFoundException {
     Class<?> clazz = super.getClassInstance(name);
 
@@ -106,6 +107,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     return clazz;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public Object buildBean(Class clazz, Map extraContext) {
     if (injector == null) {
@@ -122,34 +124,37 @@ public class GuiceObjectFactory extends ObjectFactory {
   private void createInjector() {
     try {
       logger.info("Creating injector...");
-      this.injector = Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          // Install default servlet bindings.
-          install(new ServletModule());
+      this.injector =
+          Guice.createInjector(
+              new AbstractModule() {
+                @Override
+                protected void configure() {
+                  // Install default servlet bindings.
+                  install(new ServletModule());
 
-          // Install user's module.
-          if (module != null) {
-            logger.info("Installing " + module + "...");
-            install(module);
-          }
-          else {
-            logger.info("No module found. Set 'guice.module' to a Module "
-                + "class name if you'd like to use one.");
-          }
+                  // Install user's module.
+                  if (module != null) {
+                    logger.info("Installing " + module + "...");
+                    install(module);
+                  } else {
+                    logger.info(
+                        "No module found. Set 'guice.module' to a Module "
+                            + "class name if you'd like to use one.");
+                  }
 
-          // Tell the injector about all the action classes, etc., so it
-          // can validate them at startup.
-          for (Class<?> boundClass : boundClasses) {
-            // TODO: Set source from Struts XML.
-            bind(boundClass);
-          }
+                  // Tell the injector about all the action classes, etc., so it
+                  // can validate them at startup.
+                  for (Class<?> boundClass : boundClasses) {
+                    // TODO: Set source from Struts XML.
+                    bind(boundClass);
+                  }
 
-          // Validate the interceptor class.
-          for (ProvidedInterceptor interceptor : interceptors) {
-            interceptor.validate(binder());
-          }
-        }
-      });
+                  // Validate the interceptor class.
+                  for (ProvidedInterceptor interceptor : interceptors) {
+                    interceptor.validate(binder());
+                  }
+                }
+              });
 
       // Inject interceptors.
       for (ProvidedInterceptor interceptor : interceptors) {
@@ -163,9 +168,10 @@ public class GuiceObjectFactory extends ObjectFactory {
     logger.info("Injector created successfully.");
   }
 
+  @Override
   @SuppressWarnings("unchecked")
-  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,
-      Map interceptorRefParams) throws ConfigurationException {
+  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
+      throws ConfigurationException {
     // Ensure the interceptor class is present.
     Class<? extends Interceptor> interceptorClass;
     try {
@@ -218,16 +224,19 @@ public class GuiceObjectFactory extends ObjectFactory {
       delegate = superBuildInterceptor(config, params);
     }
 
+    @Override
     public void destroy() {
       if (null != delegate) {
         delegate.destroy();
       }
     }
 
+    @Override
     public void init() {
       throw new AssertionError();
     }
 
+    @Override
     public String intercept(ActionInvocation invocation) throws Exception {
       return delegate.intercept(invocation);
     }

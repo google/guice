@@ -221,15 +221,16 @@ public class Annotations {
     /** Returns true if the given class has one of the desired annotations. */
     private CacheLoader<Class<? extends Annotation>, Boolean> hasAnnotations =
         new CacheLoader<Class<? extends Annotation>, Boolean>() {
-      public Boolean load(Class<? extends Annotation> annotationType) {
-        for (Annotation annotation : annotationType.getAnnotations()) {
-          if (annotationTypes.contains(annotation.annotationType())) {
-            return true;
+          @Override
+          public Boolean load(Class<? extends Annotation> annotationType) {
+            for (Annotation annotation : annotationType.getAnnotations()) {
+              if (annotationTypes.contains(annotation.annotationType())) {
+                return true;
+              }
+            }
+            return false;
           }
-        }
-        return false;
-      }
-    };
+        };
 
     final LoadingCache<Class<? extends Annotation>, Boolean> cache = CacheBuilder.newBuilder().weakKeys()
         .build(hasAnnotations);

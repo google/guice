@@ -37,38 +37,47 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
     return null;
   }
 
+  @Override
   public V visit(InstanceBinding<? extends T> instanceBinding) {
     return visitOther(instanceBinding);
   }
 
+  @Override
   public V visit(ProviderInstanceBinding<? extends T> providerInstanceBinding) {
     return visitOther(providerInstanceBinding);
   }
 
+  @Override
   public V visit(ProviderKeyBinding<? extends T> providerKeyBinding) {
     return visitOther(providerKeyBinding);
   }
 
+  @Override
   public V visit(LinkedKeyBinding<? extends T> linkedKeyBinding) {
     return visitOther(linkedKeyBinding);
   }
 
+  @Override
   public V visit(ExposedBinding<? extends T> exposedBinding) {
     return visitOther(exposedBinding);
   }
 
+  @Override
   public V visit(UntargettedBinding<? extends T> untargettedBinding) {
     return visitOther(untargettedBinding);
   }
 
+  @Override
   public V visit(ConstructorBinding<? extends T> constructorBinding) {
     return visitOther(constructorBinding);
   }
 
+  @Override
   public V visit(ConvertedConstantBinding<? extends T> convertedConstantBinding) {
     return visitOther(convertedConstantBinding);
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public V visit(ProviderBinding<? extends T> providerBinding) {
     // TODO(cushon): remove raw (Binding) cast when we don't care about javac 6 anymore

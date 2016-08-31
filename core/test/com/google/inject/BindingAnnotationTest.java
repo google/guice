@@ -151,20 +151,23 @@ public class BindingAnnotationTest extends TestCase {
 
   public Blue createBlue(final int value) {
     return new Blue() {
+      @Override
       public int value() {
         return value;
       }
 
+      @Override
       public Class<? extends Annotation> annotationType() {
         return Blue.class;
       }
 
-      @Override public boolean equals(Object o) {
-        return o instanceof Blue
-            && ((Blue) o).value() == value;
+      @Override
+      public boolean equals(Object o) {
+        return o instanceof Blue && ((Blue) o).value() == value;
       }
 
-      @Override public int hashCode() {
+      @Override
+      public int hashCode() {
         return 127 * "value".hashCode() ^ value;
       }
     };

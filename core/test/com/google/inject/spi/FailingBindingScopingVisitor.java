@@ -24,18 +24,22 @@ import java.lang.annotation.Annotation;
 
 public class FailingBindingScopingVisitor implements BindingScopingVisitor<Void> {
 
+  @Override
   public Void visitEagerSingleton() {
     throw new AssertionFailedError();
   }
 
+  @Override
   public Void visitScope(Scope scope) {
     throw new AssertionFailedError();
   }
 
+  @Override
   public Void visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
     throw new AssertionFailedError();
   }
 
+  @Override
   public Void visitNoScoping() {
     throw new AssertionFailedError();
   }

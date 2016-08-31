@@ -147,6 +147,7 @@ public class InjectionPointTest extends TestCase {
 
     try {
       InjectionPoint.forConstructor(constructor, new TypeLiteral<LinkedHashSet<String>>() {});
+      fail("Expected ConfigurationException");
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "java.util.LinkedHashSet<java.lang.String>",
           " does not define java.util.HashSet.<init>()",
@@ -155,6 +156,7 @@ public class InjectionPointTest extends TestCase {
 
     try {
       InjectionPoint.forConstructor((Constructor) constructor, new TypeLiteral<Set<String>>() {});
+      fail("Expected ConfigurationException");
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "java.util.Set<java.lang.String>",
           " does not define java.util.HashSet.<init>()",
@@ -329,8 +331,12 @@ public class InjectionPointTest extends TestCase {
   }
   
   static class Sub extends Super {
+    @Override
     @SuppressWarnings("OverridesJavaxInjectableMethod")
     public void atInject() {}
+
+    @Override
+    @SuppressWarnings("OverridesGuiceInjectableMethod")
     public void gInject() {}
     
     @com.google.inject.Inject public void privateAtAndPublicG() {}
@@ -346,12 +352,18 @@ public class InjectionPointTest extends TestCase {
   }
   
   static class SubSub extends Sub {
+    @SuppressWarnings("OverridesGuiceInjectableMethod")
     @Override public void privateAtAndPublicG() {}
     @SuppressWarnings("OverridesJavaxInjectableMethod")
     @Override public void privateGAndPublicAt() {}
-    
-    @Override public void atFirstThenG() {}
-    @Override public void gFirstThenAt() {}
+
+    @SuppressWarnings("OverridesGuiceInjectableMethod")
+    @Override
+    public void atFirstThenG() {}
+
+    @SuppressWarnings("OverridesGuiceInjectableMethod")
+    @Override
+    public void gFirstThenAt() {}
   }
   
   static class RestrictedSuper {

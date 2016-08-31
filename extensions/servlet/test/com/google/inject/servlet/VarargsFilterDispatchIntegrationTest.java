@@ -165,16 +165,20 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class TestFilter implements Filter {
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
       inits++;
     }
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) throws IOException, ServletException {
+    @Override
+    public void doFilter(
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
       doFilters++;
       filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    @Override
     public void destroy() {
       destroys++;
     }

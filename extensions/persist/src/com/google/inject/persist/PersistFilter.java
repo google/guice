@@ -75,16 +75,22 @@ public final class PersistFilter implements Filter {
     this.persistService = persistService;
   }
 
+  @Override
   public void init(FilterConfig filterConfig) throws ServletException {
     persistService.start();
   }
 
+  @Override
   public void destroy() {
     persistService.stop();
   }
 
-  public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
-      final FilterChain filterChain) throws IOException, ServletException {
+  @Override
+  public void doFilter(
+      final ServletRequest servletRequest,
+      final ServletResponse servletResponse,
+      final FilterChain filterChain)
+      throws IOException, ServletException {
 
     unitOfWork.begin();
     try {

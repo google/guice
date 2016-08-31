@@ -445,42 +445,46 @@ import java.util.Random;
   static class InterceptorModule
       extends AbstractModule {
     @Override protected void configure() {
-      bindInterceptor(new AbstractMatcher<Class<?>>() {
-        public boolean matches(Class<?> clazz) {
-          try {
+      bindInterceptor(
+          new AbstractMatcher<Class<?>>() {
+            @Override
+            public boolean matches(Class<?> clazz) {
+              try {
 
-            // the class and constructor must be visible
-            int clazzModifiers = clazz.getModifiers();
-            int ctorModifiers = clazz.getConstructor().getModifiers();
-            return (clazzModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
-                && (ctorModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0;
+                // the class and constructor must be visible
+                int clazzModifiers = clazz.getModifiers();
+                int ctorModifiers = clazz.getConstructor().getModifiers();
+                return (clazzModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+                    && (ctorModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0;
 
-          } catch (NoSuchMethodException e) {
-            return false;
-          }
-        }
-      }, new AbstractMatcher<Method>() {
-        public boolean matches(Method method) {
+              } catch (NoSuchMethodException e) {
+                return false;
+              }
+            }
+          },
+          new AbstractMatcher<Method>() {
+            @Override
+            public boolean matches(Method method) {
 
-          // the intercepted method must also be visible
-          int methodModifiers = method.getModifiers();
-          return (methodModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0;
+              // the intercepted method must also be visible
+              int methodModifiers = method.getModifiers();
+              return (methodModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0;
+            }
+          },
+          new org.aopalliance.intercept.MethodInterceptor() {
+            @Override
+            public Object invoke(org.aopalliance.intercept.MethodInvocation mi) throws Throwable {
 
-        }
-      }, new org.aopalliance.intercept.MethodInterceptor() {
-        public Object invoke(org.aopalliance.intercept.MethodInvocation mi)
-            throws Throwable {
-
-          return mi.proceed();
-        }
-      });
+              return mi.proceed();
+            }
+          });
     }
   }
-/*end[AOP]*/
+  /*end[AOP]*/
 
   // called from OSGi when bundle starts
-  public void start(BundleContext context)
-      throws BundleException {
+  @Override
+  public void start(BundleContext context) throws BundleException {
 
     final Bundle bundle = context.getBundle();
 
@@ -507,5 +511,6 @@ import java.util.Random;
   }
 
   // called from OSGi when bundle stops
+  @Override
   public void stop(BundleContext context) {}
 }

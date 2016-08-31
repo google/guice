@@ -444,6 +444,7 @@ public class ServletScopes {
   private static final <T> Callable<T> wrap(
       final Callable<T> delegate, final RequestScoper requestScoper) {
     return new Callable<T>() {
+      @Override
       public T call() throws Exception {
         RequestScoper.CloseableScope scope = requestScoper.open();
         try {

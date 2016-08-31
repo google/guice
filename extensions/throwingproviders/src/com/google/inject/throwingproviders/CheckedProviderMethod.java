@@ -103,6 +103,7 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
         binder, exceptionTypes, sbinder.getExceptionTypes(), checkedProvider);
   }
 
+  @Override
   public T get() throws Exception {
     Object[] parameters = new Object[parameterProviders.size()];
     for (int i = 0; i < parameters.length; i++) {
@@ -128,6 +129,7 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
     }
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return dependencies;
   }

@@ -34,6 +34,7 @@ final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     this.source = checkNotNull(source, "source");
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     // TODO(sameb): Does this need to push state into the context?

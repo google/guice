@@ -25,6 +25,7 @@ import com.google.inject.spi.ElementsTest;
  */
 public class NoopOverrideTest extends ElementsTest {
 
+  @Override
   protected void checkModule(Module module, ElementVisitor<?>... visitors) {
     Module overridden = Modules.override(module).with(Modules.EMPTY_MODULE);
     super.checkModule(overridden, visitors);

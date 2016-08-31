@@ -215,16 +215,20 @@ public class FilterDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class TestFilter implements Filter {
+    @Override
     public void init(FilterConfig filterConfig) {
       inits++;
     }
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) throws IOException, ServletException {
+    @Override
+    public void doFilter(
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
       doFilters++;
       filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    @Override
     public void destroy() {
       destroys++;
     }
@@ -341,9 +345,10 @@ public class FilterDispatchIntegrationTest extends TestCase {
       this.counter = counter;
     }
     
-    public void destroy() {
-    }
+    @Override
+    public void destroy() {}
     
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws ServletException, IOException {
       if (calledAt != -1) {
@@ -353,6 +358,7 @@ public class FilterDispatchIntegrationTest extends TestCase {
       chain.doFilter(request, response);
     }
     
+    @Override
     public void init(FilterConfig filterConfig) {}
   }
   

@@ -41,20 +41,28 @@ import javax.inject.Named;
 public class GuiceTck extends TestCase {
 
   public static Test suite() {
-    return Tck.testsFor(Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Car.class).to(Convertible.class);
-        bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
-        bind(Engine.class).to(V8Engine.class);
-        bind(Cupholder.class);
-        bind(Tire.class);
-        bind(FuelTank.class);
-        requestStaticInjection(Convertible.class, SpareTire.class);
-      }
+    return Tck.testsFor(
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    bind(Car.class).to(Convertible.class);
+                    bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
+                    bind(Engine.class).to(V8Engine.class);
+                    bind(Cupholder.class);
+                    bind(Tire.class);
+                    bind(FuelTank.class);
+                    requestStaticInjection(Convertible.class, SpareTire.class);
+                  }
 
-      @Provides @Named("spare") Tire provideSpareTire(SpareTire spare) {
-        return spare;
-      }
-    }).getInstance(Car.class), true, true);
+                  @Provides
+                  @Named("spare")
+                  Tire provideSpareTire(SpareTire spare) {
+                    return spare;
+                  }
+                })
+            .getInstance(Car.class),
+        true,
+        true);
   }
 }

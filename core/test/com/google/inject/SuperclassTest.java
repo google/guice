@@ -24,11 +24,14 @@ import junit.framework.TestCase;
 public class SuperclassTest extends TestCase {
 
   public void testSuperclassInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class);
+              }
+            });
 
     Provider<Sub> creator = injector.getProvider(Sub.class);
     Sub sub = creator.get();

@@ -42,6 +42,7 @@ public class ManualLocalTransactionsTest extends TestCase {
   private static final String UNIQUE_TEXT = "some unique text" + new Date();
   private static final String UNIQUE_TEXT_2 = "some other unique text" + new Date();
 
+  @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -49,6 +50,7 @@ public class ManualLocalTransactionsTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
+  @Override
   public void tearDown() {
     injector.getInstance(EntityManagerFactory.class).close();
   }

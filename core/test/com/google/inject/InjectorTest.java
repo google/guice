@@ -57,14 +57,15 @@ public class InjectorTest extends TestCase {
     final SampleSingleton singleton = new SampleSingleton();
     final SampleSingleton other = new SampleSingleton();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(SampleSingleton.class).toInstance(singleton);
-        bind(SampleSingleton.class)
-            .annotatedWith(Other.class)
-            .toInstance(other);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(SampleSingleton.class).toInstance(singleton);
+                bind(SampleSingleton.class).annotatedWith(Other.class).toInstance(other);
+              }
+            });
 
     assertSame(singleton,
         injector.getInstance(Key.get(SampleSingleton.class)));
@@ -91,14 +92,16 @@ public class InjectorTest extends TestCase {
   }
 
   private Injector createFooInjector() throws CreationException {
-    return Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Bar.class).to(BarImpl.class);
-        bind(Tee.class).to(TeeImpl.class);
-        bindConstant().annotatedWith(S.class).to("test");
-        bindConstant().annotatedWith(I.class).to(5);
-      }
-    });
+    return Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Bar.class).to(BarImpl.class);
+            bind(Tee.class).to(TeeImpl.class);
+            bindConstant().annotatedWith(S.class).to("test");
+            bindConstant().annotatedWith(I.class).to(5);
+          }
+        });
   }
 
   public void testGetInstance() throws CreationException {
@@ -111,11 +114,14 @@ public class InjectorTest extends TestCase {
 
   public void testIntAndIntegerAreInterchangeable()
       throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bindConstant().annotatedWith(I.class).to(5);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(I.class).to(5);
+              }
+            });
 
     IntegerWrapper iw = injector.getInstance(IntegerWrapper.class);
     assertEquals(5, (int) iw.i);
@@ -168,10 +174,12 @@ public class InjectorTest extends TestCase {
       this.tee = tee;
     }
 
+    @Override
     public Tee getTee() {
       return tee;
     }
 
+    @Override
     public int getI() {
       return i;
     }
@@ -193,23 +201,27 @@ public class InjectorTest extends TestCase {
       this.s = s;
     }
 
+    @Override
     public String getS() {
       return s;
     }
 
+    @Override
     public Bar getBar() {
       return bar;
     }
   }
 
   public void testInjectStatics() throws CreationException {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bindConstant().annotatedWith(S.class).to("test");
-        bindConstant().annotatedWith(I.class).to(5);
-        requestStaticInjection(Static.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bindConstant().annotatedWith(S.class).to("test");
+            bindConstant().annotatedWith(I.class).to(5);
+            requestStaticInjection(Static.class);
+          }
+        });
 
     assertEquals("test", Static.s);
     assertEquals(5, Static.i);
@@ -217,11 +229,13 @@ public class InjectorTest extends TestCase {
 
   public void testInjectStaticInterface() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          requestStaticInjection(Interface.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              requestStaticInjection(Interface.class);
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(1, ce.getErrorMessages().size());
@@ -248,12 +262,15 @@ public class InjectorTest extends TestCase {
   }
 
   public void testPrivateInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("foo");
-        bind(int.class).toInstance(5);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("foo");
+                bind(int.class).toInstance(5);
+              }
+            });
 
     Private p = injector.getInstance(Private.class);
     assertEquals("foo", p.fromConstructor);
@@ -276,12 +293,15 @@ public class InjectorTest extends TestCase {
   }
 
   public void testProtectedInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("foo");
-        bind(int.class).toInstance(5);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("foo");
+                bind(int.class).toInstance(5);
+              }
+            });
 
     Protected p = injector.getInstance(Protected.class);
     assertEquals("foo", p.fromConstructor);
@@ -304,15 +324,19 @@ public class InjectorTest extends TestCase {
   }
 
   public void testInstanceInjectionHappensAfterFactoriesAreSetUp() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Object.class).toInstance(new Object() {
-          @Inject Runnable r;
-        });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Object.class)
+                .toInstance(
+                    new Object() {
+                      @Inject Runnable r;
+                    });
 
-        bind(Runnable.class).to(MyRunnable.class);
-      }
-    });
+            bind(Runnable.class).to(MyRunnable.class);
+          }
+        });
   }
 
   public void testSubtypeNotProvided() {
@@ -361,13 +385,15 @@ public class InjectorTest extends TestCase {
   }
 
   static class MyRunnable implements Runnable {
-   public void run() {}
+    @Override
+    public void run() {}
   }
 
   @ProvidedBy(Tree.class)
   static class Money {}
 
   static class Tree implements Provider<Object> {
+    @Override
     public Object get() {
       return "Money doesn't grow on trees";
     }
@@ -381,6 +407,7 @@ public class InjectorTest extends TestCase {
 
   @ProvidedBy(Chicken.class)
   static class Chicken implements Provider<Chicken> {
+    @Override
     public Chicken get() {
       return this;
     }
@@ -390,21 +417,28 @@ public class InjectorTest extends TestCase {
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
     final AtomicReference<JustInTime> got = new AtomicReference<JustInTime>();
 
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        requestInjection(new Object() {
-          @Inject void initialize(final Injector injector)
-              throws ExecutionException, InterruptedException {
-            Future<JustInTime> future = executorService.submit(new Callable<JustInTime>() {
-              public JustInTime call() throws Exception {
-                return injector.getInstance(JustInTime.class);
-              }
-            });
-            got.set(future.get());
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            requestInjection(
+                new Object() {
+                  @Inject
+                  void initialize(final Injector injector)
+                      throws ExecutionException, InterruptedException {
+                    Future<JustInTime> future =
+                        executorService.submit(
+                            new Callable<JustInTime>() {
+                              @Override
+                              public JustInTime call() throws Exception {
+                                return injector.getInstance(JustInTime.class);
+                              }
+                            });
+                    got.set(future.get());
+                  }
+                });
           }
         });
-      }
-    });
 
     assertNotNull(got.get());
   }

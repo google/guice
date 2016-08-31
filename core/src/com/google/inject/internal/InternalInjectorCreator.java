@@ -201,22 +201,25 @@ public final class InternalInjectorCreator {
     for (final BindingImpl<?> binding : candidateBindings) {
       if (isEagerSingleton(injector, binding, stage)) {
         try {
-          injector.callInContext(new ContextualCallable<Void>() {
-            Dependency<?> dependency = Dependency.get(binding.getKey());
-            public Void call(InternalContext context) {
-              Dependency previous = context.pushDependency(dependency, binding.getSource());
-              Errors errorsForBinding = errors.withSource(dependency);
-              try {
-                binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
-              } catch (ErrorsException e) {
-                errorsForBinding.merge(e.getErrors());
-              } finally {
-                context.popStateAndSetDependency(previous);
-              }
+          injector.callInContext(
+              new ContextualCallable<Void>() {
+                Dependency<?> dependency = Dependency.get(binding.getKey());
 
-              return null;
-            }
-          });
+                @Override
+                public Void call(InternalContext context) {
+                  Dependency previous = context.pushDependency(dependency, binding.getSource());
+                  Errors errorsForBinding = errors.withSource(dependency);
+                  try {
+                    binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
+                  } catch (ErrorsException e) {
+                    errorsForBinding.merge(e.getErrors());
+                  } finally {
+                    context.popStateAndSetDependency(previous);
+                  }
+
+                  return null;
+                }
+              });
         } catch (ErrorsException e) {
           throw new AssertionError();
         }
@@ -247,63 +250,81 @@ public final class InternalInjectorCreator {
     ToolStageInjector(Injector delegateInjector) {
       this.delegateInjector = delegateInjector;
     }
+    @Override
     public void injectMembers(Object o) {
       throw new UnsupportedOperationException(
         "Injector.injectMembers(Object) is not supported in Stage.TOOL");
     }
+    @Override
     public Map<Key<?>, Binding<?>> getBindings() {
       return this.delegateInjector.getBindings();
     }
+    @Override
     public Map<Key<?>, Binding<?>> getAllBindings() {
       return this.delegateInjector.getAllBindings();
     }
+    @Override
     public <T> Binding<T> getBinding(Key<T> key) {
       return this.delegateInjector.getBinding(key);
     }
+    @Override
     public <T> Binding<T> getBinding(Class<T> type) {
       return this.delegateInjector.getBinding(type);
     }
+    @Override
     public <T> Binding<T> getExistingBinding(Key<T> key) {
       return this.delegateInjector.getExistingBinding(key);
     }
+    @Override
     public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
       return this.delegateInjector.findBindingsByType(type);
     }
+    @Override
     public Injector getParent() {
       return delegateInjector.getParent();
     }
+    @Override
     public Injector createChildInjector(Iterable<? extends Module> modules) {
       return delegateInjector.createChildInjector(modules);
     }
+    @Override
     public Injector createChildInjector(Module... modules) {
       return delegateInjector.createChildInjector(modules);
     }
+    @Override
     public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
       return delegateInjector.getScopeBindings();
     }
+    @Override
     public Set<TypeConverterBinding> getTypeConverterBindings() {
       return delegateInjector.getTypeConverterBindings();
     }
+    @Override
     public <T> Provider<T> getProvider(Key<T> key) {
       throw new UnsupportedOperationException(
         "Injector.getProvider(Key<T>) is not supported in Stage.TOOL");
     }
+    @Override
     public <T> Provider<T> getProvider(Class<T> type) {
       throw new UnsupportedOperationException(
         "Injector.getProvider(Class<T>) is not supported in Stage.TOOL");
     }
+    @Override
     public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
       throw new UnsupportedOperationException(
         "Injector.getMembersInjector(TypeLiteral<T>) is not supported in Stage.TOOL");
     }
+    @Override
     public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
       throw new UnsupportedOperationException(
         "Injector.getMembersInjector(Class<T>) is not supported in Stage.TOOL");
     }
+    @Override
     public <T> T getInstance(Key<T> key) {
       throw new UnsupportedOperationException(
         "Injector.getInstance(Key<T>) is not supported in Stage.TOOL");
     }
+    @Override
     public <T> T getInstance(Class<T> type) {
       throw new UnsupportedOperationException(
         "Injector.getInstance(Class<T>) is not supported in Stage.TOOL");

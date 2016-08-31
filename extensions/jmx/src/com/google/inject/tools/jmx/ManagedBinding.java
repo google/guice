@@ -26,14 +26,17 @@ class ManagedBinding implements ManagedBindingMBean {
     this.binding = binding;
   }
 
+  @Override
   public String getSource() {
     return binding.getSource().toString();
   }
 
+  @Override
   public String getKey() {
     return binding.getKey().toString();
   }
 
+  @Override
   public String getProvider() {
     return binding.getProvider().toString();
   }

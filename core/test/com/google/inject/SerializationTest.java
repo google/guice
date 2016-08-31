@@ -35,6 +35,7 @@ public class SerializationTest extends TestCase {
     Asserts.reserialize(new MyAbstractModule());
   }
   static class MyAbstractModule extends AbstractModule implements Serializable {
+    @Override
     protected void configure() {}
   }
 
@@ -44,11 +45,13 @@ public class SerializationTest extends TestCase {
 
   private CreationException createCreationException() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(List.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(List.class);
+            }
+          });
       throw new AssertionFailedError();
     } catch (CreationException e) {
       return e;

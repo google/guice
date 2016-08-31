@@ -30,11 +30,13 @@ final class ConstantFactory<T> implements InternalFactory<T> {
     this.initializable = initializable;
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
       throws ErrorsException {
     return initializable.get(errors);
   }
 
+  @Override
   public String toString() {
     return MoreObjects.toStringHelper(ConstantFactory.class)
         .add("value", initializable)

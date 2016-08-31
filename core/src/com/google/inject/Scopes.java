@@ -39,41 +39,47 @@ public class Scopes {
   public static final Scope SINGLETON = new SingletonScope();
 
   /**
-   * No scope; the same as not applying any scope at all.  Each time the
-   * Injector obtains an instance of an object with "no scope", it injects this
-   * instance then immediately forgets it.  When the next request for the same
-   * binding arrives it will need to obtain the instance over again.
+   * No scope; the same as not applying any scope at all. Each time the Injector obtains an instance
+   * of an object with "no scope", it injects this instance then immediately forgets it. When the
+   * next request for the same binding arrives it will need to obtain the instance over again.
    *
-   * <p>This exists only in case a class has been annotated with a scope
-   * annotation such as {@link Singleton @Singleton}, and you need to override
-   * this to "no scope" in your binding.
+   * <p>This exists only in case a class has been annotated with a scope annotation such as {@link
+   * Singleton @Singleton}, and you need to override this to "no scope" in your binding.
    *
    * @since 2.0
    */
-  public static final Scope NO_SCOPE = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-      return unscoped;
-    }
-    @Override public String toString() {
-      return "Scopes.NO_SCOPE";
-    }
-  };
+  public static final Scope NO_SCOPE =
+      new Scope() {
+        @Override
+        public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+          return unscoped;
+        }
 
-  private static final BindingScopingVisitor<Boolean> IS_SINGLETON_VISITOR
-      = new BindingScopingVisitor<Boolean>() {
+        @Override
+        public String toString() {
+          return "Scopes.NO_SCOPE";
+        }
+      };
+
+  private static final BindingScopingVisitor<Boolean> IS_SINGLETON_VISITOR =
+      new BindingScopingVisitor<Boolean>() {
+        @Override
         public Boolean visitNoScoping() {
           return false;
         }
 
+        @Override
         public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
           return scopeAnnotation == Singleton.class
               || scopeAnnotation == javax.inject.Singleton.class;
         }
 
+        @Override
         public Boolean visitScope(Scope scope) {
           return scope == Scopes.SINGLETON;
         }
 
+        @Override
         public Boolean visitEagerSingleton() {
           return true;
         }
@@ -129,23 +135,29 @@ public class Scopes {
   public static boolean isScoped(Binding<?> binding, final Scope scope,
       final Class<? extends Annotation> scopeAnnotation) {
     do {
-      boolean matches = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
-        public Boolean visitNoScoping() {
-          return false;
-        }
+      boolean matches =
+          binding.acceptScopingVisitor(
+              new BindingScopingVisitor<Boolean>() {
+                @Override
+                public Boolean visitNoScoping() {
+                  return false;
+                }
 
-        public Boolean visitScopeAnnotation(Class<? extends Annotation> visitedAnnotation) {
-          return visitedAnnotation == scopeAnnotation;
-        }
+                @Override
+                public Boolean visitScopeAnnotation(Class<? extends Annotation> visitedAnnotation) {
+                  return visitedAnnotation == scopeAnnotation;
+                }
 
-        public Boolean visitScope(Scope visitedScope) {
-          return visitedScope == scope;
-        }
+                @Override
+                public Boolean visitScope(Scope visitedScope) {
+                  return visitedScope == scope;
+                }
 
-        public Boolean visitEagerSingleton() {
-          return false;
-        }
-      });
+                @Override
+                public Boolean visitEagerSingleton() {
+                  return false;
+                }
+              });
 
       if (matches) {
         return true;

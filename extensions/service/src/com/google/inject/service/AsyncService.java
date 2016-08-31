@@ -42,6 +42,7 @@ public abstract class AsyncService implements Service {
     this.executor = executor;
   }
 
+  @Override
   public synchronized final Future<State> start() {
     Preconditions.checkState(state != State.STOPPED,
         "Cannot restart a service that has been stopped");
@@ -51,12 +52,14 @@ public abstract class AsyncService implements Service {
       return new FutureTask<State>(DO_NOTHING, State.STARTED);
     }
 
-    return executor.submit(new Callable<State>() {
-      public State call() {
-        onStart();
-        return state = State.STARTED;
-      }
-    });
+    return executor.submit(
+        new Callable<State>() {
+          @Override
+          public State call() {
+            onStart();
+            return state = State.STARTED;
+          }
+        });
   }
 
   /**
@@ -68,6 +71,7 @@ public abstract class AsyncService implements Service {
    */
   protected abstract void onStart();
 
+  @Override
   public synchronized final Future<State> stop() {
     Preconditions.checkState(state != null, "Must start this service before you stop it!");
 
@@ -76,12 +80,14 @@ public abstract class AsyncService implements Service {
       return new FutureTask<State>(DO_NOTHING, State.STOPPED);
     }
 
-    return executor.submit(new Callable<State>() {
-      public State call() {
-        onStop();
-        return state = State.STOPPED;
-      }
-    });
+    return executor.submit(
+        new Callable<State>() {
+          @Override
+          public State call() {
+            onStop();
+            return state = State.STOPPED;
+          }
+        });
   }
 
   /**
@@ -93,6 +99,7 @@ public abstract class AsyncService implements Service {
    */
   protected abstract void onStop();
 
+  @Override
   public final State state() {
     return state;
   }

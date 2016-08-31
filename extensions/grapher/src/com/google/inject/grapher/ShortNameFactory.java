@@ -38,6 +38,7 @@ import java.util.List;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class ShortNameFactory implements NameFactory {
+  @Override
   public String getMemberName(Member member) {
     if (member instanceof Constructor) {
       return "<init>";
@@ -48,6 +49,7 @@ public class ShortNameFactory implements NameFactory {
     }
   }
 
+  @Override
   public String getAnnotationName(Key<?> key) {
     Annotation annotation = key.getAnnotation();
     Class<? extends Annotation> annotationType = key.getAnnotationType();
@@ -66,11 +68,13 @@ public class ShortNameFactory implements NameFactory {
     }
   }
 
+  @Override
   public String getClassName(Key<?> key) {
     TypeLiteral<?> typeLiteral = key.getTypeLiteral();
     return stripPackages(typeLiteral.toString());
   }
 
+  @Override
   public String getInstanceName(Object instance) {
     if (instance instanceof ProviderMethod) {
       return getMethodString(((ProviderMethod<?>) instance).getMethod());
@@ -94,10 +98,11 @@ public class ShortNameFactory implements NameFactory {
   }
 
   /**
-   * Returns a name for a Guice "source" object. This will typically be either
-   * a {@link StackTraceElement} for when the binding is made to the instance,
-   * or a {@link Method} when a provider method is used.
+   * Returns a name for a Guice "source" object. This will typically be either a {@link
+   * StackTraceElement} for when the binding is made to the instance, or a {@link Method} when a
+   * provider method is used.
    */
+  @Override
   public String getSourceName(Object source) {
     if (source instanceof ElementSource) {
       source = ((ElementSource) source).getDeclaringSource();

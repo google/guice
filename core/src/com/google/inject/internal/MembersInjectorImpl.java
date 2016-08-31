@@ -62,6 +62,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     return memberInjectors == null ? ImmutableList.<SingleMemberInjector>of() : memberInjectors;
   }
 
+  @Override
   public void injectMembers(T instance) {
     TypeLiteral<T> localTypeLiteral = typeLiteral;
     Errors errors = new Errors(localTypeLiteral);

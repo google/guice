@@ -33,14 +33,17 @@ public final class RequireExactBindingAnnotationsOption implements Element {
     this.source = checkNotNull(source, "source");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).requireExactBindingAnnotations();
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }

@@ -77,17 +77,22 @@ public class ProvisionExceptionsTest extends TestCase {
   }
   
   public void testCustomProvidersRuntimeException() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Exploder.class).toProvider(new Provider<Exploder>() {
-          public Exploder get() {
-            return Explosion.createRuntime();
-          }
-        });
-        bind(Tracer.class).to(TracerImpl.class);        
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Exploder.class)
+                    .toProvider(
+                        new Provider<Exploder>() {
+                          @Override
+                          public Exploder get() {
+                            return Explosion.createRuntime();
+                          }
+                        });
+                bind(Tracer.class).to(TracerImpl.class);
+              }
+            });
     try {
       injector.getInstance(Tracer.class);
       fail();

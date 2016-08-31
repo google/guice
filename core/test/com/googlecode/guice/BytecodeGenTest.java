@@ -50,27 +50,37 @@ public class BytecodeGenTest extends TestCase {
 
   private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-  private final Module interceptorModule = new AbstractModule() {
-    protected void configure() {
-      bindInterceptor(any(), any(), new MethodInterceptor() {
-        public Object invoke(MethodInvocation chain)
-            throws Throwable {
-          return chain.proceed() + " WORLD";
+  private final Module interceptorModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bindInterceptor(
+              any(),
+              any(),
+              new MethodInterceptor() {
+                @Override
+                public Object invoke(MethodInvocation chain) throws Throwable {
+                  return chain.proceed() + " WORLD";
+                }
+              });
         }
-      });
-    }
-  };
+      };
 
-  private final Module noopInterceptorModule = new AbstractModule() {
-      protected void configure() {
-        bindInterceptor(any(), any(), new MethodInterceptor() {
-          public Object invoke(MethodInvocation chain)
-              throws Throwable {
-            return chain.proceed();
-          }
-        });
-      }
-    };
+  private final Module noopInterceptorModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bindInterceptor(
+              any(),
+              any(),
+              new MethodInterceptor() {
+                @Override
+                public Object invoke(MethodInvocation chain) throws Throwable {
+                  return chain.proceed();
+                }
+              });
+        }
+      };
 
   public void testPackageVisibility() {
     Injector injector = Guice.createInjector(new PackageVisibilityTestModule());
@@ -158,6 +168,7 @@ public class BytecodeGenTest extends TestCase {
   private Class<ProxyTestImpl> realClass;
   private Module testModule;
 
+  @Override
   @SuppressWarnings("unchecked")
   protected void setUp() throws Exception {
     super.setUp();
@@ -166,11 +177,13 @@ public class BytecodeGenTest extends TestCase {
     proxyTestClass = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTest.class.getName());
     realClass = (Class<ProxyTestImpl>) testClassLoader.loadClass(ProxyTestImpl.class.getName());
 
-    testModule = new AbstractModule() {
-      public void configure() {
-        bind(proxyTestClass).to(realClass);
-      }
-    };
+    testModule =
+        new AbstractModule() {
+          @Override
+          public void configure() {
+            bind(proxyTestClass).to(realClass);
+          }
+        };
   }
 
   interface ProxyTest {
@@ -190,6 +203,7 @@ public class BytecodeGenTest extends TestCase {
       //System.out.println(ProxyTestImpl.class.getClassLoader());
     }
 
+    @Override
     public String sayHello() {
       return "HELLO";
     }
@@ -205,11 +219,16 @@ public class BytecodeGenTest extends TestCase {
   }
 
   public void testSystemClassLoaderIsUsedIfProxiedClassUsesIt() {
-    ProxyTest testProxy = Guice.createInjector(interceptorModule, new Module() {
-      public void configure(Binder binder) {
-        binder.bind(ProxyTest.class).to(ProxyTestImpl.class);
-      }
-    }).getInstance(ProxyTest.class);
+    ProxyTest testProxy =
+        Guice.createInjector(
+                interceptorModule,
+                new Module() {
+                  @Override
+                  public void configure(Binder binder) {
+                    binder.bind(ProxyTest.class).to(ProxyTestImpl.class);
+                  }
+                })
+            .getInstance(ProxyTest.class);
 
     if (ProxyTest.class.getClassLoader() == systemClassLoader) {
       assertSame(testProxy.getClass().getClassLoader(), systemClassLoader);

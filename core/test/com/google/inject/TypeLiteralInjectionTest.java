@@ -34,11 +34,13 @@ public class TypeLiteralInjectionTest extends TestCase {
 
   public void testBindingToRawTypeLiteralIsNotAllowed() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(TypeLiteral.class).toInstance(TypeLiteral.get(String.class));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(TypeLiteral.class).toInstance(TypeLiteral.get(String.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -48,12 +50,14 @@ public class TypeLiteralInjectionTest extends TestCase {
 
   public void testBindingToParameterizedTypeLiteralIsNotAllowed() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(new TypeLiteral<TypeLiteral<String>>() {})
-              .toInstance(TypeLiteral.get(String.class));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(new TypeLiteral<TypeLiteral<String>>() {})
+                  .toInstance(TypeLiteral.get(String.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),

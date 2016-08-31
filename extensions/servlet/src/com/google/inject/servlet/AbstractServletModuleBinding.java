@@ -36,10 +36,12 @@ class AbstractServletModuleBinding<T> implements ServletModuleBinding {
     this.patternMatcher = patternMatcher;
   }
 
+  @Override
   public Map<String, String> getInitParams() {
     return initParams;
   }
 
+  @Override
   public String getPattern() {
     return patternMatcher.getOriginalPattern();
   }
@@ -48,10 +50,12 @@ class AbstractServletModuleBinding<T> implements ServletModuleBinding {
     return target;
   }
 
+  @Override
   public UriPatternType getUriPatternType() {
     return patternMatcher.getPatternType();
   }
   
+  @Override
   public boolean matchesUri(String uri) {
     return patternMatcher.matches(uri);
   }

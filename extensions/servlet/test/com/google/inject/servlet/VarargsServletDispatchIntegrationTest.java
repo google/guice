@@ -185,15 +185,18 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class TestServlet extends HttpServlet {
+    @Override
     public void init(ServletConfig filterConfig) throws ServletException {
       inits++;
     }
 
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse)
         throws IOException, ServletException {
       services++;
     }
 
+    @Override
     public void destroy() {
       destroys++;
     }
@@ -201,15 +204,18 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class NeverServlet extends HttpServlet {
+    @Override
     public void init(ServletConfig filterConfig) throws ServletException {
       inits++;
     }
 
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse)
         throws IOException, ServletException {
       fail("NeverServlet was fired, when it should not have been.");
     }
 
+    @Override
     public void destroy() {
       destroys++;
     }
@@ -217,16 +223,20 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class TestFilter implements Filter {
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
       inits++;
     }
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) throws IOException, ServletException {
+    @Override
+    public void doFilter(
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
       doFilters++;
       filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    @Override
     public void destroy() {
       destroys++;
     }

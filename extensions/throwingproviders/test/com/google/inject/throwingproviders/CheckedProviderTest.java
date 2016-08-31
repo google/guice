@@ -74,6 +74,7 @@ public class CheckedProviderTest extends TestCase {
   
   private static final Function<Dependency<?>, Key<?>> DEPENDENCY_TO_KEY =
       new Function<Dependency<?>, Key<?>>() {
+        @Override
         public Key<?> apply(Dependency<?> from) {
           return from.getKey();
         }
@@ -650,6 +651,7 @@ public class CheckedProviderTest extends TestCase {
   }
 
   interface RemoteProvider<T> extends CheckedProvider<T> { 
+    @Override
     public T get() throws RemoteException, BindException;
   }
   
@@ -675,6 +677,7 @@ public class CheckedProviderTest extends TestCase {
     
     @Inject void initialize(long foo) {}
     
+    @Override
     public T get() {
       return null;
     }
@@ -774,6 +777,7 @@ public class CheckedProviderTest extends TestCase {
       this.nextToReturn = nextToReturn;
     }
     
+    @Override
     public T get() throws RemoteException, BindException {
       if (nextToThrow instanceof RemoteException) {
         throw (RemoteException) nextToThrow;
@@ -790,18 +794,22 @@ public class CheckedProviderTest extends TestCase {
   }
 
   public void testBindingToInterfaceWithBoundValueType_Bind() throws RemoteException {
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(StringRemoteProvider.class, String.class)
-            .to(new StringRemoteProvider() {
-              public String get() {
-                return "A";
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(StringRemoteProvider.class, String.class)
+                    .to(
+                        new StringRemoteProvider() {
+                          @Override
+                          public String get() {
+                            return "A";
+                          }
+                        });
               }
             });
-      }
-    });
     
     assertEquals("A", bindInjector.getInstance(StringRemoteProvider.class).get());
   }
@@ -829,18 +837,22 @@ public class CheckedProviderTest extends TestCase {
 
   @SuppressWarnings("deprecation")
   public void testBindingToInterfaceWithGeneric_Bind() throws Exception {
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, new TypeLiteral<List<String>>() { }.getType())
-            .to(new RemoteProvider<List<String>>() {
-              public List<String> get() {
-                return Arrays.asList("A", "B");
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, new TypeLiteral<List<String>>() {}.getType())
+                    .to(
+                        new RemoteProvider<List<String>>() {
+                          @Override
+                          public List<String> get() {
+                            return Arrays.asList("A", "B");
+                          }
+                        });
               }
             });
-      }
-    });
 
     Key<RemoteProvider<List<String>>> key
         = Key.get(new TypeLiteral<RemoteProvider<List<String>>>() { });
@@ -848,18 +860,22 @@ public class CheckedProviderTest extends TestCase {
   }
   
   public void testBindingToInterfaceWithGeneric_BindUsingTypeLiteral() throws Exception {
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, new TypeLiteral<List<String>>() {})
-            .to(new RemoteProvider<List<String>>() {
-              public List<String> get() {
-                return Arrays.asList("A", "B");
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, new TypeLiteral<List<String>>() {})
+                    .to(
+                        new RemoteProvider<List<String>>() {
+                          @Override
+                          public List<String> get() {
+                            return Arrays.asList("A", "B");
+                          }
+                        });
               }
             });
-      }
-    });
 
     Key<RemoteProvider<List<String>>> key
         = Key.get(new TypeLiteral<RemoteProvider<List<String>>>() { });
@@ -1315,18 +1331,21 @@ public class CheckedProviderTest extends TestCase {
   
   public void testIncorrectPredefinedType_Bind() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override
-        protected void configure() {
-          ThrowingProviderBinder.create(binder())
-              .bind(StringRemoteProvider.class, Integer.class)
-              .to(new StringRemoteProvider() {
-                public String get() {
-                  return "A";
-                }
-              });
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              ThrowingProviderBinder.create(binder())
+                  .bind(StringRemoteProvider.class, Integer.class)
+                  .to(
+                      new StringRemoteProvider() {
+                        @Override
+                        public String get() {
+                          return "A";
+                        }
+                      });
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(StringRemoteProvider.class.getName() 
@@ -1413,6 +1432,7 @@ public class CheckedProviderTest extends TestCase {
     @SuppressWarnings("unused")
     FailingProvider(Integer foo) {}
     
+    @Override
     public String get() {
       return null;
     }

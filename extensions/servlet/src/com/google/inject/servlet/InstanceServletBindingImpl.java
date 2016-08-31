@@ -35,6 +35,7 @@ class InstanceServletBindingImpl extends AbstractServletModuleBinding<HttpServle
     super(initParams, target, patternMatcher);
   }
 
+  @Override
   public HttpServlet getServletInstance() {
     return getTarget();
   }

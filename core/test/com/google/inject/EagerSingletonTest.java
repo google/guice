@@ -30,19 +30,24 @@ public class EagerSingletonTest extends TestCase {
   }
 
   public void testJustInTimeEagerSingletons() {
-    Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
-      protected void configure() {
-        // create a just-in-time binding for A
-        getProvider(A.class);
+    Guice.createInjector(
+        Stage.PRODUCTION,
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            // create a just-in-time binding for A
+            getProvider(A.class);
 
-        // create a just-in-time binding for C
-        requestInjection(new Object() {
-          @Inject void inject(Injector injector) {
-            injector.getInstance(C.class);
+            // create a just-in-time binding for C
+            requestInjection(
+                new Object() {
+                  @Inject
+                  void inject(Injector injector) {
+                    injector.getInstance(C.class);
+                  }
+                });
           }
         });
-      }
-    });
 
     assertEquals(1, A.instanceCount);
     assertEquals("Singletons discovered when creating singletons should not be built eagerly",

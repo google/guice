@@ -48,15 +48,16 @@ public class SpringIntegrationTest extends TestCase {
         = new RootBeanDefinition(Prototype.class, false);
     beanFactory.registerBeanDefinition("prototype", prototype);
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(BeanFactory.class).toInstance(beanFactory);
-        bind(Singleton.class)
-            .toProvider(fromSpring(Singleton.class, "singleton"));
-        bind(Prototype.class)
-            .toProvider(fromSpring(Prototype.class, "prototype"));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(BeanFactory.class).toInstance(beanFactory);
+                bind(Singleton.class).toProvider(fromSpring(Singleton.class, "singleton"));
+                bind(Prototype.class).toProvider(fromSpring(Prototype.class, "prototype"));
+              }
+            });
 
     assertNotNull(injector.getInstance(Singleton.class));
     assertSame(injector.getInstance(Singleton.class),
@@ -79,11 +80,14 @@ public class SpringIntegrationTest extends TestCase {
         = new RootBeanDefinition(Prototype.class, false);
     beanFactory.registerBeanDefinition("prototype", prototype);
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        SpringIntegration.bindAll(binder(), beanFactory);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                SpringIntegration.bindAll(binder(), beanFactory);
+              }
+            });
 
     Key<Singleton> singletonKey
         = Key.get(Singleton.class, Names.named("singleton"));

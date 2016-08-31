@@ -62,12 +62,14 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     this.filterInstance = filterInstance;
   }
 
+  @Override
   public FilterDefinition get() {
     return this;
   }
 
-  public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
-      ProviderInstanceBinding<? extends B> binding) {
+  @Override
+  public <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
     if(visitor instanceof ServletModuleTargetVisitor) {
       if(filterInstance != null) {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
@@ -108,23 +110,28 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     }
 
     //initialize our filter with the configured context params and servlet context
-    filter.init(new FilterConfig() {
-      public String getFilterName() {
-        return filterKey.toString();
-      }
+    filter.init(
+        new FilterConfig() {
+          @Override
+          public String getFilterName() {
+            return filterKey.toString();
+          }
 
-      public ServletContext getServletContext() {
-        return servletContext;
-      }
+          @Override
+          public ServletContext getServletContext() {
+            return servletContext;
+          }
 
-      public String getInitParameter(String s) {
-        return initParams.get(s);
-      }
+          @Override
+          public String getInitParameter(String s) {
+            return initParams.get(s);
+          }
 
-      public Enumeration getInitParameterNames() {
-        return Iterators.asEnumeration(initParams.keySet().iterator());
-      }
-    });
+          @Override
+          public Enumeration getInitParameterNames() {
+            return Iterators.asEnumeration(initParams.keySet().iterator());
+          }
+        });
 
     initializedSoFar.add(filter);
   }

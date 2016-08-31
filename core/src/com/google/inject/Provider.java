@@ -52,5 +52,6 @@ public interface Provider<T> extends javax.inject.Provider<T> {
    * @throws ProvisionException if an instance cannot be provided. Such exceptions include messages
    *     and throwables to describe why provision failed.
    */
+  @Override
   T get();
 }

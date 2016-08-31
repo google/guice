@@ -409,7 +409,7 @@ public class ProvisionListenerTest extends TestCase {
   }
   
   interface Interface {}
-  class Implementation implements Interface {}
+  static class Implementation implements Interface {}
   
   @Singleton static class Sole {}
   static class Many {}
@@ -419,11 +419,13 @@ public class ProvisionListenerTest extends TestCase {
   static interface LinkedFoo {}
   static class Foo implements JitFoo, LinkedFoo {}
   static class FooP implements Provider<Foo> {
+    @Override
     public Foo get() {
       return new Foo();
     }
   }
   static class JitFoo2P implements Provider<JitFoo2> {
+    @Override
     public JitFoo2 get() {
       return new JitFoo2();
     }
@@ -445,6 +447,7 @@ public class ProvisionListenerTest extends TestCase {
   
   private static class Counter implements ProvisionListener {
     int count = 0;
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       count++;
     }
@@ -454,6 +457,7 @@ public class ProvisionListenerTest extends TestCase {
     int beforeProvision = 0;
     int afterProvision = 0;
     AtomicReference<RuntimeException> capture = new AtomicReference<RuntimeException>();
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       beforeProvision++;
       try {
@@ -468,6 +472,7 @@ public class ProvisionListenerTest extends TestCase {
   
   private static class Capturer implements ProvisionListener {
     List<Key> keys = Lists.newArrayList(); 
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       keys.add(provision.getBinding().getKey());
       T provisioned = provision.provision();
@@ -498,26 +503,30 @@ public class ProvisionListenerTest extends TestCase {
   }
 
   private static class FailBeforeProvision implements ProvisionListener {
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       throw new RuntimeException("boo");
     }
   }  
   private static class FailAfterProvision implements ProvisionListener {
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       provision.provision();
       throw new RuntimeException("boo");
     }
   }  
   private static class JustProvision implements ProvisionListener {
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       provision.provision();
     }
   }  
   private static class NoProvision implements ProvisionListener {
-    public <T> void onProvision(ProvisionInvocation<T> provision) {
-    }
+    @Override
+    public <T> void onProvision(ProvisionInvocation<T> provision) {}
   }
   private static class ProvisionTwice implements ProvisionListener {
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       provision.provision();
       provision.provision();
@@ -533,6 +542,7 @@ public class ProvisionListenerTest extends TestCase {
       this.expected = ImmutableList.copyOf(expected);
     }
     
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       List<Class<?>> actual = Lists.newArrayList();
       for (DependencyAndSource dep : provision.getDependencyChain()) {
@@ -556,49 +566,56 @@ public class ProvisionListenerTest extends TestCase {
   public void testDependencyChain() {
     final List<Class<?>> pList = Lists.newArrayList();
     final List<Class<?>> totalList = Lists.newArrayList();
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Instance.class).toInstance(new Instance());
-        bind(B.class).to(BImpl.class);
-        bind(D.class).toProvider(DP.class);
-        
-        bindListener(Matchers.any(), new ProvisionListener() {
-          public <T> void onProvision(ProvisionInvocation<T> provision) {
-            totalList.add(provision.getBinding().getKey().getRawType());
-          }
-        });
-        
-        // Build up a list of asserters for our dependency chains.
-        ImmutableList.Builder<Class<?>> chain = ImmutableList.builder();
-        chain.add(Instance.class);
-        bindListener(keyMatcher(Instance.class), new ChainAsserter(pList, chain.build()));
-        
-        chain.add(A.class);
-        bindListener(keyMatcher(A.class), new ChainAsserter(pList, chain.build()));
-        
-        chain.add(B.class).add(BImpl.class);
-        bindListener(keyMatcher(BImpl.class), new ChainAsserter(pList, chain.build()));
-        
-        chain.add(C.class);
-        bindListener(keyMatcher(C.class), new ChainAsserter(pList, chain.build()));
-        
-        // the chain has D before DP even though DP is provisioned & notified first
-        // because we do DP because of D, and need DP to provision D.
-        chain.add(D.class).add(DP.class);
-        bindListener(keyMatcher(D.class), new ChainAsserter(pList, chain.build()));
-        bindListener(keyMatcher(DP.class), new ChainAsserter(pList, chain.build()));
-        
-        chain.add(E.class);
-        bindListener(keyMatcher(E.class), new ChainAsserter(pList, chain.build()));
-        
-        chain.add(F.class);
-        bindListener(keyMatcher(F.class), new ChainAsserter(pList, chain.build()));
-      }
-      @Provides C c(D d) {
-        return new C() {};
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Instance.class).toInstance(new Instance());
+                bind(B.class).to(BImpl.class);
+                bind(D.class).toProvider(DP.class);
+
+                bindListener(
+                    Matchers.any(),
+                    new ProvisionListener() {
+                      @Override
+                      public <T> void onProvision(ProvisionInvocation<T> provision) {
+                        totalList.add(provision.getBinding().getKey().getRawType());
+                      }
+                    });
+
+                // Build up a list of asserters for our dependency chains.
+                ImmutableList.Builder<Class<?>> chain = ImmutableList.builder();
+                chain.add(Instance.class);
+                bindListener(keyMatcher(Instance.class), new ChainAsserter(pList, chain.build()));
+
+                chain.add(A.class);
+                bindListener(keyMatcher(A.class), new ChainAsserter(pList, chain.build()));
+
+                chain.add(B.class).add(BImpl.class);
+                bindListener(keyMatcher(BImpl.class), new ChainAsserter(pList, chain.build()));
+
+                chain.add(C.class);
+                bindListener(keyMatcher(C.class), new ChainAsserter(pList, chain.build()));
+
+                // the chain has D before DP even though DP is provisioned & notified first
+                // because we do DP because of D, and need DP to provision D.
+                chain.add(D.class).add(DP.class);
+                bindListener(keyMatcher(D.class), new ChainAsserter(pList, chain.build()));
+                bindListener(keyMatcher(DP.class), new ChainAsserter(pList, chain.build()));
+
+                chain.add(E.class);
+                bindListener(keyMatcher(E.class), new ChainAsserter(pList, chain.build()));
+
+                chain.add(F.class);
+                bindListener(keyMatcher(F.class), new ChainAsserter(pList, chain.build()));
+              }
+
+              @Provides
+              C c(D d) {
+                return new C() {};
+              }
+            });
     Instance instance = injector.getInstance(Instance.class);
     // make sure we're checking all of the chain asserters..
     assertEquals(
@@ -625,19 +642,25 @@ public class ProvisionListenerTest extends TestCase {
   
   public void testToProviderInstance() {
     final AtomicBoolean notified = new AtomicBoolean();    
-    Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Object.class).toProvider(new Provider<Object>() {
-          @Inject Foo foo;
-          public Object get() {
-            return null;
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Object.class)
+                .toProvider(
+                    new Provider<Object>() {
+                      @Inject Foo foo;
+
+                      @Override
+                      public Object get() {
+                        return null;
+                      }
+                    });
+            bindListener(
+                Matchers.any(),
+                new SpecialChecker(Foo.class, getClass().getName() + ".configure(", notified));
           }
         });
-        bindListener(Matchers.any(),
-            new SpecialChecker(Foo.class, getClass().getName() + ".configure(", notified));
-      }
-    });
     assertTrue(notified.get());
   }
   
@@ -667,6 +690,7 @@ public class ProvisionListenerTest extends TestCase {
       this.notified = notified;
     }
     
+    @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       notified.set(true);
       assertEquals(notifyType, provision.getBinding().getKey().getRawType());            
@@ -696,6 +720,7 @@ public class ProvisionListenerTest extends TestCase {
   private interface D {}
   private static class DP implements Provider<D> {
     @Inject Provider<E> ep;
+    @Override
     public D get() {
       ep.get();
       return new D() {};

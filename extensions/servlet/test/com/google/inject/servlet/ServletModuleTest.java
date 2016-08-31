@@ -99,21 +99,25 @@ public class ServletModuleTest extends TestCase {
     List<InstanceFilterBinding> instanceFilters = Lists.newArrayList();
     List<InstanceServletBinding> instanceServlets = Lists.newArrayList();
     
+    @Override
     public Void visit(LinkedFilterBinding binding) {
       linkedFilters.add(binding);
       return null;
     }
 
+    @Override
     public Void visit(InstanceFilterBinding binding) {
       instanceFilters.add(binding);
       return null;
     }
 
+    @Override
     public Void visit(LinkedServletBinding binding) {
       linkedServlets.add(binding);
       return null;
     }
 
+    @Override
     public Void visit(InstanceServletBinding binding) {
       instanceServlets.add(binding);
       return null;

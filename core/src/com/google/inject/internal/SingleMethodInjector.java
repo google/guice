@@ -49,6 +49,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
         final int index = fastClass.getMethod(method).getIndex();
 
         return new MethodInvoker() {
+          @Override
           public Object invoke(Object target, Object... parameters)
               throws IllegalAccessException, InvocationTargetException {
             return fastClass.invoke(index, target, parameters);
@@ -65,6 +66,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
     }
 
     return new MethodInvoker() {
+      @Override
       public Object invoke(Object target, Object... parameters)
           throws IllegalAccessException, InvocationTargetException {
         return method.invoke(target, parameters);
@@ -72,10 +74,12 @@ final class SingleMethodInjector implements SingleMemberInjector {
     };
   }
 
+  @Override
   public InjectionPoint getInjectionPoint() {
     return injectionPoint;
   }
 
+  @Override
   public void inject(Errors errors, InternalContext context, Object o) {
     Object[] parameters;
     try {

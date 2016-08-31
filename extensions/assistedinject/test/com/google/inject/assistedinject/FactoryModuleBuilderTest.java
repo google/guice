@@ -40,13 +40,11 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
-
-import junit.framework.TestCase;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import junit.framework.TestCase;
 
 public class FactoryModuleBuilderTest extends TestCase {
   
@@ -492,6 +490,7 @@ public class FactoryModuleBuilderTest extends TestCase {
               .build(NotHidden.class));
         }
       });
+      fail("Expected CreationException");
     } catch(CreationException ce) {
       assertEquals(NotHidden.class.getName() + " is public, but has a method that returns a non-public type: "
           + Hidden.class.getName() + ". Due to limitations with java.lang.reflect.Proxy, this is not allowed. "

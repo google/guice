@@ -431,88 +431,108 @@ public class WeakKeySetTest extends TestCase {
   }
 
   private static class TestState implements State {
+    @Override
     public State parent() {
       return new TestState();
     }
 
+    @Override
     public <T> BindingImpl<T> getExplicitBinding(Key<T> key) {
       return null;
     }
 
+    @Override
     public Map<Key<?>, Binding<?>> getExplicitBindingsThisLevel() {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void putBinding(Key<?> key, BindingImpl<?> binding) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation) {
       return null;
     }
 
+    @Override
     public void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void addConverter(TypeConverterBinding typeConverterBinding) {
       throw new UnsupportedOperationException();
     }
 
-    public TypeConverterBinding getConverter(String stringValue, TypeLiteral<?> type, Errors errors,
-        Object source) {
+    @Override
+    public TypeConverterBinding getConverter(
+        String stringValue, TypeLiteral<?> type, Errors errors, Object source) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public Iterable<TypeConverterBinding> getConvertersThisLevel() {
       return ImmutableSet.of();
     }
 
     /*if[AOP]*/
+    @Override
     public void addMethodAspect(MethodAspect methodAspect) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public ImmutableList<MethodAspect> getMethodAspects() {
       return ImmutableList.of();
     }
     /*end[AOP]*/
 
+    @Override
     public void addTypeListener(TypeListenerBinding typeListenerBinding) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public List<TypeListenerBinding> getTypeListenerBindings() {
       return ImmutableList.of();
     }
 
+    @Override
     public void addProvisionListener(ProvisionListenerBinding provisionListenerBinding) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public List<ProvisionListenerBinding> getProvisionListenerBindings() {
       return ImmutableList.of();
     }
 
+    @Override
     public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
       return ImmutableList.of();
     }
 
-    public void blacklist(Key<?> key, State state, Object source) {
-    }
+    @Override
+    public void blacklist(Key<?> key, State state, Object source) {}
 
+    @Override
     public boolean isBlacklisted(Key<?> key) {
       return true;
     }
 
+    @Override
     public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public Object lock() {
       throw new UnsupportedOperationException();
     }
@@ -521,6 +541,7 @@ public class WeakKeySetTest extends TestCase {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public Map<Class<? extends Annotation>, Scope> getScopes() {
       return ImmutableMap.of();
     }

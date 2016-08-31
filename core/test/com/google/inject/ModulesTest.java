@@ -70,6 +70,7 @@ public class ModulesTest extends TestCase {
 
   private <T> Module newModule(final T toBind) {
     return new AbstractModule() {
+      @Override
       protected void configure() {
         @SuppressWarnings("unchecked") // getClass always needs a cast
         Class<T> tClass = (Class<T>) toBind.getClass();

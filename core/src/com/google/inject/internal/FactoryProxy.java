@@ -41,6 +41,7 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
     this.source = source;
   }
 
+  @Override
   public void notify(final Errors errors) {
     try {
       targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
@@ -49,6 +50,7 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
     }
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     Key<? extends T> localTargetKey = targetKey;

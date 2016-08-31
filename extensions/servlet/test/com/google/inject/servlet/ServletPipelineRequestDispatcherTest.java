@@ -83,15 +83,18 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
 
     final boolean[] run = new boolean[1];
-    final HttpServlet mockServlet = new HttpServlet() {
-      protected void service(HttpServletRequest request, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
-        run[0] = true;
+    final HttpServlet mockServlet =
+        new HttpServlet() {
+          @Override
+          protected void service(
+              HttpServletRequest request, HttpServletResponse httpServletResponse)
+              throws ServletException, IOException {
+            run[0] = true;
 
-        final Object o = request.getAttribute(A_KEY);
-        assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
-      }
-    };
+            final Object o = request.getAttribute(A_KEY);
+            assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
+          }
+        };
 
     expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
         .andReturn(true);
@@ -156,15 +159,18 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expectLastCall().once();
 
     final List<String> paths = new ArrayList<String>();
-    final HttpServlet mockServlet = new HttpServlet() {
-      protected void service(HttpServletRequest request, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
-        paths.add(request.getRequestURI());
+    final HttpServlet mockServlet =
+        new HttpServlet() {
+          @Override
+          protected void service(
+              HttpServletRequest request, HttpServletResponse httpServletResponse)
+              throws ServletException, IOException {
+            paths.add(request.getRequestURI());
 
-        final Object o = request.getAttribute(A_KEY);
-        assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
-      }
-    };
+            final Object o = request.getAttribute(A_KEY);
+            assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
+          }
+        };
 
     expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
         .andReturn(true);
@@ -231,14 +237,17 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(mockResponse.isCommitted())
         .andReturn(true);
 
-    final HttpServlet mockServlet = new HttpServlet() {
-      protected void service(HttpServletRequest request, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+    final HttpServlet mockServlet =
+        new HttpServlet() {
+          @Override
+          protected void service(
+              HttpServletRequest request, HttpServletResponse httpServletResponse)
+              throws ServletException, IOException {
 
-        final Object o = request.getAttribute(A_KEY);
-        assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
-      }
-    };
+            final Object o = request.getAttribute(A_KEY);
+            assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
+          }
+        };
 
     expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
         .andReturn(true);

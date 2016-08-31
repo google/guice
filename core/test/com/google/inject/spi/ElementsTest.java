@@ -47,9 +47,6 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -67,6 +64,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -100,53 +98,55 @@ public class ElementsTest extends TestCase {
   public void testAddThrowableErrorCommand() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             addError(new Exception("A"));
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
+          @Override
+          public Void visit(Message command) {
             assertEquals("A", command.getCause().getMessage());
-            assertEquals(command.getMessage(),
-                "An exception was caught and reported. Message: A");
+            assertEquals(command.getMessage(), "An exception was caught and reported. Message: A");
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testErrorsAddedWhenExceptionsAreThrown() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
-            install(new AbstractModule() {
-              protected void configure() {
-                throw new RuntimeException("Throwing RuntimeException in AbstractModule.configure().");
-              }
-            });
+            install(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    throw new RuntimeException(
+                        "Throwing RuntimeException in AbstractModule.configure().");
+                  }
+                });
 
             addError("Code after the exception still gets executed");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
-            assertEquals("Throwing RuntimeException in AbstractModule.configure().",
+          @Override
+          public Void visit(Message command) {
+            assertEquals(
+                "Throwing RuntimeException in AbstractModule.configure().",
                 command.getCause().getMessage());
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
-            assertEquals("Code after the exception still gets executed",
-                command.getMessage());
+          @Override
+          public Void visit(Message command) {
+            assertEquals("Code after the exception still gets executed", command.getMessage());
             return null;
           }
-        }
-    );
+        });
   }
 
   private <T> T getInstance(Binding<T> binding) {
@@ -156,35 +156,36 @@ public class ElementsTest extends TestCase {
   public void testBindConstantAnnotations() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindConstant().annotatedWith(SampleAnnotation.class).to("A");
             bindConstant().annotatedWith(Names.named("Bee")).to("B");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class, Names.named("Bee")), command.getKey());
             assertEquals("B", getInstance(command));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindConstantTypes() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindConstant().annotatedWith(Names.named("String")).to("A");
             bindConstant().annotatedWith(Names.named("int")).to(2);
@@ -199,106 +200,105 @@ public class ElementsTest extends TestCase {
             bindConstant().annotatedWith(Names.named("Enum")).to(CoinSide.TAILS);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class, Names.named("String")), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Integer.class, Names.named("int")), command.getKey());
             assertEquals(2, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Long.class, Names.named("long")), command.getKey());
             assertEquals(3L, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Boolean.class, Names.named("boolean")), command.getKey());
             assertEquals(false, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Double.class, Names.named("double")), command.getKey());
             assertEquals(5.0d, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Float.class, Names.named("float")), command.getKey());
             assertEquals(6.0f, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Short.class, Names.named("short")), command.getKey());
             assertEquals((short) 7, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
             assertEquals('h', getInstance(command));
             return null;
           }
         },
-        
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Byte.class, Names.named("byte")), command.getKey());
             assertEquals((byte) 8, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Class.class, Names.named("Class")), command.getKey());
             assertEquals(Iterator.class, getInstance(command));
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(CoinSide.class, Names.named("Enum")), command.getKey());
             assertEquals(CoinSide.TAILS, getInstance(command));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindKeysNoAnnotations() {
@@ -311,6 +311,7 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toInstance("A");
             bind(new TypeLiteral<String>() {}).toInstance("B");
@@ -319,8 +320,7 @@ public class ElementsTest extends TestCase {
         },
         keyChecker,
         keyChecker,
-        keyChecker
-    );
+        keyChecker);
   }
 
   public void testBindKeysWithAnnotationType() {
@@ -333,14 +333,16 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).annotatedWith(SampleAnnotation.class).toInstance("A");
-            bind(new TypeLiteral<String>() {}).annotatedWith(SampleAnnotation.class).toInstance("B");
+            bind(new TypeLiteral<String>() {})
+                .annotatedWith(SampleAnnotation.class)
+                .toInstance("B");
           }
         },
         annotationChecker,
-        annotationChecker
-    );
+        annotationChecker);
   }
 
   public void testBindKeysWithAnnotationInstance() {
@@ -354,39 +356,46 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).annotatedWith(Names.named("a")).toInstance("B");
             bind(new TypeLiteral<String>() {}).annotatedWith(Names.named("a")).toInstance("C");
           }
         },
         annotationChecker,
-        annotationChecker
-    );
+        annotationChecker);
   }
 
   public void testBindToProvider() {
-    final Provider<String> aProvider = new Provider<String>() {
-      public String get() {
-        return "A";
-      }
-    };
+    final Provider<String> aProvider =
+        new Provider<String>() {
+          @Override
+          public String get() {
+            return "A";
+          }
+        };
     
-    final javax.inject.Provider<Integer> intJavaxProvider = new javax.inject.Provider<Integer>() {
-      public Integer get() {
-        return 42;
-      }
-    };
+    final javax.inject.Provider<Integer> intJavaxProvider =
+        new javax.inject.Provider<Integer>() {
+          @Override
+          public Integer get() {
+            return 42;
+          }
+        };
     
-    final javax.inject.Provider<Double> doubleJavaxProvider = new javax.inject.Provider<Double>() {
-      @javax.inject.Inject String string;
-      
-      public Double get() {
-        return 42.42;
-      }
-    };
+    final javax.inject.Provider<Double> doubleJavaxProvider =
+        new javax.inject.Provider<Double>() {
+          @javax.inject.Inject String string;
+
+          @Override
+          public Double get() {
+            return 42.42;
+          }
+        };
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toProvider(aProvider);
             bind(Integer.class).toProvider(intJavaxProvider);
@@ -396,186 +405,203 @@ public class ElementsTest extends TestCase {
             bind(Iterable.class).toProvider(new TypeLiteral<TProvider<List>>() {});
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof ProviderInstanceBinding);
             assertEquals(Key.get(String.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(
-                  ProviderInstanceBinding<? extends T> binding) {
-                assertSame(aProvider, binding.getUserSuppliedProvider());
-                assertSame(aProvider, binding.getProviderInstance());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderInstanceBinding<? extends T> binding) {
+                    assertSame(aProvider, binding.getUserSuppliedProvider());
+                    assertSame(aProvider, binding.getProviderInstance());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-        
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof ProviderInstanceBinding);
             assertEquals(Key.get(Integer.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(
-                  ProviderInstanceBinding<? extends T> binding) {
-                assertSame(intJavaxProvider, binding.getUserSuppliedProvider());
-                assertEquals(42, binding.getProviderInstance().get());
-                // we don't wrap this w/ dependencies if there were none.
-                assertFalse(binding.getProviderInstance() instanceof HasDependencies);
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderInstanceBinding<? extends T> binding) {
+                    assertSame(intJavaxProvider, binding.getUserSuppliedProvider());
+                    assertEquals(42, binding.getProviderInstance().get());
+                    // we don't wrap this w/ dependencies if there were none.
+                    assertFalse(binding.getProviderInstance() instanceof HasDependencies);
+                    return null;
+                  }
+                });
             return null;
           }
-        },        
-        
+        },
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof ProviderInstanceBinding);
             assertEquals(Key.get(Double.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(
-                  ProviderInstanceBinding<? extends T> binding) {
-                assertSame(doubleJavaxProvider, binding.getUserSuppliedProvider());
-                assertEquals(42.42, binding.getProviderInstance().get());
-                // we do wrap it with dependencies if there were some.
-                assertTrue(binding.getProviderInstance() instanceof HasDependencies);
-                Set<Dependency<?>> deps =
-                    ((HasDependencies) binding.getProviderInstance()).getDependencies();
-                assertEquals(1, deps.size());
-                assertEquals(String.class,
-                    deps.iterator().next().getKey().getTypeLiteral().getRawType());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderInstanceBinding<? extends T> binding) {
+                    assertSame(doubleJavaxProvider, binding.getUserSuppliedProvider());
+                    assertEquals(42.42, binding.getProviderInstance().get());
+                    // we do wrap it with dependencies if there were some.
+                    assertTrue(binding.getProviderInstance() instanceof HasDependencies);
+                    Set<Dependency<?>> deps =
+                        ((HasDependencies) binding.getProviderInstance()).getDependencies();
+                    assertEquals(1, deps.size());
+                    assertEquals(
+                        String.class,
+                        deps.iterator().next().getKey().getTypeLiteral().getRawType());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof ProviderKeyBinding);
             assertEquals(Key.get(List.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
-                assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderKeyBinding<? extends T> binding) {
+                    assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof ProviderKeyBinding);
             assertEquals(Key.get(Collection.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
-                assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderKeyBinding<? extends T> binding) {
+                    assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof ProviderKeyBinding);
             assertEquals(Key.get(Iterable.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
-                assertEquals(new Key<TProvider<List>>() {}, binding.getProviderKey());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderKeyBinding<? extends T> binding) {
+                    assertEquals(new Key<TProvider<List>>() {}, binding.getProviderKey());
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindToLinkedBinding() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(List.class).to(ArrayList.class);
             bind(Map.class).to(new TypeLiteral<HashMap<Integer, String>>() {});
             bind(Set.class).to(Key.get(TreeSet.class, SampleAnnotation.class));
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof LinkedKeyBinding);
             assertEquals(Key.get(List.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(LinkedKeyBinding<? extends T> binding) {
-                assertEquals(Key.get(ArrayList.class), binding.getLinkedKey());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(LinkedKeyBinding<? extends T> binding) {
+                    assertEquals(Key.get(ArrayList.class), binding.getLinkedKey());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof LinkedKeyBinding);
             assertEquals(Key.get(Map.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(LinkedKeyBinding<? extends T> binding) {
-                assertEquals(Key.get(new TypeLiteral<HashMap<Integer, String>>() {}),
-                    binding.getLinkedKey());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(LinkedKeyBinding<? extends T> binding) {
+                    assertEquals(
+                        Key.get(new TypeLiteral<HashMap<Integer, String>>() {}),
+                        binding.getLinkedKey());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof LinkedKeyBinding);
             assertEquals(Key.get(Set.class), command.getKey());
-            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(LinkedKeyBinding<? extends T> binding) {
-                assertEquals(Key.get(TreeSet.class, SampleAnnotation.class),
-                    binding.getLinkedKey());
-                return null;
-              }
-            });
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(LinkedKeyBinding<? extends T> binding) {
+                    assertEquals(
+                        Key.get(TreeSet.class, SampleAnnotation.class), binding.getLinkedKey());
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindToInstance() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toInstance("A");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindInScopes() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class);
             bind(List.class).to(ArrayList.class).in(Scopes.SINGLETON);
@@ -583,245 +609,264 @@ public class ElementsTest extends TestCase {
             bind(Set.class).to(TreeSet.class).asEagerSingleton();
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitNoScoping() {
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitNoScoping() {
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitScope(Scope scope) {
-                assertEquals(Scopes.SINGLETON, scope);
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitScope(Scope scope) {
+                    assertEquals(Scopes.SINGLETON, scope);
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(Map.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
-                assertEquals(Singleton.class, annotation);
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
+                    assertEquals(Singleton.class, annotation);
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(Set.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              public Void visitEagerSingleton() {
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitEagerSingleton() {
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindToInstanceInScope() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             AnnotatedBindingBuilder<String> b = bind(String.class);
             b.toInstance("A");
             b.in(Singleton.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
-            assertEquals("Setting the scope is not permitted when binding to a single instance.",
+          @Override
+          public Void visit(Message command) {
+            assertEquals(
+                "Setting the scope is not permitted when binding to a single instance.",
                 command.getMessage());
             assertNull(command.getCause());
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-      );
+        });
   }
 
   public void testBindToInstanceScope() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toInstance("A");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertEquals(Key.get(String.class), binding.getKey());
-            binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              public Void visitEagerSingleton() {
-                return null;
-              }
-            });
+            binding.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitEagerSingleton() {
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-      );
+        });
   }
 
   /*if[AOP]*/
   public void testBindIntercepor() {
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
     final Matcher<Object> methodMatcher = Matchers.any();
-    final org.aopalliance.intercept.MethodInterceptor methodInterceptor
-        = new org.aopalliance.intercept.MethodInterceptor() {
-      public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
-        return null;
-      }
-    };
+    final org.aopalliance.intercept.MethodInterceptor methodInterceptor =
+        new org.aopalliance.intercept.MethodInterceptor() {
+          @Override
+          public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
+            return null;
+          }
+        };
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindInterceptor(classMatcher, methodMatcher, methodInterceptor);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(InterceptorBinding command) {
+          @Override
+          public Void visit(InterceptorBinding command) {
             assertSame(classMatcher, command.getClassMatcher());
             assertSame(methodMatcher, command.getMethodMatcher());
             assertEquals(Arrays.asList(methodInterceptor), command.getInterceptors());
             return null;
           }
-        }
-    );
+        });
   }
   /*end[AOP]*/
 
   public void testBindScope() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindScope(SampleAnnotation.class, Scopes.NO_SCOPE);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(ScopeBinding command) {
+          @Override
+          public Void visit(ScopeBinding command) {
             assertSame(SampleAnnotation.class, command.getAnnotationType());
             assertSame(Scopes.NO_SCOPE, command.getScope());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindListener() {
     final Matcher<Object> typeMatcher = Matchers.only(TypeLiteral.get(String.class));
-    final TypeListener listener = new TypeListener() {
-      public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-        throw new UnsupportedOperationException();
-      }
-    };
+    final TypeListener listener =
+        new TypeListener() {
+          @Override
+          public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+            throw new UnsupportedOperationException();
+          }
+        };
     
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindListener(typeMatcher, listener);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(TypeListenerBinding binding) {
+          @Override
+          public Void visit(TypeListenerBinding binding) {
             assertSame(typeMatcher, binding.getTypeMatcher());
             assertSame(listener, binding.getListener());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testConvertToTypes() {
-    final TypeConverter typeConverter = new TypeConverter() {
-      public Object convert(String value, TypeLiteral<?> toType) {
-        return value;
-      }
-    };
+    final TypeConverter typeConverter =
+        new TypeConverter() {
+          @Override
+          public Object convert(String value, TypeLiteral<?> toType) {
+            return value;
+          }
+        };
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             convertToTypes(Matchers.any(), typeConverter);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(TypeConverterBinding command) {
+          @Override
+          public Void visit(TypeConverterBinding command) {
             assertSame(typeConverter, command.getTypeConverter());
             assertSame(Matchers.any(), command.getTypeMatcher());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testGetProvider() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
-            Provider<String> keyGetProvider
-                = getProvider(Key.get(String.class, SampleAnnotation.class));
+            Provider<String> keyGetProvider =
+                getProvider(Key.get(String.class, SampleAnnotation.class));
             try {
               keyGetProvider.get();
+              fail("Expected IllegalStateException");
             } catch (IllegalStateException e) {
-              assertEquals("This Provider cannot be used until the Injector has been created.",
+              assertEquals(
+                  "This Provider cannot be used until the Injector has been created.",
                   e.getMessage());
             }
 
             Provider<String> typeGetProvider = getProvider(String.class);
             try {
               typeGetProvider.get();
+              fail("Expected IllegalStateException");
             } catch (IllegalStateException e) {
-              assertEquals("This Provider cannot be used until the Injector has been created.",
+              assertEquals(
+                  "This Provider cannot be used until the Injector has been created.",
                   e.getMessage());
             }
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(ProviderLookup<T> command) {
+          @Override
+          public <T> Void visit(ProviderLookup<T> command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertNull(command.getDelegate());
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(ProviderLookup<T> command) {
+          @Override
+          public <T> Void visit(ProviderLookup<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
             assertNull(command.getDelegate());
             return null;
           }
-        }
-    );
+        });
   }
   
   public void testElementInitialization() {
@@ -831,21 +876,24 @@ public class ElementsTest extends TestCase {
         = new AtomicReference<MembersInjector<String>>();
 
     final AtomicReference<String> lastInjected = new AtomicReference<String>();
-    final MembersInjector<String> stringInjector = new MembersInjector<String>() {
-      public void injectMembers(String instance) {
-        lastInjected.set(instance);
-      }
-    };
+    final MembersInjector<String> stringInjector =
+        new MembersInjector<String>() {
+          @Override
+          public void injectMembers(String instance) {
+            lastInjected.set(instance);
+          }
+        };
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             providerFromBinder.set(getProvider(String.class));
             membersInjectorFromBinder.set(getMembersInjector(String.class));
           }
         },
-
         new FailingElementVisitor() {
+          @Override
           public <T> Void visit(ProviderLookup<T> providerLookup) {
             @SuppressWarnings("unchecked") // we know that T is a String here
             ProviderLookup<String> stringLookup = (ProviderLookup<String>) providerLookup;
@@ -855,9 +903,9 @@ public class ElementsTest extends TestCase {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(MembersInjectorLookup<T> lookup) {
+          @Override
+          public <T> Void visit(MembersInjectorLookup<T> lookup) {
             @SuppressWarnings("unchecked") // we know that T is a String here
             MembersInjectorLookup<String> stringLookup = (MembersInjectorLookup<String>) lookup;
             stringLookup.initializeDelegate(stringInjector);
@@ -872,11 +920,13 @@ public class ElementsTest extends TestCase {
   public void testGetMembersInjector() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
-            MembersInjector<A<String>> typeMembersInjector
-                = getMembersInjector(new TypeLiteral<A<String>>() {});
+            MembersInjector<A<String>> typeMembersInjector =
+                getMembersInjector(new TypeLiteral<A<String>>() {});
             try {
               typeMembersInjector.injectMembers(new A<String>());
+              fail("Expected IllegalStateException");
             } catch (IllegalStateException e) {
               assertEquals(
                   "This MembersInjector cannot be used until the Injector has been created.",
@@ -886,6 +936,7 @@ public class ElementsTest extends TestCase {
             MembersInjector<String> classMembersInjector = getMembersInjector(String.class);
             try {
               classMembersInjector.injectMembers("hello");
+              fail("Expected IllegalStateException");
             } catch (IllegalStateException e) {
               assertEquals(
                   "This MembersInjector cannot be used until the Injector has been created.",
@@ -893,23 +944,22 @@ public class ElementsTest extends TestCase {
             }
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(MembersInjectorLookup<T> command) {
+          @Override
+          public <T> Void visit(MembersInjectorLookup<T> command) {
             assertEquals(new TypeLiteral<A<String>>() {}, command.getType());
             assertNull(command.getDelegate());
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(MembersInjectorLookup<T> command) {
+          @Override
+          public <T> Void visit(MembersInjectorLookup<T> command) {
             assertEquals(TypeLiteral.get(String.class), command.getType());
             assertNull(command.getDelegate());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testRequestInjection() {
@@ -918,43 +968,43 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             requestInjection(firstObject);
             requestInjection(secondObject);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(InjectionRequest<?> command) {
+          @Override
+          public Void visit(InjectionRequest<?> command) {
             assertEquals(firstObject, command.getInstance());
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(InjectionRequest<?> command) {
+          @Override
+          public Void visit(InjectionRequest<?> command) {
             assertEquals(secondObject, command.getInstance());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testRequestStaticInjection() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             requestStaticInjection(ArrayList.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(StaticInjectionRequest command) {
+          @Override
+          public Void visit(StaticInjectionRequest command) {
             assertEquals(ArrayList.class, command.getType());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testNewPrivateBinder() {
@@ -968,189 +1018,191 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             PrivateBinder one = binder().newPrivateBinder();
             one.expose(ArrayList.class);
             one.expose(Collection.class).annotatedWith(SampleAnnotation.class);
             one.bind(List.class).to(ArrayList.class);
 
-            PrivateBinder two = binder().withSource("1 FooBar")
-                .newPrivateBinder().withSource("2 FooBar");
+            PrivateBinder two =
+                binder().withSource("1 FooBar").newPrivateBinder().withSource("2 FooBar");
             two.expose(String.class).annotatedWith(Names.named("a"));
             two.expose(b);
             two.bind(List.class).to(ArrayList.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(PrivateElements one) {
+          @Override
+          public Void visit(PrivateElements one) {
             assertEquals(collections, one.getExposedKeys());
-            checkElements(one.getElements(),
+            checkElements(
+                one.getElements(),
                 new FailingElementVisitor() {
-                  @Override public <T> Void visit(Binding<T> binding) {
+                  @Override
+                  public <T> Void visit(Binding<T> binding) {
                     assertEquals(Key.get(List.class), binding.getKey());
                     return null;
                   }
-                }
-            );
+                });
             return null;
           }
         },
-
         new ExternalFailureVisitor() {
-          @Override public Void visit(PrivateElements two) {
+          @Override
+          public Void visit(PrivateElements two) {
             assertEquals(ab, two.getExposedKeys());
             assertEquals("1 FooBar", two.getSource().toString());
-            checkElements(two.getElements(),
+            checkElements(
+                two.getElements(),
                 new ExternalFailureVisitor() {
-                  @Override public <T> Void visit(Binding<T> binding) {
+                  @Override
+                  public <T> Void visit(Binding<T> binding) {
                     assertEquals("2 FooBar", binding.getSource().toString());
                     assertEquals(Key.get(List.class), binding.getKey());
                     return null;
                   }
-                }
-            );
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindWithMultipleAnnotationsAddsError() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             AnnotatedBindingBuilder<String> abb = bind(String.class);
             abb.annotatedWith(SampleAnnotation.class);
             abb.annotatedWith(Names.named("A"));
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
-            assertEquals("More than one annotation is specified for this binding.",
-                command.getMessage());
+          @Override
+          public Void visit(Message command) {
+            assertEquals(
+                "More than one annotation is specified for this binding.", command.getMessage());
             assertNull(command.getCause());
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindWithMultipleTargetsAddsError() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             AnnotatedBindingBuilder<String> abb = bind(String.class);
             abb.toInstance("A");
             abb.toInstance("B");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
+          @Override
+          public Void visit(Message command) {
             assertEquals("Implementation is set more than once.", command.getMessage());
             assertNull(command.getCause());
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindWithMultipleScopesAddsError() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             ScopedBindingBuilder sbb = bind(List.class).to(ArrayList.class);
             sbb.in(Scopes.NO_SCOPE);
             sbb.asEagerSingleton();
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
+          @Override
+          public Void visit(Message command) {
             assertEquals("Scope is set more than once.", command.getMessage());
             assertNull(command.getCause());
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindConstantWithMultipleAnnotationsAddsError() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             AnnotatedConstantBindingBuilder cbb = bindConstant();
             cbb.annotatedWith(SampleAnnotation.class).to("A");
             cbb.annotatedWith(Names.named("A"));
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
-            assertEquals("More than one annotation is specified for this binding.",
-                command.getMessage());
+          @Override
+          public Void visit(Message command) {
+            assertEquals(
+                "More than one annotation is specified for this binding.", command.getMessage());
             assertNull(command.getCause());
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindConstantWithMultipleTargetsAddsError() {
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             ConstantBindingBuilder cbb = bindConstant().annotatedWith(SampleAnnotation.class);
             cbb.to("A");
             cbb.to("B");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message message) {
+          @Override
+          public Void visit(Message message) {
             assertEquals("Constant value is set more than once.", message.getMessage());
             assertNull(message.getCause());
             assertContains(message.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindToConstructor() throws NoSuchMethodException, NoSuchFieldException {
@@ -1160,56 +1212,66 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(A.class).toConstructor(aConstructor);
-            bind(B.class).toConstructor(bConstructor, new TypeLiteral<B<Integer>>() {})
+            bind(B.class)
+                .toConstructor(bConstructor, new TypeLiteral<B<Integer>>() {})
                 .in(Singleton.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertEquals(new Key<A>() {}, binding.getKey());
 
-            return binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ConstructorBinding<? extends T> constructorBinding) {
-                InjectionPoint injectionPoint = constructorBinding.getConstructor();
-                assertEquals(aConstructor, injectionPoint.getMember());
-                assertEquals(new TypeLiteral<A>() {}, injectionPoint.getDeclaringType());
-                return null;
-              }
-            });
+            return binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ConstructorBinding<? extends T> constructorBinding) {
+                    InjectionPoint injectionPoint = constructorBinding.getConstructor();
+                    assertEquals(aConstructor, injectionPoint.getMember());
+                    assertEquals(new TypeLiteral<A>() {}, injectionPoint.getDeclaringType());
+                    return null;
+                  }
+                });
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertEquals(new Key<B>() {}, binding.getKey());
-            binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
-                assertEquals(Singleton.class, annotation);
-                return null;
-              }
-            });
+            binding.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
+                    assertEquals(Singleton.class, annotation);
+                    return null;
+                  }
+                });
 
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ConstructorBinding<? extends T> constructorBinding) {
-                assertEquals(bConstructor, constructorBinding.getConstructor().getMember());
-                assertEquals(Key.get(Integer.class),
-                    getOnlyElement(constructorBinding.getConstructor().getDependencies()).getKey());
-                assertEquals(field,
-                    getOnlyElement(constructorBinding.getInjectableMembers()).getMember());
-                assertEquals(2, constructorBinding.getDependencies().size());
-/*if[AOP]*/
-                assertEquals(ImmutableMap.of(), constructorBinding.getMethodInterceptors());
-/*end[AOP]*/
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ConstructorBinding<? extends T> constructorBinding) {
+                    assertEquals(bConstructor, constructorBinding.getConstructor().getMember());
+                    assertEquals(
+                        Key.get(Integer.class),
+                        getOnlyElement(constructorBinding.getConstructor().getDependencies())
+                            .getKey());
+                    assertEquals(
+                        field,
+                        getOnlyElement(constructorBinding.getInjectableMembers()).getMember());
+                    assertEquals(2, constructorBinding.getDependencies().size());
+                    /*if[AOP]*/
+                    assertEquals(ImmutableMap.of(), constructorBinding.getMethodInterceptors());
+                    /*end[AOP]*/
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testBindToMalformedConstructor() throws NoSuchMethodException, NoSuchFieldException {
@@ -1217,59 +1279,67 @@ public class ElementsTest extends TestCase {
 
     checkModule(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(C.class).toConstructor(constructor);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertEquals(Key.get(C.class), binding.getKey());
             assertTrue(binding instanceof UntargettedBinding);
             return null;
           }
         },
-
         new ExternalFailureVisitor() {
-          @Override public Void visit(Message message) {
-            assertContains(message.getMessage(),
+          @Override
+          public Void visit(Message message) {
+            assertContains(
+                message.getMessage(),
                 C.class.getName() + ".a has more than one annotation ",
-                Named.class.getName(), SampleAnnotation.class.getName());
+                Named.class.getName(),
+                SampleAnnotation.class.getName());
             return null;
           }
         },
-
         new ExternalFailureVisitor() {
-          @Override public Void visit(Message message) {
-            assertContains(message.getMessage(),
+          @Override
+          public Void visit(Message message) {
+            assertContains(
+                message.getMessage(),
                 C.class.getName() + ".<init>() has more than one annotation ",
-                Named.class.getName(), SampleAnnotation.class.getName());
+                Named.class.getName(),
+                SampleAnnotation.class.getName());
             return null;
           }
-        }
-    );
+        });
   }
 
   // Business logic tests
 
   public void testModulesAreInstalledAtMostOnce() {
     final AtomicInteger aConfigureCount = new AtomicInteger(0);
-    final Module a = new AbstractModule() {
-      public void configure() {
-        aConfigureCount.incrementAndGet();
-      }
-    };
+    final Module a =
+        new AbstractModule() {
+          @Override
+          public void configure() {
+            aConfigureCount.incrementAndGet();
+          }
+        };
 
     Elements.getElements(a, a);
     assertEquals(1, aConfigureCount.get());
 
     aConfigureCount.set(0);
-    Module b = new AbstractModule() {
-      protected void configure() {
-        install(a);
-        install(a);
-      }
-    };
+    Module b =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            install(a);
+            install(a);
+          }
+        };
 
     Elements.getElements(b);
     assertEquals(1, aConfigureCount.get());
@@ -1305,12 +1375,14 @@ public class ElementsTest extends TestCase {
   }
 
   private static class ListProvider implements Provider<List> {
+    @Override
     public List get() {
       return new ArrayList();
     }
   }
 
   private static class TProvider<T> implements Provider<T> {
+    @Override
     public T get() {
       return null;
     }
@@ -1320,7 +1392,7 @@ public class ElementsTest extends TestCase {
    * By extending this interface rather than FailingElementVisitor, the source of the error doesn't
    * need to contain the string {@code ElementsTest.java}.
    */
-  abstract class ExternalFailureVisitor extends FailingElementVisitor {}
+  abstract static class ExternalFailureVisitor extends FailingElementVisitor {}
 
   @Retention(RUNTIME)
   @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })

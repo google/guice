@@ -46,6 +46,7 @@ public final class TypeConverterBinding implements Element {
     this.typeConverter = checkNotNull(typeConverter, "typeConverter");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
@@ -58,10 +59,12 @@ public final class TypeConverterBinding implements Element {
     return typeConverter;
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).convertToTypes(typeMatcher, typeConverter);
   }

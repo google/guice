@@ -44,26 +44,32 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
     this.targetKey = targetKey;
   }
 
+  @Override
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public Key<? extends T> getLinkedKey() {
     return targetKey;
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return ImmutableSet.<Dependency<?>>of(Dependency.get(targetKey));
   }
 
+  @Override
   public BindingImpl<T> withScoping(Scoping scoping) {
     return new LinkedBindingImpl<T>(getSource(), getKey(), scoping, targetKey);
   }
 
+  @Override
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedBindingImpl<T>(getSource(), key, getScoping(), targetKey);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     getScoping().applyTo(binder.withSource(getSource()).bind(getKey()).to(getLinkedKey()));
   }

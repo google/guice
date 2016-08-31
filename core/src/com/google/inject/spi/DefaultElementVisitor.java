@@ -37,72 +37,89 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return null;
   }
 
+  @Override
   public V visit(Message message) {
     return visitOther(message);
   }
 
+  @Override
   public <T> V visit(Binding<T> binding) {
     return visitOther(binding);
   }
 
   /*if[AOP]*/
+  @Override
   public V visit(InterceptorBinding interceptorBinding) {
     return visitOther(interceptorBinding);
   }
   /*end[AOP]*/
 
+  @Override
   public V visit(ScopeBinding scopeBinding) {
     return visitOther(scopeBinding);
   }
 
+  @Override
   public V visit(TypeConverterBinding typeConverterBinding) {
     return visitOther(typeConverterBinding);
   }
 
+  @Override
   public <T> V visit(ProviderLookup<T> providerLookup) {
     return visitOther(providerLookup);
   }
 
+  @Override
   public V visit(InjectionRequest<?> injectionRequest) {
     return visitOther(injectionRequest);
   }
 
+  @Override
   public V visit(StaticInjectionRequest staticInjectionRequest) {
     return visitOther(staticInjectionRequest);
   }
 
+  @Override
   public V visit(PrivateElements privateElements) {
     return visitOther(privateElements);
   }
 
+  @Override
   public <T> V visit(MembersInjectorLookup<T> lookup) {
     return visitOther(lookup);
   }
 
+  @Override
   public V visit(TypeListenerBinding binding) {
     return visitOther(binding);
   }
   
+  @Override
   public V visit(ProvisionListenerBinding binding) {
     return visitOther(binding);
   }
   
+  @Override
   public V visit(DisableCircularProxiesOption option) {
     return visitOther(option);
   }
   
+  @Override
   public V visit(RequireExplicitBindingsOption option) {
     return visitOther(option);
   }
   
+  @Override
   public V visit(RequireAtInjectOnConstructorsOption option) {
     return visitOther(option);
   }
 
+  @Override
   public V visit(RequireExactBindingAnnotationsOption option) {
     return visitOther(option);
   }
 
+  @Override
   public V visit(ModuleAnnotatedMethodScannerBinding binding) {
     return visitOther(binding);
   }

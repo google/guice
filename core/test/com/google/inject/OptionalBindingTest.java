@@ -42,44 +42,51 @@ public class OptionalBindingTest extends TestCase {
   private static final F injectF = new F() {};
   private static final G injectG = new G() {};
 
-  private Module everythingModule = new AbstractModule() {
-    protected void configure() {
-      bind(A.class).toInstance(injectA);
-      bind(B.class).toInstance(injectB);
-      bind(C.class).toInstance(injectC);
-      bind(D.class).toInstance(injectD);
-      bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
-      bind(F.class).toInstance(injectF);
-      bind(G.class).toInstance(injectG);
-    }
-  };
+  private Module everythingModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(A.class).toInstance(injectA);
+          bind(B.class).toInstance(injectB);
+          bind(C.class).toInstance(injectC);
+          bind(D.class).toInstance(injectD);
+          bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
+          bind(F.class).toInstance(injectF);
+          bind(G.class).toInstance(injectG);
+        }
+      };
 
-  private Module partialModule = new AbstractModule() {
-    protected void configure() {
-      bind(C.class).toInstance(new C() {});
-    }
-  };
+  private Module partialModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(C.class).toInstance(new C() {});
+        }
+      };
 
-  private Module toInstanceModule = new AbstractModule() {
-    protected void configure() {
-      bind(HasOptionalInjections.class)
-          .toInstance(new HasOptionalInjections());
-    }
-  };
+  private Module toInstanceModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasOptionalInjections.class).toInstance(new HasOptionalInjections());
+        }
+      };
 
-  private Module toProviderInstanceModule = new AbstractModule() {
-    protected void configure() {
-      bind(HasOptionalInjections.class)
-          .toProvider(new HasOptionalInjectionsProvider());
-    }
-  };
+  private Module toProviderInstanceModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasOptionalInjections.class).toProvider(new HasOptionalInjectionsProvider());
+        }
+      };
 
-  private Module toProviderModule = new AbstractModule() {
-    protected void configure() {
-      bind(HasOptionalInjections.class)
-          .toProvider(HasOptionalInjectionsProvider.class);
-    }
-  };
+  private Module toProviderModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasOptionalInjections.class).toProvider(HasOptionalInjectionsProvider.class);
+        }
+      };
 
   public void testEverythingInjectorGetInstance() {
     Guice.createInjector(everythingModule)
@@ -239,6 +246,7 @@ public class OptionalBindingTest extends TestCase {
 
   static class HasOptionalInjectionsProvider
       extends HasOptionalInjections implements Provider<HasOptionalInjections> {
+    @Override
     public HasOptionalInjections get() {
       return this;
     }
@@ -266,11 +274,13 @@ public class OptionalBindingTest extends TestCase {
 
   public void testStaticInjection() {
     staticInjectA = injectA;
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        requestStaticInjection(OptionalBindingTest.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            requestStaticInjection(OptionalBindingTest.class);
+          }
+        });
     assertSame(staticInjectA, injectA);
   }
 

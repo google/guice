@@ -32,8 +32,7 @@ public interface ExposedBinding<T> extends Binding<T>, HasDependencies {
    */
   PrivateElements getPrivateElements();
 
-  /**
-   * Unsupported. Always throws {@link UnsupportedOperationException}.
-   */
+  /** Unsupported. Always throws {@link UnsupportedOperationException}. */
+  @Override
   void applyTo(Binder binder);
 }

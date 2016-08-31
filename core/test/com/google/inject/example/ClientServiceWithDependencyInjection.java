@@ -30,9 +30,10 @@ public interface Service {
 }
 
 public static class ServiceImpl implements ClientServiceWithDependencyInjection.Service {
-  public void go() {
-    // ...
-  }
+    @Override
+    public void go() {
+      // ...
+    }
 }
 
 public static class ServiceFactory {
@@ -80,7 +81,8 @@ public static class MockService implements Service {
 
   private boolean gone = false;
 
-  public void go() {
+    @Override
+    public void go() {
     gone = true;
   }
 

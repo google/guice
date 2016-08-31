@@ -60,6 +60,5 @@ public class JpaPersistServiceTest extends TestCase {
     }
   }
 
-  private class SimulatedException extends RuntimeException {
-  }
+  private static class SimulatedException extends RuntimeException {}
 }

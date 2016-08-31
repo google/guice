@@ -1090,12 +1090,14 @@ public class OptionalBinderTest extends TestCase {
   }
 
   private static class AStringProvider implements Provider<String> {
+    @Override
     public String get() {
       return "A";
     }
   }
 
   private static class BStringProvider implements Provider<String> {
+    @Override
     public String get() {
       return "B";
     }

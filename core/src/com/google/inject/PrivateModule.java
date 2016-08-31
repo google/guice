@@ -91,6 +91,7 @@ public abstract class PrivateModule implements Module {
   /** Like abstract module, the binder of the current private module */
   private PrivateBinder binder;
 
+  @Override
   public final synchronized void configure(Binder binder) {
     checkState(this.binder == null, "Re-entry is not allowed.");
 

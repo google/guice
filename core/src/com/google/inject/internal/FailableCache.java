@@ -28,19 +28,22 @@ import com.google.common.cache.LoadingCache;
  */
 public abstract class FailableCache<K, V> {
   
-  private final LoadingCache<K, Object> delegate = CacheBuilder.newBuilder().build(
-      new CacheLoader<K, Object>() {
-        public Object load(K key) {
-          Errors errors = new Errors();
-          V result = null;
-          try {
-            result = FailableCache.this.create(key, errors);
-          } catch (ErrorsException e) {
-            errors.merge(e.getErrors());
-          }
-          return errors.hasErrors() ? errors : result;
-        }
-      });
+  private final LoadingCache<K, Object> delegate =
+      CacheBuilder.newBuilder()
+          .build(
+              new CacheLoader<K, Object>() {
+                @Override
+                public Object load(K key) {
+                  Errors errors = new Errors();
+                  V result = null;
+                  try {
+                    result = FailableCache.this.create(key, errors);
+                  } catch (ErrorsException e) {
+                    errors.merge(e.getErrors());
+                  }
+                  return errors.hasErrors() ? errors : result;
+                }
+              });
 
   protected abstract V create(K key, Errors errors) throws ErrorsException;
   

@@ -153,6 +153,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     return interceptors;
   }
 
+  @Override
   public ConstructionProxy<T> create() throws ErrorsException {
     if (interceptors.isEmpty()) {
       return new DefaultConstructionProxyFactory<T>(injectionPoint).create();
@@ -219,6 +220,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       this.hashCode = indices.hashCode();
     }
 
+    @Override
     public int accept(Method method) {
       return indices.get(MethodWrapper.create(method));
     }
@@ -258,6 +260,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       this.constructorIndex = fastClass.getIndex(constructor.getParameterTypes());
     }
 
+    @Override
     @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
     public T newInstance(Object... arguments) throws InvocationTargetException {
       Enhancer.registerCallbacks(enhanced, callbacks);
@@ -268,14 +271,17 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       }
     }
 
+    @Override
     public InjectionPoint getInjectionPoint() {
       return injectionPoint;
     }
 
+    @Override
     public Constructor<T> getConstructor() {
       return constructor;
     }
 
+    @Override
     public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
       return methodInterceptors;
     }

@@ -85,8 +85,8 @@ class ManagedFilterPipeline implements FilterPipeline{
     return filterDefinitions.toArray(new FilterDefinition[filterDefinitions.size()]);
   }
 
-  public synchronized void initPipeline(ServletContext servletContext)
-      throws ServletException {
+  @Override
+  public synchronized void initPipeline(ServletContext servletContext) throws ServletException {
 
     //double-checked lock, prevents duplicate initialization
     if (initialized)
@@ -106,8 +106,10 @@ class ManagedFilterPipeline implements FilterPipeline{
     initialized = true;
   }
 
-  public void dispatch(ServletRequest request, ServletResponse response,
-      FilterChain proceedingFilterChain) throws IOException, ServletException {
+  @Override
+  public void dispatch(
+      ServletRequest request, ServletResponse response, FilterChain proceedingFilterChain)
+      throws IOException, ServletException {
 
     //lazy init of filter pipeline (OK by the servlet specification). This is needed
     //in order for us not to force users to create a GuiceServletContextListener subclass.
@@ -156,6 +158,7 @@ class ManagedFilterPipeline implements FilterPipeline{
     };
   }
 
+  @Override
   public void destroyPipeline() {
     //destroy servlets first
     servletPipeline.destroy();

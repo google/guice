@@ -42,10 +42,12 @@ final class SingleFieldInjector implements SingleMemberInjector {
     binding = injector.getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT);
   }
 
+  @Override
   public InjectionPoint getInjectionPoint() {
     return injectionPoint;
   }
 
+  @Override
   public void inject(Errors errors, InternalContext context, Object o) {
     errors = errors.withSource(dependency);
 

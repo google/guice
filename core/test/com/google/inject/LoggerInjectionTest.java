@@ -46,24 +46,29 @@ public class LoggerInjectionTest extends TestCase {
   }
 
   public void testCanBindAnnotatedLogger() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Logger.class)
-            .annotatedWith(Names.named("anonymous"))
-            .toInstance(Logger.getAnonymousLogger());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Logger.class)
+                    .annotatedWith(Names.named("anonymous"))
+                    .toInstance(Logger.getAnonymousLogger());
+              }
+            });
 
     assertNull(injector.getInstance(Key.get(Logger.class, Names.named("anonymous"))).getName());
   }
   
   public void testCannotBindLogger() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Logger.class).toInstance(Logger.getAnonymousLogger());
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Logger.class).toInstance(Logger.getAnonymousLogger());
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),

@@ -67,41 +67,50 @@ final class InheritingState implements State {
     this.blacklistedKeys = new WeakKeySet(lock);
   }
 
+  @Override
   public State parent() {
     return parent;
   }
 
+  @Override
   @SuppressWarnings("unchecked") // we only put in BindingImpls that match their key types
   public <T> BindingImpl<T> getExplicitBinding(Key<T> key) {
     Binding<?> binding = explicitBindings.get(key);
     return binding != null ? (BindingImpl<T>) binding : parent.getExplicitBinding(key);
   }
 
+  @Override
   public Map<Key<?>, Binding<?>> getExplicitBindingsThisLevel() {
     return explicitBindings;
   }
 
+  @Override
   public void putBinding(Key<?> key, BindingImpl<?> binding) {
     explicitBindingsMutable.put(key, binding);
   }
 
+  @Override
   public ScopeBinding getScopeBinding(Class<? extends Annotation> annotationType) {
     ScopeBinding scopeBinding = scopes.get(annotationType);
     return scopeBinding != null ? scopeBinding : parent.getScopeBinding(annotationType);
   }
 
+  @Override
   public void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope) {
     scopes.put(annotationType, scope);
   }
 
+  @Override
   public Iterable<TypeConverterBinding> getConvertersThisLevel() {
     return converters;
   }
 
+  @Override
   public void addConverter(TypeConverterBinding typeConverterBinding) {
     converters.add(typeConverterBinding);
   }
 
+  @Override
   public TypeConverterBinding getConverter(
       String stringValue, TypeLiteral<?> type, Errors errors, Object source) {
     TypeConverterBinding matchingConverter = null;
@@ -119,10 +128,12 @@ final class InheritingState implements State {
   }
 
   /*if[AOP]*/
+  @Override
   public void addMethodAspect(MethodAspect methodAspect) {
     methodAspects.add(methodAspect);
   }
 
+  @Override
   public ImmutableList<MethodAspect> getMethodAspects() {
     return new ImmutableList.Builder<MethodAspect>()
         .addAll(parent.getMethodAspects())
@@ -131,10 +142,12 @@ final class InheritingState implements State {
   }
   /*end[AOP]*/
 
+  @Override
   public void addTypeListener(TypeListenerBinding listenerBinding) {
     typeListenerBindings.add(listenerBinding);
   }
 
+  @Override
   public List<TypeListenerBinding> getTypeListenerBindings() {
     List<TypeListenerBinding> parentBindings = parent.getTypeListenerBindings();
     List<TypeListenerBinding> result =
@@ -144,10 +157,12 @@ final class InheritingState implements State {
     return result;
   }
   
+  @Override
   public void addProvisionListener(ProvisionListenerBinding listenerBinding) {
     provisionListenerBindings.add(listenerBinding);
   }
 
+  @Override
   public List<ProvisionListenerBinding> getProvisionListenerBindings() {
     List<ProvisionListenerBinding> parentBindings = parent.getProvisionListenerBindings();
     List<ProvisionListenerBinding> result =
@@ -157,10 +172,12 @@ final class InheritingState implements State {
     return result;
   }
 
+  @Override
   public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
     scannerBindings.add(scanner);
   }
 
+  @Override
   public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
     List<ModuleAnnotatedMethodScannerBinding> parentBindings = parent.getScannerBindings();
     List<ModuleAnnotatedMethodScannerBinding> result =
@@ -170,23 +187,28 @@ final class InheritingState implements State {
     return result;
   }
 
+  @Override
   public void blacklist(Key<?> key, State state, Object source) {
     parent.blacklist(key, state, source);
     blacklistedKeys.add(key, state, source);
   }
 
+  @Override
   public boolean isBlacklisted(Key<?> key) {
     return blacklistedKeys.contains(key);
   }
   
+  @Override
   public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
     return blacklistedKeys.getSources(key);
   }
 
+  @Override
   public Object lock() {
     return lock;
   }
 
+  @Override
   public Map<Class<? extends Annotation>, Scope> getScopes() {
     ImmutableMap.Builder<Class<? extends Annotation>, Scope> builder = ImmutableMap.builder();
     for (Map.Entry<Class<? extends Annotation>, ScopeBinding> entry : scopes.entrySet()) {

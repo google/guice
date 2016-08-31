@@ -60,11 +60,15 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       if (provisionCallback == null) {
         return provision(provider, errors, dependency, constructionContext);
       } else {
-        return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
-          public T call() throws ErrorsException {
-            return provision(provider, errors, dependency, constructionContext);
-          }
-        });
+        return provisionCallback.provision(
+            errors,
+            context,
+            new ProvisionCallback<T>() {
+              @Override
+              public T call() throws ErrorsException {
+                return provision(provider, errors, dependency, constructionContext);
+              }
+            });
       }
     } finally {
       constructionContext.removeCurrentReference();

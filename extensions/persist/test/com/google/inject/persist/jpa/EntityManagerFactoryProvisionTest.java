@@ -33,10 +33,12 @@ import javax.persistence.EntityManagerFactory;
 public class EntityManagerFactoryProvisionTest extends TestCase {
   private Injector injector;
 
+  @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
   }
 
+  @Override
   public final void tearDown() {
     injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();

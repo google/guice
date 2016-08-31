@@ -55,49 +55,53 @@ public class SpiBindingsTest extends TestCase {
   public void testBindConstant() {
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindConstant().annotatedWith(Names.named("one")).to(1);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof InstanceBinding);
             assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testToInstanceBinding() {
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toInstance("A");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof InstanceBinding);
             checkBindingSource(binding);
             assertEquals(Key.get(String.class), binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(InstanceBinding<? extends T> binding) {
-                assertEquals("A", binding.getInstance());
-                return null;
-              }
-            });
-            binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              public Void visitEagerSingleton() {
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(InstanceBinding<? extends T> binding) {
+                    assertEquals("A", binding.getInstance());
+                    return null;
+                  }
+                });
+            binding.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitEagerSingleton() {
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testToProviderBinding() {
@@ -105,52 +109,55 @@ public class SpiBindingsTest extends TestCase {
 
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toProvider(stringProvider);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof ProviderInstanceBinding);
             checkBindingSource(binding);
             assertEquals(Key.get(String.class), binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(
-                  ProviderInstanceBinding<? extends T> binding) {
-                assertSame(stringProvider, binding.getUserSuppliedProvider());
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderInstanceBinding<? extends T> binding) {
+                    assertSame(stringProvider, binding.getUserSuppliedProvider());
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testToProviderKeyBinding() {
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(String.class).toProvider(StringProvider.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof ProviderKeyBinding);
             checkBindingSource(binding);
             assertEquals(Key.get(String.class), binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
-                assertEquals(Key.get(StringProvider.class), binding.getProviderKey());
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ProviderKeyBinding<? extends T> binding) {
+                    assertEquals(Key.get(StringProvider.class), binding.getProviderKey());
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testToKeyBinding() {
@@ -159,94 +166,103 @@ public class SpiBindingsTest extends TestCase {
 
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(aKey).to(bKey);
             bind(bKey).toInstance("B");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof LinkedKeyBinding);
             checkBindingSource(binding);
             assertEquals(aKey, binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(LinkedKeyBinding<? extends T> binding) {
-                assertEquals(bKey, binding.getLinkedKey());
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(LinkedKeyBinding<? extends T> binding) {
+                    assertEquals(bKey, binding.getLinkedKey());
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertEquals(bKey, binding.getKey());
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testToConstructorBinding() {
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(D.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof ConstructorBinding);
             checkBindingSource(binding);
             assertEquals(Key.get(D.class), binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ConstructorBinding<? extends T> binding) {
-                Constructor<?> expected = D.class.getDeclaredConstructors()[0];
-                assertEquals(expected, binding.getConstructor().getMember());
-                assertEquals(ImmutableSet.<InjectionPoint>of(), binding.getInjectableMembers());
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ConstructorBinding<? extends T> binding) {
+                    Constructor<?> expected = D.class.getDeclaredConstructors()[0];
+                    assertEquals(expected, binding.getConstructor().getMember());
+                    assertEquals(ImmutableSet.<InjectionPoint>of(), binding.getInjectableMembers());
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testConstantBinding() {
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bindConstant().annotatedWith(Names.named("one")).to(1);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof InstanceBinding);
             checkBindingSource(binding);
             assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(InstanceBinding<? extends T> binding) {
-                assertEquals(1, binding.getInstance());
-                return null;
-              }
-            });
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(InstanceBinding<? extends T> binding) {
+                    assertEquals(1, binding.getInstance());
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testConvertedConstantBinding() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bindConstant().annotatedWith(Names.named("one")).to("1");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(Names.named("one")).to("1");
+              }
+            });
 
     Binding<Integer> binding = injector.getBinding(Key.get(Integer.class, Names.named("one")));
     assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
@@ -263,11 +279,14 @@ public class SpiBindingsTest extends TestCase {
   }
 
   public void testProviderBinding() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("A");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("A");
+              }
+            });
 
     Key<Provider<String>> providerOfStringKey = new Key<Provider<String>>() {};
     Binding<Provider<String>> binding = injector.getBinding(providerOfStringKey);
@@ -286,97 +305,120 @@ public class SpiBindingsTest extends TestCase {
   public void testScopes() {
     checkInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
-            bind(String.class).annotatedWith(Names.named("a"))
-                .toProvider(StringProvider.class).in(Singleton.class);
-            bind(String.class).annotatedWith(Names.named("b"))
-                .toProvider(StringProvider.class).in(Scopes.SINGLETON);
-            bind(String.class).annotatedWith(Names.named("c"))
-                .toProvider(StringProvider.class).asEagerSingleton();
-            bind(String.class).annotatedWith(Names.named("d"))
-                .toProvider(StringProvider.class);
+            bind(String.class)
+                .annotatedWith(Names.named("a"))
+                .toProvider(StringProvider.class)
+                .in(Singleton.class);
+            bind(String.class)
+                .annotatedWith(Names.named("b"))
+                .toProvider(StringProvider.class)
+                .in(Scopes.SINGLETON);
+            bind(String.class)
+                .annotatedWith(Names.named("c"))
+                .toProvider(StringProvider.class)
+                .asEagerSingleton();
+            bind(String.class).annotatedWith(Names.named("d")).toProvider(StringProvider.class);
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitScope(Scope scope) {
-                // even though we bound with an annotation, the injector always uses instances
-                assertSame(Scopes.SINGLETON, scope);
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitScope(Scope scope) {
+                    // even though we bound with an annotation, the injector always uses instances
+                    assertSame(Scopes.SINGLETON, scope);
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("b")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitScope(Scope scope) {
-                assertSame(Scopes.SINGLETON, scope);
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitScope(Scope scope) {
+                    assertSame(Scopes.SINGLETON, scope);
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("c")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitEagerSingleton() {
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitEagerSingleton() {
+                    return null;
+                  }
+                });
             return null;
           }
         },
-
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> command) {
+          @Override
+          public <T> Void visit(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("d")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
-              @Override public Void visitNoScoping() {
-                return null;
-              }
-            });
+            command.acceptScopingVisitor(
+                new FailingBindingScopingVisitor() {
+                  @Override
+                  public Void visitNoScoping() {
+                    return null;
+                  }
+                });
             return null;
           }
-        }
-    );
+        });
   }
   
   public void testExtensionSpi() {
     final AtomicBoolean visiting = new AtomicBoolean(false);
     
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toProvider(new ProviderWithExtensionVisitor<String>() {
-          public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
-              ProviderInstanceBinding<? extends B> binding) {
-            assertSame(this, binding.getUserSuppliedProvider());
-            // We can't always check for FailingSpiTargetVisitor,
-            // because constructing the injector visits here, and we need
-            // to process the binding as normal
-            if(visiting.get()) {
-              assertTrue("visitor: " + visitor, visitor instanceof FailingSpiTargetVisitor);
-              return (V)"visited";
-            } else {
-              return visitor.visit(binding);
-            }
-          }
-          
-          public String get() {
-            return "FooBar";
-          }
-        });
-      }
-    });
+    final Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class)
+                    .toProvider(
+                        new ProviderWithExtensionVisitor<String>() {
+                          @Override
+                          public <B, V> V acceptExtensionVisitor(
+                              BindingTargetVisitor<B, V> visitor,
+                              ProviderInstanceBinding<? extends B> binding) {
+                            assertSame(this, binding.getUserSuppliedProvider());
+                            // We can't always check for FailingSpiTargetVisitor,
+                            // because constructing the injector visits here, and we need
+                            // to process the binding as normal
+                            if (visiting.get()) {
+                              assertTrue(
+                                  "visitor: " + visitor,
+                                  visitor instanceof FailingSpiTargetVisitor);
+                              return (V) "visited";
+                            } else {
+                              return visitor.visit(binding);
+                            }
+                          }
+
+                          @Override
+                          public String get() {
+                            return "FooBar";
+                          }
+                        });
+              }
+            });
     
     visiting.set(true);
 
@@ -443,13 +485,16 @@ public class SpiBindingsTest extends TestCase {
   private final ImmutableSet<Key<?>> BUILT_IN_BINDINGS = ImmutableSet.of(
       Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
 
-  private final Comparator<Binding<?>> orderByKey = new Comparator<Binding<?>>() {
-    public int compare(Binding<?> a, Binding<?> b) {
-      return a.getKey().toString().compareTo(b.getKey().toString());
-    }
-  };
+  private final Comparator<Binding<?>> orderByKey =
+      new Comparator<Binding<?>>() {
+        @Override
+        public int compare(Binding<?> a, Binding<?> b) {
+          return a.getKey().toString().compareTo(b.getKey().toString());
+        }
+      };
 
   private static class StringProvider implements Provider<String> {
+    @Override
     public String get() {
       return "A";
     }

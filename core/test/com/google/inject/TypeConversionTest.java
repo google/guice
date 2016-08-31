@@ -374,16 +374,19 @@ public class TypeConversionTest extends TestCase {
   }
 
   public void testStringIsConvertedOnlyOnce() {
-    final TypeConverter converter = new TypeConverter() {
-      boolean converted = false;
-      public Object convert(String value, TypeLiteral<?> toType) {
-        if (converted) {
-          throw new AssertionFailedError("converted multiple times!");
-        }
-        converted = true;
-        return new Date();
-      }
-    };
+    final TypeConverter converter =
+        new TypeConverter() {
+          boolean converted = false;
+
+          @Override
+          public Object convert(String value, TypeLiteral<?> toType) {
+            if (converted) {
+              throw new AssertionFailedError("converted multiple times!");
+            }
+            converted = true;
+            return new Date();
+          }
+        };
 
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override protected void configure() {
@@ -452,11 +455,13 @@ public class TypeConversionTest extends TestCase {
 
   TypeConverter mockTypeConverter(final Object result) {
     return new TypeConverter() {
+      @Override
       public Object convert(String value, TypeLiteral<?> toType) {
         return result;
       }
 
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return "CustomConverter";
       }
     };
@@ -464,10 +469,13 @@ public class TypeConversionTest extends TestCase {
 
   private static TypeConverter failingTypeConverter() {
     return new TypeConverter() {
+      @Override
       public Object convert(String value, TypeLiteral<?> toType) {
         throw new UnsupportedOperationException("Cannot convert");
       }
-      @Override public String toString() {
+
+      @Override
+      public String toString() {
         return "BrokenConverter";
       }
     };

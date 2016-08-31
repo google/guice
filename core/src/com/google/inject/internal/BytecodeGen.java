@@ -131,17 +131,21 @@ public final class BytecodeGen {
     if (getCustomClassLoadingOption() == CustomClassLoadingOption.OFF) {
       builder.maximumSize(0);
     }
-    CLASS_LOADER_CACHE = builder.build(
-        new CacheLoader<ClassLoader, ClassLoader>() {
-          @Override public ClassLoader load(final ClassLoader typeClassLoader) {
-            logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
-            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-              public ClassLoader run() {
-                return new BridgeClassLoader(typeClassLoader);
+    CLASS_LOADER_CACHE =
+        builder.build(
+            new CacheLoader<ClassLoader, ClassLoader>() {
+              @Override
+              public ClassLoader load(final ClassLoader typeClassLoader) {
+                logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
+                return AccessController.doPrivileged(
+                    new PrivilegedAction<ClassLoader>() {
+                      @Override
+                      public ClassLoader run() {
+                        return new BridgeClassLoader(typeClassLoader);
+                      }
+                    });
               }
             });
-          }
-        });
   }
 
   /**

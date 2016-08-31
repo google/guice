@@ -35,6 +35,7 @@ class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> imp
     super(initParams, target, patternMatcher);
   }
 
+  @Override
   public Filter getFilterInstance() {
     return getTarget();
   }

@@ -162,6 +162,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     @Inject ConstructedClassProvider(A a, B b, C c) {}
     @Inject void setF(F f) {}
     
+    @Override
     public ConstructedClass get() {
       return null;
     }
@@ -171,6 +172,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     @Inject A a;
     @Inject B b;
     
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(G.class)));
     }

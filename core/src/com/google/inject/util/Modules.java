@@ -58,6 +58,7 @@ public final class Modules {
   
   public static final Module EMPTY_MODULE = new EmptyModule();
   private static class EmptyModule implements Module {
+    @Override
     public void configure(Binder binder) {}
   }
 
@@ -122,6 +123,7 @@ public final class Modules {
       this.modulesSet = ImmutableSet.copyOf(modules);
     }
     
+    @Override
     public void configure(Binder binder) {
       binder = binder.skipSources(getClass());
       for (Module module : modulesSet) {
@@ -153,10 +155,12 @@ public final class Modules {
       this.baseModules = ImmutableSet.copyOf(baseModules);
     }
 
+    @Override
     public Module with(Module... overrides) {
       return with(Arrays.asList(overrides));
     }
 
+    @Override
     public Module with(Iterable<? extends Module> overrides) {
       return new OverrideModule(overrides, baseModules);
     }

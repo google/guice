@@ -56,14 +56,17 @@ public final class ProvisionListenerBinding implements Element {
     return bindingMatcher;
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
+  @Override
   public <R> R acceptVisitor(ElementVisitor<R> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).bindListener(bindingMatcher,
         listeners.toArray(new ProvisionListener[listeners.size()]));

@@ -25,10 +25,6 @@ import static com.google.inject.util.Types.supertypeOf;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.MoreTypes;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -37,6 +33,8 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -190,6 +188,7 @@ public class TypesTest extends TestCase {
 
     try {
       Types.newParameterizedTypeWithOwner(Object.class, Set.class, String.class);
+      fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertContains(expected.getMessage(),
           "Owner type for unenclosed " + Set.class);
@@ -210,6 +209,7 @@ public class TypesTest extends TestCase {
   }
 
   static class Outer<T> {
+    @SuppressWarnings("ClassCanBeStatic")
     class Inner {}
   }
 }

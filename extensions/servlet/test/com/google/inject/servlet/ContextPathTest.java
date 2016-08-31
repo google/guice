@@ -277,8 +277,9 @@ public class ContextPathTest extends TestCase {
   public static class TestFilterChain implements FilterChain {
     private boolean triggered = false;
 
-    public void doFilter(ServletRequest request, ServletResponse response) throws IOException,
-        ServletException {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response)
+        throws IOException, ServletException {
       triggered = true;
     }
 

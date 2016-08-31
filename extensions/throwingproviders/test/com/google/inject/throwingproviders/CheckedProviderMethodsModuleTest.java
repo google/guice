@@ -54,6 +54,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
   private final TestScope testScope = new TestScope();
 
   interface RpcProvider<T> extends CheckedProvider<T> {
+    @Override
     T get() throws RemoteException, BindException;
   }
 
@@ -156,7 +157,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
     RpcProvider<Pair<Double, String>> provider = injector
         .getInstance(Key.get(rpcProviderOfPair));
     Pair<Double, String> pair = provider.get();
-    assertEquals(pair.first, 4.0d);
+    assertEquals(pair.first, 4.0d, 0.0);
   }
 
   public void testWithThrownException() {

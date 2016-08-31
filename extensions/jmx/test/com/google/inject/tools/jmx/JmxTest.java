@@ -49,6 +49,7 @@ public class JmxTest {
   
   public static class TestModule extends AbstractModule {
 
+    @Override
     protected void configure() {
       bind(Foo.class).to(FooImpl.class);
       bind(Bar.class);

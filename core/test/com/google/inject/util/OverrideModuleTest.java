@@ -64,9 +64,11 @@ public class OverrideModuleTest extends TestCase {
   private static final Key<String> key2 = Key.get(String.class, named("2"));
   private static final Key<String> key3 = Key.get(String.class, named("3"));
 
-  private static final Module EMPTY_MODULE = new Module() {
-    public void configure(Binder binder) {}
-  };
+  private static final Module EMPTY_MODULE =
+      new Module() {
+        @Override
+        public void configure(Binder binder) {}
+      };
 
   public void testOverride() {
     Injector injector = createInjector(Modules.override(newModule("A")).with(newModule("B")));
@@ -79,8 +81,8 @@ public class OverrideModuleTest extends TestCase {
     Injector injector = createInjector(module);
     assertEquals("B", injector.getInstance(String.class));
     assertEquals(2, injector.getInstance(Integer.class).intValue());
-    assertEquals(0.5f, injector.getInstance(Float.class));
-    assertEquals(1.5d, injector.getInstance(Double.class));
+    assertEquals(0.5f, injector.getInstance(Float.class), 0.0f);
+    assertEquals(1.5d, injector.getInstance(Double.class), 0.0);
   }
 
   public void testOverrideUnmatchedTolerated() {
@@ -276,11 +278,13 @@ public class OverrideModuleTest extends TestCase {
   }
 
   public void testOverrideScopeAnnotation() {
-    final Scope scope = new Scope() {
-      public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-        throw new AssertionError("Should not be called");
-      }
-    };
+    final Scope scope =
+        new Scope() {
+          @Override
+          public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+            throw new AssertionError("Should not be called");
+          }
+        };
 
     final SingleUseScope replacementScope = new SingleUseScope();
 
@@ -303,15 +307,18 @@ public class OverrideModuleTest extends TestCase {
   }
 
   public void testFailsIfOverridenScopeInstanceHasBeenUsed() {
-    final Scope scope = new Scope() {
-      public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-        return unscoped;
-      }
+    final Scope scope =
+        new Scope() {
+          @Override
+          public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+            return unscoped;
+          }
 
-      @Override public String toString() {
-        return "ORIGINAL SCOPE";
-      }
-    };
+          @Override
+          public String toString() {
+            return "ORIGINAL SCOPE";
+          }
+        };
 
     final Module original = new AbstractModule() {
       @Override protected void configure() {
@@ -502,6 +509,7 @@ public class OverrideModuleTest extends TestCase {
 
   private static class SingleUseScope implements Scope {
     boolean used = false;
+    @Override
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
       assertFalse(used);
       used = true;
@@ -662,6 +670,7 @@ public class OverrideModuleTest extends TestCase {
       }
     }
     
+    @Override
     public Object get() {
       return new Object();
     }

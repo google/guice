@@ -54,11 +54,13 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
     provisionCallback = listener;
   }
   
+  @Override
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     providerBinding =
         injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
       throws ErrorsException {
     BindingImpl<? extends Provider<T>> localProviderBinding = providerBinding;

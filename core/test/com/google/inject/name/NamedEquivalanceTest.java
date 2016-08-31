@@ -191,15 +191,18 @@ public class NamedEquivalanceTest extends TestCase {
       this.value = value;
     }
 
+    @Override
     public String value() {
       return this.value;
     }
 
+    @Override
     public int hashCode() {
       // This is specified in java.lang.Annotation.
       return (127 * "value".hashCode()) ^ value.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
       if (!(o instanceof javax.inject.Named)) {
         return false;
@@ -209,10 +212,12 @@ public class NamedEquivalanceTest extends TestCase {
       return value.equals(other.value());
     }
 
+    @Override
     public String toString() {
       return "@" + javax.inject.Named.class.getName() + "(value=" + value + ")";
     }
 
+    @Override
     public Class<? extends Annotation> annotationType() {
       return javax.inject.Named.class;
     }
@@ -227,15 +232,18 @@ public class NamedEquivalanceTest extends TestCase {
       this.value = value;
     }
     
+    @Override
     public String value() {
       return this.value;
     }
     
+    @Override
     public int hashCode() {
       // This is specified in java.lang.Annotation.
       return (127 * "value".hashCode()) ^ value.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
       if (!(o instanceof com.google.inject.name.Named)) {
         return false;
@@ -245,10 +253,12 @@ public class NamedEquivalanceTest extends TestCase {
       return value.equals(other.value());
     }
 
+    @Override
     public String toString() {
       return "@" + com.google.inject.name.Named.class.getName() + "(value=" + value + ")";
     }
 
+    @Override
     public Class<? extends Annotation> annotationType() {
       return com.google.inject.name.Named.class;
     }

@@ -52,6 +52,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     this.persistenceProperties = persistenceProperties;
   }
 
+  @Override
   public EntityManager get() {
     if (!isWorking()) {
       begin();
@@ -69,6 +70,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     return entityManager.get() != null;
   }
 
+  @Override
   public void begin() {
     Preconditions.checkState(null == entityManager.get(),
         "Work already begun on this thread. Looks like you have called UnitOfWork.begin() twice"
@@ -77,6 +79,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     entityManager.set(emFactory.createEntityManager());
   }
 
+  @Override
   public void end() {
     EntityManager em = entityManager.get();
 
@@ -100,6 +103,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     this.emFactory = emFactory;
   }
 
+  @Override
   public synchronized void start() {
     Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
 
@@ -111,6 +115,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     }
   }
 
+  @Override
   public synchronized void stop() {
     Preconditions.checkState(emFactory.isOpen(), "Persistence service was already shut down.");
     emFactory.close();
@@ -125,6 +130,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
       this.emProvider = emProvider;
     }
 
+    @Override
     public EntityManagerFactory get() {
       assert null != emProvider.emFactory;
       return emProvider.emFactory;

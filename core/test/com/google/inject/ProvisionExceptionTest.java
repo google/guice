@@ -393,6 +393,7 @@ public class ProvisionExceptionTest extends TestCase {
     @Inject QuadrupleSameFailure(Integer i1, Integer i2, String s1, String s2) { }
   }
   
+  @SuppressWarnings("ClassCanBeStatic")
   private class InnerClass {}
 
   static class A {
@@ -446,6 +447,7 @@ public class ProvisionExceptionTest extends TestCase {
   }
 
   static class DProvider implements Provider<D> {
+    @Override
     public D get() {
       throw new UnsupportedOperationException();
     }
@@ -458,6 +460,7 @@ public class ProvisionExceptionTest extends TestCase {
   }
 
   static class FProvider implements Provider<F> {
+    @Override
     public F get() {
       return new F();
     }

@@ -39,17 +39,20 @@ public class StackTraceElements {
 
   /*if[AOP]*/
   static final LoadingCache<Class<?>, LineNumbers> lineNumbersCache =
-      CacheBuilder.newBuilder().weakKeys().softValues().build(
-          new CacheLoader<Class<?>, LineNumbers>() {
-            public LineNumbers load(Class<?> key) {
-              try {
-                return new LineNumbers(key);
-              }
-              catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            }
-          });
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .softValues()
+          .build(
+              new CacheLoader<Class<?>, LineNumbers>() {
+                @Override
+                public LineNumbers load(Class<?> key) {
+                  try {
+                    return new LineNumbers(key);
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                }
+              });
   /*end[AOP]*/
 
   private static final ConcurrentMap<InMemoryStackTraceElement, InMemoryStackTraceElement>

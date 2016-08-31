@@ -289,46 +289,53 @@ public class ThrowingProviderBinder {
 
       // don't bother binding the proxy type if this is in an invalid state.
       if(valid) {
-        binder.bind(interfaceKey).toProvider(new ProviderWithDependencies<P>() {
-          private final P instance = interfaceType.cast(Proxy.newProxyInstance(
-              interfaceType.getClassLoader(), new Class<?>[] { interfaceType },
-              new InvocationHandler() {
-                public Object invoke(Object proxy, Method method, Object[] args)
-                    throws Throwable {
-                  // Allow methods like .equals(..), .hashcode(..), .toString(..) to work.
-                  if (method.getDeclaringClass() == Object.class) {
-                    return method.invoke(this, args);
+        binder
+            .bind(interfaceKey)
+            .toProvider(
+                new ProviderWithDependencies<P>() {
+                  private final P instance =
+                      interfaceType.cast(
+                          Proxy.newProxyInstance(
+                              interfaceType.getClassLoader(),
+                              new Class<?>[] {interfaceType},
+                              new InvocationHandler() {
+                                @Override
+                                public Object invoke(Object proxy, Method method, Object[] args)
+                                    throws Throwable {
+                                  // Allow methods like .equals(..), .hashcode(..), .toString(..) to work.
+                                  if (method.getDeclaringClass() == Object.class) {
+                                    return method.invoke(this, args);
+                                  }
+
+                                  if (scopeExceptions) {
+                                    return resultProvider.get().getOrThrow();
+                                  } else {
+                                    Result result;
+                                    try {
+                                      result = resultProvider.get();
+                                    } catch (ProvisionException pe) {
+                                      Throwable cause = pe.getCause();
+                                      if (cause instanceof ResultException) {
+                                        throw ((ResultException) cause).getCause();
+                                      } else {
+                                        throw pe;
+                                      }
+                                    }
+                                    return result.getOrThrow();
+                                  }
+                                }
+                              }));
+
+                  @Override
+                  public P get() {
+                    return instance;
                   }
-                  
-                  if (scopeExceptions) {
-                    return resultProvider.get().getOrThrow();
-                  } else {
-                    Result result;
-                    try {
-                      result = resultProvider.get();
-                    } catch (ProvisionException pe) {
-                      Throwable cause = pe.getCause();
-                      if (cause instanceof ResultException) {
-                        throw ((ResultException)cause).getCause();
-                      } else {
-                        throw pe;
-                      }
-                    }
-                    return result.getOrThrow();
+
+                  @Override
+                  public Set<Dependency<?>> getDependencies() {
+                    return ImmutableSet.<Dependency<?>>of(Dependency.get(resultKey));
                   }
-                }
-              }));
-            
-            @Override
-            public P get() {
-              return instance;
-            }
-  
-            @Override
-            public Set<Dependency<?>> getDependencies() {
-              return ImmutableSet.<Dependency<?>>of(Dependency.get(resultKey));
-            }
-          });
+                });
       }
 
       // The provider is unscoped, but the user may apply a scope to it through the 

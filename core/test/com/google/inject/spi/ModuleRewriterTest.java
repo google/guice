@@ -39,12 +39,14 @@ public class ModuleRewriterTest extends TestCase {
 
   public void testRewriteBindings() {
     // create a module the binds String.class and CharSequence.class
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("Pizza");
-        bind(CharSequence.class).toInstance("Wine");
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toInstance("Pizza");
+            bind(CharSequence.class).toInstance("Wine");
+          }
+        };
 
     // record the elements from that module
     List<Element> elements = Elements.getElements(module);
@@ -81,25 +83,32 @@ public class ModuleRewriterTest extends TestCase {
   }
 
   public void testGetProviderAvailableAtInjectMembersTime() {
-    Module module = new AbstractModule() {
-      public void configure() {
-        final Provider<String> stringProvider = getProvider(String.class);
+    Module module =
+        new AbstractModule() {
+          @Override
+          public void configure() {
+            final Provider<String> stringProvider = getProvider(String.class);
 
-        bind(String.class).annotatedWith(Names.named("2")).toProvider(new Provider<String>() {
-          private String value;
+            bind(String.class)
+                .annotatedWith(Names.named("2"))
+                .toProvider(
+                    new Provider<String>() {
+                      private String value;
 
-          @Inject void initialize() {
-            value = stringProvider.get();
+                      @Inject
+                      void initialize() {
+                        value = stringProvider.get();
+                      }
+
+                      @Override
+                      public String get() {
+                        return value;
+                      }
+                    });
+
+            bind(String.class).toInstance("A");
           }
-
-          public String get() {
-            return value;
-          }
-        });
-
-        bind(String.class).toInstance("A");
-      }
-    };
+        };
 
     // the module works fine normally
     Injector injector = Guice.createInjector(module);

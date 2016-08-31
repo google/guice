@@ -29,8 +29,8 @@ class DelegatingInvocationHandler<T> implements InvocationHandler {
 
   private T delegate;
 
-  public Object invoke(Object proxy, Method method, Object[] args)
-      throws Throwable {
+  @Override
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
       // checking volatile field for synchronization
       Preconditions.checkState(initialized,

@@ -47,13 +47,15 @@ final class ProvisionListenerCallbackStore {
   
   private final ImmutableList<ProvisionListenerBinding> listenerBindings;
 
-  private final LoadingCache<KeyBinding, ProvisionListenerStackCallback<?>> cache
-      = CacheBuilder.newBuilder().build(
-          new CacheLoader<KeyBinding, ProvisionListenerStackCallback<?>>() {
-            public ProvisionListenerStackCallback<?> load(KeyBinding key) {
-              return create(key.binding);
-            }
-          });
+  private final LoadingCache<KeyBinding, ProvisionListenerStackCallback<?>> cache =
+      CacheBuilder.newBuilder()
+          .build(
+              new CacheLoader<KeyBinding, ProvisionListenerStackCallback<?>>() {
+                @Override
+                public ProvisionListenerStackCallback<?> load(KeyBinding key) {
+                  return create(key.binding);
+                }
+              });
 
   ProvisionListenerCallbackStore(List<ProvisionListenerBinding> listenerBindings) {
     this.listenerBindings = ImmutableList.copyOf(listenerBindings);

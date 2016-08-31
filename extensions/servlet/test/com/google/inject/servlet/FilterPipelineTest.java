@@ -98,29 +98,32 @@ public class FilterPipelineTest extends TestCase {
 
   @Singleton
   public static class TestFilter implements Filter {
-    public void init(FilterConfig filterConfig) {
-    }
+    @Override
+    public void init(FilterConfig filterConfig) {}
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) throws IOException, ServletException {
+    @Override
+    public void doFilter(
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
       filterChain.doFilter(servletRequest, servletResponse);
     }
 
-    public void destroy() {
-    }
+    @Override
+    public void destroy() {}
   }
 
   @Singleton
   public static class NeverFilter implements Filter {
-    public void init(FilterConfig filterConfig) {
-    }
+    @Override
+    public void init(FilterConfig filterConfig) {}
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) {
+    @Override
+    public void doFilter(
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {
       fail("This filter should never have fired");
     }
 
-    public void destroy() {
-    }
+    @Override
+    public void destroy() {}
   }
 }

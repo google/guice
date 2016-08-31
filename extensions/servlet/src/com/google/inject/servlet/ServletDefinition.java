@@ -72,12 +72,14 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     this.servletInstance = servletInstance;
   }
 
+  @Override
   public ServletDefinition get() {
     return this;
   }
 
-  public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
-      ProviderInstanceBinding<? extends B> binding) {
+  @Override
+  public <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
     if(visitor instanceof ServletModuleTargetVisitor) {
       if(servletInstance != null) {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
@@ -117,23 +119,28 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     }
 
     //initialize our servlet with the configured context params and servlet context
-    httpServlet.init(new ServletConfig() {
-      public String getServletName() {
-        return servletKey.toString();
-      }
+    httpServlet.init(
+        new ServletConfig() {
+          @Override
+          public String getServletName() {
+            return servletKey.toString();
+          }
 
-      public ServletContext getServletContext() {
-        return servletContext;
-      }
+          @Override
+          public ServletContext getServletContext() {
+            return servletContext;
+          }
 
-      public String getInitParameter(String s) {
-        return initParams.get(s);
-      }
+          @Override
+          public String getInitParameter(String s) {
+            return initParams.get(s);
+          }
 
-      public Enumeration getInitParameterNames() {
-        return Iterators.asEnumeration(initParams.keySet().iterator());
-      }
-    });
+          @Override
+          public Enumeration getInitParameterNames() {
+            return Iterators.asEnumeration(initParams.keySet().iterator());
+          }
+        });
 
     // Mark as initialized.
     initializedSoFar.add(httpServlet);

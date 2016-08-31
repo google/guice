@@ -72,31 +72,37 @@ public class CycleDetectingLockTest extends TestCase {
                 super.lock();
               }
             });
-    Future<Void> firstThreadResult = Executors.newSingleThreadExecutor().submit(
-        new Callable<Void>() {
-          public Void call() throws Exception {
-            Thread.currentThread().setName("T1");
-            signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
-            assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
-            lockB.unlock();
-            lockA.unlock();
-            return null;
-          }
-        });
-    Future<Void> secondThreadResult = Executors.newSingleThreadExecutor().submit(
-        new Callable<Void>() {
-          public Void call() throws Exception {
-            Thread.currentThread().setName("T2");
-            assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
-            signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            signal2.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            lockB.unlock();
-            assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
-            lockA.unlock();
-            return null;
-          }
-        });
+    Future<Void> firstThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<Void>() {
+                  @Override
+                  public Void call() throws Exception {
+                    Thread.currentThread().setName("T1");
+                    signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
+                    assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
+                    lockB.unlock();
+                    lockA.unlock();
+                    return null;
+                  }
+                });
+    Future<Void> secondThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<Void>() {
+                  @Override
+                  public Void call() throws Exception {
+                    Thread.currentThread().setName("T2");
+                    assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
+                    signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    signal2.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    lockB.unlock();
+                    assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
+                    lockA.unlock();
+                    return null;
+                  }
+                });
 
     firstThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
     secondThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
@@ -122,34 +128,40 @@ public class CycleDetectingLockTest extends TestCase {
     final CycleDetectingLockFactory<String> factoryB = new CycleDetectingLockFactory<String>();
     final CycleDetectingLock<String> lockB = factoryB.create("B");
     final CyclicBarrier eachThreadAcquiredFirstLock = new CyclicBarrier(2);
-    Future<Boolean> threadA = Executors.newSingleThreadExecutor().submit(
-        new Callable<Boolean>() {
-          public Boolean call() throws Exception {
-            Thread.currentThread().setName("A");
-            assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
-            eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            boolean isEmpty = lockB.lockOrDetectPotentialLocksCycle().isEmpty();
-            if (isEmpty) {
-              lockB.unlock();
-            }
-            lockA.unlock();
-            return isEmpty;
-          }
-        });
-    Future<Boolean> threadB = Executors.newSingleThreadExecutor().submit(
-        new Callable<Boolean>() {
-          public Boolean call() throws Exception {
-            Thread.currentThread().setName("B");
-            assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
-            eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            boolean isEmpty = lockA.lockOrDetectPotentialLocksCycle().isEmpty();
-            if (isEmpty) {
-              lockA.unlock();
-            }
-            lockB.unlock();
-            return isEmpty;
-          }
-        });
+    Future<Boolean> threadA =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<Boolean>() {
+                  @Override
+                  public Boolean call() throws Exception {
+                    Thread.currentThread().setName("A");
+                    assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
+                    eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    boolean isEmpty = lockB.lockOrDetectPotentialLocksCycle().isEmpty();
+                    if (isEmpty) {
+                      lockB.unlock();
+                    }
+                    lockA.unlock();
+                    return isEmpty;
+                  }
+                });
+    Future<Boolean> threadB =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<Boolean>() {
+                  @Override
+                  public Boolean call() throws Exception {
+                    Thread.currentThread().setName("B");
+                    assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
+                    eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    boolean isEmpty = lockA.lockOrDetectPotentialLocksCycle().isEmpty();
+                    if (isEmpty) {
+                      lockA.unlock();
+                    }
+                    lockB.unlock();
+                    return isEmpty;
+                  }
+                });
 
     boolean deadlockADetected = threadA.get(DEADLOCK_TIMEOUT_SECONDS * 2, TimeUnit.SECONDS);
     boolean deadlockBDetected = threadB.get(DEADLOCK_TIMEOUT_SECONDS * 2, TimeUnit.SECONDS);

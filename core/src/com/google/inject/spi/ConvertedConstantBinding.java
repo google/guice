@@ -48,8 +48,7 @@ public interface ConvertedConstantBinding<T> extends Binding<T>, HasDependencies
    */
   Key<String> getSourceKey();
 
-  /**
-   * Returns a singleton set containing only the converted key.
-   */
+  /** Returns a singleton set containing only the converted key. */
+  @Override
   Set<Dependency<?>> getDependencies();
 }

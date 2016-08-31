@@ -64,32 +64,39 @@ final class LinkedProviderBindingImpl<T>
         providerKey, delayedInitializer);
   }
 
+  @Override
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public Key<? extends javax.inject.Provider<? extends T>> getProviderKey() {
     return providerKey;
   }
 
+  @Override
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     if (delayedInitializer != null) {
       delayedInitializer.initialize(injector, errors);
     }
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return ImmutableSet.<Dependency<?>>of(Dependency.get(providerKey));
   }
 
+  @Override
   public BindingImpl<T> withScoping(Scoping scoping) {
     return new LinkedProviderBindingImpl<T>(getSource(), getKey(), scoping, providerKey);
   }
 
+  @Override
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedProviderBindingImpl<T>(getSource(), key, getScoping(), providerKey);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     getScoping().applyTo(binder.withSource(getSource())
         .bind(getKey()).toProvider(getProviderKey()));

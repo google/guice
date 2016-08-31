@@ -34,14 +34,16 @@ class DefaultFilterPipeline implements FilterPipeline {
   @Inject DefaultFilterPipeline() {
   }
 
-  public void initPipeline(ServletContext context) {
-  }
+  @Override
+  public void initPipeline(ServletContext context) {}
 
-  public void destroyPipeline() {
-  }
+  @Override
+  public void destroyPipeline() {}
 
-  public void dispatch(ServletRequest request, ServletResponse response,
-      FilterChain proceedingFilterChain) throws IOException, ServletException {
+  @Override
+  public void dispatch(
+      ServletRequest request, ServletResponse response, FilterChain proceedingFilterChain)
+      throws IOException, ServletException {
 
     proceedingFilterChain.doFilter(request, response);
   }

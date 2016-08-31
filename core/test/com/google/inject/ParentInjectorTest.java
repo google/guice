@@ -130,12 +130,13 @@ public class ParentInjectorTest extends TestCase {
   }
 
   /*if[AOP]*/
-  private final org.aopalliance.intercept.MethodInterceptor returnNullInterceptor
-      = new org.aopalliance.intercept.MethodInterceptor() {
-    public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
-      return null;
-    }
-  };
+  private final org.aopalliance.intercept.MethodInterceptor returnNullInterceptor =
+      new org.aopalliance.intercept.MethodInterceptor() {
+        @Override
+        public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
+          return null;
+        }
+      };
 
   public void testInterceptorsInherited() {
     Injector parent = Guice.createInjector(new AbstractModule() {
@@ -285,11 +286,13 @@ public class ParentInjectorTest extends TestCase {
   @Target(TYPE) @Retention(RUNTIME) @ScopeAnnotation
   public @interface MyScope {}
 
-  private final TypeConverter listConverter = new TypeConverter() {
-    public Object convert(String value, TypeLiteral<?> toType) {
-      return ImmutableList.of();
-    }
-  };
+  private final TypeConverter listConverter =
+      new TypeConverter() {
+        @Override
+        public Object convert(String value, TypeLiteral<?> toType) {
+          return ImmutableList.of();
+        }
+      };
 
   private final Module bindListConverterModule = new AbstractModule() {
     @Override protected void configure() {

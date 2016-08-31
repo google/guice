@@ -1160,14 +1160,17 @@ public class SpiUtils {
   private static class Visitor<T> extends
       DefaultBindingTargetVisitor<T, Object> implements MultibindingsTargetVisitor<T, Object> {
   
+    @Override
     public Object visit(MultibinderBinding<? extends T> multibinding) {
       return multibinding;
     }
   
+    @Override
     public Object visit(MapBinderBinding<? extends T> mapbinding) {
       return mapbinding;
     }
     
+    @Override
     public Object visit(OptionalBinderBinding<? extends T> optionalbinding) {
       return optionalbinding;
     }

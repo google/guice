@@ -50,8 +50,9 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
     this.interceptors = interceptors.toArray(new MethodInterceptor[interceptors.size()]);
   }
 
-  public Object intercept(Object proxy, Method method, Object[] arguments,
-      MethodProxy methodProxy) throws Throwable {
+  @Override
+  public Object intercept(Object proxy, Method method, Object[] arguments, MethodProxy methodProxy)
+      throws Throwable {
     return new InterceptedMethodInvocation(proxy, methodProxy, arguments, 0).proceed();
   }
 
@@ -70,6 +71,7 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
       this.index = index;
     }
 
+    @Override
     public Object proceed() throws Throwable {
       try {
         return index == interceptors.length
@@ -82,18 +84,22 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
       }
     }
 
+    @Override
     public Method getMethod() {
       return method;
     }
 
+    @Override
     public Object[] getArguments() {
       return arguments;
     }
 
+    @Override
     public Object getThis() {
       return proxy;
     }
 
+    @Override
     public AccessibleObject getStaticPart() {
       return getMethod();
     }

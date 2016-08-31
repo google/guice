@@ -34,18 +34,22 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
     this.internalFactory = internalFactory;
   }
 
+  @Override
   public T get() {
     final Errors errors = new Errors();
     try {
-      T t = injector.callInContext(new ContextualCallable<T>() {
-        public T call(InternalContext context) throws ErrorsException {
-          Dependency dependency = context.getDependency();
-          // Always pretend that we are a linked binding, to support
-          // scoping implicit bindings.  If we are not actually a linked
-          // binding, we'll fail properly elsewhere in the chain.
-          return internalFactory.get(errors, context, dependency, true);
-        }
-      });
+      T t =
+          injector.callInContext(
+              new ContextualCallable<T>() {
+                @Override
+                public T call(InternalContext context) throws ErrorsException {
+                  Dependency dependency = context.getDependency();
+                  // Always pretend that we are a linked binding, to support
+                  // scoping implicit bindings.  If we are not actually a linked
+                  // binding, we'll fail properly elsewhere in the chain.
+                  return internalFactory.get(errors, context, dependency, true);
+                }
+              });
       errors.throwIfNewErrors(0);
       return t;
     } catch (ErrorsException e) {

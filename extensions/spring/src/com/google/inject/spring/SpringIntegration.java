@@ -107,6 +107,7 @@ public class SpringIntegration {
       singleton = beanFactory.isSingleton(name);
     }
 
+    @Override
     public T get() {
       return singleton ? getSingleton() : type.cast(beanFactory.getBean(name));
     }

@@ -55,6 +55,7 @@ public class JndiIntegration {
       this.name = name;
     }
 
+    @Override
     public T get() {
       try {
         return type.cast(context.lookup(name));
