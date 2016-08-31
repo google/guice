@@ -139,6 +139,10 @@ public final class RealMultibinder<T> implements Module {
     return bindingSelection.getSetKey();
   }
 
+  public TypeLiteral<?> getElementTypeLiteral() {
+    return bindingSelection.getElementTypeLiteral();
+  }
+
   String getSetName() {
     return bindingSelection.getSetName();
   }
