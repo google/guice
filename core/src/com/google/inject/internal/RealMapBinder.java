@@ -218,7 +218,6 @@ public final class RealMapBinder<K, V> implements Module {
   private final Key<Map<K, Collection<javax.inject.Provider<V>>>> javaxProviderCollectionMultimapKey;
   private final Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> entrySetJavaxProviderKey;
   private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
-  private final Map<K, String> duplicateKeyErrorMessages;
 
   /* the target injector's binder. non-null until initialization, null afterwards */
   private Binder binder;
@@ -241,12 +240,6 @@ public final class RealMapBinder<K, V> implements Module {
     this.entrySetJavaxProviderKey = mapKey.ofType(setOfEntryOfJavaxProviderOf(keyType, valueType));
     this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
     this.binder = binder;
-    this.duplicateKeyErrorMessages = Maps.newHashMap();
-  }
-  
-  /** Sets the error message to be shown if the key had duplicate non-equal bindings. */
-  void updateDuplicateKeyMessage(K k, String errMsg) {
-    duplicateKeyErrorMessages.put(k, errMsg);
   }
 
   public void permitDuplicates() {
@@ -412,18 +405,9 @@ public final class RealMapBinder<K, V> implements Module {
         for (K key : dups.keySet()) {
           if (first) {
             first = false;
-            if (duplicateKeyErrorMessages.containsKey(key)) {
-              sb.setLength(0);
-              sb.append(duplicateKeyErrorMessages.get(key));
-            } else {
-              sb.append("\"" + key + "\", from bindings:\n");
-            }
+            sb.append("\"" + key + "\", from bindings:\n");
           } else {
-            if (duplicateKeyErrorMessages.containsKey(key)) {
-              sb.append("\n and " + duplicateKeyErrorMessages.get(key));
-            } else {
-              sb.append("\n and key: \"" + key + "\", from bindings:\n");
-            }
+            sb.append("\n and key: \"" + key + "\", from bindings:\n");
           }
           Joiner.on('\n').appendTo(sb, dups.get(key)).append("\n");
         }
