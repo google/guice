@@ -1316,7 +1316,39 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--">getDependencyChain()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html" title="class in com.google.inject.spi">ProvisionListener.ProvisionInvocation</a></dt>
 <dd>
-<div class="block">Returns the dependency chain that led to this object being provisioned.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
+ by inferring the current chain via ThreadLocals in the listener, other use cases can use
+ the static dependency graph.  For example,
+ <pre><code>    
+   bindListener(Matchers.any(), new MyListener());
+   ...
+   
+   private static final class MyListener implements ProvisionListener {
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+         new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
+           {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
+             return new ArrayDeque&lt;&gt;();
+           }
+         };
+     {@literal @}Override public &lt;T&gt; void onProvision(ProvisionInvocation&lt;T&gt; invocation) {
+       bindingStack.get().push(invocation.getBinding());
+       try {
+         invocation.provision();
+       } finally {
+         bindingStack.get().pop();
+       }
+       // Inspect the binding stack...
+     }
+   }
+ 
+ </code><pre>
+ 
+ In this example the bindingStack thread local will contain a data structure that is very
+ similar to the data returned by this list.  The main differences are that linked keys are
+ not in the stack, but such edges do exist in the static dependency graph (inspectable via
+ <a href="com/google/inject/spi/HasDependencies.html#getDependencies--"><code>HasDependencies.getDependencies()</code></a>), so you could infer some of the missing edges..</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/graphviz/GraphvizGrapher.html#getEdgeAttributes-com.google.inject.grapher.graphviz.GraphvizEdge-">getEdgeAttributes(GraphvizEdge)</a></span> - Method in class com.google.inject.grapher.graphviz.<a href="com/google/inject/grapher/graphviz/GraphvizGrapher.html" title="class in com.google.inject.grapher.graphviz">GraphvizGrapher</a></dt>
 <dd>&nbsp;</dd>

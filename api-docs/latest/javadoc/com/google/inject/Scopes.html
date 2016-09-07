@@ -215,14 +215,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>NO_SCOPE</h4>
 <pre>public static final&nbsp;<a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject">Scope</a> NO_SCOPE</pre>
-<div class="block">No scope; the same as not applying any scope at all.  Each time the
- Injector obtains an instance of an object with "no scope", it injects this
- instance then immediately forgets it.  When the next request for the same
- binding arrives it will need to obtain the instance over again.
+<div class="block">No scope; the same as not applying any scope at all. Each time the Injector obtains an instance
+ of an object with "no scope", it injects this instance then immediately forgets it. When the
+ next request for the same binding arrives it will need to obtain the instance over again.
 
- <p>This exists only in case a class has been annotated with a scope
- annotation such as <a href="../../../com/google/inject/Singleton.html" title="annotation in com.google.inject"><code>@Singleton</code></a>, and you need to override
- this to "no scope" in your binding.</div>
+ <p>This exists only in case a class has been annotated with a scope annotation such as <a href="../../../com/google/inject/Singleton.html" title="annotation in com.google.inject"><code>@Singleton</code></a>, and you need to override this to "no scope" in your binding.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>

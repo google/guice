@@ -143,6 +143,41 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--">com.google.inject.spi.ProvisionListener.ProvisionInvocation.getDependencyChain()</a>
+<div class="block"><span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
+ by inferring the current chain via ThreadLocals in the listener, other use cases can use
+ the static dependency graph.  For example,
+ <pre><code>    
+   bindListener(Matchers.any(), new MyListener());
+   ...
+   
+   private static final class MyListener implements ProvisionListener {
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+         new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
+           {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
+             return new ArrayDeque&lt;&gt;();
+           }
+         };
+     {@literal @}Override public &lt;T&gt; void onProvision(ProvisionInvocation&lt;T&gt; invocation) {
+       bindingStack.get().push(invocation.getBinding());
+       try {
+         invocation.provision();
+       } finally {
+         bindingStack.get().pop();
+       }
+       // Inspect the binding stack...
+     }
+   }
+ 
+ </code><pre>
+ 
+ In this example the bindingStack thread local will contain a data structure that is very
+ similar to the data returned by this list.  The main differences are that linked keys are
+ not in the stack, but such edges do exist in the static dependency graph (inspectable via
+ <a href="com/google/inject/spi/HasDependencies.html#getDependencies--"><code>HasDependencies.getDependencies()</code></a>), so you could infer some of the missing edges..</span></div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/inject/spi/ProviderInstanceBinding.html#getProviderInstance--">com.google.inject.spi.ProviderInstanceBinding.getProviderInstance()</a>
 <div class="block"><span class="deprecationComment">Use <a href="com/google/inject/spi/ProviderInstanceBinding.html#getUserSuppliedProvider--"><code>ProviderInstanceBinding.getUserSuppliedProvider()</code></a> instead.</span></div>
 </td>

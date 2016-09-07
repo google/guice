@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
+var methods = {"i0":6,"i1":38,"i2":6};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -148,7 +148,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -162,7 +162,39 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>abstract <a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--">getDependencyChain</a></span>()</code>
-<div class="block">Returns the dependency chain that led to this object being provisioned.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
+ by inferring the current chain via ThreadLocals in the listener, other use cases can use
+ the static dependency graph.  For example,
+ <pre><code>    
+   bindListener(Matchers.any(), new MyListener());
+   ...
+   
+   private static final class MyListener implements ProvisionListener {
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+         new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
+           {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
+             return new ArrayDeque&lt;&gt;();
+           }
+         };
+     {@literal @}Override public &lt;T&gt; void onProvision(ProvisionInvocation&lt;T&gt; invocation) {
+       bindingStack.get().push(invocation.getBinding());
+       try {
+         invocation.provision();
+       } finally {
+         bindingStack.get().pop();
+       }
+       // Inspect the binding stack...
+     }
+   }
+ 
+ </code><pre>
+ 
+ In this example the bindingStack thread local will contain a data structure that is very
+ similar to the data returned by this list.  The main differences are that linked keys are
+ not in the stack, but such edges do exist in the static dependency graph (inspectable via
+ <a href="../../../../com/google/inject/spi/HasDependencies.html#getDependencies--"><code>HasDependencies.getDependencies()</code></a>), so you could infer some of the missing edges..</span></div>
+</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -239,7 +271,39 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getDependencyChain</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a>&gt;&nbsp;getDependencyChain()</pre>
+<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a>&gt;&nbsp;getDependencyChain()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
+ by inferring the current chain via ThreadLocals in the listener, other use cases can use
+ the static dependency graph.  For example,
+ <pre><code>    
+   bindListener(Matchers.any(), new MyListener());
+   ...
+   
+   private static final class MyListener implements ProvisionListener {
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+         new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
+           {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
+             return new ArrayDeque&lt;&gt;();
+           }
+         };
+     {@literal @}Override public &lt;T&gt; void onProvision(ProvisionInvocation&lt;T&gt; invocation) {
+       bindingStack.get().push(invocation.getBinding());
+       try {
+         invocation.provision();
+       } finally {
+         bindingStack.get().pop();
+       }
+       // Inspect the binding stack...
+     }
+   }
+ 
+ </code><pre>
+ 
+ In this example the bindingStack thread local will contain a data structure that is very
+ similar to the data returned by this list.  The main differences are that linked keys are
+ not in the stack, but such edges do exist in the static dependency graph (inspectable via
+ <a href="../../../../com/google/inject/spi/HasDependencies.html#getDependencies--"><code>HasDependencies.getDependencies()</code></a>), so you could infer some of the missing edges..</span></div>
 <div class="block">Returns the dependency chain that led to this object being provisioned.</div>
 </li>
 </ul>

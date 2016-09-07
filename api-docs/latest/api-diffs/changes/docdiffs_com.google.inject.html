@@ -33,7 +33,7 @@ com.google.inject Documentation Differences
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
   <B>PREV PACKAGE</B>  &nbsp;
-  &nbsp;<B>NEXT PACKAGE</B>
+  &nbsp;<A HREF="docdiffs_com.google.inject.grapher.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="docdiffs_com.google.inject.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -61,6 +61,25 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
+<A NAME="com.google.inject.Scope.dmethod.toString()"></A><a href="com.google.inject.Scope.html" class="hiddenlink">Class <b>Scope</b></a>, <a href="com.google.inject.Scope.html#com.google.inject.Scope.toString_changed()" class="hiddenlink">String <b>toString()</b></a><br><br><blockquote>A short but useful description of this scope. <strike> </strike>For comparison, the <strike>standard
+</strike><span style="background: #FFFF00">standard</span> scopes that <strike>ship</strike><span style="background: #FFFF00">ship
+</span> with guice use the <strike>descriptions
+</strike><span style="background: #FFFF00">descriptions</span> {@code "Scopes.SINGLETON"}, {@code "ServletScopes.SESSION"} and
+ {@code "ServletScopes.REQUEST"}.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.Scopes.field.NO_SCOPE"></A><a href="com.google.inject.Scopes.html" class="hiddenlink">Class <b>Scopes</b></a>, <a href="com.google.inject.Scopes.html#com.google.inject.Scopes.NO_SCOPE" class="hiddenlink">Scope <b>NO_SCOPE</b></a><br><br><blockquote>No scope; the same as not applying any scope at all. <strike> </strike>Each time <strike>the
+</strike><span style="background: #FFFF00">the</span> Injector obtains an <strike>instance</strike><span style="background: #FFFF00">instance
+</span> of an object with "no scope", it injects <strike>this
+</strike><span style="background: #FFFF00">this</span> instance then immediately forgets it. <strike> </strike>When <strike>the</strike><span style="background: #FFFF00">the
+</span> next request for the <strike>same
+</strike><span style="background: #FFFF00">same</span> binding arrives it will need to obtain the instance over again.
+
+ <p>This exists only in case a class has been annotated with a <strike>scope
+</strike><span style="background: #FFFF00">scope</span> annotation such as <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Singleton.html"><TT>@Singleton</TT></A>, and you need to <strike>override
+</strike><span style="background: #FFFF00">override</span> this to "no scope" in your binding.
+
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
 <A NAME="com.google.inject.TypeLiteral!class"></A><a href="com.google.inject.TypeLiteral.html" class="hiddenlink">Class <b>TypeLiteral</b></a><br><br><blockquote>Represents a generic type {@code T}. Java doesn't yet provide a way to
  represent generic types, so this class does. Forces clients to create a
  subclass of this class which enables retrieval <span style="background: #FFFF00">of </span>the type information <strike>even at
@@ -85,6 +104,7 @@ Similarly, documentation which was inherited from another class or interface is 
 
  @author crazybob@google.com (Bob Lee)
  @author jessewilson@google.com (Jesse Wilson)</blockquote>
+<hr align="left" width="100%">
 
 </BODY>
 </HTML>

@@ -22,7 +22,49 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Scope"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Scope.toString_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Scopes"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Scopes.NO_SCOPE"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.TypeLiteral"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.ShortNameFactory"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.ShortNameFactory.getSourceName_changed(java.lang.Object)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -119,6 +161,24 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.multibindings.OptionalBinder.setDefault_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProvisionListener.ProvisionInvocation"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProvisionListener.ProvisionInvocation.getDependencyChain_changed()"/>
   <text>
     InsertCommentsHere
   </text>
