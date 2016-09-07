@@ -107,7 +107,7 @@ public class ErrorHandlingTest {
   }
 
   // suppress compiler error to test
-  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass, multiple-scope"})
+  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass", "multiple-scope"})
   @Singleton
   @GoodScope
   static class TooManyScopes {}
