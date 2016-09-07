@@ -37,6 +37,7 @@ public abstract class GuiceServletContextListener
 
   static final String INJECTOR_NAME = Injector.class.getName();
 
+  @Override
   public void contextInitialized(ServletContextEvent servletContextEvent) {
     final ServletContext servletContext = servletContextEvent.getServletContext();
 
@@ -50,6 +51,7 @@ public abstract class GuiceServletContextListener
     servletContext.setAttribute(INJECTOR_NAME, injector);
   }
 
+  @Override
   public void contextDestroyed(ServletContextEvent servletContextEvent) {
     ServletContext servletContext = servletContextEvent.getServletContext();
     servletContext.removeAttribute(INJECTOR_NAME);

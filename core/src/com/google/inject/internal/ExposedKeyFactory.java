@@ -34,6 +34,7 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
     this.privateElements = privateElements;
   }
 
+  @Override
   public void notify(Errors errors) {
     InjectorImpl privateInjector = (InjectorImpl) privateElements.getInjector();
     BindingImpl<T> explicitBinding = privateInjector.state.getExplicitBinding(key);
@@ -49,6 +50,7 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
     this.delegate = explicitBinding;
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     return delegate.getInternalFactory().get(errors, context, dependency, linked);

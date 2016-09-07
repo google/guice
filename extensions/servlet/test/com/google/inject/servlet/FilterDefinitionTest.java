@@ -294,18 +294,22 @@ public class FilterDefinitionTest extends TestCase {
     private boolean destroy;
     private FilterConfig config;
 
+    @Override
     public void init(FilterConfig filterConfig) {
       init = true;
 
       this.config = filterConfig;
     }
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) throws IOException, ServletException {
+    @Override
+    public void doFilter(
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
       //proceed
       filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    @Override
     public void destroy() {
       destroy = true;
     }

@@ -61,7 +61,7 @@ final class ConstructorInjector<T> {
    */
   Object construct(final Errors errors, final InternalContext context,
       Dependency<?> dependency,
-      ProvisionListenerStackCallback<T> provisionCallback)
+      /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
     // We have a circular reference between constructors. Return a proxy.
@@ -86,7 +86,7 @@ final class ConstructorInjector<T> {
     constructionContext.startConstruction();
     try {
       // Optimization: Don't go through the callback stack if we have no listeners.
-      if (!provisionCallback.hasListeners()) {
+      if (provisionCallback == null) {
         return provision(errors, context, constructionContext);
       } else {
         return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
@@ -117,8 +117,9 @@ final class ConstructorInjector<T> {
       // Store reference. If an injector re-enters this factory, they'll get the same reference.
       constructionContext.setCurrentReference(t);
 
-      membersInjector.injectMembers(t, errors, context, false);
-      membersInjector.notifyListeners(t, errors);
+      MembersInjectorImpl<T> localMembersInjector = membersInjector;
+      localMembersInjector.injectMembers(t, errors, context, false);
+      localMembersInjector.notifyListeners(t, errors);
 
       return t;
     } catch (InvocationTargetException userException) {

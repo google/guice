@@ -37,13 +37,15 @@ public interface Service {
 }
 
 public static class ServiceImpl implements Service {
-  public void go() {
-    // ...
-  }
+    @Override
+    public void go() {
+      // ...
+    }
 }
 
 public static class MyModule extends AbstractModule {
-  protected void configure() {
+    @Override
+    protected void configure() {
     bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
   }
 }
@@ -73,7 +75,8 @@ public static class MockService implements Service {
 
   private boolean gone = false;
 
-  public void go() {
+    @Override
+    public void go() {
     gone = true;
   }
 

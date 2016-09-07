@@ -132,6 +132,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
         || cxtor.isAnnotationPresent(javax.inject.Inject.class);
   }
 
+  @Override
   @SuppressWarnings("unchecked") // the result type always agrees with the ConstructorInjector type
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     factory.constructorInjector =
@@ -172,28 +173,33 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     return Dependency.forInjectionPoints(builder.build());
   }
 
+  @Override
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     checkState(factory.constructorInjector != null, "not initialized");
     return visitor.visit(this);
   }
 
+  @Override
   public InjectionPoint getConstructor() {
     checkState(factory.constructorInjector != null, "Binding is not ready");
     return factory.constructorInjector.getConstructionProxy().getInjectionPoint();
   }
 
+  @Override
   public Set<InjectionPoint> getInjectableMembers() {
     checkState(factory.constructorInjector != null, "Binding is not ready");
     return factory.constructorInjector.getInjectableMembers();
   }
 
   /*if[AOP]*/
+  @Override
   public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors() {
     checkState(factory.constructorInjector != null, "Binding is not ready");
     return factory.constructorInjector.getConstructionProxy().getMethodInterceptors();
   }
   /*end[AOP]*/
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return Dependency.forInjectionPoints(new ImmutableSet.Builder<InjectionPoint>()
         .add(getConstructor())
@@ -211,6 +217,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
         null, key, getSource(), factory, getScoping(), factory, constructorInjectionPoint);
   }
 
+  @Override
   @SuppressWarnings("unchecked") // the raw constructor member and declaring type always agree
   public void applyTo(Binder binder) {
     InjectionPoint constructor = getConstructor();
@@ -254,18 +261,22 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       this.key = key;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
         throws ErrorsException {
-      checkState(constructorInjector != null, "Constructor not ready");
+      ConstructorInjector<T> localInjector = constructorInjector;
+      if (localInjector == null) {
+        throw new IllegalStateException("Constructor not ready");
+      }
 
-      if(failIfNotLinked && !linked) {
+      if(!linked && failIfNotLinked) {
         throw errors.jitDisabled(key).toException();
       }
 
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
-      return (T) constructorInjector.construct(errors, context, dependency, provisionCallback);
+      return (T) localInjector.construct(errors, context, dependency, provisionCallback);
     }
   }
 }

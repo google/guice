@@ -234,7 +234,7 @@ public class KeyTest extends TestCase {
   @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
   @BindingAnnotation @interface Bar {}
 
-  class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
+  static class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
     A a; B b; C c;
   }
 
@@ -278,7 +278,7 @@ public class KeyTest extends TestCase {
 
   @AllDefaults
   @Marker
-  class HasAnnotations {}
+  static class HasAnnotations {}
 
   public void testAnonymousClassesDontHoldRefs() {
     final AtomicReference<Provider<List<String>>> stringProvider =

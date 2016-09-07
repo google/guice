@@ -36,11 +36,15 @@ public class GenericInjectionTest extends TestCase {
   public void testGenericInjection() throws CreationException {
     final List<String> names = Arrays.asList("foo", "bar", "bob");
 
-    Injector injector = Guice.createInjector((Module) new AbstractModule() {
-      protected void configure() {
-        bind(new TypeLiteral<List<String>>() {}).toInstance(names);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            (Module)
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    bind(new TypeLiteral<List<String>>() {}).toInstance(names);
+                  }
+                });
 
     Foo foo = injector.getInstance(Foo.class);
     assertEquals(names, foo.names);
@@ -62,12 +66,15 @@ public class GenericInjectionTest extends TestCase {
   }
 
   public void testExplicitBindingOfGenericType() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Key.get(new TypeLiteral<Parameterized<String>>() {}))
-            .to((Class) Parameterized.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Key.get(new TypeLiteral<Parameterized<String>>() {}))
+                    .to((Class) Parameterized.class);
+              }
+            });
 
     Parameterized<String> parameterized
         = injector.getInstance(Key.get(new TypeLiteral<Parameterized<String>>() { }));
@@ -88,60 +95,80 @@ public class GenericInjectionTest extends TestCase {
     final TypeLiteral<ParameterizedDeps<String, Integer>> type
         = new TypeLiteral<ParameterizedDeps<String, Integer>>() {};
 
-    assertParameterizedDepsInjected(Key.get(Object.class), new AbstractModule() {
-      protected void configure() {
-        bind(Object.class).to(type);
-      }
-    });
+    assertParameterizedDepsInjected(
+        Key.get(Object.class),
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Object.class).to(type);
+          }
+        });
   }
 
   public void testInjectingParameterizedDependenciesForBindingSource() {
     final TypeLiteral<ParameterizedDeps<String, Integer>> type
         = new TypeLiteral<ParameterizedDeps<String, Integer>>() {};
 
-    assertParameterizedDepsInjected(Key.get(type), new AbstractModule() {
-      protected void configure() {
-        bind(type);
-      }
-    });
+    assertParameterizedDepsInjected(
+        Key.get(type),
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(type);
+          }
+        });
   }
 
   public void testBindingToSubtype() {
     final TypeLiteral<ParameterizedDeps<String, Integer>> type
         = new TypeLiteral<ParameterizedDeps<String, Integer>>() {};
 
-    assertParameterizedDepsInjected(Key.get(type), new AbstractModule() {
-      protected void configure() {
-        bind(type).to(new TypeLiteral<SubParameterizedDeps<String, Long, Integer>>() {});
-      }
-    });
+    assertParameterizedDepsInjected(
+        Key.get(type),
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(type).to(new TypeLiteral<SubParameterizedDeps<String, Long, Integer>>() {});
+          }
+        });
   }
 
   public void testBindingSubtype() {
     final TypeLiteral<SubParameterizedDeps<String, Long, Integer>> type
         = new TypeLiteral<SubParameterizedDeps<String, Long, Integer>>() {};
 
-    assertParameterizedDepsInjected(Key.get(type), new AbstractModule() {
-      protected void configure() {
-        bind(type);
-      }
-    });
+    assertParameterizedDepsInjected(
+        Key.get(type),
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(type);
+          }
+        });
   }
 
   @SuppressWarnings("unchecked")
   public void assertParameterizedDepsInjected(Key<?> key, Module bindingModule) {
-    Module bindDataModule = new AbstractModule() {
-      protected void configure() {}
-      @Provides Map<String, Integer> provideMap() {
-        return ImmutableMap.of("one", 1, "two", 2);
-      }
-      @Provides Set<String> provideSet(Map<String, Integer> map) {
-        return map.keySet();
-      }
-      @Provides Collection<Integer> provideCollection(Map<String, Integer> map) {
-        return map.values();
-      }
-    };
+    Module bindDataModule =
+        new AbstractModule() {
+          @Override
+          protected void configure() {}
+
+          @Provides
+          Map<String, Integer> provideMap() {
+            return ImmutableMap.of("one", 1, "two", 2);
+          }
+
+          @Provides
+          Set<String> provideSet(Map<String, Integer> map) {
+            return map.keySet();
+          }
+
+          @Provides
+          Collection<Integer> provideCollection(Map<String, Integer> map) {
+            return map.values();
+          }
+        };
 
     Injector injector = Guice.createInjector(bindDataModule, bindingModule);
     ParameterizedDeps<String, Integer> parameterizedDeps
@@ -172,11 +199,14 @@ public class GenericInjectionTest extends TestCase {
   }
 
   public void testImmediateTypeVariablesAreInjected() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("tee");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("tee");
+              }
+            });
     InjectsT<String> injectsT = injector.getInstance(new Key<InjectsT<String>>() {});
     assertEquals("tee", injectsT.t);
   }

@@ -116,42 +116,51 @@ public final class JpaPersistModule extends PersistModule {
       return;
     }
 
-    InvocationHandler finderInvoker = new InvocationHandler() {
-      @Inject JpaFinderProxy finderProxy;
+    InvocationHandler finderInvoker =
+        new InvocationHandler() {
+          @Inject JpaFinderProxy finderProxy;
 
-      public Object invoke(final Object thisObject, final Method method, final Object[] args)
-          throws Throwable {
+          @Override
+          public Object invoke(final Object thisObject, final Method method, final Object[] args)
+              throws Throwable {
 
-        // Don't intercept non-finder methods like equals and hashcode.
-        if (!method.isAnnotationPresent(Finder.class)) {
-          // NOTE(dhanji): This is not ideal, we are using the invocation handler's equals
-          // and hashcode as a proxy (!) for the proxy's equals and hashcode. 
-          return method.invoke(this, args);
-        }
+            // Don't intercept non-finder methods like equals and hashcode.
+            if (!method.isAnnotationPresent(Finder.class)) {
+              // NOTE(dhanji): This is not ideal, we are using the invocation handler's equals
+              // and hashcode as a proxy (!) for the proxy's equals and hashcode.
+              return method.invoke(this, args);
+            }
 
-        return finderProxy.invoke(new MethodInvocation() {
-          public Method getMethod() {
-            return method;
+            return finderProxy.invoke(
+                new MethodInvocation() {
+                  @Override
+                  public Method getMethod() {
+                    return method;
+                  }
+
+                  @Override
+                  public Object[] getArguments() {
+                    return null == args ? new Object[0] : args;
+                  }
+
+                  @Override
+                  public Object proceed() throws Throwable {
+                    return method.invoke(thisObject, args);
+                  }
+
+                  @Override
+                  public Object getThis() {
+                    throw new UnsupportedOperationException(
+                        "Bottomless proxies don't expose a this.");
+                  }
+
+                  @Override
+                  public AccessibleObject getStaticPart() {
+                    throw new UnsupportedOperationException();
+                  }
+                });
           }
-
-          public Object[] getArguments() {
-            return null == args ? new Object[0] : args; 
-          }
-
-          public Object proceed() throws Throwable {
-            return method.invoke(thisObject, args);
-          }
-
-          public Object getThis() {
-            throw new UnsupportedOperationException("Bottomless proxies don't expose a this.");
-          }
-
-          public AccessibleObject getStaticPart() {
-            throw new UnsupportedOperationException();
-          }
-        });
-      }
-    };
+        };
     requestInjection(finderInvoker);
 
     @SuppressWarnings("unchecked") // Proxy must produce instance of type given.

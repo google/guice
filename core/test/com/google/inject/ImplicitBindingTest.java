@@ -60,10 +60,12 @@ public class ImplicitBindingTest extends TestCase {
   }
 
   static class IImpl implements I {
+    @Override
     public void go() {}
   }
 
   static class AlternateImpl implements I {
+    @Override
     public void go() {}
   }
 
@@ -102,8 +104,10 @@ public class ImplicitBindingTest extends TestCase {
   }
 
   static class ProvidedProvider implements Provider<Provided> {
+    @Override
     public Provided get() {
       return new Provided() {
+        @Override
         public void go() {}
       };
     }
@@ -198,6 +202,7 @@ public class ImplicitBindingTest extends TestCase {
   static interface InvalidProvidedBy {}
   static class InvalidProvidedByProvider implements Provider<InvalidProvidedBy> {
     @Inject InvalidProvidedBy2 a;
+    @Override
     public InvalidProvidedBy get() {
       return null;
     }
@@ -207,6 +212,7 @@ public class ImplicitBindingTest extends TestCase {
   static interface InvalidProvidedBy2 {}
   static class InvalidProvidedBy2Provider implements Provider<InvalidProvidedBy2> {
     @Inject Invalid2 a;
+    @Override
     public InvalidProvidedBy2 get() {
       return null;
     }
@@ -261,6 +267,7 @@ public class ImplicitBindingTest extends TestCase {
   static class TestStringProvider implements Provider<String> {
     static final String TEST_VALUE = "This is to verify it all works";
     
+    @Override
     public String get() {
       return TEST_VALUE;
     }    

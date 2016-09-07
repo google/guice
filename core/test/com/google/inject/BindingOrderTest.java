@@ -29,12 +29,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class BindingOrderTest extends TestCase {
 
   public void testBindingOutOfOrder() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(BoundFirst.class);
-        bind(BoundSecond.class).to(BoundSecondImpl.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(BoundFirst.class);
+            bind(BoundSecond.class).to(BoundSecondImpl.class);
+          }
+        });
   }
 
   public static class BoundFirst {
@@ -45,12 +47,15 @@ public class BindingOrderTest extends TestCase {
   static class BoundSecondImpl implements BoundSecond { }
 
   public void testBindingOrderAndScopes() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class);
-        bind(B.class).asEagerSingleton();
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class);
+                bind(B.class).asEagerSingleton();
+              }
+            });
 
     assertSame(injector.getInstance(A.class).b, injector.getInstance(A.class).b);
   }
@@ -60,32 +65,37 @@ public class BindingOrderTest extends TestCase {
     final CountDownLatch done = new CountDownLatch(1);
     final AtomicReference<B> ref = new AtomicReference<B>();
 
-    final Object createsAThread = new Object() {
-      @Inject void createAnotherThread(final Injector injector) {
-        new Thread() {
-          public void run() {
-            ready.countDown();
-            A a = injector.getInstance(A.class);
-            ref.set(a.b);
-            done.countDown();
+    final Object createsAThread =
+        new Object() {
+          @Inject
+          void createAnotherThread(final Injector injector) {
+            new Thread() {
+              @Override
+              public void run() {
+                ready.countDown();
+                A a = injector.getInstance(A.class);
+                ref.set(a.b);
+                done.countDown();
+              }
+            }.start();
+
+            // to encourage collisions, we make sure the other thread is running before returning
+            try {
+              ready.await();
+            } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+            }
           }
-        }.start();
+        };
 
-        // to encourage collisions, we make sure the other thread is running before returning
-        try {
-          ready.await();
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
-
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        requestInjection(createsAThread);
-        bind(A.class).toInstance(new A());
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            requestInjection(createsAThread);
+            bind(A.class).toInstance(new A());
+          }
+        });
 
     done.await();
     assertNotNull(ref.get());

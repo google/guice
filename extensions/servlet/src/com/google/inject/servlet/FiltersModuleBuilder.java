@@ -75,27 +75,30 @@ class FiltersModuleBuilder {
       this.uriPatterns = uriPatterns;
     }
 
+    @Override
     public void through(Class<? extends Filter> filterKey) {
       through(Key.get(filterKey));
     }
 
+    @Override
     public void through(Key<? extends Filter> filterKey) {
       through(filterKey, new HashMap<String, String>());
     }
 
+    @Override
     public void through(Filter filter) {
       through(filter, new HashMap<String, String>());
     }
 
-    public void through(Class<? extends Filter> filterKey,
-        Map<String, String> initParams) {
+    @Override
+    public void through(Class<? extends Filter> filterKey, Map<String, String> initParams) {
       
       // Careful you don't accidentally make this method recursive, thank you IntelliJ IDEA!
       through(Key.get(filterKey), initParams);
     }
 
-    public void through(Key<? extends Filter> filterKey,
-        Map<String, String> initParams) {
+    @Override
+    public void through(Key<? extends Filter> filterKey, Map<String, String> initParams) {
       through(filterKey, initParams, null);
     }
     
@@ -110,8 +113,8 @@ class FiltersModuleBuilder {
       }
     }
 
-    public void through(Filter filter,
-        Map<String, String> initParams) {
+    @Override
+    public void through(Filter filter, Map<String, String> initParams) {
       Key<Filter> filterKey = Key.get(Filter.class, UniqueAnnotations.create());
       binder.bind(filterKey).toInstance(filter);
       through(filterKey, initParams, filter);

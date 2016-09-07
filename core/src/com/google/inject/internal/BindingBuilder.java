@@ -47,24 +47,29 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     super(binder, elements, source, key);
   }
 
+  @Override
   public BindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType) {
     annotatedWithInternal(annotationType);
     return this;
   }
 
+  @Override
   public BindingBuilder<T> annotatedWith(Annotation annotation) {
     annotatedWithInternal(annotation);
     return this;
   }
 
+  @Override
   public BindingBuilder<T> to(Class<? extends T> implementation) {
     return to(Key.get(implementation));
   }
 
+  @Override
   public BindingBuilder<T> to(TypeLiteral<? extends T> implementation) {
     return to(Key.get(implementation));
   }
 
+  @Override
   public BindingBuilder<T> to(Key<? extends T> linkedKey) {
     checkNotNull(linkedKey, "linkedKey");
     checkNotTargetted();
@@ -74,6 +79,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
+  @Override
   public void toInstance(T instance) {
     checkNotTargetted();
 
@@ -96,10 +102,12 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
         base.getSource(), base.getKey(), Scoping.EAGER_SINGLETON, injectionPoints, instance));
   }
 
+  @Override
   public BindingBuilder<T> toProvider(Provider<? extends T> provider) {
     return toProvider((javax.inject.Provider<T>) provider);
   }
 
+  @Override
   public BindingBuilder<T> toProvider(javax.inject.Provider<? extends T> provider) {
     checkNotNull(provider, "provider");
     checkNotTargetted();
@@ -119,16 +127,19 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
+  @Override
   public BindingBuilder<T> toProvider(
       Class<? extends javax.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
+  @Override
   public BindingBuilder<T> toProvider(
       TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
+  @Override
   public BindingBuilder<T> toProvider(
       Key<? extends javax.inject.Provider<? extends T>> providerKey) {
     checkNotNull(providerKey, "providerKey");
@@ -140,12 +151,14 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
+  @Override
   public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor) {
     return toConstructor(constructor, TypeLiteral.get(constructor.getDeclaringClass()));
   }
 
-  public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor,
-      TypeLiteral<? extends S> type) {
+  @Override
+  public <S extends T> ScopedBindingBuilder toConstructor(
+      Constructor<S> constructor, TypeLiteral<? extends S> type) {
     checkNotNull(constructor, "constructor");
     checkNotNull(type, "type");
     checkNotTargetted();

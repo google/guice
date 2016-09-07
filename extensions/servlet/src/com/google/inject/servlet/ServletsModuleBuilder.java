@@ -85,25 +85,28 @@ class ServletsModuleBuilder {
       this.uriPatterns = uriPatterns;
     }
 
+    @Override
     public void with(Class<? extends HttpServlet> servletKey) {
       with(Key.get(servletKey));
     }
 
+    @Override
     public void with(Key<? extends HttpServlet> servletKey) {
       with(servletKey, new HashMap<String, String>());
     }
 
+    @Override
     public void with(HttpServlet servlet) {
       with(servlet, new HashMap<String, String>());
     }
 
-    public void with(Class<? extends HttpServlet> servletKey,
-        Map<String, String> initParams) {
+    @Override
+    public void with(Class<? extends HttpServlet> servletKey, Map<String, String> initParams) {
       with(Key.get(servletKey), initParams);
     }
 
-    public void with(Key<? extends HttpServlet> servletKey,
-        Map<String, String> initParams) {
+    @Override
+    public void with(Key<? extends HttpServlet> servletKey, Map<String, String> initParams) {
       with(servletKey, initParams, null);
     }
 
@@ -116,8 +119,8 @@ class ServletsModuleBuilder {
       }
     }
 
-    public void with(HttpServlet servlet,
-        Map<String, String> initParams) {
+    @Override
+    public void with(HttpServlet servlet, Map<String, String> initParams) {
       Key<HttpServlet> servletKey = Key.get(HttpServlet.class, UniqueAnnotations.create());
       binder.bind(servletKey).toInstance(servlet);
       with(servletKey, initParams, servlet);

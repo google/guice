@@ -32,38 +32,40 @@ class UntargettedBindingProcessor extends AbstractBindingProcessor {
   
   @Override
   public <T> Boolean visit(Binding<T> binding) {
-    return binding.acceptTargetVisitor(new Processor<T, Boolean>((BindingImpl<T>)binding) {  
-      public Boolean visit(UntargettedBinding<? extends T> untargetted) {
-        prepareBinding();
+    return binding.acceptTargetVisitor(
+        new Processor<T, Boolean>((BindingImpl<T>) binding) {
+          @Override
+          public Boolean visit(UntargettedBinding<? extends T> untargetted) {
+            prepareBinding();
 
-        // Error: Missing implementation.
-        // Example: bind(Date.class).annotatedWith(Red.class);
-        // We can't assume abstract types aren't injectable. They may have an
-        // @ImplementedBy annotation or something.
-        if (key.getAnnotationType() != null) {
-          errors.missingImplementationWithHint(key, injector);
-          putBinding(invalidBinding(injector, key, source));
-          return true;
-        }
+            // Error: Missing implementation.
+            // Example: bind(Date.class).annotatedWith(Red.class);
+            // We can't assume abstract types aren't injectable. They may have an
+            // @ImplementedBy annotation or something.
+            if (key.getAnnotationType() != null) {
+              errors.missingImplementationWithHint(key, injector);
+              putBinding(invalidBinding(injector, key, source));
+              return true;
+            }
 
-        // This cast is safe after the preceeding check.
-        try {
-          BindingImpl<T> binding = injector.createUninitializedBinding(
-              key, scoping, source, errors, false);
-          scheduleInitialization(binding);
-          putBinding(binding);
-        } catch (ErrorsException e) {
-          errors.merge(e.getErrors());
-          putBinding(invalidBinding(injector, key, source));
-        }
-    
-        return true;
-      }
-      
-      @Override
-      protected Boolean visitOther(Binding<? extends T> binding) {
-        return false;
-      }
-    });
+            // This cast is safe after the preceeding check.
+            try {
+              BindingImpl<T> binding =
+                  injector.createUninitializedBinding(key, scoping, source, errors, false);
+              scheduleInitialization(binding);
+              putBinding(binding);
+            } catch (ErrorsException e) {
+              errors.merge(e.getErrors());
+              putBinding(invalidBinding(injector, key, source));
+            }
+
+            return true;
+          }
+
+          @Override
+          protected Boolean visitOther(Binding<? extends T> binding) {
+            return false;
+          }
+        });
   }
 }

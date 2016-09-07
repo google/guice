@@ -69,6 +69,7 @@ public class ProxyFactoryTest extends TestCase {
 
     boolean invoked = false;
 
+    @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       invoked = true;
       return methodInvocation.proceed();
@@ -186,6 +187,7 @@ public class ProxyFactoryTest extends TestCase {
 
     int count;
 
+    @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       count++;
       return methodInvocation.proceed();
@@ -194,6 +196,7 @@ public class ProxyFactoryTest extends TestCase {
 
   static class DoubleInterceptor implements MethodInterceptor {
 
+    @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       methodInvocation.proceed();
       return methodInvocation.proceed();

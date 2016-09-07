@@ -138,13 +138,20 @@ final class LineNumbers {
       super(Opcodes.ASM5);
     }
 
-    public void visit(int version, int access, String name, String signature,
-        String superName, String[] interfaces) {
+    @Override
+    public void visit(
+        int version,
+        int access,
+        String name,
+        String signature,
+        String superName,
+        String[] interfaces) {
       this.name = name;
     }
 
-    public MethodVisitor visitMethod(int access, String name, String desc,
-        String signature, String[] exceptions) {
+    @Override
+    public MethodVisitor visitMethod(
+        int access, String name, String desc, String signature, String[] exceptions) {
       if ((access & Opcodes.ACC_PRIVATE) != 0) {
         return null;
       }
@@ -153,6 +160,7 @@ final class LineNumbers {
       return new LineNumberMethodVisitor();
     }
 
+    @Override
     public void visitSource(String source, String debug) {
       LineNumbers.this.source = source;
     }
@@ -169,11 +177,13 @@ final class LineNumbers {
       }
     }
 
-    public FieldVisitor visitField(int access, String name, String desc,
-        String signature, Object value) {
+    @Override
+    public FieldVisitor visitField(
+        int access, String name, String desc, String signature, Object value) {
       return null;
     }
 
+    @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
       return new LineNumberAnnotationVisitor();
     }
@@ -188,22 +198,25 @@ final class LineNumbers {
         super(Opcodes.ASM5);
       }
 
+      @Override
       public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         return new LineNumberAnnotationVisitor();
       }
 
+      @Override
       public AnnotationVisitor visitAnnotationDefault() {
         return new LineNumberAnnotationVisitor();
       }
 
-      public void visitFieldInsn(int opcode, String owner, String name,
-          String desc) {
+      @Override
+      public void visitFieldInsn(int opcode, String owner, String name, String desc) {
         if (opcode == Opcodes.PUTFIELD && LineNumberReader.this.name.equals(owner)
             && !lines.containsKey(name) && line != -1) {
           lines.put(name, line);
         }
       }
 
+      @Override
       public void visitLineNumber(int line, Label start) {
         LineNumberReader.this.visitLineNumber(line, start);
       }
@@ -213,9 +226,11 @@ final class LineNumbers {
       LineNumberAnnotationVisitor() {
         super(Opcodes.ASM5);
       }
+      @Override
       public AnnotationVisitor visitAnnotation(String name, String desc) {
         return this;
       }
+      @Override
       public AnnotationVisitor visitArray(String name) {
         return this;
       }

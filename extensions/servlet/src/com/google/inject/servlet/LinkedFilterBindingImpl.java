@@ -38,6 +38,7 @@ class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends
     super(initParams, target, patternMatcher);
   }
 
+  @Override
   public Key<? extends Filter> getLinkedKey() {
     return getTarget();
   }

@@ -60,6 +60,7 @@ final class InternalServletModule extends AbstractModule {
       this.injectedServletContext = injectedServletContext;
     }
 
+    @Override
     public ServletContext get() {
       if (null != injectedServletContext) {
         return injectedServletContext;

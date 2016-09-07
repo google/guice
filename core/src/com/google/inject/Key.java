@@ -397,18 +397,22 @@ public class Key<T> {
   static enum NullAnnotationStrategy implements AnnotationStrategy {
     INSTANCE;
 
+    @Override
     public boolean hasAttributes() {
       return false;
     }
 
+    @Override
     public AnnotationStrategy withoutAttributes() {
       throw new UnsupportedOperationException("Key already has no attributes.");
     }
 
+    @Override
     public Annotation getAnnotation() {
       return null;
     }
 
+    @Override
     public Class<? extends Annotation> getAnnotationType() {
       return null;
     }
@@ -427,18 +431,22 @@ public class Key<T> {
       this.annotation = checkNotNull(annotation, "annotation");
     }
 
+    @Override
     public boolean hasAttributes() {
       return true;
     }
 
+    @Override
     public AnnotationStrategy withoutAttributes() {
       return new AnnotationTypeStrategy(getAnnotationType(), annotation);
     }
 
+    @Override
     public Annotation getAnnotation() {
       return annotation;
     }
 
+    @Override
     public Class<? extends Annotation> getAnnotationType() {
       return annotation.annotationType();
     }
@@ -474,18 +482,22 @@ public class Key<T> {
       this.annotation = annotation;
     }
 
+    @Override
     public boolean hasAttributes() {
       return false;
     }
 
+    @Override
     public AnnotationStrategy withoutAttributes() {
       throw new UnsupportedOperationException("Key already has no attributes.");
     }
 
+    @Override
     public Annotation getAnnotation() {
       return annotation;
     }
 
+    @Override
     public Class<? extends Annotation> getAnnotationType() {
       return annotationType;
     }

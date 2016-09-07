@@ -147,6 +147,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
 
     public String value;
 
+    @Override
     public String call() throws Exception {
       // Inside this request, we should always get the same instance.
       assertSame(someObject.get(), someObject.get());
@@ -161,6 +162,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
   private static class Caller implements Callable<SomeObject> {
     @Inject Provider<SomeObject> someObject;
 
+    @Override
     public SomeObject call() throws Exception {
       return someObject.get();
     }

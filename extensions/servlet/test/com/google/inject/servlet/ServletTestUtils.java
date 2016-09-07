@@ -29,6 +29,7 @@ public class ServletTestUtils {
   private ServletTestUtils() {}
 
   private static class ThrowingInvocationHandler implements InvocationHandler {
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       throw new UnsupportedOperationException("No methods are supported on this object");
     }
@@ -39,8 +40,8 @@ public class ServletTestUtils {
    */
   public static FilterChain newNoOpFilterChain() {
     return new FilterChain() {
-      public void doFilter(ServletRequest request, ServletResponse response) {
-      }
+      @Override
+      public void doFilter(ServletRequest request, ServletResponse response) {}
     };
   }
   
@@ -99,6 +100,7 @@ public class ServletTestUtils {
   private static class FakeHttpSessionHandler implements InvocationHandler, Serializable {
     final Map<String, Object> attributes = Maps.newHashMap();
 
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       String name = method.getName();
       if ("setAttribute".equals(name)) {

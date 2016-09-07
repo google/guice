@@ -121,11 +121,14 @@ public class InternalFlags {
     Class<T> enumType = defaultValue.getDeclaringClass();
     String value = null;
     try {
-      value = AccessController.doPrivileged(new PrivilegedAction<String>() {
-        public String run() {
-          return System.getProperty(name);
-        }
-      });
+      value =
+          AccessController.doPrivileged(
+              new PrivilegedAction<String>() {
+                @Override
+                public String run() {
+                  return System.getProperty(name);
+                }
+              });
       return (value != null && value.length() > 0) ? Enum.valueOf(enumType, value) : defaultValue;
     } catch (SecurityException e) {
       return secureValue;

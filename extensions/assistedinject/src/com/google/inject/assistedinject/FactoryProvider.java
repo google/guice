@@ -320,6 +320,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     return result;
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     List<Dependency<?>> dependencies = Lists.newArrayList();
     for (AssistedConstructor<?> constructor : factoryMethodToConstructor.values()) {
@@ -332,46 +333,49 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     return ImmutableSet.copyOf(dependencies);
   }
 
+  @Override
   public F get() {
-    InvocationHandler invocationHandler = new InvocationHandler() {
-      public Object invoke(Object proxy, Method method, Object[] creationArgs) throws Throwable {
-        // pass methods from Object.class to the proxy
-        if (method.getDeclaringClass().equals(Object.class)) {
-          if ("equals".equals(method.getName())) {
-            return proxy == creationArgs[0];
-          } else if ("hashCode".equals(method.getName())) {
-            return System.identityHashCode(proxy);
-          } else {
-            return method.invoke(this, creationArgs);
+    InvocationHandler invocationHandler =
+        new InvocationHandler() {
+          @Override
+          public Object invoke(Object proxy, Method method, Object[] creationArgs)
+              throws Throwable {
+            // pass methods from Object.class to the proxy
+            if (method.getDeclaringClass().equals(Object.class)) {
+              if ("equals".equals(method.getName())) {
+                return proxy == creationArgs[0];
+              } else if ("hashCode".equals(method.getName())) {
+                return System.identityHashCode(proxy);
+              } else {
+                return method.invoke(this, creationArgs);
+              }
+            }
+
+            AssistedConstructor<?> constructor = factoryMethodToConstructor.get(method);
+            Object[] constructorArgs = gatherArgsForConstructor(constructor, creationArgs);
+            Object objectToReturn = constructor.newInstance(constructorArgs);
+            injector.injectMembers(objectToReturn);
+            return objectToReturn;
           }
-        }
 
-        AssistedConstructor<?> constructor = factoryMethodToConstructor.get(method);
-        Object[] constructorArgs = gatherArgsForConstructor(constructor, creationArgs);
-        Object objectToReturn = constructor.newInstance(constructorArgs);
-        injector.injectMembers(objectToReturn);
-        return objectToReturn;
-      }
+          public Object[] gatherArgsForConstructor(
+              AssistedConstructor<?> constructor, Object[] factoryArgs) {
+            int numParams = constructor.getAllParameters().size();
+            int argPosition = 0;
+            Object[] result = new Object[numParams];
 
-      public Object[] gatherArgsForConstructor(
-          AssistedConstructor<?> constructor,
-          Object[] factoryArgs) {
-        int numParams = constructor.getAllParameters().size();
-        int argPosition = 0;
-        Object[] result = new Object[numParams];
-
-        for (int i = 0; i < numParams; i++) {
-          Parameter parameter = constructor.getAllParameters().get(i);
-          if (parameter.isProvidedByFactory()) {
-            result[i] = factoryArgs[argPosition];
-            argPosition++;
-          } else {
-            result[i] = parameter.getValue(injector);
+            for (int i = 0; i < numParams; i++) {
+              Parameter parameter = constructor.getAllParameters().get(i);
+              if (parameter.isProvidedByFactory()) {
+                result[i] = factoryArgs[argPosition];
+                argPosition++;
+              } else {
+                result[i] = parameter.getValue(injector);
+              }
+            }
+            return result;
           }
-        }
-        return result;
-      }
-    };
+        };
 
     @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
     Class<F> factoryRawType = (Class<F>) (Class<?>) factoryType.getRawType();

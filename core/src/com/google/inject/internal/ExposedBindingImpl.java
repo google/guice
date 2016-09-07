@@ -38,14 +38,17 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
     this.privateElements = privateElements;
   }
 
+  @Override
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
   }
 
+  @Override
   public PrivateElements getPrivateElements() {
     return privateElements;
   }
@@ -58,6 +61,7 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
         .toString();
   }
 
+  @Override
   public void applyTo(Binder binder) {
     throw new UnsupportedOperationException("This element represents a synthetic binding.");
   }

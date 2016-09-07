@@ -31,12 +31,15 @@ import java.util.List;
 public class ProviderInjectionTest extends TestCase {
 
   public void testProviderInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Bar.class);
-        bind(SampleSingleton.class).in(Scopes.SINGLETON);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Bar.class);
+                bind(SampleSingleton.class).in(Scopes.SINGLETON);
+              }
+            });
 
     Foo foo = injector.getInstance(Foo.class);
 
@@ -51,20 +54,26 @@ public class ProviderInjectionTest extends TestCase {
 
   /** Test for bug 155. */
   public void testProvidersAreInjectedWhenBound() {
-    Module m = new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Bar.class).toProvider(new Provider<Bar>() {
-          @SuppressWarnings("unused")
-          @Inject void cantBeCalled(Baz baz) {
-            fail("Can't have called this method since Baz is not bound.");
+    Module m =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Bar.class)
+                .toProvider(
+                    new Provider<Bar>() {
+                      @SuppressWarnings("unused")
+                      @Inject
+                      void cantBeCalled(Baz baz) {
+                        fail("Can't have called this method since Baz is not bound.");
+                      }
+
+                      @Override
+                      public Bar get() {
+                        return new Bar() {};
+                      }
+                    });
           }
-          public Bar get() {
-            return new Bar() {};
-          }
-        });
-      }
-    };
+        };
 
     try {
       Guice.createInjector(m);
@@ -80,31 +89,44 @@ public class ProviderInjectionTest extends TestCase {
    * List.class is injected before it is used.
    */
   public void testProvidersAreInjectedBeforeTheyAreUsed() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      public void configure() {
-        // should bind String to "[true]"
-        bind(String.class).toProvider(new Provider<String>() {
-          private String value;
-          @Inject void initialize(List list) {
-            value = list.toString();
-          }
-          public String get() {
-            return value;
-          }
-        });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              public void configure() {
+                // should bind String to "[true]"
+                bind(String.class)
+                    .toProvider(
+                        new Provider<String>() {
+                          private String value;
 
-        // should bind List to [true]
-        bind(List.class).toProvider(new Provider<List>() {
-          @Inject Boolean injectedYet = Boolean.FALSE;
-          public List get() {
-            return Arrays.asList(injectedYet);
-          }
-        });
+                          @Inject
+                          void initialize(List list) {
+                            value = list.toString();
+                          }
 
-        // should bind Boolean to true
-        bind(Boolean.class).toInstance(Boolean.TRUE);
-      }
-    });
+                          @Override
+                          public String get() {
+                            return value;
+                          }
+                        });
+
+                // should bind List to [true]
+                bind(List.class)
+                    .toProvider(
+                        new Provider<List>() {
+                          @Inject Boolean injectedYet = Boolean.FALSE;
+
+                          @Override
+                          public List get() {
+                            return Arrays.asList(injectedYet);
+                          }
+                        });
+
+                // should bind Boolean to true
+                bind(Boolean.class).toInstance(Boolean.TRUE);
+              }
+            });
 
     assertEquals("Providers not injected before use",
         "[true]",
@@ -117,41 +139,62 @@ public class ProviderInjectionTest extends TestCase {
    * value at the time that they're injected.
    */
   public void testCreationTimeInjectionOrdering() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        // instance injection
-        bind(Count.class).annotatedWith(named("a")).toInstance(new Count(0) {
-          @Inject void initialize(@Named("b") Count bCount) {
-            value = bCount.value + 1;
-          }
-        });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                // instance injection
+                bind(Count.class)
+                    .annotatedWith(named("a"))
+                    .toInstance(
+                        new Count(0) {
+                          @Inject
+                          void initialize(@Named("b") Count bCount) {
+                            value = bCount.value + 1;
+                          }
+                        });
 
-        // provider injection
-        bind(Count.class).annotatedWith(named("b")).toProvider(new Provider<Count>() {
-          Count count;
-          @Inject void initialize(@Named("c") Count cCount) {
-            count = new Count(cCount.value + 2);
-          }
-          public Count get() {
-            return count;
-          }
-        });
+                // provider injection
+                bind(Count.class)
+                    .annotatedWith(named("b"))
+                    .toProvider(
+                        new Provider<Count>() {
+                          Count count;
 
-        // field and method injection, fields first
-        bind(Count.class).annotatedWith(named("c")).toInstance(new Count(0) {
-          @Inject @Named("d") Count dCount;
-          @Inject void initialize(@Named("e") Count eCount) {
-            value = dCount.value + eCount.value + 4;
-          }
-        });
+                          @Inject
+                          void initialize(@Named("c") Count cCount) {
+                            count = new Count(cCount.value + 2);
+                          }
 
-        // static injection
-        requestStaticInjection(StaticallyInjectable.class);
+                          @Override
+                          public Count get() {
+                            return count;
+                          }
+                        });
 
-        bind(Count.class).annotatedWith(named("d")).toInstance(new Count(8));
-        bind(Count.class).annotatedWith(named("e")).toInstance(new Count(16));
-      }
-    });
+                // field and method injection, fields first
+                bind(Count.class)
+                    .annotatedWith(named("c"))
+                    .toInstance(
+                        new Count(0) {
+                          @Inject
+                          @Named("d")
+                          Count dCount;
+
+                          @Inject
+                          void initialize(@Named("e") Count eCount) {
+                            value = dCount.value + eCount.value + 4;
+                          }
+                        });
+
+                // static injection
+                requestStaticInjection(StaticallyInjectable.class);
+
+                bind(Count.class).annotatedWith(named("d")).toInstance(new Count(8));
+                bind(Count.class).annotatedWith(named("e")).toInstance(new Count(16));
+              }
+            });
 
     assertEquals(28, injector.getInstance(Key.get(Count.class, named("c"))).value);
     assertEquals(30, injector.getInstance(Key.get(Count.class, named("b"))).value);

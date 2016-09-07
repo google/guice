@@ -139,6 +139,7 @@ public class ToolStageInjectorTest extends TestCase {
     private static SM sm;
     @SuppressWarnings("unused") @Inject static void staticMethod(SM sm) { Tooled.sm = sm; }
     
+    @Override
     public Object get() {
       return null;
     }
@@ -152,6 +153,7 @@ public class ToolStageInjectorTest extends TestCase {
     private static SM sm;
     @Toolable @SuppressWarnings("unused") @Inject static void staticMethod(SM sm) { Tooled.sm = sm; }
     
+    @Override
     public Object get() {
       return null;
     }

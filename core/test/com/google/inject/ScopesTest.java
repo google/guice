@@ -216,6 +216,7 @@ public class ScopesTest extends TestCase {
   @Singleton @ProvidedBy(EProvider.class)
   interface E {}
   static class EProvider implements Provider<E> {
+    @Override
     public E get() {
       return null;
     }
@@ -418,6 +419,7 @@ public class ScopesTest extends TestCase {
 
   class RememberProviderScope implements Scope {
     final Map<Key<?>, Provider<?>> providers = Maps.newHashMap();
+    @Override
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
       providers.put(key, unscoped);
       return unscoped;
@@ -440,11 +442,13 @@ public class ScopesTest extends TestCase {
   @ScopeAnnotation
   public @interface CustomScoped {}
 
-  static final Scope CUSTOM_SCOPE = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-      return Scopes.SINGLETON.scope(key, unscoped);
-    }
-  };
+  static final Scope CUSTOM_SCOPE =
+      new Scope() {
+        @Override
+        public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+          return Scopes.SINGLETON.scope(key, unscoped);
+        }
+      };
 
   @Target({ ElementType.TYPE, ElementType.METHOD })
   @ScopeAnnotation
@@ -513,6 +517,7 @@ public class ScopesTest extends TestCase {
   }
 
   static class ImplementationProvider implements Provider<ProvidedBySingleton> {
+    @Override
     public ProvidedBySingleton get() {
       return new ProvidedBySingleton();
     }
@@ -535,8 +540,10 @@ public class ScopesTest extends TestCase {
   class ProviderGetScope implements Scope {
     @Inject Provider<B> bProvider;
 
+    @Override
     public <T> Provider<T> scope(Key<T> key, final Provider<T> unscoped) {
       return new Provider<T>() {
+        @Override
         public T get() {
           bProvider.get();
           return unscoped.get();
@@ -827,14 +834,19 @@ public class ScopesTest extends TestCase {
     volatile boolean barrierPassed = false;
 
     SBarrierProvider(int nThreads) {
-      barrier = new CyclicBarrier(nThreads, new Runnable() {
-        public void run() {
-          // would finish before returning from await() for any thread
-          barrierPassed = true;
-        }
-      });
+      barrier =
+          new CyclicBarrier(
+              nThreads,
+              new Runnable() {
+                @Override
+                public void run() {
+                  // would finish before returning from await() for any thread
+                  barrierPassed = true;
+                }
+              });
     }
 
+    @Override
     public S get() {
       try {
         if (!barrierPassed) {
@@ -873,11 +885,15 @@ public class ScopesTest extends TestCase {
       }
     });
 
-    Future<S> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<S>() {
-      public S call() {
-        return secondInjector.getInstance(S.class);
-      }
-    });
+    Future<S> secondThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<S>() {
+                  @Override
+                  public S call() {
+                    return secondInjector.getInstance(S.class);
+                  }
+                });
 
     S firstS = injector.getInstance(S.class);
     S secondS = secondThreadResult.get();
@@ -943,18 +959,26 @@ public class ScopesTest extends TestCase {
       }
     });
 
-    Future<G> firstThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<G>() {
-      public G call() {
-        Thread.currentThread().setName("G.class");
-        return injector.createChildInjector().getInstance(G.class);
-      }
-    });
-    Future<H> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<H>() {
-      public H call() {
-        Thread.currentThread().setName("H.class");
-        return injector.createChildInjector().getInstance(H.class);
-      }
-    });
+    Future<G> firstThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<G>() {
+                  @Override
+                  public G call() {
+                    Thread.currentThread().setName("G.class");
+                    return injector.createChildInjector().getInstance(G.class);
+                  }
+                });
+    Future<H> secondThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<H>() {
+                  @Override
+                  public H call() {
+                    Thread.currentThread().setName("H.class");
+                    return injector.createChildInjector().getInstance(H.class);
+                  }
+                });
 
     // using separate threads to avoid potential deadlock on the main thread
     // waiting twice as much to be sure that both would time out in their respective barriers
@@ -1097,24 +1121,36 @@ public class ScopesTest extends TestCase {
       }
     });
 
-    Future<I0> firstThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<I0>() {
-      public I0 call() {
-        Thread.currentThread().setName("I0.class");
-        return injector.getInstance(I0.class);
-      }
-    });
-    Future<J0> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<J0>() {
-      public J0 call() {
-        Thread.currentThread().setName("J0.class");
-        return injector.getInstance(J0.class);
-      }
-    });
-    Future<K0> thirdThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<K0>() {
-      public K0 call() {
-        Thread.currentThread().setName("K0.class");
-        return injector.getInstance(K0.class);
-      }
-    });
+    Future<I0> firstThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<I0>() {
+                  @Override
+                  public I0 call() {
+                    Thread.currentThread().setName("I0.class");
+                    return injector.getInstance(I0.class);
+                  }
+                });
+    Future<J0> secondThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<J0>() {
+                  @Override
+                  public J0 call() {
+                    Thread.currentThread().setName("J0.class");
+                    return injector.getInstance(J0.class);
+                  }
+                });
+    Future<K0> thirdThreadResult =
+        Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<K0>() {
+                  @Override
+                  public K0 call() {
+                    Thread.currentThread().setName("K0.class");
+                    return injector.getInstance(K0.class);
+                  }
+                });
 
     // using separate threads to avoid potential deadlock on the main thread
     // waiting twice as much to be sure that both would time out in their respective barriers
@@ -1225,6 +1261,7 @@ public class ScopesTest extends TestCase {
     private static class ScopeMarker {
       static final Provider<ScopeMarker> PROVIDER =
           new Provider<ScopeMarker>() {
+            @Override
             public ScopeMarker get() {
               return new ScopeMarker();
             }

@@ -485,8 +485,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
     assertEquals(42, injector.getInstance(Integer.class).intValue());
     assertEquals(42L, injector.getInstance(Long.class).longValue());
-    assertEquals(42D, injector.getInstance(Double.class).doubleValue());
-    assertEquals(42F, injector.getInstance(Float.class).floatValue());
+    assertEquals(42D, injector.getInstance(Double.class).doubleValue(), 0.0);
+    assertEquals(42F, injector.getInstance(Float.class).floatValue(), 0.0f);
   }
 
   private static class VisibilityModule extends AbstractModule {
@@ -529,7 +529,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     Injector injector = Guice.createInjector(new Sub1Module());
     assertEquals(42, injector.getInstance(Integer.class).intValue());
     assertEquals(42L, injector.getInstance(Long.class).longValue());
-    assertEquals(42D, injector.getInstance(Double.class).doubleValue());
+    assertEquals(42D, injector.getInstance(Double.class).doubleValue(), 0.0);
   }
 
   private static class BaseModule extends AbstractModule {
@@ -827,12 +827,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
-  class RestrictedSuper extends AbstractModule {
+  static class RestrictedSuper extends AbstractModule {
     @Provides public String provideFoo() { return "foo"; }
     @Override protected void configure() {}
   }
 
-  public class ExposedSub extends RestrictedSuper {}
+  public static class ExposedSub extends RestrictedSuper {}
 
   public void testOverrideProviderMethod_increasedVisibility() {
     // ensure we don't detect the synthetic provideFoo method in ExposedSub as an override (it is,

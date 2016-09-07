@@ -40,11 +40,12 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
-    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
+    this.provisionCallback = provisionCallback;
     this.injector = injector;
     this.providerKey = providerKey;
   }
 
+  @Override
   public void notify(Errors errors) {
     try {
       providerFactory = injector.getInternalFactory(providerKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
@@ -53,6 +54,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
     }
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     context.pushState(providerKey, source);

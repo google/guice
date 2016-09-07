@@ -65,6 +65,7 @@ class FilterChainInvocation implements FilterChain {
     this.proceedingChain = proceedingChain;
   }
 
+  @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
       throws IOException, ServletException {
     GuiceFilter.Context previous = GuiceFilter.localContext.get();

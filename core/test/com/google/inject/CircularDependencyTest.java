@@ -469,20 +469,25 @@ public class CircularDependencyTest extends TestCase {
    * provide a decent error message.
    */
   public void testCircularDependenciesDetectedEarlyWhenDependenciesHaveDifferentTypes() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Number.class).to(Integer.class);
-      }
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Number.class).to(Integer.class);
+              }
 
-      @Provides @Singleton Integer provideInteger(List list) {
-        return new Integer(2);
-      }
+              @Provides
+              @Singleton
+              Integer provideInteger(List list) {
+                return 2;
+              }
 
-      @Provides List provideList(Integer integer) {
-        return new ArrayList();
-      }
-    });
+              @Provides
+              List provideList(Integer integer) {
+                return new ArrayList();
+              }
+            });
     try {
       injector.getInstance(Number.class);
       fail();

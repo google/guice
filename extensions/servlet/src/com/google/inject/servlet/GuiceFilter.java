@@ -115,6 +115,7 @@ public class GuiceFilter implements Filter {
     localContext.remove();
   }
 
+  @Override
   public void doFilter(
       final ServletRequest servletRequest,
       final ServletResponse servletResponse,
@@ -213,6 +214,7 @@ public class GuiceFilter implements Filter {
     }
   }
 
+  @Override
   public void init(FilterConfig filterConfig) throws ServletException {
     final ServletContext servletContext = filterConfig.getServletContext();
 
@@ -226,6 +228,7 @@ public class GuiceFilter implements Filter {
     filterPipeline.initPipeline(servletContext);
   }
 
+  @Override
   public void destroy() {
 
     try {

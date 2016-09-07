@@ -56,15 +56,18 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testInject() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(B.class).toInstance(b);
-        bind(C.class).toInstance(c);
-        bind(D.class).toInstance(d);
-        bind(E.class).toInstance(e);
-        bind(A.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(B.class).toInstance(b);
+                bind(C.class).toInstance(c);
+                bind(D.class).toInstance(d);
+                bind(E.class).toInstance(e);
+                bind(A.class);
+              }
+            });
 
     A a = injector.getInstance(A.class);
     assertSame(b, a.b);
@@ -74,15 +77,18 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testQualifiedInject() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(B.class).annotatedWith(Names.named("jodie")).toInstance(b);
-        bind(C.class).annotatedWith(Red.class).toInstance(c);
-        bind(D.class).annotatedWith(RED).toInstance(d);
-        bind(E.class).annotatedWith(Names.named("jesse")).toInstance(e);
-        bind(F.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(B.class).annotatedWith(Names.named("jodie")).toInstance(b);
+                bind(C.class).annotatedWith(Red.class).toInstance(c);
+                bind(D.class).annotatedWith(RED).toInstance(d);
+                bind(E.class).annotatedWith(Names.named("jesse")).toInstance(e);
+                bind(F.class);
+              }
+            });
 
     F f = injector.getInstance(F.class);
     assertSame(b, f.b);
@@ -92,15 +98,18 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testProviderInject() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(B.class).annotatedWith(Names.named("jodie")).toInstance(b);
-        bind(C.class).toInstance(c);
-        bind(D.class).annotatedWith(RED).toInstance(d);
-        bind(E.class).toInstance(e);
-        bind(G.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(B.class).annotatedWith(Names.named("jodie")).toInstance(b);
+                bind(C.class).toInstance(c);
+                bind(D.class).annotatedWith(RED).toInstance(d);
+                bind(E.class).toInstance(e);
+                bind(G.class);
+              }
+            });
 
     G g = injector.getInstance(G.class);
     assertSame(b, g.bProvider.get());
@@ -112,13 +121,16 @@ public class Jsr330Test extends TestCase {
   public void testScopeAnnotation() {
     final TestScope scope = new TestScope();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(B.class).in(scope);
-        bind(C.class).in(TestScoped.class);
-        bindScope(TestScoped.class, scope);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(B.class).in(scope);
+                bind(C.class).in(TestScoped.class);
+                bindScope(TestScoped.class, scope);
+              }
+            });
 
     B b = injector.getInstance(B.class);
     assertSame(b, injector.getInstance(B.class));
@@ -140,11 +152,14 @@ public class Jsr330Test extends TestCase {
   }
   
   public void testSingleton() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(B.class).in(Singleton.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(B.class).in(Singleton.class);
+              }
+            });
 
     B b = injector.getInstance(B.class);
     assertSame(b, injector.getInstance(B.class));
@@ -156,24 +171,30 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testEagerSingleton() {
-    Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
-      protected void configure() {
-        bind(J.class);
-        bind(K.class).in(Singleton.class);
-      }
-    });
+    Guice.createInjector(
+        Stage.PRODUCTION,
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(J.class);
+            bind(K.class).in(Singleton.class);
+          }
+        });
 
     assertEquals(1, J.nextInstanceId);
     assertEquals(1, K.nextInstanceId);
   }
   
   public void testScopesIsSingleton() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(J.class);
-        bind(K.class).in(Singleton.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(J.class);
+                bind(K.class).in(Singleton.class);
+              }
+            });
 
     assertTrue(Scopes.isSingleton(injector.getBinding(J.class)));
     assertTrue(Scopes.isSingleton(injector.getBinding(K.class)));
@@ -181,11 +202,13 @@ public class Jsr330Test extends TestCase {
 
   public void testInjectingFinalFieldsIsForbidden() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(L.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(L.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -195,11 +218,13 @@ public class Jsr330Test extends TestCase {
 
   public void testInjectingAbstractMethodsIsForbidden() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(M.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(M.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -209,11 +234,13 @@ public class Jsr330Test extends TestCase {
 
   public void testInjectingMethodsWithTypeParametersIsForbidden() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(N.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(N.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(), "1) Injected method " + N.class.getName()
@@ -222,11 +249,13 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testInjectingMethodsWithNonVoidReturnTypes() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(P.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(P.class);
+          }
+        });
   }
 
   /**
@@ -236,14 +265,19 @@ public class Jsr330Test extends TestCase {
    * support binding to instances of javax.inject.Provider.
    */
   public void testBindProviderClass() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(B.class).toProvider(BProvider.class);
-        bind(B.class).annotatedWith(Names.named("1")).toProvider(BProvider.class);
-        bind(B.class).annotatedWith(Names.named("2")).toProvider(Key.get(BProvider.class));
-        bind(B.class).annotatedWith(Names.named("3")).toProvider(TypeLiteral.get(BProvider.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(B.class).toProvider(BProvider.class);
+                bind(B.class).annotatedWith(Names.named("1")).toProvider(BProvider.class);
+                bind(B.class).annotatedWith(Names.named("2")).toProvider(Key.get(BProvider.class));
+                bind(B.class)
+                    .annotatedWith(Names.named("3"))
+                    .toProvider(TypeLiteral.get(BProvider.class));
+              }
+            });
     
     injector.getInstance(Key.get(B.class));
     injector.getInstance(Key.get(B.class, Names.named("1")));
@@ -252,15 +286,18 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testGuicify330Provider() {
-    Provider<String> jsr330Provider = new Provider<String>() {
-      public String get() {
-        return "A";
-      }
+    Provider<String> jsr330Provider =
+        new Provider<String>() {
+          @Override
+          public String get() {
+            return "A";
+          }
 
-      @Override public String toString() {
-        return "jsr330Provider";
-      }
-    };
+          @Override
+          public String toString() {
+            return "jsr330Provider";
+          }
+        };
 
     com.google.inject.Provider<String> guicified = Providers.guicify(jsr330Provider);
     assertEquals("guicified(jsr330Provider)", guicified.toString());
@@ -273,17 +310,21 @@ public class Jsr330Test extends TestCase {
   }
   
   public void testGuicifyWithDependencies() {
-    Provider<String> jsr330Provider = new Provider<String>() {
-      @Inject double d;
-      int i;
-      @Inject void injectMe(int i) {
-        this.i = i;
-      }
-      
-      public String get() {
-        return  d + "-" + i;
-      }
-    };
+    Provider<String> jsr330Provider =
+        new Provider<String>() {
+          @Inject double d;
+          int i;
+
+          @Inject
+          void injectMe(int i) {
+            this.i = i;
+          }
+
+          @Override
+          public String get() {
+            return d + "-" + i;
+          }
+        };
     
     final com.google.inject.Provider<String> guicified =
         Providers.guicify(jsr330Provider);
@@ -367,19 +408,23 @@ public class Jsr330Test extends TestCase {
   @Qualifier @Retention(RUNTIME)
   @interface Red {}
 
-  public static final Red RED = new Red() {
-    public Class<? extends Annotation> annotationType() {
-      return Red.class;
-    }
+  public static final Red RED =
+      new Red() {
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Red.class;
+        }
 
-    @Override public boolean equals(Object obj) {
-      return obj instanceof Red;
-    }
+        @Override
+        public boolean equals(Object obj) {
+          return obj instanceof Red;
+        }
 
-    @Override public int hashCode() {
-      return 0;
-    }
-  };
+        @Override
+        public int hashCode() {
+          return 0;
+        }
+      };
 
   static class G {
     final Provider<B> bProvider;
@@ -403,12 +448,14 @@ public class Jsr330Test extends TestCase {
   static class TestScope implements Scope {
     private int now = 0;
 
-    public <T> com.google.inject.Provider<T> scope(Key<T> key,
-        final com.google.inject.Provider<T> unscoped) {
+    @Override
+    public <T> com.google.inject.Provider<T> scope(
+        Key<T> key, final com.google.inject.Provider<T> unscoped) {
       return new com.google.inject.Provider<T>() {
         private T value;
         private int snapshotTime = -1;
 
+        @Override
         public T get() {
           if (snapshotTime != now) {
             value = unscoped.get();
@@ -451,6 +498,7 @@ public class Jsr330Test extends TestCase {
   }
 
   static class M extends AbstractM {
+    @Override
     @SuppressWarnings("OverridesJavaxInjectableMethod")
     void setB(B b) {}
   }
@@ -466,6 +514,7 @@ public class Jsr330Test extends TestCase {
   }
 
   static class BProvider implements Provider<B> {
+    @Override
     public B get() {
       return new B();
     }

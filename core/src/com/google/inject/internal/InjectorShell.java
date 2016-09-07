@@ -232,15 +232,19 @@ final class InjectorShell {
       this.injector = injector;
     }
 
-    public Injector get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
+    @Override
+    public Injector get(
+        Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
         throws ErrorsException {
       return injector;
     }
 
+    @Override
     public Injector get() {
       return injector;
     }
 
+    @Override
     public String toString() {
       return "Provider<Injector>";
     }
@@ -260,17 +264,21 @@ final class InjectorShell {
   }
 
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
-    public Logger get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked) {
+    @Override
+    public Logger get(
+        Errors errors, InternalContext context, Dependency<?> dependency, boolean linked) {
       InjectionPoint injectionPoint = dependency.getInjectionPoint();
       return injectionPoint == null
           ? Logger.getAnonymousLogger()
           : Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
     }
 
+    @Override
     public Logger get() {
       return Logger.getAnonymousLogger();
     }
 
+    @Override
     public String toString() {
       return "Provider<Logger>";
     }
@@ -289,6 +297,7 @@ final class InjectorShell {
   }
 
   private static class RootModule implements Module {
+    @Override
     public void configure(Binder binder) {
       binder = binder.withSource(SourceProvider.UNKNOWN_SOURCE);
       binder.bindScope(Singleton.class, SINGLETON);
@@ -303,6 +312,7 @@ final class InjectorShell {
       this.state = state;
     }
 
+    @Override
     public void configure(Binder binder) {
       for (ModuleAnnotatedMethodScannerBinding binding : state.getScannerBindings()) {
         binding.applyTo(binder);

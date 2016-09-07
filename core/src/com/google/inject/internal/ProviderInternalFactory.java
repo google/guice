@@ -40,7 +40,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
   
   protected T circularGet(final Provider<? extends T> provider, final Errors errors,
       InternalContext context, final Dependency<?> dependency,
-      ProvisionListenerStackCallback<T> provisionCallback)
+      /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {    
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
@@ -57,14 +57,18 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
     // Optimization: Don't go through the callback stack if no one's listening.
     constructionContext.startConstruction();
     try {
-      if (!provisionCallback.hasListeners()) {
+      if (provisionCallback == null) {
         return provision(provider, errors, dependency, constructionContext);
       } else {
-        return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
-          public T call() throws ErrorsException {
-            return provision(provider, errors, dependency, constructionContext);
-          }
-        });
+        return provisionCallback.provision(
+            errors,
+            context,
+            new ProvisionCallback<T>() {
+              @Override
+              public T call() throws ErrorsException {
+                return provision(provider, errors, dependency, constructionContext);
+              }
+            });
       }
     } finally {
       constructionContext.removeCurrentReference();

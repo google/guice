@@ -38,6 +38,7 @@ class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extend
     super(initParams, target, patternMatcher);
   }
 
+  @Override
   public Key<? extends HttpServlet> getLinkedKey() {
     return getTarget();
   }

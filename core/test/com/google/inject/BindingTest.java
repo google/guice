@@ -56,12 +56,15 @@ public class BindingTest extends TestCase {
   }
 
   public void testExplicitCyclicDependency() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class);
-        bind(B.class);
-      }
-    }).getInstance(A.class);
+    Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class);
+                bind(B.class);
+              }
+            })
+        .getInstance(A.class);
   }
 
   static class A { @Inject B b; }
@@ -71,6 +74,7 @@ public class BindingTest extends TestCase {
 
   static class MyModule extends AbstractModule {
 
+    @Override
     protected void configure() {
       // Linked.
       bind(Object.class).to(Runnable.class).in(Scopes.SINGLETON);
@@ -79,11 +83,15 @@ public class BindingTest extends TestCase {
       bind(Runnable.class).toInstance(Runnables.doNothing());
 
       // Provider instance.
-      bind(Foo.class).toProvider(new Provider<Foo>() {
-        public Foo get() {
-          return new Foo();
-        }
-      }).in(Scopes.SINGLETON);
+      bind(Foo.class)
+          .toProvider(
+              new Provider<Foo>() {
+                @Override
+                public Foo get() {
+                  return new Foo();
+                }
+              })
+          .in(Scopes.SINGLETON);
 
       // Provider.
       bind(Foo.class)
@@ -101,6 +109,7 @@ public class BindingTest extends TestCase {
   static class Foo {}
 
   public static class FooProvider implements Provider<Foo> {
+    @Override
     public Foo get() {
       throw new UnsupportedOperationException();
     }
@@ -110,11 +119,13 @@ public class BindingTest extends TestCase {
 
   public void testBindToUnboundLinkedBinding() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Collection.class).to(List.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Collection.class).to(List.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(), "No implementation for java.util.List was bound.");
@@ -126,18 +137,22 @@ public class BindingTest extends TestCase {
    * not to what the key is linked to.
    */
   public void testScopeIsAppliedToKeyNotTarget() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Integer.class).toProvider(Counter.class).asEagerSingleton();
-        bind(Number.class).toProvider(Counter.class).asEagerSingleton();
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Integer.class).toProvider(Counter.class).asEagerSingleton();
+                bind(Number.class).toProvider(Counter.class).asEagerSingleton();
+              }
+            });
 
     assertNotSame(injector.getInstance(Integer.class), injector.getInstance(Number.class));
   }
 
   static class Counter implements Provider<Integer> {
     static AtomicInteger next = new AtomicInteger(1);
+    @Override
     public Integer get() {
       return next.getAndIncrement();
     }
@@ -233,11 +248,14 @@ public class BindingTest extends TestCase {
   public void testToConstructorBinding() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Object.class).toConstructor(constructor);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Object.class).toConstructor(constructor);
+              }
+            });
 
     D d = (D) injector.getInstance(Object.class);
     assertEquals(Stage.DEVELOPMENT, d.stage);
@@ -248,12 +266,15 @@ public class BindingTest extends TestCase {
     final Key<Object> s = new Key<Object>(named("s")) {};
     final Key<Object> i = new Key<Object>(named("i")) {};
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(s).toConstructor(constructor, new TypeLiteral<C<Stage>>() {});
-        bind(i).toConstructor(constructor, new TypeLiteral<C<Injector>>() {});
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(s).toConstructor(constructor, new TypeLiteral<C<Stage>>() {});
+                bind(i).toConstructor(constructor, new TypeLiteral<C<Injector>>() {});
+              }
+            });
 
     C<Stage> one = (C<Stage>) injector.getInstance(s);
     assertEquals(Stage.DEVELOPMENT, one.stage);
@@ -270,11 +291,13 @@ public class BindingTest extends TestCase {
     final Constructor constructor = C.class.getConstructor(Stage.class, Object.class);
 
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Object.class).toConstructor(constructor);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Object.class).toConstructor(constructor);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -289,19 +312,24 @@ public class BindingTest extends TestCase {
   public void testToConstructorAndMethodInterceptors() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
     final AtomicInteger count = new AtomicInteger();
-    final MethodInterceptor countingInterceptor = new MethodInterceptor() {
-      public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        count.incrementAndGet();
-        return methodInvocation.proceed();
-      }
-    };
+    final MethodInterceptor countingInterceptor =
+        new MethodInterceptor() {
+          @Override
+          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            count.incrementAndGet();
+            return methodInvocation.proceed();
+          }
+        };
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Object.class).toConstructor(constructor);
-        bindInterceptor(Matchers.any(), Matchers.any(), countingInterceptor);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Object.class).toConstructor(constructor);
+                bindInterceptor(Matchers.any(), Matchers.any(), countingInterceptor);
+              }
+            });
 
     D d = (D) injector.getInstance(Object.class);
     d.hashCode();
@@ -313,11 +341,14 @@ public class BindingTest extends TestCase {
   public void testInaccessibleConstructor() throws NoSuchMethodException {
     final Constructor<E> constructor = E.class.getDeclaredConstructor(Stage.class);
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(E.class).toConstructor(constructor);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(E.class).toConstructor(constructor);
+              }
+            });
 
     E e = injector.getInstance(E.class);
     assertEquals(Stage.DEVELOPMENT, e.stage);
@@ -331,14 +362,17 @@ public class BindingTest extends TestCase {
     final Key<Object> n = Key.get(Object.class, named("N")); // "N" instances
     final Key<Object> r = Key.get(Object.class, named("R")); // a regular binding
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(d).toConstructor(constructor);
-        bind(s).toConstructor(constructor).in(Singleton.class);
-        bind(n).toConstructor(constructor).in(Scopes.NO_SCOPE);
-        bind(r).to(F.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(d).toConstructor(constructor);
+                bind(s).toConstructor(constructor).in(Singleton.class);
+                bind(n).toConstructor(constructor).in(Scopes.NO_SCOPE);
+                bind(r).to(F.class);
+              }
+            });
 
     assertDistinct(injector, 1, d, d, d, d);
     assertDistinct(injector, 1, s, s, s, s);
@@ -359,21 +393,25 @@ public class BindingTest extends TestCase {
     final Set<TypeLiteral<?>> heardTypes = Sets.newHashSet();
 
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
-    final TypeListener listener = new TypeListener() {
-      public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-        if (!heardTypes.add(type)) {
-          fail("Heard " + type + " multiple times!");
-        }
-      }
-    };
+    final TypeListener listener =
+        new TypeListener() {
+          @Override
+          public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+            if (!heardTypes.add(type)) {
+              fail("Heard " + type + " multiple times!");
+            }
+          }
+        };
 
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Object.class).toConstructor(constructor);
-        bind(D.class).toConstructor(constructor);
-        bindListener(Matchers.any(), listener);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Object.class).toConstructor(constructor);
+            bind(D.class).toConstructor(constructor);
+            bindListener(Matchers.any(), listener);
+          }
+        });
     
     assertEquals(ImmutableSet.of(TypeLiteral.get(D.class)), heardTypes);
   }
@@ -381,11 +419,14 @@ public class BindingTest extends TestCase {
   public void testInterfaceToImplementationConstructor() throws NoSuchMethodException {
     final Constructor<CFoo> constructor = CFoo.class.getDeclaredConstructor();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(IFoo.class).toConstructor(constructor);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(IFoo.class).toConstructor(constructor);
+              }
+            });
 
     injector.getInstance(IFoo.class);
   }
@@ -394,13 +435,16 @@ public class BindingTest extends TestCase {
   public static class CFoo implements IFoo {}
 
   public void testGetAllBindings() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(D.class).toInstance(new D(Stage.PRODUCTION));
-        bind(Object.class).to(D.class);
-        getProvider(new Key<C<Stage>>() {});
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(D.class).toInstance(new D(Stage.PRODUCTION));
+                bind(Object.class).to(D.class);
+                getProvider(new Key<C<Stage>>() {});
+              }
+            });
 
     Map<Key<?>,Binding<?>> bindings = injector.getAllBindings();
     assertEquals(ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(D.class),
@@ -425,11 +469,14 @@ public class BindingTest extends TestCase {
   }
 
   public void testGetAllServletBindings() throws Exception {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(F.class); // an explicit binding that uses a JIT binding for a constructor
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(F.class); // an explicit binding that uses a JIT binding for a constructor
+              }
+            });
     injector.getAllBindings();
   }
 

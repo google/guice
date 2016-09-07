@@ -61,6 +61,7 @@ public final class Providers {
       this.instance = instance;
     }
 
+    @Override
     public T get() {
       return instance;
     }
@@ -115,6 +116,7 @@ public final class Providers {
       this.delegate = delegate;
     }
 
+    @Override
     public T get() {
       return delegate.get();
     }
@@ -149,6 +151,7 @@ public final class Providers {
       injector.injectMembers(delegate);
     }
 
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return dependencies;
     }

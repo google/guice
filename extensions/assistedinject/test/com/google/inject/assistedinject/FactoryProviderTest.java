@@ -64,11 +64,11 @@ public class FactoryProviderTest extends TestCase {
 
     Mustang blueMustang = (Mustang) carFactory.create(Color.BLUE);
     assertEquals(Color.BLUE, blueMustang.color);
-    assertEquals(5.0d, blueMustang.engineSize);
+    assertEquals(5.0d, blueMustang.engineSize, 0.0);
 
     Mustang redMustang = (Mustang) carFactory.create(Color.RED);
     assertEquals(Color.RED, redMustang.color);
-    assertEquals(5.0d, redMustang.engineSize);
+    assertEquals(5.0d, redMustang.engineSize, 0.0);
   }
 
   public void testFactoryBindingDependencies() {
@@ -164,12 +164,12 @@ public class FactoryProviderTest extends TestCase {
 
     Corvette blueCorvette = (Corvette) carFactory.createConvertible(Color.BLUE);
     assertEquals(Color.BLUE, blueCorvette.color);
-    assertEquals(100f, blueCorvette.maxMph);
+    assertEquals(100f, blueCorvette.maxMph, 0.0f);
     assertTrue(blueCorvette.isConvertable);
 
     Corvette redCorvette = (Corvette) carFactory.create(Color.RED, false);
     assertEquals(Color.RED, redCorvette.color);
-    assertEquals(140f, redCorvette.maxMph);
+    assertEquals(140f, redCorvette.maxMph, 0.0f);
     assertFalse(redCorvette.isConvertable);
   }
 
@@ -238,7 +238,7 @@ public class FactoryProviderTest extends TestCase {
 
     Porshe grayPorshe = (Porshe) carFactory.create(Color.GRAY);
     assertEquals(Color.GRAY, grayPorshe.color);
-    assertEquals(50000d, grayPorshe.price);
+    assertEquals(50000d, grayPorshe.price, 0.0);
     assertEquals(911, grayPorshe.model);
     assertEquals("turbo", grayPorshe.name);
   }
@@ -302,7 +302,7 @@ public class FactoryProviderTest extends TestCase {
     DeLorean deLorean = (DeLorean) carFactory.create(Color.GRAY);
     assertEquals(Color.GRAY, deLorean.color);
     assertEquals("Flux Capacitor", deLorean.features.iterator().next());
-    assertEquals(new Integer(88), deLorean.featureActivationSpeeds.iterator().next());
+    assertEquals(Integer.valueOf(88), deLorean.featureActivationSpeeds.iterator().next());
   }
 
   public static class DeLorean implements Car {
@@ -621,7 +621,7 @@ public class FactoryProviderTest extends TestCase {
 
     Mustang blueMustang = mustangFactory.create(Color.BLUE);
     assertEquals(Color.BLUE, blueMustang.color);
-    assertEquals(5.0d, blueMustang.engineSize);
+    assertEquals(5.0d, blueMustang.engineSize, 0.0);
 
     Camaro redCamaro = camaroFactory.create(Color.RED);
     assertEquals(Color.RED, redCamaro.color);
@@ -695,13 +695,13 @@ public class FactoryProviderTest extends TestCase {
     Mustang mustang = new Mustang(5000d, Color.BLACK);
     MustangInsurance mustangPolicy =
         (MustangInsurance) mustangInsuranceFactory.create(mustang, 800.0d);
-    assertEquals(800.0d, mustangPolicy.premium);
-    assertEquals(50000.0d, mustangPolicy.limit);
+    assertEquals(800.0d, mustangPolicy.premium, 0.0);
+    assertEquals(50000.0d, mustangPolicy.limit, 0.0);
 
     Camaro camaro = new Camaro(3000, 1967, Color.BLUE);
     CamaroInsurance camaroPolicy = (CamaroInsurance) camaroInsuranceFactory.create(camaro, 800.0d);
-    assertEquals(800.0d, camaroPolicy.premium);
-    assertEquals(100000.0d, camaroPolicy.limit);
+    assertEquals(800.0d, camaroPolicy.premium, 0.0);
+    assertEquals(100000.0d, camaroPolicy.limit, 0.0);
   }
 
   public interface InsuranceFactory<T extends Car> {
@@ -734,13 +734,13 @@ public class FactoryProviderTest extends TestCase {
     Mustang mustang = new Mustang(5000d, Color.BLACK);
     MustangInsurance mustangPolicy =
         (MustangInsurance) mustangInsuranceFactory.create(mustang, 800.0d);
-    assertEquals(800.0d, mustangPolicy.premium);
-    assertEquals(50000.0d, mustangPolicy.limit);
+    assertEquals(800.0d, mustangPolicy.premium, 0.0);
+    assertEquals(50000.0d, mustangPolicy.limit, 0.0);
 
     Camaro camaro = new Camaro(3000, 1967, Color.BLUE);
     CamaroInsurance camaroPolicy = (CamaroInsurance) camaroInsuranceFactory.create(camaro, 800.0d);
-    assertEquals(800.0d, camaroPolicy.premium);
-    assertEquals(100000.0d, camaroPolicy.limit);
+    assertEquals(800.0d, camaroPolicy.premium, 0.0);
+    assertEquals(100000.0d, camaroPolicy.limit, 0.0);
   }
 
   public static class AutoInsurance<T extends Car> implements Insurance<T> {
@@ -777,8 +777,8 @@ public class FactoryProviderTest extends TestCase {
     Camaro camaro = new Camaro(3000, 1967, Color.BLUE);
     AutoInsurance<?> camaroPolicy =
         (AutoInsurance<?>) camaroInsuranceFactory.create(camaro, 800.0d);
-    assertEquals(800.0d, camaroPolicy.premium);
-    assertEquals(50000.0d, camaroPolicy.limit);
+    assertEquals(800.0d, camaroPolicy.premium, 0.0);
+    assertEquals(50000.0d, camaroPolicy.limit, 0.0);
     assertEquals(camaro, camaroPolicy.car);
   }
 
@@ -797,11 +797,11 @@ public class FactoryProviderTest extends TestCase {
 
     Mustang blueMustang = (Mustang) carFactory.create(Color.BLUE);
     assertEquals(Color.BLUE, blueMustang.color);
-    assertEquals(5.0d, blueMustang.engineSize);
+    assertEquals(5.0d, blueMustang.engineSize, 0.0);
 
     Mustang redMustang = (Mustang) carFactory.create(Color.RED);
     assertEquals(Color.RED, redMustang.color);
-    assertEquals(5.0d, redMustang.engineSize);
+    assertEquals(5.0d, redMustang.engineSize, 0.0);
   }
 
   public interface Equals {
@@ -836,6 +836,6 @@ public class FactoryProviderTest extends TestCase {
     Equals.Factory equalsFactory = injector.getInstance(Equals.Factory.class);
     Equals.Impl shallowEquals = (Impl) equalsFactory.equals(ComparisonMethod.SHALLOW);
     assertEquals(ComparisonMethod.SHALLOW, shallowEquals.comparisonMethod);
-    assertEquals(0.01d, shallowEquals.sigma);
+    assertEquals(0.01d, shallowEquals.sigma, 0.0);
   }
 }

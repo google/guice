@@ -38,11 +38,14 @@ public class HasDependenciesTest extends TestCase {
    * When an instance implements HasDependencies, the injected dependencies aren't used.
    */
   public void testInstanceWithDependencies() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class).toInstance(new AWithDependencies());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).toInstance(new AWithDependencies());
+              }
+            });
 
     InstanceBinding<?> binding = (InstanceBinding<?>) injector.getBinding(A.class);
     assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class))),
@@ -50,11 +53,14 @@ public class HasDependenciesTest extends TestCase {
   }
 
   public void testInstanceWithoutDependencies() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class).toInstance(new A());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).toInstance(new A());
+              }
+            });
 
     InstanceBinding<?> binding = (InstanceBinding<?>) injector.getBinding(A.class);
     Dependency<?> onlyDependency = Iterables.getOnlyElement(binding.getDependencies());
@@ -62,11 +68,14 @@ public class HasDependenciesTest extends TestCase {
   }
 
   public void testProvider() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class).toProvider(new ProviderOfA());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).toProvider(new ProviderOfA());
+              }
+            });
 
     ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) injector.getBinding(A.class);
     Dependency<?> onlyDependency = Iterables.getOnlyElement(binding.getDependencies());
@@ -80,12 +89,14 @@ public class HasDependenciesTest extends TestCase {
   static class ProviderOfA implements Provider<A> {
     @Inject void injectUnusedDependencies(String unused) {}
 
+    @Override
     public A get() {
       throw new UnsupportedOperationException();
     }
   }
 
   static class AWithDependencies extends A implements HasDependencies {
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)));
     }
@@ -93,6 +104,7 @@ public class HasDependenciesTest extends TestCase {
 
   static class ProviderOfAWithDependencies
       extends ProviderOfA implements ProviderWithDependencies<A> {
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)));
     }

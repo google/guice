@@ -36,10 +36,11 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
       Initializable<? extends javax.inject.Provider<? extends T>> initializable,
       Object source, ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
-    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
+    this.provisionCallback = provisionCallback;
     this.initializable = checkNotNull(initializable, "provider");
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     return circularGet(initializable.get(errors), errors, context, dependency,

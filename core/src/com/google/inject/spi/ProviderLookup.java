@@ -52,6 +52,7 @@ public final class ProviderLookup<T> implements Element {
     this.dependency = checkNotNull(dependency, "dependency");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
@@ -65,6 +66,7 @@ public final class ProviderLookup<T> implements Element {
     return dependency;
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
@@ -79,6 +81,7 @@ public final class ProviderLookup<T> implements Element {
     this.delegate = checkNotNull(delegate, "delegate");
   }
 
+  @Override
   public void applyTo(Binder binder) {
     initializeDelegate(binder.withSource(getSource()).getProvider(dependency));
   }
@@ -98,12 +101,17 @@ public final class ProviderLookup<T> implements Element {
    */
   public Provider<T> getProvider() {
     return new ProviderWithDependencies<T>() {
+      @Override
       public T get() {
-        checkState(delegate != null,
-            "This Provider cannot be used until the Injector has been created.");
-        return delegate.get();
+        Provider<T> local = delegate;
+        if (local == null) {
+          throw new IllegalStateException(
+              "This Provider cannot be used until the Injector has been created.");
+        }
+        return local.get();
       }
 
+      @Override
       public Set<Dependency<?>> getDependencies() {
         // We depend on Provider<T>, not T directly.  This is an important distinction
         // for dependency analysis tools that short-circuit on providers.
@@ -111,7 +119,8 @@ public final class ProviderLookup<T> implements Element {
         return ImmutableSet.<Dependency<?>>of(Dependency.get(providerKey));
       }
 
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return "Provider<" + getKey().getTypeLiteral() + ">";
       }
     };

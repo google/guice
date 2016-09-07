@@ -38,11 +38,13 @@ public class LineNumbersTest extends TestCase {
 
   public void testLineNumbers() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(A.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(A.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(
@@ -62,18 +64,24 @@ public class LineNumbersTest extends TestCase {
   /*if[AOP]*/
   public void testCanHandleLineNumbersForGuiceGeneratedClasses() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bindInterceptor(Matchers.only(A.class), Matchers.any(),
-              new org.aopalliance.intercept.MethodInterceptor() {
-                public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
-                  return null;
-                }
-              });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bindInterceptor(
+                  Matchers.only(A.class),
+                  Matchers.any(),
+                  new org.aopalliance.intercept.MethodInterceptor() {
+                    @Override
+                    public Object invoke(
+                        org.aopalliance.intercept.MethodInvocation methodInvocation) {
+                      return null;
+                    }
+                  });
 
-          bind(A.class);
-        }
-      });
+              bind(A.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(
@@ -121,11 +129,13 @@ public class LineNumbersTest extends TestCase {
 
   public void testUnavailableByteCodeShowsUnknownSource() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(new GeneratingClassLoader().generate());
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(new GeneratingClassLoader().generate());
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(
@@ -139,12 +149,15 @@ public class LineNumbersTest extends TestCase {
   
   public void testGeneratedClassesCanSucceed() {
     final Class<?> generated = new GeneratingClassLoader().generate();
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(generated);
-        bind(B.class).toInstance(new B() {});
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(generated);
+                bind(B.class).toInstance(new B() {});
+              }
+            });
     Object instance = injector.getInstance(generated);
     assertEquals(instance.getClass(), generated);
   }

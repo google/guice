@@ -39,9 +39,10 @@ class TestScope implements Scope {
 
   private Map<Key, Object> inScopeObjectsMap = new HashMap<Key, Object>();
 
-  public <T> Provider<T> scope(
-      final Key<T> key, final Provider<T> provider) {
+  @Override
+  public <T> Provider<T> scope(final Key<T> key, final Provider<T> provider) {
     return new Provider<T>() {
+      @Override
       @SuppressWarnings({"unchecked"})
       public T get() {
         T t = (T) inScopeObjectsMap.get(key);

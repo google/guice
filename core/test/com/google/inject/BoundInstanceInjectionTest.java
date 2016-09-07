@@ -36,12 +36,15 @@ public class BoundInstanceInjectionTest extends TestCase {
   public void testInstancesAreInjected() throws CreationException {
     final O o = new O();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(O.class).toInstance(o);
-        bind(int.class).toInstance(5);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(O.class).toInstance(o);
+                bind(int.class).toInstance(5);
+              }
+            });
 
     assertEquals(5, o.fromMethod);
   }
@@ -55,30 +58,39 @@ public class BoundInstanceInjectionTest extends TestCase {
   }
 
   public void testProvidersAreInjected() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(O.class).toProvider(new Provider<O>() {
-          @Inject int i;
-          public O get() {
-            O o = new O();
-            o.setInt(i);
-            return o;
-          }
-        });
-        bind(int.class).toInstance(5);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(O.class)
+                    .toProvider(
+                        new Provider<O>() {
+                          @Inject int i;
+
+                          @Override
+                          public O get() {
+                            O o = new O();
+                            o.setInt(i);
+                            return o;
+                          }
+                        });
+                bind(int.class).toInstance(5);
+              }
+            });
 
     assertEquals(5, injector.getInstance(O.class).fromMethod);
   }
 
   public void testMalformedInstance() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Object.class).toInstance(new MalformedInjectable());
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Object.class).toInstance(new MalformedInjectable());
+            }
+          });
       fail();
     } catch (CreationException expected) {
       Asserts.assertContains(expected.getMessage(), MalformedInjectable.class.getName(),
@@ -89,11 +101,13 @@ public class BoundInstanceInjectionTest extends TestCase {
 
   public void testMalformedProvider() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(String.class).toProvider(new MalformedProvider());
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(String.class).toProvider(new MalformedProvider());
+            }
+          });
       fail();
     } catch (CreationException expected) {
       Asserts.assertContains(expected.getMessage(), MalformedProvider.class.getName(),
@@ -109,6 +123,7 @@ public class BoundInstanceInjectionTest extends TestCase {
   static class MalformedProvider implements Provider<String> {
     @Inject void doublyAnnotated(@Named("a") @Another String s) {}
 
+    @Override
     public String get() {
       return "a";
     }

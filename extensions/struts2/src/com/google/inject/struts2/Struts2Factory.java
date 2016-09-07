@@ -70,6 +70,7 @@ public class Struts2Factory extends ObjectFactory {
 
   Set<Class<?>> boundClasses = new HashSet<Class<?>>();
 
+  @Override
   public Class<?> getClassInstance(String name) throws ClassNotFoundException {
     Class<?> clazz = super.getClassInstance(name);
 
@@ -119,22 +120,25 @@ public class Struts2Factory extends ObjectFactory {
       throw new RuntimeException(ERROR_NO_INJECTOR);
     }
 
-    this.strutsInjector = injector.createChildInjector(new AbstractModule() {
-      protected void configure() {
+    this.strutsInjector =
+        injector.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
 
-        // Tell the injector about all the action classes, etc., so it
-        // can validate them at startup.
-        for (Class<?> boundClass : boundClasses) {
-          // TODO: Set source from Struts XML.
-          bind(boundClass);
-        }
+                // Tell the injector about all the action classes, etc., so it
+                // can validate them at startup.
+                for (Class<?> boundClass : boundClasses) {
+                  // TODO: Set source from Struts XML.
+                  bind(boundClass);
+                }
 
-        // Validate the interceptor class.
-        for (ProvidedInterceptor interceptor : interceptors) {
-          interceptor.validate(binder());
-        }
-      }
-    });
+                // Validate the interceptor class.
+                for (ProvidedInterceptor interceptor : interceptors) {
+                  interceptor.validate(binder());
+                }
+              }
+            });
 
     // Inject interceptors.
     for (ProvidedInterceptor interceptor : interceptors) {
@@ -144,9 +148,10 @@ public class Struts2Factory extends ObjectFactory {
     logger.info("Injector created successfully.");
   }
 
+  @Override
   @SuppressWarnings("unchecked")
-  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,
-      Map interceptorRefParams) throws ConfigurationException {
+  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
+      throws ConfigurationException {
     // Ensure the interceptor class is present.
     Class<? extends Interceptor> interceptorClass;
     try {
@@ -202,16 +207,19 @@ public class Struts2Factory extends ObjectFactory {
       delegate = superBuildInterceptor(config, params);
     }
 
+    @Override
     public void destroy() {
       if (null != delegate) {
         delegate.destroy();
       }
     }
 
+    @Override
     public void init() {
       throw new AssertionError();
     }
 
+    @Override
     public String intercept(ActionInvocation invocation) throws Exception {
       return delegate.intercept(invocation);
     }

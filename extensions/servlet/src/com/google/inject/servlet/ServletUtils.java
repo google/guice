@@ -220,10 +220,11 @@ final class ServletUtils {
     }
 
     private void ensureCapacity(int minCapacity) {
-      if (bytes.length >= minCapacity) {
+      int cap = bytes.length;
+      if (cap >= minCapacity) {
         return;
       }
-      int newCapacity = bytes.length + bytes.length >> 1;  // *1.5
+      int newCapacity = cap + (cap >> 1);  // *1.5
       if (newCapacity < minCapacity) {
         // we are close to overflowing, grow by smaller steps
         newCapacity = minCapacity;

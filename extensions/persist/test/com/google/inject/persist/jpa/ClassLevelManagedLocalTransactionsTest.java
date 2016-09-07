@@ -47,6 +47,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
   private static final String TRANSIENT_UNIQUE_TEXT = "JPAsome other unique texaksoksojadasdt"
       + new Date();
 
+  @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -54,6 +55,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
+  @Override
   public void tearDown() {
     injector.getInstance(PersistService.class).stop();
     injector = null;

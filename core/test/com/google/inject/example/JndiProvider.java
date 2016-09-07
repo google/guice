@@ -33,6 +33,7 @@ class JndiProvider<T> implements Provider<T> {
     this.type = type;
   }
 
+  @Override
   public T get() {
     try {
       return type.cast(context.lookup(name));

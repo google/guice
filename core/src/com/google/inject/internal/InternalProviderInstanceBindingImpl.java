@@ -100,8 +100,10 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     @Override
     public final T get() {
       Provider<T> local = delegateProvider;
-      checkState(local != null,
-          "This Provider cannot be used until the Injector has been created.");
+      if (local == null) {
+        throw new IllegalStateException(
+            "This Provider cannot be used until the Injector has been created.");
+      }
       return local.get();
     }
 
@@ -111,7 +113,7 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
         final Dependency<?> dependency,
         boolean linked)
         throws ErrorsException {
-      if (!provisionCallback.hasListeners()) {
+      if (provisionCallback == null) {
           return doProvision(errors, context, dependency);
         } else {
           return provisionCallback.provision(
@@ -164,7 +166,7 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
       // Optimization: Don't go through the callback stack if no one's listening.
       constructionContext.startConstruction();
       try {
-        if (!provisionCallback.hasListeners()) {
+        if (provisionCallback == null) {
           return provision(errors, dependency, context, constructionContext);
         } else {
           return provisionCallback.provision(

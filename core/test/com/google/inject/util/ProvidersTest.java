@@ -75,6 +75,7 @@ public class ProvidersTest extends TestCase {
       this.value = value;
     }
     
+    @Override
     public Integer get() {
       return value;
     }
@@ -95,6 +96,7 @@ public class ProvidersTest extends TestCase {
       this.value = value;
     }
     
+    @Override
     public Integer get() {
       return value;
     }

@@ -73,21 +73,25 @@ class ServletSpiVisitor
     this.allowedClasses = builder.build();
   }
 
+  @Override
   public Integer visit(InstanceFilterBinding binding) {
     actual.add(new Params(binding, binding.getFilterInstance()));
     return currentCount++;
   }
 
+  @Override
   public Integer visit(InstanceServletBinding binding) {
     actual.add(new Params(binding, binding.getServletInstance()));
     return currentCount++;
   }
 
+  @Override
   public Integer visit(LinkedFilterBinding binding) {
     actual.add(new Params(binding, binding.getLinkedKey()));
     return currentCount++;
   }
 
+  @Override
   public Integer visit(LinkedServletBinding binding) {
     actual.add(new Params(binding, binding.getLinkedKey()));
     return currentCount++;

@@ -8,13 +8,12 @@ import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-import junit.framework.TestCase;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -109,6 +108,7 @@ public class NullableInjectionPointTest extends TestCase {
   private Injector createInjector() {
     return Guice.createInjector(
         new AbstractModule() {
+          @Override
           protected void configure() {
             bind(Foo.class).toProvider(Providers.<Foo>of(null));
           }
@@ -120,11 +120,13 @@ public class NullableInjectionPointTest extends TestCase {
    */
   public void testBindNullToInstance() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Foo.class).toInstance(null);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Foo.class).toInstance(null);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -134,16 +136,20 @@ public class NullableInjectionPointTest extends TestCase {
   }
 
   public void testBindNullToProvider() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(Providers.<Foo>of(null));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).toProvider(Providers.<Foo>of(null));
+              }
+            });
     assertNull(injector.getInstance(NullableFooField.class).foo);
     assertNull(injector.getInstance(CustomNullableFooField.class).foo);
 
     try {
       injector.getInstance(FooField.class);
+      fail("Expected ProvisionException");
     }
     catch(ProvisionException expected) {
       assertContains(expected.getMessage(), "null returned by binding at");
@@ -151,16 +157,20 @@ public class NullableInjectionPointTest extends TestCase {
   }
 
   public void testBindScopedNull() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(Providers.<Foo>of(null)).in(Scopes.SINGLETON);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).toProvider(Providers.<Foo>of(null)).in(Scopes.SINGLETON);
+              }
+            });
     assertNull(injector.getInstance(NullableFooField.class).foo);
     assertNull(injector.getInstance(CustomNullableFooField.class).foo);
 
     try {
       injector.getInstance(FooField.class);
+      fail("Expected ProvisionException");
     }
     catch(ProvisionException expected) {
       assertContains(expected.getMessage(), "null returned by binding at");
@@ -168,11 +178,14 @@ public class NullableInjectionPointTest extends TestCase {
   }
 
   public void testBindNullAsEagerSingleton() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(Providers.<Foo>of(null)).asEagerSingleton();
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).toProvider(Providers.<Foo>of(null)).asEagerSingleton();
+              }
+            });
     assertNull(injector.getInstance(NullableFooField.class).foo);
     assertNull(injector.getInstance(CustomNullableFooField.class).foo);
 

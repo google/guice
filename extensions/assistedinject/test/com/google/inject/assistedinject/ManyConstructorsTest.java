@@ -217,8 +217,12 @@ public class ManyConstructorsTest extends TestCase {
       
     }
     
-    public String getName() { return name; }
-    public Integer getIndex() { return index; }
+    @Override
+    public String getName() {
+      return name; }
+    @Override
+    public Integer getIndex() {
+      return index; }
   }
   
   public static interface Bar {

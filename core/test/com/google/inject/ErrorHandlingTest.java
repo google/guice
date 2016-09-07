@@ -40,15 +40,21 @@ public class ErrorHandlingTest {
       System.err.println("--");
     }
 
-    Injector bad = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toProvider(new Provider<String>() {
-          public String get() {
-            return null;
-          }
-        });
-      }
-    });
+    Injector bad =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class)
+                    .toProvider(
+                        new Provider<String>() {
+                          @Override
+                          public String get() {
+                            return null;
+                          }
+                        });
+              }
+            });
     try {
       bad.getInstance(String.class);
     }
@@ -101,7 +107,7 @@ public class ErrorHandlingTest {
   }
 
   // suppress compiler error to test
-  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass, multiple-scope"})
+  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass", "multiple-scope"})
   @Singleton
   @GoodScope
   static class TooManyScopes {}
@@ -117,6 +123,7 @@ public class ErrorHandlingTest {
   interface I {}
 
   static class MyModule extends AbstractModule {
+    @Override
     protected void configure() {
       bind(Runnable.class);
       bind(Foo.class);

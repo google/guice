@@ -94,11 +94,13 @@ public final class MiniGuice {
     for (final Map.Entry<Key, Provider<?>> binding : bindings.entrySet()) {
       Key key = binding.getKey();
       final Provider<?> value = binding.getValue();
-      Provider<Provider<?>> providerProvider = new Provider<Provider<?>>() {
-        public Provider<?> get() {
-          return value;
-        }
-      };
+      Provider<Provider<?>> providerProvider =
+          new Provider<Provider<?>>() {
+            @Override
+            public Provider<?> get() {
+              return value;
+            }
+          };
       providerBindings.put(new Key(new ProviderType(javax.inject.Provider.class, key.type),
           key.annotation), providerProvider);
     }
@@ -120,11 +122,14 @@ public final class MiniGuice {
     for (Key key : singletons) {
       Provider<?> provider = bindings.get(key);
       final Object onlyInstance = provider.get();
-      bindings.put(key, new Provider<Object>() {
-        public Object get() {
-          return onlyInstance;
-        }
-      });
+      bindings.put(
+          key,
+          new Provider<Object>() {
+            @Override
+            public Object get() {
+              return onlyInstance;
+            }
+          });
     }
   }
 
@@ -148,18 +153,20 @@ public final class MiniGuice {
     final Key[] parameterKeys = parametersToKeys(
         method, method.getGenericParameterTypes(), method.getParameterAnnotations());
     method.setAccessible(true);
-    final Provider<Object> unscoped = new Provider<Object>() {
-      public Object get() {
-        Object[] parameters = keysToValues(parameterKeys);
-        try {
-          return method.invoke(instance, parameters);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException(e.getCause());
-        }
-      }
-    };
+    final Provider<Object> unscoped =
+        new Provider<Object>() {
+          @Override
+          public Object get() {
+            Object[] parameters = keysToValues(parameterKeys);
+            try {
+              return method.invoke(instance, parameters);
+            } catch (IllegalAccessException e) {
+              throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+              throw new RuntimeException(e.getCause());
+            }
+          }
+        };
 
     boolean singleton = method.isAnnotationPresent(javax.inject.Singleton.class);
     putBinding(key, unscoped, singleton);
@@ -235,25 +242,27 @@ public final class MiniGuice {
     final Constructor<?> constructor = injectedConstructor;
     final Key[] parameterKeys = parametersToKeys(
         constructor, constructor.getGenericParameterTypes(), constructor.getParameterAnnotations());
-    final Provider<Object> unscoped = new Provider<Object>() {
-      public Object get() {
-        Object[] constructorParameters = keysToValues(parameterKeys);
-        try {
-          Object result = constructor.newInstance(constructorParameters);
-          Object[] fieldValues = keysToValues(fieldKeys);
-          for (int i = 0; i < fieldValues.length; i++) {
-            injectedFields.get(i).set(result, fieldValues[i]);
+    final Provider<Object> unscoped =
+        new Provider<Object>() {
+          @Override
+          public Object get() {
+            Object[] constructorParameters = keysToValues(parameterKeys);
+            try {
+              Object result = constructor.newInstance(constructorParameters);
+              Object[] fieldValues = keysToValues(fieldKeys);
+              for (int i = 0; i < fieldValues.length; i++) {
+                injectedFields.get(i).set(result, fieldValues[i]);
+              }
+              return result;
+            } catch (IllegalAccessException e) {
+              throw new RuntimeException(e.getCause());
+            } catch (InvocationTargetException e) {
+              throw new RuntimeException(e.getCause());
+            } catch (InstantiationException e) {
+              throw new RuntimeException(e);
+            }
           }
-          return result;
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException(e.getCause());
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException(e.getCause());
-        } catch (InstantiationException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
+        };
 
     boolean singleton = type.isAnnotationPresent(javax.inject.Singleton.class);
     putBinding(new Key(type, null), unscoped, singleton);
@@ -263,15 +272,18 @@ public final class MiniGuice {
     if (singleton) {
       singletons.add(key);
       final Provider<Object> unscoped = provider;
-      provider = new Provider<Object>() {
-        private Object onlyInstance = UNINITIALIZED;
-        public Object get() {
-          if (onlyInstance == UNINITIALIZED) {
-            onlyInstance = unscoped.get();
-          }
-          return onlyInstance;
-        }
-      };
+      provider =
+          new Provider<Object>() {
+            private Object onlyInstance = UNINITIALIZED;
+
+            @Override
+            public Object get() {
+              if (onlyInstance == UNINITIALIZED) {
+                onlyInstance = unscoped.get();
+              }
+              return onlyInstance;
+            }
+          };
     }
 
     if (bindings.put(key, provider) != null) {
@@ -343,7 +355,7 @@ public final class MiniGuice {
     }
   }
 
-  private class RequiredKey {
+  private static class RequiredKey {
     private final Key key;
     private final Object requiredBy;
 
@@ -362,14 +374,17 @@ public final class MiniGuice {
       this.typeArgument = typeArgument;
     }
 
+    @Override
     public Type getRawType() {
       return rawType;
     }
 
+    @Override
     public Type[] getActualTypeArguments() {
       return new Type[] { typeArgument };
     }
 
+    @Override
     public Type getOwnerType() {
       return null;
     }

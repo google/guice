@@ -20,15 +20,14 @@ import static com.google.inject.Asserts.assertContains;
 
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.inject.Inject;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -37,17 +36,23 @@ public class MembersInjectorTest extends TestCase {
 
   private static final long DEADLOCK_TIMEOUT_SECONDS = 1;
 
-  private static final A<C> uninjectableA = new A<C>() {
-    @Override void doNothing() {
-      throw new AssertionFailedError();
-    }
-  };
+  private static final A<C> uninjectableA =
+      new A<C>() {
+        @Inject
+        @Override
+        void doNothing() {
+          throw new AssertionFailedError();
+        }
+      };
 
-  private static final B uninjectableB = new B() {
-    @Override void doNothing() {
-      throw new AssertionFailedError();
-    }
-  };
+  private static final B uninjectableB =
+      new B() {
+        @Inject
+        @Override
+        void doNothing() {
+          throw new AssertionFailedError();
+        }
+      };
 
   private static final C myFavouriteC = new C();
 
@@ -102,11 +107,14 @@ public class MembersInjectorTest extends TestCase {
   }
 
   public void testMembersInjectorFromInjector() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(C.class).toInstance(myFavouriteC);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(C.class).toInstance(myFavouriteC);
+              }
+            });
 
     MembersInjector<A<C>> aMembersInjector
         = injector.getMembersInjector(new TypeLiteral<A<C>>() {});
@@ -162,11 +170,15 @@ public class MembersInjectorTest extends TestCase {
   }
 
   public void testInjectingMembersInjector() {
-    InjectsMembersInjector injectsMembersInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(C.class).toInstance(myFavouriteC);
-      }
-    }).getInstance(InjectsMembersInjector.class);
+    InjectsMembersInjector injectsMembersInjector =
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    bind(C.class).toInstance(myFavouriteC);
+                  }
+                })
+            .getInstance(InjectsMembersInjector.class);
 
     A<C> a = new A<C>();
     injectsMembersInjector.aMembersInjector.injectMembers(a);
@@ -176,11 +188,13 @@ public class MembersInjectorTest extends TestCase {
 
   public void testCannotBindMembersInjector() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(MembersInjector.class).toProvider(Providers.<MembersInjector>of(null));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(MembersInjector.class).toProvider(Providers.<MembersInjector>of(null));
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -188,12 +202,14 @@ public class MembersInjectorTest extends TestCase {
     }
 
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(new TypeLiteral<MembersInjector<A<C>>>() {})
-              .toProvider(Providers.<MembersInjector<A<C>>>of(null));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(new TypeLiteral<MembersInjector<A<C>>>() {})
+                  .toProvider(Providers.<MembersInjector<A<C>>>of(null));
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
@@ -217,11 +233,14 @@ public class MembersInjectorTest extends TestCase {
   }
 
   public void testLookupMembersInjectorBinding() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(C.class).toInstance(myFavouriteC);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(C.class).toInstance(myFavouriteC);
+              }
+            });
     MembersInjector<A<C>> membersInjector =
         injector.getInstance(new Key<MembersInjector<A<C>>>() {});
 

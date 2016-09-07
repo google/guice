@@ -44,6 +44,7 @@ public final class MembersInjectorLookup<T> implements Element {
     this.type = checkNotNull(type, "type");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
@@ -55,6 +56,7 @@ public final class MembersInjectorLookup<T> implements Element {
     return type;
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
@@ -69,6 +71,7 @@ public final class MembersInjectorLookup<T> implements Element {
     this.delegate = checkNotNull(delegate, "delegate");
   }
 
+  @Override
   public void applyTo(Binder binder) {
     initializeDelegate(binder.withSource(getSource()).getMembersInjector(type));
   }
@@ -89,13 +92,18 @@ public final class MembersInjectorLookup<T> implements Element {
    */
   public MembersInjector<T> getMembersInjector() {
     return new MembersInjector<T>() {
+      @Override
       public void injectMembers(T instance) {
-        checkState(delegate != null,
-            "This MembersInjector cannot be used until the Injector has been created.");
-        delegate.injectMembers(instance);
+        MembersInjector<T> local = delegate;
+        if (local == null) {
+          throw new IllegalStateException(
+              "This MembersInjector cannot be used until the Injector has been created.");
+        }
+        local.injectMembers(instance);
       }
 
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return "MembersInjector<" + type + ">";
       }
     };

@@ -64,10 +64,12 @@ public final class PrivateElementsImpl implements PrivateElements {
     this.source = checkNotNull(source, "source");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
+  @Override
   public List<Element> getElements() {
     if (elements == null) {
       elements = ImmutableList.copyOf(elementsMutable);
@@ -77,6 +79,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     return elements;
   }
 
+  @Override
   public Injector getInjector() {
     return injector;
   }
@@ -86,6 +89,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     this.injector = checkNotNull(injector, "injector");
   }
 
+  @Override
   public Set<Key<?>> getExposedKeys() {
     if (exposedKeysToSources == null) {
       Map<Key<?>, Object> exposedKeysToSourcesMutable = Maps.newLinkedHashMap();
@@ -99,6 +103,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     return exposedKeysToSources.keySet();
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
@@ -111,6 +116,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     exposureBuilders.add(exposureBuilder);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     PrivateBinder privateBinder = binder.withSource(source).newPrivateBinder();
 
@@ -124,6 +130,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     }
   }
 
+  @Override
   public Object getExposedSource(Key<?> key) {
     getExposedKeys(); // ensure exposedKeysToSources is populated
     Object source = exposedKeysToSources.get(key);

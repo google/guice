@@ -311,17 +311,23 @@ public class MultibinderTest extends TestCase {
   }
 
   public void testMultibinderSetIsLazy() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), Integer.class)
-            .addBinding().toProvider(new Provider<Integer>() {
-          int nextValue = 1;
-          public Integer get() {
-            return nextValue++;
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder.newSetBinder(binder(), Integer.class)
+                .addBinding()
+                .toProvider(
+                    new Provider<Integer>() {
+                      int nextValue = 1;
+
+                      @Override
+                      public Integer get() {
+                        return nextValue++;
+                      }
+                    });
           }
-        });
-      }
-    };
+        };
     Injector injector = Guice.createInjector(module);
 
     assertEquals(setOf(1), injector.getInstance(Key.get(setOfInteger)));
@@ -785,12 +791,14 @@ public class MultibinderTest extends TestCase {
   }
 
   private static class AStringProvider implements Provider<String> {
+    @Override
     public String get() {
       return "A";
     }
   }
 
   private static class BStringProvider implements Provider<String> {
+    @Override
     public String get() {
       return "B";
     }

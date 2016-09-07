@@ -401,57 +401,70 @@ public class JitBindingsTest extends TestCase {
 
   public void testPrivateModulesInheritOptions() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          binder().requireExplicitBindings();
-          bind(Foo.class).to(FooImpl.class);
-  
-          install(new PrivateModule() {
-            public void configure() {
-              bind(FooBar.class);
-              expose(FooBar.class);
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              binder().requireExplicitBindings();
+              bind(Foo.class).to(FooImpl.class);
+
+              install(
+                  new PrivateModule() {
+                    @Override
+                    public void configure() {
+                      bind(FooBar.class);
+                      expose(FooBar.class);
+                    }
+                  });
             }
           });
-        }
-      });
       fail("should have failed");
     } catch(CreationException expected) {
       assertContains(expected.getMessage(), jitFailed(Bar.class));
       assertEquals(1, expected.getErrorMessages().size());
     }
     
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        binder().requireExplicitBindings();
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder().requireExplicitBindings();
 
-        install(new PrivateModule() {
-          public void configure() {
-            bind(Foo.class).to(FooImpl.class);
-            expose(Foo.class);
-          }
-        });
-      }
-    });
+                install(
+                    new PrivateModule() {
+                      @Override
+                      public void configure() {
+                        bind(Foo.class).to(FooImpl.class);
+                        expose(Foo.class);
+                      }
+                    });
+              }
+            });
     ensureInChild(injector, FooImpl.class);
   }
   
   public void testPrivateModuleAddsOption() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Foo.class).to(FooImpl.class);
-  
-          // Fails because FooBar is in the private module,
-          // and it wants Bar, but Bar would be JIT.
-          install(new PrivateModule() {
-            public void configure() {
-              binder().requireExplicitBindings();
-              bind(FooBar.class);
-              expose(FooBar.class);
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Foo.class).to(FooImpl.class);
+
+              // Fails because FooBar is in the private module,
+              // and it wants Bar, but Bar would be JIT.
+              install(
+                  new PrivateModule() {
+                    @Override
+                    public void configure() {
+                      binder().requireExplicitBindings();
+                      bind(FooBar.class);
+                      expose(FooBar.class);
+                    }
+                  });
             }
           });
-        }
-      });
       fail("should have failed");
     } catch(CreationException expected) {
       assertContains(expected.getMessage(), jitFailed(Bar.class));
@@ -460,27 +473,33 @@ public class JitBindingsTest extends TestCase {
   }
 
   public void testPrivateModuleSiblingsDontShareOption() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).to(FooImpl.class);
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Foo.class).to(FooImpl.class);
 
-        install(new PrivateModule() {
-          public void configure() {
-            binder().requireExplicitBindings();
+            install(
+                new PrivateModule() {
+                  @Override
+                  public void configure() {
+                    binder().requireExplicitBindings();
+                  }
+                });
+
+            // This works, even though Bar is JIT,
+            // because the requireExplicitBindings isn't shared
+            // between sibling private modules.
+            install(
+                new PrivateModule() {
+                  @Override
+                  public void configure() {
+                    bind(FooBar.class);
+                    expose(FooBar.class);
+                  }
+                });
           }
         });
-
-        // This works, even though Bar is JIT,
-        // because the requireExplicitBindings isn't shared
-        // between sibling private modules.
-        install(new PrivateModule() {
-          public void configure() {
-            bind(FooBar.class);
-            expose(FooBar.class);
-          }
-        });
-      }
-    });
   }  
 
   public void testTypeLiteralsCanBeInjected() {
@@ -696,6 +715,7 @@ public class JitBindingsTest extends TestCase {
     @SuppressWarnings("unused") @Inject Provider<Bar> bar;
   }
   private static class FooProvider implements Provider<Foo> {
+    @Override
     public Foo get() {
       return new FooImpl();
     }
@@ -713,6 +733,7 @@ public class JitBindingsTest extends TestCase {
   @ProvidedBy(ProvByProvider.class)
   private static interface ProvBy {}
   private static class ProvByProvider implements Provider<ProvBy> {
+    @Override
     public ProvBy get() {
       return new ProvBy() {};
     }

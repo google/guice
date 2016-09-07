@@ -54,19 +54,24 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
     provisionCallback = listener;
   }
   
+  @Override
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     providerBinding =
         injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
       throws ErrorsException {
-    checkState(providerBinding != null, "not initialized");
-    
-    context.pushState(providerKey, providerBinding.getSource());
+    BindingImpl<? extends Provider<T>> localProviderBinding = providerBinding;
+    if (localProviderBinding == null) {
+      throw new IllegalStateException("not initialized");
+    }
+    Key<? extends Provider<T>> localProviderKey = providerKey;
+    context.pushState(localProviderKey, localProviderBinding.getSource());
     try {
-      errors = errors.withSource(providerKey);
-      Provider<? extends T> provider = providerBinding.getInternalFactory().get(
+      errors = errors.withSource(localProviderKey);
+      Provider<? extends T> provider = localProviderBinding.getInternalFactory().get(
           errors, context, dependency, true);
       return circularGet(provider, errors, context, dependency, provisionCallback);
     } finally {

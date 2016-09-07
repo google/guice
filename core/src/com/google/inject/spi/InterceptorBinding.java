@@ -59,6 +59,7 @@ public final class InterceptorBinding implements Element {
     this.interceptors = ImmutableList.copyOf(interceptors);
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
@@ -75,10 +76,12 @@ public final class InterceptorBinding implements Element {
     return interceptors;
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).bindInterceptor(classMatcher, methodMatcher,
         interceptors.toArray(new MethodInterceptor[interceptors.size()]));

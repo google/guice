@@ -60,43 +60,50 @@ public class ContinuingRequestIntegrationTest extends TestCase {
   private static final String PARAM_NAME = "hi";
 
   private final AtomicBoolean failed = new AtomicBoolean(false);
-  private final AbstractExecutorService sameThreadExecutor = new AbstractExecutorService() {
-    public void shutdown() {
-    }
+  private final AbstractExecutorService sameThreadExecutor =
+      new AbstractExecutorService() {
+        @Override
+        public void shutdown() {}
 
-    public List<Runnable> shutdownNow() {
-      return ImmutableList.of();
-    }
+        @Override
+        public List<Runnable> shutdownNow() {
+          return ImmutableList.of();
+        }
 
-    public boolean isShutdown() {
-      return true;
-    }
+        @Override
+        public boolean isShutdown() {
+          return true;
+        }
 
-    public boolean isTerminated() {
-      return true;
-    }
+        @Override
+        public boolean isTerminated() {
+          return true;
+        }
 
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-      return true;
-    }
+        @Override
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+          return true;
+        }
 
-    public void execute(Runnable command) {
-      command.run();
-    }
+        @Override
+        public void execute(Runnable command) {
+          command.run();
+        }
 
-    @Override public <T> Future<T> submit(Callable<T> task) {
-      try {
-        task.call();
-        fail();
-      } catch (Exception e) {
-        // Expected.
-        assertTrue(e instanceof IllegalStateException);
-        failed.set(true);
-      }
+        @Override
+        public <T> Future<T> submit(Callable<T> task) {
+          try {
+            task.call();
+            fail();
+          } catch (Exception e) {
+            // Expected.
+            assertTrue(e instanceof IllegalStateException);
+            failed.set(true);
+          }
 
-      return null;
-    }
-  };
+          return null;
+        }
+      };
 
   private ExecutorService executor;
   private Injector injector;
@@ -223,6 +230,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     public String value;
 
+    @Override
     public String call() throws Exception {
       assertNull(response.get());
 

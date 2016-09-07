@@ -54,6 +54,7 @@ class JpaFinderProxy implements MethodInterceptor {
     this.emProvider = emProvider;
   }
 
+  @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
     EntityManager em = emProvider.get();
 

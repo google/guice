@@ -23,10 +23,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -105,6 +103,7 @@ public class RequestInjectionTest extends TestCase {
           requestInjection(new NeedsRunnable());
         }
       });
+      fail("Expected CreationException");
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) No implementation for java.lang.Runnable was bound",
@@ -114,17 +113,21 @@ public class RequestInjectionTest extends TestCase {
 
   public void testInjectionErrorOnInjectedMembers() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override
-        protected void configure() {
-          bind(Runnable.class).toProvider(new Provider<Runnable>() {
-            public Runnable get() {
-              throw new UnsupportedOperationException();
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Runnable.class)
+                  .toProvider(
+                      new Provider<Runnable>() {
+                        @Override
+                        public Runnable get() {
+                          throw new UnsupportedOperationException();
+                        }
+                      });
+              requestInjection(new NeedsRunnable());
             }
           });
-          requestInjection(new NeedsRunnable());
-        }
-      });
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Error in custom provider, java.lang.UnsupportedOperationException",

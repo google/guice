@@ -167,7 +167,7 @@ public class ExtensionSpiTest extends TestCase {
     }
   }
 
-  public class Module extends AbstractModule{
+  public static class Module extends AbstractModule {
     @Override
     protected void configure() {
       bind(String.class).annotatedWith(named("catName1")).toInstance("kitty1");
@@ -181,8 +181,8 @@ public class ExtensionSpiTest extends TestCase {
     }
   }
 
-  public class AssistedInjectSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
-      implements AssistedInjectTargetVisitor<Object, Integer>  {
+  public static class AssistedInjectSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
+      implements AssistedInjectTargetVisitor<Object, Integer> {
 
     private final Set<Class> allowedClasses = 
       ImmutableSet.<Class> of(
@@ -193,6 +193,7 @@ public class ExtensionSpiTest extends TestCase {
     private int currentCount = 0;
     private List<AssistedInjectBinding<?>> assistedInjectBindings = Lists.newArrayList();
 
+    @Override
     public Integer visit(AssistedInjectBinding assistedInjectBinding) {
       assistedInjectBindings.add(assistedInjectBinding);
       assistedBindingCount++;

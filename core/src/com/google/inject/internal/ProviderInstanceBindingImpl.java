@@ -53,6 +53,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
     this.providerInstance = providerInstance;
   }
 
+  @Override
   @SuppressWarnings("unchecked") // the extension type is always consistent with the provider type
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     if(providerInstance instanceof ProviderWithExtensionVisitor) {
@@ -67,30 +68,36 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
     return Providers.guicify(providerInstance);
   }
   
+  @Override
   public javax.inject.Provider<? extends T> getUserSuppliedProvider() {
     return providerInstance;
   }
 
+  @Override
   public Set<InjectionPoint> getInjectionPoints() {
     return injectionPoints;
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return providerInstance instanceof HasDependencies
         ? ImmutableSet.copyOf(((HasDependencies) providerInstance).getDependencies())
         : Dependency.forInjectionPoints(injectionPoints);
   }
 
+  @Override
   public BindingImpl<T> withScoping(Scoping scoping) {
     return new ProviderInstanceBindingImpl<T>(
         getSource(), getKey(), scoping, injectionPoints, providerInstance);
   }
 
+  @Override
   public BindingImpl<T> withKey(Key<T> key) {
     return new ProviderInstanceBindingImpl<T>(
         getSource(), key, getScoping(), injectionPoints, providerInstance);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     getScoping().applyTo(
         binder.withSource(getSource()).bind(getKey()).toProvider(getUserSuppliedProvider()));

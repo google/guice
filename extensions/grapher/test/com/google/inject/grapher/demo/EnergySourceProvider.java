@@ -26,6 +26,7 @@ class EnergySourceProvider implements Provider<EnergySource> {
   // This will demonstrate a ConvertedConstantBinding.
   @Inject void setYear(@Named("year") int year) {}
   
+  @Override
   public EnergySource get() {
     return null;
   }

@@ -31,12 +31,15 @@ public class IntegrationTest extends TestCase {
   public void testIntegration() throws CreationException {
     final CountingInterceptor counter = new CountingInterceptor();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class);
-        bindInterceptor(any(), any(), counter);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class);
+                bindInterceptor(any(), any(), counter);
+              }
+            });
 
     Foo foo = injector.getInstance(Key.get(Foo.class));
     foo.foo();
@@ -60,6 +63,7 @@ public class IntegrationTest extends TestCase {
 
     int count;
 
+    @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       count++;
       return methodInvocation.proceed();

@@ -39,9 +39,10 @@ public interface Service {
 
 @Singleton
 public static class ServiceImpl implements ClientServiceWithGuiceDefaults.Service {
-  public void go() {
-    // ...
-  }
+    @Override
+    public void go() {
+      // ...
+    }
 }
 
 public static class Client {
@@ -69,7 +70,8 @@ public static class MockService implements Service {
 
   private boolean gone = false;
 
-  public void go() {
+    @Override
+    public void go() {
     gone = true;
   }
 

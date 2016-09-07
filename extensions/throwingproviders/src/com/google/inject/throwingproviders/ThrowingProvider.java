@@ -36,5 +36,6 @@ package com.google.inject.throwingproviders;
  */
 @Deprecated
 public interface ThrowingProvider<T,E extends Exception> extends CheckedProvider<T> {
+  @Override
   T get() throws E;
 }

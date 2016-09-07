@@ -364,6 +364,7 @@ public class DuplicateBindingsTest extends TestCase {
       super(foo, pFoo, pclFoo, clFoo, cFoo);
     }
     
+    @Override
     protected void configure() {
       // InstanceBinding
       bind(Foo.class).toInstance(foo);
@@ -413,6 +414,7 @@ public class DuplicateBindingsTest extends TestCase {
       super(foo, pFoo, pclFoo, clFoo, cFoo);
     }
     
+    @Override
     protected void configure() {
       // InstanceBinding
       bind(Foo.class).annotatedWith(named("instance")).toInstance(foo);
@@ -449,6 +451,7 @@ public class DuplicateBindingsTest extends TestCase {
       this.scope = scope;
     }
     
+    @Override
     protected void configure() {
       // ProviderInstanceBinding
       bind(Foo.class).annotatedWith(named("pInstance")).toProvider(pFoo).in(scope);
@@ -478,6 +481,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
     
     
+    @Override
     protected void configure() {
       // ProviderInstanceBinding
       bind(Foo.class).annotatedWith(named("pInstance")).toProvider(pFoo).in(scope);
@@ -511,6 +515,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }  
   private static class FooProvider implements Provider<Foo> {
+    @Override
     public Foo get() {
       return new FooImpl();
     }
@@ -530,6 +535,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }  
   private static class BarProvider implements Provider<Foo> {
+    @Override
     public Foo get() {
       return new Bar();
     }
@@ -568,6 +574,7 @@ public class DuplicateBindingsTest extends TestCase {
       }
     }
     
+    @Override
     public Object get() {
       return new Object();
     }

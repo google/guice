@@ -36,6 +36,7 @@ public final class ModuleAnnotatedMethodScannerBinding implements Element {
     this.scanner = checkNotNull(scanner, "scanner");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
@@ -44,10 +45,12 @@ public final class ModuleAnnotatedMethodScannerBinding implements Element {
     return scanner;
   }
   
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).scanModulesForAnnotatedMethods(scanner);
   }

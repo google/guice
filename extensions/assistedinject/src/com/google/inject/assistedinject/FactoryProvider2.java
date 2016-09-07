@@ -93,27 +93,33 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   static final Logger logger = Logger.getLogger(AssistedInject.class.getName());
 
   /** if a factory method parameter isn't annotated, it gets this annotation. */
-  static final Assisted DEFAULT_ANNOTATION = new Assisted() {
-    public String value() {
-      return "";
-    }
+  static final Assisted DEFAULT_ANNOTATION =
+      new Assisted() {
+        @Override
+        public String value() {
+          return "";
+        }
 
-    public Class<? extends Annotation> annotationType() {
-      return Assisted.class;
-    }
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return Assisted.class;
+        }
 
-    @Override public boolean equals(Object o) {
-      return o instanceof Assisted && ((Assisted) o).value().isEmpty();
-    }
+        @Override
+        public boolean equals(Object o) {
+          return o instanceof Assisted && ((Assisted) o).value().isEmpty();
+        }
 
-    @Override public int hashCode() {
-      return 127 * "value".hashCode() ^ "".hashCode();
-    }
+        @Override
+        public int hashCode() {
+          return 127 * "value".hashCode() ^ "".hashCode();
+        }
 
-    @Override public String toString() {
-      return "@" + Assisted.class.getName() + "(value=)";
-    }
-  };
+        @Override
+        public String toString() {
+          return "@" + Assisted.class.getName() + "(value=)";
+        }
+      };
 
   /** All the data necessary to perform an assisted inject. */
   private static class AssistData implements AssistedMethod {
@@ -167,18 +173,22 @@ final class FactoryProvider2 <F> implements InvocationHandler,
         .toString();
     }
 
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return dependencies;
     }
 
+    @Override
     public Method getFactoryMethod() {
       return factoryMethod;
     }
 
+    @Override
     public Constructor<?> getImplementationConstructor() {
       return constructor;
     }
 
+    @Override
     public TypeLiteral<?> getImplementationType() {
       return implementationType;
     }
@@ -397,10 +407,12 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     return true;
   }
 
+  @Override
   public F get() {
     return factory;
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     Set<Dependency<?>> combinedDeps = new HashSet<Dependency<?>>();
     for(AssistData data : assistDataByMethod.values()) {
@@ -409,20 +421,23 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     return ImmutableSet.copyOf(combinedDeps);
   }
   
+  @Override
   public Key<F> getKey() {
     return factoryKey;
   }
 
   // Safe cast because values are typed to AssistedData, which is an AssistedMethod, and
   // the collection is immutable.
+  @Override
   @SuppressWarnings("unchecked")
   public Collection<AssistedMethod> getAssistedMethods() {
     return (Collection<AssistedMethod>) (Collection<?>) assistDataByMethod.values();
   }
 
+  @Override
   @SuppressWarnings("unchecked")
-  public <T, V> V acceptExtensionVisitor(BindingTargetVisitor<T, V> visitor,
-      ProviderInstanceBinding<? extends T> binding) {
+  public <T, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<T, V> visitor, ProviderInstanceBinding<? extends T> binding) {
     if (visitor instanceof AssistedInjectTargetVisitor) {
       return ((AssistedInjectTargetVisitor<T, V>)visitor).visit((AssistedInjectBinding<T>)this);
     }
@@ -742,6 +757,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    * When a factory method is invoked, we create a child injector that binds all parameters, then
    * use that to get an instance of the return type.
    */
+  @Override
   public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
     // If we setup a method handle earlier for this method, call it.
     // This is necessary for default methods that java8 creates, so we

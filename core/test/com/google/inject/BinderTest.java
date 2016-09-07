@@ -28,9 +28,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Date;
@@ -39,6 +36,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -72,15 +70,20 @@ public class BinderTest extends TestCase {
   }
 
   public void testProviderFromBinder() {
-    Guice.createInjector(new Module() {
-      public void configure(Binder binder) {
-        fooProvider = binder.getProvider(Foo.class);
+    Guice.createInjector(
+        new Module() {
+          @Override
+          public void configure(Binder binder) {
+            fooProvider = binder.getProvider(Foo.class);
 
-        try {
-          fooProvider.get();
-        } catch (IllegalStateException e) { /* expected */ }
-      }
-    });
+            try {
+              fooProvider.get();
+              fail();
+            } catch (IllegalStateException e) {
+              /* expected */
+            }
+          }
+        });
 
     assertNotNull(fooProvider.get());
   }
@@ -89,38 +92,49 @@ public class BinderTest extends TestCase {
 
   public void testMissingBindings() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override
-        public void configure() {
-          getProvider(Runnable.class);
-          bind(Comparator.class);
-          requireBinding(Key.get(new TypeLiteral<Callable<String>>() {}));
-          bind(Date.class).annotatedWith(Names.named("date"));
-        }
-      });
+      Guice.createInjector(
+          // We put each binding in a separate module so the order of the error messages doesn't
+          // depend on line numbers
+          new AbstractModule() {
+            @Override
+            public void configure() {
+              getProvider(Runnable.class);
+            }
+          },
+          new AbstractModule() {
+            @Override
+            public void configure() {
+              bind(Comparator.class);
+            }
+          },
+          new AbstractModule() {
+            @Override
+            public void configure() {
+              requireBinding(Key.get(new TypeLiteral<Callable<String>>() {}));
+            }
+          },
+          new AbstractModule() {
+            @Override
+            public void configure() {
+              bind(Date.class).annotatedWith(Names.named("date"));
+            }
+          });
+      fail("Expected CreationException");
     } catch (CreationException e) {
       assertEquals(4, e.getErrorMessages().size());
-      String segment1 = "No implementation for " + Comparator.class.getName() + " was bound.";
-      String segment2 = "No implementation for java.util.Date annotated with @"
-          + Named.class.getName() + "(value=date) was bound.";
-      String segment3 = "No implementation for java.lang.Runnable was bound.";
-      String segment4 = " No implementation for java.util.concurrent.Callable<java.lang.String> was"
+      String segment1 = "No implementation for java.lang.Runnable was bound.";
+      String segment2 = "No implementation for " + Comparator.class.getName() + " was bound.";
+      String segment3 = "No implementation for java.util.concurrent.Callable<java.lang.String> was"
           + " bound.";
+      String segment4 = "No implementation for java.util.Date annotated with @"
+          + Named.class.getName() + "(value=date) was bound.";
       String atSegment = "at " + getClass().getName();
       String sourceFileName = getDeclaringSourcePart(getClass());
-      if (isIncludeStackTraceOff()) {
-        assertContains(e.getMessage(),
-            segment1, atSegment, sourceFileName,
-            segment2, atSegment, sourceFileName,
-            segment3, atSegment, sourceFileName,
-            segment4, atSegment, sourceFileName);
-      } else {
-        assertContains(e.getMessage(),
-            segment3, atSegment, sourceFileName,
-            segment1, atSegment, sourceFileName,
-            segment4, atSegment, sourceFileName,
-            segment2, atSegment, sourceFileName);
-      }
+      assertContains(e.getMessage(),
+          segment1, atSegment, sourceFileName,
+          segment2, atSegment, sourceFileName,
+          segment3, atSegment, sourceFileName,
+          segment4, atSegment, sourceFileName);
     }
   }
 
@@ -132,6 +146,7 @@ public class BinderTest extends TestCase {
           bind(NeedsRunnable.class);
         }
       });
+      fail("Expected CreationException");
     } catch (CreationException e) {
       assertEquals(1, e.getErrorMessages().size());
       assertContains(e.getMessage(),
@@ -563,6 +578,7 @@ public class BinderTest extends TestCase {
   interface HasProvidedBy1 {}
 
   static class HasProvidedBy1Provider implements Provider<HasProvidedBy1> {
+    @Override
     public HasProvidedBy1 get() {
       return new HasProvidedBy1() {};
     }
@@ -577,6 +593,7 @@ public class BinderTest extends TestCase {
   static class HasProvidedBy2 {}
 
   static class HasProvidedBy2Provider implements Provider<HasProvidedBy2> {
+    @Override
     public HasProvidedBy2 get() {
       return new HasProvidedBy2() {};
     }

@@ -37,6 +37,7 @@ import javax.persistence.EntityManagerFactory;
 public class EntityManagerProvisionTest extends TestCase {
   private Injector injector;
 
+  @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -44,6 +45,7 @@ public class EntityManagerProvisionTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
+  @Override
   public final void tearDown() {
     injector.getInstance(EntityManagerFactory.class).close();
   }

@@ -67,6 +67,7 @@ final class CheckedProviderMethodsModule implements Module {
     return new CheckedProviderMethodsModule(module);
   }
   
+  @Override
   public synchronized void configure(Binder binder) {
     for (CheckedProviderMethod<?> throwingProviderMethod : getProviderMethods(binder)) {
       throwingProviderMethod.configure(binder);
@@ -151,6 +152,7 @@ final class CheckedProviderMethodsModule implements Module {
       this.name = method.getDeclaringClass().getName() + "." + method.getName();
     }
     
+    @Override
     public Logger get() {
       return Logger.getLogger(name);
     }

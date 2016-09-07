@@ -77,6 +77,7 @@ public class CompositeService {
     final List<Key<? extends Service>> services = ImmutableList.copyOf(this.services);
 
     return new Service() {
+      @Override
       public Future<State> start() {
         final List<Future<State>> tasks = Lists.newArrayList();
         for (Key<? extends Service> service : services) {
@@ -86,6 +87,7 @@ public class CompositeService {
         return futureGet(tasks, State.STARTED);
       }
 
+      @Override
       public Future<State> stop() {
         final List<Future<State>> tasks = Lists.newArrayList();
         for (Key<? extends Service> service : services) {
@@ -95,6 +97,7 @@ public class CompositeService {
         return futureGet(tasks, State.STOPPED);
       }
 
+      @Override
       public State state() {
         return compositeState;
       }
@@ -103,21 +106,23 @@ public class CompositeService {
 
   private FutureTask<Service.State> futureGet(final List<Future<Service.State>> tasks,
       final Service.State state) {
-    return new FutureTask<Service.State>(new Callable<Service.State>() {
-      public Service.State call() {
-        boolean ok = true;
-        for (Future<Service.State> task : tasks) {
-          try {
-            ok = state == task.get();
-          } catch (InterruptedException e) {
-            return compositeState = Service.State.FAILED;
-          } catch (ExecutionException e) {
-            return compositeState = Service.State.FAILED;
-          }
-        }
+    return new FutureTask<Service.State>(
+        new Callable<Service.State>() {
+          @Override
+          public Service.State call() {
+            boolean ok = true;
+            for (Future<Service.State> task : tasks) {
+              try {
+                ok = state == task.get();
+              } catch (InterruptedException e) {
+                return compositeState = Service.State.FAILED;
+              } catch (ExecutionException e) {
+                return compositeState = Service.State.FAILED;
+              }
+            }
 
-        return compositeState = ok ? state : Service.State.FAILED;
-      }
-    });
+            return compositeState = ok ? state : Service.State.FAILED;
+          }
+        });
   }
 }

@@ -64,42 +64,48 @@ public class ThrowingProviderTest extends TestCase {
       = new TypeLiteral<RemoteProvider<String>>() { };
   private final MockRemoteProvider<String> mockRemoteProvider = new MockRemoteProvider<String>();
   private final TestScope testScope = new TestScope();
-  private Injector bindInjector = Guice.createInjector(new AbstractModule() {
-    protected void configure() {
-      ThrowingProviderBinder.create(binder())
-          .bind(RemoteProvider.class, String.class)
-          .to(mockRemoteProvider)
-          .in(testScope);
-      
-      ThrowingProviderBinder.create(binder())
-        .bind(RemoteProvider.class, String.class)
-        .annotatedWith(NotExceptionScoping.class)
-        .scopeExceptions(false)
-        .to(mockRemoteProvider)
-        .in(testScope);
-    }
-  });
-  private Injector providesInjector = Guice.createInjector(new AbstractModule() {
-    protected void configure() {
-      install(ThrowingProviderBinder.forModule(this));
-     bindScope(TestScope.Scoped.class, testScope);
-    }
-    
-    @SuppressWarnings("unused")
-    @CheckedProvides(RemoteProvider.class)
-    @TestScope.Scoped
-    String throwOrGet() throws RemoteException {
-      return mockRemoteProvider.get();
-    }
-    
-    @SuppressWarnings("unused")
-    @CheckedProvides(value = RemoteProvider.class, scopeExceptions = false)
-    @NotExceptionScoping
-    @TestScope.Scoped
-    String notExceptionScopingThrowOrGet() throws RemoteException {
-      return mockRemoteProvider.get();
-    }    
-  });
+  private Injector bindInjector =
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              ThrowingProviderBinder.create(binder())
+                  .bind(RemoteProvider.class, String.class)
+                  .to(mockRemoteProvider)
+                  .in(testScope);
+
+              ThrowingProviderBinder.create(binder())
+                  .bind(RemoteProvider.class, String.class)
+                  .annotatedWith(NotExceptionScoping.class)
+                  .scopeExceptions(false)
+                  .to(mockRemoteProvider)
+                  .in(testScope);
+            }
+          });
+  private Injector providesInjector =
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+              bindScope(TestScope.Scoped.class, testScope);
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(RemoteProvider.class)
+            @TestScope.Scoped
+            String throwOrGet() throws RemoteException {
+              return mockRemoteProvider.get();
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(value = RemoteProvider.class, scopeExceptions = false)
+            @NotExceptionScoping
+            @TestScope.Scoped
+            String notExceptionScopingThrowOrGet() throws RemoteException {
+              return mockRemoteProvider.get();
+            }
+          });
 
   public void testExceptionsThrown_Bind() {
     tExceptionsThrown(bindInjector);
@@ -216,42 +222,48 @@ public class ThrowingProviderTest extends TestCase {
   public void testAnnotations_Bind() throws RemoteException {
     final MockRemoteProvider<String> mockRemoteProviderA = new MockRemoteProvider<String>();
     final MockRemoteProvider<String> mockRemoteProviderB = new MockRemoteProvider<String>();
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, String.class)
-            .annotatedWith(Names.named("a"))
-            .to(mockRemoteProviderA);
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, String.class)
+                    .annotatedWith(Names.named("a"))
+                    .to(mockRemoteProviderA);
 
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, String.class)
-            .to(mockRemoteProviderB);
-      }
-    });
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, String.class)
+                    .to(mockRemoteProviderB);
+              }
+            });
     tAnnotations(bindInjector, mockRemoteProviderA, mockRemoteProviderB);
   }
   
   public void testAnnotations_Provides() throws RemoteException {
     final MockRemoteProvider<String> mockRemoteProviderA = new MockRemoteProvider<String>();
     final MockRemoteProvider<String> mockRemoteProviderB = new MockRemoteProvider<String>();
-    providesInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
-       }
-       
-       @SuppressWarnings("unused")
-       @CheckedProvides(RemoteProvider.class)
-       @Named("a")
-       String throwOrGet() throws RemoteException {
-         return mockRemoteProviderA.get();
-       }
-       
-       @SuppressWarnings("unused")
-       @CheckedProvides(RemoteProvider.class)
-       String throwOrGet2() throws RemoteException {
-         return mockRemoteProviderB.get();
-       }
-    });
+    providesInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(ThrowingProviderBinder.forModule(this));
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(RemoteProvider.class)
+              @Named("a")
+              String throwOrGet() throws RemoteException {
+                return mockRemoteProviderA.get();
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(RemoteProvider.class)
+              String throwOrGet2() throws RemoteException {
+                return mockRemoteProviderB.get();
+              }
+            });
     tAnnotations(providesInjector, mockRemoteProviderA, mockRemoteProviderB);
   }
   
@@ -299,13 +311,16 @@ public class ThrowingProviderTest extends TestCase {
     final SubMockRemoteProvider aProvider = new SubMockRemoteProvider();
     aProvider.setNextToReturn("A");
 
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, String.class)
-            .to(aProvider);
-      }
-    });
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, String.class)
+                    .to(aProvider);
+              }
+            });
 
     assertEquals("A",
         bindInjector.getInstance(Key.get(remoteProviderOfString)).get());
@@ -315,13 +330,15 @@ public class ThrowingProviderTest extends TestCase {
 
   public void testBindingToNonInterfaceType_Bind() throws RemoteException {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          ThrowingProviderBinder.create(binder())
-              .bind(MockRemoteProvider.class, String.class)
-              .to(mockRemoteProvider);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              ThrowingProviderBinder.create(binder())
+                  .bind(MockRemoteProvider.class, String.class)
+                  .to(mockRemoteProvider);
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertEquals(MockRemoteProvider.class.getName() + " must be an interface",
@@ -331,17 +348,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testBindingToNonInterfaceType_Provides() throws RemoteException {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-          
-        @SuppressWarnings("unused")
-        @CheckedProvides(MockRemoteProvider.class)
-        String foo() {
-          return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(MockRemoteProvider.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertEquals(MockRemoteProvider.class.getName() + " must be an interface",
@@ -351,12 +370,15 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testBindingToSubSubInterface_Bind() throws RemoteException {
     try {
-      bindInjector = Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          ThrowingProviderBinder.create(binder())
-              .bind(SubRemoteProvider.class, String.class);
-        }
-      });
+      bindInjector =
+          Guice.createInjector(
+              new AbstractModule() {
+                @Override
+                protected void configure() {
+                  ThrowingProviderBinder.create(binder())
+                      .bind(SubRemoteProvider.class, String.class);
+                }
+              });
       fail();
     } catch (CreationException expected) {
       assertEquals(SubRemoteProvider.class.getName() + " must extend CheckedProvider (and only CheckedProvider)",
@@ -366,17 +388,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testBindingToSubSubInterface_Provides() throws RemoteException {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-          
-        @SuppressWarnings("unused")
-        @CheckedProvides(SubRemoteProvider.class)
-        String foo() {
-          return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(SubRemoteProvider.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertEquals(SubRemoteProvider.class.getName() + " must extend CheckedProvider (and only CheckedProvider)",
@@ -388,12 +412,15 @@ public class ThrowingProviderTest extends TestCase {
 
   public void testBindingToInterfaceWithExtraMethod_Bind() throws RemoteException {
     try {
-      bindInjector = Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          ThrowingProviderBinder.create(binder())
-              .bind(RemoteProviderWithExtraMethod.class, String.class);
-        }
-      });
+      bindInjector =
+          Guice.createInjector(
+              new AbstractModule() {
+                @Override
+                protected void configure() {
+                  ThrowingProviderBinder.create(binder())
+                      .bind(RemoteProviderWithExtraMethod.class, String.class);
+                }
+              });
       fail();
     } catch (CreationException expected) {
       assertEquals(RemoteProviderWithExtraMethod.class.getName() + " may not declare any new methods, but declared " 
@@ -404,17 +431,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testBindingToInterfaceWithExtraMethod_Provides() throws RemoteException {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-          
-        @SuppressWarnings("unused")
-        @CheckedProvides(RemoteProviderWithExtraMethod.class)
-        String foo() {
-          return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(RemoteProviderWithExtraMethod.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertEquals(RemoteProviderWithExtraMethod.class.getName() + " may not declare any new methods, but declared " 
@@ -424,17 +453,20 @@ public class ThrowingProviderTest extends TestCase {
   }
   
   public void testDependencies_Bind() {
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("Foo");
-        bind(Integer.class).toInstance(5);
-        bind(Double.class).toInstance(5d);
-        bind(Long.class).toInstance(5L);
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, String.class)
-            .to(DependentRemoteProvider.class);
-      }
-    });
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("Foo");
+                bind(Integer.class).toInstance(5);
+                bind(Double.class).toInstance(5d);
+                bind(Long.class).toInstance(5L);
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, String.class)
+                    .to(DependentRemoteProvider.class);
+              }
+            });
     
     HasDependencies hasDependencies =
         (HasDependencies)bindInjector.getBinding(Key.get(remoteProviderOfString));
@@ -446,33 +478,39 @@ public class ThrowingProviderTest extends TestCase {
         Iterables.getOnlyElement(hasDependencies.getDependencies()));
     // And make sure DependentRemoteProvider has the proper dependencies.
     hasDependencies = (HasDependencies)bindInjector.getBinding(DependentRemoteProvider.class);
-    Set<Key<?>> dependencyKeys = ImmutableSet.copyOf(
-        Iterables.transform(hasDependencies.getDependencies(),
-          new Function<Dependency<?>, Key<?>>() {
-            public Key<?> apply(Dependency<?> from) {
-              return from.getKey();
-            }
-          }));
+    Set<Key<?>> dependencyKeys =
+        ImmutableSet.copyOf(
+            Iterables.transform(
+                hasDependencies.getDependencies(),
+                new Function<Dependency<?>, Key<?>>() {
+                  @Override
+                  public Key<?> apply(Dependency<?> from) {
+                    return from.getKey();
+                  }
+                }));
     assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class), Key.get(Integer.class),
         Key.get(Long.class), Key.get(Double.class)), dependencyKeys);
   }
   
   public void testDependencies_Provides() {
-    providesInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("Foo");
-        bind(Integer.class).toInstance(5);
-        bind(Double.class).toInstance(5d);
-        bind(Long.class).toInstance(5L);
-        install(ThrowingProviderBinder.forModule(this));
-      }
-      
-      @SuppressWarnings("unused")
-      @CheckedProvides(RemoteProvider.class)
-      String foo(String s, Integer i, Double d, Long l) {
-        return null;
-      }
-    });
+    providesInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("Foo");
+                bind(Integer.class).toInstance(5);
+                bind(Double.class).toInstance(5d);
+                bind(Long.class).toInstance(5L);
+                install(ThrowingProviderBinder.forModule(this));
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(RemoteProvider.class)
+              String foo(String s, Integer i, Double d, Long l) {
+                return null;
+              }
+            });
     
     HasDependencies hasDependencies =
         (HasDependencies)providesInjector.getBinding(Key.get(remoteProviderOfString));
@@ -483,13 +521,16 @@ public class ThrowingProviderTest extends TestCase {
     // And the provider method has our real dependencies..
     hasDependencies = (HasDependencies)providesInjector.getBinding(
         Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
-    Set<Key<?>> dependencyKeys = ImmutableSet.copyOf(
-        Iterables.transform(hasDependencies.getDependencies(),
-          new Function<Dependency<?>, Key<?>>() {
-            public Key<?> apply(Dependency<?> from) {
-              return from.getKey();
-            }
-          }));
+    Set<Key<?>> dependencyKeys =
+        ImmutableSet.copyOf(
+            Iterables.transform(
+                hasDependencies.getDependencies(),
+                new Function<Dependency<?>, Key<?>>() {
+                  @Override
+                  public Key<?> apply(Dependency<?> from) {
+                    return from.getKey();
+                  }
+                }));
     assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class), Key.get(Integer.class),
         Key.get(Long.class), Key.get(Double.class)), dependencyKeys);
   }  
@@ -508,6 +549,7 @@ public class ThrowingProviderTest extends TestCase {
     
     @Inject void initialize(long foo) {}
     
+    @Override
     public T get() throws RemoteException {
       return null;
     }
@@ -529,6 +571,7 @@ public class ThrowingProviderTest extends TestCase {
       this.nextToReturn = nextToReturn;
     }
     
+    @Override
     public T get() throws RemoteException {
       if (nextToThrow instanceof RemoteException) {
         throw (RemoteException) nextToThrow;
@@ -543,33 +586,41 @@ public class ThrowingProviderTest extends TestCase {
   }
 
   public void testBindingToInterfaceWithBoundValueType_Bind() throws RemoteException {
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(StringRemoteProvider.class, String.class)
-            .to(new StringRemoteProvider() {
-              public String get() throws RemoteException {
-                return "A";
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(StringRemoteProvider.class, String.class)
+                    .to(
+                        new StringRemoteProvider() {
+                          @Override
+                          public String get() throws RemoteException {
+                            return "A";
+                          }
+                        });
               }
             });
-      }
-    });
     
     assertEquals("A", bindInjector.getInstance(StringRemoteProvider.class).get());
   }
   
   public void testBindingToInterfaceWithBoundValueType_Provides() throws RemoteException {
-    providesInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
-      }
-      
-      @SuppressWarnings("unused")
-      @CheckedProvides(StringRemoteProvider.class)
-      String foo() throws RemoteException {
-          return "A";
-      }
-    });
+    providesInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(ThrowingProviderBinder.forModule(this));
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(StringRemoteProvider.class)
+              String foo() throws RemoteException {
+                return "A";
+              }
+            });
     
     assertEquals("A", providesInjector.getInstance(StringRemoteProvider.class).get());
   }
@@ -577,17 +628,22 @@ public class ThrowingProviderTest extends TestCase {
   interface StringRemoteProvider extends ThrowingProvider<String, RemoteException> { }
 
   public void testBindingToInterfaceWithGeneric_Bind() throws RemoteException {
-    bindInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        ThrowingProviderBinder.create(binder())
-            .bind(RemoteProvider.class, new TypeLiteral<List<String>>() { }.getType())
-            .to(new RemoteProvider<List<String>>() {
-              public List<String> get() throws RemoteException {
-                return Arrays.asList("A", "B");
+    bindInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                ThrowingProviderBinder.create(binder())
+                    .bind(RemoteProvider.class, new TypeLiteral<List<String>>() {}.getType())
+                    .to(
+                        new RemoteProvider<List<String>>() {
+                          @Override
+                          public List<String> get() throws RemoteException {
+                            return Arrays.asList("A", "B");
+                          }
+                        });
               }
             });
-      }
-    });
 
     Key<RemoteProvider<List<String>>> key
         = Key.get(new TypeLiteral<RemoteProvider<List<String>>>() { });
@@ -595,17 +651,20 @@ public class ThrowingProviderTest extends TestCase {
   }
   
   public void testBindingToInterfaceWithGeneric_Provides() throws RemoteException {
-    providesInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
-      }
-      
-      @SuppressWarnings("unused")
-      @CheckedProvides(RemoteProvider.class)
-      List<String> foo() throws RemoteException {
-          return Arrays.asList("A", "B");
-      }
-    });
+    providesInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(ThrowingProviderBinder.forModule(this));
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(RemoteProvider.class)
+              List<String> foo() throws RemoteException {
+                return Arrays.asList("A", "B");
+              }
+            });
 
     Key<RemoteProvider<List<String>>> key
         = Key.get(new TypeLiteral<RemoteProvider<List<String>>>() { });
@@ -614,17 +673,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testProviderMethodWithWrongException() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(RemoteProvider.class)
-        String foo() throws InterruptedException {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(RemoteProvider.class)
+            String foo() throws InterruptedException {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(InterruptedException.class.getName() + " is not compatible with the exceptions (["
@@ -635,17 +696,20 @@ public class ThrowingProviderTest extends TestCase {
   }
   
   public void testProviderMethodWithSubclassOfExceptionIsOk() {
-    providesInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
-      }
-      
-      @SuppressWarnings("unused")
-      @CheckedProvides(RemoteProvider.class)
-      String foo() throws AccessException {
-        throw new AccessException("boo!");
-      }
-    });
+    providesInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(ThrowingProviderBinder.forModule(this));
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(RemoteProvider.class)
+              String foo() throws AccessException {
+                throw new AccessException("boo!");
+              }
+            });
     
     RemoteProvider<String> remoteProvider = 
       providesInjector.getInstance(Key.get(remoteProviderOfString));
@@ -661,17 +725,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testProviderMethodWithSuperclassFails() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(RemoteProvider.class)
-        String foo() throws IOException {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(RemoteProvider.class)
+            String foo() throws IOException {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(IOException.class.getName() + " is not compatible with the exceptions (["
@@ -682,17 +748,20 @@ public class ThrowingProviderTest extends TestCase {
   }
   
   public void testProviderMethodWithRuntimeExceptionsIsOk() throws RemoteException {
-    providesInjector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
-      }
-      
-      @SuppressWarnings("unused")
-      @CheckedProvides(RemoteProvider.class)
-      String foo() throws RuntimeException {
-        throw new RuntimeException("boo!");
-      }
-    });
+    providesInjector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(ThrowingProviderBinder.forModule(this));
+              }
+
+              @SuppressWarnings("unused")
+              @CheckedProvides(RemoteProvider.class)
+              String foo() throws RuntimeException {
+                throw new RuntimeException("boo!");
+              }
+            });
     
     RemoteProvider<String> remoteProvider = 
       providesInjector.getInstance(Key.get(remoteProviderOfString));
@@ -707,18 +776,21 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testProviderMethodWithManyExceptions() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(RemoteProvider.class)
-        String foo() throws InterruptedException, RuntimeException, RemoteException, 
-                            AccessException, TooManyListenersException {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(RemoteProvider.class)
+            String foo()
+                throws InterruptedException, RuntimeException, RemoteException, AccessException,
+                    TooManyListenersException {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       // The only two that should fail are Interrupted & TooManyListeners.. the rest are OK.
@@ -737,17 +809,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testMoreTypeParameters() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(TooManyTypeParameters.class)
-        String foo() {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(TooManyTypeParameters.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(TooManyTypeParameters.class.getName() + " has more than one generic type parameter: [T, P]",
@@ -757,17 +831,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testWrongThrowingProviderType() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(WrongThrowingProviderType.class)
-        String foo() {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(WrongThrowingProviderType.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(WrongThrowingProviderType.class.getName() 
@@ -779,17 +855,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testOneMethodThatIsntGet() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(OneNoneGetMethod.class)
-        String foo() {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(OneNoneGetMethod.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(OneNoneGetMethod.class.getName() 
@@ -800,17 +878,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testManyMethods() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(ManyMethods.class)
-        String foo() {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(ManyMethods.class)
+            String foo() {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(ManyMethods.class.getName() 
@@ -821,17 +901,21 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testIncorrectPredefinedType_Bind() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          ThrowingProviderBinder.create(binder())
-              .bind(StringRemoteProvider.class, Integer.class)
-              .to(new StringRemoteProvider() {
-                public String get() throws RemoteException {
-                  return "A";
-                }
-              });
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              ThrowingProviderBinder.create(binder())
+                  .bind(StringRemoteProvider.class, Integer.class)
+                  .to(
+                      new StringRemoteProvider() {
+                        @Override
+                        public String get() throws RemoteException {
+                          return "A";
+                        }
+                      });
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(StringRemoteProvider.class.getName() 
@@ -842,17 +926,19 @@ public class ThrowingProviderTest extends TestCase {
   
   public void testIncorrectPredefinedType_Provides() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          install(ThrowingProviderBinder.forModule(this));
-        }
-        
-        @SuppressWarnings("unused")
-        @CheckedProvides(StringRemoteProvider.class)
-        Integer foo() {
-            return null;
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              install(ThrowingProviderBinder.forModule(this));
+            }
+
+            @SuppressWarnings("unused")
+            @CheckedProvides(StringRemoteProvider.class)
+            Integer foo() {
+              return null;
+            }
+          });
       fail();
     } catch(CreationException ce) {
       assertEquals(StringRemoteProvider.class.getName() 

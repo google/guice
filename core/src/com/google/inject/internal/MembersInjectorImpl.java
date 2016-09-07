@@ -33,33 +33,41 @@ import com.google.inject.spi.InjectionPoint;
 final class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final TypeLiteral<T> typeLiteral;
   private final InjectorImpl injector;
-  private final ImmutableList<SingleMemberInjector> memberInjectors;
-  private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
-  private final ImmutableList<InjectionListener<? super T>> injectionListeners;
+  // a null list means empty. Since it is common for many of these lists to be empty we can save
+  // some memory lookups by representing empty as null.
+  /* @Nullable */ private final ImmutableList<SingleMemberInjector> memberInjectors;
+  /* @Nullable */ private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
+  /* @Nullable */ private final ImmutableList<InjectionListener<? super T>> injectionListeners;
   /*if[AOP]*/
-  private final ImmutableList<MethodAspect> addedAspects;
+  /* @Nullable */ private final ImmutableList<MethodAspect> addedAspects;
   /*end[AOP]*/
 
   MembersInjectorImpl(InjectorImpl injector, TypeLiteral<T> typeLiteral,
       EncounterImpl<T> encounter, ImmutableList<SingleMemberInjector> memberInjectors) {
     this.injector = injector;
     this.typeLiteral = typeLiteral;
-    this.memberInjectors = memberInjectors;
-    this.userMembersInjectors = encounter.getMembersInjectors().asList();
-    this.injectionListeners = encounter.getInjectionListeners().asList();
+    this.memberInjectors = memberInjectors.isEmpty() ? null : memberInjectors;
+    this.userMembersInjectors = encounter.getMembersInjectors().isEmpty() 
+        ? null 
+        : encounter.getMembersInjectors().asList();
+    this.injectionListeners = encounter.getInjectionListeners().isEmpty() 
+        ? null 
+        : encounter.getInjectionListeners().asList();
     /*if[AOP]*/
-    this.addedAspects = encounter.getAspects();
+    this.addedAspects = encounter.getAspects().isEmpty() ? null : encounter.getAspects();
     /*end[AOP]*/
   }
 
   public ImmutableList<SingleMemberInjector> getMemberInjectors() {
-    return memberInjectors;
+    return memberInjectors == null ? ImmutableList.<SingleMemberInjector>of() : memberInjectors;
   }
 
+  @Override
   public void injectMembers(T instance) {
-    Errors errors = new Errors(typeLiteral);
+    TypeLiteral<T> localTypeLiteral = typeLiteral;
+    Errors errors = new Errors(localTypeLiteral);
     try {
-      injectAndNotify(instance, errors, null, null, typeLiteral, false);
+      injectAndNotify(instance, errors, null, null, localTypeLiteral, false);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -82,7 +90,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
       public Void call(final InternalContext context) throws ErrorsException {
         context.pushState(key, source);
         try {
-          if (provisionCallback != null && provisionCallback.hasListeners()) {
+          if (provisionCallback != null) {
             provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
               @Override public T call() {
                 injectMembers(instance, errors, context, toolableOnly);
@@ -113,10 +121,15 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   }
 
   void notifyListeners(T instance, Errors errors) throws ErrorsException {
+    ImmutableList<InjectionListener<? super T>> localInjectionListeners = injectionListeners;
+    if (localInjectionListeners == null) {
+      // no listeners
+      return;
+    }
     int numErrorsBefore = errors.size();
     // optimization: use manual for/each to save allocating an iterator here
-    for (int i = 0; i < injectionListeners.size(); i++) {
-      InjectionListener<? super T> injectionListener = injectionListeners.get(i);
+    for (int i = 0; i < localInjectionListeners.size(); i++) {
+      InjectionListener<? super T> injectionListener = localInjectionListeners.get(i);
       try {
         injectionListener.afterInjection(instance);
       } catch (RuntimeException e) {
@@ -127,23 +140,29 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   }
 
   void injectMembers(T t, Errors errors, InternalContext context, boolean toolableOnly) {
-    // optimization: use manual for/each to save allocating an iterator here
-    for (int i = 0, size = memberInjectors.size(); i < size; i++) {
-      SingleMemberInjector injector = memberInjectors.get(i);
-      if(!toolableOnly || injector.getInjectionPoint().isToolable()) {
-        injector.inject(errors, context, t);
+    ImmutableList<SingleMemberInjector> localMembersInjectors = memberInjectors;
+    if (localMembersInjectors != null) {
+      // optimization: use manual for/each to save allocating an iterator here
+      for (int i = 0, size = localMembersInjectors.size(); i < size; i++) {
+        SingleMemberInjector injector = localMembersInjectors.get(i);
+        if(!toolableOnly || injector.getInjectionPoint().isToolable()) {
+          injector.inject(errors, context, t);
+        }
       }
     }
 
     // TODO: There's no way to know if a user's MembersInjector wants toolable injections.
     if(!toolableOnly) {
-      // optimization: use manual for/each to save allocating an iterator here
-      for (int i = 0; i < userMembersInjectors.size(); i++) {
-        MembersInjector<? super T> userMembersInjector = userMembersInjectors.get(i);
-        try {
-          userMembersInjector.injectMembers(t);
-        } catch (RuntimeException e) {
-          errors.errorInUserInjector(userMembersInjector, typeLiteral, e);
+      ImmutableList<MembersInjector<? super T>> localUsersMembersInjectors = userMembersInjectors;
+      if (localUsersMembersInjectors != null) {
+        // optimization: use manual for/each to save allocating an iterator here
+        for (int i = 0; i < localUsersMembersInjectors.size(); i++) {
+          MembersInjector<? super T> userMembersInjector = localUsersMembersInjectors.get(i);
+          try {
+            userMembersInjector.injectMembers(t);
+          } catch (RuntimeException e) {
+            errors.errorInUserInjector(userMembersInjector, typeLiteral, e);
+          }
         }
       }
     }
@@ -154,16 +173,20 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   }
 
   public ImmutableSet<InjectionPoint> getInjectionPoints() {
-    ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
-    for (SingleMemberInjector memberInjector : memberInjectors) {
-      builder.add(memberInjector.getInjectionPoint());
+    ImmutableList<SingleMemberInjector> localMemberInjectors = memberInjectors;
+    if (localMemberInjectors != null) {
+      ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
+      for (SingleMemberInjector memberInjector : localMemberInjectors) {
+        builder.add(memberInjector.getInjectionPoint());
+      }
+      return builder.build();
     }
-    return builder.build();
+    return ImmutableSet.of();
   }
 
   /*if[AOP]*/
   public ImmutableList<MethodAspect> getAddedAspects() {
-    return addedAspects;
+    return addedAspects == null ? ImmutableList.<MethodAspect>of() : addedAspects;
   }
   /*end[AOP]*/
 }

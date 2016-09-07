@@ -122,6 +122,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   static class MyInteger implements MyComparable<MyInteger> {
     int value;
+    @Override
     public int compareTo(MyInteger o) {
       return value - o.value;
     }

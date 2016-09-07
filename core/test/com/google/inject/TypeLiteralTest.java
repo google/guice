@@ -192,7 +192,7 @@ public class TypeLiteralTest extends TestCase {
     assertEqualsBothWays(bTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[1]));
   }
 
-  class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
+  static class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
     A a; B b; C c;
   }
 }
