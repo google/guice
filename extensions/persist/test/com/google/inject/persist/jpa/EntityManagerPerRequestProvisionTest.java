@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +22,9 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import junit.framework.TestCase;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -63,14 +61,18 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
     dao.persist(te);
 
     //im not sure this hack works...
-    assertEquals("Entity managers closed inside same thread-scope",
-        injector.getInstance(EntityManager.class), JpaDao.em);
+    assertEquals(
+        "Entity managers closed inside same thread-scope",
+        injector.getInstance(EntityManager.class),
+        JpaDao.em);
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
-    assertTrue("EntityManager was closed and reopened around txn"
-        + " (persistent object does not persist)", dao.contains(te));
+    assertTrue(
+        "EntityManager was closed and reopened around txn"
+            + " (persistent object does not persist)",
+        dao.contains(te));
   }
 
   public void testEntityManagerLifecyclePerTxn2() {
@@ -83,16 +85,21 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
     dao.persist(te);
 
     //im not sure this hack works...
-    assertEquals("Duplicate entity managers crossing-scope",
-        injector.getInstance(EntityManager.class), JpaDao.em);
-    assertEquals("Duplicate entity managers crossing-scope",
-        injector.getInstance(EntityManager.class), JpaDao.em);
+    assertEquals(
+        "Duplicate entity managers crossing-scope",
+        injector.getInstance(EntityManager.class),
+        JpaDao.em);
+    assertEquals(
+        "Duplicate entity managers crossing-scope",
+        injector.getInstance(EntityManager.class),
+        JpaDao.em);
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
-    assertTrue("EntityManager was closed and reopened around txn"
-        + " (persistent object doesnt persist)", dao.contains(te));
+    assertTrue(
+        "EntityManager was closed and reopened around txn" + " (persistent object doesnt persist)",
+        dao.contains(te));
   }
 
   public static class JpaDao {

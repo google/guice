@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 
 package com.google.inject.persist.jpa;
 
-import junit.framework.TestCase;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
@@ -24,24 +23,26 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+import junit.framework.TestCase;
 
 public class JpaPersistServiceTest extends TestCase {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
 
-  private final JpaPersistService sut = new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
+  private final JpaPersistService sut =
+      new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);
   private final EntityManagerFactory factory = mock(EntityManagerFactory.class);
   private final EntityManager entityManager = mock(EntityManager.class);
 
   @Override
   public void setUp() throws Exception {
-    when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES)).thenReturn(factory);
+    when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES))
+        .thenReturn(factory);
     when(factory.createEntityManager()).thenReturn(entityManager);
   }
 
@@ -54,8 +55,7 @@ public class JpaPersistServiceTest extends TestCase {
     try {
       sut.end();
       fail("Exception expected");
-    }
-    catch (SimulatedException expected) {
+    } catch (SimulatedException expected) {
       assertThat(sut.isWorking(), is(false));
     }
   }
