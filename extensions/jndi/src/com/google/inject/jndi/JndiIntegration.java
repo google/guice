@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +18,11 @@ package com.google.inject.jndi;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
 
 /**
- * Integrates Guice with JNDI. Requires a binding to 
- * {@link javax.naming.Context}.
+ * Integrates Guice with JNDI. Requires a binding to {@link javax.naming.Context}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -33,8 +31,7 @@ public class JndiIntegration {
   private JndiIntegration() {}
 
   /**
-   * Creates a provider which looks up objects in JNDI using the given name.
-   * Example usage:
+   * Creates a provider which looks up objects in JNDI using the given name. Example usage:
    *
    * <pre>
    * bind(DataSource.class).toProvider(fromJndi(DataSource.class, "java:..."));
@@ -59,8 +56,7 @@ public class JndiIntegration {
     public T get() {
       try {
         return type.cast(context.lookup(name));
-      }
-      catch (NamingException e) {
+      } catch (NamingException e) {
         throw new RuntimeException(e);
       }
     }

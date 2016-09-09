@@ -29,7 +29,6 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Nullability;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -44,31 +43,24 @@ import java.lang.reflect.Type;
  * <p>The following rules are followed in determining how fields are bound using this module:
  *
  * <ul>
- * <li>
- * For each {@link Bind} annotated field of an object and its superclasses, this module will bind
- * that field's type to that field's value at injector creation time. This includes both instance
- * and static fields.
- * </li>
- * <li>
- * If {@link Bind#to} is specified, the field's value will be bound to the class specified by
- * {@link Bind#to} instead of the field's actual type.
- * </li>
- * <li>
- * If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
- * that field will be bound using that annotation via {@link AnnotatedBindingBuilder#annotatedWith}.
- * For example, {@code bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}.
- * It is an error to supply more than one {@link BindingAnnotation} or
- * {@link javax.inject.Qualifier}.
- * </li>
- * <li>
- * If the field is of type {@link Provider}, the field's value will be bound as a {@link Provider}
- * using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized type. For example,
- * {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a non-parameterized
- * {@link Provider} without a {@link Bind#to} clause is an error.
- * </li>
+ * <li> For each {@link Bind} annotated field of an object and its superclasses, this module will
+ *     bind that field's type to that field's value at injector creation time. This includes both
+ *     instance and static fields.
+ * <li> If {@link Bind#to} is specified, the field's value will be bound to the class specified by
+ *     {@link Bind#to} instead of the field's actual type.
+ * <li> If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
+ *     that field will be bound using that annotation via {@link
+ *     AnnotatedBindingBuilder#annotatedWith}. For example, {@code
+ *     bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error to
+ *     supply more than one {@link BindingAnnotation} or {@link javax.inject.Qualifier}.
+ * <li> If the field is of type {@link Provider}, the field's value will be bound as a {@link
+ *     Provider} using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized type.
+ *     For example, {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a
+ *     non-parameterized {@link Provider} without a {@link Bind#to} clause is an error.
  * </ul>
  *
  * <p>Example use:
+ *
  * <pre><code>
  * public class TestFoo {
  *   // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
@@ -133,8 +125,8 @@ public final class BoundFieldModule implements Module {
     /**
      * The actual type of the field.
      *
-     * <p>For example, {@code @Bind(to = Object.class) Number one = new Integer(1);} will be
-     * {@link Number}.
+     * <p>For example, {@code @Bind(to = Object.class) Number one = new Integer(1);} will be {@link
+     * Number}.
      */
     final TypeLiteral<?> type;
 
@@ -144,26 +136,23 @@ public final class BoundFieldModule implements Module {
     /**
      * The type this field will bind to.
      *
-     * <p>For example, {@code @Bind(to = Object.class) Number one = new Integer(1);} will be
-     * {@link Object} and {@code @Bind Number one = new Integer(1);} will be {@link Number}.
+     * <p>For example, {@code @Bind(to = Object.class) Number one = new Integer(1);} will be {@link
+     * Object} and {@code @Bind Number one = new Integer(1);} will be {@link Number}.
      */
     final TypeLiteral<?> boundType;
 
     /**
      * The "natural" type of this field.
      *
-     * <p>For example, {@code @Bind(to = Object.class) Number one = new Integer(1);} will be
-     * {@link Number}, and {@code @Bind(to = Object.class) Provider<Number> one = new Integer(1);}
-     * will be {@link Number}.
+     * <p>For example, {@code @Bind(to = Object.class) Number one = new Integer(1);} will be {@link
+     * Number}, and {@code @Bind(to = Object.class) Provider<Number> one = new Integer(1);} will be
+     * {@link Number}.
      *
      * @see #getNaturalFieldType
      */
     final Optional<TypeLiteral<?>> naturalType;
 
-    BoundFieldInfo(
-        Field field,
-        Bind bindAnnotation,
-        TypeLiteral<?> fieldType) {
+    BoundFieldInfo(Field field, Bind bindAnnotation, TypeLiteral<?> fieldType) {
       this.field = field;
       this.type = fieldType;
       this.bindAnnotation = bindAnnotation;
@@ -184,7 +173,7 @@ public final class BoundFieldModule implements Module {
           throwBoundFieldException(
               field,
               "Non parameterized Provider fields must have an explicit "
-              + "binding class via @Bind(to = Foo.class)");
+                  + "binding class via @Bind(to = Foo.class)");
         }
         return this.naturalType.get();
       } else {
@@ -201,7 +190,7 @@ public final class BoundFieldModule implements Module {
      * is the field's actual type.
      *
      * @return the type this field binds to naturally, or {@link Optional#absent()} if this field is
-     * a non-parameterized {@link Provider}.
+     *     a non-parameterized {@link Provider}.
      */
     private Optional<TypeLiteral<?>> getNaturalFieldType() {
       if (isTransparentProvider(type.getRawType())) {
@@ -243,31 +232,24 @@ public final class BoundFieldModule implements Module {
   /**
    * Retrieve a {@link BoundFieldInfo}.
    *
-   * <p>This returns a {@link BoundFieldInfo} if the field has a {@link Bind} annotation.
-   * Otherwise it returns {@link Optional#absent()}.
+   * <p>This returns a {@link BoundFieldInfo} if the field has a {@link Bind} annotation. Otherwise
+   * it returns {@link Optional#absent()}.
    */
   private Optional<BoundFieldInfo> getBoundFieldInfo(
-      TypeLiteral<?> containingClassType,
-      Field field) {
+      TypeLiteral<?> containingClassType, Field field) {
     Bind bindAnnotation = field.getAnnotation(Bind.class);
     if (bindAnnotation == null) {
       return Optional.absent();
     }
     if (hasInject(field)) {
-      throwBoundFieldException(
-          field,
-          "Fields annotated with both @Bind and @Inject are illegal.");
+      throwBoundFieldException(field, "Fields annotated with both @Bind and @Inject are illegal.");
     }
     return Optional.of(
-        new BoundFieldInfo(
-            field,
-            bindAnnotation,
-            containingClassType.getFieldType(field)));
+        new BoundFieldInfo(field, bindAnnotation, containingClassType.getFieldType(field)));
   }
 
   private LinkedBindingBuilder<?> verifyBindingAnnotations(
-      Field field,
-      AnnotatedBindingBuilder<?> annotatedBinder) {
+      Field field, AnnotatedBindingBuilder<?> annotatedBinder) {
     LinkedBindingBuilder<?> binderRet = annotatedBinder;
     for (Annotation annotation : field.getAnnotations()) {
       Class<? extends Annotation> annotationType = annotation.annotationType();
@@ -283,13 +265,13 @@ public final class BoundFieldModule implements Module {
   /**
    * Determines if {@code clazz} is a "transparent provider".
    *
-   * <p>A transparent provider is a {@link com.google.inject.Provider} or
-   * {@link javax.inject.Provider} which binds to it's parameterized type when used as the argument
-   * to {@link Binder#bind}.
+   * <p>A transparent provider is a {@link com.google.inject.Provider} or {@link
+   * javax.inject.Provider} which binds to it's parameterized type when used as the argument to
+   * {@link Binder#bind}.
    *
    * <p>A {@link Provider} is transparent if the base class of that object is {@link Provider}. In
-   * other words, subclasses of {@link Provider} are not transparent. As a special case, if a
-   * {@link Provider} has no parameterized type but is otherwise transparent, then it is considered
+   * other words, subclasses of {@link Provider} are not transparent. As a special case, if a {@link
+   * Provider} has no parameterized type but is otherwise transparent, then it is considered
    * transparent.
    *
    * <p>Subclasses of {@link Provider} are not considered transparent in order to allow users to
@@ -390,10 +372,8 @@ public final class BoundFieldModule implements Module {
 
   private void throwBoundFieldException(Field field, String format, Object... args) {
     Preconditions.checkNotNull(binder);
-    String source = String.format(
-        "%s field %s",
-        field.getDeclaringClass().getName(),
-        field.getName());
+    String source =
+        String.format("%s field %s", field.getDeclaringClass().getName(), field.getName());
     throw new BoundFieldException(new Message(source, String.format(format, args)));
   }
 
@@ -406,8 +386,7 @@ public final class BoundFieldModule implements Module {
     while (currentClassType.getRawType() != Object.class) {
       for (Field field : currentClassType.getRawType().getDeclaredFields()) {
         try {
-          Optional<BoundFieldInfo> fieldInfoOpt =
-              getBoundFieldInfo(currentClassType, field);
+          Optional<BoundFieldInfo> fieldInfoOpt = getBoundFieldInfo(currentClassType, field);
           if (fieldInfoOpt.isPresent()) {
             bindField(fieldInfoOpt.get());
           }

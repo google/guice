@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * JNDI integration; this extension requires {@code guice-jndi.jar}.
- */
+/** JNDI integration; this extension requires {@code guice-jndi.jar}. */
 package com.google.inject.jndi;

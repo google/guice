@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,18 +30,14 @@ import static com.google.inject.matcher.Matchers.subclassesOf;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.AbstractList;
+import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 
 public class MatcherTest extends TestCase {
 
@@ -77,8 +73,7 @@ public class MatcherTest extends TestCase {
 
   public void testAnnotatedWith() {
     assertTrue(annotatedWith(Foo.class).matches(Bar.class));
-    assertFalse(annotatedWith(Foo.class).matches(
-        MatcherTest.class.getMethods()[0]));
+    assertFalse(annotatedWith(Foo.class).matches(MatcherTest.class.getMethods()[0]));
     assertEquals("annotatedWith(Foo.class)", annotatedWith(Foo.class).toString());
     assertEqualsBothWays(annotatedWith(Foo.class), annotatedWith(Foo.class));
     assertFalse(annotatedWith(Foo.class).equals(annotatedWith(Named.class)));
@@ -134,15 +129,15 @@ public class MatcherTest extends TestCase {
     assertFalse(inSubpackage(stringPackageName).matches(Matchers.class));
     assertFalse(inSubpackage("jav").matches(Object.class));
     assertEqualsBothWays(inSubpackage(stringPackageName), inSubpackage(stringPackageName));
-    assertFalse(inSubpackage(stringPackageName).equals(inSubpackage(Matchers.class.getPackage().getName())));
+    assertFalse(
+        inSubpackage(stringPackageName)
+            .equals(inSubpackage(Matchers.class.getPackage().getName())));
   }
 
   public void testReturns() throws NoSuchMethodException {
     Matcher<Method> predicate = returns(only(String.class));
-    assertTrue(predicate.matches(
-        Object.class.getMethod("toString")));
-    assertFalse(predicate.matches(
-        Object.class.getMethod("hashCode")));
+    assertTrue(predicate.matches(Object.class.getMethod("toString")));
+    assertFalse(predicate.matches(Object.class.getMethod("hashCode")));
     assertEquals("returns(only(class java.lang.String))", returns(only(String.class)).toString());
     assertEqualsBothWays(predicate, returns(only(String.class)));
     assertFalse(predicate.equals(returns(only(Integer.class))));
@@ -163,7 +158,7 @@ public class MatcherTest extends TestCase {
     assertEqualWhenReserialized(only("a").and(only("b")));
   }
 
-  static abstract class MyRunnable implements Runnable {}
+  abstract static class MyRunnable implements Runnable {}
 
   @Retention(RetentionPolicy.RUNTIME)
   @interface Foo {}
