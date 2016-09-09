@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@
 package com.google.inject.grapher.graphviz;
 
 /**
- * Arrow symbols that are available from Graphviz. These can be composed by
- * concatenation to make double arrows and such.
- * <p>
- * See: http://www.graphviz.org/doc/info/arrows.html
+ * Arrow symbols that are available from Graphviz. These can be composed by concatenation to make
+ * double arrows and such.
+ *
+ * <p>See: http://www.graphviz.org/doc/info/arrows.html
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */

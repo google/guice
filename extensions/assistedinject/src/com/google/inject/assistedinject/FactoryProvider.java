@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,6 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -54,20 +53,25 @@ import java.util.Set;
  * construct objects.
  *
  * <h3>Defining a factory</h3>
+ *
  * Create an interface whose methods return the constructed type, or any of its supertypes. The
  * method's parameters are the arguments required to build the constructed type.
+ *
  * <pre>public interface PaymentFactory {
  *   Payment create(Date startDate, Money amount);
  * }</pre>
+ *
  * You can name your factory methods whatever you like, such as <i>create</i>, <i>createPayment</i>
  * or <i>newPayment</i>.
  *
  * <h3>Creating a type that accepts factory parameters</h3>
+ *
  * {@code constructedType} is a concrete class with an {@literal @}{@link Inject}-annotated
- * constructor. In addition to injector-supplied parameters, the constructor should have
- * parameters that match each of the factory method's parameters. Each factory-supplied parameter
- * requires an {@literal @}{@link Assisted} annotation. This serves to document that the parameter
- * is not bound by your application's modules.
+ * constructor. In addition to injector-supplied parameters, the constructor should have parameters
+ * that match each of the factory method's parameters. Each factory-supplied parameter requires an
+ * {@literal @}{@link Assisted} annotation. This serves to document that the parameter is not bound
+ * by your application's modules.
+ *
  * <pre>public class RealPayment implements Payment {
  *   {@literal @}Inject
  *   public RealPayment(
@@ -78,19 +82,25 @@ import java.util.Set;
  *     ...
  *   }
  * }</pre>
+ *
  * Any parameter that permits a null value should also be annotated {@code @Nullable}.
  *
  * <h3>Configuring factories</h3>
+ *
  * In your {@link com.google.inject.Module module}, bind the factory interface to the returned
  * factory:
+ *
  * <pre>bind(PaymentFactory.class).toProvider(
  *     FactoryProvider.newFactory(PaymentFactory.class, RealPayment.class));</pre>
+ *
  * As a side-effect of this binding, Guice will inject the factory to initialize it for use. The
  * factory cannot be used until the injector has been initialized.
  *
  * <h3>Using the factory</h3>
- * Inject your factory into your application classes. When you use the factory, your arguments
- * will be combined with values from the injector to construct an instance.
+ *
+ * Inject your factory into your application classes. When you use the factory, your arguments will
+ * be combined with values from the injector to construct an instance.
+ *
  * <pre>public class PaymentAction {
  *   {@literal @}Inject private PaymentFactory paymentFactory;
  *
@@ -101,9 +111,10 @@ import java.util.Set;
  * }</pre>
  *
  * <h3>Making parameter types distinct</h3>
- * The types of the factory method's parameters must be distinct. To use multiple parameters of
- * the same type, use a named {@literal @}{@link Assisted} annotation to disambiguate the
- * parameters. The names must be applied to the factory method's parameters:
+ *
+ * The types of the factory method's parameters must be distinct. To use multiple parameters of the
+ * same type, use a named {@literal @}{@link Assisted} annotation to disambiguate the parameters.
+ * The names must be applied to the factory method's parameters:
  *
  * <pre>public interface PaymentFactory {
  *   Payment create(
@@ -111,7 +122,9 @@ import java.util.Set;
  *       <strong>{@literal @}Assisted("dueDate")</strong> Date dueDate,
  *       Money amount);
  * } </pre>
+ *
  * ...and to the concrete type's constructor parameters:
+ *
  * <pre>public class RealPayment implements Payment {
  *   {@literal @}Inject
  *   public RealPayment(
@@ -125,28 +138,27 @@ import java.util.Set;
  * }</pre>
  *
  * <h3>Values are created by Guice</h3>
+ *
  * Returned factories use child injectors to create values. The values are eligible for method
  * interception. In addition, {@literal @}{@literal Inject} members will be injected before they are
  * returned.
  *
  * <h3>Backwards compatibility using {@literal @}AssistedInject</h3>
+ *
  * Instead of the {@literal @}Inject annotation, you may annotate the constructed classes with
  * {@literal @}{@link AssistedInject}. This triggers a limited backwards-compatability mode.
  *
  * <p>Instead of matching factory method arguments to constructor parameters using their names, the
- * <strong>parameters are matched by their order</strong>. The first factory method argument is
- * used for the first {@literal @}Assisted constructor parameter, etc.. Annotation names have no
- * effect.
+ * <strong>parameters are matched by their order</strong>. The first factory method argument is used
+ * for the first {@literal @}Assisted constructor parameter, etc.. Annotation names have no effect.
  *
  * <p>Returned values are <strong>not created by Guice</strong>. These types are not eligible for
  * method interception. They do receive post-construction member injection.
  *
  * @param <F> The factory interface
- *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  * @author dtm@google.com (Daniel Martin)
- * 
  * @deprecated use {@link FactoryModuleBuilder} instead.
  */
 @Deprecated
@@ -163,14 +175,14 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
   private final TypeLiteral<?> implementationType;
   private final Map<Method, AssistedConstructor<?>> factoryMethodToConstructor;
 
-  public static <F> Provider<F> newFactory(Class<F> factoryType, Class<?> implementationType){
+  public static <F> Provider<F> newFactory(Class<F> factoryType, Class<?> implementationType) {
     return newFactory(TypeLiteral.get(factoryType), TypeLiteral.get(implementationType));
   }
 
   public static <F> Provider<F> newFactory(
       TypeLiteral<F> factoryType, TypeLiteral<?> implementationType) {
-    Map<Method, AssistedConstructor<?>> factoryMethodToConstructor
-        = createMethodMapping(factoryType, implementationType);
+    Map<Method, AssistedConstructor<?>> factoryMethodToConstructor =
+        createMethodMapping(factoryType, implementationType);
 
     if (!factoryMethodToConstructor.isEmpty()) {
       return new FactoryProvider<F>(factoryType, implementationType, factoryMethodToConstructor);
@@ -184,12 +196,12 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
       try {
         for (Method method : factoryType.getRawType().getMethods()) {
-          Key<?> returnType = getKey(factoryType.getReturnType(method), method,
-              method.getAnnotations(), errors);
+          Key<?> returnType =
+              getKey(factoryType.getReturnType(method), method, method.getAnnotations(), errors);
           if (!implementationKey.equals(returnType)) {
             collector.addBinding(returnType, implementationType);
           }
-      }
+        }
       } catch (ErrorsException e) {
         throw new ConfigurationException(e.getErrors().getMessages());
       }
@@ -198,7 +210,8 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     }
   }
 
-  private FactoryProvider(TypeLiteral<F> factoryType,
+  private FactoryProvider(
+      TypeLiteral<F> factoryType,
       TypeLiteral<?> implementationType,
       Map<Method, AssistedConstructor<?>> factoryMethodToConstructor) {
     this.factoryType = factoryType;
@@ -212,12 +225,14 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     this.injector = injector;
     for (AssistedConstructor<?> c : factoryMethodToConstructor.values()) {
       for (Parameter p : c.getAllParameters()) {
-        if(!p.isProvidedByFactory() && !paramCanBeInjected(p, injector)) {
+        if (!p.isProvidedByFactory() && !paramCanBeInjected(p, injector)) {
           // this is lame - we're not using the proper mechanism to add an
           // error to the injector. Throughout this class we throw exceptions
           // to add errors, which isn't really the best way in Guice
-          throw newConfigurationException("Parameter of type '%s' is not injectable or annotated "
-                + "with @Assisted for Constructor '%s'", p, c);
+          throw newConfigurationException(
+              "Parameter of type '%s' is not injectable or annotated "
+                  + "with @Assisted for Constructor '%s'",
+              p, c);
         }
       }
     }
@@ -228,8 +243,10 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       for (Class<?> constructorException : entry.getValue().getDeclaredExceptions()) {
         if (!isConstructorExceptionCompatibleWithFactoryExeception(
             constructorException, entry.getKey().getExceptionTypes())) {
-          throw newConfigurationException("Constructor %s declares an exception, but no compatible "
-              + "exception is thrown by the factory method %s", entry.getValue(), entry.getKey());
+          throw newConfigurationException(
+              "Constructor %s declares an exception, but no compatible "
+                  + "exception is thrown by the factory method %s",
+              entry.getValue(), entry.getKey());
         }
       }
     }
@@ -255,8 +272,9 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
     for (Constructor<?> constructor : implementationType.getRawType().getDeclaredConstructors()) {
       if (constructor.isAnnotationPresent(AssistedInject.class)) {
-        AssistedConstructor<?> assistedConstructor = AssistedConstructor.create(
-            constructor, implementationType.getParameterTypes(constructor));
+        AssistedConstructor<?> assistedConstructor =
+            AssistedConstructor.create(
+                constructor, implementationType.getParameterTypes(constructor));
         constructors.add(assistedConstructor);
       }
     }
@@ -268,9 +286,10 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     Method[] factoryMethods = factoryType.getRawType().getMethods();
 
     if (constructors.size() != factoryMethods.length) {
-      throw newConfigurationException("Constructor mismatch: %s has %s @AssistedInject "
-          + "constructors, factory %s has %s creation methods", implementationType,
-          constructors.size(), factoryType, factoryMethods.length);
+      throw newConfigurationException(
+          "Constructor mismatch: %s has %s @AssistedInject "
+              + "constructors, factory %s has %s creation methods",
+          implementationType, constructors.size(), factoryType, factoryMethods.length);
     }
 
     Map<ParameterListKey, AssistedConstructor<?>> paramsToConstructor = Maps.newHashMap();
@@ -285,8 +304,8 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     Map<Method, AssistedConstructor<?>> result = Maps.newHashMap();
     for (Method method : factoryMethods) {
       if (!method.getReturnType().isAssignableFrom(implementationType.getRawType())) {
-        throw newConfigurationException("Return type of method %s is not assignable from %s",
-            method, implementationType);
+        throw newConfigurationException(
+            "Return type of method %s is not assignable from %s", method, implementationType);
       }
 
       List<Type> parameterTypes = Lists.newArrayList();
@@ -296,8 +315,9 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       ParameterListKey methodParams = new ParameterListKey(parameterTypes);
 
       if (!paramsToConstructor.containsKey(methodParams)) {
-        throw newConfigurationException("%s has no @AssistInject constructor that takes the "
-            + "@Assisted parameters %s in that order. @AssistInject constructors are %s",
+        throw newConfigurationException(
+            "%s has no @AssistInject constructor that takes the "
+                + "@Assisted parameters %s in that order. @AssistInject constructors are %s",
             implementationType, methodParams, paramsToConstructor.values());
       }
 
@@ -305,9 +325,10 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       for (Annotation[] parameterAnnotations : method.getParameterAnnotations()) {
         for (Annotation parameterAnnotation : parameterAnnotations) {
           if (parameterAnnotation.annotationType() == Assisted.class) {
-            throw newConfigurationException("Factory method %s has an @Assisted parameter, which "
-                + "is incompatible with the deprecated @AssistedInject annotation. Please replace "
-                + "@AssistedInject with @Inject on the %s constructor.",
+            throw newConfigurationException(
+                "Factory method %s has an @Assisted parameter, which "
+                    + "is incompatible with the deprecated @AssistedInject annotation. Please replace "
+                    + "@AssistedInject with @Inject on the %s constructor.",
                 method, implementationType);
           }
         }
@@ -379,8 +400,11 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
     @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
     Class<F> factoryRawType = (Class<F>) (Class<?>) factoryType.getRawType();
-    return factoryRawType.cast(Proxy.newProxyInstance(BytecodeGen.getClassLoader(factoryRawType),
-        new Class[] { factoryRawType }, invocationHandler));
+    return factoryRawType.cast(
+        Proxy.newProxyInstance(
+            BytecodeGen.getClassLoader(factoryRawType),
+            new Class[] {factoryRawType},
+            invocationHandler));
   }
 
   @Override

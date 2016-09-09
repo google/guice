@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,8 @@ package com.google.inject.grapher.graphviz;
 import java.lang.reflect.Member;
 
 /**
- * Interface for a service that returns Graphviz port IDs, used for naming the
- * rows in {@link com.google.inject.grapher.ImplementationNode}-displaying {@link GraphvizNode}s.
+ * Interface for a service that returns Graphviz port IDs, used for naming the rows in {@link
+ * com.google.inject.grapher.ImplementationNode}-displaying {@link GraphvizNode}s.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */

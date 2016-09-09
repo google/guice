@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +26,9 @@ import com.google.inject.grapher.ShortNameFactory;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class GraphvizModule extends AbstractModule {
-  @Override protected void configure() {
-    bind(NameFactory.class)
-        .annotatedWith(Graphviz.class)
-        .to(ShortNameFactory.class);
-    bind(PortIdFactory.class)
-        .annotatedWith(Graphviz.class)
-        .to(PortIdFactoryImpl.class);
+  @Override
+  protected void configure() {
+    bind(NameFactory.class).annotatedWith(Graphviz.class).to(ShortNameFactory.class);
+    bind(PortIdFactory.class).annotatedWith(Graphviz.class).to(PortIdFactoryImpl.class);
   }
 }
