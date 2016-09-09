@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 class PlutoniumProvider implements Provider<Plutonium> {
-  @Inject public PlutoniumProvider(@Inventor Person inventor, @Used PinballParts parts) {}
+  @Inject
+  public PlutoniumProvider(@Inventor Person inventor, @Used PinballParts parts) {}
 
   @Override
   public Plutonium get() {
