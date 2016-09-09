@@ -27,6 +27,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+@SuppressWarnings("ProvidesMethodOutsideOfModule")
 public final class MiniGuiceTest extends TestCase {
 
   public void testBasicInjection() {

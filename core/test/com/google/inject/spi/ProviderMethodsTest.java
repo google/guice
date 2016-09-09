@@ -67,6 +67,7 @@ import java.util.logging.Logger;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
+@SuppressWarnings("ProvidesMethodOutsideOfModule")
 public class ProviderMethodsTest extends TestCase implements Module {
 
   @SuppressWarnings("unchecked")
