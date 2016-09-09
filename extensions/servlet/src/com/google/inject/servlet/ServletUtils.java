@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +22,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.net.UrlEscapers;
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -44,9 +42,8 @@ final class ServletUtils {
   }
 
   /**
-   * Gets the context path relative path of the URI. Returns the path of the
-   * resource relative to the context path for a request's URI, or null if no
-   * path can be extracted.
+   * Gets the context path relative path of the URI. Returns the path of the resource relative to
+   * the context path for a request's URI, or null if no path can be extracted.
    *
    * <p>Also performs url decoding and normalization of the path.
    */
@@ -60,17 +57,14 @@ final class ServletUtils {
       if (contextPath.length() < requestURI.length()) {
         String suffix = requestURI.substring(contextPath.length());
         return normalizePath(suffix);
-      } else if (requestURI.trim().length() > 0 &&
-          contextPath.length() == requestURI.length()) {
+      } else if (requestURI.trim().length() > 0 && contextPath.length() == requestURI.length()) {
         return "/";
       }
     }
     return null;
   }
 
-  /**
-   * Normalizes a path by unescaping all safe, percent encoded characters.
-   */
+  /** Normalizes a path by unescaping all safe, percent encoded characters. */
   static String normalizePath(String path) {
     StringBuilder sb = new StringBuilder(path.length());
     int queryStart = path.indexOf('?');
@@ -108,11 +102,10 @@ final class ServletUtils {
 
 
   /**
-   * Percent-decodes a US-ASCII string into a Unicode string. The specified
-   * encoding is used to determine what characters are represented by any
-   * consecutive sequences of the form "%<i>XX</i>". This is the lenient
-   * kind of decoding that will simply ignore and copy as-is any "%XX"
-   * sequence that is invalid (for example, "%HH").
+   * Percent-decodes a US-ASCII string into a Unicode string. The specified encoding is used to
+   * determine what characters are represented by any consecutive sequences of the form
+   * "%<i>XX</i>". This is the lenient kind of decoding that will simply ignore and copy as-is any
+   * "%XX" sequence that is invalid (for example, "%HH").
    *
    * @param string a percent-encoded US-ASCII string
    * @param encoding a character encoding
@@ -134,8 +127,7 @@ final class ServletUtils {
       return string;
     }
 
-    ByteAccumulator accumulator =
-        new ByteAccumulator(string.length(), encoding);
+    ByteAccumulator accumulator = new ByteAccumulator(string.length(), encoding);
     StringBuilder builder = new StringBuilder(string.length());
 
     if (firstPercentPos > 0) {
@@ -146,7 +138,7 @@ final class ServletUtils {
 
       char c = string.charAt(srcPos);
 
-      if (c < 0x80) {  // ASCII
+      if (c < 0x80) { // ASCII
         boolean processed = false;
 
         if (c == '%' && string.length() >= srcPos + 3) {
@@ -175,7 +167,7 @@ final class ServletUtils {
             accumulator.append((byte) c);
           }
         }
-      } else {  // Non-ASCII
+      } else { // Non-ASCII
         // A non-ASCII char marks the end of a multi-char encoding sequence,
         // if one is in progress.
 
@@ -189,10 +181,7 @@ final class ServletUtils {
     return builder.toString();
   }
 
-  /**
-   * Accumulates byte sequences while decoding strings, and
-   * encodes them into a StringBuilder.
-   */
+  /** Accumulates byte sequences while decoding strings, and encodes them into a StringBuilder. */
   private static class ByteAccumulator {
     private byte[] bytes;
     private int length;
@@ -224,7 +213,7 @@ final class ServletUtils {
       if (cap >= minCapacity) {
         return;
       }
-      int newCapacity = cap + (cap >> 1);  // *1.5
+      int newCapacity = cap + (cap >> 1); // *1.5
       if (newCapacity < minCapacity) {
         // we are close to overflowing, grow by smaller steps
         newCapacity = minCapacity;

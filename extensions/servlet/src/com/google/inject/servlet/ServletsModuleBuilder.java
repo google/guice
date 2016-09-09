@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,27 +19,24 @@ import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.internal.UniqueAnnotations;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServlet;
 
 /**
- * Builds the guice module that binds configured servlets, with their
- * wrapper ServletDefinitions. Is part of the binding EDSL. Very similar to
- * {@link com.google.inject.servlet.FiltersModuleBuilder}.
+ * Builds the guice module that binds configured servlets, with their wrapper ServletDefinitions. Is
+ * part of the binding EDSL. Very similar to {@link com.google.inject.servlet.FiltersModuleBuilder}.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 class ServletsModuleBuilder {
-  
+
   private final Set<String> servletUris = Sets.newHashSet();
   private final Binder binder;
-  
+
   public ServletsModuleBuilder(Binder binder) {
     this.binder = binder;
   }
@@ -110,7 +107,9 @@ class ServletsModuleBuilder {
       with(servletKey, initParams, null);
     }
 
-    private void with(Key<? extends HttpServlet> servletKey, Map<String, String> initParams,
+    private void with(
+        Key<? extends HttpServlet> servletKey,
+        Map<String, String> initParams,
         HttpServlet servletInstance) {
       for (UriPatternMatcher pattern : uriPatterns) {
         binder

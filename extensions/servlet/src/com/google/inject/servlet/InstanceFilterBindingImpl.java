@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +17,16 @@
 package com.google.inject.servlet;
 
 import com.google.common.base.MoreObjects;
-
 import java.util.Map;
-
 import javax.servlet.Filter;
 
 /**
  * Default implementation of InstanceFilterBinding.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
-class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> implements
-    InstanceFilterBinding {
+class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter>
+    implements InstanceFilterBinding {
 
   InstanceFilterBindingImpl(
       Map<String, String> initParams, Filter target, UriPatternMatcher patternMatcher) {
@@ -39,13 +37,14 @@ class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> imp
   public Filter getFilterInstance() {
     return getTarget();
   }
-  
-  @Override public String toString() {
+
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(InstanceFilterBinding.class)
-      .add("pattern", getPattern())
-      .add("initParams", getInitParams())
-      .add("uriPatternType", getUriPatternType())
-      .add("filterInstance", getFilterInstance())
-      .toString();
+        .add("pattern", getPattern())
+        .add("initParams", getInitParams())
+        .add("uriPatternType", getUriPatternType())
+        .add("filterInstance", getFilterInstance())
+        .toString();
   }
 }

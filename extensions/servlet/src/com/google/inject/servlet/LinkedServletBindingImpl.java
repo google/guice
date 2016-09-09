@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,12 @@ package com.google.inject.servlet;
 
 import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
-
 import java.util.Map;
-
 import javax.servlet.http.HttpServlet;
 
 /**
  * Default implementation of LinkedServletBinding.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extends HttpServlet>>
@@ -43,13 +41,13 @@ class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extend
     return getTarget();
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(LinkedServletBinding.class)
-      .add("pattern", getPattern())
-      .add("initParams", getInitParams())
-      .add("uriPatternType", getUriPatternType())
-      .add("linkedServletKey", getLinkedKey())
-      .toString();
+        .add("pattern", getPattern())
+        .add("initParams", getInitParams())
+        .add("uriPatternType", getUriPatternType())
+        .add("linkedServletKey", getLinkedKey())
+        .toString();
   }
-  
 }

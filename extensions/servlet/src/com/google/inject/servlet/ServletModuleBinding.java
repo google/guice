@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * A binding created by {@link ServletModule}.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  * @since 3.0
  */
@@ -34,7 +34,7 @@ public interface ServletModuleBinding {
 
   /** Returns any context params supplied when creating the binding. */
   Map<String, String> getInitParams();
-  
+
   /** Returns true if the given URI will match this binding. */
   boolean matchesUri(String uri);
 }

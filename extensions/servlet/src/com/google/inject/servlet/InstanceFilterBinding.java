@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ package com.google.inject.servlet;
 import javax.servlet.Filter;
 
 /**
- * A binding to a single instance of a filter. 
+ * A binding to a single instance of a filter.
  *
  * @author sameb@google.com
  * @since 3.0
@@ -28,5 +28,4 @@ public interface InstanceFilterBinding extends ServletModuleBinding {
 
   /** Returns the filter instance that will be used. */
   Filter getFilterInstance();
-
 }

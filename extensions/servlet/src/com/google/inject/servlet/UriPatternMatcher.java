@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,13 +32,12 @@ interface UriPatternMatcher {
   /**
    * @param pattern The Path that this service pattern can match against.
    * @return Returns a canonical servlet path from this pattern. For instance, if the pattern is
-   *         {@code /home/*} then the path extracted will be {@code /home}. Each pattern matcher
-   *         implementation must decide and publish what a canonical path represents.
-   *
-   *         NOTE(dhanji): This method returns null for the regex pattern matcher.
+   *     {@code /home/*} then the path extracted will be {@code /home}. Each pattern matcher
+   *     implementation must decide and publish what a canonical path represents.
+   *     <p>NOTE(dhanji): This method returns null for the regex pattern matcher.
    */
   String extractPath(String pattern);
-  
+
   /** Returns the type of pattern this is. */
   UriPatternType getPatternType();
 

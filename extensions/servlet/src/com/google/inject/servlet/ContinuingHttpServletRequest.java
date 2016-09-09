@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +18,8 @@ package com.google.inject.servlet;
 
 import com.google.common.collect.Maps;
 import com.google.inject.OutOfScopeException;
-
 import java.io.IOException;
 import java.util.Map;
-
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +27,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
 
 /**
- * A wrapper for requests that makes requests immutable, taking a snapshot
- * of the original request.
+ * A wrapper for requests that makes requests immutable, taking a snapshot of the original request.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -63,31 +60,38 @@ class ContinuingHttpServletRequest extends HttpServletRequestWrapper {
     }
   }
 
-  @Override public HttpSession getSession() {
+  @Override
+  public HttpSession getSession() {
     throw new OutOfScopeException("Cannot access the session in a continued request");
   }
 
-  @Override public HttpSession getSession(boolean create) {
+  @Override
+  public HttpSession getSession(boolean create) {
     throw new UnsupportedOperationException("Cannot access the session in a continued request");
   }
 
-  @Override public ServletInputStream getInputStream() throws IOException {
+  @Override
+  public ServletInputStream getInputStream() throws IOException {
     throw new UnsupportedOperationException("Cannot access raw request on a continued request");
   }
 
-  @Override public void setAttribute(String name, Object o) {
+  @Override
+  public void setAttribute(String name, Object o) {
     attributes.put(name, o);
   }
 
-  @Override public void removeAttribute(String name) {
+  @Override
+  public void removeAttribute(String name) {
     attributes.remove(name);
   }
 
-  @Override public Object getAttribute(String name) {
+  @Override
+  public Object getAttribute(String name) {
     return attributes.get(name);
   }
 
-  @Override public Cookie[] getCookies() {
+  @Override
+  public Cookie[] getCookies() {
     // NOTE(dhanji): Cookies themselves are mutable. However a ContinuingHttpServletRequest
     // snapshots the original set of cookies it received and imprisons them in immutable
     // form. Unfortunately, the cookie array itself is mutable and there is no way for us
@@ -112,31 +116,38 @@ class ContinuingHttpServletRequest extends HttpServletRequestWrapper {
       }
     }
 
-    @Override public void setComment(String purpose) {
+    @Override
+    public void setComment(String purpose) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
 
-    @Override public void setDomain(String pattern) {
+    @Override
+    public void setDomain(String pattern) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
 
-    @Override public void setMaxAge(int expiry) {
+    @Override
+    public void setMaxAge(int expiry) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
 
-    @Override public void setPath(String uri) {
+    @Override
+    public void setPath(String uri) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
 
-    @Override public void setSecure(boolean flag) {
+    @Override
+    public void setSecure(boolean flag) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
 
-    @Override public void setValue(String newValue) {
+    @Override
+    public void setValue(String newValue) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
 
-    @Override public void setVersion(int v) {
+    @Override
+    public void setVersion(int v) {
       throw new UnsupportedOperationException("Cannot modify cookies on a continued request");
     }
   }

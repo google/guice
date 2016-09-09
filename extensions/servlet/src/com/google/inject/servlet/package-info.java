@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,7 @@
  */
 
 /**
- * Servlet API scopes, bindings and registration; this extension requires {@code
- * guice-servlet.jar}.
+ * Servlet API scopes, bindings and registration; this extension requires {@code guice-servlet.jar}.
  *
  * <p>Apply {@link com.google.inject.servlet.GuiceFilter} to any servlets which will use the servlet
  * scopes. Install {@link com.google.inject.servlet.ServletModule} into your {@link

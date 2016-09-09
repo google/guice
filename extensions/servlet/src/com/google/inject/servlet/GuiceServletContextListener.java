@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,23 +17,20 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Injector;
-
 import java.lang.ref.WeakReference;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
- * As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener}
- * class as a logical place to create and configure your injector. This will ensure the injector
- * is created when the web application is deployed.
- * 
+ * As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener} class
+ * as a logical place to create and configure your injector. This will ensure the injector is
+ * created when the web application is deployed.
+ *
  * @author Kevin Bourrillion (kevinb@google.com)
  * @since 2.0
  */
-public abstract class GuiceServletContextListener
-    implements ServletContextListener {
+public abstract class GuiceServletContextListener implements ServletContextListener {
 
   static final String INJECTOR_NAME = Injector.class.getName();
 
@@ -46,7 +43,8 @@ public abstract class GuiceServletContextListener
     GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
 
     Injector injector = getInjector();
-    injector.getInstance(InternalServletModule.BackwardsCompatibleServletContextProvider.class)
+    injector
+        .getInstance(InternalServletModule.BackwardsCompatibleServletContextProvider.class)
         .set(servletContext);
     servletContext.setAttribute(INJECTOR_NAME, injector);
   }
@@ -57,9 +55,6 @@ public abstract class GuiceServletContextListener
     servletContext.removeAttribute(INJECTOR_NAME);
   }
 
-  /**
-   * Override this method to create (or otherwise obtain a reference to) your
-   * injector.
-   */
+  /** Override this method to create (or otherwise obtain a reference to) your injector. */
   protected abstract Injector getInjector();
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 package com.google.inject.servlet;
 
 import java.io.IOException;
-
 import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -31,8 +30,8 @@ import javax.servlet.ServletResponse;
  * @see com.google.inject.servlet.ManagedFilterPipeline See Also ManagedFilterPipeline.
  */
 class DefaultFilterPipeline implements FilterPipeline {
-  @Inject DefaultFilterPipeline() {
-  }
+  @Inject
+  DefaultFilterPipeline() {}
 
   @Override
   public void initPipeline(ServletContext context) {}
