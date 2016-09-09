@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,13 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.Module;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates methods of a {@link Module} to add items to a {@link Multibinder}.
- * The method's return type and binding annotation determines what Set this will
- * contribute to. For example,
+ * Annotates methods of a {@link Module} to add items to a {@link Multibinder}. The method's return
+ * type and binding annotation determines what Set this will contribute to. For example,
  *
  * <pre>
  * {@literal @}ProvidesIntoSet
@@ -49,5 +47,4 @@ import java.lang.annotation.Target;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-public @interface ProvidesIntoSet {
-}
+public @interface ProvidesIntoSet {}

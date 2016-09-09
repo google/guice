@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +20,8 @@ import com.google.inject.spi.BindingTargetVisitor;
 
 /**
  * A visitor for the multibinder extension.
- * <p>
- * If your {@link BindingTargetVisitor} implements this interface, bindings created by using
+ *
+ * <p>If your {@link BindingTargetVisitor} implements this interface, bindings created by using
  * {@link Multibinder}, {@link MapBinder} or {@link OptionalBinderBinding} will be visited through
  * this interface.
  *
@@ -29,22 +29,17 @@ import com.google.inject.spi.BindingTargetVisitor;
  * @author sameb@google.com (Sam Berlin)
  */
 public interface MultibindingsTargetVisitor<T, V> extends BindingTargetVisitor<T, V> {
-  
-  /**
-   * Visits a binding created through {@link Multibinder}.
-   */
+
+  /** Visits a binding created through {@link Multibinder}. */
   V visit(MultibinderBinding<? extends T> multibinding);
-  
-  /**
-   * Visits a binding created through {@link MapBinder}.
-   */
+
+  /** Visits a binding created through {@link MapBinder}. */
   V visit(MapBinderBinding<? extends T> mapbinding);
-  
+
   /**
    * Visits a binding created through {@link OptionalBinder}.
-   * 
+   *
    * @since 4.0
    */
   V visit(OptionalBinderBinding<? extends T> optionalbinding);
-
 }

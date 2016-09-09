@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * Allows users define customized key type annotations for map bindings by annotating an annotation
  * of a {@code Map}'s key type. The custom key annotation can be applied to methods also annotated
  * with {@literal @}{@link ProvidesIntoMap}.
- * 
+ *
  * <p>A {@link StringMapKey} and {@link ClassMapKey} are provided for convenience with maps whose
  * keys are strings or classes. For maps with enums or primitive types as keys, you must provide
  * your own MapKey annotation, such as this one for an enum:
@@ -40,10 +40,10 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  *
- * You can also use the whole annotation as the key, if {@code unwrapValue=false}.
- * When unwrapValue is false, the annotation type will be the key type for the injected map and
- * the annotation instances will be the key values. If {@code unwrapValue=true}, the value() type
- * will be the key type for injected map and the value() instances will be the keys values.
+ * You can also use the whole annotation as the key, if {@code unwrapValue=false}. When unwrapValue
+ * is false, the annotation type will be the key type for the injected map and the annotation
+ * instances will be the key values. If {@code unwrapValue=true}, the value() type will be the key
+ * type for injected map and the value() instances will be the keys values.
  *
  * @since 4.0
  */
