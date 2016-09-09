@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,15 +27,13 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
- * A support class for {@link Module}s which reduces repetition and results in
- * a more readable configuration. Simply extend this class, implement {@link
- * #configure()}, and call the inherited methods which mirror those found in
- * {@link Binder}. For example:
+ * A support class for {@link Module}s which reduces repetition and results in a more readable
+ * configuration. Simply extend this class, implement {@link #configure()}, and call the inherited
+ * methods which mirror those found in {@link Binder}. For example:
  *
  * <pre>
  * public class MyModule extends AbstractModule {
@@ -61,78 +59,56 @@ public abstract class AbstractModule implements Module {
     this.binder = checkNotNull(builder, "builder");
     try {
       configure();
-    }
-    finally {
+    } finally {
       this.binder = null;
     }
   }
 
-  /**
-   * Configures a {@link Binder} via the exposed methods.
-   */
+  /** Configures a {@link Binder} via the exposed methods. */
   protected abstract void configure();
 
-  /**
-   * Gets direct access to the underlying {@code Binder}.
-   */
+  /** Gets direct access to the underlying {@code Binder}. */
   protected Binder binder() {
     checkState(binder != null, "The binder can only be used inside configure()");
     return binder;
   }
 
-  /**
-   * @see Binder#bindScope(Class, Scope)
-   */
-  protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-      Scope scope) {
+  /** @see Binder#bindScope(Class, Scope) */
+  protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
     binder().bindScope(scopeAnnotation, scope);
   }
 
-  /**
-   * @see Binder#bind(Key)
-   */
+  /** @see Binder#bind(Key) */
   protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
     return binder().bind(key);
   }
 
-  /**
-   * @see Binder#bind(TypeLiteral)
-   */
+  /** @see Binder#bind(TypeLiteral) */
   protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return binder().bind(typeLiteral);
   }
 
-  /**
-   * @see Binder#bind(Class)
-   */
+  /** @see Binder#bind(Class) */
   protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
     return binder().bind(clazz);
   }
 
-  /**
-   * @see Binder#bindConstant()
-   */
+  /** @see Binder#bindConstant() */
   protected AnnotatedConstantBindingBuilder bindConstant() {
     return binder().bindConstant();
   }
 
-  /**
-   * @see Binder#install(Module)
-   */
+  /** @see Binder#install(Module) */
   protected void install(Module module) {
     binder().install(module);
   }
 
-  /**
-   * @see Binder#addError(String, Object[])
-   */
+  /** @see Binder#addError(String, Object[]) */
   protected void addError(String message, Object... arguments) {
     binder().addError(message, arguments);
   }
 
-  /**
-   * @see Binder#addError(Throwable) 
-   */
+  /** @see Binder#addError(Throwable) */
   protected void addError(Throwable t) {
     binder().addError(t);
   }
@@ -153,9 +129,7 @@ public abstract class AbstractModule implements Module {
     binder().requestInjection(instance);
   }
 
-  /**
-   * @see Binder#requestStaticInjection(Class[])
-   */
+  /** @see Binder#requestStaticInjection(Class[]) */
   protected void requestStaticInjection(Class<?>... types) {
     binder().requestStaticInjection(types);
   }
@@ -163,10 +137,10 @@ public abstract class AbstractModule implements Module {
   /*if[AOP]*/
   /**
    * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
-   *  com.google.inject.matcher.Matcher,
-   *  org.aopalliance.intercept.MethodInterceptor[])
+   *     com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])
    */
-  protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
+  protected void bindInterceptor(
+      Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       org.aopalliance.intercept.MethodInterceptor... interceptors) {
     binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
@@ -174,10 +148,9 @@ public abstract class AbstractModule implements Module {
   /*end[AOP]*/
 
   /**
-   * Adds a dependency from this module to {@code key}. When the injector is
-   * created, Guice will report an error if {@code key} cannot be injected.
-   * Note that this requirement may be satisfied by implicit binding, such as
-   * a public no-arguments constructor.
+   * Adds a dependency from this module to {@code key}. When the injector is created, Guice will
+   * report an error if {@code key} cannot be injected. Note that this requirement may be satisfied
+   * by implicit binding, such as a public no-arguments constructor.
    *
    * @since 2.0
    */
@@ -186,10 +159,9 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * Adds a dependency from this module to {@code type}. When the injector is
-   * created, Guice will report an error if {@code type} cannot be injected.
-   * Note that this requirement may be satisfied by implicit binding, such as
-   * a public no-arguments constructor.
+   * Adds a dependency from this module to {@code type}. When the injector is created, Guice will
+   * report an error if {@code type} cannot be injected. Note that this requirement may be satisfied
+   * by implicit binding, such as a public no-arguments constructor.
    *
    * @since 2.0
    */
@@ -217,13 +189,13 @@ public abstract class AbstractModule implements Module {
    * @see Binder#convertToTypes
    * @since 2.0
    */
-  protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter converter) {
+  protected void convertToTypes(
+      Matcher<? super TypeLiteral<?>> typeMatcher, TypeConverter converter) {
     binder().convertToTypes(typeMatcher, converter);
   }
 
   /**
-   * @see Binder#currentStage() 
+   * @see Binder#currentStage()
    * @since 2.0
    */
   protected Stage currentStage() {
@@ -247,21 +219,19 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see Binder#bindListener(com.google.inject.matcher.Matcher,
-   *  com.google.inject.spi.TypeListener)
+   * @see Binder#bindListener(com.google.inject.matcher.Matcher, com.google.inject.spi.TypeListener)
    * @since 2.0
    */
-  protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeListener listener) {
+  protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
     binder().bindListener(typeMatcher, listener);
   }
-  
+
   /**
    * @see Binder#bindListener(Matcher, ProvisionListener...)
    * @since 4.0
    */
-  protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
-      ProvisionListener... listener) {
+  protected void bindListener(
+      Matcher<? super Binding<?>> bindingMatcher, ProvisionListener... listener) {
     binder().bindListener(bindingMatcher, listener);
   }
 }
