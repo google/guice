@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,26 +19,19 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-
+import java.lang.reflect.Method;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-import java.lang.reflect.Method;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
   // TODO(gak): Move these args to the cxtor & make these final.
-  @Inject
-  private JpaPersistService emProvider = null;
+  @Inject private JpaPersistService emProvider = null;
 
-  @Inject
-  private UnitOfWork unitOfWork = null;
+  @Inject private UnitOfWork unitOfWork = null;
 
   @Transactional
   private static class Internal {}
@@ -92,7 +85,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       txn.commit();
     } finally {
       //close the em if necessary
-      if (null != didWeStartWork.get() ) {
+      if (null != didWeStartWork.get()) {
         didWeStartWork.remove();
         unitOfWork.end();
       }
@@ -128,8 +121,8 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
    * @param e The exception to test for rollback
    * @param txn A JPA Transaction to issue rollbacks on
    */
-  private boolean rollbackIfNecessary(Transactional transactional, Exception e,
-      EntityTransaction txn) {
+  private boolean rollbackIfNecessary(
+      Transactional transactional, Exception e, EntityTransaction txn) {
     boolean commit = true;
 
     //check rollback clauses

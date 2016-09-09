@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,78 +18,76 @@ package com.google.inject.example;
 
 import static junit.framework.Assert.assertTrue;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ClientServiceWithDependencyInjection {
 
-// 62 lines
+  // 62 lines
 
-public interface Service {
-  void go();
-}
+  public interface Service {
+    void go();
+  }
 
-public static class ServiceImpl implements ClientServiceWithDependencyInjection.Service {
+  public static class ServiceImpl implements ClientServiceWithDependencyInjection.Service {
     @Override
     public void go() {
       // ...
     }
-}
-
-public static class ServiceFactory {
-
-  private ServiceFactory() {}
-
-  private static final Service service = new ServiceImpl();
-
-  public static Service getInstance() {
-    return service;
-  }
-}
-
-public static class Client {
-
-  private final Service service;
-
-  public Client(Service service) {
-    this.service = service;
   }
 
-  public void go() {
-    service.go();
+  public static class ServiceFactory {
+
+    private ServiceFactory() {}
+
+    private static final Service service = new ServiceImpl();
+
+    public static Service getInstance() {
+      return service;
+    }
   }
-}
 
-public static class ClientFactory {
+  public static class Client {
 
-  private ClientFactory() {}
+    private final Service service;
 
-  public static Client getInstance() {
-    Service service = ServiceFactory.getInstance();
-    return new Client(service);
+    public Client(Service service) {
+      this.service = service;
+    }
+
+    public void go() {
+      service.go();
+    }
   }
-}
 
-public void testClient() {
-  MockService mock = new MockService();
-  Client client = new Client(mock);
-  client.go();
-  assertTrue(mock.isGone());
-}
+  public static class ClientFactory {
 
-public static class MockService implements Service {
+    private ClientFactory() {}
 
-  private boolean gone = false;
+    public static Client getInstance() {
+      Service service = ServiceFactory.getInstance();
+      return new Client(service);
+    }
+  }
+
+  public void testClient() {
+    MockService mock = new MockService();
+    Client client = new Client(mock);
+    client.go();
+    assertTrue(mock.isGone());
+  }
+
+  public static class MockService implements Service {
+
+    private boolean gone = false;
 
     @Override
     public void go() {
-    gone = true;
-  }
+      gone = true;
+    }
 
-  public boolean isGone() {
-    return gone;
+    public boolean isGone() {
+      return gone;
+    }
   }
-}
 
   public static void main(String[] args) {
     new ClientServiceWithDependencyInjection().testClient();

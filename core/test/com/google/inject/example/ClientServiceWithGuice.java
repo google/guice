@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,69 +25,67 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ClientServiceWithGuice {
 
-// 48 lines
+  // 48 lines
 
-public interface Service {
-  void go();
-}
+  public interface Service {
+    void go();
+  }
 
-public static class ServiceImpl implements Service {
+  public static class ServiceImpl implements Service {
     @Override
     public void go() {
       // ...
     }
-}
+  }
 
-public static class MyModule extends AbstractModule {
+  public static class MyModule extends AbstractModule {
     @Override
     protected void configure() {
-    bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
-  }
-}
-
-public static class Client {
-
-  private final Service service;
-
-  @Inject
-  public Client(Service service) {
-    this.service = service;
+      bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
+    }
   }
 
-  public void go() {
-    service.go();
+  public static class Client {
+
+    private final Service service;
+
+    @Inject
+    public Client(Service service) {
+      this.service = service;
+    }
+
+    public void go() {
+      service.go();
+    }
   }
-}
 
-public void testClient() {
-  MockService mock = new MockService();
-  Client client = new Client(mock);
-  client.go();
-  assertTrue(mock.isGone());
-}
+  public void testClient() {
+    MockService mock = new MockService();
+    Client client = new Client(mock);
+    client.go();
+    assertTrue(mock.isGone());
+  }
 
-public static class MockService implements Service {
+  public static class MockService implements Service {
 
-  private boolean gone = false;
+    private boolean gone = false;
 
     @Override
     public void go() {
-    gone = true;
+      gone = true;
+    }
+
+    public boolean isGone() {
+      return gone;
+    }
   }
 
-  public boolean isGone() {
-    return gone;
+  public static void main(String[] args) throws CreationException {
+    new ClientServiceWithGuice().testClient();
+    Injector injector = Guice.createInjector(new MyModule());
+    Client client = injector.getInstance(Client.class);
   }
-}
-
-public static void main(String[] args) throws CreationException {
-  new ClientServiceWithGuice().testClient();
-  Injector injector = Guice.createInjector(new MyModule());
-  Client client = injector.getInstance(Client.class);
-}
 }

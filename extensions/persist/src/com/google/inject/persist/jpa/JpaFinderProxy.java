@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +24,6 @@ import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
 import com.google.inject.persist.finder.FirstResult;
 import com.google.inject.persist.finder.MaxResults;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -35,9 +31,10 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * TODO(dhanji): Make this work!!
@@ -83,31 +80,33 @@ class JpaFinderProxy implements MethodInterceptor {
     return result;
   }
 
-  private Object getAsCollection(JpaFinderProxy.FinderDescriptor finderDescriptor,
-      List results) {
+  private Object getAsCollection(JpaFinderProxy.FinderDescriptor finderDescriptor, List results) {
     Collection<?> collection;
     try {
       collection = (Collection) finderDescriptor.returnCollectionTypeConstructor.newInstance();
     } catch (InstantiationException e) {
       throw new RuntimeException(
           "Specified collection class of Finder's returnAs could not be instantated: "
-              + finderDescriptor.returnCollectionType, e);
+              + finderDescriptor.returnCollectionType,
+          e);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(
           "Specified collection class of Finder's returnAs could not be instantated (do not have access privileges): "
-              + finderDescriptor.returnCollectionType, e);
+              + finderDescriptor.returnCollectionType,
+          e);
     } catch (InvocationTargetException e) {
       throw new RuntimeException(
           "Specified collection class of Finder's returnAs could not be instantated (it threw an exception): "
-              + finderDescriptor.returnCollectionType, e);
+              + finderDescriptor.returnCollectionType,
+          e);
     }
 
     collection.addAll(results);
     return collection;
   }
 
-  private void bindQueryNamedParameters(Query jpaQuery,
-      JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
+  private void bindQueryNamedParameters(
+      Query jpaQuery, JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
     for (int i = 0; i < arguments.length; i++) {
       Object argument = arguments[i];
       Object annotation = descriptor.parameterAnnotations[i];
@@ -115,7 +114,7 @@ class JpaFinderProxy implements MethodInterceptor {
       if (null == annotation)
       //noinspection UnnecessaryContinue
       {
-        continue;   //skip param as it's not bindable
+        continue; //skip param as it's not bindable
       } else if (annotation instanceof Named) {
         Named named = (Named) annotation;
         jpaQuery.setParameter(named.value(), argument);
@@ -130,8 +129,8 @@ class JpaFinderProxy implements MethodInterceptor {
     }
   }
 
-  private void bindQueryRawParameters(Query jpaQuery,
-      JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
+  private void bindQueryRawParameters(
+      Query jpaQuery, JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
     for (int i = 0, index = 1; i < arguments.length; i++) {
       Object argument = arguments[i];
       Object annotation = descriptor.parameterAnnotations[i];
@@ -190,7 +189,7 @@ class JpaFinderProxy implements MethodInterceptor {
         } else if (MaxResults.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           break;
-        }   //leave as null for no binding
+        } //leave as null for no binding
       }
     }
 
@@ -202,13 +201,14 @@ class JpaFinderProxy implements MethodInterceptor {
         && finderDescriptor.returnClass != Collection.class) {
       finderDescriptor.returnCollectionType = finder.returnAs();
       try {
-        finderDescriptor.returnCollectionTypeConstructor = finderDescriptor.returnCollectionType
-            .getConstructor();
-        finderDescriptor.returnCollectionTypeConstructor.setAccessible(true);   //UGH!
+        finderDescriptor.returnCollectionTypeConstructor =
+            finderDescriptor.returnCollectionType.getConstructor();
+        finderDescriptor.returnCollectionTypeConstructor.setAccessible(true); //UGH!
       } catch (NoSuchMethodException e) {
         throw new RuntimeException(
             "Finder's collection return type specified has no default constructor! returnAs: "
-                + finderDescriptor.returnCollectionType, e);
+                + finderDescriptor.returnCollectionType,
+            e);
       }
     }
 
@@ -239,19 +239,17 @@ class JpaFinderProxy implements MethodInterceptor {
     return JpaFinderProxy.ReturnType.PLAIN;
   }
 
-  /**
-   * A wrapper data class that caches information about a finder method.
-   */
+  /** A wrapper data class that caches information about a finder method. */
   private static class FinderDescriptor {
     private volatile boolean isKeyedQuery = false;
     volatile boolean isBindAsRawParameters = true;
-        //should we treat the query as having ? instead of :named params
+    //should we treat the query as having ? instead of :named params
     volatile JpaFinderProxy.ReturnType returnType;
     volatile Class<?> returnClass;
     volatile Class<? extends Collection> returnCollectionType;
     volatile Constructor returnCollectionTypeConstructor;
     volatile Object[] parameterAnnotations;
-        //contract is: null = no bind, @Named = param, @FirstResult/@MaxResults for paging
+    //contract is: null = no bind, @Named = param, @FirstResult/@MaxResults for paging
 
     private String query;
     private String name;
@@ -275,6 +273,8 @@ class JpaFinderProxy implements MethodInterceptor {
   }
 
   private static enum ReturnType {
-    PLAIN, COLLECTION, ARRAY
+    PLAIN,
+    COLLECTION,
+    ARRAY
   }
 }

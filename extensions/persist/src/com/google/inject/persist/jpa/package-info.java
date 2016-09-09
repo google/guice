@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * guice-persist's Java Persistence API (JPA) support.
- */
+/** guice-persist's Java Persistence API (JPA) support. */
 package com.google.inject.persist.jpa;
