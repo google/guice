@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,10 +35,6 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,10 +42,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class SpiBindingsTest extends TestCase {
 
   public void testBindConstant() {
@@ -268,14 +264,15 @@ public class SpiBindingsTest extends TestCase {
     assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
     checkBindingSource(binding);
     assertTrue(binding instanceof ConvertedConstantBinding);
-    binding.acceptTargetVisitor(new FailingTargetVisitor<Integer>() {
-      @Override public Void visit(
-          ConvertedConstantBinding<? extends Integer> binding) {
-        assertEquals((Integer) 1, binding.getValue());
-        assertEquals(Key.get(String.class, Names.named("one")), binding.getSourceKey());
-        return null;
-      }
-    });
+    binding.acceptTargetVisitor(
+        new FailingTargetVisitor<Integer>() {
+          @Override
+          public Void visit(ConvertedConstantBinding<? extends Integer> binding) {
+            assertEquals((Integer) 1, binding.getValue());
+            assertEquals(Key.get(String.class, Names.named("one")), binding.getSourceKey());
+            return null;
+          }
+        });
   }
 
   public void testProviderBinding() {
@@ -293,13 +290,14 @@ public class SpiBindingsTest extends TestCase {
     assertEquals(providerOfStringKey, binding.getKey());
     checkBindingSource(binding);
     assertTrue(binding instanceof ProviderBinding);
-    binding.acceptTargetVisitor(new FailingTargetVisitor<Provider<String>>() {
-      @Override public Void visit(
-          ProviderBinding<? extends Provider<String>> binding) {
-        assertEquals(Key.get(String.class), binding.getProvidedKey());
-        return null;
-      }
-    });
+    binding.acceptTargetVisitor(
+        new FailingTargetVisitor<Provider<String>>() {
+          @Override
+          public Void visit(ProviderBinding<? extends Provider<String>> binding) {
+            assertEquals(Key.get(String.class), binding.getProvidedKey());
+            return null;
+          }
+        });
   }
 
   public void testScopes() {
@@ -382,10 +380,10 @@ public class SpiBindingsTest extends TestCase {
           }
         });
   }
-  
+
   public void testExtensionSpi() {
     final AtomicBoolean visiting = new AtomicBoolean(false);
-    
+
     final Injector injector =
         Guice.createInjector(
             new AbstractModule() {
@@ -419,7 +417,7 @@ public class SpiBindingsTest extends TestCase {
                         });
               }
             });
-    
+
     visiting.set(true);
 
     // Check for Provider<String> binding -- that is still a ProviderBinding.
@@ -428,13 +426,15 @@ public class SpiBindingsTest extends TestCase {
     assertEquals(providerOfStringKey, providerBinding.getKey());
     checkBindingSource(providerBinding);
     assertTrue("binding: " + providerBinding, providerBinding instanceof ProviderBinding);
-    providerBinding.acceptTargetVisitor(new FailingTargetVisitor<Provider<String>>() {
-      @Override public Void visit(ProviderBinding<? extends Provider<String>> binding) {
-        assertEquals(Key.get(String.class), binding.getProvidedKey());
-        return null;
-      }
-    });
-    
+    providerBinding.acceptTargetVisitor(
+        new FailingTargetVisitor<Provider<String>>() {
+          @Override
+          public Void visit(ProviderBinding<? extends Provider<String>> binding) {
+            assertEquals(Key.get(String.class), binding.getProvidedKey());
+            return null;
+          }
+        });
+
     // Check for String binding -- that one is ProviderInstanceBinding, and gets hooked
     Binding<String> binding = injector.getBinding(String.class);
     assertEquals(Key.get(String.class), binding.getKey());
@@ -460,7 +460,7 @@ public class SpiBindingsTest extends TestCase {
       assertEquals(0, source.getStackTrace().length);
     }
   }
-  
+
   public void checkInjector(Module module, ElementVisitor<?>... visitors) {
     Injector injector = Guice.createInjector(module);
 
@@ -482,8 +482,8 @@ public class SpiBindingsTest extends TestCase {
     }
   }
 
-  private final ImmutableSet<Key<?>> BUILT_IN_BINDINGS = ImmutableSet.of(
-      Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
+  private final ImmutableSet<Key<?>> BUILT_IN_BINDINGS =
+      ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
 
   private final Comparator<Binding<?>> orderByKey =
       new Comparator<Binding<?>>() {
@@ -500,9 +500,10 @@ public class SpiBindingsTest extends TestCase {
     }
   }
 
-  private static class C { }
+  private static class C {}
 
   private static class D extends C {
-    @Inject public D(Injector unused) { }
+    @Inject
+    public D(Injector unused) {}
   }
 }

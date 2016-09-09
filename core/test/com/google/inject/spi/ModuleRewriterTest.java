@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,14 +27,10 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
-
+import java.util.List;
 import junit.framework.TestCase;
 
-import java.util.List;
-
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class ModuleRewriterTest extends TestCase {
 
   public void testRewriteBindings() {
@@ -54,17 +50,19 @@ public class ModuleRewriterTest extends TestCase {
     // create a rewriter that rewrites the binding to 'Wine' with a binding to 'Beer'
     List<Element> rewritten = Lists.newArrayList();
     for (Element element : elements) {
-      element = element.acceptVisitor(new DefaultElementVisitor<Element>() {
-        @Override public <T> Element visit(Binding<T> binding) {
-          T target = binding.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
-          if ("Wine".equals(target)) {
-            return null;
-          }
-          else {
-            return binding;
-          }
-        }
-      });
+      element =
+          element.acceptVisitor(
+              new DefaultElementVisitor<Element>() {
+                @Override
+                public <T> Element visit(Binding<T> binding) {
+                  T target = binding.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
+                  if ("Wine".equals(target)) {
+                    return null;
+                  } else {
+                    return binding;
+                  }
+                }
+              });
       if (element != null) {
         rewritten.add(element);
       }

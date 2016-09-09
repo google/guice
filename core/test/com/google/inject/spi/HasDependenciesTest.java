@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +24,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-
+import java.util.Set;
 import junit.framework.TestCase;
 
-import java.util.Set;
-
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class HasDependenciesTest extends TestCase {
 
-  /**
-   * When an instance implements HasDependencies, the injected dependencies aren't used.
-   */
+  /** When an instance implements HasDependencies, the injected dependencies aren't used. */
   public void testInstanceWithDependencies() {
     Injector injector =
         Guice.createInjector(
@@ -48,7 +42,8 @@ public class HasDependenciesTest extends TestCase {
             });
 
     InstanceBinding<?> binding = (InstanceBinding<?>) injector.getBinding(A.class);
-    assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class))),
+    assertEquals(
+        ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class))),
         binding.getDependencies());
   }
 
@@ -83,11 +78,13 @@ public class HasDependenciesTest extends TestCase {
   }
 
   static class A {
-    @Inject void injectUnusedDependencies(String unused) {}
+    @Inject
+    void injectUnusedDependencies(String unused) {}
   }
 
   static class ProviderOfA implements Provider<A> {
-    @Inject void injectUnusedDependencies(String unused) {}
+    @Inject
+    void injectUnusedDependencies(String unused) {}
 
     @Override
     public A get() {
@@ -102,8 +99,8 @@ public class HasDependenciesTest extends TestCase {
     }
   }
 
-  static class ProviderOfAWithDependencies
-      extends ProviderOfA implements ProviderWithDependencies<A> {
+  static class ProviderOfAWithDependencies extends ProviderOfA
+      implements ProviderWithDependencies<A> {
     @Override
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)));

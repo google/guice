@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,8 @@
 package com.google.inject.spi;
 
 import com.google.inject.Scope;
-
-import junit.framework.AssertionFailedError;
-
 import java.lang.annotation.Annotation;
+import junit.framework.AssertionFailedError;
 
 public class FailingBindingScopingVisitor implements BindingScopingVisitor<Void> {
 
