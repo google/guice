@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,25 +43,37 @@ public class InstanceNode extends Node {
     return members;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (!(obj instanceof InstanceNode)) {
       return false;
     }
     InstanceNode other = (InstanceNode) obj;
-    return super.equals(other) && Objects.equal(instance, other.instance)
+    return super.equals(other)
+        && Objects.equal(instance, other.instance)
         && Objects.equal(members, other.members);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return 31 * super.hashCode() + Objects.hashCode(instance, members);
   }
 
-  @Override public String toString() {
-    return "InstanceNode{id=" + getId() + " source=" + getSource() + " instance=" + instance
-        + " members=" + members + "}";
+  @Override
+  public String toString() {
+    return "InstanceNode{id="
+        + getId()
+        + " source="
+        + getSource()
+        + " instance="
+        + instance
+        + " members="
+        + members
+        + "}";
   }
 
-  @Override public Node copy(NodeId id) {
+  @Override
+  public Node copy(NodeId id) {
     return new InstanceNode(id, getSource(), getInstance(), getMembers());
   }
 }
