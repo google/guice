@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * JMX integration; this extension requires {@code guice-jmx.jar}.
- */
+/** JMX integration; this extension requires {@code guice-jmx.jar}. */
 package com.google.inject.tools.jmx;

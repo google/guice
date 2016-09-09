@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,22 +17,23 @@
 package com.google.inject.service;
 
 import com.google.common.base.Preconditions;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 /**
- * An asynchronous implementation of {@link com.google.inject.service.Service}
- * that provides convenience callbacks to create your own services.
+ * An asynchronous implementation of {@link com.google.inject.service.Service} that provides
+ * convenience callbacks to create your own services.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public abstract class AsyncService implements Service {
-  private static final Runnable DO_NOTHING = new Runnable() {
-    @Override public void run() {}
-  };
+  private static final Runnable DO_NOTHING =
+      new Runnable() {
+        @Override
+        public void run() {}
+      };
 
   private final ExecutorService executor;
 
@@ -43,9 +44,9 @@ public abstract class AsyncService implements Service {
   }
 
   @Override
-  public synchronized final Future<State> start() {
-    Preconditions.checkState(state != State.STOPPED,
-        "Cannot restart a service that has been stopped");
+  public final synchronized Future<State> start() {
+    Preconditions.checkState(
+        state != State.STOPPED, "Cannot restart a service that has been stopped");
 
     // Starts are idempotent.
     if (state == State.STARTED) {
@@ -63,16 +64,14 @@ public abstract class AsyncService implements Service {
   }
 
   /**
-   * Called back when this service must do its start work. Typically occurs
-   * in a background thread. The result of this method is returned to the
-   * original caller of {@link Service#start()} and can thus be used to
-   * return a status message after start completes (or fails as the case
-   * may be).
+   * Called back when this service must do its start work. Typically occurs in a background thread.
+   * The result of this method is returned to the original caller of {@link Service#start()} and can
+   * thus be used to return a status message after start completes (or fails as the case may be).
    */
   protected abstract void onStart();
 
   @Override
-  public synchronized final Future<State> stop() {
+  public final synchronized Future<State> stop() {
     Preconditions.checkState(state != null, "Must start this service before you stop it!");
 
     // Likewise, stops are idempotent.
@@ -91,11 +90,9 @@ public abstract class AsyncService implements Service {
   }
 
   /**
-   * Called back when this service must shutdown. Typically occurs
-   * in a background thread. The result of this method is returned to the
-   * original caller of {@link Service#stop()} and can thus be used to
-   * return a status message after stop completes (or fails as the case
-   * may be).
+   * Called back when this service must shutdown. Typically occurs in a background thread. The
+   * result of this method is returned to the original caller of {@link Service#stop()} and can thus
+   * be used to return a status message after stop completes (or fails as the case may be).
    */
   protected abstract void onStop();
 

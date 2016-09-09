@@ -27,12 +27,10 @@ import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderWithDependencies;
-
 import java.util.Set;
 
 /**
- * Static utility methods for creating and working with instances of
- * {@link Provider}.
+ * Static utility methods for creating and working with instances of {@link Provider}.
  *
  * @author Kevin Bourrillion (kevinb9n@gmail.com)
  * @since 2.0
@@ -42,13 +40,12 @@ public final class Providers {
   private Providers() {}
 
   /**
-   * Returns a provider which always provides {@code instance}.  This should not
-   * be necessary to use in your application, but is helpful for several types
-   * of unit tests.
+   * Returns a provider which always provides {@code instance}. This should not be necessary to use
+   * in your application, but is helpful for several types of unit tests.
    *
-   * @param instance the instance that should always be provided.  This is also
-   *     permitted to be null, to enable aggressive testing, although in real
-   *     life a Guice-supplied Provider will never return null.
+   * @param instance the instance that should always be provided. This is also permitted to be null,
+   *     to enable aggressive testing, although in real life a Guice-supplied Provider will never
+   *     return null.
    */
   public static <T> Provider<T> of(final T instance) {
     return new ConstantProvider<T>(instance);
@@ -66,42 +63,45 @@ public final class Providers {
       return instance;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "of(" + instance + ")";
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       return (obj instanceof ConstantProvider)
           && Objects.equal(instance, ((ConstantProvider<?>) obj).instance);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return Objects.hashCode(instance);
     }
   }
 
   /**
-   * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
-   * JSR-330 {@code javax.inject.Provider}. The converse method is unnecessary,
-   * since Guice providers directly implement the JSR-330 interface.
-   * 
+   * Returns a Guice-friendly {@code com.google.inject.Provider} for the given JSR-330 {@code
+   * javax.inject.Provider}. The converse method is unnecessary, since Guice providers directly
+   * implement the JSR-330 interface.
+   *
    * @since 3.0
    */
   public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
     if (provider instanceof Provider) {
       return (Provider<T>) provider;
     }
-  
+
     final javax.inject.Provider<T> delegate = checkNotNull(provider, "provider");
-    
+
     // Ensure that we inject all injection points from the delegate provider.
     Set<InjectionPoint> injectionPoints =
         InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
-    if(injectionPoints.isEmpty()) {
+    if (injectionPoints.isEmpty()) {
       return new GuicifiedProvider<T>(delegate);
     } else {
       Set<Dependency<?>> mutableDeps = Sets.newHashSet();
-      for(InjectionPoint ip : injectionPoints) {
+      for (InjectionPoint ip : injectionPoints) {
         mutableDeps.addAll(ip.getDependencies());
       }
       final Set<Dependency<?>> dependencies = ImmutableSet.copyOf(mutableDeps);
@@ -121,26 +121,29 @@ public final class Providers {
       return delegate.get();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "guicified(" + delegate + ")";
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       return (obj instanceof GuicifiedProvider)
           && Objects.equal(delegate, ((GuicifiedProvider<?>) obj).delegate);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return Objects.hashCode(delegate);
     }
   }
 
-  private static final class GuicifiedProviderWithDependencies<T>
-      extends GuicifiedProvider<T> implements ProviderWithDependencies<T> {
+  private static final class GuicifiedProviderWithDependencies<T> extends GuicifiedProvider<T>
+      implements ProviderWithDependencies<T> {
     private final Set<Dependency<?>> dependencies;
 
-    private GuicifiedProviderWithDependencies(Set<Dependency<?>> dependencies,
-        javax.inject.Provider<T> delegate) {
+    private GuicifiedProviderWithDependencies(
+        Set<Dependency<?>> dependencies, javax.inject.Provider<T> delegate) {
       super(delegate);
       this.dependencies = dependencies;
     }

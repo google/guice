@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,8 @@ package com.google.inject.struts2;
 import com.google.inject.AbstractModule;
 
 /**
- * Initializes the Struts 2 Guice Plugin. Must be added to the injector returned
- * by {@link com.google.inject.servlet.GuiceServletContextListener#getInjector}.
+ * Initializes the Struts 2 Guice Plugin. Must be added to the injector returned by {@link
+ * com.google.inject.servlet.GuiceServletContextListener#getInjector}.
  *
  * @author benmccann.com
  */
@@ -30,5 +30,4 @@ public class Struts2GuicePluginModule extends AbstractModule {
   protected void configure() {
     requestStaticInjection(Struts2Factory.class);
   }
-
 }
