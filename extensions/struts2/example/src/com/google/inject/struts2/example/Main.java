@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
 
-/**
- * Starts the example web server on port 8080. Run from "./struts2/example".
- */
+/** Starts the example web server on port 8080. Run from "./struts2/example". */
 public class Main {
 
   public static void main(String[] args) throws Exception {
@@ -31,7 +29,7 @@ public class Main {
 
     Connector connector = new SelectChannelConnector();
     connector.setPort(8080);
-    server.setConnectors(new Connector[] { connector });
+    server.setConnectors(new Connector[] {connector});
 
     WebAppContext webapp = new WebAppContext("./root", "/example");
     server.addHandler(webapp);

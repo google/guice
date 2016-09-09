@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Support for binding to string-based names.
- */
+/** Support for binding to string-based names. */
 package com.google.inject.name;

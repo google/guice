@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Dynamic Finder API for Guice Persist.
- */
+/** Dynamic Finder API for Guice Persist. */
 package com.google.inject.persist.finder;
