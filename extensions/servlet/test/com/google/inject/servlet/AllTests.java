@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,7 @@ package com.google.inject.servlet;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-/**
- * @author dhanji@gmail.com (Dhanji R. Prasanna)
- */
+/** @author dhanji@gmail.com (Dhanji R. Prasanna) */
 public class AllTests {
 
   public static Test suite() {

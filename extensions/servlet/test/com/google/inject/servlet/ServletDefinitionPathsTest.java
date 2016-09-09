@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,20 +28,16 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingScopingVisitor;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.HashMap;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import junit.framework.TestCase;
 
 /**
- * Ensures servlet spec compliance for CGI-style variables and general
- *  path/pattern matching.
+ * Ensures servlet spec compliance for CGI-style variables and general path/pattern matching.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
@@ -61,37 +57,39 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletPath("/thing/wing/index.html", "/thing/*", "/thing");
   }
 
-  private void servletPath(final String requestPath, String mapping,
-      final String expectedServletPath) throws IOException, ServletException {
+  private void servletPath(
+      final String requestPath, String mapping, final String expectedServletPath)
+      throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
     Binding binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
     final boolean[] run = new boolean[1];
     //get an instance of this servlet
     expect(injector.getInstance(Key.get(HttpServlet.class)))
-        .andReturn(new HttpServlet() {
+        .andReturn(
+            new HttpServlet() {
 
-          @Override
-          protected void service(HttpServletRequest servletRequest,
-              HttpServletResponse httpServletResponse) throws ServletException, IOException {
+              @Override
+              protected void service(
+                  HttpServletRequest servletRequest, HttpServletResponse httpServletResponse)
+                  throws ServletException, IOException {
 
-            final String path = servletRequest.getServletPath();
-            assertEquals(String.format("expected [%s] but was [%s]", expectedServletPath, path),
-                expectedServletPath, path);
-            run[0] = true;
-          }
-        });
+                final String path = servletRequest.getServletPath();
+                assertEquals(
+                    String.format("expected [%s] but was [%s]", expectedServletPath, path),
+                    expectedServletPath,
+                    path);
+                run[0] = true;
+              }
+            });
 
-    expect(request.getServletPath())
-        .andReturn(requestPath);
+    expect(request.getServletPath()).andReturn(requestPath);
 
     replay(injector, binding, request);
 
@@ -106,45 +104,51 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
-    
-    verify(injector, binding, request);
 
+    verify(injector, binding, request);
   }
 
   // Data-driven test.
   public final void testPathInfoWithServletStyleMatching() throws IOException, ServletException {
     pathInfoWithServletStyleMatching("/path/index.html", "/path", "/*", "/index.html", "");
-    pathInfoWithServletStyleMatching("/path//hulaboo///index.html", "/path", "/*",
-        "/hulaboo/index.html", "");
+    pathInfoWithServletStyleMatching(
+        "/path//hulaboo///index.html", "/path", "/*", "/hulaboo/index.html", "");
     pathInfoWithServletStyleMatching("/path/", "/path", "/*", "/", "");
     pathInfoWithServletStyleMatching("/path////////", "/path", "/*", "/", "");
 
     // a servlet mapping of /thing/*
     pathInfoWithServletStyleMatching("/path/thing////////", "/path", "/thing/*", "/", "/thing");
     pathInfoWithServletStyleMatching("/path/thing/stuff", "/path", "/thing/*", "/stuff", "/thing");
-    pathInfoWithServletStyleMatching("/path/thing/stuff.html", "/path", "/thing/*", "/stuff.html",
-        "/thing");
+    pathInfoWithServletStyleMatching(
+        "/path/thing/stuff.html", "/path", "/thing/*", "/stuff.html", "/thing");
     pathInfoWithServletStyleMatching("/path/thing", "/path", "/thing/*", null, "/thing");
 
     // see external issue 372
-    pathInfoWithServletStyleMatching("/path/some/path/of.jsp", "/path", "/thing/*",
-        null, "/some/path/of.jsp");
+    pathInfoWithServletStyleMatching(
+        "/path/some/path/of.jsp", "/path", "/thing/*", null, "/some/path/of.jsp");
 
     // *.xx style mapping
     pathInfoWithServletStyleMatching("/path/thing.thing", "/path", "*.thing", null, "/thing.thing");
     pathInfoWithServletStyleMatching("/path///h.thing", "/path", "*.thing", null, "/h.thing");
-    pathInfoWithServletStyleMatching("/path///...//h.thing", "/path", "*.thing", null,
-        "/.../h.thing");
+    pathInfoWithServletStyleMatching(
+        "/path///...//h.thing", "/path", "*.thing", null, "/.../h.thing");
     pathInfoWithServletStyleMatching("/path/my/h.thing", "/path", "*.thing", null, "/my/h.thing");
 
     // Encoded URLs
     pathInfoWithServletStyleMatching("/path/index%2B.html", "/path", "/*", "/index+.html", "");
-    pathInfoWithServletStyleMatching("/path/a%20file%20with%20spaces%20in%20name.html", "/path", "/*", "/a file with spaces in name.html", "");
-    pathInfoWithServletStyleMatching("/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/*", "/Tamás nem más.html", "");
+    pathInfoWithServletStyleMatching(
+        "/path/a%20file%20with%20spaces%20in%20name.html",
+        "/path", "/*", "/a file with spaces in name.html", "");
+    pathInfoWithServletStyleMatching(
+        "/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/*", "/Tamás nem más.html", "");
   }
 
-  private void pathInfoWithServletStyleMatching(final String requestUri, final String contextPath,
-      String mapping, final String expectedPathInfo, final String servletPath)
+  private void pathInfoWithServletStyleMatching(
+      final String requestUri,
+      final String contextPath,
+      String mapping,
+      final String expectedPathInfo,
+      final String servletPath)
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
@@ -152,48 +156,45 @@ public class ServletDefinitionPathsTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
     final boolean[] run = new boolean[1];
     //get an instance of this servlet
     expect(injector.getInstance(Key.get(HttpServlet.class)))
-        .andReturn(new HttpServlet() {
+        .andReturn(
+            new HttpServlet() {
 
-          @Override
-          protected void service(HttpServletRequest servletRequest,
-              HttpServletResponse httpServletResponse) throws ServletException, IOException {
+              @Override
+              protected void service(
+                  HttpServletRequest servletRequest, HttpServletResponse httpServletResponse)
+                  throws ServletException, IOException {
 
-            final String path = servletRequest.getPathInfo();
+                final String path = servletRequest.getPathInfo();
 
-            if (null == expectedPathInfo) {
-              assertNull(String.format("expected [%s] but was [%s]", expectedPathInfo, path),
-                  path);
-            }
-            else {
-              assertEquals(String.format("expected [%s] but was [%s]", expectedPathInfo, path),
-                  expectedPathInfo, path);
-            }
+                if (null == expectedPathInfo) {
+                  assertNull(
+                      String.format("expected [%s] but was [%s]", expectedPathInfo, path), path);
+                } else {
+                  assertEquals(
+                      String.format("expected [%s] but was [%s]", expectedPathInfo, path),
+                      expectedPathInfo,
+                      path);
+                }
 
-            //assert memoizer
-            //noinspection StringEquality
-            assertSame("memo field did not work", path, servletRequest.getPathInfo());
+                //assert memoizer
+                //noinspection StringEquality
+                assertSame("memo field did not work", path, servletRequest.getPathInfo());
 
-            run[0] = true;
-          }
-        });
+                run[0] = true;
+              }
+            });
 
-    expect(request.getRequestURI())
-        .andReturn(requestUri);
+    expect(request.getRequestURI()).andReturn(requestUri);
 
-    expect(request.getServletPath())
-        .andReturn(servletPath)
-        .anyTimes();
+    expect(request.getServletPath()).andReturn(servletPath).anyTimes();
 
-    expect(request.getContextPath())
-        .andReturn(contextPath);
+    expect(request.getContextPath()).andReturn(contextPath);
 
     expect(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).andReturn(null);
 
@@ -218,37 +219,47 @@ public class ServletDefinitionPathsTest extends TestCase {
   public final void testPathInfoWithRegexMatching() throws IOException, ServletException {
     // first a mapping of /*
     pathInfoWithRegexMatching("/path/index.html", "/path", "/(.)*", "/index.html", "");
-    pathInfoWithRegexMatching("/path//hulaboo///index.html", "/path", "/(.)*",
-        "/hulaboo/index.html", "");
+    pathInfoWithRegexMatching(
+        "/path//hulaboo///index.html", "/path", "/(.)*", "/hulaboo/index.html", "");
     pathInfoWithRegexMatching("/path/", "/path", "/(.)*", "/", "");
     pathInfoWithRegexMatching("/path////////", "/path", "/(.)*", "/", "");
 
     // a servlet mapping of /thing/*
     pathInfoWithRegexMatching("/path/thing////////", "/path", "/thing/(.)*", "/", "/thing");
     pathInfoWithRegexMatching("/path/thing/stuff", "/path", "/thing/(.)*", "/stuff", "/thing");
-    pathInfoWithRegexMatching("/path/thing/stuff.html", "/path", "/thing/(.)*", "/stuff.html",
-        "/thing");
+    pathInfoWithRegexMatching(
+        "/path/thing/stuff.html", "/path", "/thing/(.)*", "/stuff.html", "/thing");
     pathInfoWithRegexMatching("/path/thing", "/path", "/thing/(.)*", null, "/thing");
 
     // *.xx style mapping
     pathInfoWithRegexMatching("/path/thing.thing", "/path", ".*\\.thing", null, "/thing.thing");
     pathInfoWithRegexMatching("/path///h.thing", "/path", ".*\\.thing", null, "/h.thing");
-    pathInfoWithRegexMatching("/path///...//h.thing", "/path", ".*\\.thing", null,
-        "/.../h.thing");
+    pathInfoWithRegexMatching("/path///...//h.thing", "/path", ".*\\.thing", null, "/.../h.thing");
     pathInfoWithRegexMatching("/path/my/h.thing", "/path", ".*\\.thing", null, "/my/h.thing");
 
     // path
-    pathInfoWithRegexMatching("/path/test.com/com.test.MyServletModule", "", "/path/[^/]+/(.*)",
-        "com.test.MyServletModule", "/path/test.com/com.test.MyServletModule");
+    pathInfoWithRegexMatching(
+        "/path/test.com/com.test.MyServletModule",
+        "",
+        "/path/[^/]+/(.*)",
+        "com.test.MyServletModule",
+        "/path/test.com/com.test.MyServletModule");
 
     // Encoded URLs
     pathInfoWithRegexMatching("/path/index%2B.html", "/path", "/(.)*", "/index+.html", "");
-    pathInfoWithRegexMatching("/path/a%20file%20with%20spaces%20in%20name.html", "/path", "/(.)*", "/a file with spaces in name.html", "");
-    pathInfoWithRegexMatching("/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/(.)*", "/Tamás nem más.html", "");
+    pathInfoWithRegexMatching(
+        "/path/a%20file%20with%20spaces%20in%20name.html",
+        "/path", "/(.)*", "/a file with spaces in name.html", "");
+    pathInfoWithRegexMatching(
+        "/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/(.)*", "/Tamás nem más.html", "");
   }
 
-  public final void pathInfoWithRegexMatching(final String requestUri, final String contextPath,
-      String mapping, final String expectedPathInfo, final String servletPath)
+  public final void pathInfoWithRegexMatching(
+      final String requestUri,
+      final String contextPath,
+      String mapping,
+      final String expectedPathInfo,
+      final String servletPath)
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
@@ -256,48 +267,45 @@ public class ServletDefinitionPathsTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
     final boolean[] run = new boolean[1];
     //get an instance of this servlet
     expect(injector.getInstance(Key.get(HttpServlet.class)))
-        .andReturn(new HttpServlet() {
+        .andReturn(
+            new HttpServlet() {
 
-          @Override
-          protected void service(HttpServletRequest servletRequest,
-              HttpServletResponse httpServletResponse) throws ServletException, IOException {
+              @Override
+              protected void service(
+                  HttpServletRequest servletRequest, HttpServletResponse httpServletResponse)
+                  throws ServletException, IOException {
 
-            final String path = servletRequest.getPathInfo();
+                final String path = servletRequest.getPathInfo();
 
-            if (null == expectedPathInfo) {
-              assertNull(String.format("expected [%s] but was [%s]", expectedPathInfo, path),
-                  path);
-            }
-            else {
-              assertEquals(String.format("expected [%s] but was [%s]", expectedPathInfo, path),
-                  expectedPathInfo, path);
-            }
+                if (null == expectedPathInfo) {
+                  assertNull(
+                      String.format("expected [%s] but was [%s]", expectedPathInfo, path), path);
+                } else {
+                  assertEquals(
+                      String.format("expected [%s] but was [%s]", expectedPathInfo, path),
+                      expectedPathInfo,
+                      path);
+                }
 
-            //assert memoizer
-            //noinspection StringEquality
-            assertSame("memo field did not work", path, servletRequest.getPathInfo());
+                //assert memoizer
+                //noinspection StringEquality
+                assertSame("memo field did not work", path, servletRequest.getPathInfo());
 
-            run[0] = true;
-          }
-        });
+                run[0] = true;
+              }
+            });
 
-    expect(request.getRequestURI())
-        .andReturn(requestUri);
+    expect(request.getRequestURI()).andReturn(requestUri);
 
-    expect(request.getServletPath())
-        .andReturn(servletPath)
-        .anyTimes();
+    expect(request.getServletPath()).andReturn(servletPath).anyTimes();
 
-    expect(request.getContextPath())
-        .andReturn(contextPath);
+    expect(request.getContextPath()).andReturn(contextPath);
 
     expect(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).andReturn(null);
 
@@ -314,7 +322,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
-    
+
     verify(injector, binding, request);
   }
 }

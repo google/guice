@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,9 +28,6 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -38,12 +35,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.ServletException;
+import junit.framework.TestCase;
 
-/**
- * Tests continuation of requests
- */
+/** Tests continuation of requests */
 
 public class ScopeRequestIntegrationTest extends TestCase {
   private static final String A_VALUE = "thereaoskdao";
@@ -57,17 +52,24 @@ public class ScopeRequestIntegrationTest extends TestCase {
 
     // We use servlet module here because we want to test that @RequestScoped
     // behaves properly with the non-HTTP request scope logic.
-    Injector injector = Guice.createInjector(new ServletModule() {
-      @Override protected void configureServlets() {
-        bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
-        bind(SomeObject.class).in(RequestScoped.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
+              @Override
+              protected void configureServlets() {
+                bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
+                bind(SomeObject.class).in(RequestScoped.class);
+              }
+            });
 
     SomeObject someObject = new SomeObject(A_VALUE);
     OffRequestCallable offRequestCallable = injector.getInstance(OffRequestCallable.class);
-    executor.submit(ServletScopes.scopeRequest(offRequestCallable,
-        ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), someObject))).get();
+    executor
+        .submit(
+            ServletScopes.scopeRequest(
+                offRequestCallable,
+                ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), someObject)))
+        .get();
 
     assertSame(injector.getInstance(OffRequestCallable.class), offRequestCallable);
 
@@ -77,8 +79,12 @@ public class ScopeRequestIntegrationTest extends TestCase {
 
     // Now create a new request and assert that the scopes don't cross.
     someObject = new SomeObject(A_DIFFERENT_VALUE);
-    executor.submit(ServletScopes.scopeRequest(offRequestCallable,
-        ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), someObject))).get();
+    executor
+        .submit(
+            ServletScopes.scopeRequest(
+                offRequestCallable,
+                ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), someObject)))
+        .get();
 
     assertSame(injector.getInstance(OffRequestCallable.class), offRequestCallable);
 
@@ -90,36 +96,46 @@ public class ScopeRequestIntegrationTest extends TestCase {
   }
 
   public final void testWrongValueClasses() throws Exception {
-    Injector injector = Guice.createInjector(new ServletModule() {
-      @Override protected void configureServlets() {
-        bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
-        bind(SomeObject.class).in(RequestScoped.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
+              @Override
+              protected void configureServlets() {
+                bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
+                bind(SomeObject.class).in(RequestScoped.class);
+              }
+            });
 
     OffRequestCallable offRequestCallable = injector.getInstance(OffRequestCallable.class);
     try {
-      ServletScopes.scopeRequest(offRequestCallable,
-        ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), "Boo!"));
+      ServletScopes.scopeRequest(
+          offRequestCallable, ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), "Boo!"));
       fail();
-    } catch(IllegalArgumentException iae) {
-      assertEquals("Value[Boo!] of type[java.lang.String] is not compatible with key[" + Key.get(SomeObject.class) + "]", iae.getMessage());
+    } catch (IllegalArgumentException iae) {
+      assertEquals(
+          "Value[Boo!] of type[java.lang.String] is not compatible with key["
+              + Key.get(SomeObject.class)
+              + "]",
+          iae.getMessage());
     }
   }
 
   public final void testNullReplacement() throws Exception {
-    Injector injector = Guice.createInjector(new ServletModule() {
-      @Override protected void configureServlets() {
-        bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
-        bind(SomeObject.class).in(RequestScoped.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
+              @Override
+              protected void configureServlets() {
+                bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
+                bind(SomeObject.class).in(RequestScoped.class);
+              }
+            });
 
     Callable<SomeObject> callable = injector.getInstance(Caller.class);
     try {
       assertNotNull(callable.call());
       fail();
-    } catch(ProvisionException pe) {
+    } catch (ProvisionException pe) {
       assertTrue(pe.getCause() instanceof OutOfScopeException);
     }
 
@@ -138,6 +154,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
     public SomeObject(@Named(INVALID) String value) {
       this.value = value;
     }
+
     private final String value;
   }
 

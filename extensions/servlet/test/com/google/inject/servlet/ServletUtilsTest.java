@@ -1,14 +1,14 @@
 // Copyright 2012 Google Inc. All Rights Reserved.
 
 package com.google.inject.servlet;
+
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
-import junit.framework.TestCase;
-
 import javax.servlet.http.HttpServletRequest;
+import junit.framework.TestCase;
 
 /**
  * Unit test for the servlet utility class.
@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ServletUtilsTest extends TestCase {
   public void testGetContextRelativePath() {
-    assertEquals("/test.html", 
-        getContextRelativePath("/a_context_path", "/a_context_path/test.html"));
+    assertEquals(
+        "/test.html", getContextRelativePath("/a_context_path", "/a_context_path/test.html"));
     assertEquals("/test.html", getContextRelativePath("", "/test.html"));
     assertEquals("/test.html", getContextRelativePath("", "/foo/../test.html"));
     assertEquals("/test.html", getContextRelativePath("", "/././foo/../test.html"));

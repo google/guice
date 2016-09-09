@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,33 +34,29 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.util.Providers;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import junit.framework.TestCase;
 
 /**
- * Tests forwarding and inclusion (RequestDispatcher actions from the
- * servlet spec).
+ * Tests forwarding and inclusion (RequestDispatcher actions from the servlet spec).
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 public class ServletPipelineRequestDispatcherTest extends TestCase {
   private static final Key<HttpServlet> HTTP_SERLVET_KEY = Key.get(HttpServlet.class);
   private static final String A_KEY = "thinglyDEgintly" + new Date() + UUID.randomUUID();
-  private static final String A_VALUE = ServletPipelineRequestDispatcherTest.class.toString()
-      + new Date() + UUID.randomUUID();
+  private static final String A_VALUE =
+      ServletPipelineRequestDispatcherTest.class.toString() + new Date() + UUID.randomUUID();
 
   public final void testIncludeManagedServlet() throws IOException, ServletException {
     String pattern = "blah.html";
@@ -75,9 +71,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     final Binding binding = createMock(Binding.class);
     final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getAttribute(A_KEY))
-        .andReturn(A_VALUE);
-
+    expect(requestMock.getAttribute(A_KEY)).andReturn(A_VALUE);
 
     requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
@@ -96,32 +90,25 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
           }
         };
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(binding);
-    expect(injector.getInstance(HTTP_SERLVET_KEY))
-        .andReturn(mockServlet);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
+    expect(injector.getInstance(HTTP_SERLVET_KEY)).andReturn(mockServlet);
 
-
-    final Key<ServletDefinition> servetDefsKey = Key
-        .get(TypeLiteral.get(ServletDefinition.class));
+    final Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
 
     Binding<ServletDefinition> mockBinding = createMock(Binding.class);
     expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
         .andReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
     Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
-    expect(mockBinding.getProvider())
-        .andReturn(bindingProvider);
+    expect(mockBinding.getProvider()).andReturn(bindingProvider);
 
     replay(injector, binding, requestMock, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
 
-    final RequestDispatcher dispatcher = new ManagedServletPipeline(
-        injector)
-        .getRequestDispatcher(pattern);
+    final RequestDispatcher dispatcher =
+        new ManagedServletPipeline(injector).getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
     dispatcher.include(requestMock, createMock(HttpServletResponse.class));
@@ -145,15 +132,12 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 
-    expect(requestMock.getAttribute(A_KEY))
-        .andReturn(A_VALUE);
-
+    expect(requestMock.getAttribute(A_KEY)).andReturn(A_VALUE);
 
     requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
 
-    expect(mockResponse.isCommitted())
-        .andReturn(false);
+    expect(mockResponse.isCommitted()).andReturn(false);
 
     mockResponse.resetBuffer();
     expectLastCall().once();
@@ -172,31 +156,26 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
           }
         };
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
-    expect(injector.getInstance(HTTP_SERLVET_KEY))
-        .andReturn(mockServlet);
+    expect(injector.getInstance(HTTP_SERLVET_KEY)).andReturn(mockServlet);
 
-    final Key<ServletDefinition> servetDefsKey = Key
-        .get(TypeLiteral.get(ServletDefinition.class));
+    final Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
 
     Binding<ServletDefinition> mockBinding = createMock(Binding.class);
     expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
         .andReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
     Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
-    expect(mockBinding.getProvider())
-        .andReturn(bindingProvider);
+    expect(mockBinding.getProvider()).andReturn(bindingProvider);
 
     replay(injector, binding, requestMock, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
 
-    final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
-        .getRequestDispatcher(pattern);
+    final RequestDispatcher dispatcher =
+        new ManagedServletPipeline(injector).getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
     dispatcher.forward(requestMock, mockResponse);
@@ -211,8 +190,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     IllegalStateException expected = null;
     try {
       forwardToManagedServletFailureOnCommittedBuffer();
-    }
-    catch (IllegalStateException ise) {
+    } catch (IllegalStateException ise) {
       expected = ise;
     } finally {
       assertNotNull("Expected IllegalStateException was not thrown", expected);
@@ -234,8 +212,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 
-    expect(mockResponse.isCommitted())
-        .andReturn(true);
+    expect(mockResponse.isCommitted()).andReturn(true);
 
     final HttpServlet mockServlet =
         new HttpServlet() {
@@ -249,39 +226,32 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
           }
         };
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
-    expect(injector.getInstance(Key.get(HttpServlet.class)))
-        .andReturn(mockServlet);
+    expect(injector.getInstance(Key.get(HttpServlet.class))).andReturn(mockServlet);
 
-
-    final Key<ServletDefinition> servetDefsKey = Key
-        .get(TypeLiteral.get(ServletDefinition.class));
+    final Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
 
     Binding<ServletDefinition> mockBinding = createMock(Binding.class);
     expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
         .andReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
     Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
-    expect(mockBinding.getProvider())
-        .andReturn(bindingProvider);
+    expect(mockBinding.getProvider()).andReturn(bindingProvider);
 
     replay(injector, binding, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
 
-    final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
-        .getRequestDispatcher(pattern);
+    final RequestDispatcher dispatcher =
+        new ManagedServletPipeline(injector).getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
 
     try {
       dispatcher.forward(mockRequest, mockResponse);
-    }
-    finally {
+    } finally {
       verify(injector, mockRequest, mockResponse, mockBinding);
     }
   }
@@ -318,7 +288,6 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
     assertEquals("http://the.server/new-uri", wrappedRequest.getRequestURL().toString());
   }
-
 
   public final void testWrappedRequestUrlDefaultHttpsPort() {
     final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
