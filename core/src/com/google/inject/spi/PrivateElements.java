@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ package com.google.inject.spi;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.util.List;
 import java.util.Set;
 
@@ -31,9 +30,7 @@ import java.util.Set;
  */
 public interface PrivateElements extends Element {
 
-  /**
-   * Returns the configuration information in this private environment.
-   */
+  /** Returns the configuration information in this private environment. */
   List<Element> getElements();
 
   /**
@@ -42,9 +39,7 @@ public interface PrivateElements extends Element {
    */
   Injector getInjector();
 
-  /**
-   * Returns the unique exposed keys for these private elements.
-   */
+  /** Returns the unique exposed keys for these private elements. */
   Set<Key<?>> getExposedKeys();
 
   /**

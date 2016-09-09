@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ package com.google.inject.spi;
 
 import com.google.inject.Binding;
 import com.google.inject.Key;
-
 import java.util.Set;
 
 /**
@@ -30,14 +29,12 @@ import java.util.Set;
  */
 public interface ConvertedConstantBinding<T> extends Binding<T>, HasDependencies {
 
-  /**
-   * Returns the converted value.
-   */
+  /** Returns the converted value. */
   T getValue();
 
   /**
    * Returns the type converter binding used to convert the constant.
-   * 
+   *
    * @since 3.0
    */
   TypeConverterBinding getTypeConverterBinding();

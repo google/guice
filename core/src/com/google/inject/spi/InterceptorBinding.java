@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,16 +21,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.matcher.Matcher;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.reflect.Method;
 import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Registration of interceptors for matching methods of matching classes. Instances are created
- * explicitly in a module using {@link com.google.inject.Binder#bindInterceptor(
- * Matcher, Matcher, MethodInterceptor[]) bindInterceptor()} statements:
+ * explicitly in a module using {@link com.google.inject.Binder#bindInterceptor( Matcher, Matcher,
+ * MethodInterceptor[]) bindInterceptor()} statements:
+ *
  * <pre>
  *     bindInterceptor(Matchers.subclassesOf(MyAction.class),
  *         Matchers.annotatedWith(Transactional.class),
@@ -83,7 +82,11 @@ public final class InterceptorBinding implements Element {
 
   @Override
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).bindInterceptor(classMatcher, methodMatcher,
-        interceptors.toArray(new MethodInterceptor[interceptors.size()]));
+    binder
+        .withSource(getSource())
+        .bindInterceptor(
+            classMatcher,
+            methodMatcher,
+            interceptors.toArray(new MethodInterceptor[interceptors.size()]));
   }
 }

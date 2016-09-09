@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import com.google.inject.TypeLiteral;
 /**
  * A lookup of the members injector for a type. Lookups are created explicitly in a module using
  * {@link com.google.inject.Binder#getMembersInjector(Class) getMembersInjector()} statements:
+ *
  * <pre>
  *     MembersInjector&lt;PaymentService&gt; membersInjector
  *         = getMembersInjector(PaymentService.class);</pre>
@@ -49,9 +50,7 @@ public final class MembersInjectorLookup<T> implements Element {
     return source;
   }
 
-  /**
-   * Gets the type containing the members to be injected.
-   */
+  /** Gets the type containing the members to be injected. */
   public TypeLiteral<T> getType() {
     return type;
   }
@@ -77,9 +76,9 @@ public final class MembersInjectorLookup<T> implements Element {
   }
 
   /**
-   * Returns the delegate members injector, or {@code null} if it has not yet been initialized.
-   * The delegate will be initialized when this element is processed, or otherwise used to create
-   * an injector.
+   * Returns the delegate members injector, or {@code null} if it has not yet been initialized. The
+   * delegate will be initialized when this element is processed, or otherwise used to create an
+   * injector.
    */
   public MembersInjector<T> getDelegate() {
     return delegate;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,20 +19,17 @@ package com.google.inject.spi;
 import com.google.inject.Binding;
 
 /**
- * No-op visitor for subclassing. All interface methods simply delegate to
- * {@link #visitOther(Element)}, returning its result.
+ * No-op visitor for subclassing. All interface methods simply delegate to {@link
+ * #visitOther(Element)}, returning its result.
  *
- * @param <V> any type to be returned by the visit method. Use {@link Void} with
- *     {@code return null} if no return type is needed.
- *
+ * @param <V> any type to be returned by the visit method. Use {@link Void} with {@code return null}
+ *     if no return type is needed.
  * @author sberlin@gmail.com (Sam Berlin)
  * @since 2.0
  */
 public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
 
-  /**
-   * Default visit implementation. Returns {@code null}.
-   */
+  /** Default visit implementation. Returns {@code null}. */
   protected V visitOther(Element element) {
     return null;
   }
@@ -93,22 +90,22 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
   public V visit(TypeListenerBinding binding) {
     return visitOther(binding);
   }
-  
+
   @Override
   public V visit(ProvisionListenerBinding binding) {
     return visitOther(binding);
   }
-  
+
   @Override
   public V visit(DisableCircularProxiesOption option) {
     return visitOther(option);
   }
-  
+
   @Override
   public V visit(RequireExplicitBindingsOption option) {
     return visitOther(option);
   }
-  
+
   @Override
   public V visit(RequireAtInjectOnConstructorsOption option) {
     return visitOther(option);

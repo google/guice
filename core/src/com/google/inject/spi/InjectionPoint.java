@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.util.Classes;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -58,7 +57,7 @@ import java.util.logging.Logger;
  * @since 2.0
  */
 public final class InjectionPoint {
-  
+
   private static final Logger logger = Logger.getLogger(InjectionPoint.class.getName());
 
   private final boolean optional;
@@ -77,8 +76,8 @@ public final class InjectionPoint {
     this.member = constructor;
     this.declaringType = declaringType;
     this.optional = false;
-    this.dependencies = forMember(
-        constructor, declaringType, constructor.getParameterAnnotations());
+    this.dependencies =
+        forMember(constructor, declaringType, constructor.getParameterAnnotations());
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
@@ -99,12 +98,13 @@ public final class InjectionPoint {
     }
     errors.throwConfigurationExceptionIfErrorsExist();
 
-    this.dependencies = ImmutableList.<Dependency<?>>of(
-        newDependency(key, Nullability.allowsNull(annotations), -1));
+    this.dependencies =
+        ImmutableList.<Dependency<?>>of(
+            newDependency(key, Nullability.allowsNull(annotations), -1));
   }
 
-  private ImmutableList<Dependency<?>> forMember(Member member, TypeLiteral<?> type,
-      Annotation[][] paramterAnnotations) {
+  private ImmutableList<Dependency<?>> forMember(
+      Member member, TypeLiteral<?> type, Annotation[][] paramterAnnotations) {
     Errors errors = new Errors(member);
     Iterator<Annotation[]> annotationsIterator = Arrays.asList(paramterAnnotations).iterator();
 
@@ -133,9 +133,7 @@ public final class InjectionPoint {
     return new Dependency<T>(this, key, allowsNull, parameterIndex);
   }
 
-  /**
-   * Returns the injected constructor, field, or method.
-   */
+  /** Returns the injected constructor, field, or method. */
   public Member getMember() {
     // TODO: Don't expose the original member (which probably has setAccessible(true)).
     return member;
@@ -161,38 +159,41 @@ public final class InjectionPoint {
   public boolean isOptional() {
     return optional;
   }
-  
+
   /**
    * Returns true if the element is annotated with {@literal @}{@link Toolable}.
-   * 
+   *
    * @since 3.0
    */
   public boolean isToolable() {
-    return ((AnnotatedElement)member).isAnnotationPresent(Toolable.class);
+    return ((AnnotatedElement) member).isAnnotationPresent(Toolable.class);
   }
 
   /**
    * Returns the generic type that defines this injection point. If the member exists on a
    * parameterized type, the result will include more type information than the member's {@link
    * Member#getDeclaringClass() raw declaring class}.
-   * 
+   *
    * @since 3.0
    */
   public TypeLiteral<?> getDeclaringType() {
     return declaringType;
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     return o instanceof InjectionPoint
         && member.equals(((InjectionPoint) o).member)
         && declaringType.equals(((InjectionPoint) o).declaringType);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return member.hashCode() ^ declaringType.hashCode();
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return Classes.toString(member);
   }
 
@@ -202,7 +203,6 @@ public final class InjectionPoint {
    * type literal.
    *
    * @param constructor any single constructor present on {@code type}.
-   * 
    * @since 3.0
    */
   public static <T> InjectionPoint forConstructor(Constructor<T> constructor) {
@@ -214,7 +214,6 @@ public final class InjectionPoint {
    *
    * @param constructor any single constructor present on {@code type}.
    * @param type the concrete type that defines {@code constructor}.
-   * 
    * @since 3.0
    */
   public static <T> InjectionPoint forConstructor(
@@ -307,13 +306,11 @@ public final class InjectionPoint {
   }
 
   /**
-   * Returns a new injection point for the specified method of {@code type}.
-   * This is useful for extensions that need to build dependency graphs from
-   * arbitrary methods.
+   * Returns a new injection point for the specified method of {@code type}. This is useful for
+   * extensions that need to build dependency graphs from arbitrary methods.
    *
    * @param method any single method present on {@code type}.
    * @param type the concrete type that defines {@code method}.
-   *
    * @since 4.0
    */
   public static <T> InjectionPoint forMethod(Method method, TypeLiteral<T> type) {
@@ -324,25 +321,25 @@ public final class InjectionPoint {
    * Returns all static method and field injection points on {@code type}.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
-   *      fields are returned and then all methods. Within the fields, supertype fields are returned
-   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
-   *      a field with multiple binding annotations. The exception's {@link
-   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
-   *      of the valid injection points.
+   *     a field with multiple binding annotations. The exception's {@link
+   *     ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>} of
+   *     the valid injection points.
    */
   public static Set<InjectionPoint> forStaticMethodsAndFields(TypeLiteral<?> type) {
     Errors errors = new Errors();
-    
+
     Set<InjectionPoint> result;
-    
+
     if (type.getRawType().isInterface()) {
       errors.staticInjectionOnInterface(type.getRawType());
       result = null;
     } else {
       result = getInjectionPoints(type, true, errors);
     }
-    
+
     if (errors.hasErrors()) {
       throw new ConfigurationException(errors.getMessages()).withPartialValue(result);
     }
@@ -353,12 +350,12 @@ public final class InjectionPoint {
    * Returns all static method and field injection points on {@code type}.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
-   *      fields are returned and then all methods. Within the fields, supertype fields are returned
-   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
-   *      a field with multiple binding annotations. The exception's {@link
-   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
-   *      of the valid injection points.
+   *     a field with multiple binding annotations. The exception's {@link
+   *     ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>} of
+   *     the valid injection points.
    */
   public static Set<InjectionPoint> forStaticMethodsAndFields(Class<?> type) {
     return forStaticMethodsAndFields(TypeLiteral.get(type));
@@ -368,12 +365,12 @@ public final class InjectionPoint {
    * Returns all instance method and field injection points on {@code type}.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
-   *      fields are returned and then all methods. Within the fields, supertype fields are returned
-   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
-   *      a field with multiple binding annotations. The exception's {@link
-   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
-   *      of the valid injection points.
+   *     a field with multiple binding annotations. The exception's {@link
+   *     ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>} of
+   *     the valid injection points.
    */
   public static Set<InjectionPoint> forInstanceMethodsAndFields(TypeLiteral<?> type) {
     Errors errors = new Errors();
@@ -388,23 +385,22 @@ public final class InjectionPoint {
    * Returns all instance method and field injection points on {@code type}.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
-   *      fields are returned and then all methods. Within the fields, supertype fields are returned
-   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
-   *      a field with multiple binding annotations. The exception's {@link
-   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
-   *      of the valid injection points.
+   *     a field with multiple binding annotations. The exception's {@link
+   *     ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>} of
+   *     the valid injection points.
    */
   public static Set<InjectionPoint> forInstanceMethodsAndFields(Class<?> type) {
     return forInstanceMethodsAndFields(TypeLiteral.get(type));
   }
 
-  /**
-   * Returns true if the binding annotation is in the wrong place.
-   */
+  /** Returns true if the binding annotation is in the wrong place. */
   private static boolean checkForMisplacedBindingAnnotations(Member member, Errors errors) {
-    Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
-        errors, member, ((AnnotatedElement) member).getAnnotations());
+    Annotation misplacedBindingAnnotation =
+        Annotations.findBindingAnnotation(
+            errors, member, ((AnnotatedElement) member).getAnnotations());
     if (misplacedBindingAnnotation == null) {
       return false;
     }
@@ -424,10 +420,8 @@ public final class InjectionPoint {
     return true;
   }
 
-  /**
-   * Node in the doubly-linked list of injectable members (fields and methods).
-   */
-  static abstract class InjectableMember {
+  /** Node in the doubly-linked list of injectable members (fields and methods). */
+  abstract static class InjectableMember {
     final TypeLiteral<?> declaringType;
     final boolean optional;
     final boolean jsr330;
@@ -452,8 +446,8 @@ public final class InjectionPoint {
 
   static class InjectableField extends InjectableMember {
     final Field field;
-    InjectableField(TypeLiteral<?> declaringType, Field field,
-        Annotation atInject) {
+
+    InjectableField(TypeLiteral<?> declaringType, Field field, Annotation atInject) {
       super(declaringType, atInject);
       this.field = field;
     }
@@ -467,13 +461,12 @@ public final class InjectionPoint {
   static class InjectableMethod extends InjectableMember {
     final Method method;
     /**
-     * true if this method overrode a method that was annotated
-     * with com.google.inject.Inject.  used to allow different
-     * override behavior for guice inject vs javax.inject.Inject
+     * true if this method overrode a method that was annotated with com.google.inject.Inject. used
+     * to allow different override behavior for guice inject vs javax.inject.Inject
      */
     boolean overrodeGuiceInject;
-    InjectableMethod(TypeLiteral<?> declaringType, Method method,
-        Annotation atInject) {
+
+    InjectableMethod(TypeLiteral<?> declaringType, Method method, Annotation atInject) {
       super(declaringType, atInject);
       this.method = method;
     }
@@ -493,9 +486,7 @@ public final class InjectionPoint {
     return a == null ? member.getAnnotation(Inject.class) : a;
   }
 
-  /**
-   * Linked list of injectable members.
-   */
+  /** Linked list of injectable members. */
   static class InjectableMembers {
     InjectableMember head;
     InjectableMember tail;
@@ -555,23 +546,19 @@ public final class InjectionPoint {
     Signature lastSignature;
 
     /**
-     * Removes a method overridden by the given method, if present. In order to
-     * remain backwards compatible with prior Guice versions, this will *not*
-     * remove overridden methods if 'alwaysRemove' is false and the overridden
-     * signature was annotated with a com.google.inject.Inject.
-     * 
-     * @param method
-     *          The method used to determine what is overridden and should be
-     *          removed.
-     * @param alwaysRemove
-     *          true if overridden methods should be removed even if they were
-     *          guice @Inject
-     * @param injectableMethod
-     *          if this method overrode any guice @Inject methods,
-     *          {@link InjectableMethod#overrodeGuiceInject} is set to true
+     * Removes a method overridden by the given method, if present. In order to remain backwards
+     * compatible with prior Guice versions, this will *not* remove overridden methods if
+     * 'alwaysRemove' is false and the overridden signature was annotated with a
+     * com.google.inject.Inject.
+     *
+     * @param method The method used to determine what is overridden and should be removed.
+     * @param alwaysRemove true if overridden methods should be removed even if they were
+     *     guice @Inject
+     * @param injectableMethod if this method overrode any guice @Inject methods, {@link
+     *     InjectableMethod#overrodeGuiceInject} is set to true
      */
-    boolean removeIfOverriddenBy(Method method, boolean alwaysRemove, 
-        InjectableMethod injectableMethod) {
+    boolean removeIfOverriddenBy(
+        Method method, boolean alwaysRemove, InjectableMethod injectableMethod) {
       if (position == Position.TOP) {
         // If we're at the top of the hierarchy, there's nothing to override.
         return false;
@@ -581,7 +568,8 @@ public final class InjectionPoint {
         // We encountered a method in a subclass. Time to index the
         // methods in the parent class.
         bySignature = new HashMap<Signature, List<InjectableMethod>>();
-        for (InjectableMember member = injectableMembers.head; member != null;
+        for (InjectableMember member = injectableMembers.head;
+            member != null;
             member = member.next) {
           if (!(member instanceof InjectableMethod)) continue;
           InjectableMethod im = (InjectableMethod) member;
@@ -597,19 +585,18 @@ public final class InjectionPoint {
       List<InjectableMethod> methods = bySignature.get(signature);
       boolean removed = false;
       if (methods != null) {
-        for (Iterator<InjectableMethod> iterator = methods.iterator();
-            iterator.hasNext();) {
+        for (Iterator<InjectableMethod> iterator = methods.iterator(); iterator.hasNext(); ) {
           InjectableMethod possiblyOverridden = iterator.next();
           if (overrides(method, possiblyOverridden.method)) {
             boolean wasGuiceInject =
-              !possiblyOverridden.jsr330 || possiblyOverridden.overrodeGuiceInject;
-            if(injectableMethod != null) {
+                !possiblyOverridden.jsr330 || possiblyOverridden.overrodeGuiceInject;
+            if (injectableMethod != null) {
               injectableMethod.overrodeGuiceInject = wasGuiceInject;
             }
             // Only actually remove the methods if we want to force
             // remove or if the signature never specified @com.google.inject.Inject
             // somewhere.
-            if(alwaysRemove || !wasGuiceInject) {
+            if (alwaysRemove || !wasGuiceInject) {
               removed = true;
               iterator.remove();
               injectableMembers.remove(possiblyOverridden);
@@ -621,20 +608,21 @@ public final class InjectionPoint {
     }
 
     /**
-     * Adds the given method to the list of injection points. Keeps track of it in this index
-     * in case it gets overridden.
+     * Adds the given method to the list of injection points. Keeps track of it in this index in
+     * case it gets overridden.
      */
     void add(InjectableMethod injectableMethod) {
       injectableMembers.add(injectableMethod);
-      if (position == Position.BOTTOM
-          || injectableMethod.isFinal()) {
+      if (position == Position.BOTTOM || injectableMethod.isFinal()) {
         // This method can't be overridden, so there's no need to index it.
         return;
       }
       if (bySignature != null) {
         // Try to reuse the signature we created during removal
-        Signature signature = injectableMethod.method == lastMethod
-            ? lastSignature : new Signature(injectableMethod.method);
+        Signature signature =
+            injectableMethod.method == lastMethod
+                ? lastSignature
+                : new Signature(injectableMethod.method);
         List<InjectableMethod> methods = bySignature.get(signature);
         if (methods == null) {
           methods = new ArrayList<InjectableMethod>();
@@ -653,8 +641,8 @@ public final class InjectionPoint {
    * @param statics true is this method should return static members, false for instance members
    * @param errors used to record errors
    */
-  private static Set<InjectionPoint> getInjectionPoints(final TypeLiteral<?> type,
-      boolean statics, Errors errors) {
+  private static Set<InjectionPoint> getInjectionPoints(
+      final TypeLiteral<?> type, boolean statics, Errors errors) {
     InjectableMembers injectableMembers = new InjectableMembers();
     OverrideIndex overrideIndex = null;
 
@@ -689,18 +677,21 @@ public final class InjectionPoint {
         if (isEligibleForInjection(method, statics)) {
           Annotation atInject = getAtInject(method);
           if (atInject != null) {
-            InjectableMethod injectableMethod = new InjectableMethod(
-                current, method, atInject);
+            InjectableMethod injectableMethod = new InjectableMethod(current, method, atInject);
             if (checkForMisplacedBindingAnnotations(method, errors)
                 || !isValidMethod(injectableMethod, errors)) {
               if (overrideIndex != null) {
-                boolean removed = overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
-                if(removed) {
-                  logger.log(Level.WARNING, "Method: {0} is not a valid injectable method ("
-                      + "because it either has misplaced binding annotations "
-                      + "or specifies type parameters) but is overriding a method that is valid. "
-                      + "Because it is not valid, the method will not be injected. "
-                      + "To fix this, make the method a valid injectable method.", method);
+                boolean removed =
+                    overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
+                if (removed) {
+                  logger.log(
+                      Level.WARNING,
+                      "Method: {0} is not a valid injectable method ("
+                          + "because it either has misplaced binding annotations "
+                          + "or specifies type parameters) but is overriding a method that is valid. "
+                          + "Because it is not valid, the method will not be injected. "
+                          + "To fix this, make the method a valid injectable method.",
+                      method);
                 }
               }
               continue;
@@ -724,13 +715,16 @@ public final class InjectionPoint {
               overrideIndex.add(injectableMethod);
             }
           } else {
-            if(overrideIndex != null) {
+            if (overrideIndex != null) {
               boolean removed = overrideIndex.removeIfOverriddenBy(method, false, null);
-              if(removed) {
-                logger.log(Level.WARNING, "Method: {0} is not annotated with @Inject but "
-                    + "is overriding a method that is annotated with @javax.inject.Inject.  Because "
-                    + "it is not annotated with @Inject, the method will not be injected. "
-                    + "To fix this, annotate the method with @Inject.", method);
+              if (removed) {
+                logger.log(
+                    Level.WARNING,
+                    "Method: {0} is not annotated with @Inject but "
+                        + "is overriding a method that is annotated with @javax.inject.Inject.  Because "
+                        + "it is not annotated with @Inject, the method will not be injected. "
+                        + "To fix this, annotate the method with @Inject.",
+                    method);
               }
             }
           }
@@ -743,8 +737,7 @@ public final class InjectionPoint {
     }
 
     ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
-    for (InjectableMember im = injectableMembers.head; im != null;
-        im = im.next) {
+    for (InjectableMember im = injectableMembers.head; im != null; im = im.next) {
       try {
         builder.add(im.toInjectionPoint());
       } catch (ConfigurationException ignorable) {
@@ -756,22 +749,22 @@ public final class InjectionPoint {
     return builder.build();
   }
 
-  /** 
-   * Returns true if the method is eligible to be injected.  This is different than
-   * {@link #isValidMethod}, because ineligibility will not drop a method
-   * from being injected if a superclass was eligible & valid. 
-   * Bridge & synthetic methods are excluded from eligibility for two reasons:
-   * 
-   * <p>Prior to Java8, javac would generate these methods in subclasses without
-   * annotations, which means this would accidentally stop injecting a method
-   * annotated with {@link javax.inject.Inject}, since the spec says to stop
-   * injecting if a subclass isn't annotated with it.
-   * 
-   * <p>Starting at Java8, javac copies the annotations to the generated subclass
-   * method, except it leaves out the generic types.  If this considered it a valid
-   * injectable method, this would eject the parent's overridden method that had the
-   * proper generic types, and would use invalid injectable parameters as a result.
-   * 
+  /**
+   * Returns true if the method is eligible to be injected. This is different than {@link
+   * #isValidMethod}, because ineligibility will not drop a method from being injected if a
+   * superclass was eligible & valid. Bridge & synthetic methods are excluded from eligibility for
+   * two reasons:
+   *
+   * <p>Prior to Java8, javac would generate these methods in subclasses without annotations, which
+   * means this would accidentally stop injecting a method annotated with {@link
+   * javax.inject.Inject}, since the spec says to stop injecting if a subclass isn't annotated with
+   * it.
+   *
+   * <p>Starting at Java8, javac copies the annotations to the generated subclass method, except it
+   * leaves out the generic types. If this considered it a valid injectable method, this would eject
+   * the parent's overridden method that had the proper generic types, and would use invalid
+   * injectable parameters as a result.
+   *
    * <p>The fix for both is simply to ignore these synthetic bridge methods.
    */
   private static boolean isEligibleForInjection(Method method, boolean statics) {
@@ -780,8 +773,7 @@ public final class InjectionPoint {
         && !method.isSynthetic();
   }
 
-  private static boolean isValidMethod(InjectableMethod injectableMethod,
-      Errors errors) {
+  private static boolean isValidMethod(InjectableMethod injectableMethod, Errors errors) {
     boolean result = true;
     if (injectableMethod.jsr330) {
       Method method = injectableMethod.method;
@@ -824,9 +816,7 @@ public final class InjectionPoint {
     return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
   }
 
-  /**
-   * A method signature. Used to handle method overridding.
-   */
+  /** A method signature. Used to handle method overridding. */
   static class Signature {
 
     final String name;
@@ -845,11 +835,13 @@ public final class InjectionPoint {
       this.hash = h;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return this.hash;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
       if (!(o instanceof Signature)) {
         return false;
       }

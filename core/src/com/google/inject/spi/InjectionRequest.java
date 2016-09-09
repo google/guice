@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +21,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
-
 import java.util.Set;
 
 /**
  * A request to inject the instance fields and methods of an instance. Requests are created
  * explicitly in a module using {@link com.google.inject.Binder#requestInjection(Object)
  * requestInjection()} statements:
+ *
  * <pre>
  *     requestInjection(serviceInstance);</pre>
  *
@@ -64,12 +64,12 @@ public final class InjectionRequest<T> implements Element {
    * this request.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
-   *      fields are returned and then all methods. Within the fields, supertype fields are returned
-   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on the class of {@code
-   *      instance}, such as a field with multiple binding annotations. The exception's {@link
-   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
-   *      of the valid injection points.
+   *     instance}, such as a field with multiple binding annotations. The exception's {@link
+   *     ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>} of
+   *     the valid injection points.
    */
   public Set<InjectionPoint> getInjectionPoints() throws ConfigurationException {
     return InjectionPoint.forInstanceMethodsAndFields(instance.getClass());

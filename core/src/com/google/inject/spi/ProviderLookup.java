@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +24,12 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.util.Types;
-
 import java.util.Set;
 
 /**
- * A lookup of the provider for a type. Lookups are created explicitly in a module using
- * {@link com.google.inject.Binder#getProvider(Class) getProvider()} statements:
+ * A lookup of the provider for a type. Lookups are created explicitly in a module using {@link
+ * com.google.inject.Binder#getProvider(Class) getProvider()} statements:
+ *
  * <pre>
  *     Provider&lt;PaymentService&gt; paymentServiceProvider
  *         = getProvider(PaymentService.class);</pre>
