@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,6 @@ import static com.google.inject.util.Types.setOf;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.util.Types;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -43,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import junit.framework.TestCase;
 
 /**
  * This test checks that TypeLiteral can perform type resolution on its members.
@@ -51,20 +49,20 @@ import java.util.Set;
  */
 public class TypeLiteralTypeResolutionTest extends TestCase {
   Type arrayListOfString = newParameterizedType(ArrayList.class, String.class);
-  Type hasGenericFieldsOfShort = newParameterizedTypeWithOwner(
-      getClass(), HasGenericFields.class, Short.class);
-  Type hasGenericConstructorOfShort = newParameterizedTypeWithOwner(
-      getClass(), GenericConstructor.class, Short.class);
-  Type throwerOfNpe = newParameterizedTypeWithOwner(
-      getClass(), Thrower.class, NullPointerException.class);
+  Type hasGenericFieldsOfShort =
+      newParameterizedTypeWithOwner(getClass(), HasGenericFields.class, Short.class);
+  Type hasGenericConstructorOfShort =
+      newParameterizedTypeWithOwner(getClass(), GenericConstructor.class, Short.class);
+  Type throwerOfNpe =
+      newParameterizedTypeWithOwner(getClass(), Thrower.class, NullPointerException.class);
   Type hasArrayOfShort = newParameterizedTypeWithOwner(getClass(), HasArray.class, Short.class);
-  Type hasRelatedOfString = newParameterizedTypeWithOwner(
-      getClass(), HasRelated.class, String.class, String.class);
+  Type hasRelatedOfString =
+      newParameterizedTypeWithOwner(getClass(), HasRelated.class, String.class, String.class);
   Type mapK = Map.class.getTypeParameters()[0];
   Type hashMapK = HashMap.class.getTypeParameters()[0];
   Type setEntryKV;
-  Type entryStringInteger = setOf(newParameterizedTypeWithOwner(
-      Map.class, Map.Entry.class, String.class, Integer.class));
+  Type entryStringInteger =
+      setOf(newParameterizedTypeWithOwner(Map.class, Map.Entry.class, String.class, Integer.class));
   Field list;
   Field instance;
   Constructor<GenericConstructor> newHasGenericConstructor;
@@ -77,7 +75,8 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
   Method echo;
   Method throwS;
 
-  @Override protected void setUp() throws Exception {
+  @Override
+  protected void setUp() throws Exception {
     super.setUp();
 
     list = HasGenericFields.class.getField("list");
@@ -96,19 +95,24 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   public void testDirectInheritance() throws NoSuchMethodException {
     TypeLiteral<?> resolver = TypeLiteral.get(arrayListOfString);
-    assertEquals(listOf(String.class),
+    assertEquals(
+        listOf(String.class),
         resolver.getReturnType(List.class.getMethod("subList", int.class, int.class)).getType());
-    assertEquals(ImmutableList.<TypeLiteral<?>>of(TypeLiteral.get(String.class)),
+    assertEquals(
+        ImmutableList.<TypeLiteral<?>>of(TypeLiteral.get(String.class)),
         resolver.getParameterTypes(Collection.class.getMethod("add", Object.class)));
   }
-  
+
   public void testGenericSupertype() {
     TypeLiteral<?> resolver = TypeLiteral.get(arrayListOfString);
-    assertEquals(newParameterizedType(Collection.class, String.class),
+    assertEquals(
+        newParameterizedType(Collection.class, String.class),
         resolver.getSupertype(Collection.class).getType());
-    assertEquals(newParameterizedType(Iterable.class, String.class),
+    assertEquals(
+        newParameterizedType(Iterable.class, String.class),
         resolver.getSupertype(Iterable.class).getType());
-    assertEquals(newParameterizedType(AbstractList.class, String.class),
+    assertEquals(
+        newParameterizedType(AbstractList.class, String.class),
         resolver.getSupertype(AbstractList.class).getType());
     assertEquals(Object.class, resolver.getSupertype(Object.class).getType());
   }
@@ -122,12 +126,13 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   static class MyInteger implements MyComparable<MyInteger> {
     int value;
+
     @Override
     public int compareTo(MyInteger o) {
       return value - o.value;
     }
   }
-  
+
   public void testFields() {
     TypeLiteral<?> resolver = TypeLiteral.get(hasGenericFieldsOfShort);
     assertEquals(listOf(Short.class), resolver.getFieldType(list).getType());
@@ -141,8 +146,8 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   public void testGenericConstructor() throws NoSuchMethodException {
     TypeLiteral<?> resolver = TypeLiteral.get(hasGenericConstructorOfShort);
-    assertEquals(Short.class,
-        resolver.getParameterTypes(newHasGenericConstructor).get(0).getType());
+    assertEquals(
+        Short.class, resolver.getParameterTypes(newHasGenericConstructor).get(0).getType());
   }
 
   static class GenericConstructor<S> {
@@ -158,6 +163,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   static class Thrower<S extends Exception> {
     public Thrower() throws S {}
+
     public void throwS() throws S {}
   }
 
@@ -169,6 +175,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   static interface HasArray<T extends Number> {
     T[] getArray();
+
     Set<T[]> getSetOfArray();
   }
 
@@ -184,17 +191,20 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   /** Ensure the cache doesn't cache too much */
   public void testCachingAndReindexing() throws NoSuchMethodException {
-    TypeLiteral<?> resolver = TypeLiteral.get(
-        newParameterizedTypeWithOwner(getClass(), HasLists.class, String.class, Short.class));
-    assertEquals(listOf(String.class),
-        resolver.getReturnType(HasLists.class.getMethod("listS")).getType());
-    assertEquals(listOf(Short.class),
-        resolver.getReturnType(HasLists.class.getMethod("listT")).getType());
+    TypeLiteral<?> resolver =
+        TypeLiteral.get(
+            newParameterizedTypeWithOwner(getClass(), HasLists.class, String.class, Short.class));
+    assertEquals(
+        listOf(String.class), resolver.getReturnType(HasLists.class.getMethod("listS")).getType());
+    assertEquals(
+        listOf(Short.class), resolver.getReturnType(HasLists.class.getMethod("listT")).getType());
   }
 
   interface HasLists<S, T> {
     List<S> listS();
+
     List<T> listT();
+
     List<Map.Entry<S, T>> listEntries();
   }
 
@@ -205,43 +215,54 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
       resolver.getExceptionTypes(stringIndexOf);
       fail();
     } catch (IllegalArgumentException e) {
-      assertEquals("public int java.lang.String.indexOf(java.lang.String) is not defined by a "
-          + "supertype of java.util.ArrayList<java.lang.String>", e.getMessage());
+      assertEquals(
+          "public int java.lang.String.indexOf(java.lang.String) is not defined by a "
+              + "supertype of java.util.ArrayList<java.lang.String>",
+          e.getMessage());
     }
     try {
       resolver.getParameterTypes(stringIndexOf);
       fail();
     } catch (Exception e) {
-      assertEquals("public int java.lang.String.indexOf(java.lang.String) is not defined by a "
-          + "supertype of java.util.ArrayList<java.lang.String>", e.getMessage());
+      assertEquals(
+          "public int java.lang.String.indexOf(java.lang.String) is not defined by a "
+              + "supertype of java.util.ArrayList<java.lang.String>",
+          e.getMessage());
     }
     try {
       resolver.getReturnType(stringIndexOf);
       fail();
     } catch (Exception e) {
-      assertEquals("public int java.lang.String.indexOf(java.lang.String) is not defined by a "
-          + "supertype of java.util.ArrayList<java.lang.String>", e.getMessage());
+      assertEquals(
+          "public int java.lang.String.indexOf(java.lang.String) is not defined by a "
+              + "supertype of java.util.ArrayList<java.lang.String>",
+          e.getMessage());
     }
     try {
       resolver.getSupertype(String.class);
       fail();
     } catch (Exception e) {
-      assertEquals("class java.lang.String is not a supertype of "
-          + "java.util.ArrayList<java.lang.String>", e.getMessage());
+      assertEquals(
+          "class java.lang.String is not a supertype of " + "java.util.ArrayList<java.lang.String>",
+          e.getMessage());
     }
     try {
       resolver.getExceptionTypes(newString);
       fail();
     } catch (Exception e) {
-      assertEquals("public java.lang.String(java.lang.String) does not construct "
-          + "a supertype of java.util.ArrayList<java.lang.String>", e.getMessage());
+      assertEquals(
+          "public java.lang.String(java.lang.String) does not construct "
+              + "a supertype of java.util.ArrayList<java.lang.String>",
+          e.getMessage());
     }
     try {
       resolver.getParameterTypes(newString);
       fail();
     } catch (Exception e) {
-      assertEquals("public java.lang.String(java.lang.String) does not construct "
-          + "a supertype of java.util.ArrayList<java.lang.String>", e.getMessage());
+      assertEquals(
+          "public java.lang.String(java.lang.String) does not construct "
+              + "a supertype of java.util.ArrayList<java.lang.String>",
+          e.getMessage());
     }
   }
 
@@ -251,8 +272,8 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
     typeResolver = new TypeLiteral<Map<String, Integer>>() {};
     assertEquals(String.class, typeResolver.resolveType(mapK));
-    assertEquals(Types.mapOf(String.class, Integer.class),
-        typeResolver.getSupertype(Map.class).getType());
+    assertEquals(
+        Types.mapOf(String.class, Integer.class), typeResolver.getSupertype(Map.class).getType());
 
     typeResolver = new TypeLiteral<BetterMap<String, Integer>>() {};
     assertEquals(String.class, typeResolver.resolveType(mapK));
@@ -278,17 +299,21 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
   }
 
   interface StringIntegerMap extends Map<String, Integer> {}
+
   interface BetterMap<K1, V1> extends Map<K1, V1> {}
+
   interface BestMap<K2, V2> extends BetterMap<K2, V2> {}
+
   static class StringIntegerHashMap extends HashMap<String, Integer> {}
 
   public void testGetSupertype() {
     TypeLiteral<AbstractList<String>> listOfString = new TypeLiteral<AbstractList<String>>() {};
-    assertEquals(Types.newParameterizedType(AbstractCollection.class, String.class),
+    assertEquals(
+        Types.newParameterizedType(AbstractCollection.class, String.class),
         listOfString.getSupertype(AbstractCollection.class).getType());
 
-    TypeLiteral arrayListOfE = TypeLiteral.get(newParameterizedType(
-        ArrayList.class, ArrayList.class.getTypeParameters()));
+    TypeLiteral arrayListOfE =
+        TypeLiteral.get(newParameterizedType(ArrayList.class, ArrayList.class.getTypeParameters()));
     assertEquals(
         newParameterizedType(AbstractCollection.class, ArrayList.class.getTypeParameters()),
         arrayListOfE.getSupertype(AbstractCollection.class).getType());
@@ -298,18 +323,22 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
     Class<? extends List> arraysAsListClass = Arrays.asList().getClass();
     Type anotherE = arraysAsListClass.getTypeParameters()[0];
     TypeLiteral type = TypeLiteral.get(newParameterizedType(AbstractList.class, anotherE));
-    assertEquals(newParameterizedType(AbstractCollection.class, anotherE),
+    assertEquals(
+        newParameterizedType(AbstractCollection.class, anotherE),
         type.getSupertype(AbstractCollection.class).getType());
   }
 
   public void testWildcards() throws NoSuchFieldException {
     TypeLiteral<Parameterized<String>> ofString = new TypeLiteral<Parameterized<String>>() {};
 
-    assertEquals(new TypeLiteral<List<String>>() {}.getType(),
+    assertEquals(
+        new TypeLiteral<List<String>>() {}.getType(),
         ofString.getFieldType(Parameterized.class.getField("t")).getType());
-    assertEquals(new TypeLiteral<List<? extends String>>() {}.getType(),
+    assertEquals(
+        new TypeLiteral<List<? extends String>>() {}.getType(),
         ofString.getFieldType(Parameterized.class.getField("extendsT")).getType());
-    assertEquals(new TypeLiteral<List<? super String>>() {}.getType(),
+    assertEquals(
+        new TypeLiteral<List<? super String>>() {}.getType(),
         ofString.getFieldType(Parameterized.class.getField("superT")).getType());
   }
 

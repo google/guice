@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,22 +25,17 @@ import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.ConstructorBinding;
-
-import junit.framework.TestCase;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class MethodInterceptionTest extends TestCase {
 
   private AtomicInteger count = new AtomicInteger();
@@ -59,7 +54,7 @@ public class MethodInterceptionTest extends TestCase {
       return null;
     }
   }
-  
+
   private static final class NoOpInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
@@ -103,9 +98,11 @@ public class MethodInterceptionTest extends TestCase {
     Interceptable nullFoosTwo = childTwo.getInstance(Interceptable.class);
     assertNull(nullFoosTwo.foo()); // confirm it's being intercepted
 
-    assertSame("Child injectors should share proxy classes, otherwise memory leaks!",
-        nullFoosOne.getClass(), nullFoosTwo.getClass());
-    
+    assertSame(
+        "Child injectors should share proxy classes, otherwise memory leaks!",
+        nullFoosOne.getClass(),
+        nullFoosTwo.getClass());
+
     Injector injector2 =
         Guice.createInjector(
             new AbstractModule() {
@@ -117,8 +114,10 @@ public class MethodInterceptionTest extends TestCase {
             });
     Interceptable separateNullFoos = injector2.getInstance(Interceptable.class);
     assertNull(separateNullFoos.foo()); // confirm it's being intercepted
-    assertSame("different injectors should share proxy classes, otherwise memory leaks!",
-        nullFoosOne.getClass(), separateNullFoos.getClass());
+    assertSame(
+        "different injectors should share proxy classes, otherwise memory leaks!",
+        nullFoosOne.getClass(),
+        separateNullFoos.getClass());
   }
 
   public void testGetThis() {
@@ -167,10 +166,12 @@ public class MethodInterceptionTest extends TestCase {
     try {
       injector.getInstance(NotInterceptable.class);
       fail();
-    } catch(ConfigurationException ce) {
-      assertEquals("Unable to method intercept: " + NotInterceptable.class.getName(),
+    } catch (ConfigurationException ce) {
+      assertEquals(
+          "Unable to method intercept: " + NotInterceptable.class.getName(),
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage().toString());
-      assertEquals("Cannot subclass final class " + NotInterceptable.class.getName(),
+      assertEquals(
+          "Cannot subclass final class " + NotInterceptable.class.getName(),
           ce.getCause().getMessage());
     }
   }
@@ -192,18 +193,20 @@ public class MethodInterceptionTest extends TestCase {
               }
             });
 
-    ConstructorBinding<?> interceptedBinding
-        = (ConstructorBinding<?>) injector.getBinding(Interceptable.class);
+    ConstructorBinding<?> interceptedBinding =
+        (ConstructorBinding<?>) injector.getBinding(Interceptable.class);
     Method barMethod = Interceptable.class.getMethod("bar");
     Method fooMethod = Interceptable.class.getMethod("foo");
-    assertEquals(ImmutableMap.<Method, List<MethodInterceptor>>of(
-        fooMethod, ImmutableList.of(countingInterceptor, returnNullInterceptor),
-        barMethod, ImmutableList.of(returnNullInterceptor)),
+    assertEquals(
+        ImmutableMap.<Method, List<MethodInterceptor>>of(
+            fooMethod, ImmutableList.of(countingInterceptor, returnNullInterceptor),
+            barMethod, ImmutableList.of(returnNullInterceptor)),
         interceptedBinding.getMethodInterceptors());
 
-    ConstructorBinding<?> nonInterceptedBinding
-        = (ConstructorBinding<?>) injector.getBinding(Foo.class);
-    assertEquals(ImmutableMap.<Method, List<MethodInterceptor>>of(),
+    ConstructorBinding<?> nonInterceptedBinding =
+        (ConstructorBinding<?>) injector.getBinding(Foo.class);
+    assertEquals(
+        ImmutableMap.<Method, List<MethodInterceptor>>of(),
         nonInterceptedBinding.getMethodInterceptors());
 
     injector.getInstance(Interceptable.class).foo();
@@ -236,7 +239,7 @@ public class MethodInterceptionTest extends TestCase {
       }
     }
   }
-  
+
   public void testNotInterceptedMethodsInInterceptedClassDontAddFrames() {
     Injector injector =
         Guice.createInjector(
@@ -260,7 +263,7 @@ public class MethodInterceptionTest extends TestCase {
     }
     assertTrue(Arrays.toString(interceptable.lastElements), cglibFound);
     cglibFound = false;
-    
+
     interceptable.bar();
     for (int i = 0; i < interceptable.lastElements.length; i++) {
       if (interceptable.lastElements[i].toString().contains("cglib")) {
@@ -272,19 +275,22 @@ public class MethodInterceptionTest extends TestCase {
   }
 
   static class Foo {}
+
   static class Bar {}
 
   public static class Interceptable {
-    StackTraceElement[] lastElements; 
-    
+    StackTraceElement[] lastElements;
+
     public Foo foo() {
       lastElements = Thread.currentThread().getStackTrace();
       return new Foo() {};
     }
+
     public Bar bar() {
       lastElements = Thread.currentThread().getStackTrace();
       return new Bar() {};
     }
+
     public String explode() throws Exception {
       lastElements = Thread.currentThread().getStackTrace();
       throw new Exception("kaboom!", new RuntimeException("boom!"));
@@ -292,7 +298,7 @@ public class MethodInterceptionTest extends TestCase {
   }
 
   public static final class NotInterceptable {}
-  
+
   public void testInterceptingNonBridgeWorks() {
     Injector injector =
         Guice.createInjector(
@@ -316,18 +322,23 @@ public class MethodInterceptionTest extends TestCase {
     intf.aMethod(null);
     assertEquals(1, count.get());
   }
-  
+
   static class ErasedType {}
-  static class RetType extends ErasedType {}  
-  static abstract class Superclass<T extends ErasedType> {
-      public T aMethod(T t) { return null; }
+
+  static class RetType extends ErasedType {}
+
+  abstract static class Superclass<T extends ErasedType> {
+    public T aMethod(T t) {
+      return null;
+    }
   }
+
   public interface Interface {
-      RetType aMethod(RetType obj);
+    RetType aMethod(RetType obj);
   }
-  public static class Impl extends Superclass<RetType> implements Interface {
-  }
-  
+
+  public static class Impl extends Superclass<RetType> implements Interface {}
+
   public void testInterceptionOrder() {
     final List<String> callList = Lists.newArrayList();
     Injector injector =
@@ -349,31 +360,34 @@ public class MethodInterceptionTest extends TestCase {
     interceptable.foo();
     assertEquals(Arrays.asList("a", "b", "c"), callList);
   }
-  
+
   private static final class NamedInterceptor implements MethodInterceptor {
     private final String name;
     final List<String> called;
-    
+
     NamedInterceptor(String name, List<String> callList) {
       this.name = name;
       this.called = callList;
     }
-    
+
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       called.add(name);
       return methodInvocation.proceed();
     }
   }
-  
+
   public void testDeDuplicateInterceptors() throws Exception {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        CountingInterceptor interceptor = new CountingInterceptor();
-        bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
-        bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                CountingInterceptor interceptor = new CountingInterceptor();
+                bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
+                bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
+              }
+            });
 
     Interceptable interceptable = injector.getInstance(Interceptable.class);
     interceptable.foo();
@@ -409,16 +423,17 @@ public class MethodInterceptionTest extends TestCase {
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-      queue.add(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            methodInvocation.proceed();
-          } catch (Throwable t) {
-            throw new RuntimeException(t);
-          }
-        }
-      });
+      queue.add(
+          new Runnable() {
+            @Override
+            public void run() {
+              try {
+                methodInvocation.proceed();
+              } catch (Throwable t) {
+                throw new RuntimeException(t);
+              }
+            }
+          });
       return null;
     }
   }

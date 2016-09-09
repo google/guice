@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,21 +20,19 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
 
+import java.lang.annotation.Retention;
+import java.text.DecimalFormat;
+import java.util.concurrent.Callable;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import java.lang.annotation.Retention;
-import java.text.DecimalFormat;
-import java.util.concurrent.Callable;
-
 /**
- * A semi-useless microbenchmark. Spring and Guice constuct the same object
- * graph a bunch of times, and we see who can construct the most per second.
- * As of this writing Guice is more than 50X faster. Also useful for comparing 
- * pure Java configuration options.
+ * A semi-useless microbenchmark. Spring and Guice constuct the same object graph a bunch of times,
+ * and we see who can construct the most per second. As of this writing Guice is more than 50X
+ * faster. Also useful for comparing pure Java configuration options.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -49,7 +47,7 @@ public class PerformanceComparison {
 
     for (int i2 = 0; i2 < 10; i2++) {
       iterate(springFactory, "Spring:  ");
-      iterate(juiceFactory,  "Guice:   ");
+      iterate(juiceFactory, "Guice:   ");
       iterate(byHandFactory, "By Hand: ");
 
       System.err.println();
@@ -59,7 +57,7 @@ public class PerformanceComparison {
 
     for (int i2 = 0; i2 < 10; i2++) {
       concurrentlyIterate(springFactory, "Spring:  ");
-      concurrentlyIterate(juiceFactory,  "Guice:   ");
+      concurrentlyIterate(juiceFactory, "Guice:   ");
       concurrentlyIterate(byHandFactory, "By Hand: ");
 
       System.err.println();
@@ -172,16 +170,14 @@ public class PerformanceComparison {
     for (int i = 0; i < count; i++) {
       try {
         callable.call();
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
 
     time = System.currentTimeMillis() - time;
 
-    System.err.println(label
-        + format.format(count * 1000 / time) + " creations/s");
+    System.err.println(label + format.format(count * 1000 / time) + " creations/s");
   }
 
   static void concurrentlyIterate(final Callable<Foo> callable, String label) {
@@ -206,7 +202,6 @@ public class PerformanceComparison {
           };
     }
 
-
     long time = System.currentTimeMillis();
 
     for (int i = 0; i < threadCount; i++) {
@@ -216,16 +211,14 @@ public class PerformanceComparison {
     for (int i = 0; i < threadCount; i++) {
       try {
         threads[i].join();
-      }
-      catch (InterruptedException e) {
+      } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
     }
 
     time = System.currentTimeMillis() - time;
 
-    System.err.println(label
-        + format.format(count * 1000 / time) + " creations/s");
+    System.err.println(label + format.format(count * 1000 / time) + " creations/s");
   }
 
   public static class Foo {
@@ -259,6 +252,7 @@ public class PerformanceComparison {
   interface Bar {
 
     Tee getTee();
+
     int getI();
   }
 
@@ -306,8 +300,10 @@ public class PerformanceComparison {
   }
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface I {}
+  @BindingAnnotation
+  @interface I {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface S {}
+  @BindingAnnotation
+  @interface S {}
 }

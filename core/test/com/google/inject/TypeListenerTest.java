@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,22 +31,19 @@ import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-
-import junit.framework.TestCase;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class TypeListenerTest extends TestCase {
 
-  private final Matcher<Object> onlyAbcd = Matchers.only(new TypeLiteral<A>() {})
-      .or(only(new TypeLiteral<B>() {}))
-      .or(only(new TypeLiteral<C>() {}))
-      .or(only(new TypeLiteral<D>() {}));
+  private final Matcher<Object> onlyAbcd =
+      Matchers.only(new TypeLiteral<A>() {})
+          .or(only(new TypeLiteral<B>() {}))
+          .or(only(new TypeLiteral<C>() {}))
+          .or(only(new TypeLiteral<D>() {}));
 
   final TypeListener failingTypeListener =
       new TypeListener() {
@@ -105,12 +102,14 @@ public class TypeListenerTest extends TestCase {
           }
         };
 
-    Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindListener(onlyAbcd, typeListener);
-        bind(A.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bindListener(onlyAbcd, typeListener);
+            bind(A.class);
+          }
+        });
 
     assertEquals(1, firedCount.get());
   }
@@ -159,7 +158,7 @@ public class TypeListenerTest extends TestCase {
     A a4 = aProvider.get();
     assertEquals(ImmutableList.of(a1, a2, b1, a3, a4), injectees);
   }
-  
+
   /*if[AOP]*/
   private static org.aopalliance.intercept.MethodInterceptor prefixInterceptor(
       final String prefix) {
@@ -203,27 +202,32 @@ public class TypeListenerTest extends TestCase {
   /*end[AOP]*/
 
   class OuterThrowsModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       install(new InnerThrowsModule());
     }
   }
+
   class InnerThrowsModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       bindListener(onlyAbcd, failingTypeListener);
       bind(B.class);
       bind(C.class);
     }
   }
+
   public void testTypeListenerThrows() {
     try {
       Guice.createInjector(new OuterThrowsModule());
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
           getDeclaringSourcePart(getClass()),
           asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
-          "of " + B.class.getName(), 
+          "of " + B.class.getName(),
           "Reason: java.lang.ClassCastException: whoops, failure #1",
           "2) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
           getDeclaringSourcePart(getClass()),
@@ -231,17 +235,21 @@ public class TypeListenerTest extends TestCase {
           "of " + C.class.getName(),
           "Reason: java.lang.ClassCastException: whoops, failure #2");
     }
-    
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindListener(onlyAbcd, failingTypeListener);
-      }
-    });
+
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindListener(onlyAbcd, failingTypeListener);
+              }
+            });
     try {
       injector.getProvider(B.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
           getDeclaringSourcePart(getClass()),
           "of " + B.class.getName(),
@@ -253,7 +261,8 @@ public class TypeListenerTest extends TestCase {
       injector.getInstance(B.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
           getDeclaringSourcePart(getClass()),
           "of " + B.class.getName(),
@@ -286,7 +295,8 @@ public class TypeListenerTest extends TestCase {
       injector.getInstance(A.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "1) Error notifying InjectionListener goofy of " + A.class.getName(),
           " Reason: java.lang.ClassCastException: whoops, failure #1");
     }
@@ -296,7 +306,8 @@ public class TypeListenerTest extends TestCase {
       injector.getInstance(A.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "1) Error notifying InjectionListener goofy of " + A.class.getName(),
           " Reason: java.lang.ClassCastException: whoops, failure #2");
     }
@@ -307,7 +318,8 @@ public class TypeListenerTest extends TestCase {
       bProvider.get();
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "1) Error notifying InjectionListener goofy of " + B.class.getName(),
           " Reason: java.lang.ClassCastException: whoops, failure #3");
     }
@@ -318,17 +330,21 @@ public class TypeListenerTest extends TestCase {
 
   public void testInjectMembersTypeListenerFails() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          getMembersInjector(A.class);
-          bindListener(onlyAbcd, failingTypeListener);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              getMembersInjector(A.class);
+              bindListener(onlyAbcd, failingTypeListener);
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at ",
-          TypeListenerTest.class.getName(), getDeclaringSourcePart(getClass()),
+          TypeListenerTest.class.getName(),
+          getDeclaringSourcePart(getClass()),
           "of " + A.class.getName(),
           " Reason: java.lang.ClassCastException: whoops, failure #1");
     }
@@ -400,8 +416,8 @@ public class TypeListenerTest extends TestCase {
 
   public void testLookupsAtInjectorCreateTime() {
     final AtomicReference<Provider<B>> bProviderReference = new AtomicReference<Provider<B>>();
-    final AtomicReference<MembersInjector<A>> aMembersInjectorReference
-        = new AtomicReference<MembersInjector<A>>();
+    final AtomicReference<MembersInjector<A>> aMembersInjectorReference =
+        new AtomicReference<MembersInjector<A>>();
 
     final InjectionListener<Object> lookupsTester =
         new InjectionListener<Object>() {
@@ -478,7 +494,7 @@ public class TypeListenerTest extends TestCase {
                     });
               }
             });
-    
+
     injector.getInstance(C.class);
   }
 
@@ -565,7 +581,8 @@ public class TypeListenerTest extends TestCase {
       injector.getInstance(A.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "1) Error injecting " + A.class.getName() + " using awkward.",
           "Reason: java.lang.ClassCastException: whoops, failure #1");
     }
@@ -575,7 +592,8 @@ public class TypeListenerTest extends TestCase {
       injector.getInstance(A.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "1) Error injecting " + A.class.getName() + " using awkward.",
           "Reason: java.lang.ClassCastException: whoops, failure #2");
     }
@@ -586,7 +604,8 @@ public class TypeListenerTest extends TestCase {
       bProvider.get();
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "1) Error injecting " + B.class.getName() + " using awkward.",
           "Reason: java.lang.ClassCastException: whoops, failure #3");
     }
@@ -624,7 +643,8 @@ public class TypeListenerTest extends TestCase {
   }
 
   public void testEncounterCannotBeUsedAfterHearReturns() {
-    final AtomicReference<TypeEncounter<?>> encounterReference = new AtomicReference<TypeEncounter<?>>();
+    final AtomicReference<TypeEncounter<?>> encounterReference =
+        new AtomicReference<TypeEncounter<?>>();
 
     Guice.createInjector(
         new AbstractModule() {
@@ -711,7 +731,8 @@ public class TypeListenerTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) There was an error on java.lang.Object",
           "2) An exception was caught and reported. Message: whoops!",
           "3) And another problem",
@@ -754,13 +775,15 @@ public class TypeListenerTest extends TestCase {
 
   public void testDeDuplicateTypeListeners() {
     final DuplicatingTypeListener typeListener = new DuplicatingTypeListener();
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindListener(any(), typeListener);
-        bindListener(only(new TypeLiteral<D>() {}), typeListener);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindListener(any(), typeListener);
+                bindListener(only(new TypeLiteral<D>() {}), typeListener);
+              }
+            });
     D d = injector.getInstance(D.class);
     d.assertAllCounts(1);
     assertEquals(1, typeListener.count);
@@ -790,7 +813,8 @@ public class TypeListenerTest extends TestCase {
     int userInjected = 0;
     int listenersNotified = 0;
 
-    @Inject void guiceInjected() {
+    @Inject
+    void guiceInjected() {
       guiceInjected++;
     }
 

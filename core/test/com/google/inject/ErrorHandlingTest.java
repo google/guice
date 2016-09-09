@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,22 +20,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ErrorHandlingTest {
 
   public static void main(String[] args) throws CreationException {
     try {
       Guice.createInjector(new MyModule());
-    }
-    catch (CreationException e) {
+    } catch (CreationException e) {
       e.printStackTrace();
       System.err.println("--");
     }
@@ -57,15 +53,13 @@ public class ErrorHandlingTest {
             });
     try {
       bad.getInstance(String.class);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       System.err.println("--");
     }
     try {
       bad.getInstance(NeedsString.class);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       System.err.println("--");
     }
@@ -75,29 +69,34 @@ public class ErrorHandlingTest {
     @Inject String mofo;
   }
 
-  @Inject @Named("missing")
+  @Inject
+  @Named("missing")
   static List<String> missing = null;
 
   static class Foo {
     @Inject
     public Foo(Runnable r) {}
 
-    @Inject void setNames(List<String> names) {}
+    @Inject
+    void setNames(List<String> names) {}
   }
 
   static class Bar {
     // Invalid constructor.
     Bar(String s) {}
 
-    @Inject void setNumbers(@Named("numbers") List<Integer> numbers) {}
+    @Inject
+    void setNumbers(@Named("numbers") List<Integer> numbers) {}
 
-    @Inject void bar(@Named("foo") String s) {}
+    @Inject
+    void bar(@Named("foo") String s) {}
   }
 
   static class Tee {
     @Inject String s;
 
-    @Inject void tee(String s, int i) {}
+    @Inject
+    void tee(String s, int i) {}
 
     @Inject Invalid invalid;
   }
@@ -134,15 +133,18 @@ public class ErrorHandlingTest {
       bind(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       bind(TooManyScopes.class);
       bindScope(BadScope.class, Scopes.SINGLETON);
-      bind(Object.class).toInstance(new Object() {
-        @Inject void foo() {
-          throw new RuntimeException();
-        }
-      });
+      bind(Object.class)
+          .toInstance(
+              new Object() {
+                @Inject
+                void foo() {
+                  throw new RuntimeException();
+                }
+              });
       requestStaticInjection(ErrorHandlingTest.class);
 
       addError("I don't like %s", "you");
-      
+
       Object o = "2";
       try {
         Integer i = (Integer) o;

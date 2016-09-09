@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,18 +19,15 @@ package com.google.inject;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.spi.ElementSource;
-
+import java.lang.annotation.Retention;
 import junit.framework.TestCase;
 
-import java.lang.annotation.Retention;
-
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ReflectionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface I {}
+  @BindingAnnotation
+  @interface I {}
 
   public void testNormalBinding() throws CreationException {
     final Foo foo = new Foo();

@@ -3,10 +3,8 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
-
 import java.util.logging.Logger;
+import junit.framework.TestCase;
 
 /**
  * Test built-in injection of loggers.
@@ -22,21 +20,23 @@ public class LoggerInjectionTest extends TestCase {
     injector.injectMembers(this);
     assertEquals("com.google.inject.LoggerInjectionTest", logger.getName());
   }
-  
+
   public void testLoggerInConstructor() {
     Injector injector = Guice.createInjector();
     Foo foo = injector.getInstance(Foo.class);
     assertEquals("com.google.inject.LoggerInjectionTest$Foo", foo.logger.getName());
   }
-  
+
   private static class Foo {
     Logger logger;
+
     @SuppressWarnings("unused")
-    @Inject Foo(Logger logger) {
+    @Inject
+    Foo(Logger logger) {
       this.logger = logger;
     }
   }
-  
+
   public void testLoggerWithoutMember() {
     Injector injector = Guice.createInjector();
     assertNull(injector.getInstance(Logger.class).getName());
@@ -59,7 +59,7 @@ public class LoggerInjectionTest extends TestCase {
 
     assertNull(injector.getInstance(Key.get(Logger.class, Names.named("anonymous"))).getName());
   }
-  
+
   public void testCannotBindLogger() {
     try {
       Guice.createInjector(
@@ -71,8 +71,8 @@ public class LoggerInjectionTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "A binding to java.util.logging.Logger was already configured");
+      assertContains(
+          expected.getMessage(), "A binding to java.util.logging.Logger was already configured");
     }
   }
 }

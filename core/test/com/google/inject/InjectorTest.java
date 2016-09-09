@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,6 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.util.concurrent.Callable;
@@ -31,21 +28,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 
 public class InjectorTest extends TestCase {
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface Other {}
+  @BindingAnnotation
+  @interface Other {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface S {}
+  @BindingAnnotation
+  @interface S {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface I {}
+  @BindingAnnotation
+  @interface I {}
 
   public void testToStringDoesNotInfinitelyRecurse() {
     Injector injector = Guice.createInjector(Stage.TOOL);
@@ -67,12 +66,10 @@ public class InjectorTest extends TestCase {
               }
             });
 
-    assertSame(singleton,
-        injector.getInstance(Key.get(SampleSingleton.class)));
+    assertSame(singleton, injector.getInstance(Key.get(SampleSingleton.class)));
     assertSame(singleton, injector.getInstance(SampleSingleton.class));
 
-    assertSame(other,
-        injector.getInstance(Key.get(SampleSingleton.class, Other.class)));
+    assertSame(other, injector.getInstance(Key.get(SampleSingleton.class, Other.class)));
   }
 
   static class SampleSingleton {}
@@ -112,8 +109,7 @@ public class InjectorTest extends TestCase {
     assertEquals(5, bar.getI());
   }
 
-  public void testIntAndIntegerAreInterchangeable()
-      throws CreationException {
+  public void testIntAndIntegerAreInterchangeable() throws CreationException {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
@@ -159,6 +155,7 @@ public class InjectorTest extends TestCase {
   interface Bar {
 
     Tee getTee();
+
     int getI();
   }
 
@@ -188,6 +185,7 @@ public class InjectorTest extends TestCase {
   interface Tee {
 
     String getS();
+
     Bar getBar();
   }
 
@@ -237,11 +235,12 @@ public class InjectorTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
+    } catch (CreationException ce) {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "1) " + Interface.class.getName()
+          "1) "
+              + Interface.class.getName()
               + " is an interface, but interfaces have no static injection points.",
           "at " + InjectorTest.class.getName(),
           "configure");
@@ -256,7 +255,8 @@ public class InjectorTest extends TestCase {
 
     static String s;
 
-    @Inject static void setS(@S String s) {
+    @Inject
+    static void setS(@S String s) {
       Static.s = s;
     }
   }
@@ -344,10 +344,13 @@ public class InjectorTest extends TestCase {
       Guice.createInjector().getInstance(Money.class);
       fail();
     } catch (ProvisionException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           Tree.class.getName() + " doesn't provide instances of " + Money.class.getName(),
-          "while locating ", Tree.class.getName(),
-          "while locating ", Money.class.getName());
+          "while locating ",
+          Tree.class.getName(),
+          "while locating ",
+          Money.class.getName());
     }
   }
 
@@ -356,9 +359,11 @@ public class InjectorTest extends TestCase {
       Guice.createInjector().getInstance(PineTree.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           Tree.class.getName() + " doesn't extend " + PineTree.class.getName(),
-          "while locating ", PineTree.class.getName());
+          "while locating ",
+          PineTree.class.getName());
     }
   }
 
@@ -367,9 +372,11 @@ public class InjectorTest extends TestCase {
       Guice.createInjector().getInstance(SeaHorse.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "@ImplementedBy points to the same class it annotates.",
-          "while locating ", SeaHorse.class.getName());
+          "while locating ",
+          SeaHorse.class.getName());
     }
   }
 
@@ -378,9 +385,11 @@ public class InjectorTest extends TestCase {
       Guice.createInjector().getInstance(Chicken.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "@ProvidedBy points to the same class it annotates",
-          "while locating ", Chicken.class.getName());
+          "while locating ",
+          Chicken.class.getName());
     }
   }
 

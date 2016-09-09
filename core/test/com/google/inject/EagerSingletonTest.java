@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +18,11 @@ package com.google.inject;
 
 import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class EagerSingletonTest extends TestCase {
 
-  @Override public void setUp() {
+  @Override
+  public void setUp() {
     A.instanceCount = 0;
     B.instanceCount = 0;
     C.instanceCount = 0;
@@ -50,8 +49,10 @@ public class EagerSingletonTest extends TestCase {
         });
 
     assertEquals(1, A.instanceCount);
-    assertEquals("Singletons discovered when creating singletons should not be built eagerly",
-        0, B.instanceCount);
+    assertEquals(
+        "Singletons discovered when creating singletons should not be built eagerly",
+        0,
+        B.instanceCount);
     assertEquals(1, C.instanceCount);
   }
 
@@ -63,11 +64,13 @@ public class EagerSingletonTest extends TestCase {
 
   public void testChildEagerSingletons() {
     Injector parent = Guice.createInjector(Stage.PRODUCTION);
-    parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(D.class).to(C.class);
-      }
-    });
+    parent.createChildInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(D.class).to(C.class);
+          }
+        });
 
     assertEquals(1, C.instanceCount);
   }
@@ -77,7 +80,8 @@ public class EagerSingletonTest extends TestCase {
     static int instanceCount = 0;
     int instanceId = instanceCount++;
 
-    @Inject A(Injector injector) {
+    @Inject
+    A(Injector injector) {
       injector.getProvider(B.class);
     }
   }

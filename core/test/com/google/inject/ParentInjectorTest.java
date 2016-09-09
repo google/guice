@@ -26,16 +26,12 @@ import com.google.common.collect.Iterables;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeConverter;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class ParentInjectorTest extends TestCase {
 
   public void testParentAndChildCannotShareExplicitBindings() {
@@ -44,9 +40,17 @@ public class ParentInjectorTest extends TestCase {
       parent.createChildInjector(bindsA);
       fail("Created the same explicit binding on both parent and child");
     } catch (CreationException e) {
-      assertContains(e.getMessage(), "A binding to ", A.class.getName(), " was already configured",
-          " at ", getClass().getName(), getDeclaringSourcePart(getClass()),
-          " at ", getClass().getName(), getDeclaringSourcePart(getClass()));
+      assertContains(
+          e.getMessage(),
+          "A binding to ",
+          A.class.getName(),
+          " was already configured",
+          " at ",
+          getClass().getName(),
+          getDeclaringSourcePart(getClass()),
+          " at ",
+          getClass().getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -57,7 +61,8 @@ public class ParentInjectorTest extends TestCase {
       parent.getInstance(A.class);
       fail("Created a just-in-time binding on the parent that's the same as a child's binding");
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "Unable to create binding for " + A.class.getName(),
           "It was already configured on one or more child injectors or private modules",
           "bound at " + bindsA.getClass().getName() + ".configure(",
@@ -65,17 +70,20 @@ public class ParentInjectorTest extends TestCase {
           "while locating " + A.class.getName());
     }
   }
-  
+
   public void testChildCannotBindToAParentJitBinding() {
     Injector parent = Guice.createInjector();
     parent.getInstance(A.class);
     try {
       parent.createChildInjector(bindsA);
       fail();
-    } catch(CreationException ce) {
-      assertContains(Iterables.getOnlyElement(ce.getErrorMessages()).getMessage(),
-          "A just-in-time binding to " + A.class.getName() + " was already configured on a parent injector.");
-    }    
+    } catch (CreationException ce) {
+      assertContains(
+          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage(),
+          "A just-in-time binding to "
+              + A.class.getName()
+              + " was already configured on a parent injector.");
+    }
   }
 
   public void testJustInTimeBindingsAreSharedWithParentIfPossible() {
@@ -116,16 +124,22 @@ public class ParentInjectorTest extends TestCase {
   }
 
   public void testScopesInherited() {
-    Injector parent = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindScope(MyScope.class, Scopes.SINGLETON);
-      }
-    });
-    Injector child = parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(A.class).in(MyScope.class);
-      }
-    });
+    Injector parent =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindScope(MyScope.class, Scopes.SINGLETON);
+              }
+            });
+    Injector child =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).in(MyScope.class);
+              }
+            });
     assertSame(child.getInstance(A.class), child.getInstance(A.class));
   }
 
@@ -139,18 +153,26 @@ public class ParentInjectorTest extends TestCase {
       };
 
   public void testInterceptorsInherited() {
-    Injector parent = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        super.bindInterceptor(Matchers.any(), Matchers.returns(Matchers.identicalTo(A.class)),
-            returnNullInterceptor);
-      }
-    });
+    Injector parent =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                super.bindInterceptor(
+                    Matchers.any(),
+                    Matchers.returns(Matchers.identicalTo(A.class)),
+                    returnNullInterceptor);
+              }
+            });
 
-    Injector child = parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(C.class);
-      }
-    });
+    Injector child =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(C.class);
+              }
+            });
 
     assertNull(child.getInstance(C.class).interceptedMethod());
   }
@@ -177,11 +199,14 @@ public class ParentInjectorTest extends TestCase {
 
   public void testInjectorInjectionSpanningInjectors() {
     Injector parent = Guice.createInjector();
-    Injector child = parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(D.class);
-      }
-    });
+    Injector child =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(D.class);
+              }
+            });
 
     D d = child.getInstance(D.class);
     assertSame(d.injector, child);
@@ -195,7 +220,7 @@ public class ParentInjectorTest extends TestCase {
     Injector left = top.createChildInjector();
     Injector leftLeft = left.createChildInjector(bindsD);
     Injector right = top.createChildInjector(bindsD);
-    
+
     assertSame(leftLeft, leftLeft.getInstance(D.class).injector);
     assertSame(right, right.getInstance(D.class).injector);
     assertSame(top, leftLeft.getInstance(E.class).injector);
@@ -219,33 +244,40 @@ public class ParentInjectorTest extends TestCase {
 
   public void testScopeBoundInChildInjectorOnly() {
     Injector parent = Guice.createInjector();
-    Injector child = parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindScope(MyScope.class, Scopes.SINGLETON);
-      }
-    });
+    Injector child =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindScope(MyScope.class, Scopes.SINGLETON);
+              }
+            });
 
     try {
       parent.getProvider(F.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "No scope is bound to com.google.inject.ParentInjectorTest$MyScope.",
           "at " + F.class.getName() + ".class(ParentInjectorTest.java",
           "  while locating " + F.class.getName());
     }
-    
+
     assertNotNull(child.getProvider(F.class).get());
   }
 
   public void testErrorInParentButOkayInChild() {
     Injector parent = Guice.createInjector();
-    Injector childInjector = parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindScope(MyScope.class, Scopes.SINGLETON);
-        bind(Object.class).to(F.class);
-      }
-    });
+    Injector childInjector =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindScope(MyScope.class, Scopes.SINGLETON);
+                bind(Object.class).to(F.class);
+              }
+            });
     Object one = childInjector.getInstance(Object.class);
     Object two = childInjector.getInstance(Object.class);
     assertSame(one, two);
@@ -258,8 +290,10 @@ public class ParentInjectorTest extends TestCase {
     try {
       childInjector.getInstance(G.class);
       fail();
-    } catch(ConfigurationException expected) {
-      assertContains(expected.getMessage(), "No scope is bound to " + MyScope.class.getName(),
+    } catch (ConfigurationException expected) {
+      assertContains(
+          expected.getMessage(),
+          "No scope is bound to " + MyScope.class.getName(),
           "at " + F.class.getName() + ".class(ParentInjectorTest.java:",
           "  while locating " + G.class.getName());
     }
@@ -268,22 +302,29 @@ public class ParentInjectorTest extends TestCase {
   @Singleton
   static class A {}
 
-  private final Module bindsA = new AbstractModule() {
-    @Override protected void configure() {
-      bind(A.class).toInstance(new A());
-    }
-  };
+  private final Module bindsA =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(A.class).toInstance(new A());
+        }
+      };
 
   interface B {}
+
   static class RealB implements B {}
 
-  private final Module bindsB = new AbstractModule() {
-    @Override protected void configure() {
-      bind(B.class).to(RealB.class);
-    }
-  };
+  private final Module bindsB =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(B.class).to(RealB.class);
+        }
+      };
 
-  @Target(TYPE) @Retention(RUNTIME) @ScopeAnnotation
+  @Target(TYPE)
+  @Retention(RUNTIME)
+  @ScopeAnnotation
   public @interface MyScope {}
 
   private final TypeConverter listConverter =
@@ -294,17 +335,21 @@ public class ParentInjectorTest extends TestCase {
         }
       };
 
-  private final Module bindListConverterModule = new AbstractModule() {
-    @Override protected void configure() {
-      convertToTypes(Matchers.any(), listConverter);
-    }
-  };
+  private final Module bindListConverterModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          convertToTypes(Matchers.any(), listConverter);
+        }
+      };
 
-  private final Module bindStringNamedB = new AbstractModule() {
-    @Override protected void configure() {
-      bind(String.class).annotatedWith(Names.named("B")).toInstance("buzz");
-    }
-  };
+  private final Module bindStringNamedB =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(String.class).annotatedWith(Names.named("B")).toInstance("buzz");
+        }
+      };
 
   public static class C {
     public A interceptedMethod() {
@@ -320,11 +365,13 @@ public class ParentInjectorTest extends TestCase {
     @Inject Injector injector;
   }
 
-  private final Module bindsD = new AbstractModule() {
-    @Override protected void configure() {
-      bind(D.class);
-    }
-  };
+  private final Module bindsD =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(D.class);
+        }
+      };
 
   @MyScope
   static class F implements G {}

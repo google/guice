@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +19,10 @@ package com.google.inject;
 import static com.google.inject.matcher.Matchers.any;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class IntegrationTest extends TestCase {
 
   public void testIntegration() throws CreationException {
@@ -54,6 +51,7 @@ public class IntegrationTest extends TestCase {
 
   static class Foo {
     boolean invoked;
+
     public void foo() {
       invoked = true;
     }
@@ -69,5 +67,4 @@ public class IntegrationTest extends TestCase {
       return methodInvocation.proceed();
     }
   }
-
 }

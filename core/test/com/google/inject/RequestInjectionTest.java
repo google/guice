@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,16 +26,16 @@ import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Retention;
 import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class RequestInjectionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface ForField {}
+  @BindingAnnotation
+  @interface ForField {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface ForMethod {}
+  @BindingAnnotation
+  @interface ForMethod {}
 
   @Override
   protected void setUp() throws Exception {
@@ -47,14 +47,15 @@ public class RequestInjectionTest extends TestCase {
   public void testInjectMembers() {
     final HasInjections hi = new HasInjections();
 
-    Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindConstant().annotatedWith(ForMethod.class).to("test");
-        bindConstant().annotatedWith(ForField.class).to(5);
-        requestInjection(hi);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bindConstant().annotatedWith(ForMethod.class).to("test");
+            bindConstant().annotatedWith(ForField.class).to(5);
+            requestInjection(hi);
+          }
+        });
 
     assertEquals("test", hi.instanceMethod);
     assertEquals(5, hi.instanceField);
@@ -63,31 +64,33 @@ public class RequestInjectionTest extends TestCase {
   }
 
   public void testInjectStatics() throws CreationException {
-    Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindConstant().annotatedWith(ForMethod.class).to("test");
-        bindConstant().annotatedWith(ForField.class).to(5);
-        requestStaticInjection(HasInjections.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bindConstant().annotatedWith(ForMethod.class).to("test");
+            bindConstant().annotatedWith(ForField.class).to(5);
+            requestStaticInjection(HasInjections.class);
+          }
+        });
 
     assertEquals("test", HasInjections.staticMethod);
     assertEquals(5, HasInjections.staticField);
   }
-  
+
   public void testInjectMembersAndStatics() {
     final HasInjections hi = new HasInjections();
 
-    Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindConstant().annotatedWith(ForMethod.class).to("test");
-        bindConstant().annotatedWith(ForField.class).to(5);
-        requestStaticInjection(HasInjections.class);
-        requestInjection(hi);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bindConstant().annotatedWith(ForMethod.class).to("test");
+            bindConstant().annotatedWith(ForField.class).to(5);
+            requestStaticInjection(HasInjections.class);
+            requestInjection(hi);
+          }
+        });
 
     assertEquals("test", hi.instanceMethod);
     assertEquals(5, hi.instanceField);
@@ -97,17 +100,20 @@ public class RequestInjectionTest extends TestCase {
 
   public void testValidationErrorOnInjectedMembers() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override
-        protected void configure() {
-          requestInjection(new NeedsRunnable());
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              requestInjection(new NeedsRunnable());
+            }
+          });
       fail("Expected CreationException");
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) No implementation for java.lang.Runnable was bound",
-          "at " + NeedsRunnable.class.getName(), ".runnable(RequestInjectionTest.java:");
+          "at " + NeedsRunnable.class.getName(),
+          ".runnable(RequestInjectionTest.java:");
     }
   }
 
@@ -129,24 +135,28 @@ public class RequestInjectionTest extends TestCase {
             }
           });
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error in custom provider, java.lang.UnsupportedOperationException",
           "for field at " + NeedsRunnable.class.getName() + ".runnable(RequestInjectionTest.java:",
-          "at " + getClass().getName(), getDeclaringSourcePart(getClass()));
+          "at " + getClass().getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
   public void testUserExceptionWhileInjectingInstance() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override
-        protected void configure() {
-          requestInjection(new BlowsUpOnInject());
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              requestInjection(new BlowsUpOnInject());
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error injecting method, java.lang.UnsupportedOperationException: Pop",
           "at " + BlowsUpOnInject.class.getName() + ".injectInstance(RequestInjectionTest.java:");
     }
@@ -154,15 +164,17 @@ public class RequestInjectionTest extends TestCase {
 
   public void testUserExceptionWhileInjectingStatically() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override
-        protected void configure() {
-          requestStaticInjection(BlowsUpOnInject.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              requestStaticInjection(BlowsUpOnInject.class);
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Error injecting method, java.lang.UnsupportedOperationException: Snap",
           "at " + BlowsUpOnInject.class.getName() + ".injectStatically(RequestInjectionTest.java:");
     }
@@ -180,59 +192,72 @@ public class RequestInjectionTest extends TestCase {
     static String staticMethod;
     String instanceMethod;
 
-    @Inject static void setStaticMethod(@ForMethod String staticMethod) {
+    @Inject
+    static void setStaticMethod(@ForMethod String staticMethod) {
       HasInjections.staticMethod = staticMethod;
     }
 
-    @Inject void setInstanceS(@ForMethod String instanceS) {
+    @Inject
+    void setInstanceS(@ForMethod String instanceS) {
       this.instanceMethod = instanceS;
     }
   }
 
   static class BlowsUpOnInject {
-    @Inject void injectInstance() {
+    @Inject
+    void injectInstance() {
       throw new UnsupportedOperationException("Pop");
     }
 
-    @Inject static void injectStatically() {
+    @Inject
+    static void injectStatically() {
       throw new UnsupportedOperationException("Snap");
     }
   }
-  
+
   /*
    * Tests that initializables of the same instance don't clobber
    * membersInjectors in InitializableReference, so that they ultimately
    * can be requested in any order.
    */
   public void testEarlyInjectableReferencesWithSameIdentity() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        // Add a listener to trigger all toInstance bindings to get an Initializable.
-        bindListener(Matchers.any(), new TypeListener() {
-          @Override
-          public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-          }
-        });
-        
-        // Bind two different Keys to the IDENTITICAL object
-        // ORDER MATTERS! We want the String binding to push out the Object one
-        String fail = new String("better not fail!");
-        bind(Object.class).toInstance(fail);
-        bind(String.class).toInstance(fail);
-        
-        // Then try to inject those objects in a requestInjection,
-        // letting us get into InjectableReference.get before it has
-        // finished running through all its injections.
-        // Each of these technically has its own InjectableReference internally.
-        // ORDER MATTERS!.. because Object is injected first, that InjectableReference
-        // attempts to process its members injector, but it wasn't initialized,
-        // because String pushed it out of the queue!
-        requestInjection(new Object() {
-          @SuppressWarnings("unused") @Inject Object obj;
-          @SuppressWarnings("unused") @Inject String str;
-        });
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                // Add a listener to trigger all toInstance bindings to get an Initializable.
+                bindListener(
+                    Matchers.any(),
+                    new TypeListener() {
+                      @Override
+                      public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {}
+                    });
+
+                // Bind two different Keys to the IDENTITICAL object
+                // ORDER MATTERS! We want the String binding to push out the Object one
+                String fail = new String("better not fail!");
+                bind(Object.class).toInstance(fail);
+                bind(String.class).toInstance(fail);
+
+                // Then try to inject those objects in a requestInjection,
+                // letting us get into InjectableReference.get before it has
+                // finished running through all its injections.
+                // Each of these technically has its own InjectableReference internally.
+                // ORDER MATTERS!.. because Object is injected first, that InjectableReference
+                // attempts to process its members injector, but it wasn't initialized,
+                // because String pushed it out of the queue!
+                requestInjection(
+                    new Object() {
+                      @SuppressWarnings("unused")
+                      @Inject
+                      Object obj;
+
+                      @SuppressWarnings("unused")
+                      @Inject
+                      String str;
+                    });
+              }
+            });
   }
 }

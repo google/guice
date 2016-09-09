@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,15 +19,11 @@ package com.google.inject;
 import static com.google.inject.name.Names.named;
 
 import com.google.inject.name.Named;
-
-import junit.framework.TestCase;
-
 import java.util.Arrays;
 import java.util.List;
+import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ProviderInjectionTest extends TestCase {
 
   public void testProviderInjection() throws CreationException {
@@ -78,15 +74,13 @@ public class ProviderInjectionTest extends TestCase {
     try {
       Guice.createInjector(m);
       fail("Should have thrown a CreationException");
-    }
-    catch (CreationException expected) {
+    } catch (CreationException expected) {
     }
   }
 
   /**
-   * When custom providers are used at injector creation time, they should be
-   * injected before use. In this testcase, we verify that a provider for
-   * List.class is injected before it is used.
+   * When custom providers are used at injector creation time, they should be injected before use.
+   * In this testcase, we verify that a provider for List.class is injected before it is used.
    */
   public void testProvidersAreInjectedBeforeTheyAreUsed() {
     Injector injector =
@@ -128,15 +122,13 @@ public class ProviderInjectionTest extends TestCase {
               }
             });
 
-    assertEquals("Providers not injected before use",
-        "[true]",
-        injector.getInstance(String.class));
+    assertEquals("Providers not injected before use", "[true]", injector.getInstance(String.class));
   }
 
   /**
-   * This test ensures that regardless of binding order, instances are injected
-   * before they are used. It injects mutable Count objects and records their
-   * value at the time that they're injected.
+   * This test ensures that regardless of binding order, instances are injected before they are
+   * used. It injects mutable Count objects and records their value at the time that they're
+   * injected.
    */
   public void testCreationTimeInjectionOrdering() {
     Injector injector =
@@ -204,6 +196,7 @@ public class ProviderInjectionTest extends TestCase {
 
   static class Count {
     int value;
+
     Count(int value) {
       this.value = value;
     }
@@ -211,7 +204,9 @@ public class ProviderInjectionTest extends TestCase {
 
   static class StaticallyInjectable {
     static int cCountAtInjectionTime;
-    @Inject static void initialize(@Named("c") Count cCount) {
+
+    @Inject
+    static void initialize(@Named("c") Count cCount) {
       cCountAtInjectionTime = cCount.value;
     }
   }
@@ -225,6 +220,5 @@ public class ProviderInjectionTest extends TestCase {
 
   static class SampleSingleton {}
 
-  interface Baz { }
-
+  interface Baz {}
 }

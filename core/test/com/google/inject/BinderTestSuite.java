@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,9 +37,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class BinderTestSuite extends TestCase {
 
   public static Test suite() {
@@ -102,24 +100,27 @@ public class BinderTestSuite extends TestCase {
 
     new Builder()
         .name("no binding, AWithProvidedBy named apple")
-        .key(Key.get(AWithProvidedBy.class, named("apple")),
-            InjectsAWithProvidedByNamedApple.class)
-        .configurationException("No implementation for %s annotated with %s was bound",
+        .key(Key.get(AWithProvidedBy.class, named("apple")), InjectsAWithProvidedByNamedApple.class)
+        .configurationException(
+            "No implementation for %s annotated with %s was bound",
             AWithProvidedBy.class.getName(), named("apple"))
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, AWithImplementedBy named apple")
-        .key(Key.get(AWithImplementedBy.class, named("apple")),
+        .key(
+            Key.get(AWithImplementedBy.class, named("apple")),
             InjectsAWithImplementedByNamedApple.class)
-        .configurationException("No implementation for %s annotated with %s was bound",
+        .configurationException(
+            "No implementation for %s annotated with %s was bound",
             AWithImplementedBy.class.getName(), named("apple"))
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, ScopedA named apple")
         .key(Key.get(ScopedA.class, named("apple")), InjectsScopedANamedApple.class)
-        .configurationException("No implementation for %s annotated with %s was bound",
+        .configurationException(
+            "No implementation for %s annotated with %s was bound",
             ScopedA.class.getName(), named("apple"))
         .addToSuite(suite);
 
@@ -220,7 +221,6 @@ public class BinderTestSuite extends TestCase {
           .scoper(scoper)
           .addToSuite(suite);
 
-
       new Builder()
           .name("bind AWithProvidedBy named apple")
           .module(
@@ -262,16 +262,16 @@ public class BinderTestSuite extends TestCase {
               "No implementation for %s annotated with %s was bound",
               ScopedA.class.getName(), named("apple"))
           .addToSuite(suite);
-
     }
-    
+
     return suite;
   }
-  
+
   enum Scoper {
     UNSCOPED {
       @Override
       void configure(ScopedBindingBuilder sbb) {}
+
       @Override
       void apply(Builder builder) {}
     },
@@ -281,6 +281,7 @@ public class BinderTestSuite extends TestCase {
       void configure(ScopedBindingBuilder sbb) {
         sbb.asEagerSingleton();
       }
+
       @Override
       void apply(Builder builder) {
         builder.expectedValues(new PlainA(101), new PlainA(101), new PlainA(101));
@@ -293,6 +294,7 @@ public class BinderTestSuite extends TestCase {
       void configure(ScopedBindingBuilder sbb) {
         sbb.in(Scopes.SINGLETON);
       }
+
       @Override
       void apply(Builder builder) {
         builder.expectedValues(new PlainA(201), new PlainA(201), new PlainA(201));
@@ -304,6 +306,7 @@ public class BinderTestSuite extends TestCase {
       void configure(ScopedBindingBuilder sbb) {
         sbb.in(Singleton.class);
       }
+
       @Override
       void apply(Builder builder) {
         builder.expectedValues(new PlainA(201), new PlainA(201), new PlainA(201));
@@ -315,6 +318,7 @@ public class BinderTestSuite extends TestCase {
       void configure(ScopedBindingBuilder sbb) {
         sbb.in(TwoAtATimeScoped.class);
       }
+
       @Override
       void apply(Builder builder) {
         builder.expectedValues(new PlainA(201), new PlainA(201), new PlainA(202), new PlainA(202));
@@ -326,6 +330,7 @@ public class BinderTestSuite extends TestCase {
       void configure(ScopedBindingBuilder sbb) {
         sbb.in(new TwoAtATimeScope());
       }
+
       @Override
       void apply(Builder builder) {
         builder.expectedValues(new PlainA(201), new PlainA(201), new PlainA(202), new PlainA(202));
@@ -333,12 +338,15 @@ public class BinderTestSuite extends TestCase {
     };
 
     abstract void configure(ScopedBindingBuilder sbb);
+
     abstract void apply(Builder builder);
   }
 
   /** When Guice creates a value, directly or via a provider */
   enum CreationTime {
-    NONE, EAGER, LAZY
+    NONE,
+    EAGER,
+    LAZY
   }
 
   public static class Builder {
@@ -353,8 +361,8 @@ public class BinderTestSuite extends TestCase {
                 bindScope(TwoAtATimeScoped.class, new TwoAtATimeScope());
               }
             });
-    private List<Object> expectedValues = Lists.<Object>newArrayList(
-        new PlainA(201), new PlainA(202), new PlainA(203));
+    private List<Object> expectedValues =
+        Lists.<Object>newArrayList(new PlainA(201), new PlainA(202), new PlainA(203));
     private CreationTime creationTime = CreationTime.LAZY;
     private String creationException;
     private String configurationException;
@@ -569,9 +577,12 @@ public class BinderTestSuite extends TestCase {
         newInjector().getInstance(injectsKey);
         fail();
       } catch (ConfigurationException expected) {
-        assertContains(expected.getMessage(),
-            configurationException, injectsKey.getName() + ".inject",
-            configurationException, injectsKey.getName() + ".inject",
+        assertContains(
+            expected.getMessage(),
+            configurationException,
+            injectsKey.getName() + ".inject",
+            configurationException,
+            injectsKey.getName() + ".inject",
             "2 errors");
       }
 
@@ -580,9 +591,12 @@ public class BinderTestSuite extends TestCase {
         newInjector().injectMembers(injectable);
         fail();
       } catch (ConfigurationException expected) {
-        assertContains(expected.getMessage(),
-            configurationException, injectsKey.getName() + ".inject",
-            configurationException, injectsKey.getName() + ".inject",
+        assertContains(
+            expected.getMessage(),
+            configurationException,
+            injectsKey.getName() + ".inject",
+            configurationException,
+            injectsKey.getName() + ".inject",
             "2 errors");
       }
     }
@@ -696,15 +710,18 @@ public class BinderTestSuite extends TestCase {
   interface AWithProvidedBy {}
 
   static class InjectsAWithProvidedBy extends Injectable {
-    @Inject public void inject(AWithProvidedBy aWithProvidedBy,
-        Provider<AWithProvidedBy> aWithProvidedByProvider) {
+    @Inject
+    public void inject(
+        AWithProvidedBy aWithProvidedBy, Provider<AWithProvidedBy> aWithProvidedByProvider) {
       this.value = aWithProvidedBy;
       this.provider = aWithProvidedByProvider;
     }
   }
 
   static class InjectsAWithProvidedByNamedApple extends Injectable {
-    @Inject public void inject(@Named("apple") AWithProvidedBy aWithProvidedBy,
+    @Inject
+    public void inject(
+        @Named("apple") AWithProvidedBy aWithProvidedBy,
         @Named("apple") Provider<AWithProvidedBy> aWithProvidedByProvider) {
       this.value = aWithProvidedBy;
       this.provider = aWithProvidedByProvider;
@@ -715,7 +732,9 @@ public class BinderTestSuite extends TestCase {
   interface AWithImplementedBy {}
 
   static class InjectsAWithImplementedBy extends Injectable {
-    @Inject public void inject(AWithImplementedBy aWithImplementedBy,
+    @Inject
+    public void inject(
+        AWithImplementedBy aWithImplementedBy,
         Provider<AWithImplementedBy> aWithImplementedByProvider) {
       this.value = aWithImplementedBy;
       this.provider = aWithImplementedByProvider;
@@ -723,7 +742,9 @@ public class BinderTestSuite extends TestCase {
   }
 
   static class InjectsAWithImplementedByNamedApple extends Injectable {
-    @Inject public void inject(@Named("apple") AWithImplementedBy aWithImplementedBy,
+    @Inject
+    public void inject(
+        @Named("apple") AWithImplementedBy aWithImplementedBy,
         @Named("apple") Provider<AWithImplementedBy> aWithImplementedByProvider) {
       this.value = aWithImplementedBy;
       this.provider = aWithImplementedByProvider;
@@ -733,7 +754,8 @@ public class BinderTestSuite extends TestCase {
   interface A extends AWithProvidedBy, AWithImplementedBy {}
 
   static class InjectsA extends Injectable {
-    @Inject public void inject(A a, Provider<A> aProvider) {
+    @Inject
+    public void inject(A a, Provider<A> aProvider) {
       this.value = a;
       this.provider = aProvider;
     }
@@ -741,24 +763,28 @@ public class BinderTestSuite extends TestCase {
 
   static class PlainA implements A {
     final int value;
+
     PlainA() {
       value = nextId.getAndIncrement();
       if (value < 0) {
         throw new RuntimeException("Illegal value: " + value);
       }
     }
+
     PlainA(int value) {
       this.value = value;
     }
+
     @Override
     public boolean equals(Object obj) {
-      return obj instanceof PlainA
-          && value == ((PlainA) obj).value;
+      return obj instanceof PlainA && value == ((PlainA) obj).value;
     }
+
     @Override
     public int hashCode() {
       return value;
     }
+
     @Override
     public String toString() {
       return "PlainA#" + value;
@@ -773,13 +799,14 @@ public class BinderTestSuite extends TestCase {
   }
 
   static class InjectsPlainA extends Injectable {
-    @Inject public void inject(PlainA plainA, Provider<PlainA> plainAProvider) {
+    @Inject
+    public void inject(PlainA plainA, Provider<PlainA> plainAProvider) {
       this.value = plainA;
       this.provider = plainAProvider;
     }
   }
 
-  /** This scope hands out each value exactly twice  */
+  /** This scope hands out each value exactly twice */
   static class TwoAtATimeScope implements Scope {
     @Override
     public <T> Provider<T> scope(Key<T> key, final Provider<T> unscoped) {
@@ -801,22 +828,26 @@ public class BinderTestSuite extends TestCase {
     }
   }
 
-  @Target({ TYPE, METHOD }) @Retention(RUNTIME) @ScopeAnnotation
+  @Target({TYPE, METHOD})
+  @Retention(RUNTIME)
+  @ScopeAnnotation
   public @interface TwoAtATimeScoped {}
 
   @TwoAtATimeScoped
   static class ScopedA extends PlainA {}
 
   static class InjectsScopedA extends Injectable {
-    @Inject public void inject(ScopedA scopedA, Provider<ScopedA> scopedAProvider) {
+    @Inject
+    public void inject(ScopedA scopedA, Provider<ScopedA> scopedAProvider) {
       this.value = scopedA;
       this.provider = scopedAProvider;
     }
   }
 
   static class InjectsScopedANamedApple extends Injectable {
-    @Inject public void inject(@Named("apple") ScopedA scopedA,
-        @Named("apple") Provider<ScopedA> scopedAProvider) {
+    @Inject
+    public void inject(
+        @Named("apple") ScopedA scopedA, @Named("apple") Provider<ScopedA> scopedAProvider) {
       this.value = scopedA;
       this.provider = scopedAProvider;
     }

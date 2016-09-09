@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.util.Types;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -42,14 +39,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class KeyTest extends TestCase {
 
   public void foo(List<String> a, List<String> b) {}
+
   public void bar(Provider<List<String>> a) {}
+
   @Foo String baz;
   List<? extends CharSequence> wildcardExtends;
 
@@ -67,10 +65,11 @@ public class KeyTest extends TestCase {
   }
 
   public void testProviderKey() throws NoSuchMethodException {
-    Key<?> actual = Key.get(getClass().getMethod("foo", List.class, List.class)
-        .getGenericParameterTypes()[0]).providerKey();
-    Key<?> expected = Key.get(getClass().getMethod("bar", Provider.class)
-        .getGenericParameterTypes()[0]);
+    Key<?> actual =
+        Key.get(getClass().getMethod("foo", List.class, List.class).getGenericParameterTypes()[0])
+            .providerKey();
+    Key<?> expected =
+        Key.get(getClass().getMethod("bar", Provider.class).getGenericParameterTypes()[0]);
     assertEqualsBothWays(expected, actual);
     assertEquals(expected.toString(), actual.toString());
   }
@@ -81,23 +80,37 @@ public class KeyTest extends TestCase {
     assertEquals(types[0], types[1]);
     Key<List<String>> k = new Key<List<String>>() {};
     assertEquals(types[0], k.getTypeLiteral().getType());
-    assertFalse(types[0].equals(
-        new Key<List<Integer>>() {}.getTypeLiteral().getType()));
+    assertFalse(types[0].equals(new Key<List<Integer>>() {}.getTypeLiteral().getType()));
   }
 
   /**
-   * Key canonicalizes {@link int.class} to {@code Integer.class}, and
-   * won't expose wrapper types.
+   * Key canonicalizes {@link int.class} to {@code Integer.class}, and won't expose wrapper types.
    */
   public void testPrimitivesAndWrappersAreEqual() {
-    Class[] primitives = new Class[] {
-        boolean.class, byte.class, short.class, int.class, long.class,
-        float.class, double.class, char.class, void.class
-    };
-    Class[] wrappers = new Class[] {
-        Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
-        Float.class, Double.class, Character.class, Void.class
-    };
+    Class[] primitives =
+        new Class[] {
+          boolean.class,
+          byte.class,
+          short.class,
+          int.class,
+          long.class,
+          float.class,
+          double.class,
+          char.class,
+          void.class
+        };
+    Class[] wrappers =
+        new Class[] {
+          Boolean.class,
+          Byte.class,
+          Short.class,
+          Integer.class,
+          Long.class,
+          Float.class,
+          Double.class,
+          Character.class,
+          Void.class
+        };
 
     for (int t = 0; t < primitives.length; t++) {
       @SuppressWarnings("unchecked")
@@ -154,7 +167,9 @@ public class KeyTest extends TestCase {
       Key.get(String.class, Deprecated.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(), "java.lang.Deprecated is not a binding annotation. ",
+      assertContains(
+          expected.getMessage(),
+          "java.lang.Deprecated is not a binding annotation. ",
           "Please annotate it with @BindingAnnotation.");
     }
   }
@@ -164,7 +179,9 @@ public class KeyTest extends TestCase {
       Key.get(String.class, Bar.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(), Bar.class.getName() + " is not retained at runtime.",
+      assertContains(
+          expected.getMessage(),
+          Bar.class.getName() + " is not retained at runtime.",
           "Please annotate it with @Retention(RUNTIME).");
     }
   }
@@ -173,16 +190,20 @@ public class KeyTest extends TestCase {
 
   /** Test for issue 186 */
   public void testCannotCreateKeysWithTypeVariables() throws NoSuchMethodException {
-    ParameterizedType listOfTType = (ParameterizedType) getClass().getDeclaredMethod(
-        "parameterizedWithVariable", List.class).getGenericParameterTypes()[0];
+    ParameterizedType listOfTType =
+        (ParameterizedType)
+            getClass()
+                    .getDeclaredMethod("parameterizedWithVariable", List.class)
+                    .getGenericParameterTypes()[
+                0];
 
     TypeLiteral<?> listOfT = TypeLiteral.get(listOfTType);
     try {
       Key.get(listOfT);
       fail("Guice should not allow keys for java.util.List<T>");
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(),
-          "java.util.List<T> cannot be used as a key; It is not fully specified.");
+      assertContains(
+          e.getMessage(), "java.util.List<T> cannot be used as a key; It is not fully specified.");
     }
 
     TypeVariable tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
@@ -191,8 +212,7 @@ public class KeyTest extends TestCase {
       Key.get(t);
       fail("Guice should not allow keys for T");
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(),
-          "T cannot be used as a key; It is not fully specified.");
+      assertContains(e.getMessage(), "T cannot be used as a key; It is not fully specified.");
     }
   }
 
@@ -202,8 +222,7 @@ public class KeyTest extends TestCase {
       Key.get(typeLiteral);
       fail("Guice should not allow keys for T");
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(),
-          "T cannot be used as a key; It is not fully specified.");
+      assertContains(e.getMessage(), "T cannot be used as a key; It is not fully specified.");
     }
   }
 
@@ -216,8 +235,7 @@ public class KeyTest extends TestCase {
       KeyTest.<Integer>createKey();
       fail("Guice should not allow keys for T");
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(),
-          "T cannot be used as a key; It is not fully specified.");
+      assertContains(e.getMessage(), "T cannot be used as a key; It is not fully specified.");
     }
   }
 
@@ -228,14 +246,18 @@ public class KeyTest extends TestCase {
   interface B {}
 
   @Retention(RUNTIME)
-  @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
-  @BindingAnnotation @interface Foo {}
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  @interface Foo {}
 
-  @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
-  @BindingAnnotation @interface Bar {}
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  @interface Bar {}
 
   static class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
-    A a; B b; C c;
+    A a;
+    B b;
+    C c;
   }
 
   public void testKeysWithDefaultAnnotations() {
@@ -255,26 +277,32 @@ public class KeyTest extends TestCase {
   }
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface AllDefaults {
+  @BindingAnnotation
+  @interface AllDefaults {
     int v1() default 1;
+
     String v2() default "foo";
   }
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface SomeDefaults {
+  @BindingAnnotation
+  @interface SomeDefaults {
     int v1() default 1;
+
     String v2() default "foo";
+
     Class<?> clazz();
   }
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface NoDefaults {
+  @BindingAnnotation
+  @interface NoDefaults {
     int value();
   }
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface Marker {
-  }
+  @BindingAnnotation
+  @interface Marker {}
 
   @AllDefaults
   @Marker
@@ -285,31 +313,38 @@ public class KeyTest extends TestCase {
         new AtomicReference<Provider<List<String>>>();
     final AtomicReference<Provider<List<Integer>>> intProvider =
         new AtomicReference<Provider<List<Integer>>>();
-    final Object foo = new Object() {
-      @SuppressWarnings("unused") @Inject List<String> list;
-    };
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        bind(new Key<List<String>>() {}).toInstance(new ArrayList<String>());
-        bind(new TypeLiteral<List<Integer>>() {}).toInstance(new ArrayList<Integer>());
+    final Object foo =
+        new Object() {
+          @SuppressWarnings("unused")
+          @Inject
+          List<String> list;
+        };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(new Key<List<String>>() {}).toInstance(new ArrayList<String>());
+            bind(new TypeLiteral<List<Integer>>() {}).toInstance(new ArrayList<Integer>());
 
-        stringProvider.set(getProvider(new Key<List<String>>() {}));
-        intProvider.set(binder().getProvider(Dependency.get(new Key<List<Integer>>() {})));
+            stringProvider.set(getProvider(new Key<List<String>>() {}));
+            intProvider.set(binder().getProvider(Dependency.get(new Key<List<Integer>>() {})));
 
-        binder().requestInjection(new TypeLiteral<Object>() {}, foo);
-      }
-    };
+            binder().requestInjection(new TypeLiteral<Object>() {}, foo);
+          }
+        };
     WeakReference<Module> moduleRef = new WeakReference<Module>(module);
     final Injector injector = Guice.createInjector(module);
     module = null;
     awaitClear(moduleRef); // Make sure anonymous keys & typeliterals don't hold the module.
 
-    Runnable runner = new Runnable() {
-      @Override public void run() {
-        injector.getInstance(new Key<Typed<String>>() {});
-        injector.getInstance(Key.get(new TypeLiteral<Typed<Integer>>() {}));
-      }
-    };
+    Runnable runner =
+        new Runnable() {
+          @Override
+          public void run() {
+            injector.getInstance(new Key<Typed<String>>() {});
+            injector.getInstance(Key.get(new TypeLiteral<Typed<Integer>>() {}));
+          }
+        };
     WeakReference<Runnable> runnerRef = new WeakReference<Runnable>(runner);
     runner.run();
     runner = null;
@@ -317,5 +352,4 @@ public class KeyTest extends TestCase {
   }
 
   static class Typed<T> {}
-
 }
