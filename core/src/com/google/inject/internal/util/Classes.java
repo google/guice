@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,14 +24,11 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-/**
- * Class utilities.
- */
+/** Class utilities. */
 public final class Classes {
 
   public static boolean isInnerClass(Class<?> clazz) {
-    return !Modifier.isStatic(clazz.getModifiers())
-        && clazz.getEnclosingClass() != null;
+    return !Modifier.isStatic(clazz.getModifiers()) && clazz.getEnclosingClass() != null;
   }
 
   public static boolean isConcrete(Class<?> clazz) {
@@ -40,12 +37,12 @@ public final class Classes {
   }
 
   /**
-   * Formats a member as concise string, such as {@code java.util.ArrayList.size},
-   * {@code java.util.ArrayList<init>()} or {@code java.util.List.remove()}.
+   * Formats a member as concise string, such as {@code java.util.ArrayList.size}, {@code
+   * java.util.ArrayList<init>()} or {@code java.util.List.remove()}.
    */
   public static String toString(Member member) {
     Class<? extends Member> memberType = Classes.memberType(member);
-  
+
     if (memberType == Method.class) {
       return member.getDeclaringClass().getName() + "." + member.getName() + "()";
     } else if (memberType == Field.class) {
@@ -57,21 +54,19 @@ public final class Classes {
     }
   }
 
-  /**
-   * Returns {@code Field.class}, {@code Method.class} or {@code Constructor.class}.
-   */
+  /** Returns {@code Field.class}, {@code Method.class} or {@code Constructor.class}. */
   public static Class<? extends Member> memberType(Member member) {
     checkNotNull(member, "member");
-  
+
     if (member instanceof Field) {
       return Field.class;
-  
+
     } else if (member instanceof Method) {
       return Method.class;
-  
+
     } else if (member instanceof Constructor) {
       return Constructor.class;
-  
+
     } else {
       throw new IllegalArgumentException(
           "Unsupported implementation class for Member, " + member.getClass());

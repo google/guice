@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,28 +34,36 @@ import com.google.inject.assistedinject.FactoryProvider2Test.Equals.Impl;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import junit.framework.TestCase;
 
 @SuppressWarnings("deprecation")
 public class FactoryProvider2Test extends TestCase {
 
-  private enum Color { BLUE, GREEN, RED, GRAY, BLACK, ORANGE, PINK }
-  
+  private enum Color {
+    BLUE,
+    GREEN,
+    RED,
+    GRAY,
+    BLACK,
+    ORANGE,
+    PINK
+  }
+
   public void testAssistedFactory() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).toInstance(5.0d);
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).toInstance(5.0d);
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     Mustang blueMustang = (Mustang) carFactory.create(Color.BLUE);
@@ -68,15 +76,17 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testAssistedFactoryWithAnnotations() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(int.class).annotatedWith(Names.named("horsePower")).toInstance(250);
-        bind(int.class).annotatedWith(Names.named("modelYear")).toInstance(1984);
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Camaro.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(int.class).annotatedWith(Names.named("horsePower")).toInstance(250);
+                bind(int.class).annotatedWith(Names.named("modelYear")).toInstance(1984);
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Camaro.class));
+              }
+            });
 
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
@@ -131,14 +141,16 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testFactoryUsesInjectedConstructor() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(float.class).toInstance(140f);
-        bind(SummerCarFactory.class).toProvider(
-            FactoryProvider.newFactory(SummerCarFactory.class, Corvette.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(float.class).toInstance(140f);
+                bind(SummerCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(SummerCarFactory.class, Corvette.class));
+              }
+            });
 
     SummerCarFactory carFactory = injector.getInstance(SummerCarFactory.class);
 
@@ -167,13 +179,15 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testConstructorDoesntNeedAllFactoryMethodArguments() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(SummerCarFactory.class).toProvider(
-            FactoryProvider.newFactory(SummerCarFactory.class, Beetle.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(SummerCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(SummerCarFactory.class, Beetle.class));
+              }
+            });
     SummerCarFactory factory = injector.getInstance(SummerCarFactory.class);
 
     Beetle beetle = (Beetle) factory.create(Color.RED, true);
@@ -182,6 +196,7 @@ public class FactoryProvider2Test extends TestCase {
 
   public static class Beetle implements Car {
     private final Color color;
+
     @Inject
     public Beetle(@Assisted Color color) {
       this.color = color;
@@ -189,16 +204,18 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testMethodsAndFieldsGetInjected() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(String.class).toInstance("turbo");
-        bind(int.class).toInstance(911);
-        bind(double.class).toInstance(50000d);
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Porsche.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("turbo");
+                bind(int.class).toInstance(911);
+                bind(double.class).toInstance(50000d);
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Porsche.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     Porsche grayPorsche = (Porsche) carFactory.create(Color.GRAY);
@@ -220,20 +237,24 @@ public class FactoryProvider2Test extends TestCase {
       this.price = price;
     }
 
-    @Inject void setModel(int model) {
+    @Inject
+    void setModel(int model) {
       this.model = model;
     }
   }
 
   public void testProviderInjection() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(String.class).toInstance("trans am");
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Firebird.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("trans am");
+                bind(ColoredCarFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(ColoredCarFactory.class, Firebird.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     Firebird blackFirebird = (Firebird) carFactory.create(Color.BLACK);
@@ -251,50 +272,58 @@ public class FactoryProvider2Test extends TestCase {
       this.color = color;
     }
   }
-  
+
   public void testAssistedProviderInjection() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(String.class).toInstance("trans am");
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Flamingbird.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("trans am");
+                bind(ColoredCarFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(ColoredCarFactory.class, Flamingbird.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     Flamingbird flamingbird = (Flamingbird) carFactory.create(Color.BLACK);
     assertEquals(Color.BLACK, flamingbird.colorProvider.get());
     assertEquals("trans am", flamingbird.modifiersProvider.get());
-    
+
     Flamingbird flamingbird2 = (Flamingbird) carFactory.create(Color.RED);
     assertEquals(Color.RED, flamingbird2.colorProvider.get());
     assertEquals("trans am", flamingbird2.modifiersProvider.get());
     // Make sure the original flamingbird is black still.
     assertEquals(Color.BLACK, flamingbird.colorProvider.get());
-  }  
-  
+  }
+
   public static class Flamingbird implements Car {
     private final Provider<String> modifiersProvider;
     private final Provider<Color> colorProvider;
 
     @Inject
-    public Flamingbird(Provider<String> modifiersProvider, @Assisted Provider<Color> colorProvider) {
+    public Flamingbird(
+        Provider<String> modifiersProvider, @Assisted Provider<Color> colorProvider) {
       this.modifiersProvider = modifiersProvider;
       this.colorProvider = colorProvider;
     }
   }
 
   public void testTypeTokenInjection() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(new TypeLiteral<Set<String>>() {}).toInstance(Collections.singleton("Flux Capacitor"));
-        bind(new TypeLiteral<Set<Integer>>() {}).toInstance(Collections.singleton(88));
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, DeLorean.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(new TypeLiteral<Set<String>>() {})
+                    .toInstance(Collections.singleton("Flux Capacitor"));
+                bind(new TypeLiteral<Set<Integer>>() {}).toInstance(Collections.singleton(88));
+                bind(ColoredCarFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(ColoredCarFactory.class, DeLorean.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     DeLorean deLorean = (DeLorean) carFactory.create(Color.GRAY);
@@ -318,14 +347,16 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testTypeTokenProviderInjection() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(new TypeLiteral<Set<String>>() { }).toInstance(Collections.singleton("Datsun"));
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Z.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(new TypeLiteral<Set<String>>() {}).toInstance(Collections.singleton("Datsun"));
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Z.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     Z orangeZ = (Z) carFactory.create(Color.ORANGE);
@@ -354,13 +385,15 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testAssistInjectionInNonPublicConstructor() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Prius.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Prius.class));
+              }
+            });
     Prius prius = (Prius) injector.getInstance(ColoredCarFactory.class).create(Color.ORANGE);
     assertEquals(prius.color, Color.ORANGE);
   }
@@ -373,13 +406,16 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testExceptionDuringConstruction() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, ExplodingCar.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ColoredCarFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(ColoredCarFactory.class, ExplodingCar.class));
+              }
+            });
     try {
       injector.getInstance(ColoredCarFactory.class).create(Color.ORANGE);
       fail();
@@ -395,8 +431,9 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
-  public static class ExplosionException extends Exception { }
-  public static class FireException extends Exception { }
+  public static class ExplosionException extends Exception {}
+
+  public static class FireException extends Exception {}
 
   public interface DefectiveCarFactoryWithNoExceptions {
     Car createCar();
@@ -411,13 +448,17 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testConstructorExceptionsAreThrownByFactory() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(CorrectDefectiveCarFactory.class).toProvider(
-            FactoryProvider.newFactory(CorrectDefectiveCarFactory.class, DefectiveCar.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(CorrectDefectiveCarFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            CorrectDefectiveCarFactory.class, DefectiveCar.class));
+              }
+            });
     try {
       injector.getInstance(CorrectDefectiveCarFactory.class).createCar();
       fail();
@@ -434,17 +475,21 @@ public class FactoryProvider2Test extends TestCase {
     }
 
     @Inject
-    public WildcardCollection(@SuppressWarnings("unused") @Assisted Collection<?> items) { }
+    public WildcardCollection(@SuppressWarnings("unused") @Assisted Collection<?> items) {}
   }
 
   public void testWildcardGenerics() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(WildcardCollection.Factory.class).toProvider(
-            FactoryProvider.newFactory(WildcardCollection.Factory.class, WildcardCollection.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(WildcardCollection.Factory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            WildcardCollection.Factory.class, WildcardCollection.class));
+              }
+            });
     WildcardCollection.Factory factory = injector.getInstance(WildcardCollection.Factory.class);
     factory.create(Collections.emptyList());
   }
@@ -463,13 +508,15 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testFactoryWithImplicitBindings() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Fiat.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Fiat.class));
+              }
+            });
 
     ColoredCarFactory coloredCarFactory = injector.getInstance(ColoredCarFactory.class);
     Fiat fiat = (Fiat) coloredCarFactory.create(Color.GREEN);
@@ -479,44 +526,54 @@ public class FactoryProvider2Test extends TestCase {
 
   public void testFactoryFailsWithMissingBinding() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          bind(ColoredCarFactory.class).toProvider(
-              FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(ColoredCarFactory.class)
+                  .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "Could not find a suitable constructor in java.lang.Double.",
           "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
     }
   }
-  
+
   public void testFactoryFailsWithMissingBindingInToolStage() {
     try {
-      Guice.createInjector(Stage.TOOL, new AbstractModule() {
-        @Override protected void configure() {
-          bind(ColoredCarFactory.class).toProvider(
-              FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-        }
-      });
+      Guice.createInjector(
+          Stage.TOOL,
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(ColoredCarFactory.class)
+                  .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "Could not find a suitable constructor in java.lang.Double.",
           "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
     }
   }
 
   public void testMethodsDeclaredInObject() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          bind(Double.class).toInstance(5.0d);
-          bind(ColoredCarFactory.class).toProvider(
-              FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-        }
-      });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).toInstance(5.0d);
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+              }
+            });
 
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
@@ -528,34 +585,40 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testInjectingProviderOfParameter() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          bind(ColoredCarFactory.class).toProvider(
-              FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class));
-        }
-      });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class));
+              }
+            });
 
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
     Subaru subaru = (Subaru) carFactory.create(Color.RED);
 
     assertSame(Color.RED, subaru.colorProvider.get());
     assertSame(Color.RED, subaru.colorProvider.get());
-    
-    Subaru sedan  = (Subaru) carFactory.create(Color.BLUE);
+
+    Subaru sedan = (Subaru) carFactory.create(Color.BLUE);
     assertSame(Color.BLUE, sedan.colorProvider.get());
     assertSame(Color.BLUE, sedan.colorProvider.get());
-    
+
     // and make sure the subaru is still red
     assertSame(Color.RED, subaru.colorProvider.get());
   }
 
   public void testInjectingNullParameter() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          bind(ColoredCarFactory.class).toProvider(
-              FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class));
-        }
-      });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class));
+              }
+            });
 
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
     Subaru subaru = (Subaru) carFactory.create(null);
@@ -566,91 +629,125 @@ public class FactoryProvider2Test extends TestCase {
 
   interface ProviderBasedColoredCarFactory {
     Car createCar(Provider<Color> colorProvider, Provider<String> stringProvider);
+
     Mustang createMustang(@Assisted("color") Provider<Color> colorProvider);
   }
 
   public void testAssistedProviderIsDisallowed() {
     try {
-      Guice.createInjector(new AbstractModule() {
-          @Override protected void configure() {
-            bind(ProviderBasedColoredCarFactory.class).toProvider(
-                FactoryProvider.newFactory(ProviderBasedColoredCarFactory.class, Subaru.class));
-          }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(ProviderBasedColoredCarFactory.class)
+                  .toProvider(
+                      FactoryProvider.newFactory(
+                          ProviderBasedColoredCarFactory.class, Subaru.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
       // Assert each method individually, because JDK7 doesn't guarantee method ordering.
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject."
-            + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<" + Color.class.getName() + ">] on method ["
-            + ProviderBasedColoredCarFactory.class.getName() + ".createCar()]");
-      assertContains(expected.getMessage(),
+              + "\n  Offending instance is parameter [1] with key"
+              + " [com.google.inject.Provider<"
+              + Color.class.getName()
+              + ">] on method ["
+              + ProviderBasedColoredCarFactory.class.getName()
+              + ".createCar()]");
+      assertContains(
+          expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject."
-            + "\n  Offending instance is parameter [2] with key"
-            + " [com.google.inject.Provider<java.lang.String>] on method ["
-            + ProviderBasedColoredCarFactory.class.getName() + ".createCar()]");
-      assertContains(expected.getMessage(),
+              + "\n  Offending instance is parameter [2] with key"
+              + " [com.google.inject.Provider<java.lang.String>] on method ["
+              + ProviderBasedColoredCarFactory.class.getName()
+              + ".createCar()]");
+      assertContains(
+          expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject."
-            + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<" + Color.class.getName() + ">"
-            + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
-            + " on method [" + ProviderBasedColoredCarFactory.class.getName() + ".createMustang()]"
-      );
-      assertContains(expected.getMessage(),
+              + "\n  Offending instance is parameter [1] with key"
+              + " [com.google.inject.Provider<"
+              + Color.class.getName()
+              + ">"
+              + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
+              + " on method ["
+              + ProviderBasedColoredCarFactory.class.getName()
+              + ".createMustang()]");
+      assertContains(
+          expected.getMessage(),
           ") No implementation for com.google.inject.assistedinject."
-            + "FactoryProvider2Test$ProviderBasedColoredCarFactory was bound.");
+              + "FactoryProvider2Test$ProviderBasedColoredCarFactory was bound.");
     }
   }
 
   interface JavaxProviderBasedColoredCarFactory {
-    Car createCar(javax.inject.Provider<Color> colorProvider, javax.inject.Provider<String> stringProvider);
+    Car createCar(
+        javax.inject.Provider<Color> colorProvider, javax.inject.Provider<String> stringProvider);
+
     Mustang createMustang(@Assisted("color") javax.inject.Provider<Color> colorProvider);
   }
 
   public void testAssistedJavaxProviderIsDisallowed() {
     try {
-      Guice.createInjector(new AbstractModule() {
-          @Override protected void configure() {
-            bind(JavaxProviderBasedColoredCarFactory.class).toProvider(
-                FactoryProvider.newFactory(JavaxProviderBasedColoredCarFactory.class, Subaru.class));
-          }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(JavaxProviderBasedColoredCarFactory.class)
+                  .toProvider(
+                      FactoryProvider.newFactory(
+                          JavaxProviderBasedColoredCarFactory.class, Subaru.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
       assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject."
-            + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<" + Color.class.getName() + ">] on method ["
-            + JavaxProviderBasedColoredCarFactory.class.getName() + ".createCar()]");
-      assertContains(expected.getMessage(),
+              + "\n  Offending instance is parameter [1] with key"
+              + " [com.google.inject.Provider<"
+              + Color.class.getName()
+              + ">] on method ["
+              + JavaxProviderBasedColoredCarFactory.class.getName()
+              + ".createCar()]");
+      assertContains(
+          expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject."
-            + "\n  Offending instance is parameter [2] with key"
-            + " [com.google.inject.Provider<java.lang.String>] on method ["
-            + JavaxProviderBasedColoredCarFactory.class.getName() + ".createCar()]");
-      assertContains(expected.getMessage(),
+              + "\n  Offending instance is parameter [2] with key"
+              + " [com.google.inject.Provider<java.lang.String>] on method ["
+              + JavaxProviderBasedColoredCarFactory.class.getName()
+              + ".createCar()]");
+      assertContains(
+          expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject."
-            + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<" + Color.class.getName() + ">"
-            + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
-            + " on method [" + JavaxProviderBasedColoredCarFactory.class.getName() + ".createMustang()]"
-      );
-      assertContains(expected.getMessage(),
+              + "\n  Offending instance is parameter [1] with key"
+              + " [com.google.inject.Provider<"
+              + Color.class.getName()
+              + ">"
+              + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
+              + " on method ["
+              + JavaxProviderBasedColoredCarFactory.class.getName()
+              + ".createMustang()]");
+      assertContains(
+          expected.getMessage(),
           ") No implementation for com.google.inject.assistedinject."
-            + "FactoryProvider2Test$JavaxProviderBasedColoredCarFactory was bound.");
+              + "FactoryProvider2Test$JavaxProviderBasedColoredCarFactory was bound.");
     }
   }
 
   public void testFactoryUseBeforeInitialization() {
-    ColoredCarFactory carFactory = FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class)
-        .get();
+    ColoredCarFactory carFactory =
+        FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class).get();
     try {
       carFactory.create(Color.RED);
       fail();
     } catch (IllegalStateException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "Factories.create() factories cannot be used until they're initialized by Guice.");
     }
   }
@@ -660,15 +757,17 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testFactoryBuildingConcreteTypes() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(double.class).toInstance(5.0d);
-        // note there is no 'thatMakes()' call here:
-        bind(MustangFactory.class).toProvider(
-            FactoryProvider.newFactory(MustangFactory.class, Mustang.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(double.class).toInstance(5.0d);
+                // note there is no 'thatMakes()' call here:
+                bind(MustangFactory.class)
+                    .toProvider(FactoryProvider.newFactory(MustangFactory.class, Mustang.class));
+              }
+            });
     MustangFactory factory = injector.getInstance(MustangFactory.class);
 
     Mustang mustang = factory.create(Color.RED);
@@ -686,16 +785,18 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testInjectDeepIntoConstructedObjects() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(double.class).toInstance(5.0d);
-        bind(int.class).annotatedWith(Names.named("horsePower")).toInstance(250);
-        bind(int.class).annotatedWith(Names.named("modelYear")).toInstance(1984);
-        bind(FleetFactory.class).toProvider(FactoryProvider.newFactory(FleetFactory.class,
-            Fleet.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(double.class).toInstance(5.0d);
+                bind(int.class).annotatedWith(Names.named("horsePower")).toInstance(250);
+                bind(int.class).annotatedWith(Names.named("modelYear")).toInstance(1984);
+                bind(FleetFactory.class)
+                    .toProvider(FactoryProvider.newFactory(FleetFactory.class, Fleet.class));
+              }
+            });
 
     FleetFactory fleetFactory = injector.getInstance(FleetFactory.class);
     Fleet fleet = fleetFactory.createFleet(Color.RED);
@@ -712,18 +813,25 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   static class Maxima implements Car {
-    @Inject @Assisted("paint") Color paint;
-    @Inject @Assisted("fabric") Color fabric;
+    @Inject
+    @Assisted("paint")
+    Color paint;
+
+    @Inject
+    @Assisted("fabric")
+    Color fabric;
   }
 
   public void testDistinctKeys() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(TwoToneCarFactory.class).toProvider(
-            FactoryProvider.newFactory(TwoToneCarFactory.class, Maxima.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(TwoToneCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(TwoToneCarFactory.class, Maxima.class));
+              }
+            });
 
     TwoToneCarFactory factory = injector.getInstance(TwoToneCarFactory.class);
     Maxima maxima = (Maxima) factory.create(Color.BLACK, Color.GRAY);
@@ -737,16 +845,23 @@ public class FactoryProvider2Test extends TestCase {
 
   public void testDuplicateKeys() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          bind(DoubleToneCarFactory.class).toProvider(
-              FactoryProvider.newFactory(DoubleToneCarFactory.class, Maxima.class));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(DoubleToneCarFactory.class)
+                  .toProvider(FactoryProvider.newFactory(DoubleToneCarFactory.class, Maxima.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "A binding to " + Color.class.getName() + " annotated with @"
-          + Assisted.class.getName() + "(value=paint) was already configured at");
+      assertContains(
+          expected.getMessage(),
+          "A binding to "
+              + Color.class.getName()
+              + " annotated with @"
+              + Assisted.class.getName()
+              + "(value=paint) was already configured at");
     }
   }
 
@@ -763,15 +878,17 @@ public class FactoryProvider2Test extends TestCase {
           }
         };
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
-        bind(Double.class).toInstance(5.0d);
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
+                bind(Double.class).toInstance(5.0d);
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+              }
+            });
 
     ColoredCarFactory factory = injector.getInstance(ColoredCarFactory.class);
     Mustang mustang = (Mustang) factory.create(Color.GREEN);
@@ -786,27 +903,31 @@ public class FactoryProvider2Test extends TestCase {
    * like, I have a test case to make sure the error message is pretty.
    */
   public void testFactoryReuseErrorMessageIsPretty() {
-    final Provider<ColoredCarFactory> factoryProvider
-        = FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class);
+    final Provider<ColoredCarFactory> factoryProvider =
+        FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class);
 
-    Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(Double.class).toInstance(5.0d);
-        bind(ColoredCarFactory.class).toProvider(factoryProvider);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Double.class).toInstance(5.0d);
+            bind(ColoredCarFactory.class).toProvider(factoryProvider);
+          }
+        });
 
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          bind(Double.class).toInstance(5.0d);
-          bind(ColoredCarFactory.class).toProvider(factoryProvider);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(Double.class).toInstance(5.0d);
+              bind(ColoredCarFactory.class).toProvider(factoryProvider);
+            }
+          });
       fail();
-    } catch(CreationException expected) {
-      assertContains(expected.getMessage(),
-          "Factories.create() factories may only be used in one Injector!");
+    } catch (CreationException expected) {
+      assertContains(
+          expected.getMessage(), "Factories.create() factories may only be used in one Injector!");
     }
   }
 
@@ -814,8 +935,9 @@ public class FactoryProvider2Test extends TestCase {
     try {
       FactoryProvider.newFactory(NamedParameterFactory.class, Mustang.class);
       fail();
-    } catch(ConfigurationException expected) {
-      assertContains(expected.getMessage(),
+    } catch (ConfigurationException expected) {
+      assertContains(
+          expected.getMessage(),
           "Only @Assisted is allowed for factory parameters, but found @" + Named.class.getName());
     }
   }
@@ -824,10 +946,9 @@ public class FactoryProvider2Test extends TestCase {
     Car create(@Named("seats") int seats, double engineSize);
   }
 
-
   public void testDefaultAssistedAnnotation() throws NoSuchFieldException {
-    Assisted plainAssisted
-        = Subaru.class.getDeclaredField("colorProvider").getAnnotation(Assisted.class);
+    Assisted plainAssisted =
+        Subaru.class.getDeclaredField("colorProvider").getAnnotation(Assisted.class);
     assertEqualsBothWays(FactoryProvider2.DEFAULT_ANNOTATION, plainAssisted);
     assertEquals(FactoryProvider2.DEFAULT_ANNOTATION.toString(), plainAssisted.toString());
   }
@@ -837,28 +958,34 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testGenericAssistedFactory() {
-    final TypeLiteral<GenericColoredCarFactory<Mustang>> mustangTypeLiteral
-        = new TypeLiteral<GenericColoredCarFactory<Mustang>>() {};
-    final TypeLiteral<GenericColoredCarFactory<Camaro>> camaroTypeLiteral
-        = new TypeLiteral<GenericColoredCarFactory<Camaro>>() {};
+    final TypeLiteral<GenericColoredCarFactory<Mustang>> mustangTypeLiteral =
+        new TypeLiteral<GenericColoredCarFactory<Mustang>>() {};
+    final TypeLiteral<GenericColoredCarFactory<Camaro>> camaroTypeLiteral =
+        new TypeLiteral<GenericColoredCarFactory<Camaro>>() {};
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).toInstance(5.0d);
-        bind(int.class).annotatedWith(Names.named("horsePower")).toInstance(250);
-        bind(int.class).annotatedWith(Names.named("modelYear")).toInstance(1984);
-        bind(mustangTypeLiteral)
-            .toProvider(FactoryProvider.newFactory(mustangTypeLiteral, TypeLiteral.get(Mustang.class)));
-        bind(camaroTypeLiteral)
-            .toProvider(FactoryProvider.newFactory(camaroTypeLiteral, TypeLiteral.get(Camaro.class)));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).toInstance(5.0d);
+                bind(int.class).annotatedWith(Names.named("horsePower")).toInstance(250);
+                bind(int.class).annotatedWith(Names.named("modelYear")).toInstance(1984);
+                bind(mustangTypeLiteral)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            mustangTypeLiteral, TypeLiteral.get(Mustang.class)));
+                bind(camaroTypeLiteral)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            camaroTypeLiteral, TypeLiteral.get(Camaro.class)));
+              }
+            });
 
-    GenericColoredCarFactory<Mustang> mustangFactory
-        = injector.getInstance(Key.get(mustangTypeLiteral));
-    GenericColoredCarFactory<Camaro> camaroFactory
-        = injector.getInstance(Key.get(camaroTypeLiteral));
+    GenericColoredCarFactory<Mustang> mustangFactory =
+        injector.getInstance(Key.get(mustangTypeLiteral));
+    GenericColoredCarFactory<Camaro> camaroFactory =
+        injector.getInstance(Key.get(camaroTypeLiteral));
 
     Mustang blueMustang = mustangFactory.create(Color.BLUE);
     assertEquals(Color.BLUE, blueMustang.color);
@@ -871,17 +998,18 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   @SuppressWarnings("unused")
-  public interface Insurance<T extends Car> {
-  }
+  public interface Insurance<T extends Car> {}
 
   public static class MustangInsurance implements Insurance<Mustang> {
     private final double premium;
     private final double limit;
-    @SuppressWarnings("unused") private Mustang car;
+
+    @SuppressWarnings("unused")
+    private Mustang car;
 
     @Inject
-    public MustangInsurance(@Named("lowLimit") double limit, @Assisted Mustang car,
-        @Assisted double premium) {
+    public MustangInsurance(
+        @Named("lowLimit") double limit, @Assisted Mustang car, @Assisted double premium) {
       this.premium = premium;
       this.limit = limit;
       this.car = car;
@@ -893,11 +1021,13 @@ public class FactoryProvider2Test extends TestCase {
   public static class CamaroInsurance implements Insurance<Camaro> {
     private final double premium;
     private final double limit;
-    @SuppressWarnings("unused") private Camaro car;
+
+    @SuppressWarnings("unused")
+    private Camaro car;
 
     @Inject
-    public CamaroInsurance(@Named("highLimit") double limit, @Assisted Camaro car,
-        @Assisted double premium) {
+    public CamaroInsurance(
+        @Named("highLimit") double limit, @Assisted Camaro car, @Assisted double premium) {
       this.premium = premium;
       this.limit = limit;
       this.car = car;
@@ -916,17 +1046,23 @@ public class FactoryProvider2Test extends TestCase {
 
   public void testAssistedFactoryForConcreteType() {
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).annotatedWith(Names.named("lowLimit")).toInstance(50000.0d);
-        bind(Double.class).annotatedWith(Names.named("highLimit")).toInstance(100000.0d);
-        bind(MustangInsuranceFactory.class).toProvider(
-            FactoryProvider.newFactory(MustangInsuranceFactory.class, MustangInsurance.class));
-        bind(CamaroInsuranceFactory.class).toProvider(
-            FactoryProvider.newFactory(CamaroInsuranceFactory.class, CamaroInsurance.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).annotatedWith(Names.named("lowLimit")).toInstance(50000.0d);
+                bind(Double.class).annotatedWith(Names.named("highLimit")).toInstance(100000.0d);
+                bind(MustangInsuranceFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            MustangInsuranceFactory.class, MustangInsurance.class));
+                bind(CamaroInsuranceFactory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            CamaroInsuranceFactory.class, CamaroInsurance.class));
+              }
+            });
 
     MustangInsuranceFactory mustangInsuranceFactory =
         injector.getInstance(MustangInsuranceFactory.class);
@@ -955,17 +1091,23 @@ public class FactoryProvider2Test extends TestCase {
     final TypeLiteral<InsuranceFactory<Camaro>> camaroInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Camaro>>() {};
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).annotatedWith(Names.named("lowLimit")).toInstance(50000.0d);
-        bind(Double.class).annotatedWith(Names.named("highLimit")).toInstance(100000.0d);
-        bind(mustangInsuranceFactoryType).toProvider(FactoryProvider.newFactory(
-            mustangInsuranceFactoryType, TypeLiteral.get(MustangInsurance.class)));
-        bind(camaroInsuranceFactoryType).toProvider(FactoryProvider.newFactory(
-            camaroInsuranceFactoryType, TypeLiteral.get(CamaroInsurance.class)));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).annotatedWith(Names.named("lowLimit")).toInstance(50000.0d);
+                bind(Double.class).annotatedWith(Names.named("highLimit")).toInstance(100000.0d);
+                bind(mustangInsuranceFactoryType)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            mustangInsuranceFactoryType, TypeLiteral.get(MustangInsurance.class)));
+                bind(camaroInsuranceFactoryType)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            camaroInsuranceFactoryType, TypeLiteral.get(CamaroInsurance.class)));
+              }
+            });
 
     InsuranceFactory<Mustang> mustangInsuranceFactory =
         injector.getInstance(Key.get(mustangInsuranceFactoryType));
@@ -1003,14 +1145,19 @@ public class FactoryProvider2Test extends TestCase {
     final TypeLiteral<InsuranceFactory<Camaro>> camaroInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Camaro>>() {};
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).toInstance(50000.0d);
-        bind(camaroInsuranceFactoryType).toProvider(FactoryProvider.newFactory(
-            camaroInsuranceFactoryType, new TypeLiteral<AutoInsurance<Camaro>>() {}));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).toInstance(50000.0d);
+                bind(camaroInsuranceFactoryType)
+                    .toProvider(
+                        FactoryProvider.newFactory(
+                            camaroInsuranceFactoryType,
+                            new TypeLiteral<AutoInsurance<Camaro>>() {}));
+              }
+            });
 
     InsuranceFactory<Camaro> camaroInsuranceFactory =
         injector.getInstance(Key.get(camaroInsuranceFactoryType));
@@ -1024,35 +1171,40 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testInjectingAndUsingInjector() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Segway.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Segway.class));
+              }
+            });
 
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
-    Segway green = (Segway)carFactory.create(Color.GREEN);
+    Segway green = (Segway) carFactory.create(Color.GREEN);
     assertSame(Color.GREEN, green.getColor());
     assertSame(Color.GREEN, green.getColor());
-    
-    Segway pink = (Segway)carFactory.create(Color.PINK);
+
+    Segway pink = (Segway) carFactory.create(Color.PINK);
     assertSame(Color.PINK, pink.getColor());
     assertSame(Color.PINK, pink.getColor());
     assertSame(Color.GREEN, green.getColor());
   }
-  
+
   public void testDuplicateAssistedFactoryBinding() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).toInstance(5.0d);
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-        bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).toInstance(5.0d);
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+                bind(ColoredCarFactory.class)
+                    .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+              }
+            });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     Mustang blueMustang = (Mustang) carFactory.create(Color.BLUE);
@@ -1066,7 +1218,10 @@ public class FactoryProvider2Test extends TestCase {
 
   public interface Equals {
 
-    enum ComparisonMethod { SHALLOW, DEEP; }
+    enum ComparisonMethod {
+      SHALLOW,
+      DEEP;
+    }
 
     interface Factory {
       Equals equals(Equals.ComparisonMethod comparisonMethod);
@@ -1085,14 +1240,17 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public void testFactoryMethodCalledEquals() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Double.class).toInstance(0.01d);
-        bind(Equals.Factory.class).toProvider(
-            FactoryProvider.newFactory(Equals.Factory.class, Equals.Impl.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Double.class).toInstance(0.01d);
+                bind(Equals.Factory.class)
+                    .toProvider(
+                        FactoryProvider.newFactory(Equals.Factory.class, Equals.Impl.class));
+              }
+            });
     Equals.Factory equalsFactory = injector.getInstance(Equals.Factory.class);
     Equals.Impl shallowEquals = (Impl) equalsFactory.equals(ComparisonMethod.SHALLOW);
     assertEquals(ComparisonMethod.SHALLOW, shallowEquals.comparisonMethod);
@@ -1102,16 +1260,20 @@ public class FactoryProvider2Test extends TestCase {
   static class Segway implements Car {
     @Inject Injector injector;
 
-    Color getColor() { return injector.getInstance(Key.get(Color.class, FactoryProvider2.DEFAULT_ANNOTATION)); }
+    Color getColor() {
+      return injector.getInstance(Key.get(Color.class, FactoryProvider2.DEFAULT_ANNOTATION));
+    }
   }
 
   public void testReturnValueMatchesParamValue() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      public void configure() {
-        install(new FactoryModuleBuilder().build(Delegater.Factory.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              public void configure() {
+                install(new FactoryModuleBuilder().build(Delegater.Factory.class));
+              }
+            });
     Delegater delegate = new Delegater();
     Delegater user = injector.getInstance(Delegater.Factory.class).create(delegate);
     assertSame(delegate, user.delegate);
@@ -1124,7 +1286,8 @@ public class FactoryProvider2Test extends TestCase {
 
     private final Delegater delegate;
 
-    @Inject Delegater(@Assisted Delegater delegater) {
+    @Inject
+    Delegater(@Assisted Delegater delegater) {
       this.delegate = delegater;
     }
 
@@ -1133,14 +1296,15 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
-  public static abstract class AbstractAssisted {
+  public abstract static class AbstractAssisted {
     interface Factory<O extends AbstractAssisted, I extends CharSequence> {
       O create(I string);
     }
   }
 
   static class ConcreteAssisted extends AbstractAssisted {
-    @Inject ConcreteAssisted(@SuppressWarnings("unused") @Assisted String string) {}
+    @Inject
+    ConcreteAssisted(@SuppressWarnings("unused") @Assisted String string) {}
   }
 
   static class ConcreteAssistedWithOverride extends AbstractAssisted {
@@ -1151,26 +1315,36 @@ public class FactoryProvider2Test extends TestCase {
     ConcreteAssistedWithOverride(@SuppressWarnings("unused") @Assisted StringBuilder sb) {}
 
     interface Factory extends AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> {
-      @Override ConcreteAssistedWithOverride create(String string);
+      @Override
+      ConcreteAssistedWithOverride create(String string);
     }
 
     interface Factory2 extends AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> {
-      @Override ConcreteAssistedWithOverride create(String string);
+      @Override
+      ConcreteAssistedWithOverride create(String string);
+
       ConcreteAssistedWithOverride create(StringBuilder sb);
     }
   }
 
   static class ConcreteAssistedWithoutOverride extends AbstractAssisted {
-    @Inject ConcreteAssistedWithoutOverride(@SuppressWarnings("unused") @Assisted String string) {}
+    @Inject
+    ConcreteAssistedWithoutOverride(@SuppressWarnings("unused") @Assisted String string) {}
+
     interface Factory extends AbstractAssisted.Factory<ConcreteAssistedWithoutOverride, String> {}
   }
 
   public static class Public extends AbstractAssisted {
-    @AssistedInject Public(@SuppressWarnings("unused") @Assisted String string) {}
-    @AssistedInject Public(@SuppressWarnings("unused") @Assisted StringBuilder sb) {}
+    @AssistedInject
+    Public(@SuppressWarnings("unused") @Assisted String string) {}
+
+    @AssistedInject
+    Public(@SuppressWarnings("unused") @Assisted StringBuilder sb) {}
 
     public interface Factory extends AbstractAssisted.Factory<Public, String> {
-      @Override Public create(String string);
+      @Override
+      Public create(String string);
+
       Public create(StringBuilder sb);
     }
   }
@@ -1179,15 +1353,22 @@ public class FactoryProvider2Test extends TestCase {
   public void testGeneratedDefaultMethodsForwardCorrectly() {
     final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =
         new Key<AbstractAssisted.Factory<ConcreteAssisted, String>>() {};
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        install(new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
-        install(new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory2.class));
-        install(new FactoryModuleBuilder().build(ConcreteAssistedWithoutOverride.Factory.class));
-        install(new FactoryModuleBuilder().build(Public.Factory.class));
-        install(new FactoryModuleBuilder().build(concreteKey));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(
+                    new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
+                install(
+                    new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory2.class));
+                install(
+                    new FactoryModuleBuilder()
+                        .build(ConcreteAssistedWithoutOverride.Factory.class));
+                install(new FactoryModuleBuilder().build(Public.Factory.class));
+                install(new FactoryModuleBuilder().build(concreteKey));
+              }
+            });
 
     ConcreteAssistedWithOverride.Factory factory1 =
         injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
@@ -1214,8 +1395,7 @@ public class FactoryProvider2Test extends TestCase {
     AbstractAssisted.Factory<Public, String> factory4Abstract = factory4;
     factory4Abstract.create("foo");
 
-    AbstractAssisted.Factory<ConcreteAssisted, String> factory5 =
-        injector.getInstance(concreteKey);
+    AbstractAssisted.Factory<ConcreteAssisted, String> factory5 = injector.getInstance(concreteKey);
     factory5.create("foo");
   }
 }
