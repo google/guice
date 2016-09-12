@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,8 @@ import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.multibindings.OptionalBinderBinding;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 
-class Collector extends DefaultBindingTargetVisitor<Object, Object> implements
-    MultibindingsTargetVisitor<Object, Object> {
+class Collector extends DefaultBindingTargetVisitor<Object, Object>
+    implements MultibindingsTargetVisitor<Object, Object> {
   MapBinderBinding<? extends Object> mapbinding;
   MultibinderBinding<? extends Object> setbinding;
   OptionalBinderBinding<? extends Object> optionalbinding;
@@ -36,10 +36,10 @@ class Collector extends DefaultBindingTargetVisitor<Object, Object> implements
 
   @Override
   public Object visit(MultibinderBinding<? extends Object> multibinding) {
-   this.setbinding = multibinding;
-   return null;
+    this.setbinding = multibinding;
+    return null;
   }
-  
+
   @Override
   public Object visit(OptionalBinderBinding<? extends Object> optionalbinding) {
     this.optionalbinding = optionalbinding;

@@ -2,15 +2,13 @@ package com.google.inject.internal;
 
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory.ReentrantCycleDetectingLock;
-
-import junit.framework.TestCase;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import junit.framework.TestCase;
 
 public class CycleDetectingLockTest extends TestCase {
 
@@ -28,8 +26,8 @@ public class CycleDetectingLockTest extends TestCase {
    *   T1: Finishes locking B, unlocks B, unlocks A
    * </pre>
    *
-   * <p>This should succeed, even though T1 was locked on T2 and T2 is locked on T1 when T2 locks
-   * A. Incorrect implementation detects a cycle waiting on S3.
+   * <p>This should succeed, even though T1 was locked on T2 and T2 is locked on T1 when T2 locks A.
+   * Incorrect implementation detects a cycle waiting on S3.
    */
 
   public void testSingletonThreadsRuntimeCircularDependency() throws Exception {
@@ -38,7 +36,9 @@ public class CycleDetectingLockTest extends TestCase {
     final CyclicBarrier signal3 = new CyclicBarrier(2);
     final CycleDetectingLockFactory<String> lockFactory = new CycleDetectingLockFactory<String>();
     final CycleDetectingLock<String> lockA =
-        new ReentrantCycleDetectingLock<String>(lockFactory, "A",
+        new ReentrantCycleDetectingLock<String>(
+            lockFactory,
+            "A",
             new ReentrantLock() {
               @Override
               public void lock() {
@@ -55,7 +55,9 @@ public class CycleDetectingLockTest extends TestCase {
               }
             });
     final CycleDetectingLock<String> lockB =
-        new ReentrantCycleDetectingLock<String>(lockFactory, "B",
+        new ReentrantCycleDetectingLock<String>(
+            lockFactory,
+            "B",
             new ReentrantLock() {
               @Override
               public void lock() {
@@ -118,8 +120,8 @@ public class CycleDetectingLockTest extends TestCase {
    *   Thread B: lock a lock A (factory A)
    * </pre>
    *
-   * <p>This should succeed even though from the point of view of each individual factory
-   * there are no deadlocks to detect.
+   * <p>This should succeed even though from the point of view of each individual factory there are
+   * no deadlocks to detect.
    */
 
   public void testCycleDetectingLockFactoriesDoNotDeadlock() throws Exception {
