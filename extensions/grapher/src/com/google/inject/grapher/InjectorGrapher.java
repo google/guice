@@ -18,7 +18,6 @@ package com.google.inject.grapher;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.io.IOException;
 import java.util.Set;
 
@@ -41,4 +40,5 @@ public interface InjectorGrapher {
    * their transitive dependencies.
    */
   void graph(Injector injector, Set<Key<?>> root) throws IOException;
+
 }

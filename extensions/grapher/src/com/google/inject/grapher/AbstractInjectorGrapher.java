@@ -23,6 +23,7 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   private final AliasCreator aliasCreator;
   private final NodeCreator nodeCreator;
   private final EdgeCreator edgeCreator;
+  private final SubgraphCreator subgraphCreator;
+  private final Set<Subgraph> foundSubgraphs;
 
   /**
    * Parameters used to override default settings of the grapher.
@@ -49,6 +52,7 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     private AliasCreator aliasCreator = new ProviderAliasCreator();
     private NodeCreator nodeCreator = new DefaultNodeCreator();
     private EdgeCreator edgeCreator = new DefaultEdgeCreator();
+    private SubgraphCreator subgraphCreator = new DefaultSubgraphCreator();
 
     public RootKeySetCreator getRootKeySetCreator() {
       return rootKeySetCreator;
@@ -85,6 +89,15 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
       this.edgeCreator = edgeCreator;
       return this;
     }
+
+    public SubgraphCreator getSubgraphCreator() {
+      return subgraphCreator;
+    }
+
+    public GrapherParameters setSubgraphCreator(SubgraphCreator subCreator) {
+      this.subgraphCreator = subCreator;
+      return this;
+    }
   }
 
   public AbstractInjectorGrapher() {
@@ -96,6 +109,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     this.aliasCreator = options.getAliasCreator();
     this.nodeCreator = options.getNodeCreator();
     this.edgeCreator = options.getEdgeCreator();
+    this.subgraphCreator = options.getSubgraphCreator();
+    this.foundSubgraphs = new HashSet<Subgraph>();
   }
 
   @Override public final void graph(Injector injector) throws IOException {
@@ -104,12 +119,17 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
 
   @Override public final void graph(Injector injector, Set<Key<?>> root) throws IOException {
     reset();
+    graphModule("", injector, root);
+    createSubs();
+    postProcess();
+  }
 
+  private void graphModule(String subname, Injector injector, Set<Key<?>> root) throws IOException {
     Iterable<Binding<?>> bindings = getBindings(injector, root);
     Map<NodeId, NodeId> aliases = resolveAliases(aliasCreator.createAliases(bindings));
-    createNodes(nodeCreator.getNodes(bindings), aliases);
-    createEdges(edgeCreator.getEdges(bindings), aliases);
-    postProcess();
+    createNodes(nodeCreator.getNodes(subname, bindings), aliases);
+    createEdges(edgeCreator.getEdges(subname, bindings), aliases);
+    appendSubgraphs(subgraphCreator.getSubgraphs(bindings), aliases);
   }
 
   /** Resets the state of the grapher before rendering a new graph. */
@@ -166,10 +186,36 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     }
   }
 
+  private void appendSubgraphs(Iterable<Subgraph> subs, Map<NodeId, NodeId> aliases) {
+    for (Subgraph sub : subs) {
+      foundSubgraphs.add(sub);
+    }
+  }
+
   private NodeId resolveAlias(Map<NodeId, NodeId> aliases, NodeId nodeId) {
     return aliases.containsKey(nodeId) ? aliases.get(nodeId) : nodeId;
   }
 
+  /**
+   * Use a BFS alike approach to discovery all sub-graphs exposed by the
+   * ExposedBinding instances. For each sub-graph, create its nodes and edges
+   * by calling graphModule().
+   *
+   * @see graphModule
+   */
+  private void createSubs() throws IOException {
+    Set<Key<?>> visitedKeys = Sets.newHashSet();
+    while (!foundSubgraphs.isEmpty()) {
+      Iterator<Subgraph> iterator = foundSubgraphs.iterator();
+      Subgraph sub = iterator.next();
+      iterator.remove();
+      if (!visitedKeys.contains(sub.getKey())) {
+        graphModule(sub.getName(), sub.getInjector(), rootKeySetCreator.getRootKeys(
+            sub.getInjector()));
+        visitedKeys.add(sub.getKey());
+      }
+    }
+  }
   /**
    * Transitively resolves aliases. Given aliases (X to Y) and (Y to Z), it will return mappings
    * (X to Z) and (Y to Z).
@@ -210,12 +256,10 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     Set<Key<?>> visitedKeys = Sets.newHashSet();
     List<Binding<?>> bindings = Lists.newArrayList();
     TransitiveDependencyVisitor keyVisitor = new TransitiveDependencyVisitor();
-
     while (!keys.isEmpty()) {
       Iterator<Key<?>> iterator = keys.iterator();
       Key<?> key = iterator.next();
       iterator.remove();
-
       if (!visitedKeys.contains(key)) {
         Binding<?> binding = injector.getBinding(key);
         bindings.add(binding);

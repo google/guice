@@ -46,22 +46,28 @@ public final class NodeId {
 
   private final Key<?> key;
   private final NodeType nodeType;
+  private final String subname;
 
-  private NodeId(Key<?> key, NodeType nodeType) {
+  private NodeId(String subname, Key<?> key, NodeType nodeType) {
     this.key = key;
     this.nodeType = nodeType;
+    this.subname = subname;
   }
 
-  public static NodeId newTypeId(Key<?> key) {
-    return new NodeId(key, NodeType.TYPE);
+  public static NodeId newTypeId(String subname, Key<?> key) {
+    return new NodeId(subname, key, NodeType.TYPE);
   }
 
-  public static NodeId newInstanceId(Key<?> key) {
-    return new NodeId(key, NodeType.INSTANCE);
+  public static NodeId newInstanceId(String subname, Key<?> key) {
+    return new NodeId(subname, key, NodeType.INSTANCE);
   }
 
   public Key<?> getKey() {
     return key;
+  }
+
+  public String getSubname() {
+    return subname;
   }
 
   @Override public int hashCode() {
@@ -73,10 +79,11 @@ public final class NodeId {
       return false;
     }
     NodeId other = (NodeId) obj;
-    return Objects.equal(key, other.key) && Objects.equal(nodeType, other.nodeType);
+    return Objects.equal(key, other.key) && Objects.equal(nodeType, other.nodeType)
+        && Objects.equal(subname, other.subname);
   }
 
   @Override public String toString() {
-    return "NodeId{nodeType=" + nodeType + " key=" + key + "}";
+    return "NodeId{nodeType=" + nodeType + " key=" + key + " subname=" + subname + "}";
   }
 }

@@ -27,5 +27,5 @@ import com.google.inject.Binding;
 public interface NodeCreator {
 
   /** Returns nodes for the given dependency graph. */
-  Iterable<Node> getNodes(Iterable<Binding<?>> bindings);
+  Iterable<Node> getNodes(String subname, Iterable<Binding<?>> bindings);
 }

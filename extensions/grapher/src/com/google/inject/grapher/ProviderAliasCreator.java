@@ -34,8 +34,8 @@ final class ProviderAliasCreator implements AliasCreator {
     List<Alias> aliases = Lists.newArrayList();
     for (Binding<?> binding : bindings) {
       if (binding instanceof ProviderBinding) {
-        aliases.add(new Alias(NodeId.newTypeId(binding.getKey()),
-            NodeId.newTypeId(((ProviderBinding<?>) binding).getProvidedKey())));
+        aliases.add(new Alias(NodeId.newTypeId("", binding.getKey()),
+            NodeId.newTypeId("", ((ProviderBinding<?>) binding).getProvidedKey())));
       }
     }
     return aliases;
