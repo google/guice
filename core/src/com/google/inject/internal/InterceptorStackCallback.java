@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +17,15 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.Lists;
-
-import net.sf.cglib.proxy.MethodProxy;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.sf.cglib.proxy.MethodProxy;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Intercepts a method with a stack of interceptors.
@@ -36,16 +33,17 @@ import java.util.Set;
  * @author crazybob@google.com (Bob Lee)
  */
 final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterceptor {
-  private static final Set<String> AOP_INTERNAL_CLASSES = new HashSet<String>(Arrays.asList(
-      InterceptorStackCallback.class.getName(),
-      InterceptedMethodInvocation.class.getName(),
-      MethodProxy.class.getName()));
+  private static final Set<String> AOP_INTERNAL_CLASSES =
+      new HashSet<String>(
+          Arrays.asList(
+              InterceptorStackCallback.class.getName(),
+              InterceptedMethodInvocation.class.getName(),
+              MethodProxy.class.getName()));
 
   final MethodInterceptor[] interceptors;
   final Method method;
 
-  public InterceptorStackCallback(Method method,
-      List<MethodInterceptor> interceptors) {
+  public InterceptorStackCallback(Method method, List<MethodInterceptor> interceptors) {
     this.method = method;
     this.interceptors = interceptors.toArray(new MethodInterceptor[interceptors.size()]);
   }
@@ -63,8 +61,8 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
     final MethodProxy methodProxy;
     final int index;
 
-    public InterceptedMethodInvocation(Object proxy, MethodProxy methodProxy,
-        Object[] arguments, int index) {
+    public InterceptedMethodInvocation(
+        Object proxy, MethodProxy methodProxy, Object[] arguments, int index) {
       this.proxy = proxy;
       this.methodProxy = methodProxy;
       this.arguments = arguments;
@@ -76,8 +74,8 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
       try {
         return index == interceptors.length
             ? methodProxy.invokeSuper(proxy, arguments)
-            : interceptors[index].invoke(
-                new InterceptedMethodInvocation(proxy, methodProxy, arguments, index + 1));
+            : interceptors[index]
+                .invoke(new InterceptedMethodInvocation(proxy, methodProxy, arguments, index + 1));
       } catch (Throwable t) {
         pruneStacktrace(t);
         throw t;
@@ -106,11 +104,11 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
   }
 
   /**
-   * Removes stacktrace elements related to AOP internal mechanics from the
-   * throwable's stack trace and any causes it may have.
+   * Removes stacktrace elements related to AOP internal mechanics from the throwable's stack trace
+   * and any causes it may have.
    */
   private void pruneStacktrace(Throwable throwable) {
-    for(Throwable t = throwable; t != null; t = t.getCause()) {
+    for (Throwable t = throwable; t != null; t = t.getCause()) {
       StackTraceElement[] stackTrace = t.getStackTrace();
       List<StackTraceElement> pruned = Lists.newArrayList();
       for (StackTraceElement element : stackTrace) {

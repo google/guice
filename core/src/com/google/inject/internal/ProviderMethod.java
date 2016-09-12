@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,14 +49,18 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   /**
    * Creates a {@link ProviderMethod}.
    *
-   * <p>Unless {@code skipFastClassGeneration} is set, this will use
-   * {@link net.sf.cglib.reflect.FastClass} to invoke the actual method, since it is significantly
-   * faster. However, this will fail if the method is {@code private} or {@code protected}, since
-   * fastclass is subject to java access policies.
+   * <p>Unless {@code skipFastClassGeneration} is set, this will use {@link
+   * net.sf.cglib.reflect.FastClass} to invoke the actual method, since it is significantly faster.
+   * However, this will fail if the method is {@code private} or {@code protected}, since fastclass
+   * is subject to java access policies.
    */
-  static <T> ProviderMethod<T> create(Key<T> key, Method method, Object instance,
+  static <T> ProviderMethod<T> create(
+      Key<T> key,
+      Method method,
+      Object instance,
       ImmutableSet<Dependency<?>> dependencies,
-      Class<? extends Annotation> scopeAnnotation, boolean skipFastClassGeneration,
+      Class<? extends Annotation> scopeAnnotation,
+      boolean skipFastClassGeneration,
       Annotation annotation) {
     int modifiers = method.getModifiers();
     /*if[AOP]*/
@@ -64,29 +68,22 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       try {
         net.sf.cglib.reflect.FastClass fc = BytecodeGen.newFastClassForMember(method);
         if (fc != null) {
-          return new FastClassProviderMethod<T>(key,
-              fc,
-              method,
-              instance,
-              dependencies,
-              scopeAnnotation,
-              annotation);
+          return new FastClassProviderMethod<T>(
+              key, fc, method, instance, dependencies, scopeAnnotation, annotation);
         }
-      } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
+      } catch (net.sf.cglib.core.CodeGenerationException e) {
+        /* fall-through */
+      }
     }
     /*end[AOP]*/
 
-    if (!Modifier.isPublic(modifiers) ||
-        !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+    if (!Modifier.isPublic(modifiers)
+        || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
       method.setAccessible(true);
     }
 
-    return new ReflectionProviderMethod<T>(key,
-        method,
-        instance,
-        dependencies,
-        scopeAnnotation,
-        annotation);
+    return new ReflectionProviderMethod<T>(
+        key, method, instance, dependencies, scopeAnnotation, annotation);
   }
 
   protected final Object instance;
@@ -103,12 +100,14 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
    */
   private SingleParameterInjector<?>[] parameterInjectors;
 
-  /**
-   * @param method the method to invoke. It's return type must be the same type as {@code key}.
-   */
-  private ProviderMethod(Key<T> key, Method method, Object instance,
+  /** @param method the method to invoke. It's return type must be the same type as {@code key}. */
+  private ProviderMethod(
+      Key<T> key,
+      Method method,
+      Object instance,
       ImmutableSet<Dependency<?>> dependencies,
-      Class<? extends Annotation> scopeAnnotation, Annotation annotation) {
+      Class<? extends Annotation> scopeAnnotation,
+      Annotation annotation) {
     // We can be safely initialized eagerly since our bindings must exist statically and it is an
     // error for them not to.
     super(InitializationTiming.EAGER);
@@ -135,12 +134,12 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   public Object getInstance() {
     return instance;
   }
-  
+
   @Override
   public Object getEnclosingInstance() {
     return instance;
   }
-  
+
   @Override
   public Annotation getAnnotation() {
     return annotation;
@@ -190,18 +189,19 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   public Set<Dependency<?>> getDependencies() {
     return dependencies;
   }
-  
+
   @Override
   @SuppressWarnings("unchecked")
-  public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
-      ProviderInstanceBinding<? extends B> binding) {
+  public <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
     if (visitor instanceof ProvidesMethodTargetVisitor) {
-      return ((ProvidesMethodTargetVisitor<T, V>)visitor).visit(this);
+      return ((ProvidesMethodTargetVisitor<T, V>) visitor).visit(this);
     }
     return visitor.visit(binding);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     String annotationString = annotation.toString();
     // Show @Provides w/o the com.google.inject prefix.
     if (annotation.annotationType() == Provides.class) {
@@ -212,19 +212,19 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     }
     return annotationString + " " + StackTraceElements.forMember(method);
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof ProviderMethod) {
       ProviderMethod<?> o = (ProviderMethod<?>) obj;
       return method.equals(o.method)
-         && instance.equals(o.instance)
-         && annotation.equals(o.annotation);
+          && instance.equals(o.instance)
+          && annotation.equals(o.annotation);
     } else {
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     // Avoid calling hashCode on 'instance', which is a user-object
@@ -242,19 +242,15 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     final net.sf.cglib.reflect.FastClass fastClass;
     final int methodIndex;
 
-    FastClassProviderMethod(Key<T> key,
-        net.sf.cglib.reflect.FastClass fc, 
+    FastClassProviderMethod(
+        Key<T> key,
+        net.sf.cglib.reflect.FastClass fc,
         Method method,
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
         Class<? extends Annotation> scopeAnnotation,
         Annotation annotation) {
-      super(key,
-          method,
-          instance,
-          dependencies,
-          scopeAnnotation,
-          annotation);
+      super(key, method, instance, dependencies, scopeAnnotation, annotation);
       this.fastClass = fc;
       this.methodIndex = fc.getMethod(method).getIndex();
     }
@@ -269,21 +265,17 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   /*end[AOP]*/
 
   /**
-   * A {@link ProviderMethod} implementation that invokes the method using normal java reflection. 
+   * A {@link ProviderMethod} implementation that invokes the method using normal java reflection.
    */
   private static final class ReflectionProviderMethod<T> extends ProviderMethod<T> {
-    ReflectionProviderMethod(Key<T> key,
+    ReflectionProviderMethod(
+        Key<T> key,
         Method method,
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
         Class<? extends Annotation> scopeAnnotation,
         Annotation annotation) {
-      super(key,
-          method,
-          instance,
-          dependencies,
-          scopeAnnotation,
-          annotation);
+      super(key, method, instance, dependencies, scopeAnnotation, annotation);
     }
 
     @SuppressWarnings("unchecked")

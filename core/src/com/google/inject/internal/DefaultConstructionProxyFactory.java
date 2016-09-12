@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,9 +34,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
   private final InjectionPoint injectionPoint;
 
-  /**
-   * @param injectionPoint an injection point whose member is a constructor of {@code T}.
-   */
+  /** @param injectionPoint an injection point whose member is a constructor of {@code T}. */
   DefaultConstructionProxyFactory(InjectionPoint injectionPoint) {
     this.injectionPoint = injectionPoint;
   }
@@ -49,18 +46,18 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     /*if[AOP]*/
     try {
-      net.sf.cglib.reflect.FastClass fc =
-          BytecodeGen.newFastClassForMember(constructor);
+      net.sf.cglib.reflect.FastClass fc = BytecodeGen.newFastClassForMember(constructor);
       if (fc != null) {
         int index = fc.getIndex(constructor.getParameterTypes());
         // We could just fall back to reflection in this case but I believe this should actually
         // be impossible.
-        Preconditions.checkArgument(index >= 0,
-            "Could not find constructor %s in fast class",
-            constructor);
+        Preconditions.checkArgument(
+            index >= 0, "Could not find constructor %s in fast class", constructor);
         return new FastClassProxy<T>(injectionPoint, constructor, fc, index);
       }
-    } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
+    } catch (net.sf.cglib.core.CodeGenerationException e) {
+      /* fall-through */
+    }
     /*end[AOP]*/
 
     return new ReflectiveProxy<T>(injectionPoint, constructor);
@@ -74,8 +71,11 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     final net.sf.cglib.reflect.FastClass fc;
     final int index;
 
-    private FastClassProxy(InjectionPoint injectionPoint, Constructor<T> constructor,
-        net.sf.cglib.reflect.FastClass fc, int index) {
+    private FastClassProxy(
+        InjectionPoint injectionPoint,
+        Constructor<T> constructor,
+        net.sf.cglib.reflect.FastClass fc,
+        int index) {
       this.injectionPoint = injectionPoint;
       this.constructor = constructor;
       this.fc = fc;

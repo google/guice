@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,14 @@ package com.google.inject.internal;
 
 import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Element;
-
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * Abstract base class for creating an injector from module elements.
  *
- * <p>Extending classes must return {@code true} from any overridden
- * {@code visit*()} methods, in order for the element processor to remove the
- * handled element.
+ * <p>Extending classes must return {@code true} from any overridden {@code visit*()} methods, in
+ * order for the element processor to remove the handled element.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -63,7 +61,7 @@ abstract class AbstractProcessor extends DefaultElementVisitor<Boolean> {
       this.injector = null;
     }
   }
-  
+
   @Override
   protected Boolean visitOther(Element element) {
     return false;

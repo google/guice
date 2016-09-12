@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,16 +20,14 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.Dependency;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   private final InjectorImpl injector;
   private final InternalFactory<? extends T> internalFactory;
 
-  public ProviderToInternalFactoryAdapter(InjectorImpl injector,
-      InternalFactory<? extends T> internalFactory) {
+  public ProviderToInternalFactoryAdapter(
+      InjectorImpl injector, InternalFactory<? extends T> internalFactory) {
     this.injector = injector;
     this.internalFactory = internalFactory;
   }
@@ -56,13 +54,14 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
       throw new ProvisionException(errors.merge(e.getErrors()).getMessages());
     }
   }
-  
+
   /** Exposed for SingletonScope. */
   InjectorImpl getInjector() {
     return injector;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return internalFactory.toString();
   }
 }

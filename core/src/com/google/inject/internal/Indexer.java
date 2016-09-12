@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,6 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
-
 import java.lang.annotation.Annotation;
 
 /**
@@ -42,7 +41,7 @@ import java.lang.annotation.Annotation;
  *
  * <p>Note: simply using equals/hashCode on the BindingImpls doesn't work because they all have
  * unique annotations. This works around that by reimplementing equality semantics that ignores
- * {@link Element#uniqueId()}.  A better solution might be to introduce the idea of an 'anonymous'
+ * {@link Element#uniqueId()}. A better solution might be to introduce the idea of an 'anonymous'
  * binding to guice, that might support this usecase directly.
  */
 class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding>
@@ -77,7 +76,8 @@ class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding
       this.annotationType = annotation.type();
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       if (!(obj instanceof IndexedBinding)) {
         return false;
       }
@@ -90,9 +90,10 @@ class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding
           && Objects.equal(extraEquality, o.extraEquality);
     }
 
-    @Override public int hashCode() {
-      return Objects.hashCode(type, scope, typeLiteral, annotationType, annotationName,
-          extraEquality);
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(
+          type, scope, typeLiteral, annotationType, annotationName, extraEquality);
     }
   }
 
@@ -110,65 +111,80 @@ class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding
     return binding.acceptScopingVisitor(this);
   }
 
-  @Override public Indexer.IndexedBinding visit(ConstructorBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.CONSTRUCTOR, scope(binding),
-        binding.getConstructor());
+  @Override
+  public Indexer.IndexedBinding visit(ConstructorBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding, BindingType.CONSTRUCTOR, scope(binding), binding.getConstructor());
   }
 
-  @Override public Indexer.IndexedBinding visit(
-      ConvertedConstantBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.CONSTANT, scope(binding),
-        binding.getValue());
+  @Override
+  public Indexer.IndexedBinding visit(ConvertedConstantBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding, BindingType.CONSTANT, scope(binding), binding.getValue());
   }
 
-  @Override public Indexer.IndexedBinding visit(ExposedBinding<? extends Object> binding) {
+  @Override
+  public Indexer.IndexedBinding visit(ExposedBinding<? extends Object> binding) {
     return new Indexer.IndexedBinding(binding, BindingType.EXPOSED, scope(binding), binding);
   }
 
-  @Override public Indexer.IndexedBinding visit(InstanceBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.INSTANCE, scope(binding),
-        binding.getInstance());
+  @Override
+  public Indexer.IndexedBinding visit(InstanceBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding, BindingType.INSTANCE, scope(binding), binding.getInstance());
   }
 
-  @Override public Indexer.IndexedBinding visit(LinkedKeyBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.LINKED_KEY, scope(binding),
-        binding.getLinkedKey());
+  @Override
+  public Indexer.IndexedBinding visit(LinkedKeyBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding, BindingType.LINKED_KEY, scope(binding), binding.getLinkedKey());
   }
 
-  @Override public Indexer.IndexedBinding visit(ProviderBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.PROVIDED_BY, scope(binding),
+  @Override
+  public Indexer.IndexedBinding visit(ProviderBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding,
+        BindingType.PROVIDED_BY,
+        scope(binding),
         injector.getBinding(binding.getProvidedKey()));
   }
 
-  @Override public Indexer.IndexedBinding visit(ProviderInstanceBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.PROVIDER_INSTANCE, scope(binding),
-        binding.getUserSuppliedProvider());
+  @Override
+  public Indexer.IndexedBinding visit(ProviderInstanceBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding, BindingType.PROVIDER_INSTANCE, scope(binding), binding.getUserSuppliedProvider());
   }
 
-  @Override public Indexer.IndexedBinding visit(ProviderKeyBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.PROVIDER_KEY, scope(binding),
-        binding.getProviderKey());
+  @Override
+  public Indexer.IndexedBinding visit(ProviderKeyBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(
+        binding, BindingType.PROVIDER_KEY, scope(binding), binding.getProviderKey());
   }
 
-  @Override public Indexer.IndexedBinding visit(UntargettedBinding<? extends Object> binding) {
+  @Override
+  public Indexer.IndexedBinding visit(UntargettedBinding<? extends Object> binding) {
     return new Indexer.IndexedBinding(binding, BindingType.UNTARGETTED, scope(binding), null);
   }
-  
+
   private static final Object EAGER_SINGLETON = new Object();
-  
-  @Override public Object visitEagerSingleton() {
+
+  @Override
+  public Object visitEagerSingleton() {
     return EAGER_SINGLETON;
   }
 
-  @Override public Object visitNoScoping() {
+  @Override
+  public Object visitNoScoping() {
     return Scopes.NO_SCOPE;
   }
 
-  @Override public Object visitScope(Scope scope) {
+  @Override
+  public Object visitScope(Scope scope) {
     return scope;
   }
 
-  @Override public Object visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
+  @Override
+  public Object visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
     return scopeAnnotation;
   }
 }

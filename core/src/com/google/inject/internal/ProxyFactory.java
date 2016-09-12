@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,15 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.spi.InjectionPoint;
-
-import net.sf.cglib.core.MethodWrapper;
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.reflect.FastClass;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,6 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sf.cglib.core.MethodWrapper;
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.CallbackFilter;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.reflect.FastClass;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Builds a construction proxy that can participate in AOP. This class manages applying type and
@@ -48,7 +45,7 @@ import java.util.logging.Logger;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
-  
+
   private static final Logger logger = Logger.getLogger(ProxyFactory.class.getName());
 
   private final InjectionPoint injectionPoint;
@@ -67,7 +64,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     this.injectionPoint = injectionPoint;
 
     @SuppressWarnings("unchecked") // the member of injectionPoint is always a Constructor<T>
-        Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
+    Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
     declaringClass = constructor.getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
@@ -100,12 +97,13 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     for (MethodAspect methodAspect : applicableAspects) {
       for (MethodInterceptorsPair pair : methodInterceptorsPairs) {
         if (methodAspect.matches(pair.method)) {
-          if(pair.method.isSynthetic()) {
-            logger.log(Level.WARNING,
+          if (pair.method.isSynthetic()) {
+            logger.log(
+                Level.WARNING,
                 "Method [{0}] is synthetic and is being intercepted by {1}."
-              + " This could indicate a bug.  The method may be intercepted twice,"
-              + " or may not be intercepted at all.",
-                new Object[] { pair.method, methodAspect.interceptors() });
+                    + " This could indicate a bug.  The method may be intercepted twice,"
+                    + " or may not be intercepted at all.",
+                new Object[] {pair.method, methodAspect.interceptors()});
           }
           visibility = visibility.and(BytecodeGen.Visibility.forMember(pair.method));
           pair.addAll(methodAspect.interceptors());
@@ -141,14 +139,13 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       callbacks[i] = new InterceptorStackCallback(pair.method, deDuplicated);
     }
 
-    interceptors = interceptorsMapBuilder != null
-        ? interceptorsMapBuilder.build()
-        : ImmutableMap.<Method, List<MethodInterceptor>>of();
+    interceptors =
+        interceptorsMapBuilder != null
+            ? interceptorsMapBuilder.build()
+            : ImmutableMap.<Method, List<MethodInterceptor>>of();
   }
 
-  /**
-   * Returns the interceptors that apply to the constructed type.
-   */
+  /** Returns the interceptors that apply to the constructed type. */
   public ImmutableMap<Method, List<MethodInterceptor>> getInterceptors() {
     return interceptors;
   }
@@ -172,10 +169,10 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     // Create the proxied class. We're careful to ensure that all enhancer state is not-specific
     // to this injector. Otherwise, the proxies for each injector will waste PermGen memory
     try {
-    Enhancer enhancer = BytecodeGen.newEnhancer(declaringClass, visibility);
-    enhancer.setCallbackFilter(new IndicesCallbackFilter(methods));
-    enhancer.setCallbackTypes(callbackTypes);
-    return new ProxyConstructor<T>(enhancer, injectionPoint, callbacks, interceptors);
+      Enhancer enhancer = BytecodeGen.newEnhancer(declaringClass, visibility);
+      enhancer.setCallbackFilter(new IndicesCallbackFilter(methods));
+      enhancer.setCallbackTypes(callbackTypes);
+      return new ProxyConstructor<T>(enhancer, injectionPoint, callbacks, interceptors);
     } catch (Throwable e) {
       throw new Errors().errorEnhancingClass(declaringClass, e).toException();
     }
@@ -202,10 +199,9 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   }
 
   /**
-   * A callback filter that maps methods to unique IDs. We define equals and
-   * hashCode without using any state related to the injector so that enhanced
-   * classes intercepting the same methods can be shared between injectors (and
-   * child injectors, etc).
+   * A callback filter that maps methods to unique IDs. We define equals and hashCode without using
+   * any state related to the injector so that enhanced classes intercepting the same methods can be
+   * shared between injectors (and child injectors, etc).
    */
   private static class IndicesCallbackFilter implements CallbackFilter {
     final Map<Object, Integer> indices;
@@ -225,19 +221,19 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return indices.get(MethodWrapper.create(method));
     }
 
-    @Override public boolean equals(Object o) {
-      return o instanceof IndicesCallbackFilter &&
-          ((IndicesCallbackFilter) o).indices.equals(indices);
+    @Override
+    public boolean equals(Object o) {
+      return o instanceof IndicesCallbackFilter
+          && ((IndicesCallbackFilter) o).indices.equals(indices);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return hashCode;
     }
   }
 
-  /**
-   * Constructs instances that participate in AOP.
-   */
+  /** Constructs instances that participate in AOP. */
   private static class ProxyConstructor<T> implements ConstructionProxy<T> {
     final Class<?> enhanced;
     final InjectionPoint injectionPoint;
@@ -249,7 +245,10 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     final FastClass fastClass;
 
     @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
-    ProxyConstructor(Enhancer enhancer, InjectionPoint injectionPoint, Callback[] callbacks,
+    ProxyConstructor(
+        Enhancer enhancer,
+        InjectionPoint injectionPoint,
+        Callback[] callbacks,
         ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors) {
       this.enhanced = enhancer.createClass(); // this returns a cached class if possible
       this.injectionPoint = injectionPoint;

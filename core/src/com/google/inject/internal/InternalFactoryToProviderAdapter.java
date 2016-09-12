@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 
-/**
- * @author crazybob@google.com (Bob Lee)
-*/
+/** @author crazybob@google.com (Bob Lee) */
 final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
 
   private final Provider<? extends T> provider;
@@ -45,7 +43,8 @@ final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     }
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return provider.toString();
   }
 }

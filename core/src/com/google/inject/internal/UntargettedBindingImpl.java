@@ -65,7 +65,8 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
     getScoping().applyTo(binder.withSource(getSource()).bind(getKey()));
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(UntargettedBinding.class)
         .add("key", getKey())
         .add("source", getSource())
@@ -74,10 +75,9 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
 
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof UntargettedBindingImpl) {
-      UntargettedBindingImpl<?> o = (UntargettedBindingImpl<?>)obj;
-      return getKey().equals(o.getKey())
-        && getScoping().equals(o.getScoping());
+    if (obj instanceof UntargettedBindingImpl) {
+      UntargettedBindingImpl<?> o = (UntargettedBindingImpl<?>) obj;
+      return getKey().equals(o.getKey()) && getScoping().equals(o.getScoping());
     } else {
       return false;
     }

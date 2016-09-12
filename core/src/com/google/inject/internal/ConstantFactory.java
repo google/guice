@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,7 @@ package com.google.inject.internal;
 import com.google.common.base.MoreObjects;
 import com.google.inject.spi.Dependency;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 final class ConstantFactory<T> implements InternalFactory<T> {
 
   private final Initializable<T> initializable;
@@ -38,8 +36,6 @@ final class ConstantFactory<T> implements InternalFactory<T> {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(ConstantFactory.class)
-        .add("value", initializable)
-        .toString();
+    return MoreObjects.toStringHelper(ConstantFactory.class).add("value", initializable).toString();
   }
 }

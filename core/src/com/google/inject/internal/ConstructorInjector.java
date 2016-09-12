@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
@@ -37,7 +36,8 @@ final class ConstructorInjector<T> {
   private final ConstructionProxy<T> constructionProxy;
   private final MembersInjectorImpl<T> membersInjector;
 
-  ConstructorInjector(Set<InjectionPoint> injectableMembers,
+  ConstructorInjector(
+      Set<InjectionPoint> injectableMembers,
       ConstructionProxy<T> constructionProxy,
       SingleParameterInjector<?>[] parameterInjectors,
       MembersInjectorImpl<T> membersInjector) {
@@ -56,10 +56,12 @@ final class ConstructorInjector<T> {
   }
 
   /**
-   * Construct an instance. Returns {@code Object} instead of {@code T} because
-   * it may return a proxy.
+   * Construct an instance. Returns {@code Object} instead of {@code T} because it may return a
+   * proxy.
    */
-  Object construct(final Errors errors, final InternalContext context,
+  Object construct(
+      final Errors errors,
+      final InternalContext context,
       Dependency<?> dependency,
       /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {
@@ -67,8 +69,8 @@ final class ConstructorInjector<T> {
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
       // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
-      return constructionContext.createProxy(errors, context.getInjectorOptions(),
-          dependency.getKey().getTypeLiteral().getRawType());
+      return constructionContext.createProxy(
+          errors, context.getInjectorOptions(), dependency.getKey().getTypeLiteral().getRawType());
     }
 
     // If we're re-entering this factory while injecting fields or methods,
@@ -76,8 +78,9 @@ final class ConstructorInjector<T> {
     T t = constructionContext.getCurrentReference();
     if (t != null) {
       if (context.getInjectorOptions().disableCircularProxies) {
-        throw errors.circularDependenciesDisabled(
-            dependency.getKey().getTypeLiteral().getRawType()).toException();
+        throw errors
+            .circularDependenciesDisabled(dependency.getKey().getTypeLiteral().getRawType())
+            .toException();
       } else {
         return t;
       }
@@ -89,12 +92,15 @@ final class ConstructorInjector<T> {
       if (provisionCallback == null) {
         return provision(errors, context, constructionContext);
       } else {
-        return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
-          @Override
-          public T call() throws ErrorsException {
-            return provision(errors, context, constructionContext);
-          }
-        });
+        return provisionCallback.provision(
+            errors,
+            context,
+            new ProvisionCallback<T>() {
+              @Override
+              public T call() throws ErrorsException {
+                return provision(errors, context, constructionContext);
+              }
+            });
       }
     } finally {
       constructionContext.finishConstruction();
@@ -102,8 +108,9 @@ final class ConstructorInjector<T> {
   }
 
   /** Provisions a new T. */
-  private T provision(Errors errors, InternalContext context,
-      ConstructionContext<T> constructionContext) throws ErrorsException {
+  private T provision(
+      Errors errors, InternalContext context, ConstructionContext<T> constructionContext)
+      throws ErrorsException {
     try {
       T t;
       try {
@@ -123,11 +130,11 @@ final class ConstructorInjector<T> {
 
       return t;
     } catch (InvocationTargetException userException) {
-      Throwable cause = userException.getCause() != null
-          ? userException.getCause()
-          : userException;
-      throw errors.withSource(constructionProxy.getInjectionPoint())
-          .errorInjectingConstructor(cause).toException();
+      Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
+      throw errors
+          .withSource(constructionProxy.getInjectionPoint())
+          .errorInjectingConstructor(cause)
+          .toException();
     } finally {
       constructionContext.removeCurrentReference();
     }

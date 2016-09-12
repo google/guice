@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,13 +23,11 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
-import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
-
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +169,7 @@ interface State {
   Map<Key<?>, Binding<?>> getExplicitBindingsThisLevel();
 
   void putBinding(Key<?> key, BindingImpl<?> binding);
- 
+
   ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation);
 
   void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope);
@@ -192,11 +190,11 @@ interface State {
   /*end[AOP]*/
 
   void addTypeListener(TypeListenerBinding typeListenerBinding);
-  
+
   List<TypeListenerBinding> getTypeListenerBindings();
-  
+
   void addProvisionListener(ProvisionListenerBinding provisionListenerBinding);
-  
+
   List<ProvisionListenerBinding> getProvisionListenerBindings();
 
   void addScanner(ModuleAnnotatedMethodScannerBinding scanner);
@@ -215,7 +213,7 @@ interface State {
    * one of this injector's descendent's has bound the key.
    */
   boolean isBlacklisted(Key<?> key);
-  
+
   /** Returns the source of a blacklisted key. */
   Set<Object> getSourcesForBlacklistedKey(Key<?> key);
 
@@ -225,8 +223,6 @@ interface State {
    */
   Object lock();
 
-  /**
-   * Returns all the scope bindings at this level and parent levels.
-   */
+  /** Returns all the scope bindings at this level and parent levels. */
   Map<Class<? extends Annotation>, Scope> getScopes();
 }

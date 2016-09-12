@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import com.google.common.collect.Lists;
 import com.google.inject.spi.PrivateElements;
-
 import java.util.List;
 
 /**
@@ -34,10 +33,10 @@ final class PrivateElementProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visit(PrivateElements privateElements) {
-    InjectorShell.Builder builder = new InjectorShell.Builder()
-        .parent(injector)
-        .privateElements(privateElements);
+  @Override
+  public Boolean visit(PrivateElements privateElements) {
+    InjectorShell.Builder builder =
+        new InjectorShell.Builder().parent(injector).privateElements(privateElements);
     injectorShellBuilders.add(builder);
     return true;
   }

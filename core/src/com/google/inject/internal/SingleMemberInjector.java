@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +18,9 @@ package com.google.inject.internal;
 
 import com.google.inject.spi.InjectionPoint;
 
-/**
- * Injects a field or method of a given object.
- */
+/** Injects a field or method of a given object. */
 interface SingleMemberInjector {
   void inject(Errors errors, InternalContext context, Object o);
+
   InjectionPoint getInjectionPoint();
 }

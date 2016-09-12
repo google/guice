@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,11 @@ package com.google.inject.internal;
 
 import com.google.inject.internal.InjectorImpl.MethodInvoker;
 import com.google.inject.spi.InjectionPoint;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-/**
- * Invokes an injectable method.
- */
+/** Invokes an injectable method. */
 final class SingleMethodInjector implements SingleMemberInjector {
   private final MethodInvoker methodInvoker;
   private final SingleParameterInjector<?>[] parameterInjectors;
@@ -43,8 +40,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
 
     /*if[AOP]*/
     try {
-    final net.sf.cglib.reflect.FastClass fastClass =
-        BytecodeGen.newFastClassForMember(method);
+      final net.sf.cglib.reflect.FastClass fastClass = BytecodeGen.newFastClassForMember(method);
       if (fastClass != null) {
         final int index = fastClass.getMethod(method).getIndex();
 
@@ -56,12 +52,14 @@ final class SingleMethodInjector implements SingleMemberInjector {
           }
         };
       }
-    } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
+    } catch (net.sf.cglib.core.CodeGenerationException e) {
+      /* fall-through */
+    }
     /*end[AOP]*/
 
     int modifiers = method.getModifiers();
-    if (!Modifier.isPublic(modifiers) ||
-        !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+    if (!Modifier.isPublic(modifiers)
+        || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
       method.setAccessible(true);
     }
 
@@ -94,9 +92,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
     } catch (IllegalAccessException e) {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } catch (InvocationTargetException userException) {
-      Throwable cause = userException.getCause() != null
-          ? userException.getCause()
-          : userException;
+      Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
       errors.withSource(injectionPoint).errorInjectingMethod(cause);
     }
   }

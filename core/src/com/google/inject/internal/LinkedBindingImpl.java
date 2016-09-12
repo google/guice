@@ -25,15 +25,19 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.LinkedKeyBinding;
-
 import java.util.Set;
 
-public final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T>, HasDependencies {
+public final class LinkedBindingImpl<T> extends BindingImpl<T>
+    implements LinkedKeyBinding<T>, HasDependencies {
 
   final Key<? extends T> targetKey;
 
-  public LinkedBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Scoping scoping,
+  public LinkedBindingImpl(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Scoping scoping,
       Key<? extends T> targetKey) {
     super(injector, key, source, internalFactory, scoping);
     this.targetKey = targetKey;
@@ -74,7 +78,8 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
     getScoping().applyTo(binder.withSource(getSource()).bind(getKey()).to(getLinkedKey()));
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(LinkedKeyBinding.class)
         .add("key", getKey())
         .add("source", getSource())
@@ -85,11 +90,11 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
 
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof LinkedBindingImpl) {
-      LinkedBindingImpl<?> o = (LinkedBindingImpl<?>)obj;
+    if (obj instanceof LinkedBindingImpl) {
+      LinkedBindingImpl<?> o = (LinkedBindingImpl<?>) obj;
       return getKey().equals(o.getKey())
-        && getScoping().equals(o.getScoping())
-        && Objects.equal(targetKey, o.targetKey);
+          && getScoping().equals(o.getScoping())
+          && Objects.equal(targetKey, o.targetKey);
     } else {
       return false;
     }

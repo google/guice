@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ import com.google.common.cache.LoadingCache;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public abstract class FailableCache<K, V> {
-  
+
   private final LoadingCache<K, Object> delegate =
       CacheBuilder.newBuilder()
           .build(
@@ -46,7 +46,7 @@ public abstract class FailableCache<K, V> {
               });
 
   protected abstract V create(K key, Errors errors) throws ErrorsException;
-  
+
   public V get(K key, Errors errors) throws ErrorsException {
     Object resultOrError = delegate.getUnchecked(key);
     if (resultOrError instanceof Errors) {
@@ -58,7 +58,7 @@ public abstract class FailableCache<K, V> {
       return result;
     }
   }
-  
+
   boolean remove(K key) {
     return delegate.asMap().remove(key) != null;
   }

@@ -26,48 +26,36 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
  *
- * Introduction from the author:
- * Implementation of this class seems unreasonably complicated at the first sight.
- * I fully agree with you, that the beast below is very complex
- * and it's hard to reason on how does it work or not.
- * Still I want to assure you that hundreds(?) of hours were thrown
- * into making this code simple, while still maintaining Singleton contract.
+ * <p>Introduction from the author: Implementation of this class seems unreasonably complicated at
+ * the first sight. I fully agree with you, that the beast below is very complex and it's hard to
+ * reason on how does it work or not. Still I want to assure you that hundreds(?) of hours were
+ * thrown into making this code simple, while still maintaining Singleton contract.
  *
- * Anyway, why is it so complex? Singleton scope does not seem to be that unique.
- * 1) Guice has never truly expected to be used in multi threading environment
- *    with many Injectors working alongside each other. There is almost no
- *    code with Guice that propagates state between threads. And Singleton
- *    scope is The exception.
- * 2) Guice supports circular dependencies and thus manages proxy objects.
- *    There is no interface that allows user defined Scopes to create proxies,
- *    it is expected to be done by Guice. Singleton scope needs to be
- *    able to detect circular dependencies spanning several threads,
- *    therefore Singleton scope needs to be able to create these proxies.
- * 3) To make things worse, Guice has a very tricky definition for a binding
- *    resolution when Injectors are in in a parent/child relationship.
- *    And Scope does not have access to this information by design,
- *    the only real action that Scope can do is to call or not to call a creator.
- * 4) There is no readily available code in Guice that can detect a potential
- *    deadlock, and no code for handling dependency cycles spanning several threads.
- *    This is significantly harder as all the dependencies in a thread at runtime
- *    can be represented with a list, where in a multi threaded environment
- *    we have more complex dependency trees.
- * 5) Guice has a pretty strong contract regarding Garbage Collection,
- *    which often prevents us from linking objects directly.
- *    So simple domain specific code can not be written and intermediary
- *    id objects need to be managed.
- * 6) Guice is relatively fast and we should not make things worse.
- *    We're trying our best to optimize synchronization for speed and memory.
- *    Happy path should be almost as fast as in a single threaded solution
- *    and should not take much more memory.
- * 7) Error message generation in Guice was not meant to be used like this and to work around
- *    its APIs we need a lot of code. Additional complexity comes from inherent data races
- *    as message is only generated when failure occurs on proxy object generation.
- * Things get ugly pretty fast.
+ * <p>Anyway, why is it so complex? Singleton scope does not seem to be that unique. 1) Guice has
+ * never truly expected to be used in multi threading environment with many Injectors working
+ * alongside each other. There is almost no code with Guice that propagates state between threads.
+ * And Singleton scope is The exception. 2) Guice supports circular dependencies and thus manages
+ * proxy objects. There is no interface that allows user defined Scopes to create proxies, it is
+ * expected to be done by Guice. Singleton scope needs to be able to detect circular dependencies
+ * spanning several threads, therefore Singleton scope needs to be able to create these proxies. 3)
+ * To make things worse, Guice has a very tricky definition for a binding resolution when Injectors
+ * are in in a parent/child relationship. And Scope does not have access to this information by
+ * design, the only real action that Scope can do is to call or not to call a creator. 4) There is
+ * no readily available code in Guice that can detect a potential deadlock, and no code for handling
+ * dependency cycles spanning several threads. This is significantly harder as all the dependencies
+ * in a thread at runtime can be represented with a list, where in a multi threaded environment we
+ * have more complex dependency trees. 5) Guice has a pretty strong contract regarding Garbage
+ * Collection, which often prevents us from linking objects directly. So simple domain specific code
+ * can not be written and intermediary id objects need to be managed. 6) Guice is relatively fast
+ * and we should not make things worse. We're trying our best to optimize synchronization for speed
+ * and memory. Happy path should be almost as fast as in a single threaded solution and should not
+ * take much more memory. 7) Error message generation in Guice was not meant to be used like this
+ * and to work around its APIs we need a lot of code. Additional complexity comes from inherent data
+ * races as message is only generated when failure occurs on proxy object generation. Things get
+ * ugly pretty fast.
  *
  * @see #scope(Key, Provider)
  * @see CycleDetectingLock
- *
  * @author timofeyb (Timothy Basanov)
  */
 public class SingletonScope implements Scope {
@@ -76,10 +64,10 @@ public class SingletonScope implements Scope {
   private static final Object NULL = new Object();
 
   /**
-   * A map of thread running singleton instantiation, to the InternalContext that is relevant
-   * to the singleton being instantiated. In the case of a multithreaded circular dependency in
-   * singleton instantiation, this map is used to provide an extensive error message that contains
-   * information on all of the threads involved in the circular dependency.
+   * A map of thread running singleton instantiation, to the InternalContext that is relevant to the
+   * singleton being instantiated. In the case of a multithreaded circular dependency in singleton
+   * instantiation, this map is used to provide an extensive error message that contains information
+   * on all of the threads involved in the circular dependency.
    */
   private static final ConcurrentMap<Thread, InternalContext> internalContextsMap =
       Maps.newConcurrentMap();
@@ -88,37 +76,34 @@ public class SingletonScope implements Scope {
    * Allows us to detect when circular proxies are necessary. It's only used during singleton
    * instance initialization, after initialization direct access through volatile field is used.
    *
-   * NB: Factory uses {@link Key}s as a user locks ids, different injectors can
-   * share them. Cycles are detected properly as cycle detection does not rely on user locks ids,
-   * but error message generated could be less than ideal.
-   *
-   * TODO(user): we may use one factory per injector tree for optimization reasons
+   * <p>NB: Factory uses {@link Key}s as a user locks ids, different injectors can share them.
+   * Cycles are detected properly as cycle detection does not rely on user locks ids, but error
+   * message generated could be less than ideal.
    */
+  // TODO(user): we may use one factory per injector tree for optimization reasons
   private static final CycleDetectingLockFactory<Key<?>> cycleDetectingLockFactory =
       new CycleDetectingLockFactory<Key<?>>();
 
   /**
-   * Provides singleton scope with the following properties:
-   * - creates no more than one instance per Key as a creator is used no more than once,
-   * - result is cached and returned quickly on subsequent calls,
-   * - exception in a creator is not treated as instance creation and is not cached,
-   * - creates singletons in parallel whenever possible,
-   * - waits for dependent singletons to be created even across threads and when dependencies
-   *   are shared as long as no circular dependencies are detected,
-   * - returns circular proxy only when circular dependencies are detected,
-   * - aside from that, blocking synchronization is only used for proxy creation and initialization,
+   * Provides singleton scope with the following properties: - creates no more than one instance per
+   * Key as a creator is used no more than once, - result is cached and returned quickly on
+   * subsequent calls, - exception in a creator is not treated as instance creation and is not
+   * cached, - creates singletons in parallel whenever possible, - waits for dependent singletons to
+   * be created even across threads and when dependencies are shared as long as no circular
+   * dependencies are detected, - returns circular proxy only when circular dependencies are
+   * detected, - aside from that, blocking synchronization is only used for proxy creation and
+   * initialization,
+   *
    * @see CycleDetectingLockFactory
    */
   @Override
   public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
     /**
-     * Locking strategy:
-     * - volatile instance: double-checked locking for quick exit when scope is initialized,
-     * - constructionContext: manipulations with proxies list or instance initialization
-     * - creationLock: singleton instance creation,
-     *   -- allows to guarantee only one instance per singleton,
-     *   -- special type of a lock, that prevents potential deadlocks,
-     *   -- guards constructionContext for all operations except proxy creation
+     * Locking strategy: - volatile instance: double-checked locking for quick exit when scope is
+     * initialized, - constructionContext: manipulations with proxies list or instance
+     * initialization - creationLock: singleton instance creation, -- allows to guarantee only one
+     * instance per singleton, -- special type of a lock, that prevents potential deadlocks, --
+     * guards constructionContext for all operations except proxy creation
      */
     return new Provider<T>() {
       /**
@@ -145,7 +130,7 @@ public class SingletonScope implements Scope {
       {
         // If we are getting called by Scoping
         if (creator instanceof ProviderToInternalFactoryAdapter) {
-          injector = ((ProviderToInternalFactoryAdapter)creator).getInjector();
+          injector = ((ProviderToInternalFactoryAdapter) creator).getInjector();
         } else {
           injector = null;
         }
@@ -298,7 +283,9 @@ public class SingletonScope implements Scope {
        * internal context.
        *
        * <p>The main thing being done is creating a list of Dependencies involved into lock cycle
-       * across all the threads involved. This is a structure we're creating: <pre>
+       * across all the threads involved. This is a structure we're creating:
+       *
+       * <pre>
        * { Current Thread, C.class, B.class, Other Thread, B.class, C.class, Current Thread }
        * To be inserted in the beginning by Guice: { A.class, B.class, C.class }
        * </pre>
@@ -310,7 +297,7 @@ public class SingletonScope implements Scope {
       private Message createCycleDependenciesMessage(
           Map<Thread, InternalContext> internalContextsMap,
           ListMultimap<Long, Key<?>> locksCycle,
-          /* @Nullable */  Message proxyCreationError) {
+          /* @Nullable */ Message proxyCreationError) {
         // this is the main thing that we'll show in an error message,
         // current thread is populate by Guice
         List<Object> sourcesCycle = Lists.newArrayList();
@@ -403,7 +390,8 @@ public class SingletonScope implements Scope {
     };
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "Scopes.SINGLETON";
   }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,9 +27,9 @@ interface InternalFactory<T> {
 
   /**
    * Creates an object to be injected.
+   *
    * @param context of this injection
    * @param linked true if getting as a result of a linked binding
-   *
    * @throws com.google.inject.internal.ErrorsException if a value cannot be provided
    * @return instance to be injected
    */

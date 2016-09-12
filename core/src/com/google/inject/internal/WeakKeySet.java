@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,6 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.google.inject.Key;
 import com.google.inject.internal.util.SourceProvider;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -52,18 +51,19 @@ final class WeakKeySet {
    * Tracks child injector lifetimes and evicts blacklisted keys/sources after the child injector is
    * garbage collected.
    */
-  private final Cache<State, Set<KeyAndSource>> evictionCache = CacheBuilder.newBuilder()
-      .weakKeys()
-      .removalListener(
-          new RemovalListener<State, Set<KeyAndSource>>() {
-            @Override
-            public void onRemoval(RemovalNotification<State, Set<KeyAndSource>> notification) {
-              Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
+  private final Cache<State, Set<KeyAndSource>> evictionCache =
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .removalListener(
+              new RemovalListener<State, Set<KeyAndSource>>() {
+                @Override
+                public void onRemoval(RemovalNotification<State, Set<KeyAndSource>> notification) {
+                  Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
 
-              cleanUpForCollectedState(notification.getValue());
-            }
-          })
-      .build();
+                  cleanUpForCollectedState(notification.getValue());
+                }
+              })
+          .build();
 
   /**
    * There may be multiple child injectors blacklisting a certain key so only remove the source
@@ -150,8 +150,7 @@ final class WeakKeySet {
       }
 
       KeyAndSource other = (KeyAndSource) obj;
-      return Objects.equal(key, other.key)
-          && Objects.equal(source, other.source);
+      return Objects.equal(key, other.key) && Objects.equal(source, other.source);
     }
   }
 }

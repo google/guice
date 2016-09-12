@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,8 @@ final class ModuleAnnotatedMethodScannerProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visit(ModuleAnnotatedMethodScannerBinding command) {
+  @Override
+  public Boolean visit(ModuleAnnotatedMethodScannerBinding command) {
     injector.state.addScanner(command);
     return true;
   }

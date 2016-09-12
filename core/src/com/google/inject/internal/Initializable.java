@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,6 @@ package com.google.inject.internal;
  */
 interface Initializable<T> {
 
-  /**
-   * Ensures the reference is initialized, then returns it.
-   */
+  /** Ensures the reference is initialized, then returns it. */
   T get(Errors errors) throws ErrorsException;
 }

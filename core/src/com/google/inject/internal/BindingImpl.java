@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,9 +24,7 @@ import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InstanceBinding;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public abstract class BindingImpl<T> implements Binding<T> {
 
   private final InjectorImpl injector;
@@ -35,8 +33,12 @@ public abstract class BindingImpl<T> implements Binding<T> {
   private final Scoping scoping;
   private final InternalFactory<? extends T> internalFactory;
 
-  public BindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Scoping scoping) {
+  public BindingImpl(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Scoping scoping) {
     this.injector = injector;
     this.key = key;
     this.source = source;
@@ -85,8 +87,8 @@ public abstract class BindingImpl<T> implements Binding<T> {
   }
 
   /**
-   * Is this a constant binding? This returns true for constant bindings as
-   * well as toInstance() bindings.
+   * Is this a constant binding? This returns true for constant bindings as well as toInstance()
+   * bindings.
    */
   public boolean isConstant() {
     return this instanceof InstanceBinding;
@@ -109,8 +111,9 @@ public abstract class BindingImpl<T> implements Binding<T> {
   protected BindingImpl<T> withKey(Key<T> key) {
     throw new AssertionError();
   }
-  
-  @Override public String toString() {
+
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(Binding.class)
         .add("key", key)
         .add("scope", scoping)

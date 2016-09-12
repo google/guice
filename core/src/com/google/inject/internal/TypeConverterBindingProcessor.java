@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeConverterBinding;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -117,11 +116,11 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
         });
   }
 
-  private static <T> void convertToPrimitiveType(InjectorImpl injector, Class<T> primitiveType,
-      final Class<T> wrapperType) {
+  private static <T> void convertToPrimitiveType(
+      InjectorImpl injector, Class<T> primitiveType, final Class<T> wrapperType) {
     try {
-      final Method parser = wrapperType.getMethod(
-          "parse" + capitalize(primitiveType.getName()), String.class);
+      final Method parser =
+          wrapperType.getMethod("parse" + capitalize(primitiveType.getName()), String.class);
 
       TypeConverter typeConverter =
           new TypeConverter() {
@@ -149,13 +148,13 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
     }
   }
 
-  private static <T> void convertToClass(InjectorImpl injector, Class<T> type,
-      TypeConverter converter) {
+  private static <T> void convertToClass(
+      InjectorImpl injector, Class<T> type, TypeConverter converter) {
     convertToClasses(injector, Matchers.identicalTo(type), converter);
   }
 
-  private static void convertToClasses(InjectorImpl injector,
-      final Matcher<? super Class<?>> typeMatcher, TypeConverter converter) {
+  private static void convertToClasses(
+      InjectorImpl injector, final Matcher<? super Class<?>> typeMatcher, TypeConverter converter) {
     internalConvertToTypes(
         injector,
         new AbstractMatcher<TypeLiteral<?>>() {
@@ -177,28 +176,26 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
         converter);
   }
 
-  private static void internalConvertToTypes(InjectorImpl injector,
-      Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter converter) {
+  private static void internalConvertToTypes(
+      InjectorImpl injector, Matcher<? super TypeLiteral<?>> typeMatcher, TypeConverter converter) {
     injector.state.addConverter(
         new TypeConverterBinding(SourceProvider.UNKNOWN_SOURCE, typeMatcher, converter));
   }
 
-  @Override public Boolean visit(TypeConverterBinding command) {
-    injector.state.addConverter(new TypeConverterBinding(
-        command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
+  @Override
+  public Boolean visit(TypeConverterBinding command) {
+    injector.state.addConverter(
+        new TypeConverterBinding(
+            command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
     return true;
   }
-  
+
   private static String capitalize(String s) {
     if (s.length() == 0) {
       return s;
     }
     char first = s.charAt(0);
     char capitalized = Character.toUpperCase(first);
-    return (first == capitalized)
-        ? s
-        : capitalized + s.substring(1);
+    return (first == capitalized) ? s : capitalized + s.substring(1);
   }
-
 }

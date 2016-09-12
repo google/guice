@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +16,10 @@
 
 package com.google.inject.internal;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 final class Initializables {
 
-  /**
-   * Returns an initializable for an instance that requires no initialization.
-   */
+  /** Returns an initializable for an instance that requires no initialization. */
   static <T> Initializable<T> of(final T instance) {
     return new Initializable<T>() {
       @Override

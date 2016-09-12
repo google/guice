@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +34,9 @@ import java.util.Set;
 /**
  * A {@link ModuleAnnotatedMethodScanner} that handles the {@link ProvidesIntoSet}, {@link
  * ProvidesIntoMap} and {@link ProvidesIntoOptional}.
- * 
+ *
  * <p>The public interface is currently {@link com.google.inject.multibindings.MultibindingsScanner}
- * but this should eventually be installed by default. 
+ * but this should eventually be installed by default.
  */
 public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScanner {
   public static final MultibindingsMethodScanner INSTANCE = new MultibindingsMethodScanner();
@@ -51,8 +51,8 @@ public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScann
 
   @SuppressWarnings({"unchecked", "rawtypes"}) // mapKey doesn't know its key type
   @Override
-  public <T> Key<T> prepareMethod(Binder binder, Annotation annotation, Key<T> key,
-      InjectionPoint injectionPoint) {
+  public <T> Key<T> prepareMethod(
+      Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
     Method method = (Method) injectionPoint.getMember();
     AnnotationOrError mapKey = findMapKeyAnnotation(binder, method);
     if (annotation instanceof ProvidesIntoSet) {
@@ -86,10 +86,11 @@ public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScann
     }
     throw new IllegalStateException("Invalid annotation: " + annotation);
   }
-  
+
   private static class AnnotationOrError {
     final Annotation annotation;
     final boolean error;
+
     AnnotationOrError(Annotation annotation, boolean error) {
       this.annotation = annotation;
       this.error = error;
@@ -98,7 +99,7 @@ public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScann
     static AnnotationOrError forPossiblyNullAnnotation(Annotation annotation) {
       return new AnnotationOrError(annotation, false);
     }
-    
+
     static AnnotationOrError forError() {
       return new AnnotationOrError(null, true);
     }
@@ -118,12 +119,14 @@ public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScann
             // validate there's a declared method called "value"
             Method valueMethod = annotation.annotationType().getDeclaredMethod("value");
             if (valueMethod.getReturnType().isArray()) {
-              binder.addError("Array types are not allowed in a MapKey with unwrapValue=true: %s",                    
+              binder.addError(
+                  "Array types are not allowed in a MapKey with unwrapValue=true: %s",
                   annotation.annotationType());
               return AnnotationOrError.forError();
             }
           } catch (NoSuchMethodException invalid) {
-            binder.addError("No 'value' method in MapKey with unwrapValue=true: %s",
+            binder.addError(
+                "No 'value' method in MapKey with unwrapValue=true: %s",
                 annotation.annotationType());
             return AnnotationOrError.forError();
           }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,14 +32,11 @@ import com.google.inject.PrivateBinder;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.PrivateElements;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public final class PrivateElementsImpl implements PrivateElements {
 
   /*
@@ -58,6 +55,7 @@ public final class PrivateElementsImpl implements PrivateElements {
 
   /** lazily instantiated */
   private ImmutableMap<Key<?>, Object> exposedKeysToSources;
+
   private Injector injector;
 
   public PrivateElementsImpl(Object source) {
@@ -138,7 +136,8 @@ public final class PrivateElementsImpl implements PrivateElements {
     return source;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(PrivateElements.class)
         .add("exposedKeys", getExposedKeys())
         .add("source", getSource())

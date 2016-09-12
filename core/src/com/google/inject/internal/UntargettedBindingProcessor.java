@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +25,11 @@ import com.google.inject.spi.UntargettedBinding;
  * @author sameb@google.com (Sam Berlin)
  */
 class UntargettedBindingProcessor extends AbstractBindingProcessor {
-  
+
   UntargettedBindingProcessor(Errors errors, ProcessedBindingData bindingData) {
     super(errors, bindingData);
   }
-  
+
   @Override
   public <T> Boolean visit(Binding<T> binding) {
     return binding.acceptTargetVisitor(
