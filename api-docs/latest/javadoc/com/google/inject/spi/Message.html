@@ -116,6 +116,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 implements <a href="http://docs.oracle.com/javase/7/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>, <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a></pre>
 <div class="block">An error message and the context in which it occured. Messages are usually created internally by
  Guice and its extensions. Messages can be created explicitly in a module using <a href="../../../../com/google/inject/Binder.html#addError-java.lang.Throwable-"><code>addError()</code></a> statements:
+
  <pre>
      try {
        bindPropertiesFromFile();
@@ -193,8 +194,8 @@ implements <a href="http://docs.oracle.com/javase/7/docs/api/java/io/Serializabl
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/Message.html#getCause--">getCause</a></span>()</code>
-<div class="block">Returns the throwable that caused this message, or <code>null</code> if this
- message was not caused by a throwable.</div>
+<div class="block">Returns the throwable that caused this message, or <code>null</code> if this message was not caused
+ by a throwable.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
@@ -369,8 +370,8 @@ implements <a href="http://docs.oracle.com/javase/7/docs/api/java/io/Serializabl
 <li class="blockList">
 <h4>getCause</h4>
 <pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;getCause()</pre>
-<div class="block">Returns the throwable that caused this message, or <code>null</code> if this
- message was not caused by a throwable.</div>
+<div class="block">Returns the throwable that caused this message, or <code>null</code> if this message was not caused
+ by a throwable.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>

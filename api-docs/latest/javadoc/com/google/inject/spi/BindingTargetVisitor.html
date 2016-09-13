@@ -99,8 +99,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>V</code> - any type to be returned by the visit method. Use <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Void.html?is-external=true" title="class or interface in java.lang"><code>Void</code></a> with
-     <code>return null</code> if no return type is needed.</dd>
+<dd><code>V</code> - any type to be returned by the visit method. Use <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Void.html?is-external=true" title="class or interface in java.lang"><code>Void</code></a> with <code>return null</code>
+     if no return type is needed.</dd>
 </dl>
 <dl>
 <dt>All Known Subinterfaces:</dt>
@@ -247,8 +247,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="type parameter in BindingTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/spi/LinkedKeyBinding.html" title="interface in com.google.inject.spi">LinkedKeyBinding</a>&lt;? extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="type parameter in BindingTargetVisitor">T</a>&gt;&nbsp;binding)</pre>
-<div class="block">Visit a linked key binding. The other key's binding is used to resolve injections. This
- target is found in both module and injector bindings.</div>
+<div class="block">Visit a linked key binding. The other key's binding is used to resolve injections. This target
+ is found in both module and injector bindings.</div>
 </li>
 </ul>
 <a name="visit-com.google.inject.spi.ExposedBinding-">
@@ -269,8 +269,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="type parameter in BindingTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/spi/UntargettedBinding.html" title="interface in com.google.inject.spi">UntargettedBinding</a>&lt;? extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="type parameter in BindingTargetVisitor">T</a>&gt;&nbsp;binding)</pre>
-<div class="block">Visit an untargetted binding. This target is found only on module bindings. It indicates
- that the injector should use its implicit binding strategies to resolve injections.</div>
+<div class="block">Visit an untargetted binding. This target is found only on module bindings. It indicates that
+ the injector should use its implicit binding strategies to resolve injections.</div>
 </li>
 </ul>
 <a name="visit-com.google.inject.spi.ConstructorBinding-">
@@ -291,8 +291,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="type parameter in BindingTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/spi/ConvertedConstantBinding.html" title="interface in com.google.inject.spi">ConvertedConstantBinding</a>&lt;? extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="type parameter in BindingTargetVisitor">T</a>&gt;&nbsp;binding)</pre>
-<div class="block">Visit a binding created from converting a bound instance to a new type. The source binding
- has the same binding annotation but a different type. This target is found only on injector
+<div class="block">Visit a binding created from converting a bound instance to a new type. The source binding has
+ the same binding annotation but a different type. This target is found only on injector
  bindings.</div>
 </li>
 </ul>

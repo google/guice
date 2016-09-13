@@ -119,12 +119,13 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
  This module may expose the bindings it creates and the bindings of the modules it installs.
 
  <p>A private module can be nested within a regular module or within another private module using
- <a href="../../../com/google/inject/Binder.html#install-com.google.inject.Module-"><code>install()</code></a>.  Its bindings live in a new environment that inherits bindings,
- type converters, scopes, and interceptors from the surrounding ("parent") environment.  When you
+ <a href="../../../com/google/inject/Binder.html#install-com.google.inject.Module-"><code>install()</code></a>. Its bindings live in a new environment that inherits bindings,
+ type converters, scopes, and interceptors from the surrounding ("parent") environment. When you
  nest multiple private modules, the result is a tree of environments where the injector's
  environment is the root.
 
- <p>Guice EDSL bindings can be exposed with <a href="../../../com/google/inject/PrivateModule.html#expose-java.lang.Class-"><code>expose()</code></a>. @<a href="../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> bindings can be exposed with the @<a href="../../../com/google/inject/Exposed.html" title="annotation in com.google.inject"><code>Exposed</code></a> annotation:
+ <p>Guice EDSL bindings can be exposed with <a href="../../../com/google/inject/PrivateModule.html#expose-java.lang.Class-"><code>expose()</code></a>. @<a href="../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> bindings can be exposed with the @<a href="../../../com/google/inject/Exposed.html" title="annotation in com.google.inject"><code>Exposed</code></a>
+ annotation:
 
  <pre>
  public class FooBarBazModule extends PrivateModule {
@@ -149,7 +150,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
  <p>Private modules are implemented using <a href="../../../com/google/inject/Injector.html#createChildInjector-com.google.inject.Module...-"><code>parent
  injectors</code></a>. When it can satisfy their dependencies, just-in-time bindings will be created in the
  root environment. Such bindings are shared among all environments in the tree.
- 
+
  <p>The scope of a binding is constrained to its environment. A singleton bound in a private
  module will be unique to its environment. But a binding for the same type in a different private
  module will yield a different instance.
@@ -159,6 +160,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
  gets access to all bindings in the child environment.
 
  <p>To promote a just-in-time binding to an explicit binding, bind it:
+
  <pre>
    bind(FooImpl.class);
  </pre></div>
@@ -602,7 +604,8 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
                                      <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../com/google/inject/Binder.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-"><code>Binder.bindInterceptor(com.google.inject.matcher.Matcher, com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])</code></a></dd>
+<dd><a href="../../../com/google/inject/Binder.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-"><code>Binder.bindInterceptor(com.google.inject.matcher.Matcher,
+     com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -662,7 +665,8 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
                                     <a href="../../../com/google/inject/spi/TypeConverter.html" title="interface in com.google.inject.spi">TypeConverter</a>&nbsp;converter)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../com/google/inject/Binder.html#convertToTypes-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeConverter-"><code>Binder.convertToTypes(com.google.inject.matcher.Matcher, com.google.inject.spi.TypeConverter)</code></a></dd>
+<dd><a href="../../../com/google/inject/Binder.html#convertToTypes-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeConverter-"><code>Binder.convertToTypes(com.google.inject.matcher.Matcher,
+     com.google.inject.spi.TypeConverter)</code></a></dd>
 </dl>
 </li>
 </ul>

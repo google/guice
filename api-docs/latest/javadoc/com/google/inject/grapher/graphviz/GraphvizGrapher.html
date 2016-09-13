@@ -120,8 +120,8 @@ var activeTableTab = "activeTableTab";
 extends <a href="../../../../../com/google/inject/grapher/AbstractInjectorGrapher.html" title="class in com.google.inject.grapher">AbstractInjectorGrapher</a></pre>
 <div class="block"><a href="../../../../../com/google/inject/grapher/InjectorGrapher.html" title="interface in com.google.inject.grapher"><code>InjectorGrapher</code></a> implementation that writes out a Graphviz DOT
  file of the graph. Dependencies are bound in <a href="../../../../../com/google/inject/grapher/graphviz/GraphvizModule.html" title="class in com.google.inject.grapher.graphviz"><code>GraphvizModule</code></a>.
- <p>
- Specify the <a href="http://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html?is-external=true" title="class or interface in java.io"><code>PrintWriter</code></a> to output to with <a href="../../../../../com/google/inject/grapher/graphviz/GraphvizGrapher.html#setOut-java.io.PrintWriter-"><code>setOut(PrintWriter)</code></a>.</div>
+
+ <p>Specify the <a href="http://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html?is-external=true" title="class or interface in java.io"><code>PrintWriter</code></a> to output to with <a href="../../../../../com/google/inject/grapher/graphviz/GraphvizGrapher.html#setOut-java.io.PrintWriter-"><code>setOut(PrintWriter)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -166,8 +166,8 @@ extends <a href="../../../../../com/google/inject/grapher/AbstractInjectorGraphe
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>protected <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/grapher/graphviz/GraphvizGrapher.html#getArrowString-java.util.List-">getArrowString</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../com/google/inject/grapher/graphviz/ArrowType.html" title="enum in com.google.inject.grapher.graphviz">ArrowType</a>&gt;&nbsp;arrows)</code>
-<div class="block">Turns a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util"><code>List</code></a> of <a href="../../../../../com/google/inject/grapher/graphviz/ArrowType.html" title="enum in com.google.inject.grapher.graphviz"><code>ArrowType</code></a>s into a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang"><code>String</code></a> that
- represents combining them.</div>
+<div class="block">Turns a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util"><code>List</code></a> of <a href="../../../../../com/google/inject/grapher/graphviz/ArrowType.html" title="enum in com.google.inject.grapher.graphviz"><code>ArrowType</code></a>s into a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang"><code>String</code></a> that represents combining
+ them.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -393,9 +393,8 @@ extends <a href="../../../../../com/google/inject/grapher/AbstractInjectorGraphe
 <li class="blockList">
 <h4>getNodeLabel</h4>
 <pre>protected&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getNodeLabel(<a href="../../../../../com/google/inject/grapher/graphviz/GraphvizNode.html" title="class in com.google.inject.grapher.graphviz">GraphvizNode</a>&nbsp;node)</pre>
-<div class="block">Creates the "label" for a node. This is a string of HTML that defines a
- table with a heading at the top and (in the case of
- <a href="../../../../../com/google/inject/grapher/ImplementationNode.html" title="class in com.google.inject.grapher"><code>ImplementationNode</code></a>s) rows for each of the member fields.</div>
+<div class="block">Creates the "label" for a node. This is a string of HTML that defines a table with a heading at
+ the top and (in the case of <a href="../../../../../com/google/inject/grapher/ImplementationNode.html" title="class in com.google.inject.grapher"><code>ImplementationNode</code></a>s) rows for each of the member fields.</div>
 </li>
 </ul>
 <a name="renderEdge-com.google.inject.grapher.graphviz.GraphvizEdge-">
@@ -423,9 +422,8 @@ extends <a href="../../../../../com/google/inject/grapher/AbstractInjectorGraphe
 <li class="blockList">
 <h4>getArrowString</h4>
 <pre>protected&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getArrowString(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../com/google/inject/grapher/graphviz/ArrowType.html" title="enum in com.google.inject.grapher.graphviz">ArrowType</a>&gt;&nbsp;arrows)</pre>
-<div class="block">Turns a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util"><code>List</code></a> of <a href="../../../../../com/google/inject/grapher/graphviz/ArrowType.html" title="enum in com.google.inject.grapher.graphviz"><code>ArrowType</code></a>s into a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang"><code>String</code></a> that
- represents combining them. With Graphviz, that just means concatenating
- them.</div>
+<div class="block">Turns a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util"><code>List</code></a> of <a href="../../../../../com/google/inject/grapher/graphviz/ArrowType.html" title="enum in com.google.inject.grapher.graphviz"><code>ArrowType</code></a>s into a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang"><code>String</code></a> that represents combining
+ them. With Graphviz, that just means concatenating them.</div>
 </li>
 </ul>
 <a name="getEdgeEndPoint-java.lang.String-java.lang.String-com.google.inject.grapher.graphviz.CompassPoint-">

@@ -104,7 +104,8 @@ var activeTableTab = "activeTableTab";
  one situation but only its methods and fields injected in another, Guice will notify this
  listener once.
 
- <p>Useful for extra type checking, <a href="../../../../com/google/inject/spi/TypeEncounter.html#register-com.google.inject.spi.InjectionListener-">registering injection listeners</a>, and <a href="../../../../com/google/inject/spi/TypeEncounter.html#bindInterceptor-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">binding method interceptors</a>.</div>
+ <p>Useful for extra type checking, <a href="../../../../com/google/inject/spi/TypeEncounter.html#register-com.google.inject.spi.InjectionListener-">registering injection listeners</a>, and <a href="../../../../com/google/inject/spi/TypeEncounter.html#bindInterceptor-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">binding method
+ interceptors</a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -157,9 +158,9 @@ var activeTableTab = "activeTableTab";
 <h4>hear</h4>
 <pre>&lt;I&gt;&nbsp;void&nbsp;hear(<a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;I&gt;&nbsp;type,
               <a href="../../../../com/google/inject/spi/TypeEncounter.html" title="interface in com.google.inject.spi">TypeEncounter</a>&lt;I&gt;&nbsp;encounter)</pre>
-<div class="block">Invoked when Guice encounters a new type eligible for constructor or members injection.
- Called during injector creation (or afterwards if Guice encounters a type at run time and
- creates a JIT binding).</div>
+<div class="block">Invoked when Guice encounters a new type eligible for constructor or members injection. Called
+ during injector creation (or afterwards if Guice encounters a type at run time and creates a
+ JIT binding).</div>
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
 <dd><code>I</code> - the injectable type</dd>

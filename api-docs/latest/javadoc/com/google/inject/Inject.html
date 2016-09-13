@@ -95,28 +95,21 @@
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Documented.html?is-external=true" title="class or interface in java.lang.annotation">@Documented</a>
 public @interface <span class="memberNameLabel">Inject</span></pre>
-<div class="block">Annotates members of your implementation class (constructors, methods
- and fields) into which the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> should inject values.
- The Injector fulfills injection requests for:
+<div class="block">Annotates members of your implementation class (constructors, methods and fields) into which the
+ <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> should inject values. The Injector fulfills injection requests for:
 
  <ul>
- <li>Every instance it constructs. The class being constructed must have
- exactly one of its constructors marked with <code>@Inject</code> or must have a
- constructor taking no parameters. The Injector then proceeds to perform
- field and method injections.
- 
- <li>Pre-constructed instances passed to <a href="../../../com/google/inject/Injector.html#injectMembers-java.lang.Object-"><code>Injector.injectMembers(java.lang.Object)</code></a>,
- <a href="../../../com/google/inject/binder/LinkedBindingBuilder.html#toInstance-T-"><code>LinkedBindingBuilder.toInstance(Object)</code></a> and
- <a href="../../../com/google/inject/binder/LinkedBindingBuilder.html#toProvider-javax.inject.Provider-"><code>LinkedBindingBuilder.toProvider(javax.inject.Provider)</code></a>.
- In this case all constructors are, of course, ignored.
-
- <li>Static fields and methods of classes which any <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> has
- specifically requested static injection for, using
- <a href="../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-"><code>Binder.requestStaticInjection(java.lang.Class&lt;?&gt;...)</code></a>.
+ <li>Every instance it constructs. The class being constructed must have exactly one of its
+     constructors marked with <code>@Inject</code> or must have a constructor taking no parameters. The
+     Injector then proceeds to perform field and method injections.
+ <li>Pre-constructed instances passed to <a href="../../../com/google/inject/Injector.html#injectMembers-java.lang.Object-"><code>Injector.injectMembers(java.lang.Object)</code></a>, <a href="../../../com/google/inject/binder/LinkedBindingBuilder.html#toInstance-T-"><code>LinkedBindingBuilder.toInstance(Object)</code></a> and <a href="../../../com/google/inject/binder/LinkedBindingBuilder.html#toProvider-javax.inject.Provider-"><code>LinkedBindingBuilder.toProvider(javax.inject.Provider)</code></a>. In this
+     case all constructors are, of course, ignored.
+ <li>Static fields and methods of classes which any <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> has specifically requested
+     static injection for, using <a href="../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-"><code>Binder.requestStaticInjection(java.lang.Class&lt;?&gt;...)</code></a>.
  </ul>
 
- In all cases, a member can be injected regardless of its Java access
- specifier (private, default, protected, public).</div>
+ In all cases, a member can be injected regardless of its Java access specifier (private, default,
+ protected, public).</div>
 </li>
 </ul>
 </div>
@@ -138,9 +131,8 @@ public @interface <span class="memberNameLabel">Inject</span></pre>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Inject.html#optional--">optional</a></span></code>
-<div class="block">If true, and the appropriate binding is not found,
- the Injector will skip injection of this method or field rather than
- produce an error.</div>
+<div class="block">If true, and the appropriate binding is not found, the Injector will skip injection of this
+ method or field rather than produce an error.</div>
 </td>
 </tr>
 </table>
@@ -165,13 +157,11 @@ public @interface <span class="memberNameLabel">Inject</span></pre>
 <li class="blockList">
 <h4>optional</h4>
 <pre>public abstract&nbsp;boolean&nbsp;optional</pre>
-<div class="block">If true, and the appropriate binding is not found,
- the Injector will skip injection of this method or field rather than
- produce an error. When applied to a field, any default value already
- assigned to the field will remain (guice will not actively null out the
- field). When applied to a method, the method will only be invoked if
- bindings for <i>all</i> parameters are found. When applied to a
- constructor, an error will result upon Injector creation.</div>
+<div class="block">If true, and the appropriate binding is not found, the Injector will skip injection of this
+ method or field rather than produce an error. When applied to a field, any default value
+ already assigned to the field will remain (guice will not actively null out the field). When
+ applied to a method, the method will only be invoked if bindings for <i>all</i> parameters are
+ found. When applied to a constructor, an error will result upon Injector creation.</div>
 <dl>
 <dt>Default:</dt>
 <dd>false</dd>

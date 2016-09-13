@@ -109,18 +109,19 @@ var activeTableTab = "activeTableTab";
 <pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
 public interface <span class="typeNameLabel">ThrowingProvider&lt;T,E extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;</span>
 extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;T&gt;</pre>
-<div class="block">Alternative to the Guice <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that throws
- a checked Exception. Users may not inject <code>T</code> directly.
+<div class="block">Alternative to the Guice <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that throws a checked Exception.
+ Users may not inject <code>T</code> directly.
 
- <p>This interface must be extended to use application-specific exception types.
- Such subinterfaces may not define new methods:
+ <p>This interface must be extended to use application-specific exception types. Such
+ subinterfaces may not define new methods:
+
  <pre>
  public interface RemoteProvider&lt;T&gt; extends ThrowingProvider&lt;T, RemoteException&gt; { }
  </pre>
 
- <p>When this type is bound using <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.html" title="class in com.google.inject.throwingproviders"><code>ThrowingProviderBinder</code></a>, the value returned
- or exception thrown by <a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html#get--"><code>get()</code></a> will be scoped. As a consequence, <a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html#get--"><code>get()</code></a>
- will invoked at most once within each scope.</div>
+ <p>When this type is bound using <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.html" title="class in com.google.inject.throwingproviders"><code>ThrowingProviderBinder</code></a>, the value returned or exception
+ thrown by <a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html#get--"><code>get()</code></a> will be scoped. As a consequence, <a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html#get--"><code>get()</code></a> will invoked at most once
+ within each scope.</div>
 </li>
 </ul>
 </div>

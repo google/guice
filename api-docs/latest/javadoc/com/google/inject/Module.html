@@ -104,18 +104,16 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">Module</span></pre>
-<div class="block">A module contributes configuration information, typically interface
- bindings, which will be used to create an <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a>. A Guice-based
- application is ultimately composed of little more than a set of
- <code>Module</code>s and some bootstrapping code.
+<div class="block">A module contributes configuration information, typically interface bindings, which will be used
+ to create an <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a>. A Guice-based application is ultimately composed of little more
+ than a set of <code>Module</code>s and some bootstrapping code.
 
- <p>Your Module classes can use a more streamlined syntax by extending
- <a href="../../../com/google/inject/AbstractModule.html" title="class in com.google.inject"><code>AbstractModule</code></a> rather than implementing this interface directly.
+ <p>Your Module classes can use a more streamlined syntax by extending <a href="../../../com/google/inject/AbstractModule.html" title="class in com.google.inject"><code>AbstractModule</code></a>
+ rather than implementing this interface directly.
 
- <p>In addition to the bindings configured via <a href="../../../com/google/inject/Module.html#configure-com.google.inject.Binder-"><code>configure(com.google.inject.Binder)</code></a>, bindings
- will be created for all methods annotated with @<a href="../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a>.
- Use scope and binding annotations on these methods to configure the
- bindings.</div>
+ <p>In addition to the bindings configured via <a href="../../../com/google/inject/Module.html#configure-com.google.inject.Binder-"><code>configure(com.google.inject.Binder)</code></a>, bindings will be created for
+ all methods annotated with @<a href="../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a>. Use scope and binding annotations on
+ these methods to configure the bindings.</div>
 </li>
 </ul>
 </div>

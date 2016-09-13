@@ -95,18 +95,15 @@
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Inherited.html?is-external=true" title="class or interface in java.lang.annotation">@Inherited</a>
 public @interface <span class="memberNameLabel">Transactional</span></pre>
-<div class="block"><p> Any method or class marked with this annotation will be considered for transactionality.
- Consult the documentation on https://github.com/google/guice/wiki/GuicePersist for detailed
- semantics.
- Marking a method <code>@Transactional</code> will start a new transaction before the method
- executes and commit it after the method returns.
- <p>
- If the method throws an exception, the transaction will be rolled back <em>unless</em>
- you have specifically requested not to in the <a href="../../../../com/google/inject/persist/Transactional.html#ignore--"><code>ignore()</code></a> clause.
- <p>
- Similarly, the set of exceptions that will trigger a rollback can be defined in
- the <a href="../../../../com/google/inject/persist/Transactional.html#rollbackOn--"><code>rollbackOn()</code></a> clause. By default, only unchecked exceptions trigger a
- rollback.</div>
+<div class="block">Any method or class marked with this annotation will be considered for transactionality. Consult
+ the documentation on https://github.com/google/guice/wiki/GuicePersist for detailed semantics.
+ Marking a method <code>@Transactional</code> will start a new transaction before the method executes
+ and commit it after the method returns.
+
+ <p>If the method throws an exception, the transaction will be rolled back <em>unless</em> you
+ have specifically requested not to in the <a href="../../../../com/google/inject/persist/Transactional.html#ignore--"><code>ignore()</code></a> clause.
+
+ <p>Similarly, the set of exceptions that will trigger a rollback can be defined in the <a href="../../../../com/google/inject/persist/Transactional.html#rollbackOn--"><code>rollbackOn()</code></a> clause. By default, only unchecked exceptions trigger a rollback.</div>
 </li>
 </ul>
 </div>
@@ -159,8 +156,8 @@ public @interface <span class="memberNameLabel">Transactional</span></pre>
 <li class="blockList">
 <h4>rollbackOn</h4>
 <pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;[]&nbsp;rollbackOn</pre>
-<div class="block">A list of exceptions to rollback on, if thrown by the transactional method.
- These exceptions are propagated correctly after a rollback.</div>
+<div class="block">A list of exceptions to rollback on, if thrown by the transactional method. These exceptions
+ are propagated correctly after a rollback.</div>
 <dl>
 <dt>Default:</dt>
 <dd>java.lang.RuntimeException.class</dd>
@@ -177,13 +174,11 @@ public @interface <span class="memberNameLabel">Transactional</span></pre>
 <li class="blockList">
 <h4>ignore</h4>
 <pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;[]&nbsp;ignore</pre>
-<div class="block">A list of exceptions to <b>not<b> rollback on. A caveat to the rollbackOn clause.
- The disjunction of rollbackOn and ignore represents the list of exceptions
- that will trigger a rollback.
- The complement of rollbackOn and the universal set plus any exceptions in the
- ignore set represents the list of exceptions that will trigger a commit.
- Note that ignore exceptions take precedence over rollbackOn, but with subtype
- granularity.</div>
+<div class="block">A list of exceptions to <b>not<b> rollback on. A caveat to the rollbackOn clause. The
+ disjunction of rollbackOn and ignore represents the list of exceptions that will trigger a
+ rollback. The complement of rollbackOn and the universal set plus any exceptions in the ignore
+ set represents the list of exceptions that will trigger a commit. Note that ignore exceptions
+ take precedence over rollbackOn, but with subtype granularity.</div>
 <dl>
 <dt>Default:</dt>
 <dd>{}</dd>

@@ -187,15 +187,13 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/inject/util/Modules.OverriddenModuleBuilder.html" title="interface in com.google.inject.util">Modules.OverriddenModuleBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/util/Modules.html#override-java.lang.Iterable-">override</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;? extends <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a>&gt;&nbsp;modules)</code>
-<div class="block">Returns a builder that creates a module that overlays override modules over the given
- modules.</div>
+<div class="block">Returns a builder that creates a module that overlays override modules over the given modules.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/inject/util/Modules.OverriddenModuleBuilder.html" title="interface in com.google.inject.util">Modules.OverriddenModuleBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/util/Modules.html#override-com.google.inject.Module...-">override</a></span>(<a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a>...&nbsp;modules)</code>
-<div class="block">Returns a builder that creates a module that overlays override modules over the given
- modules.</div>
+<div class="block">Returns a builder that creates a module that overlays override modules over the given modules.</div>
 </td>
 </tr>
 </table>
@@ -244,12 +242,12 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>override</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/inject/util/Modules.OverriddenModuleBuilder.html" title="interface in com.google.inject.util">Modules.OverriddenModuleBuilder</a>&nbsp;override(<a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a>...&nbsp;modules)</pre>
-<div class="block">Returns a builder that creates a module that overlays override modules over the given
- modules. If a key is bound in both sets of modules, only the binding from the override modules
- is kept. If a single <a href="../../../../com/google/inject/PrivateModule.html" title="class in com.google.inject"><code>PrivateModule</code></a> is supplied or all elements are from
- a single <a href="../../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject"><code>PrivateBinder</code></a>, then this will overwrite the private bindings.
- Otherwise, private bindings will not be overwritten unless they are exposed. 
- This can be used to replace the bindings of a production module with test bindings:
+<div class="block">Returns a builder that creates a module that overlays override modules over the given modules.
+ If a key is bound in both sets of modules, only the binding from the override modules is kept.
+ If a single <a href="../../../../com/google/inject/PrivateModule.html" title="class in com.google.inject"><code>PrivateModule</code></a> is supplied or all elements are from a single <a href="../../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject"><code>PrivateBinder</code></a>, then this will overwrite the private bindings. Otherwise, private bindings will
+ not be overwritten unless they are exposed. This can be used to replace the bindings of a
+ production module with test bindings:
+
  <pre>
  Module functionalTestModule
      = Modules.override(new ProductionModule()).with(new TestModule());
@@ -269,12 +267,12 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>override</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/inject/util/Modules.OverriddenModuleBuilder.html" title="interface in com.google.inject.util">Modules.OverriddenModuleBuilder</a>&nbsp;override(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;? extends <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a>&gt;&nbsp;modules)</pre>
-<div class="block">Returns a builder that creates a module that overlays override modules over the given
- modules. If a key is bound in both sets of modules, only the binding from the override modules
- is kept. If a single <a href="../../../../com/google/inject/PrivateModule.html" title="class in com.google.inject"><code>PrivateModule</code></a> is supplied or all elements are from
- a single <a href="../../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject"><code>PrivateBinder</code></a>, then this will overwrite the private bindings.
- Otherwise, private bindings will not be overwritten unless they are exposed. 
- This can be used to replace the bindings of a production module with test bindings:
+<div class="block">Returns a builder that creates a module that overlays override modules over the given modules.
+ If a key is bound in both sets of modules, only the binding from the override modules is kept.
+ If a single <a href="../../../../com/google/inject/PrivateModule.html" title="class in com.google.inject"><code>PrivateModule</code></a> is supplied or all elements are from a single <a href="../../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject"><code>PrivateBinder</code></a>, then this will overwrite the private bindings. Otherwise, private bindings will
+ not be overwritten unless they are exposed. This can be used to replace the bindings of a
+ production module with test bindings:
+
  <pre>
  Module functionalTestModule
      = Modules.override(getProductionModules()).with(getTestModules());

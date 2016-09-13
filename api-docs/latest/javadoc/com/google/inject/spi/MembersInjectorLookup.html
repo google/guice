@@ -116,6 +116,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 implements <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a></pre>
 <div class="block">A lookup of the members injector for a type. Lookups are created explicitly in a module using
  <a href="../../../../com/google/inject/Binder.html#getMembersInjector-java.lang.Class-"><code>getMembersInjector()</code></a> statements:
+
  <pre>
      MembersInjector&lt;PaymentService&gt; membersInjector
          = getMembersInjector(PaymentService.class);</pre></div>
@@ -327,9 +328,9 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <li class="blockList">
 <h4>getDelegate</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;<a href="../../../../com/google/inject/spi/MembersInjectorLookup.html" title="type parameter in MembersInjectorLookup">T</a>&gt;&nbsp;getDelegate()</pre>
-<div class="block">Returns the delegate members injector, or <code>null</code> if it has not yet been initialized.
- The delegate will be initialized when this element is processed, or otherwise used to create
- an injector.</div>
+<div class="block">Returns the delegate members injector, or <code>null</code> if it has not yet been initialized. The
+ delegate will be initialized when this element is processed, or otherwise used to create an
+ injector.</div>
 </li>
 </ul>
 <a name="getMembersInjector--">

@@ -94,26 +94,22 @@
 <pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#CONSTRUCTOR" title="class or interface in java.lang.annotation">CONSTRUCTOR</a>)
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
 public @interface <span class="memberNameLabel">AssistedInject</span></pre>
-<div class="block"><p>
- When used in tandem with <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html" title="class in com.google.inject.assistedinject"><code>FactoryModuleBuilder</code></a>, constructors annotated with 
+<div class="block">When used in tandem with <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html" title="class in com.google.inject.assistedinject"><code>FactoryModuleBuilder</code></a>, constructors annotated with
  <code>@AssistedInject</code> indicate that multiple constructors can be injected, each with different
  parameters. AssistedInject annotations should not be mixed with @<a href="../../../../com/google/inject/Inject.html" title="annotation in com.google.inject"><code>Inject</code></a>
  annotations. The assisted parameters must exactly match one corresponding factory method within
  the factory interface, but the parameters do not need to be in the same order. Constructors
- annotated with AssistedInject <b>are</b> created by Guice and receive all the benefits
- (such as AOP).
- 
- <p>
- <strong>Obsolete Usage:</strong> When used in tandem with <a href="../../../../com/google/inject/assistedinject/FactoryProvider.html" title="class in com.google.inject.assistedinject"><code>FactoryProvider</code></a>, constructors
- annotated with <code>@AssistedInject</code> trigger a "backwards compatibility mode". The assisted
- parameters must exactly match one corresponding factory method within the factory interface and
- all must be in the same order as listed in the factory. In this backwards compatable mode,
- constructors annotated with AssistedInject <b>are not</b> created by Guice and thus receive
- none of the benefits.
- 
- <p>
- Constructor parameters must be either supplied by the factory interface and marked with
- <code>@Assisted</code>, or they must be injectable.</div>
+ annotated with AssistedInject <b>are</b> created by Guice and receive all the benefits (such as
+ AOP).
+
+ <p><strong>Obsolete Usage:</strong> When used in tandem with <a href="../../../../com/google/inject/assistedinject/FactoryProvider.html" title="class in com.google.inject.assistedinject"><code>FactoryProvider</code></a>,
+ constructors annotated with <code>@AssistedInject</code> trigger a "backwards compatibility mode". The
+ assisted parameters must exactly match one corresponding factory method within the factory
+ interface and all must be in the same order as listed in the factory. In this backwards
+ compatable mode, constructors annotated with AssistedInject <b>are not</b> created by Guice and
+ thus receive none of the benefits.
+
+ <p>Constructor parameters must be either supplied by the factory interface and marked with <code></div>
 </li>
 </ul>
 </div>

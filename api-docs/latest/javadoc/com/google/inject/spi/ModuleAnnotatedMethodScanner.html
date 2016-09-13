@@ -109,8 +109,8 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public abstract class <span class="typeNameLabel">ModuleAnnotatedMethodScanner</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Allows extensions to scan modules for annotated methods and bind those methods
- as providers, similar to <code>@Provides</code> methods.</div>
+<div class="block">Allows extensions to scan modules for annotated methods and bind those methods as providers,
+ similar to <code>@Provides</code> methods.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -228,9 +228,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
                                          <a href="../../../../com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a>&nbsp;injectionPoint)</pre>
 <div class="block">Prepares a method for binding. This <code>key</code> parameter is the key discovered from looking at
  the binding annotation and return value of the method. Implementations can modify the key to
- instead bind to another key. For example, Multibinder may want to change
- <code>@SetProvides String provideFoo()</code> to bind into a unique Key within the multibinder
- instead of binding <code>String</code>.
+ instead bind to another key. For example, Multibinder may want to change <code>@SetProvides
+ String provideFoo()</code> to bind into a unique Key within the multibinder instead of binding <code>String</code>.
 
  <p>The injection point and annotation are provided in case the implementation wants to set the
  key based on the property of the annotation or if any additional preparation is needed for any

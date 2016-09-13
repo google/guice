@@ -129,20 +129,25 @@ implements <a href="../../../../com/google/inject/Provider.html" title="interfac
  construct objects.
 
  <h3>Defining a factory</h3>
+
  Create an interface whose methods return the constructed type, or any of its supertypes. The
  method's parameters are the arguments required to build the constructed type.
+
  <pre>public interface PaymentFactory {
    Payment create(Date startDate, Money amount);
  }</pre>
+
  You can name your factory methods whatever you like, such as <i>create</i>, <i>createPayment</i>
  or <i>newPayment</i>.
 
  <h3>Creating a type that accepts factory parameters</h3>
+
  <code>constructedType</code> is a concrete class with an @<a href="../../../../com/google/inject/Inject.html" title="annotation in com.google.inject"><code>Inject</code></a>-annotated
- constructor. In addition to injector-supplied parameters, the constructor should have
- parameters that match each of the factory method's parameters. Each factory-supplied parameter
- requires an @<a href="../../../../com/google/inject/assistedinject/Assisted.html" title="annotation in com.google.inject.assistedinject"><code>Assisted</code></a> annotation. This serves to document that the parameter
- is not bound by your application's modules.
+ constructor. In addition to injector-supplied parameters, the constructor should have parameters
+ that match each of the factory method's parameters. Each factory-supplied parameter requires an
+ @<a href="../../../../com/google/inject/assistedinject/Assisted.html" title="annotation in com.google.inject.assistedinject"><code>Assisted</code></a> annotation. This serves to document that the parameter is not bound
+ by your application's modules.
+
  <pre>public class RealPayment implements Payment {
     @Inject
    public RealPayment(
@@ -153,19 +158,25 @@ implements <a href="../../../../com/google/inject/Provider.html" title="interfac
      ...
    }
  }</pre>
+
  Any parameter that permits a null value should also be annotated <code>@Nullable</code>.
 
  <h3>Configuring factories</h3>
+
  In your <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>module</code></a>, bind the factory interface to the returned
  factory:
+
  <pre>bind(PaymentFactory.class).toProvider(
      FactoryProvider.newFactory(PaymentFactory.class, RealPayment.class));</pre>
+
  As a side-effect of this binding, Guice will inject the factory to initialize it for use. The
  factory cannot be used until the injector has been initialized.
 
  <h3>Using the factory</h3>
- Inject your factory into your application classes. When you use the factory, your arguments
- will be combined with values from the injector to construct an instance.
+
+ Inject your factory into your application classes. When you use the factory, your arguments will
+ be combined with values from the injector to construct an instance.
+
  <pre>public class PaymentAction {
     @Inject private PaymentFactory paymentFactory;
 
@@ -176,9 +187,10 @@ implements <a href="../../../../com/google/inject/Provider.html" title="interfac
  }</pre>
 
  <h3>Making parameter types distinct</h3>
- The types of the factory method's parameters must be distinct. To use multiple parameters of
- the same type, use a named @<a href="../../../../com/google/inject/assistedinject/Assisted.html" title="annotation in com.google.inject.assistedinject"><code>Assisted</code></a> annotation to disambiguate the
- parameters. The names must be applied to the factory method's parameters:
+
+ The types of the factory method's parameters must be distinct. To use multiple parameters of the
+ same type, use a named @<a href="../../../../com/google/inject/assistedinject/Assisted.html" title="annotation in com.google.inject.assistedinject"><code>Assisted</code></a> annotation to disambiguate the parameters.
+ The names must be applied to the factory method's parameters:
 
  <pre>public interface PaymentFactory {
    Payment create(
@@ -186,7 +198,9 @@ implements <a href="../../../../com/google/inject/Provider.html" title="interfac
        <strong> @Assisted("dueDate")</strong> Date dueDate,
        Money amount);
  } </pre>
+
  ...and to the concrete type's constructor parameters:
+
  <pre>public class RealPayment implements Payment {
     @Inject
    public RealPayment(
@@ -200,18 +214,19 @@ implements <a href="../../../../com/google/inject/Provider.html" title="interfac
  }</pre>
 
  <h3>Values are created by Guice</h3>
+
  Returned factories use child injectors to create values. The values are eligible for method
  interception. In addition, @Inject members will be injected before they are
  returned.
 
  <h3>Backwards compatibility using @AssistedInject</h3>
+
  Instead of the @Inject annotation, you may annotate the constructed classes with
  @<a href="../../../../com/google/inject/assistedinject/AssistedInject.html" title="annotation in com.google.inject.assistedinject"><code>AssistedInject</code></a>. This triggers a limited backwards-compatability mode.
 
  <p>Instead of matching factory method arguments to constructor parameters using their names, the
- <strong>parameters are matched by their order</strong>. The first factory method argument is
- used for the first @Assisted constructor parameter, etc.. Annotation names have no
- effect.
+ <strong>parameters are matched by their order</strong>. The first factory method argument is used
+ for the first @Assisted constructor parameter, etc.. Annotation names have no effect.
 
  <p>Returned values are <strong>not created by Guice</strong>. These types are not eligible for
  method interception. They do receive post-construction member injection.</div>

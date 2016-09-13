@@ -100,13 +100,11 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">Scope</span></pre>
-<div class="block">A scope is a level of visibility that instances provided by Guice may have.
- By default, an instance created by the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> has <i>no scope</i>,
- meaning it has no state from the framework's perspective -- the
- <code>Injector</code> creates it, injects it once into the class that required it,
- and then immediately forgets it. Associating a scope with a particular
- binding allows the created instance to be "remembered" and possibly used
- again for other injections.
+<div class="block">A scope is a level of visibility that instances provided by Guice may have. By default, an
+ instance created by the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> has <i>no scope</i>, meaning it has no state from the
+ framework's perspective -- the <code>Injector</code> creates it, injects it once into the class that
+ required it, and then immediately forgets it. Associating a scope with a particular binding
+ allows the created instance to be "remembered" and possibly used again for other injections.
 
  <p>An example of a scope is <a href="../../../com/google/inject/Scopes.html#SINGLETON"><code>Scopes.SINGLETON</code></a>.</div>
 </li>
@@ -163,22 +161,18 @@ var activeTableTab = "activeTableTab";
 <h4>scope</h4>
 <pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;scope(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key,
                       <a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;unscoped)</pre>
-<div class="block">Scopes a provider. The returned provider returns objects from this scope.
- If an object does not exist in this scope, the provider can use the given
- unscoped provider to retrieve one.
+<div class="block">Scopes a provider. The returned provider returns objects from this scope. If an object does not
+ exist in this scope, the provider can use the given unscoped provider to retrieve one.
 
- <p>Scope implementations are strongly encouraged to override
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang"><code>Object.toString()</code></a> in the returned provider and include the backing
- provider's <code>toString()</code> output.</div>
+ <p>Scope implementations are strongly encouraged to override <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang"><code>Object.toString()</code></a> in the
+ returned provider and include the backing provider's <code>toString()</code> output.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>key</code> - binding key</dd>
-<dd><code>unscoped</code> - locates an instance when one doesn't already exist in this
-  scope.</dd>
+<dd><code>unscoped</code> - locates an instance when one doesn't already exist in this scope.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new provider which only delegates to the given unscoped provider
-  when an instance of the requested object doesn't already exist in this
-  scope</dd>
+<dd>a new provider which only delegates to the given unscoped provider when an instance of
+     the requested object doesn't already exist in this scope</dd>
 </dl>
 </li>
 </ul>

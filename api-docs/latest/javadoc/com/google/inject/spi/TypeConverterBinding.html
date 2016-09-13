@@ -114,10 +114,12 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">TypeConverterBinding</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a></pre>
-<div class="block">Registration of type converters for matching target types. Instances are created
- explicitly in a module using <a href="../../../../com/google/inject/Binder.html#convertToTypes-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeConverter-"><code>convertToTypes()</code></a> statements:
+<div class="block">Registration of type converters for matching target types. Instances are created explicitly in a
+ module using <a href="../../../../com/google/inject/Binder.html#convertToTypes-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeConverter-"><code>convertToTypes()</code></a> statements:
+
  <pre>
-     convertToTypes(Matchers.only(TypeLiteral.get(DateTime.class)), new DateTimeConverter());</pre></div>
+     convertToTypes(Matchers.only(TypeLiteral.get(DateTime.class)), new DateTimeConverter());
+ </pre></div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>

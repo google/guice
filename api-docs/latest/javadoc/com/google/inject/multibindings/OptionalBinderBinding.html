@@ -99,19 +99,17 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>T</code> - The fully qualified type of the optional binding, including Optional.
-        For example: <code>Optional&lt;String&gt;</code>.</dd>
+<dd><code>T</code> - The fully qualified type of the optional binding, including Optional. For example:
+     <code>Optional&lt;String&gt;</code>.</dd>
 </dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">OptionalBinderBinding&lt;T&gt;</span></pre>
 <div class="block">A binding for a OptionalBinder.
- 
- <p>Although OptionalBinders may be injected through a variety of types
- <code>T</code>, <code>Optional&lt;T&gt;</code>, <code>Optional&lt;Provider&lt;T&gt;&gt;</code>, etc..), an
- OptionalBinderBinding exists only on the Binding associated with the
- <code>Optional&lt;T&gt;</code> key.  Other bindings can be validated to be derived from this
- OptionalBinderBinding using <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(com.google.inject.spi.Element)</code></a>.</div>
+
+ <p>Although OptionalBinders may be injected through a variety of types <code>T</code>, <code>Optional&lt;T&gt;</code>, <code>Optional&lt;Provider&lt;T&gt;&gt;</code>, etc..), an OptionalBinderBinding exists only on the
+ Binding associated with the <code>Optional&lt;T&gt;</code> key. Other bindings can be validated to be
+ derived from this OptionalBinderBinding using <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(com.google.inject.spi.Element)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -150,8 +148,8 @@ var activeTableTab = "activeTableTab";
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getDefaultBinding--">getDefaultBinding</a></span>()</code>
-<div class="block">Returns the default binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>OptionalBinder.setDefault()</code></a>) if one exists or null
- if no default binding is set.</div>
+<div class="block">Returns the default binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>OptionalBinder.setDefault()</code></a>) if one exists or null if
+ no default binding is set.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
@@ -192,13 +190,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>getDefaultBinding</h4>
 <pre><a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;getDefaultBinding()</pre>
-<div class="block">Returns the default binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>OptionalBinder.setDefault()</code></a>) if one exists or null
- if no default binding is set. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is
+<div class="block">Returns the default binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>OptionalBinder.setDefault()</code></a>) if one exists or null if
+ no default binding is set. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is
  called on an element retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
- <p>
- The Binding's type will always match the type Optional's generic type. For example, if getKey
- returns a key of <code>Optional&lt;String></code>, then this will always return a
- <code>Binding&lt;String></code>.</div>
+
+ <p>The Binding's type will always match the type Optional's generic type. For example, if
+ getKey returns a key of <code>Optional&lt;String></code>, then this will always return a <code>
+ Binding&lt;String></code>.</div>
 </li>
 </ul>
 <a name="getActualBinding--">
@@ -208,13 +206,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>getActualBinding</h4>
 <pre><a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;getActualBinding()</pre>
-<div class="block">Returns the actual binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>OptionalBinder.setBinding()</code></a>) or null if not set.
- This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element retrieved
- from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
- <p>
- The Binding's type will always match the type Optional's generic type. For example, if getKey
- returns a key of <code>Optional&lt;String></code>, then this will always return a
- <code>Binding&lt;String></code>.</div>
+<div class="block">Returns the actual binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>OptionalBinder.setBinding()</code></a>) or null if not set. This
+ will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element retrieved from
+ <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
+
+ <p>The Binding's type will always match the type Optional's generic type. For example, if
+ getKey returns a key of <code>Optional&lt;String></code>, then this will always return a <code>
+ Binding&lt;String></code>.</div>
 </li>
 </ul>
 <a name="containsElement-com.google.inject.spi.Element-">
@@ -226,10 +224,8 @@ var activeTableTab = "activeTableTab";
 <pre>boolean&nbsp;containsElement(<a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&nbsp;element)</pre>
 <div class="block">Returns true if this OptionalBinder contains the given Element in order to build the optional
  binding or uses the given Element in order to support building and injecting its data. This
- will work for OptionalBinderBinding retrieved from an injector and
- <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>. Usually this is only necessary if you are working with elements
- retrieved from modules (without an Injector), otherwise <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getDefaultBinding--"><code>getDefaultBinding()</code></a> and
- <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getActualBinding--"><code>getActualBinding()</code></a> are better options.</div>
+ will work for OptionalBinderBinding retrieved from an injector and <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>. Usually this is only necessary if you are working with elements
+ retrieved from modules (without an Injector), otherwise <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getDefaultBinding--"><code>getDefaultBinding()</code></a> and <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getActualBinding--"><code>getActualBinding()</code></a> are better options.</div>
 </li>
 </ul>
 </li>

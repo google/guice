@@ -100,10 +100,10 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">PersistService</span></pre>
-<div class="block">Persistence provider service. Use this to manage the overall
- startup and stop of the persistence module(s).
+<div class="block">Persistence provider service. Use this to manage the overall startup and stop of the persistence
+ module(s).
 
- TODO(dhanji): Integrate with Service API when appropriate.</div>
+ <p>TODO(dhanji): Integrate with Service API when appropriate.</div>
 </li>
 </ul>
 </div>
@@ -125,8 +125,7 @@ var activeTableTab = "activeTableTab";
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/persist/PersistService.html#start--">start</a></span>()</code>
-<div class="block">Starts the underlying persistence engine and makes guice-persist ready for
- use.</div>
+<div class="block">Starts the underlying persistence engine and makes guice-persist ready for use.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -157,12 +156,10 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>start</h4>
 <pre>void&nbsp;start()</pre>
-<div class="block">Starts the underlying persistence engine and makes guice-persist ready for
- use. For instance, with JPA, it creates an EntityManagerFactory and may
- open connection pools. This method must be called by your code prior to
- using any guice-persist or JPA artifacts. If already started,
- calling this method does nothing, if already stopped, it also does
- nothing.</div>
+<div class="block">Starts the underlying persistence engine and makes guice-persist ready for use. For instance,
+ with JPA, it creates an EntityManagerFactory and may open connection pools. This method must be
+ called by your code prior to using any guice-persist or JPA artifacts. If already started,
+ calling this method does nothing, if already stopped, it also does nothing.</div>
 </li>
 </ul>
 <a name="stop--">
@@ -172,9 +169,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>stop</h4>
 <pre>void&nbsp;stop()</pre>
-<div class="block">Stops the underlying persistence engine. For instance, with JPA, it
- closes the <code>EntityManagerFactory</code>. If already stopped, calling this
- method does nothing. If not yet started, it also does nothing.</div>
+<div class="block">Stops the underlying persistence engine. For instance, with JPA, it closes the <code>EntityManagerFactory</code>. If already stopped, calling this method does nothing. If not yet
+ started, it also does nothing.</div>
 </li>
 </ul>
 </li>

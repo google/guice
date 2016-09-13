@@ -98,7 +98,7 @@ public @interface <span class="memberNameLabel">MapKey</span></pre>
 <div class="block">Allows users define customized key type annotations for map bindings by annotating an annotation
  of a <code>Map</code>'s key type. The custom key annotation can be applied to methods also annotated
  with @<a href="../../../../com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a>.
- 
+
  <p>A <a href="../../../../com/google/inject/multibindings/StringMapKey.html" title="annotation in com.google.inject.multibindings"><code>StringMapKey</code></a> and <a href="../../../../com/google/inject/multibindings/ClassMapKey.html" title="annotation in com.google.inject.multibindings"><code>ClassMapKey</code></a> are provided for convenience with maps whose
  keys are strings or classes. For maps with enums or primitive types as keys, you must provide
  your own MapKey annotation, such as this one for an enum:
@@ -111,10 +111,10 @@ public @interface <span class="memberNameLabel">MapKey</span></pre>
  }
  </pre>
 
- You can also use the whole annotation as the key, if <code>unwrapValue=false</code>.
- When unwrapValue is false, the annotation type will be the key type for the injected map and
- the annotation instances will be the key values. If <code>unwrapValue=true</code>, the value() type
- will be the key type for injected map and the value() instances will be the keys values.</div>
+ You can also use the whole annotation as the key, if <code>unwrapValue=false</code>. When unwrapValue
+ is false, the annotation type will be the key type for the injected map and the annotation
+ instances will be the key values. If <code>unwrapValue=true</code>, the value() type will be the key
+ type for injected map and the value() instances will be the keys values.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>

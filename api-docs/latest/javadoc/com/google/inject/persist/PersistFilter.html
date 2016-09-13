@@ -114,38 +114,35 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">PersistFilter</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet">Filter</a></pre>
-<div class="block">Apply this filter to enable the HTTP Request unit of work and to have
- guice-persist manage the lifecycle of active units of work.
- The filter automatically starts and stops the relevant <a href="../../../../com/google/inject/persist/PersistService.html" title="interface in com.google.inject.persist"><code>PersistService</code></a>
- upon <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#init-javax.servlet.FilterConfig-" title="class or interface in javax.servlet"><code>Filter.init(javax.servlet.FilterConfig)</code></a> and
- <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#destroy--" title="class or interface in javax.servlet"><code>Filter.destroy()</code></a> respectively.
+<div class="block">Apply this filter to enable the HTTP Request unit of work and to have guice-persist manage the
+ lifecycle of active units of work. The filter automatically starts and stops the relevant <a href="../../../../com/google/inject/persist/PersistService.html" title="interface in com.google.inject.persist"><code>PersistService</code></a> upon <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#init-javax.servlet.FilterConfig-" title="class or interface in javax.servlet"><code>Filter.init(javax.servlet.FilterConfig)</code></a> and <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#destroy--" title="class or interface in javax.servlet"><code>Filter.destroy()</code></a> respectively.
 
- <p> To be able to use the open session-in-view pattern (i.e. work per request),
- register this filter <b>once</b> in your Guice <code>ServletModule</code>. It is
- important that you register this filter before any other filter.
+ <p>To be able to use the open session-in-view pattern (i.e. work per request), register this
+ filter <b>once</b> in your Guice <code>ServletModule</code>. It is important that you register this
+ filter before any other filter.
 
- For multiple providers, you should register this filter once per provider, inside
- a private module for each persist module installed (this must be the same private
- module where the specific persist module is itself installed).
+ <p>For multiple providers, you should register this filter once per provider, inside a private
+ module for each persist module installed (this must be the same private module where the specific
+ persist module is itself installed).
 
- <p>
- Example configuration:
+ <p>Example configuration:
+
  <pre><code>
-  public class MyModule extends ServletModule {
-    public void configureServlets() {
-      filter("/*").through(PersistFilter.class);
+ public class MyModule extends ServletModule {
+   public void configureServlets() {
+     filter("/*").through(PersistFilter.class);
 
-      serve("/index.html").with(MyHtmlServlet.class);
-      // Etc.
-    }
-  }
+     serve("/index.html").with(MyHtmlServlet.class);
+     // Etc.
+   }
+ }
  </code></pre>
- <p>
- This filter is thread safe and allows you to create injectors concurrently
- and deploy multiple guice-persist modules within the same injector, or even
- multiple injectors with persist modules withing the same JVM or web app.
- <p>
- This filter requires the Guice Servlet extension.</div>
+
+ <p>This filter is thread safe and allows you to create injectors concurrently and deploy multiple
+ guice-persist modules within the same injector, or even multiple injectors with persist modules
+ withing the same JVM or web app.
+
+ <p>This filter requires the Guice Servlet extension.</div>
 </li>
 </ul>
 </div>

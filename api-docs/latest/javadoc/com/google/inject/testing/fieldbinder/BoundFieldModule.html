@@ -122,31 +122,21 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
  <p>The following rules are followed in determining how fields are bound using this module:
 
  <ul>
- <li>
- For each <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated field of an object and its superclasses, this module will bind
- that field's type to that field's value at injector creation time. This includes both instance
- and static fields.
- </li>
- <li>
- If <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> is specified, the field's value will be bound to the class specified by
- <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> instead of the field's actual type.
- </li>
- <li>
- If a <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code> is present on the field,
- that field will be bound using that annotation via <a href="../../../../../com/google/inject/binder/AnnotatedBindingBuilder.html#annotatedWith-java.lang.Class-"><code>AnnotatedBindingBuilder.annotatedWith(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)</code></a>.
- For example, <code>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)</code>.
- It is an error to supply more than one <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or
- <code>Qualifier</code>.
- </li>
- <li>
- If the field is of type <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>, the field's value will be bound as a <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>
- using <a href="../../../../../com/google/inject/binder/LinkedBindingBuilder.html#toProvider-com.google.inject.Provider-"><code>LinkedBindingBuilder.toProvider(com.google.inject.Provider&lt;? extends T&gt;)</code></a> to the provider's parameterized type. For example,
- <code>Provider&lt;Integer&gt;</code> binds to <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><code>Integer</code></a>. Attempting to bind a non-parameterized
- <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> without a <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> clause is an error.
- </li>
+ <li> For each <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated field of an object and its superclasses, this module will
+     bind that field's type to that field's value at injector creation time. This includes both
+     instance and static fields.
+ <li> If <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> is specified, the field's value will be bound to the class specified by
+     <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> instead of the field's actual type.
+ <li> If a <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code> is present on the field,
+     that field will be bound using that annotation via <a href="../../../../../com/google/inject/binder/AnnotatedBindingBuilder.html#annotatedWith-java.lang.Class-"><code>AnnotatedBindingBuilder.annotatedWith(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)</code></a>. For example, <code>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)</code>. It is an error to
+     supply more than one <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code>.
+ <li> If the field is of type <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>, the field's value will be bound as a <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> using <a href="../../../../../com/google/inject/binder/LinkedBindingBuilder.html#toProvider-com.google.inject.Provider-"><code>LinkedBindingBuilder.toProvider(com.google.inject.Provider&lt;? extends T&gt;)</code></a> to the provider's parameterized type.
+     For example, <code>Provider&lt;Integer&gt;</code> binds to <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><code>Integer</code></a>. Attempting to bind a
+     non-parameterized <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> without a <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> clause is an error.
  </ul>
 
  <p>Example use:
+
  <pre><code>
  public class TestFoo {
    // bind(new TypeLiteral<code> &lt;List&lt;Object&gt;&gt;</code>() {}).toInstance(listOfObjects);

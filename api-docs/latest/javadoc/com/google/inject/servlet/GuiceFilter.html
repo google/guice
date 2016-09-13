@@ -114,11 +114,11 @@ var activeTableTab = "activeTableTab";
 <pre>public class <span class="typeNameLabel">GuiceFilter</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet">Filter</a></pre>
-<div class="block"><p>
- Apply this filter in web.xml above all other filters (typically), to all requests where you plan
-  to use servlet scopes. This is also needed in order to dispatch requests to injectable filters
-  and servlets:
-  <pre>
+<div class="block">Apply this filter in web.xml above all other filters (typically), to all requests where you plan
+ to use servlet scopes. This is also needed in order to dispatch requests to injectable filters
+ and servlets:
+
+ <pre>
   &lt;filter&gt;
     &lt;filter-name&gt;guiceFilter&lt;/filter-name&gt;
     &lt;filter-class&gt;<b>com.google.inject.servlet.GuiceFilter</b>&lt;/filter-class&gt;
@@ -130,9 +130,9 @@ implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/se
   &lt;/filter-mapping&gt;
   </pre>
 
- This filter must appear before every filter that makes use of Guice injection or servlet
- scopes functionality. Typically, you will only register this filter in web.xml and register
- any other filters (and servlets) using a <a href="../../../../com/google/inject/servlet/ServletModule.html" title="class in com.google.inject.servlet"><code>ServletModule</code></a>.</div>
+ This filter must appear before every filter that makes use of Guice injection or servlet scopes
+ functionality. Typically, you will only register this filter in web.xml and register any other
+ filters (and servlets) using a <a href="../../../../com/google/inject/servlet/ServletModule.html" title="class in com.google.inject.servlet"><code>ServletModule</code></a>.</div>
 </li>
 </ul>
 </div>

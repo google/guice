@@ -110,28 +110,30 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">DaggerAdapter</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A utility to adapt classes annotated with <code>@dagger.Module</code> such that their
- <code>@dagger.Provides</code> methods can be properly invoked by Guice to perform their
- provision operations.
+ <code>@dagger.Provides</code> methods can be properly invoked by Guice to perform their provision
+ operations.
 
- <p>Simple example: <pre><code>
-   Guice.createInjector(...other modules..., DaggerAdapter.from(new SomeDaggerAdapter()));
+ <p>Simple example:
+
+ <pre><code>
+ Guice.createInjector(...other modules..., DaggerAdapter.from(new SomeDaggerAdapter()));
  </code></pre>
 
  <p>Some notes on usage and compatibility.
-   <ul>
-     <li>Dagger provider methods have a "SET_VALUES" provision mode not supported by Guice.
-     <li>MapBindings are not yet implemented (pending).
-     <li>Be careful about stateful modules. In contrast to Dagger (where components are
-         expected to be recreated on-demand with new Module instances), Guice typically
-         has a single injector with a long lifetime, so your module instance will be used
-         throughout the lifetime of the entire app.
-     <li>Dagger 1.x uses <code>@Singleton</code> for all scopes, including shorter-lived scopes
-         like per-request or per-activity.  Using modules written with Dagger 1.x usage
-         in mind may result in mis-scoped objects.
-     <li>Dagger 2.x supports custom scope annotations, but for use in Guice, a custom scope
-         implementation must be registered in order to support the custom lifetime of that
-         annotation.
-   </ul></div>
+
+ <ul>
+ <li>Dagger provider methods have a "SET_VALUES" provision mode not supported by Guice.
+ <li>MapBindings are not yet implemented (pending).
+ <li>Be careful about stateful modules. In contrast to Dagger (where components are expected to be
+     recreated on-demand with new Module instances), Guice typically has a single injector with a
+     long lifetime, so your module instance will be used throughout the lifetime of the entire
+     app.
+ <li>Dagger 1.x uses <code>@Singleton</code> for all scopes, including shorter-lived scopes like
+     per-request or per-activity. Using modules written with Dagger 1.x usage in mind may result
+     in mis-scoped objects.
+ <li>Dagger 2.x supports custom scope annotations, but for use in Guice, a custom scope
+     implementation must be registered in order to support the custom lifetime of that annotation.
+ </ul></div>
 </li>
 </ul>
 </div>

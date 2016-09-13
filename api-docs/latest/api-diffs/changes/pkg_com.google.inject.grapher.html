@@ -32,8 +32,8 @@ com.google.inject.grapher
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="pkg_com.google.inject.html"><B>PREV PACKAGE</B></A>
-&nbsp;<A HREF="pkg_com.google.inject.multibindings.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.daggeradapter.html"><B>PREV PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.grapher.graphviz.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_com.google.inject.grapher.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -51,9 +51,45 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </H2>
 <p>
 <a NAME="Changed"></a>
-<TABLE summary="Changed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="AbstractInjectorGrapher.GrapherParameters"></A>
+  <nobr><A HREF="com.google.inject.grapher.AbstractInjectorGrapher.GrapherParameters.html">AbstractInjectorGrapher.<br>GrapherParameters</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Parameters used to override default settings of the grapher.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="DefaultRootKeySetCreator"></A>
+  <nobr><A HREF="com.google.inject.grapher.DefaultRootKeySetCreator.html">DefaultRootKeySetCreator</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Root key set creator that starts with all types that are not Guice internal types or the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/DefaultRootKeySetCreator/Logger.html"><TT>Logger</TT></A> type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ImplementationNode"></A>
+  <nobr><A HREF="com.google.inject.grapher.ImplementationNode.html">ImplementationNode</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Node for types that have <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/com/google/inject/spi/Dependency.html"><TT>com.google.inject.spi.Dependency</TT></A>s and are bound to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/InterfaceNode.html"><TT>InterfaceNode</TT></A>s.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="NameFactory"></A>
+  <nobr><A HREF="com.google.inject.grapher.NameFactory.html"><I>NameFactory</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Interface for a service that provides nice <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/NameFactory/String.html"><TT>String</TT></A>s that we can display in the graph for
+ the types that come up in <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/NameFactory/com/google/inject/Binding.html"><TT>com.google.inject.Binding</TT></A>s.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="NodeId"></A>
+  <nobr><A HREF="com.google.inject.grapher.NodeId.html">NodeId</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">ID of a node in the graph.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -61,6 +97,14 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
   <nobr><A HREF="com.google.inject.grapher.ShortNameFactory.html">ShortNameFactory</A></nobr>
   </TD>
   <TD VALIGN="TOP">Reasonable implementation for <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ShortNameFactory/NameFactory.html"><TT>NameFactory</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="TransitiveDependencyVisitor"></A>
+  <nobr><A HREF="com.google.inject.grapher.TransitiveDependencyVisitor.html">TransitiveDependencyVisitor</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/com/google/inject/spi/BindingTargetVisitor.html"><TT>com.google.inject.spi.BindingTargetVisitor</TT></A> that returns a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Collection.html"><TT>Collection</TT></A> of the
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Key.html"><TT>Key</TT></A>s of each <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Binding.html"><TT>Binding</TT></A>'s dependencies.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -85,8 +129,8 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="pkg_com.google.inject.html"><B>PREV PACKAGE</B></A>
-&nbsp;<A HREF="pkg_com.google.inject.multibindings.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.daggeradapter.html"><B>PREV PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.grapher.graphviz.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_com.google.inject.grapher.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

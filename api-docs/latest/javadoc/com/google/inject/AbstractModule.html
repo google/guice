@@ -118,9 +118,9 @@ var activeTableTab = "activeTableTab";
 <pre>public abstract class <span class="typeNameLabel">AbstractModule</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a></pre>
-<div class="block">A support class for <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a>s which reduces repetition and results in
- a more readable configuration. Simply extend this class, implement <a href="../../../com/google/inject/AbstractModule.html#configure--"><code>configure()</code></a>, and call the inherited methods which mirror those found in
- <a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>. For example:
+<div class="block">A support class for <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a>s which reduces repetition and results in a more readable
+ configuration. Simply extend this class, implement <a href="../../../com/google/inject/AbstractModule.html#configure--"><code>configure()</code></a>, and call the inherited
+ methods which mirror those found in <a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>. For example:
 
  <pre>
  public class MyModule extends AbstractModule {
@@ -523,8 +523,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../com/google/inject/Binder.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-"><code>Binder.bindInterceptor(com.google.inject.matcher.Matcher,
-  com.google.inject.matcher.Matcher,
-  org.aopalliance.intercept.MethodInterceptor[])</code></a></dd>
+     com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -535,10 +534,9 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <li class="blockList">
 <h4>requireBinding</h4>
 <pre>protected&nbsp;void&nbsp;requireBinding(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&nbsp;key)</pre>
-<div class="block">Adds a dependency from this module to <code>key</code>. When the injector is
- created, Guice will report an error if <code>key</code> cannot be injected.
- Note that this requirement may be satisfied by implicit binding, such as
- a public no-arguments constructor.</div>
+<div class="block">Adds a dependency from this module to <code>key</code>. When the injector is created, Guice will
+ report an error if <code>key</code> cannot be injected. Note that this requirement may be satisfied
+ by implicit binding, such as a public no-arguments constructor.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -552,10 +550,9 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <li class="blockList">
 <h4>requireBinding</h4>
 <pre>protected&nbsp;void&nbsp;requireBinding(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;type)</pre>
-<div class="block">Adds a dependency from this module to <code>type</code>. When the injector is
- created, Guice will report an error if <code>type</code> cannot be injected.
- Note that this requirement may be satisfied by implicit binding, such as
- a public no-arguments constructor.</div>
+<div class="block">Adds a dependency from this module to <code>type</code>. When the injector is created, Guice will
+ report an error if <code>type</code> cannot be injected. Note that this requirement may be satisfied
+ by implicit binding, such as a public no-arguments constructor.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -665,8 +662,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../com/google/inject/Binder.html#bindListener-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeListener-"><code>Binder.bindListener(com.google.inject.matcher.Matcher,
-  com.google.inject.spi.TypeListener)</code></a></dd>
+<dd><a href="../../../com/google/inject/Binder.html#bindListener-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeListener-"><code>Binder.bindListener(com.google.inject.matcher.Matcher, com.google.inject.spi.TypeListener)</code></a></dd>
 </dl>
 </li>
 </ul>

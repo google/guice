@@ -95,9 +95,9 @@
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#METHOD" title="class or interface in java.lang.annotation">METHOD</a>)
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
 public @interface <span class="memberNameLabel">ProvidesIntoMap</span></pre>
-<div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings"><code>MapBinder</code></a>.
- The method's return type, binding annotation and additional key annotation determines
- what Map this will contribute to. For example,
+<div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings"><code>MapBinder</code></a>. The method's return
+ type, binding annotation and additional key annotation determines what Map this will contribute
+ to. For example,
 
  <pre>
   @ProvidesIntoMap
@@ -111,12 +111,12 @@ public @interface <span class="memberNameLabel">ProvidesIntoMap</span></pre>
  Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
  </pre>
 
- will add two items to the <code>@Named("urls") Map&lt;String, Plugin&gt;</code> map. The key 'Foo'
- will map to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method.
- The values are bound as providers and will be evaluated at injection time.
+ will add two items to the <code>@Named("urls") Map&lt;String, Plugin&gt;</code> map. The key 'Foo' will map
+ to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. The values
+ are bound as providers and will be evaluated at injection time.
 
- <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive
- types and annotation instances are supported as keys.</div>
+ <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive types
+ and annotation instances are supported as keys.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>

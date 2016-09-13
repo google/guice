@@ -107,8 +107,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>V</code> - any type to be returned by the visit method. Use <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Void.html?is-external=true" title="class or interface in java.lang"><code>Void</code></a> with
-     <code>return null</code> if no return type is needed.</dd>
+<dd><code>V</code> - any type to be returned by the visit method. Use <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Void.html?is-external=true" title="class or interface in java.lang"><code>Void</code></a> with <code>return null</code>
+     if no return type is needed.</dd>
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
@@ -119,8 +119,8 @@ var activeTableTab = "activeTableTab";
 <pre>public class <span class="typeNameLabel">DefaultBindingScopingVisitor&lt;V&gt;</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../com/google/inject/spi/BindingScopingVisitor.html" title="interface in com.google.inject.spi">BindingScopingVisitor</a>&lt;V&gt;</pre>
-<div class="block">No-op visitor for subclassing. All interface methods simply delegate to
- <a href="../../../../com/google/inject/spi/DefaultBindingScopingVisitor.html#visitOther--"><code>visitOther()</code></a>, returning its result.</div>
+<div class="block">No-op visitor for subclassing. All interface methods simply delegate to <a href="../../../../com/google/inject/spi/DefaultBindingScopingVisitor.html#visitOther--"><code>visitOther()</code></a>,
+ returning its result.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -295,9 +295,9 @@ implements <a href="../../../../com/google/inject/spi/BindingScopingVisitor.html
 <pre>public&nbsp;<a href="../../../../com/google/inject/spi/DefaultBindingScopingVisitor.html" title="type parameter in DefaultBindingScopingVisitor">V</a>&nbsp;visitNoScoping()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingScopingVisitor.html#visitNoScoping--">BindingScopingVisitor</a></code></span></div>
 <div class="block">Visit an unspecified or unscoped strategy. On a module, this strategy indicates that the
- injector should use scoping annotations to find a scope. On an injector, it indicates that
- no scope is applied to the binding. An unscoped binding will behave like a scoped one when it
- is linked to a scoped binding.</div>
+ injector should use scoping annotations to find a scope. On an injector, it indicates that no
+ scope is applied to the binding. An unscoped binding will behave like a scoped one when it is
+ linked to a scoped binding.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/inject/spi/BindingScopingVisitor.html#visitNoScoping--">visitNoScoping</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingScopingVisitor.html" title="interface in com.google.inject.spi">BindingScopingVisitor</a>&lt;<a href="../../../../com/google/inject/spi/DefaultBindingScopingVisitor.html" title="type parameter in DefaultBindingScopingVisitor">V</a>&gt;</code></dd>

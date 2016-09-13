@@ -106,8 +106,8 @@ var activeTableTab = "activeTableTab";
 <pre>public interface <span class="typeNameLabel">ServletModuleTargetVisitor&lt;T,V&gt;</span>
 extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;T,V&gt;</pre>
 <div class="block">A visitor for the servlet extension.
- 
- If your <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi"><code>BindingTargetVisitor</code></a> implements this interface, bindings created by using
+
+ <p>If your <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi"><code>BindingTargetVisitor</code></a> implements this interface, bindings created by using
  <a href="../../../../com/google/inject/servlet/ServletModule.html" title="class in com.google.inject.servlet"><code>ServletModule</code></a> will be visited through this interface.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -134,29 +134,25 @@ extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" ti
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html#visit-com.google.inject.servlet.InstanceFilterBinding-">visit</a></span>(<a href="../../../../com/google/inject/servlet/InstanceFilterBinding.html" title="interface in com.google.inject.servlet">InstanceFilterBinding</a>&nbsp;binding)</code>
-<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a> where
- <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet"><code>Filter</code></a>.</div>
+<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a> where <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet"><code>Filter</code></a>.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html#visit-com.google.inject.servlet.InstanceServletBinding-">visit</a></span>(<a href="../../../../com/google/inject/servlet/InstanceServletBinding.html" title="interface in com.google.inject.servlet">InstanceServletBinding</a>&nbsp;binding)</code>
-<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where 
- <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with an <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/http/HttpServlet.html?is-external=true" title="class or interface in javax.servlet.http"><code>HttpServlet</code></a>.</div>
+<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with an <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/http/HttpServlet.html?is-external=true" title="class or interface in javax.servlet.http"><code>HttpServlet</code></a>.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html#visit-com.google.inject.servlet.LinkedFilterBinding-">visit</a></span>(<a href="../../../../com/google/inject/servlet/LinkedFilterBinding.html" title="interface in com.google.inject.servlet">LinkedFilterBinding</a>&nbsp;binding)</code>
-<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a>, where
- <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a Class or Key.</div>
+<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a>, where <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a Class or Key.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html#visit-com.google.inject.servlet.LinkedServletBinding-">visit</a></span>(<a href="../../../../com/google/inject/servlet/LinkedServletBinding.html" title="interface in com.google.inject.servlet">LinkedServletBinding</a>&nbsp;binding)</code>
-<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where
- <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with a Class or Key.</div>
+<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with a Class or Key.</div>
 </td>
 </tr>
 </table>
@@ -188,10 +184,9 @@ extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" ti
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/servlet/LinkedFilterBinding.html" title="interface in com.google.inject.servlet">LinkedFilterBinding</a>&nbsp;binding)</pre>
-<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a>, where
- <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a Class or Key.
- 
- If multiple patterns were specified, this will be called multiple times.</div>
+<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a>, where <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a Class or Key.
+
+ <p>If multiple patterns were specified, this will be called multiple times.</div>
 </li>
 </ul>
 <a name="visit-com.google.inject.servlet.InstanceFilterBinding-">
@@ -201,10 +196,9 @@ extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" ti
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/servlet/InstanceFilterBinding.html" title="interface in com.google.inject.servlet">InstanceFilterBinding</a>&nbsp;binding)</pre>
-<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a> where
- <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet"><code>Filter</code></a>.
- 
- If multiple patterns were specified, this will be called multiple times.</div>
+<div class="block">Visits a filter binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-"><code>ServletModule.filter(java.lang.String, java.lang.String...)</code></a> where <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html#through-java.lang.Class-"><code>ServletModule.FilterKeyBindingBuilder.through(java.lang.Class&lt;? extends javax.servlet.Filter&gt;)</code></a> is called with a <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet"><code>Filter</code></a>.
+
+ <p>If multiple patterns were specified, this will be called multiple times.</div>
 </li>
 </ul>
 <a name="visit-com.google.inject.servlet.LinkedServletBinding-">
@@ -214,10 +208,9 @@ extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" ti
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/servlet/LinkedServletBinding.html" title="interface in com.google.inject.servlet">LinkedServletBinding</a>&nbsp;binding)</pre>
-<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where
- <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with a Class or Key.
- 
- If multiple patterns were specified, this will be called multiple times.</div>
+<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with a Class or Key.
+
+ <p>If multiple patterns were specified, this will be called multiple times.</div>
 </li>
 </ul>
 <a name="visit-com.google.inject.servlet.InstanceServletBinding-">
@@ -227,10 +220,9 @@ extends <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" ti
 <li class="blockList">
 <h4>visit</h4>
 <pre><a href="../../../../com/google/inject/servlet/ServletModuleTargetVisitor.html" title="type parameter in ServletModuleTargetVisitor">V</a>&nbsp;visit(<a href="../../../../com/google/inject/servlet/InstanceServletBinding.html" title="interface in com.google.inject.servlet">InstanceServletBinding</a>&nbsp;binding)</pre>
-<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where 
- <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with an <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/http/HttpServlet.html?is-external=true" title="class or interface in javax.servlet.http"><code>HttpServlet</code></a>.
- 
- If multiple patterns were specified, this will be called multiple times.</div>
+<div class="block">Visits a servlet binding created by <a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-"><code>ServletModule.serve(java.lang.String, java.lang.String...)</code></a> where <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html#with-java.lang.Class-"><code>ServletModule.ServletKeyBindingBuilder.with(java.lang.Class&lt;? extends javax.servlet.http.HttpServlet&gt;)</code></a>, is called with an <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/http/HttpServlet.html?is-external=true" title="class or interface in javax.servlet.http"><code>HttpServlet</code></a>.
+
+ <p>If multiple patterns were specified, this will be called multiple times.</div>
 </li>
 </ul>
 </li>

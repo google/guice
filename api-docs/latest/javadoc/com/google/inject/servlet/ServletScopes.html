@@ -192,8 +192,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletScopes.html#transferRequest-java.util.concurrent.Callable-">transferRequest</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;callable)</code>
-<div class="block">Wraps the given callable in a contextual callable that "transfers" the
- request to another thread.</div>
+<div class="block">Wraps the given callable in a contextual callable that "transfers" the request to another
+ thread.</div>
 </td>
 </tr>
 </table>
@@ -256,37 +256,33 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;continueRequest(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;callable,
                                                           <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;seedMap)</pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">You probably want to use <code>transferRequest</code> instead</span></div>
-<div class="block">Wraps the given callable in a contextual callable that "continues" the
- HTTP request in another thread. This acts as a way of transporting
- request context data from the request processing thread to to worker
- threads.
- <p>
- There are some limitations:
+<div class="block">Wraps the given callable in a contextual callable that "continues" the HTTP request in another
+ thread. This acts as a way of transporting request context data from the request processing
+ thread to to worker threads.
+
+ <p>There are some limitations:
+
  <ul>
-   <li>Derived objects (i.e. anything marked @RequestScoped will not be
-      transported.</li>
-   <li>State changes to the HttpServletRequest after this method is called
-      will not be seen in the continued thread.</li>
-   <li>Only the HttpServletRequest, ServletContext and request parameter
-      map are available in the continued thread. The response and session
-      are not available.</li>
+ <li>Derived objects (i.e. anything marked @RequestScoped will not be transported.
+ <li>State changes to the HttpServletRequest after this method is called will not be seen in the
+     continued thread.
+ <li>Only the HttpServletRequest, ServletContext and request parameter map are available in the
+     continued thread. The response and session are not available.
  </ul>
 
- <p>The returned callable will throw a <a href="../../../../com/google/inject/servlet/ScopingException.html" title="class in com.google.inject.servlet"><code>ScopingException</code></a> when called
- if the HTTP request scope is still active on the current thread.</div>
+ <p>The returned callable will throw a <a href="../../../../com/google/inject/servlet/ScopingException.html" title="class in com.google.inject.servlet"><code>ScopingException</code></a> when called if the HTTP request
+ scope is still active on the current thread.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>callable</code> - code to be executed in another thread, which depends on
-     the request scope.</dd>
-<dd><code>seedMap</code> - the initial set of scoped instances for Guice to seed the
-     request scope with.  To seed a key with null, use <code>null</code> as
-     the value.</dd>
+<dd><code>callable</code> - code to be executed in another thread, which depends on the request scope.</dd>
+<dd><code>seedMap</code> - the initial set of scoped instances for Guice to seed the request scope with. To
+     seed a key with null, use <code>null</code> as the value.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a callable that will invoke the given callable, making the request
-     context available to it.</dd>
+<dd>a callable that will invoke the given callable, making the request context available to
+     it.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../com/google/inject/OutOfScopeException.html" title="class in com.google.inject">OutOfScopeException</a></code> - if this method is called from a non-request
-     thread, or if the request has completed.</dd>
+<dd><code><a href="../../../../com/google/inject/OutOfScopeException.html" title="class in com.google.inject">OutOfScopeException</a></code> - if this method is called from a non-request thread, or if the
+     request has completed.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
 </dl>
@@ -299,29 +295,27 @@ public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/
 <li class="blockList">
 <h4>transferRequest</h4>
 <pre>public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;transferRequest(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;callable)</pre>
-<div class="block">Wraps the given callable in a contextual callable that "transfers" the
- request to another thread. This acts as a way of transporting
- request context data from the current thread to a future thread.
+<div class="block">Wraps the given callable in a contextual callable that "transfers" the request to another
+ thread. This acts as a way of transporting request context data from the current thread to a
+ future thread.
 
- <p>As opposed to <a href="../../../../com/google/inject/servlet/ServletScopes.html#continueRequest-java.util.concurrent.Callable-java.util.Map-"><code>continueRequest(java.util.concurrent.Callable&lt;T&gt;, java.util.Map&lt;com.google.inject.Key&lt;?&gt;, java.lang.Object&gt;)</code></a>, this method propagates all
- existing scoped objects. The primary use case is in server implementations
- where you can detach the request processing thread while waiting for data,
- and reattach to a different thread to finish processing at a later time.
+ <p>As opposed to <a href="../../../../com/google/inject/servlet/ServletScopes.html#continueRequest-java.util.concurrent.Callable-java.util.Map-"><code>continueRequest(java.util.concurrent.Callable&lt;T&gt;, java.util.Map&lt;com.google.inject.Key&lt;?&gt;, java.lang.Object&gt;)</code></a>, this method propagates all existing scoped objects.
+ The primary use case is in server implementations where you can detach the request processing
+ thread while waiting for data, and reattach to a different thread to finish processing at a
+ later time.
 
- <p>Because request-scoped objects are not typically thread-safe, the
- callable returned by this method must not be run on a different thread
- until the current request scope has terminated. The returned callable will
- block until the current thread has released the request scope.</div>
+ <p>Because request-scoped objects are not typically thread-safe, the callable returned by this
+ method must not be run on a different thread until the current request scope has terminated.
+ The returned callable will block until the current thread has released the request scope.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>callable</code> - code to be executed in another thread, which depends on
-     the request scope.</dd>
+<dd><code>callable</code> - code to be executed in another thread, which depends on the request scope.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a callable that will invoke the given callable, making the request
-     context available to it.</dd>
+<dd>a callable that will invoke the given callable, making the request context available to
+     it.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../com/google/inject/OutOfScopeException.html" title="class in com.google.inject">OutOfScopeException</a></code> - if this method is called from a non-request
-     thread, or if the request has completed.</dd>
+<dd><code><a href="../../../../com/google/inject/OutOfScopeException.html" title="class in com.google.inject">OutOfScopeException</a></code> - if this method is called from a non-request thread, or if the
+     request has completed.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
 </dl>
@@ -334,27 +328,25 @@ public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/
 <li class="blockList">
 <h4>transferRequest</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/inject/servlet/RequestScoper.html" title="interface in com.google.inject.servlet">RequestScoper</a>&nbsp;transferRequest()</pre>
-<div class="block">Returns an object that "transfers" the request to another thread. This acts
- as a way of transporting request context data from the current thread to a
- future thread. The transferred scope is the one active for the thread that
- calls this method. A later call to <code>open()</code> activates the transferred
- the scope, including propagating any objects scoped at that time.
+<div class="block">Returns an object that "transfers" the request to another thread. This acts as a way of
+ transporting request context data from the current thread to a future thread. The transferred
+ scope is the one active for the thread that calls this method. A later call to <code>open()</code>
+ activates the transferred the scope, including propagating any objects scoped at that time.
 
- <p>As opposed to <a href="../../../../com/google/inject/servlet/ServletScopes.html#continueRequest-java.util.concurrent.Callable-java.util.Map-"><code>continueRequest(java.util.concurrent.Callable&lt;T&gt;, java.util.Map&lt;com.google.inject.Key&lt;?&gt;, java.lang.Object&gt;)</code></a>, this method propagates all
- existing scoped objects. The primary use case is in server implementations
- where you can detach the request processing thread while waiting for data,
- and reattach to a different thread to finish processing at a later time.
+ <p>As opposed to <a href="../../../../com/google/inject/servlet/ServletScopes.html#continueRequest-java.util.concurrent.Callable-java.util.Map-"><code>continueRequest(java.util.concurrent.Callable&lt;T&gt;, java.util.Map&lt;com.google.inject.Key&lt;?&gt;, java.lang.Object&gt;)</code></a>, this method propagates all existing scoped objects.
+ The primary use case is in server implementations where you can detach the request processing
+ thread while waiting for data, and reattach to a different thread to finish processing at a
+ later time.
 
- <p>Because request-scoped objects are not typically thread-safe, it is
- important to avoid applying the same request scope concurrently. The
- returned Scoper will block on open until the current thread has released
- the request scope.</div>
+ <p>Because request-scoped objects are not typically thread-safe, it is important to avoid
+ applying the same request scope concurrently. The returned Scoper will block on open until the
+ current thread has released the request scope.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>an object that when opened will initiate the request scope</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../com/google/inject/OutOfScopeException.html" title="class in com.google.inject">OutOfScopeException</a></code> - if this method is called from a non-request
-     thread, or if the request has completed.</dd>
+<dd><code><a href="../../../../com/google/inject/OutOfScopeException.html" title="class in com.google.inject">OutOfScopeException</a></code> - if this method is called from a non-request thread, or if the
+     request has completed.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.1</dd>
 </dl>
@@ -367,10 +359,8 @@ public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/
 <li class="blockList">
 <h4>isRequestScoped</h4>
 <pre>public static&nbsp;boolean&nbsp;isRequestScoped(<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;binding)</pre>
-<div class="block">Returns true if <code>binding</code> is request-scoped. If the binding is a
- <a href="../../../../com/google/inject/spi/LinkedKeyBinding.html" title="interface in com.google.inject.spi"><code>linked key binding</code></a> and
- belongs to an injector (i. e. it was retrieved via
- <a href="../../../../com/google/inject/Injector.html#getBinding-com.google.inject.Key-"><code>Injector.getBinding()</code></a>), then this method will
+<div class="block">Returns true if <code>binding</code> is request-scoped. If the binding is a <a href="../../../../com/google/inject/spi/LinkedKeyBinding.html" title="interface in com.google.inject.spi"><code>linked key binding</code></a> and belongs to an injector (i. e. it
+ was retrieved via <a href="../../../../com/google/inject/Injector.html#getBinding-com.google.inject.Key-"><code>Injector.getBinding()</code></a>), then this method will
  also return true if the target binding is request-scoped.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -386,24 +376,22 @@ public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/
 <h4>scopeRequest</h4>
 <pre>public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;scopeRequest(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html?is-external=true" title="class or interface in java.util.concurrent">Callable</a>&lt;T&gt;&nbsp;callable,
                                            <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;seedMap)</pre>
-<div class="block">Scopes the given callable inside a request scope. This is not the same
- as the HTTP request scope, but is used if no HTTP request scope is in
- progress. In this way, keys can be scoped as @RequestScoped and exist
- in non-HTTP requests (for example: RPC requests) as well as in HTTP
+<div class="block">Scopes the given callable inside a request scope. This is not the same as the HTTP request
+ scope, but is used if no HTTP request scope is in progress. In this way, keys can be scoped
+ as @RequestScoped and exist in non-HTTP requests (for example: RPC requests) as well as in HTTP
  request threads.
 
- <p>The returned callable will throw a <a href="../../../../com/google/inject/servlet/ScopingException.html" title="class in com.google.inject.servlet"><code>ScopingException</code></a> when called
- if there is a request scope already active on the current thread.</div>
+ <p>The returned callable will throw a <a href="../../../../com/google/inject/servlet/ScopingException.html" title="class in com.google.inject.servlet"><code>ScopingException</code></a> when called if there is a
+ request scope already active on the current thread.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>callable</code> - code to be executed which depends on the request scope.
-     Typically in another thread, but not necessarily so.</dd>
-<dd><code>seedMap</code> - the initial set of scoped instances for Guice to seed the
-     request scope with.  To seed a key with null, use <code>null</code> as
-     the value.</dd>
+<dd><code>callable</code> - code to be executed which depends on the request scope. Typically in another
+     thread, but not necessarily so.</dd>
+<dd><code>seedMap</code> - the initial set of scoped instances for Guice to seed the request scope with. To
+     seed a key with null, use <code>null</code> as the value.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a callable that when called will run inside the a request scope
-     that exposes the instances in the <code>seedMap</code> as scoped keys.</dd>
+<dd>a callable that when called will run inside the a request scope that exposes the
+     instances in the <code>seedMap</code> as scoped keys.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
 </dl>
@@ -416,19 +404,17 @@ public static&nbsp;&lt;T&gt;&nbsp;<a href="http://docs.oracle.com/javase/7/docs/
 <li class="blockList">
 <h4>scopeRequest</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/inject/servlet/RequestScoper.html" title="interface in com.google.inject.servlet">RequestScoper</a>&nbsp;scopeRequest(<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;seedMap)</pre>
-<div class="block">Returns an object that will apply request scope to a block of code. This is
- not the same as the HTTP request scope, but is used if no HTTP request
- scope is in progress. In this way, keys can be scoped as @RequestScoped and
- exist in non-HTTP requests (for example: RPC requests) as well as in HTTP
- request threads.
+<div class="block">Returns an object that will apply request scope to a block of code. This is not the same as the
+ HTTP request scope, but is used if no HTTP request scope is in progress. In this way, keys can
+ be scoped as @RequestScoped and exist in non-HTTP requests (for example: RPC requests) as well
+ as in HTTP request threads.
 
- <p>The returned object will throw a <a href="../../../../com/google/inject/servlet/ScopingException.html" title="class in com.google.inject.servlet"><code>ScopingException</code></a> when opened
- if there is a request scope already active on the current thread.</div>
+ <p>The returned object will throw a <a href="../../../../com/google/inject/servlet/ScopingException.html" title="class in com.google.inject.servlet"><code>ScopingException</code></a> when opened if there is a request
+ scope already active on the current thread.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>seedMap</code> - the initial set of scoped instances for Guice to seed the
-     request scope with.  To seed a key with null, use <code>null</code> as
-     the value.</dd>
+<dd><code>seedMap</code> - the initial set of scoped instances for Guice to seed the request scope with. To
+     seed a key with null, use <code>null</code> as the value.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>an object that when opened will initiate the request scope</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>

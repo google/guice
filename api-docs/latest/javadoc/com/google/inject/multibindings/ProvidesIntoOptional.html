@@ -95,9 +95,8 @@
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#METHOD" title="class or interface in java.lang.annotation">METHOD</a>)
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
 public @interface <span class="memberNameLabel">ProvidesIntoOptional</span></pre>
-<div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings"><code>Multibinder</code></a>.
- The method's return type and binding annotation determines what Optional this will
- contribute to. For example,
+<div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings"><code>Multibinder</code></a>. The method's return
+ type and binding annotation determines what Optional this will contribute to. For example,
 
  <pre>
   @ProvidesIntoOptional(DEFAULT)
@@ -109,8 +108,8 @@ public @interface <span class="memberNameLabel">ProvidesIntoOptional</span></pre
  String provideBarUrl(BarManager bm) { return bm.getUrl(); }
  </pre>
 
- will set the default value of <code>@Named("url") Optional&lt;String&gt;</code> to foo's URL,
- and then override it to bar's URL.</div>
+ will set the default value of <code>@Named("url") Optional&lt;String&gt;</code> to foo's URL, and then
+ override it to bar's URL.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>

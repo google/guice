@@ -105,8 +105,8 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public interface <span class="typeNameLabel">TypeEncounter&lt;I&gt;</span></pre>
 <div class="block">Context of an injectable type encounter. Enables reporting errors, registering injection
- listeners and binding method interceptors for injectable type <code>I</code>. It is an error to use
- an encounter after the <a href="../../../../com/google/inject/spi/TypeListener.html#hear-com.google.inject.TypeLiteral-com.google.inject.spi.TypeEncounter-"><code>hear()</code></a> method has
+ listeners and binding method interceptors for injectable type <code>I</code>. It is an error to use an
+ encounter after the <a href="../../../../com/google/inject/spi/TypeListener.html#hear-com.google.inject.TypeLiteral-com.google.inject.spi.TypeEncounter-"><code>hear()</code></a> method has
  returned.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -221,8 +221,8 @@ var activeTableTab = "activeTableTab";
               <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</pre>
 <div class="block">Records an error message for type <code>I</code> which will be presented to the user at a later
  time. Unlike throwing an exception, this enable us to continue configuring the Injector and
- discover more errors. Uses <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true#format-java.lang.String-java.lang.Object...-" title="class or interface in java.lang"><code>String.format(String, Object[])</code></a> to insert the arguments
- into the message.</div>
+ discover more errors. Uses <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true#format-java.lang.String-java.lang.Object...-" title="class or interface in java.lang"><code>String.format(String, Object[])</code></a> to insert the arguments into
+ the message.</div>
 </li>
 </ul>
 <a name="addError-java.lang.Throwable-">
@@ -280,8 +280,8 @@ var activeTableTab = "activeTableTab";
 <pre>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(<a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;typeLiteral)</pre>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>. The returned members injector will not be valid until the main
- injector has been created. The members injector will throw an <code>IllegalStateException</code>
- if you try to use it beforehand.</div>
+ injector has been created. The members injector will throw an <code>IllegalStateException</code> if
+ you try to use it beforehand.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>typeLiteral</code> - type to get members injector for</dd>
@@ -297,8 +297,8 @@ var activeTableTab = "activeTableTab";
 <pre>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>. The returned members injector will not be valid until the main
- injector has been created. The members injector will throw an <code>IllegalStateException</code>
- if you try to use it beforehand.</div>
+ injector has been created. The members injector will throw an <code>IllegalStateException</code> if
+ you try to use it beforehand.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>type</code> - type to get members injector for</dd>
@@ -335,18 +335,17 @@ var activeTableTab = "activeTableTab";
 <h4>bindInterceptor</h4>
 <pre>void&nbsp;bindInterceptor(<a href="../../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
                      <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</pre>
-<div class="block">Binds method interceptor[s] to methods matched in type <code>I</code> and its supertypes. A
- method is eligible for interception if:
+<div class="block">Binds method interceptor[s] to methods matched in type <code>I</code> and its supertypes. A method
+ is eligible for interception if:
 
  <ul>
-  <li>Guice created the instance the method is on</li>
-  <li>Neither the enclosing type nor the method is final</li>
-  <li>And the method is package-private or more accessible</li>
+ <li>Guice created the instance the method is on
+ <li>Neither the enclosing type nor the method is final
+ <li>And the method is package-private or more accessible
  </ul></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>methodMatcher</code> - matches methods the interceptor should apply to. For
-     example: <code>annotatedWith(Transactional.class)</code>.</dd>
+<dd><code>methodMatcher</code> - matches methods the interceptor should apply to. For example: <code>annotatedWith(Transactional.class)</code>.</dd>
 <dd><code>interceptors</code> - to bind</dd>
 </dl>
 </li>

@@ -109,9 +109,9 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">Multibinder&lt;T&gt;</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">An API to bind multiple values separately, only to later inject them as a
- complete collection. Multibinder is intended for use in your application's
- module:
+<div class="block">An API to bind multiple values separately, only to later inject them as a complete collection.
+ Multibinder is intended for use in your application's module:
+
  <pre><code>
  public class SnacksModule extends AbstractModule {
    protected void configure() {
@@ -124,6 +124,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  }</code></pre>
 
  <p>With this binding, a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util"><code>Set</code></a><code>&lt;Snack&gt;</code> can now be injected:
+
  <pre><code>
  class SnackMachine {
     @Inject
@@ -132,34 +133,31 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 
  If desired, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util"><code>Collection</code></a><code>&lt;Provider&lt;Snack&gt;&gt;</code> can also be injected.
 
- <p>Contributing multibindings from different modules is supported. For
- example, it is okay for both <code>CandyModule</code> and <code>ChipsModule</code>
- to create their own <code>Multibinder&lt;Snack&gt;</code>, and to each contribute
- bindings to the set of snacks. When that set is injected, it will contain
+ <p>Contributing multibindings from different modules is supported. For example, it is okay for
+ both <code>CandyModule</code> and <code>ChipsModule</code> to create their own <code>Multibinder&lt;Snack&gt;</code>,
+ and to each contribute bindings to the set of snacks. When that set is injected, it will contain
  elements from both modules.
 
- <p>The set's iteration order is consistent with the binding order. This is
- convenient when multiple elements are contributed by the same module because
- that module can order its bindings appropriately. Avoid relying on the
- iteration order of elements contributed by different modules, since there is
- no equivalent mechanism to order modules.
+ <p>The set's iteration order is consistent with the binding order. This is convenient when
+ multiple elements are contributed by the same module because that module can order its bindings
+ appropriately. Avoid relying on the iteration order of elements contributed by different modules,
+ since there is no equivalent mechanism to order modules.
 
- <p>The set is unmodifiable.  Elements can only be added to the set by
- configuring the multibinder.  Elements can never be removed from the set.
+ <p>The set is unmodifiable. Elements can only be added to the set by configuring the multibinder.
+ Elements can never be removed from the set.
 
- <p>Elements are resolved at set injection time. If an element is bound to a
- provider, that provider's get method will be called each time the set is
- injected (unless the binding is also scoped).
+ <p>Elements are resolved at set injection time. If an element is bound to a provider, that
+ provider's get method will be called each time the set is injected (unless the binding is also
+ scoped).
 
- <p>Annotations are be used to create different sets of the same element
- type. Each distinct annotation gets its own independent collection of
- elements.
+ <p>Annotations are be used to create different sets of the same element type. Each distinct
+ annotation gets its own independent collection of elements.
 
- <p><strong>Elements must be distinct.</strong> If multiple bound elements
- have the same value, set injection will fail.
+ <p><strong>Elements must be distinct.</strong> If multiple bound elements have the same value,
+ set injection will fail.
 
- <p><strong>Elements must be non-null.</strong> If any set element is null,
- set injection will fail.</div>
+ <p><strong>Elements must be non-null.</strong> If any set element is null, set injection will
+ fail.</div>
 </li>
 </ul>
 </div>
@@ -397,15 +395,14 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>addBinding</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="type parameter in Multibinder">T</a>&gt;&nbsp;addBinding()</pre>
-<div class="block">Returns a binding builder used to add a new element in the set. Each
- bound element must have a distinct value. Bound providers will be
- evaluated each time the set is injected.
+<div class="block">Returns a binding builder used to add a new element in the set. Each bound element must have a
+ distinct value. Bound providers will be evaluated each time the set is injected.
 
- <p>It is an error to call this method without also calling one of the
- <code>to</code> methods on the returned binding builder.
+ <p>It is an error to call this method without also calling one of the <code>to</code> methods on the
+ returned binding builder.
 
- <p>Scoping elements independently is supported. Use the <code>in</code> method
- to specify a binding scope.</div>
+ <p>Scoping elements independently is supported. Use the <code>in</code> method to specify a binding
+ scope.</div>
 </li>
 </ul>
 <a name="equals-java.lang.Object-">

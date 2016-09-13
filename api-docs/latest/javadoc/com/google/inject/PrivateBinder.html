@@ -150,15 +150,13 @@ extends <a href="../../../com/google/inject/Binder.html" title="interface in com
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject">PrivateBinder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/PrivateBinder.html#skipSources-java.lang.Class...-">skipSources</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>...&nbsp;classesToSkip)</code>
-<div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the
- calling code.</div>
+<div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the calling code.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject">PrivateBinder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/PrivateBinder.html#withSource-java.lang.Object-">withSource</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source)</code>
-<div class="block">Returns a binder that uses <code>source</code> as the reference location for
- configuration errors.</div>
+<div class="block">Returns a binder that uses <code>source</code> as the reference location for configuration errors.</div>
 </td>
 </tr>
 </table>
@@ -200,8 +198,8 @@ extends <a href="../../../com/google/inject/Binder.html" title="interface in com
 <li class="blockList">
 <h4>expose</h4>
 <pre><a href="../../../com/google/inject/binder/AnnotatedElementBuilder.html" title="interface in com.google.inject.binder">AnnotatedElementBuilder</a>&nbsp;expose(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;type)</pre>
-<div class="block">Makes a binding for <code>type</code> available to the enclosing environment. Use <a href="../../../com/google/inject/binder/AnnotatedElementBuilder.html#annotatedWith-java.lang.Class-"><code>annotatedWith()</code></a> to expose <code>type</code> with a
- binding annotation.</div>
+<div class="block">Makes a binding for <code>type</code> available to the enclosing environment. Use <a href="../../../com/google/inject/binder/AnnotatedElementBuilder.html#annotatedWith-java.lang.Class-"><code>annotatedWith()</code></a> to
+ expose <code>type</code> with a binding annotation.</div>
 </li>
 </ul>
 <a name="expose-com.google.inject.TypeLiteral-">
@@ -223,16 +221,14 @@ extends <a href="../../../com/google/inject/Binder.html" title="interface in com
 <h4>withSource</h4>
 <pre><a href="../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject">PrivateBinder</a>&nbsp;withSource(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/google/inject/Binder.html#withSource-java.lang.Object-">Binder</a></code></span></div>
-<div class="block">Returns a binder that uses <code>source</code> as the reference location for
- configuration errors. This is typically a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a>
- for <code>.java</code> source but it could any binding source, such as the
- path to a <code>.properties</code> file.</div>
+<div class="block">Returns a binder that uses <code>source</code> as the reference location for configuration errors.
+ This is typically a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a> for <code>.java</code> source but it could any binding
+ source, such as the path to a <code>.properties</code> file.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../com/google/inject/Binder.html#withSource-java.lang.Object-">withSource</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>source</code> - any object representing the source location and has a
-     concise <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang"><code>toString()</code></a> value</dd>
+<dd><code>source</code> - any object representing the source location and has a concise <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang"><code>toString()</code></a> value</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a binder that shares its configuration with this binder</dd>
 </dl>
@@ -246,15 +242,13 @@ extends <a href="../../../com/google/inject/Binder.html" title="interface in com
 <h4>skipSources</h4>
 <pre><a href="../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject">PrivateBinder</a>&nbsp;skipSources(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>...&nbsp;classesToSkip)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/google/inject/Binder.html#skipSources-java.lang.Class...-">Binder</a></code></span></div>
-<div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the
- calling code. The caller's <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a> is used to locate
- the source of configuration errors.</div>
+<div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the calling code. The caller's
+ <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a> is used to locate the source of configuration errors.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../com/google/inject/Binder.html#skipSources-java.lang.Class...-">skipSources</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>classesToSkip</code> - library classes that create bindings on behalf of
-      their clients.</dd>
+<dd><code>classesToSkip</code> - library classes that create bindings on behalf of their clients.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a binder that shares its configuration with this binder.</dd>
 </dl>

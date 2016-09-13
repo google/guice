@@ -147,12 +147,12 @@
 <div class="block"><span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
  by inferring the current chain via ThreadLocals in the listener, other use cases can use
  the static dependency graph.  For example,
- <pre><code>    
+ <pre><code>
    bindListener(Matchers.any(), new MyListener());
    ...
-   
+
    private static final class MyListener implements ProvisionListener {
-     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack =
          new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
            {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
              return new ArrayDeque&lt;&gt;();
@@ -168,9 +168,9 @@
        // Inspect the binding stack...
      }
    }
- 
+
  </code><pre>
- 
+
  In this example the bindingStack thread local will contain a data structure that is very
  similar to the data returned by this list.  The main differences are that linked keys are
  not in the stack, but such edges do exist in the static dependency graph (inspectable via

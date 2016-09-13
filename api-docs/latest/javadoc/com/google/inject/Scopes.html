@@ -158,8 +158,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Scopes.html#isCircularProxy-java.lang.Object-">isCircularProxy</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;object)</code>
-<div class="block">Returns true if the object is a proxy for a circular dependency,
- constructed by Guice because it encountered a circular dependency.</div>
+<div class="block">Returns true if the object is a proxy for a circular dependency, constructed by Guice because
+ it encountered a circular dependency.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -279,12 +279,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>isCircularProxy</h4>
 <pre>public static&nbsp;boolean&nbsp;isCircularProxy(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;object)</pre>
-<div class="block">Returns true if the object is a proxy for a circular dependency,
- constructed by Guice because it encountered a circular dependency. Scope
- implementations should be careful to <b>not cache circular proxies</b>,
- because the proxies are not intended for general purpose use. (They are
- designed just to fulfill the immediate injection, not all injections.
- Caching them can lead to IllegalArgumentExceptions or ClassCastExceptions.)</div>
+<div class="block">Returns true if the object is a proxy for a circular dependency, constructed by Guice because
+ it encountered a circular dependency. Scope implementations should be careful to <b>not cache
+ circular proxies</b>, because the proxies are not intended for general purpose use. (They are
+ designed just to fulfill the immediate injection, not all injections. Caching them can lead to
+ IllegalArgumentExceptions or ClassCastExceptions.)</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>

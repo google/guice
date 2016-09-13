@@ -99,20 +99,19 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>T</code> - The fully qualified type of the map, including Map. For example:
-          <code>MapBinderBinding&lt;Map&lt;String, Snack>></code></dd>
+<dd><code>T</code> - The fully qualified type of the map, including Map. For example: <code>
+     MapBinderBinding&lt;Map&lt;String, Snack>></code></dd>
 </dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">MapBinderBinding&lt;T&gt;</span></pre>
 <div class="block">A binding for a MapBinder.
- <p>
- Although MapBinders may be injected through a variety of generic types (Map&lt;K, V>, Map
- &lt;K, Provider&lt;V>>, Map&lt;K, Set&lt;V>>, Map<K, Set&lt;
- Provider&lt;V>>, and even Set&lt;Map.Entry&lt;K, Provider&lt;V>>), a
- MapBinderBinding exists only on the Binding associated with the Map&lt;K, V> key. Other
- bindings can be validated to be derived from this MapBinderBinding using
- <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(Element)</code></a>.</div>
+
+ <p>Although MapBinders may be injected through a variety of generic types (Map&lt;K, V>, Map
+ &lt;K, Provider&lt;V>>, Map&lt;K, Set&lt;V>>, Map<K, Set&lt; Provider&lt;V>>, and even
+ Set&lt;Map.Entry&lt;K, Provider&lt;V>>), a MapBinderBinding exists only on the Binding associated
+ with the Map&lt;K, V> key. Other bindings can be validated to be derived from this
+ MapBinderBinding using <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(Element)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
@@ -205,10 +204,10 @@ var activeTableTab = "activeTableTab";
 <h4>getKeyTypeLiteral</h4>
 <pre><a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;?&gt;&nbsp;getKeyTypeLiteral()</pre>
 <div class="block">Returns the TypeLiteral describing the keys of the map.
- <p>
- The TypeLiteral will always match the type Map's generic type. For example, if getMapKey
- returns a key of <code>Map&lt;String, Snack></code>, then this will always return a
- <code>TypeLiteral&lt;String></code>.</div>
+
+ <p>The TypeLiteral will always match the type Map's generic type. For example, if getMapKey
+ returns a key of <code>Map&lt;String, Snack></code>, then this will always return a <code>
+ TypeLiteral&lt;String></code>.</div>
 </li>
 </ul>
 <a name="getValueTypeLiteral--">
@@ -219,10 +218,10 @@ var activeTableTab = "activeTableTab";
 <h4>getValueTypeLiteral</h4>
 <pre><a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;?&gt;&nbsp;getValueTypeLiteral()</pre>
 <div class="block">Returns the TypeLiteral describing the values of the map.
- <p>
- The TypeLiteral will always match the type Map's generic type. For example, if getMapKey
- returns a key of <code>Map&lt;String, Snack></code>, then this will always return a
- <code>TypeLiteral&lt;Snack></code>.</div>
+
+ <p>The TypeLiteral will always match the type Map's generic type. For example, if getMapKey
+ returns a key of <code>Map&lt;String, Snack></code>, then this will always return a <code>
+ TypeLiteral&lt;Snack></code>.</div>
 </li>
 </ul>
 <a name="getEntries--">
@@ -234,13 +233,11 @@ var activeTableTab = "activeTableTab";
 <pre><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.Entry.html?is-external=true" title="class or interface in java.util">Map.Entry</a>&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;&nbsp;getEntries()</pre>
 <div class="block">Returns all entries in the Map. The returned list of Map.Entries contains the key and a binding
  to the value. Duplicate keys or values will exist as separate Map.Entries in the returned list.
- This is only supported on bindings returned from an injector. This will throw
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element retrieved from
- <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
- <p>
- The elements will always match the type Map's generic type. For example, if getMapKey returns a
- key of <code>Map&lt;String, Snack></code>, then this will always return a list of type
- <code>List&lt;Map.Entry&lt;String, Binding&lt;Snack>>></code>.</div>
+ This is only supported on bindings returned from an injector. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
+
+ <p>The elements will always match the type Map's generic type. For example, if getMapKey
+ returns a key of <code>Map&lt;String, Snack></code>, then this will always return a list of
+ type <code>List&lt;Map.Entry&lt;String, Binding&lt;Snack>>></code>.</div>
 </li>
 </ul>
 <a name="permitsDuplicates--">
@@ -267,10 +264,9 @@ var activeTableTab = "activeTableTab";
  MapBinderBindings retrieved from an injector and <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>. Usually this is
  only necessary if you are working with elements retrieved from modules (without an Injector),
  otherwise <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a> and <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#permitsDuplicates--"><code>permitsDuplicates()</code></a> are better options.
- <p>
- If you need to introspect the details of the map, such as the keys, values or if it permits
- duplicates, it is necessary to pass the elements through an Injector and use
- <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a> and <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#permitsDuplicates--"><code>permitsDuplicates()</code></a>.</div>
+
+ <p>If you need to introspect the details of the map, such as the keys, values or if it permits
+ duplicates, it is necessary to pass the elements through an Injector and use <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a> and <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#permitsDuplicates--"><code>permitsDuplicates()</code></a>.</div>
 </li>
 </ul>
 </li>

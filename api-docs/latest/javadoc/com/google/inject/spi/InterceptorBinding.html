@@ -116,6 +116,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 implements <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a></pre>
 <div class="block">Registration of interceptors for matching methods of matching classes. Instances are created
  explicitly in a module using <a href="../../../../com/google/inject/Binder.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-"><code>bindInterceptor()</code></a> statements:
+
  <pre>
      bindInterceptor(Matchers.subclassesOf(MyAction.class),
          Matchers.annotatedWith(Transactional.class),

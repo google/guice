@@ -114,9 +114,9 @@ var activeTableTab = "activeTableTab";
 <pre>public abstract class <span class="typeNameLabel">GuiceServletContextListener</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletContextListener.html?is-external=true" title="class or interface in javax.servlet">ServletContextListener</a></pre>
-<div class="block">As of Guice 2.0 you can still use (your subclasses of) <code>GuiceServletContextListener</code>
- class as a logical place to create and configure your injector. This will ensure the injector
- is created when the web application is deployed.</div>
+<div class="block">As of Guice 2.0 you can still use (your subclasses of) <code>GuiceServletContextListener</code> class
+ as a logical place to create and configure your injector. This will ensure the injector is
+ created when the web application is deployed.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -167,8 +167,7 @@ implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/se
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>protected abstract <a href="../../../../com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/GuiceServletContextListener.html#getInjector--">getInjector</a></span>()</code>
-<div class="block">Override this method to create (or otherwise obtain a reference to) your
- injector.</div>
+<div class="block">Override this method to create (or otherwise obtain a reference to) your injector.</div>
 </td>
 </tr>
 </table>
@@ -243,8 +242,7 @@ implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/se
 <li class="blockList">
 <h4>getInjector</h4>
 <pre>protected abstract&nbsp;<a href="../../../../com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a>&nbsp;getInjector()</pre>
-<div class="block">Override this method to create (or otherwise obtain a reference to) your
- injector.</div>
+<div class="block">Override this method to create (or otherwise obtain a reference to) your injector.</div>
 </li>
 </ul>
 </li>

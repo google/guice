@@ -22,7 +22,7 @@ com.google.inject.multibindings
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <FONT CLASS="NavBarFont1">Text Changes</FONT>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="docdiffs_index.html#com.google.inject.multibindings!package"><FONT CLASS="NavBarFont1"><B>Text Changes</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_statistics.html"><FONT CLASS="NavBarFont1"><B>Statistics</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_help.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>
     </TR>
@@ -32,8 +32,8 @@ com.google.inject.multibindings
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="pkg_com.google.inject.grapher.html"><B>PREV PACKAGE</B></A>
-&nbsp;<A HREF="pkg_com.google.inject.spi.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.matcher.html"><B>PREV PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.name.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_com.google.inject.multibindings.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -51,25 +51,59 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </H2>
 <p>
 <a NAME="Changed"></a>
-<TABLE summary="Changed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="MapBinder"></A>
   <nobr><A HREF="com.google.inject.multibindings.MapBinder.html">MapBinder</A></nobr>
   </TD>
-  <TD VALIGN="TOP">An API to bind multiple map entries separately, only to later inject them as
- a complete map.</TD>
+  <TD VALIGN="TOP">An API to bind multiple map entries separately, only to later inject them as a complete map.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MapBinderBinding"></A>
+  <nobr><A HREF="com.google.inject.multibindings.MapBinderBinding.html"><I>MapBinderBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding for a MapBinder.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MapKey"></A>
+  <nobr><A HREF="com.google.inject.multibindings.MapKey.html">MapKey</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Allows users define customized key type annotations for map bindings by annotating an annotation
+ of a {@code Map}'s key type.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="Multibinder"></A>
   <nobr><A HREF="com.google.inject.multibindings.Multibinder.html">Multibinder</A></nobr>
   </TD>
-  <TD VALIGN="TOP">An API to bind multiple values separately, only to later inject them as a
- complete collection.</TD>
+  <TD VALIGN="TOP">An API to bind multiple values separately, only to later inject them as a complete collection.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MultibinderBinding"></A>
+  <nobr><A HREF="com.google.inject.multibindings.MultibinderBinding.html"><I>MultibinderBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding for a Multibinder.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MultibindingsScanner"></A>
+  <nobr><A HREF="com.google.inject.multibindings.MultibindingsScanner.html">MultibindingsScanner</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MultibindingsTargetVisitor"></A>
+  <nobr><A HREF="com.google.inject.multibindings.MultibindingsTargetVisitor.html"><I>MultibindingsTargetVisitor</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A visitor for the multibinder extension.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -77,6 +111,34 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
   <nobr><A HREF="com.google.inject.multibindings.OptionalBinder.html">OptionalBinder</A></nobr>
   </TD>
   <TD VALIGN="TOP">An API to bind optional values, optionally with a default value.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="OptionalBinderBinding"></A>
+  <nobr><A HREF="com.google.inject.multibindings.OptionalBinderBinding.html"><I>OptionalBinderBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding for a OptionalBinder.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoMap"></A>
+  <nobr><A HREF="com.google.inject.multibindings.ProvidesIntoMap.html">ProvidesIntoMap</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/MapBinder.html"><TT>MapBinder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoOptional"></A>
+  <nobr><A HREF="com.google.inject.multibindings.ProvidesIntoOptional.html">ProvidesIntoOptional</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoOptional/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoOptional/Multibinder.html"><TT>Multibinder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoSet"></A>
+  <nobr><A HREF="com.google.inject.multibindings.ProvidesIntoSet.html">ProvidesIntoSet</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoSet/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoSet/Multibinder.html"><TT>Multibinder</TT></A>.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -91,7 +153,7 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <FONT CLASS="NavBarFont1">Text Changes</FONT>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="docdiffs_index.html#com.google.inject.multibindings!package"><FONT CLASS="NavBarFont1"><B>Text Changes</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_statistics.html"><FONT CLASS="NavBarFont1"><B>Statistics</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_help.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>
     </TR>
@@ -101,8 +163,8 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="pkg_com.google.inject.grapher.html"><B>PREV PACKAGE</B></A>
-&nbsp;<A HREF="pkg_com.google.inject.spi.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.matcher.html"><B>PREV PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.name.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_com.google.inject.multibindings.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

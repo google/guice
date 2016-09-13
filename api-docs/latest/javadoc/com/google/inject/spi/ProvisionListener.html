@@ -100,8 +100,8 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">ProvisionListener</span></pre>
-<div class="block">Listens for provisioning of objects. Useful for gathering timing information
- about provisioning, post-provision initialization, and more.</div>
+<div class="block">Listens for provisioning of objects. Useful for gathering timing information about provisioning,
+ post-provision initialization, and more.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -173,20 +173,17 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>onProvision</h4>
 <pre>&lt;T&gt;&nbsp;void&nbsp;onProvision(<a href="../../../../com/google/inject/spi/ProvisionListener.ProvisionInvocation.html" title="class in com.google.inject.spi">ProvisionListener.ProvisionInvocation</a>&lt;T&gt;&nbsp;provision)</pre>
-<div class="block">Invoked by Guice when an object requires provisioning. Provisioning occurs
- when Guice locates and injects the dependencies for a binding. For types
- bound to a Provider, provisioning encapsulates the <a href="../../../../com/google/inject/Provider.html#get--"><code>Provider.get()</code></a>
- method. For toInstance or constant bindings, provisioning encapsulates
- the injecting of @<code>Inject</code>ed fields or methods.
- For other types, provisioning encapsulates the construction of the
- object. If a type is bound within a <a href="../../../../com/google/inject/Scope.html" title="interface in com.google.inject"><code>Scope</code></a>, provisioning depends on
- the scope. Types bound in Singleton scope will only be provisioned once.
- Types bound in no scope will be provisioned every time they are injected.
+<div class="block">Invoked by Guice when an object requires provisioning. Provisioning occurs when Guice locates
+ and injects the dependencies for a binding. For types bound to a Provider, provisioning
+ encapsulates the <a href="../../../../com/google/inject/Provider.html#get--"><code>Provider.get()</code></a> method. For toInstance or constant bindings, provisioning
+ encapsulates the injecting of @<code>Inject</code>ed fields or methods. For other types,
+ provisioning encapsulates the construction of the object. If a type is bound within a <a href="../../../../com/google/inject/Scope.html" title="interface in com.google.inject"><code>Scope</code></a>, provisioning depends on the scope. Types bound in Singleton scope will only be
+ provisioned once. Types bound in no scope will be provisioned every time they are injected.
  Other scopes define their own behavior for provisioning.
- <p>
- To perform the provision, call <a href="../../../../com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#provision--"><code>ProvisionListener.ProvisionInvocation.provision()</code></a>.
- If you do not explicitly call provision, it will be automatically done after
- this method returns.  It is an error to call provision more than once.</div>
+
+ <p>To perform the provision, call <a href="../../../../com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#provision--"><code>ProvisionListener.ProvisionInvocation.provision()</code></a>. If you do not
+ explicitly call provision, it will be automatically done after this method returns. It is an
+ error to call provision more than once.</div>
 </li>
 </ul>
 </li>

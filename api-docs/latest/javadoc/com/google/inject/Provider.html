@@ -118,20 +118,17 @@ extends javax.inject.Provider&lt;T&gt;</pre>
 
  <ul>
  <li>When the default means for obtaining instances (an injectable or parameterless constructor)
- is insufficient for a particular binding, the module can specify a custom <code>Provider</code>
- instead, to control exactly how Guice creates or obtains instances for the binding.
-
+     is insufficient for a particular binding, the module can specify a custom <code>Provider</code>
+     instead, to control exactly how Guice creates or obtains instances for the binding.
  <li>An implementation class may always choose to have a <code>Provider&lt;T&gt;</code> instance injected,
- rather than having a <code>T</code> injected directly.  This may give you access to multiple
- instances, instances you wish to safely mutate and discard, instances which are out of scope
- (e.g. using a <code>@RequestScoped</code> object from within a <code>@SessionScoped</code> object), or
- instances that will be initialized lazily.
-
+     rather than having a <code>T</code> injected directly. This may give you access to multiple
+     instances, instances you wish to safely mutate and discard, instances which are out of scope
+     (e.g. using a <code>@RequestScoped</code> object from within a <code>@SessionScoped</code> object), or
+     instances that will be initialized lazily.
  <li>A custom <a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject"><code>Scope</code></a> is implemented as a decorator of <code>Provider&lt;T&gt;</code>, which decides
- when to delegate to the backing provider and when to provide the instance some other way.
-
- <li>The <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> offers access to the <code>Provider&lt;T&gt;</code> it uses to fulfill requests
- for a given key, via the <a href="../../../com/google/inject/Injector.html#getProvider-com.google.inject.Key-"><code>Injector.getProvider(com.google.inject.Key&lt;T&gt;)</code></a> methods.
+     when to delegate to the backing provider and when to provide the instance some other way.
+ <li>The <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> offers access to the <code>Provider&lt;T&gt;</code> it uses to fulfill requests for
+     a given key, via the <a href="../../../com/google/inject/Injector.html#getProvider-com.google.inject.Key-"><code>Injector.getProvider(com.google.inject.Key&lt;T&gt;)</code></a> methods.
  </ul></div>
 </li>
 </ul>

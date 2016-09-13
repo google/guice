@@ -109,44 +109,39 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">OptionalBinder&lt;T&gt;</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">An API to bind optional values, optionally with a default value.
- OptionalBinder fulfills two roles: <ol>
- <li>It allows a framework to define an injection point that may or
-     may not be bound by users.
- <li>It allows a framework to supply a default value that can be changed
-     by users.
- </ol>
- 
- <p>When an OptionalBinder is added, it will always supply the bindings:
- <code>Optional&lt;T&gt;</code> and <code>Optional&lt;Provider&lt;T&gt;&gt;</code>.  If
- <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>setBinding()</code></a> or <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>setDefault()</code></a> are called, it will also
- bind <code>T</code>.
- 
- <p><code>setDefault</code> is intended for use by frameworks that need a default
- value.  User code can call <code>setBinding</code> to override the default.
- <b>Warning: Even if setBinding is called, the default binding
- will still exist in the object graph.  If it is a singleton, it will be
- instantiated in <code>Stage.PRODUCTION</code>.</b>
- 
- <p>If setDefault or setBinding are linked to Providers, the Provider may return
- <code>null</code>.  If it does, the Optional bindings will be absent.  Binding
- setBinding to a Provider that returns null will not cause OptionalBinder
- to fall back to the setDefault binding.
- 
- <p>If neither setDefault nor setBinding are called, it will try to link to a
- user-supplied binding of the same type.  If no binding exists, the optionals
- will be absent.  Otherwise, if a user-supplied binding of that type exists,
- or if setBinding or setDefault are called, the optionals will return present
- if they are bound to a non-null value.
+<div class="block">An API to bind optional values, optionally with a default value. OptionalBinder fulfills two
+ roles:
 
- <p>Values are resolved at injection time. If a value is bound to a
- provider, that provider's get method will be called each time the optional
- is injected (unless the binding is also scoped, or an optional of provider is
- injected).
- 
- <p>Annotations are used to create different optionals of the same key/value
- type. Each distinct annotation gets its own independent binding.
-  
+ <ol>
+ <li>It allows a framework to define an injection point that may or may not be bound by users.
+ <li>It allows a framework to supply a default value that can be changed by users.
+ </ol>
+
+ <p>When an OptionalBinder is added, it will always supply the bindings: <code>Optional&lt;T&gt;</code> and
+ <code>Optional&lt;Provider&lt;T&gt;&gt;</code>. If <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>setBinding()</code></a> or <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>setDefault()</code></a> are called, it will
+ also bind <code>T</code>.
+
+ <p><code>setDefault</code> is intended for use by frameworks that need a default value. User code can
+ call <code>setBinding</code> to override the default. <b>Warning: Even if setBinding is called, the
+ default binding will still exist in the object graph. If it is a singleton, it will be
+ instantiated in <code>Stage.PRODUCTION</code>.</b>
+
+ <p>If setDefault or setBinding are linked to Providers, the Provider may return <code>null</code>. If
+ it does, the Optional bindings will be absent. Binding setBinding to a Provider that returns null
+ will not cause OptionalBinder to fall back to the setDefault binding.
+
+ <p>If neither setDefault nor setBinding are called, it will try to link to a user-supplied
+ binding of the same type. If no binding exists, the optionals will be absent. Otherwise, if a
+ user-supplied binding of that type exists, or if setBinding or setDefault are called, the
+ optionals will return present if they are bound to a non-null value.
+
+ <p>Values are resolved at injection time. If a value is bound to a provider, that provider's get
+ method will be called each time the optional is injected (unless the binding is also scoped, or
+ an optional of provider is injected).
+
+ <p>Annotations are used to create different optionals of the same key/value type. Each distinct
+ annotation gets its own independent binding.
+
  <pre><code>
  public class FrameworkModule extends AbstractModule {
    protected void configure() {
@@ -154,19 +149,20 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
    }
  }</code></pre>
 
- <p>With this module, an <code>Optional</code><code>&lt;Renamer&gt;</code> can now be
- injected.  With no other bindings, the optional will be absent.
- Users can specify bindings in one of two ways:
- 
+ <p>With this module, an <code>Optional</code><code>&lt;Renamer&gt;</code> can now be injected. With no other
+ bindings, the optional will be absent. Users can specify bindings in one of two ways:
+
  <p>Option 1:
+
  <pre><code>
  public class UserRenamerModule extends AbstractModule {
    protected void configure() {
      bind(Renamer.class).to(ReplacingRenamer.class);
    }
  }</code></pre>
- 
+
  <p>or Option 2:
+
  <pre><code>
  public class UserRenamerModule extends AbstractModule {
    protected void configure() {
@@ -174,10 +170,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
          .setBinding().to(ReplacingRenamer.class);
    }
  }</code></pre>
- With both options, the <code>Optional&lt;Renamer&gt;</code> will be present and supply the
- ReplacingRenamer. 
- 
+
+ With both options, the <code>Optional&lt;Renamer&gt;</code> will be present and supply the ReplacingRenamer.
+
  <p>Default values can be supplied using:
+
  <pre><code>
  public class FrameworkModule extends AbstractModule {
    protected void configure() {
@@ -185,8 +182,10 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
          .setDefault().toInstance(DEFAULT_LOOKUP_URL);
    }
  }</code></pre>
- With the above module, code can inject an <code>@LookupUrl String</code> and it
- will supply the DEFAULT_LOOKUP_URL.  A user can change this value by binding
+
+ With the above module, code can inject an <code>@LookupUrl String</code> and it will supply the
+ DEFAULT_LOOKUP_URL. A user can change this value by binding
+
  <pre><code>
  public class UserLookupModule extends AbstractModule {
    protected void configure() {
@@ -194,11 +193,13 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
          .setBinding().toInstance(CUSTOM_LOOKUP_URL);
    }
  }</code></pre>
+
  ... which will override the default value.
- 
- <p>If one module uses setDefault the only way to override the default is to use setBinding.
- It is an error for a user to specify the binding without using OptionalBinder if
- setDefault or setBinding are called.  For example, 
+
+ <p>If one module uses setDefault the only way to override the default is to use setBinding. It is
+ an error for a user to specify the binding without using OptionalBinder if setDefault or
+ setBinding are called. For example,
+
  <pre><code>
  public class FrameworkModule extends AbstractModule {
    protected void configure() {
@@ -209,8 +210,9 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  public class UserLookupModule extends AbstractModule {
    protected void configure() {
      bind(Key.get(String.class, LookupUrl.class)).toInstance(CUSTOM_LOOKUP_URL);
-   } 
+   }
  }</code></pre>
+
  ... would generate an error, because both the framework and the user are trying to bind
  <code>@LookupUrl String</code>.</div>
 <dl>
@@ -329,11 +331,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>setDefault</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/OptionalBinder.html" title="type parameter in OptionalBinder">T</a>&gt;&nbsp;setDefault()</pre>
-<div class="block">Returns a binding builder used to set the default value that will be injected.
- The binding set by this method will be ignored if <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>setBinding()</code></a> is called.
- 
- <p>It is an error to call this method without also calling one of the <code>to</code>
- methods on the returned binding builder.</div>
+<div class="block">Returns a binding builder used to set the default value that will be injected. The binding set
+ by this method will be ignored if <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>setBinding()</code></a> is called.
+
+ <p>It is an error to call this method without also calling one of the <code>to</code> methods on the
+ returned binding builder.</div>
 </li>
 </ul>
 <a name="setBinding--">
@@ -343,11 +345,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>setBinding</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/OptionalBinder.html" title="type parameter in OptionalBinder">T</a>&gt;&nbsp;setBinding()</pre>
-<div class="block">Returns a binding builder used to set the actual value that will be injected.
- This overrides any binding set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>setDefault()</code></a>.
- 
- <p>It is an error to call this method without also calling one of the <code>to</code>
- methods on the returned binding builder.</div>
+<div class="block">Returns a binding builder used to set the actual value that will be injected. This overrides
+ any binding set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>setDefault()</code></a>.
+
+ <p>It is an error to call this method without also calling one of the <code>to</code> methods on the
+ returned binding builder.</div>
 </li>
 </ul>
 <a name="equals-java.lang.Object-">

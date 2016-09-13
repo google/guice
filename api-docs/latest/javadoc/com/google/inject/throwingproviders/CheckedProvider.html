@@ -104,20 +104,21 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">CheckedProvider&lt;T&gt;</span></pre>
-<div class="block">Alternative to the Guice <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that throws
- a checked Exception. Users may not inject <code>T</code> directly.
+<div class="block">Alternative to the Guice <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that throws a checked Exception.
+ Users may not inject <code>T</code> directly.
 
- <p>This interface must be extended to use application-specific exception types.
- Such subinterfaces may not define new methods, but may narrow the exception type.
+ <p>This interface must be extended to use application-specific exception types. Such
+ subinterfaces may not define new methods, but may narrow the exception type.
+
  <pre>
- public interface RemoteProvider&lt;T&gt; extends CheckedProvider&lt;T&gt; { 
+ public interface RemoteProvider&lt;T&gt; extends CheckedProvider&lt;T&gt; {
    T get() throws CustomExceptionOne, CustomExceptionTwo;
  }
  </pre>
 
- <p>When this type is bound using <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.html" title="class in com.google.inject.throwingproviders"><code>ThrowingProviderBinder</code></a>, the value returned
- or exception thrown by <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>get()</code></a> will be scoped. As a consequence, <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>get()</code></a>
- will invoked at most once within each scope.</div>
+ <p>When this type is bound using <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.html" title="class in com.google.inject.throwingproviders"><code>ThrowingProviderBinder</code></a>, the value returned or exception
+ thrown by <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>get()</code></a> will be scoped. As a consequence, <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>get()</code></a> will invoked at most once
+ within each scope.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>

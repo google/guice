@@ -166,12 +166,12 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <div class="block"><span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
  by inferring the current chain via ThreadLocals in the listener, other use cases can use
  the static dependency graph.  For example,
- <pre><code>    
+ <pre><code>
    bindListener(Matchers.any(), new MyListener());
    ...
-   
+
    private static final class MyListener implements ProvisionListener {
-     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack =
          new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
            {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
              return new ArrayDeque&lt;&gt;();
@@ -187,9 +187,9 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
        // Inspect the binding stack...
      }
    }
- 
+
  </code><pre>
- 
+
  In this example the bindingStack thread local will contain a data structure that is very
  similar to the data returned by this list.  The main differences are that linked keys are
  not in the stack, but such edges do exist in the static dependency graph (inspectable via
@@ -250,9 +250,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <h4>getBinding</h4>
 <pre>public abstract&nbsp;<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;<a href="../../../../com/google/inject/spi/ProvisionListener.ProvisionInvocation.html" title="type parameter in ProvisionListener.ProvisionInvocation">T</a>&gt;&nbsp;getBinding()</pre>
 <div class="block">Returns the Binding this is provisioning.
- <p>
- You must not call <a href="../../../../com/google/inject/Provider.html#get--"><code>Provider.get()</code></a> on the provider returned by
- <a href="../../../../com/google/inject/Binding.html#getProvider--"><code>Binding.getProvider()</code></a>, otherwise you will get confusing error messages.</div>
+
+ <p>You must not call <a href="../../../../com/google/inject/Provider.html#get--"><code>Provider.get()</code></a> on the provider returned by <a href="../../../../com/google/inject/Binding.html#getProvider--"><code>Binding.getProvider()</code></a>, otherwise you will get confusing error messages.</div>
 </li>
 </ul>
 <a name="provision--">
@@ -276,12 +275,12 @@ public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
  by inferring the current chain via ThreadLocals in the listener, other use cases can use
  the static dependency graph.  For example,
- <pre><code>    
+ <pre><code>
    bindListener(Matchers.any(), new MyListener());
    ...
-   
+
    private static final class MyListener implements ProvisionListener {
-     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack = 
+     private final ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt; bindingStack =
          new ThreadLocal&lt;ArrayDeque&lt;Binding&lt;?&gt;&gt;&gt;() {
            {@literal @}Override protected ArrayDeque&lt;Binding&lt;?&gt;&gt; initialValue() {
              return new ArrayDeque&lt;&gt;();
@@ -297,9 +296,9 @@ public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util
        // Inspect the binding stack...
      }
    }
- 
+
  </code><pre>
- 
+
  In this example the bindingStack thread local will contain a data structure that is very
  similar to the data returned by this list.  The main differences are that linked keys are
  not in the stack, but such edges do exist in the static dependency graph (inspectable via

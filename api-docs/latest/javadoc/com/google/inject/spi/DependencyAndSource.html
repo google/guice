@@ -109,7 +109,8 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">DependencyAndSource</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">A combination of a <a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi"><code>Dependency</code></a> and the <a href="../../../../com/google/inject/spi/Element.html#getSource--"><code>source</code></a> where the dependency was bound.</div>
+<div class="block">A combination of a <a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi"><code>Dependency</code></a> and the <a href="../../../../com/google/inject/spi/Element.html#getSource--"><code>source</code></a> where the
+ dependency was bound.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -213,12 +214,9 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>getDependency</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;?&gt;&nbsp;getDependency()</pre>
-<div class="block">Returns the Dependency, if one exists. For anything that can be referenced
- by <a href="../../../../com/google/inject/Injector.html#getBinding-com.google.inject.Key-"><code>Injector.getBinding(com.google.inject.Key&lt;T&gt;)</code></a>, a dependency exists. A dependency will not
- exist (and this will return null) for types initialized with
- <a href="../../../../com/google/inject/Binder.html#requestInjection-com.google.inject.TypeLiteral-T-"><code>Binder.requestInjection(com.google.inject.TypeLiteral&lt;T&gt;, T)</code></a> or <a href="../../../../com/google/inject/Injector.html#injectMembers-java.lang.Object-"><code>Injector.injectMembers(Object)</code></a>,
- nor will it exist for objects injected into Providers bound with
- LinkedBindingBuilder#toProvider(Provider).</div>
+<div class="block">Returns the Dependency, if one exists. For anything that can be referenced by <a href="../../../../com/google/inject/Injector.html#getBinding-com.google.inject.Key-"><code>Injector.getBinding(com.google.inject.Key&lt;T&gt;)</code></a>, a dependency exists. A dependency will not exist (and this will return
+ null) for types initialized with <a href="../../../../com/google/inject/Binder.html#requestInjection-com.google.inject.TypeLiteral-T-"><code>Binder.requestInjection(com.google.inject.TypeLiteral&lt;T&gt;, T)</code></a> or <a href="../../../../com/google/inject/Injector.html#injectMembers-java.lang.Object-"><code>Injector.injectMembers(Object)</code></a>, nor will it exist for objects injected into Providers bound
+ with LinkedBindingBuilder#toProvider(Provider).</div>
 </li>
 </ul>
 <a name="getBindingSource--">
@@ -228,9 +226,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>getBindingSource</h4>
 <pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;getBindingSource()</pre>
-<div class="block">Returns a string describing where this dependency was bound. If the binding
- was just-in-time, there is no valid binding source, so this describes the
- class in question.</div>
+<div class="block">Returns a string describing where this dependency was bound. If the binding was just-in-time,
+ there is no valid binding source, so this describes the class in question.</div>
 </li>
 </ul>
 <a name="toString--">

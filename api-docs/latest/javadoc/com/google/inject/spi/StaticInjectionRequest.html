@@ -114,8 +114,9 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">StaticInjectionRequest</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a></pre>
-<div class="block">A request to inject the static fields and methods of a type. Requests are created
- explicitly in a module using <a href="../../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-"><code>requestStaticInjection()</code></a> statements:
+<div class="block">A request to inject the static fields and methods of a type. Requests are created explicitly in a
+ module using <a href="../../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-"><code>requestStaticInjection()</code></a> statements:
+
  <pre>
      requestStaticInjection(MyLegacyService.class);</pre></div>
 <dl>
@@ -234,12 +235,12 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a possibly empty set of injection points. The set has a specified iteration order. All
-      fields are returned and then all methods. Within the fields, supertype fields are returned
-      before subtype fields. Similarly, supertype methods are returned before subtype methods.</dd>
+     fields are returned and then all methods. Within the fields, supertype fields are returned
+     before subtype fields. Similarly, supertype methods are returned before subtype methods.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="../../../../com/google/inject/ConfigurationException.html" title="class in com.google.inject">ConfigurationException</a></code> - if there is a malformed injection point on <code>type</code>, such as
-      a field with multiple binding annotations. The exception's <a href="../../../../com/google/inject/ConfigurationException.html#getPartialValue--"><code>partial value</code></a> is a <code>Set&lt;InjectionPoint&gt;</code>
-      of the valid injection points.</dd>
+     a field with multiple binding annotations. The exception's <a href="../../../../com/google/inject/ConfigurationException.html#getPartialValue--"><code>partial value</code></a> is a <code>Set&lt;InjectionPoint&gt;</code> of
+     the valid injection points.</dd>
 </dl>
 </li>
 </ul>

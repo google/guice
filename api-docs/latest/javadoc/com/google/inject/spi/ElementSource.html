@@ -109,36 +109,28 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">ElementSource</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Contains information about where and how an <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> was
- bound.
- <p>
- The <a href="../../../../com/google/inject/spi/ElementSource.html#getDeclaringSource--"><code>declaring source</code></a> refers to a location in
- source code that defines the Guice <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a>. For example, if
- the element is created from a method annotated by @Provides, the
- declaring source of element would be the method itself.
- <p>
- The <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> refers to the sequence of calls ends at one of
- <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a> <code>bindXXX()</code> methods and eventually
- defines the element. Note that <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> lists
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElements</code></a> in reverse chronological order.
- The first element (index zero) is the last method call and the last element
- is the first method invocation. By default, the stack trace is not collected.
- The default behavior can be changed by setting the
- <code>guice_include_stack_traces</code> flag value. The value can be either
- <code>OFF</code>, <code>ONLY_FOR_DECLARING_SOURCE</code> or <code>COMPLETE</code>. Note that
- collecting stack traces for every binding can cause a performance hit when
- the injector is created.
- <p>
- The sequence of class names of <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>modules</code></a>
- involved in the element creation can be retrieved by
- <a href="../../../../com/google/inject/spi/ElementSource.html#getModuleClassNames--"><code>getModuleClassNames()</code></a>. Similar to <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a>, the
- order is reverse chronological. The first module (index 0) is the module that
- installs the <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a>. The last module is the root module.
- <p>
- In order to support the cases where a Guice <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> is
- created from another Guice <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> (original) (e.g., by
- <a href="../../../../com/google/inject/spi/Element.html#applyTo-com.google.inject.Binder-"><code>Element.applyTo(com.google.inject.Binder)</code></a>), it also provides a reference to the original
- element source (<a href="../../../../com/google/inject/spi/ElementSource.html#getOriginalElementSource--"><code>getOriginalElementSource()</code></a>).</div>
+<div class="block">Contains information about where and how an <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> was bound.
+
+ <p>The <a href="../../../../com/google/inject/spi/ElementSource.html#getDeclaringSource--"><code>declaring source</code></a> refers to a location in source code that
+ defines the Guice <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a>. For example, if the element is created from a method
+ annotated by @Provides, the declaring source of element would be the method itself.
+
+ <p>The <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> refers to the sequence of calls ends at one of <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a> <code>bindXXX()</code> methods and eventually defines the element. Note that
+ <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> lists <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElements</code></a> in reverse
+ chronological order. The first element (index zero) is the last method call and the last element
+ is the first method invocation. By default, the stack trace is not collected. The default
+ behavior can be changed by setting the <code>guice_include_stack_traces</code> flag value. The value
+ can be either <code>OFF</code>, <code>ONLY_FOR_DECLARING_SOURCE</code> or <code>COMPLETE</code>. Note that
+ collecting stack traces for every binding can cause a performance hit when the injector is
+ created.
+
+ <p>The sequence of class names of <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>modules</code></a> involved in the
+ element creation can be retrieved by <a href="../../../../com/google/inject/spi/ElementSource.html#getModuleClassNames--"><code>getModuleClassNames()</code></a>. Similar to <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a>, the order is reverse chronological. The first module (index 0) is the module
+ that installs the <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a>. The last module is the root module.
+
+ <p>In order to support the cases where a Guice <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> is created from another
+ Guice <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> (original) (e.g., by <a href="../../../../com/google/inject/spi/Element.html#applyTo-com.google.inject.Binder-"><code>Element.applyTo(com.google.inject.Binder)</code></a>), it also provides a
+ reference to the original element source (<a href="../../../../com/google/inject/spi/ElementSource.html#getOriginalElementSource--"><code>getOriginalElementSource()</code></a>).</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -240,11 +232,10 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>getDeclaringSource</h4>
 <pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;getDeclaringSource()</pre>
-<div class="block">Returns a single location in source code that defines the element. It can be any object
- such as <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Constructor.html?is-external=true" title="class or interface in java.lang.reflect"><code>Constructor</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect"><code>Method</code></a>,
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Field.html?is-external=true" title="class or interface in java.lang.reflect"><code>Field</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a>, etc. For
- example, if the element is created from a method annotated by @Provides, the
- declaring source of element would be the method itself.</div>
+<div class="block">Returns a single location in source code that defines the element. It can be any object such as
+ <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Constructor.html?is-external=true" title="class or interface in java.lang.reflect"><code>Constructor</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect"><code>Method</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Field.html?is-external=true" title="class or interface in java.lang.reflect"><code>Field</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a>, etc. For example, if the element is
+ created from a method annotated by @Provides, the declaring source of element would
+ be the method itself.</div>
 </li>
 </ul>
 <a name="getModuleClassNames--">
@@ -254,9 +245,9 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>getModuleClassNames</h4>
 <pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;getModuleClassNames()</pre>
-<div class="block">Returns the class names of modules involved in creating this <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>Element</code></a>. The first
- element (index 0) is the class name of module that defined the element, and the last element
- is the class name of root module.</div>
+<div class="block">Returns the class names of modules involved in creating this <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>Element</code></a>. The first element
+ (index 0) is the class name of module that defined the element, and the last element is the
+ class name of root module.</div>
 </li>
 </ul>
 <a name="getModuleConfigurePositionsInStackTrace--">
@@ -269,17 +260,18 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <div class="block">Returns the position of <a href="../../../../com/google/inject/Module.html#configure-com.google.inject.Binder-"><code>configure(Binder)</code></a> method
  call in the <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>stack trace</code></a> for modules that their classes returned by
  <a href="../../../../com/google/inject/spi/ElementSource.html#getModuleClassNames--"><code>getModuleClassNames()</code></a>. For example, if the stack trace looks like the following:
- <p>
- <code>0 - Binder.bind(),
-  1 - ModuleTwo.configure(),
-  2 - Binder.install(),
-  3 - ModuleOne.configure(),
-  4 - theRest(). 
- </code>
- <p>
- 1 and 3 are returned.
- <p>
- In the cases where stack trace is not available (i.e., the stack trace was not collected),
+
+ <ol>
+   <li><code>Binder.bind()</code>
+   <li><code>ModuleTwo.configure()</code>
+   <li><code>Binder.install()</code>
+   <li><code>ModuleOne.configure()</code>
+   <li>{@code theRest().
+ </ol>
+
+ <p>1 and 3 are returned.
+
+ <p>In the cases where stack trace is not available (i.e., the stack trace was not collected),
  it returns -1 for all module positions.</div>
 </li>
 </ul>
@@ -291,11 +283,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <h4>getStackTrace</h4>
 <pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang">StackTraceElement</a>[]&nbsp;getStackTrace()</pre>
 <div class="block">Returns the sequence of method calls that ends at one of <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>
- <code>bindXXX()</code> methods and eventually defines the element. Note that
- <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> lists <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElements</code></a> in reverse
- chronological order. The first element (index zero) is the last method call and the last
- element is the first method invocation. In the cases where stack trace is not available
- (i.e.,the stack trace was not collected), it returns an empty array.</div>
+ <code>bindXXX()</code> methods and eventually defines the element. Note that <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a>
+ lists <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElements</code></a> in reverse chronological order. The first
+ element (index zero) is the last method call and the last element is the first method
+ invocation. In the cases where stack trace is not available (i.e.,the stack trace was not
+ collected), it returns an empty array.</div>
 </li>
 </ul>
 <a name="toString--">

@@ -100,21 +100,21 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">UnitOfWork</span></pre>
-<div class="block">This interface is used to gain manual control over the unit of work. This is mostly to do
- work in non-request, non-transactional threads. Or where more fine-grained control over the unit
- of work is required. Starting and ending a unit of work directly corresponds to opening and
- closing a <code>Session</code>, <code>EntityManager</code> or <code>ObjectContainer</code> respectively.
- <p> The
- Unit of Work referred to by UnitOfWork will always be local to the calling thread. Be careful to
- end() in a finally block. Neither JPA, nor Hibernate supports threadsafe sessions (reasoning
- behind thread-locality of Unit of Work semantics).
+<div class="block">This interface is used to gain manual control over the unit of work. This is mostly to do work in
+ non-request, non-transactional threads. Or where more fine-grained control over the unit of work
+ is required. Starting and ending a unit of work directly corresponds to opening and closing a
+ <code>Session</code>, <code>EntityManager</code> or <code>ObjectContainer</code> respectively.
+
+ <p>The Unit of Work referred to by UnitOfWork will always be local to the calling thread. Be
+ careful to end() in a finally block. Neither JPA, nor Hibernate supports threadsafe sessions
+ (reasoning behind thread-locality of Unit of Work semantics).
 
  <ul>
-   <li>Using UnitOfWork with the PersistFilter inside a request is not recommended.</li>
-   <li>Using UnitOfWork with session-per-txn strategy is not terribly clever either.</li>
-   <li>Using UnitOfWork with session-per-request strategy but *outside* a request (i.e. in a
-       background or bootstrap thread) is probably a good use case.</li>
-  </ul></div>
+ <li>Using UnitOfWork with the PersistFilter inside a request is not recommended.
+ <li>Using UnitOfWork with session-per-txn strategy is not terribly clever either.
+ <li>Using UnitOfWork with session-per-request strategy but *outside* a request (i.e. in a
+     background or bootstrap thread) is probably a good use case.
+ </ul></div>
 </li>
 </ul>
 </div>
@@ -167,11 +167,11 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>begin</h4>
 <pre>void&nbsp;begin()</pre>
-<div class="block">Starts a Unit Of Work. Underneath, causes a session to the data layer to be opened. If there
- is already one open, the invocation will do nothing. In this way, you can define arbitrary
+<div class="block">Starts a Unit Of Work. Underneath, causes a session to the data layer to be opened. If there is
+ already one open, the invocation will do nothing. In this way, you can define arbitrary
  units-of-work that nest within one another safely.
 
- Transaction semantics are not affected.</div>
+ <p>Transaction semantics are not affected.</div>
 </li>
 </ul>
 <a name="end--">
@@ -184,8 +184,8 @@ var activeTableTab = "activeTableTab";
 <div class="block">Declares an end to the current Unit of Work. Underneath, causes any open session to the data
  layer to close. If there is no Unit of work open, then the call returns silently. You can
  safely invoke end() repeatedly.
- <p>
- Transaction semantics are not affected.</div>
+
+ <p>Transaction semantics are not affected.</div>
 </li>
 </ul>
 </li>

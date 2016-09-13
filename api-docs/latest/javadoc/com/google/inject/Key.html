@@ -109,11 +109,10 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">Key&lt;T&gt;</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Binding key consisting of an injection type and an optional annotation.
- Matches the type and annotation at a point of injection.
+<div class="block">Binding key consisting of an injection type and an optional annotation. Matches the type and
+ annotation at a point of injection.
 
- <p>For example, <code>Key.get(Service.class, Transactional.class)</code> will
- match:
+ <p>For example, <code>Key.get(Service.class, Transactional.class)</code> will match:
 
  <pre>
     @Inject
@@ -124,9 +123,9 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 
  <p><code>Key</code> supports generic types via subclassing just like <a href="../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject"><code>TypeLiteral</code></a>.
 
- <p>Keys do not differentiate between primitive types (int, char, etc.) and
- their corresponding wrapper types (Integer, Character, etc.). Primitive
- types will be replaced with their wrapper types when keys are created.</div>
+ <p>Keys do not differentiate between primitive types (int, char, etc.) and their corresponding
+ wrapper types (Integer, Character, etc.). Primitive types will be replaced with their wrapper
+ types when keys are created.</div>
 </li>
 </ul>
 </div>
@@ -273,22 +272,19 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <tr id="i15" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Key.html#ofType-java.lang.Class-">ofType</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>
-<div class="block">Returns a new key of the specified type with the same annotation as this
- key.</div>
+<div class="block">Returns a new key of the specified type with the same annotation as this key.</div>
 </td>
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Key.html#ofType-java.lang.reflect.Type-">ofType</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Type.html?is-external=true" title="class or interface in java.lang.reflect">Type</a>&nbsp;type)</code>
-<div class="block">Returns a new key of the specified type with the same annotation as this
- key.</div>
+<div class="block">Returns a new key of the specified type with the same annotation as this key.</div>
 </td>
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Key.html#ofType-com.google.inject.TypeLiteral-">ofType</a></span>(<a href="../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type)</code>
-<div class="block">Returns a new key of the specified type with the same annotation as this
- key.</div>
+<div class="block">Returns a new key of the specified type with the same annotation as this key.</div>
 </td>
 </tr>
 <tr id="i18" class="altColor">
@@ -332,12 +328,10 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <pre>protected&nbsp;Key(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&gt;&nbsp;annotationType)</pre>
 <div class="block">Constructs a new key. Derives the type from this class's type parameter.
 
- <p>Clients create an empty anonymous subclass. Doing so embeds the type
- parameter in the anonymous class's type hierarchy so we can reconstitute it
- at runtime despite erasure.
+ <p>Clients create an empty anonymous subclass. Doing so embeds the type parameter in the
+ anonymous class's type hierarchy so we can reconstitute it at runtime despite erasure.
 
- <p>Example usage for a binding of type <code>Foo</code> annotated with
- <code>@Bar</code>:
+ <p>Example usage for a binding of type <code>Foo</code> annotated with <code>@Bar</code>:
 
  <p><code>new Key&lt;Foo&gt;(Bar.class) {}</code>.</div>
 </li>
@@ -351,12 +345,10 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <pre>protected&nbsp;Key(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&nbsp;annotation)</pre>
 <div class="block">Constructs a new key. Derives the type from this class's type parameter.
 
- <p>Clients create an empty anonymous subclass. Doing so embeds the type
- parameter in the anonymous class's type hierarchy so we can reconstitute it
- at runtime despite erasure.
+ <p>Clients create an empty anonymous subclass. Doing so embeds the type parameter in the
+ anonymous class's type hierarchy so we can reconstitute it at runtime despite erasure.
 
- <p>Example usage for a binding of type <code>Foo</code> annotated with
- <code>@Bar</code>:
+ <p>Example usage for a binding of type <code>Foo</code> annotated with <code>@Bar</code>:
 
  <p><code>new Key&lt;Foo&gt;(new Bar()) {}</code>.</div>
 </li>
@@ -370,9 +362,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <pre>protected&nbsp;Key()</pre>
 <div class="block">Constructs a new key. Derives the type from this class's type parameter.
 
- <p>Clients create an empty anonymous subclass. Doing so embeds the type
- parameter in the anonymous class's type hierarchy so we can reconstitute it
- at runtime despite erasure.
+ <p>Clients create an empty anonymous subclass. Doing so embeds the type parameter in the
+ anonymous class's type hierarchy so we can reconstitute it at runtime despite erasure.
 
  <p>Example usage for a binding of type <code>Foo</code>:
 
@@ -559,8 +550,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>ofType</h4>
 <pre>public&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;ofType(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
-<div class="block">Returns a new key of the specified type with the same annotation as this
- key.</div>
+<div class="block">Returns a new key of the specified type with the same annotation as this key.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
@@ -574,8 +564,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>ofType</h4>
 <pre>public&nbsp;<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&nbsp;ofType(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Type.html?is-external=true" title="class or interface in java.lang.reflect">Type</a>&nbsp;type)</pre>
-<div class="block">Returns a new key of the specified type with the same annotation as this
- key.</div>
+<div class="block">Returns a new key of the specified type with the same annotation as this key.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
@@ -589,8 +578,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>ofType</h4>
 <pre>public&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;ofType(<a href="../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type)</pre>
-<div class="block">Returns a new key of the specified type with the same annotation as this
- key.</div>
+<div class="block">Returns a new key of the specified type with the same annotation as this key.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
@@ -618,8 +606,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>withoutAttributes</h4>
 <pre>public&nbsp;<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../com/google/inject/Key.html" title="type parameter in Key">T</a>&gt;&nbsp;withoutAttributes()</pre>
-<div class="block">Returns this key without annotation attributes, i.e. with only the
- annotation type.</div>
+<div class="block">Returns this key without annotation attributes, i.e. with only the annotation type.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>

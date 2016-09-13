@@ -118,12 +118,10 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">ServletModule</span>
 extends <a href="../../../../com/google/inject/AbstractModule.html" title="class in com.google.inject">AbstractModule</a></pre>
-<div class="block">Configures the servlet scopes and creates bindings for the servlet API
- objects so you can inject the request, response, session, etc.
+<div class="block">Configures the servlet scopes and creates bindings for the servlet API objects so you can inject
+ the request, response, session, etc.
 
- <p>
- You should subclass this module to register servlets and
- filters in the <a href="../../../../com/google/inject/servlet/ServletModule.html#configureServlets--"><code>configureServlets()</code></a> method.</div>
+ <p>You should subclass this module to register servlets and filters in the <a href="../../../../com/google/inject/servlet/ServletModule.html#configureServlets--"><code>configureServlets()</code></a> method.</div>
 </li>
 </ul>
 </div>
@@ -219,8 +217,8 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>protected <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletContext.html?is-external=true" title="class or interface in javax.servlet">ServletContext</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#getServletContext--">getServletContext</a></span>()</code>
-<div class="block">This method only works if you are using the <a href="../../../../com/google/inject/servlet/GuiceServletContextListener.html" title="class in com.google.inject.servlet">GuiceServletContextListener</a> to
- create your injector.</div>
+<div class="block">This method only works if you are using the <a href="../../../../com/google/inject/servlet/GuiceServletContextListener.html" title="class in com.google.inject.servlet">GuiceServletContextListener</a> to create
+ your injector.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
@@ -311,10 +309,10 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 <pre>protected&nbsp;void&nbsp;configureServlets()</pre>
 <div class="block"><h3>Servlet Mapping EDSL</h3>
 
- <p> Part of the EDSL builder language for configuring servlets
- and filters with guice-servlet. Think of this as an in-code replacement for web.xml.
- Filters and servlets are configured here using simple java method calls. Here is a typical
- example of registering a filter when creating your Guice injector:
+ <p>Part of the EDSL builder language for configuring servlets and filters with guice-servlet.
+ Think of this as an in-code replacement for web.xml. Filters and servlets are configured here
+ using simple java method calls. Here is a typical example of registering a filter when creating
+ your Guice injector:
 
  <pre>
    Guice.createInjector(..., new ServletModule() {
@@ -335,13 +333,15 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
  </pre>
 
  Every servlet (or filter) is required to be a singleton. If you cannot annotate the class
- directly, you should add a separate <code>bind(..).in(Singleton.class)</code> rule elsewhere in
- your module. Mapping a servlet that is bound under any other scope is an error.
+ directly, you should add a separate <code>bind(..).in(Singleton.class)</code> rule elsewhere in your
+ module. Mapping a servlet that is bound under any other scope is an error.
 
  <p>
+
  <h4>Dispatch Order</h4>
- You are free to register as many servlets and filters as you like this way. They will
- be compared and dispatched in the order in which the filter methods are called:
+
+ You are free to register as many servlets and filters as you like this way. They will be
+ compared and dispatched in the order in which the filter methods are called:
 
  <pre>
 
@@ -361,51 +361,55 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
       }
     }
  </pre>
- This will traverse down the list of rules in lexical order. For example, a url
-  "<code>/my/file.js</code>" (after it runs through the matching filters) will first
-  be compared against the servlet mapping:
- 
+
+ This will traverse down the list of rules in lexical order. For example, a url "<code>/my/file.js</code>" (after it runs through the matching filters) will first be compared against the
+ servlet mapping:
+
  <pre>
        serve("*.html").with(MyServlet.class);
  </pre>
+
  And failing that, it will descend to the next servlet mapping:
 
  <pre>
        serve("/my/*").with(MyServlet.class);
  </pre>
 
- Since this rule matches, Guice Servlet will dispatch to <code>MyServlet</code>. These
- two mapping rules can also be written in more compact form using varargs syntax:
+ Since this rule matches, Guice Servlet will dispatch to <code>MyServlet</code>. These two mapping
+ rules can also be written in more compact form using varargs syntax:
 
  <pre>
        serve(<b>"*.html", "/my/*"</b>).with(MyServlet.class);
  </pre>
- 
- This way you can map several URI patterns to the same servlet. A similar syntax is
- also available for filter mappings.
+
+ This way you can map several URI patterns to the same servlet. A similar syntax is also
+ available for filter mappings.
 
  <p>
+
  <h4>Regular Expressions</h4>
+
  You can also map servlets (or filters) to URIs using regular expressions:
+
  <pre>
     <b>serveRegex("(.)*ajax(.)*").with(MyAjaxServlet.class)</b>
  </pre>
 
  This will map any URI containing the text "ajax" in it to <code>MyAjaxServlet</code>. Such as:
- <ul>
- <li>http://www.google.com/ajax.html</li>
- <li>http://www.google.com/content/ajax/index</li>
- <li>http://www.google.com/it/is_totally_ajaxian</li>
- </ul>
 
+ <ul>
+ <li>http://www.google.com/ajax.html
+ <li>http://www.google.com/content/ajax/index
+ <li>http://www.google.com/it/is_totally_ajaxian
+ </ul>
 
  <h3>Initialization Parameters</h3>
 
- Servlets (and filters) allow you to pass in init params
- using the <code>&lt;init-param&gt;</code> tag in web.xml. You can similarly pass in parameters to
- Servlets and filters registered in Guice-servlet using a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> of parameter
- name/value pairs. For example, to initialize <code>MyServlet</code> with two parameters
- (<code>name="Dhanji", site="google.com"</code>) you could write:
+ Servlets (and filters) allow you to pass in init params using the <code>&lt;init-param&gt;</code> tag in
+ web.xml. You can similarly pass in parameters to Servlets and filters registered in
+ Guice-servlet using a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> of parameter name/value pairs. For example, to
+ initialize <code>MyServlet</code> with two parameters (<code>name="Dhanji", site="google.com"</code>) you
+ could write:
 
  <pre>
   Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
@@ -417,11 +421,11 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
  </pre>
 
  <p>
+
  <h3>Binding Keys</h3>
 
- You can also bind keys rather than classes. This lets you hide
- implementations with package-local visbility and expose them using
- only a Guice module and an annotation:
+ You can also bind keys rather than classes. This lets you hide implementations with
+ package-local visbility and expose them using only a Guice module and an annotation:
 
  <pre>
   ...
@@ -429,8 +433,8 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
  </pre>
 
  Where <code>Filter.class</code> refers to the Servlet API interface and <code>Fave.class</code> is a
- custom binding annotation. Elsewhere (in one of your own modules) you can bind this
- filter's implementation:
+ custom binding annotation. Elsewhere (in one of your own modules) you can bind this filter's
+ implementation:
 
  <pre>
    bind(Filter.class)<b>.annotatedWith(Fave.class)</b>.to(MyFilterImpl.class);
@@ -439,32 +443,33 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
  See <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a> for more information on binding syntax.
 
  <p>
+
  <h3>Multiple Modules</h3>
 
- It is sometimes useful to capture servlet and filter mappings from multiple different
- modules. This is essential if you want to package and offer drop-in Guice plugins that
- provide servlet functionality.
+ It is sometimes useful to capture servlet and filter mappings from multiple different modules.
+ This is essential if you want to package and offer drop-in Guice plugins that provide servlet
+ functionality.
 
- <p>
- Guice Servlet allows you to register several instances of <code>ServletModule</code> to your
- injector. The order in which these modules are installed determines the dispatch order
- of filters and the precedence order of servlets. For example, if you had two servlet modules,
- <code>RpcModule</code> and <code>WebServiceModule</code> and they each contained a filter that mapped
- to the same URI pattern, <code>"/*"</code>:
+ <p>Guice Servlet allows you to register several instances of <code>ServletModule</code> to your
+ injector. The order in which these modules are installed determines the dispatch order of
+ filters and the precedence order of servlets. For example, if you had two servlet modules,
+ <code>RpcModule</code> and <code>WebServiceModule</code> and they each contained a filter that mapped to
+ the same URI pattern, <code>"/*"</code>:
 
- <p>
- In <code>RpcModule</code>:
+ <p>In <code>RpcModule</code>:
+
  <pre>
      filter("/*").through(RpcFilter.class);
  </pre>
 
  In <code>WebServiceModule</code>:
+
  <pre>
      filter("/*").through(WebServiceFilter.class);
  </pre>
 
- Then the order in which these filters are dispatched is determined by the order in which
- the modules are installed:
+ Then the order in which these filters are dispatched is determined by the order in which the
+ modules are installed:
 
  <pre>
    <b>install(new WebServiceModule());</b>
@@ -609,8 +614,8 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 <li class="blockList">
 <h4>getServletContext</h4>
 <pre>protected final&nbsp;<a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletContext.html?is-external=true" title="class or interface in javax.servlet">ServletContext</a>&nbsp;getServletContext()</pre>
-<div class="block">This method only works if you are using the <a href="../../../../com/google/inject/servlet/GuiceServletContextListener.html" title="class in com.google.inject.servlet">GuiceServletContextListener</a> to
- create your injector. Otherwise, it returns null.</div>
+<div class="block">This method only works if you are using the <a href="../../../../com/google/inject/servlet/GuiceServletContextListener.html" title="class in com.google.inject.servlet">GuiceServletContextListener</a> to create
+ your injector. Otherwise, it returns null.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The current servlet context.</dd>

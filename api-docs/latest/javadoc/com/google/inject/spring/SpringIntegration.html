@@ -172,8 +172,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <h4>fromSpring</h4>
 <pre>public static&nbsp;&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;fromSpring(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type,
                                          <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;name)</pre>
-<div class="block">Creates a provider which looks up objects from Spring using the given name.
- Expects a binding to <code>BeanFactory</code>. Example usage:
+<div class="block">Creates a provider which looks up objects from Spring using the given name. Expects a binding
+ to <code>BeanFactory</code>. Example usage:
 
  <pre>
  bind(DataSource.class)
@@ -189,9 +189,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <h4>bindAll</h4>
 <pre>public static&nbsp;void&nbsp;bindAll(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
                            org.springframework.beans.factory.ListableBeanFactory&nbsp;beanFactory)</pre>
-<div class="block">Binds all Spring beans from the given factory by name. For a Spring bean
- named "foo", this method creates a binding to the bean's type and
- <code>@Named("foo")</code>.</div>
+<div class="block">Binds all Spring beans from the given factory by name. For a Spring bean named "foo", this
+ method creates a binding to the bean's type and <code>@Named("foo")</code>.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../com/google/inject/name/Named.html" title="annotation in com.google.inject.name"><code>Named</code></a>, 

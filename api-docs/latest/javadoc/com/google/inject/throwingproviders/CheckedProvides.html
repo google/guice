@@ -95,13 +95,10 @@
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#METHOD" title="class or interface in java.lang.annotation">METHOD</a>)
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
 public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
-<div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to create a
- <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a> method binding that can throw exceptions. The
- method's return type is bound to a <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a> that can be
- injected. Guice will pass dependencies to the method as parameters. Install
- @CheckedProvides methods by using
- <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.html#forModule-com.google.inject.Module-"><code>ThrowingProviderBinder.forModule(com.google.inject.Module)</code></a> on the
- module where the methods are declared.</div>
+<div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to create a <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a>
+ method binding that can throw exceptions. The method's return type is bound to a <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a> that can be injected. Guice will pass dependencies to the method as parameters.
+ Install @CheckedProvides methods by using <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.html#forModule-com.google.inject.Module-"><code>ThrowingProviderBinder.forModule(com.google.inject.Module)</code></a> on the module where the methods are
+ declared.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
@@ -187,8 +184,8 @@ public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 <li class="blockList">
 <h4>scopeExceptions</h4>
 <pre>public abstract&nbsp;boolean&nbsp;scopeExceptions</pre>
-<div class="block">Whether exceptions should be put into the Guice scope.
- Default behavior is that exceptions are scoped.</div>
+<div class="block">Whether exceptions should be put into the Guice scope. Default behavior is that exceptions are
+ scoped.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>

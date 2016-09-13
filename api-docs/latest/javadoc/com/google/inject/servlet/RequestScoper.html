@@ -168,10 +168,9 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>open</h4>
 <pre><a href="../../../../com/google/inject/servlet/RequestScoper.CloseableScope.html" title="interface in com.google.inject.servlet">RequestScoper.CloseableScope</a>&nbsp;open()</pre>
-<div class="block">Opens up the request scope until the returned object is closed.
- Implementations should ensure (e.g. by blocking) that multiple threads
- cannot open the same request scope concurrently. It is allowable to open
- the same request scope on the same thread, as long as open/close calls are
+<div class="block">Opens up the request scope until the returned object is closed. Implementations should ensure
+ (e.g. by blocking) that multiple threads cannot open the same request scope concurrently. It is
+ allowable to open the same request scope on the same thread, as long as open/close calls are
  correctly nested.</div>
 </li>
 </ul>

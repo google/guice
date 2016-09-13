@@ -32,8 +32,8 @@ com.google.inject.spi Documentation Differences
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-  <A HREF="docdiffs_com.google.inject.grapher.html"><B>PREV PACKAGE</B></A>  &nbsp;
-  &nbsp;<B>NEXT PACKAGE</B>
+  <A HREF="docdiffs_com.google.inject.servlet.html"><B>PREV PACKAGE</B></A>  &nbsp;
+  &nbsp;<A HREF="docdiffs_com.google.inject.spring.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="docdiffs_com.google.inject.spi.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -61,17 +61,514 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
+<A NAME="com.google.inject.spi.BindingScopingVisitor!class"></A><a href="com.google.inject.spi.BindingScopingVisitor.html" class="hiddenlink">Class <b>BindingScopingVisitor</b></a><br><br><blockquote>Visits each of the strategies used to scope an injection.
+
+ @param <V> any type to be returned by the visit method. Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/BindingScopingVisitor/Void.html"><TT>Void</TT></A> <strike>with
+</strike><span style="background: #FFFF00">with</span> <strike>    </strike>{@code return null}<span style="background: #FFFF00">
+    </span> if no return type is needed.
+ @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.BindingScopingVisitor.dmethod.visitNoScoping()"></A><a href="com.google.inject.spi.BindingScopingVisitor.html" class="hiddenlink">Class <b>BindingScopingVisitor</b></a>, <a href="com.google.inject.spi.BindingScopingVisitor.html#com.google.inject.spi.BindingScopingVisitor.visitNoScoping_changed()" class="hiddenlink">V <b>visitNoScoping()</b></a><br><br><blockquote>Visit an unspecified or unscoped strategy. On a module, this strategy indicates that the
+ injector should use scoping annotations to find a scope. On an injector, it indicates <strike>that
+ no</strike><span style="background: #FFFF00">that no
+</span> scope is applied to the binding. An unscoped binding will behave like a scoped one when <strike>it
+</strike><span style="background: #FFFF00">it</span> <strike>is</strike><span style="background: #FFFF00">is
+</span> linked to a scoped binding.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.BindingTargetVisitor!class"></A><a href="com.google.inject.spi.BindingTargetVisitor.html" class="hiddenlink">Class <b>BindingTargetVisitor</b></a><br><br><blockquote>Visits each of the strategies used to find an instance to satisfy an injection.
+
+ @param <V> any type to be returned by the visit method. Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/BindingTargetVisitor/Void.html"><TT>Void</TT></A> <strike>with
+</strike><span style="background: #FFFF00">with</span> <strike>    </strike>{@code return null}<span style="background: #FFFF00">
+    </span> if no return type is needed.
+ @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.BindingTargetVisitor.dmethod.visit(ConvertedConstantBinding&lt;? extends T&gt;)"></A><a href="com.google.inject.spi.BindingTargetVisitor.html" class="hiddenlink">Class <b>BindingTargetVisitor</b></a>, <a href="com.google.inject.spi.BindingTargetVisitor.html#com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ConvertedConstantBinding<? extends T>)" class="hiddenlink">V <b>visit(ConvertedConstantBinding&lt;? extends T&gt;)</b></a><br><br><blockquote>Visit a binding created from converting a bound instance to a new type. The source <strike>binding
+ has</strike><span style="background: #FFFF00">binding has
+</span> the same binding annotation but a different type. This target is found only on injector
+ bindings.</blockquote>
+<A NAME="com.google.inject.spi.BindingTargetVisitor.dmethod.visit(LinkedKeyBinding&lt;? extends T&gt;)"></A><a href="com.google.inject.spi.BindingTargetVisitor.html" class="hiddenlink">Class <b>BindingTargetVisitor</b></a>, <a href="com.google.inject.spi.BindingTargetVisitor.html#com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.LinkedKeyBinding<? extends T>)" class="hiddenlink">V <b>visit(LinkedKeyBinding&lt;? extends T&gt;)</b></a><br><br><blockquote>Visit a linked key binding. The other key's binding is used to resolve injections. <strike>This
+ target</strike><span style="background: #FFFF00">This target
+</span> is found in both module and injector bindings.</blockquote>
+<A NAME="com.google.inject.spi.BindingTargetVisitor.dmethod.visit(UntargettedBinding&lt;? extends T&gt;)"></A><a href="com.google.inject.spi.BindingTargetVisitor.html" class="hiddenlink">Class <b>BindingTargetVisitor</b></a>, <a href="com.google.inject.spi.BindingTargetVisitor.html#com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.UntargettedBinding<? extends T>)" class="hiddenlink">V <b>visit(UntargettedBinding&lt;? extends T&gt;)</b></a><br><br><blockquote>Visit an untargetted binding. This target is found only on module bindings. It <strike>indicates
+ that</strike><span style="background: #FFFF00">indicates that
+</span> the injector should use its implicit binding strategies to resolve injections.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ConstructorBinding.dmethod.getInjectableMembers()"></A><a href="com.google.inject.spi.ConstructorBinding.html" class="hiddenlink">Class <b>ConstructorBinding</b></a>, <a href="com.google.inject.spi.ConstructorBinding.html#com.google.inject.spi.ConstructorBinding.getInjectableMembers_changed()" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>getInjectableMembers()</b></a><br><br><blockquote>Returns all instance method and field injection points on {@code type}.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ConvertedConstantBinding.dmethod.getTypeConverterBinding()"></A><a href="com.google.inject.spi.ConvertedConstantBinding.html" class="hiddenlink">Class <b>ConvertedConstantBinding</b></a>, <a href="com.google.inject.spi.ConvertedConstantBinding.html#com.google.inject.spi.ConvertedConstantBinding.getTypeConverterBinding_changed()" class="hiddenlink">TypeConverterBinding <b>getTypeConverterBinding()</b></a><br><br><blockquote>Returns the type converter binding used to convert the constant.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@since 3.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.DefaultBindingScopingVisitor!class"></A><a href="com.google.inject.spi.DefaultBindingScopingVisitor.html" class="hiddenlink">Class <b>DefaultBindingScopingVisitor</b></a><br><br><blockquote>No-op visitor for subclassing. All interface methods simply delegate <strike>to
+</strike><span style="background: #FFFF00">to</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DefaultBindingScopingVisitor/.html#visitOther()"><TT>.visitOther()</TT></A>,<span style="background: #FFFF00">
+</span> returning its result.
+
+ @param <V> any type to be returned by the visit method. Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DefaultBindingScopingVisitor/Void.html"><TT>Void</TT></A> <strike>with
+  </strike><span style="background: #FFFF00">with</span> <strike>  </strike>{@code return null}<span style="background: #FFFF00">
+</span> <span style="background: #FFFF00">    </span>if no return type is needed.
+ <strike>
+ </strike>@author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.DefaultBindingTargetVisitor!class"></A><a href="com.google.inject.spi.DefaultBindingTargetVisitor.html" class="hiddenlink">Class <b>DefaultBindingTargetVisitor</b></a><br><br><blockquote>No-op visitor for subclassing. All interface methods simply delegate to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DefaultBindingTargetVisitor/.html#visitOther(Binding)"><TT>.visitOther(Binding)</TT></A>, returning its result.
+
+ @param <V> any type to be returned by the visit method. Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DefaultBindingTargetVisitor/Void.html"><TT>Void</TT></A> <strike>with
+</strike><span style="background: #FFFF00">with</span> <strike>    </strike>{@code return null}<span style="background: #FFFF00">
+ </span> <span style="background: #FFFF00">   </span>if no return type is needed.<strike>
+
+</strike><span style="background: #FFFF00">
+</span> @author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.DefaultElementVisitor!class"></A><a href="com.google.inject.spi.DefaultElementVisitor.html" class="hiddenlink">Class <b>DefaultElementVisitor</b></a><br><br><blockquote>No-op visitor for subclassing. All interface methods simply delegate <strike>to
+</strike><span style="background: #FFFF00">to</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DefaultElementVisitor/.html#visitOther(Element)"><TT>.visitOther(Element)</TT></A>, returning its result.
+
+ @param <V> any type to be returned by the visit method. Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DefaultElementVisitor/Void.html"><TT>Void</TT></A> <strike>with
+  </strike><span style="background: #FFFF00">with</span> <strike>  </strike>{@code return null}<span style="background: #FFFF00">
+</span> <span style="background: #FFFF00">    </span>if no return type is needed.<strike>
+
+</strike><span style="background: #FFFF00">
+</span> @author sberlin@gmail.com (Sam Berlin)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.DependencyAndSource!class"></A><a href="com.google.inject.spi.DependencyAndSource.html" class="hiddenlink">Class <b>DependencyAndSource</b></a><br><br><blockquote>A combination of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DependencyAndSource/Dependency.html"><TT>Dependency</TT></A> and the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DependencyAndSource/Binding.html#getSource()"><TT><strike> </strike>source</TT></A> where <strike>the</strike><span style="background: #FFFF00">the
+</span> dependency was bound.<strike>
+ 
+</strike><span style="background: #FFFF00">
+
+</span> @author sameb@google.com (Sam Berlin)
+ @since 4.0</blockquote>
+<A NAME="com.google.inject.spi.DependencyAndSource.dmethod.getBindingSource()"></A><a href="com.google.inject.spi.DependencyAndSource.html" class="hiddenlink">Class <b>DependencyAndSource</b></a>, <a href="com.google.inject.spi.DependencyAndSource.html#com.google.inject.spi.DependencyAndSource.getBindingSource_changed()" class="hiddenlink">String <b>getBindingSource()</b></a><br><br><blockquote>Returns a string describing where this dependency was bound. If the <strike>binding
+</strike><span style="background: #FFFF00">binding</span> was just-in-time,<span style="background: #FFFF00">
+</span> there is no valid binding source, so this describes <strike>the
+</strike><span style="background: #FFFF00">the</span> class in question.</blockquote>
+<A NAME="com.google.inject.spi.DependencyAndSource.dmethod.getDependency()"></A><a href="com.google.inject.spi.DependencyAndSource.html" class="hiddenlink">Class <b>DependencyAndSource</b></a>, <a href="com.google.inject.spi.DependencyAndSource.html#com.google.inject.spi.DependencyAndSource.getDependency_changed()" class="hiddenlink">Dependency&lt;?&gt; <b>getDependency()</b></a><br><br><blockquote>Returns the Dependency, if one exists. For anything that can be <strike>referenced
+</strike><span style="background: #FFFF00">referenced</span> by <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Injector.html#getBinding"><TT>Injector.getBinding</TT></A>, a dependency exists. A dependency will <strike>not
+</strike><span style="background: #FFFF00">not</span> exist (and this will <strike>return</strike><span style="background: #FFFF00">return
+</span> null) for types initialized <strike>with
+</strike><span style="background: #FFFF00">with</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Binder.html#requestInjection"><TT>Binder.requestInjection</TT></A> or <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Injector.html#injectMembers(Object)"><TT>Injector.injectMembers(Object)</TT></A>,<strike>
+</strike> nor will it exist for objects injected into Providers <strike>bound with
+</strike><span style="background: #FFFF00">bound
+ with</span> LinkedBindingBuilder#toProvider(Provider).</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ElementSource!class"></A><a href="com.google.inject.spi.ElementSource.html" class="hiddenlink">Class <b>ElementSource</b></a><br><br><blockquote>Contains information about where and how an <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/Element.html"><TT>element</TT></A> <strike>was
+</strike><span style="background: #FFFF00">was</span> bound.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>The <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/.html#getDeclaringSource()"><TT>declaring source</TT></A> refers to a location <strike>in
+</strike><span style="background: #FFFF00">in</span> source code <strike>that</strike><span style="background: #FFFF00">that
+</span> defines the Guice <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/Element.html"><TT>element</TT></A>. For example, <strike>if
+</strike><span style="background: #FFFF00">if</span> the element is created from a <strike>method</strike><span style="background: #FFFF00">method
+</span> annotated by {@literal @Provides}, <strike>the
+</strike><span style="background: #FFFF00">the</span> declaring source of element would be the method itself.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>The <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/.html#getStackTrace()"><TT>.getStackTrace()</TT></A> refers to the sequence of calls ends at one <strike>of
+</strike><span style="background: #FFFF00">of</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/com/google/inject/Binder.html"><TT>com.google.inject.Binder</TT></A> {@code bindXXX()} methods and <strike>eventually
+</strike><span style="background: #FFFF00">eventually</span> defines the element. Note <strike>that</strike><span style="background: #FFFF00">that
+</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/.html#getStackTrace()"><TT>.getStackTrace()</TT></A> <strike>lists
+</strike><span style="background: #FFFF00">lists</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/StackTraceElement.html"><TT>StackTraceElements</TT></A> in <strike>reverse</strike><span style="background: #FFFF00">reverse
+</span> chronological order.<strike>
+</strike> The first element (index zero) is the last method call and the last element
+ is the first method invocation. By default, the stack trace is not collected.<strike>
+</strike> The <strike>default</strike><span style="background: #FFFF00">default
+</span> behavior can be changed by setting <strike>the
+</strike><span style="background: #FFFF00">the</span> {@code guice_include_stack_traces} flag value. The <strike>value</strike><span style="background: #FFFF00">value
+</span> can be <strike>either
+</strike><span style="background: #FFFF00">either</span> {@code OFF}, {@code ONLY_FOR_DECLARING_SOURCE} or {@code COMPLETE}. Note that
+ collecting stack traces for every binding can cause a performance hit <strike>when
+</strike><span style="background: #FFFF00">when</span> the injector <strike>is</strike><span style="background: #FFFF00">is
+</span> created.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>The sequence of class names of <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/com/google/inject/Module.html"><TT>modules</TT></A><strike>
+</strike> involved in <strike>the</strike><span style="background: #FFFF00">the
+</span> element creation can be retrieved <strike>by
+</strike><span style="background: #FFFF00">by</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/.html#getModuleClassNames()"><TT>.getModuleClassNames()</TT></A>. Similar to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/.html#getStackTrace()"><TT>.getStackTrace()</TT></A>, <strike>the
+</strike><span style="background: #FFFF00">the</span> order is reverse chronological. The first module (index 0) is the <strike>module</strike><span style="background: #FFFF00">module
+</span> <strike>that
+</strike><span style="background: #FFFF00">that</span> installs the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/Element.html"><TT>element</TT></A>. The last module is the root module.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>In order to support the cases where a Guice <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/Element.html"><TT>element</TT></A> <strike>is
+</strike><span style="background: #FFFF00">is</span> created from <strike>another</strike><span style="background: #FFFF00">another
+</span> Guice <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/Element.html"><TT>element</TT></A> (original) (e.g., <strike>by
+</strike><span style="background: #FFFF00">by</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/Element.html#applyTo"><TT>Element.applyTo</TT></A>), it also provides <strike>a</strike><span style="background: #FFFF00">a
+</span> reference to the <strike>original
+</strike><span style="background: #FFFF00">original</span> element source (<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementSource/.html#getOriginalElementSource()"><TT>.getOriginalElementSource()</TT></A>).
+
+ @since 4.0</blockquote>
+<A NAME="com.google.inject.spi.ElementSource.dmethod.getDeclaringSource()"></A><a href="com.google.inject.spi.ElementSource.html" class="hiddenlink">Class <b>ElementSource</b></a>, <a href="com.google.inject.spi.ElementSource.html#com.google.inject.spi.ElementSource.getDeclaringSource_changed()" class="hiddenlink">Object <b>getDeclaringSource()</b></a><br><br><blockquote>Returns a single location in source code that defines the element. It can be any <strike>object
+</strike><span style="background: #FFFF00">object</span> such <strike>as</strike><span style="background: #FFFF00">as
+</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/java/lang/reflect/Constructor.html"><TT>java.lang.reflect.Constructor</TT></A>, <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/java/lang/reflect/Method.html"><TT>java.lang.reflect.Method</TT></A>,<strike>
+</strike> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/java/lang/reflect/Field.html"><TT>java.lang.reflect.Field</TT></A>, <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/StackTraceElement.html"><TT>StackTraceElement</TT></A>, etc. <strike>For
+</strike><span style="background: #FFFF00">For</span> example, if the element <strike>is</strike><span style="background: #FFFF00">is
+</span> created from a method annotated by {@literal @Provides}, <strike>the
+</strike><span style="background: #FFFF00">the</span> declaring source of element <strike>would</strike><span style="background: #FFFF00">would
+</span> be the method itself.</blockquote>
+<A NAME="com.google.inject.spi.ElementSource.dmethod.getModuleClassNames()"></A><a href="com.google.inject.spi.ElementSource.html" class="hiddenlink">Class <b>ElementSource</b></a>, <a href="com.google.inject.spi.ElementSource.html#com.google.inject.spi.ElementSource.getModuleClassNames_changed()" class="hiddenlink">List&lt;String&gt; <b>getModuleClassNames()</b></a><br><br><blockquote>Returns the class names of modules involved in creating this <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Element.html"><TT>Element</TT></A>. The <strike>first
+ element</strike><span style="background: #FFFF00">first element
+</span> (index 0) is the class name of module that defined the element, and the last <strike>element
+</strike><span style="background: #FFFF00">element</span> is <strike>the</strike><span style="background: #FFFF00">the
+</span> class name of root module.</blockquote>
+<A NAME="com.google.inject.spi.ElementSource.dmethod.getModuleConfigurePositionsInStackTrace()"></A><a href="com.google.inject.spi.ElementSource.html" class="hiddenlink">Class <b>ElementSource</b></a>, <a href="com.google.inject.spi.ElementSource.html#com.google.inject.spi.ElementSource.getModuleConfigurePositionsInStackTrace_changed()" class="hiddenlink">List&lt;Integer&gt; <b>getModuleConfigurePositionsInStackTrace()</b></a><br><br><blockquote>Returns the position of <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Module.html#configure"><TT>configure(Binder)</TT></A> method
+ call in the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getStackTrace"><TT>stack trace</TT></A> for modules that their classes returned by
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getModuleClassNames"><TT>.getModuleClassNames</TT></A>. For example, if the stack trace looks like the following:<strike>
+ </strike><span style="background: #FFFF00">
+
+ <ol></span>
+ <strike>{@code
+ </strike> <strike>0</strike> <strike>-</strike><li><span style="background: #FFFF00">{@code</span> Binder.bind()<strike>,</strike><span style="background: #FFFF00">}</span>
+  <strike>1</strike> <strike>-</strike><li><span style="background: #FFFF00">{@code</span> ModuleTwo.configure()<strike>,</strike><span style="background: #FFFF00">}</span>
+  <strike>2</strike> <strike>-</strike><li><span style="background: #FFFF00">{@code</span> Binder.install()<strike>,</strike><span style="background: #FFFF00">}</span>
+  <strike>3</strike> <strike>-</strike><li><span style="background: #FFFF00">{@code</span> ModuleOne.configure()<strike>,</strike><span style="background: #FFFF00">}</span>
+  <strike>4</strike> <strike>-</strike><li><span style="background: #FFFF00">{@code</span> theRest().<strike> </strike>
+ <strike>}
+</strike></ol><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>1 and 3 are returned.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>In the cases where stack trace is not available (i.e., the stack trace was not collected),
+ it returns -1 for all module positions.</blockquote>
+<A NAME="com.google.inject.spi.ElementSource.dmethod.getStackTrace()"></A><a href="com.google.inject.spi.ElementSource.html" class="hiddenlink">Class <b>ElementSource</b></a>, <a href="com.google.inject.spi.ElementSource.html#com.google.inject.spi.ElementSource.getStackTrace_changed()" class="hiddenlink">StackTraceElement[] <b>getStackTrace()</b></a><br><br><blockquote>Returns the sequence of method calls that ends at one of <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Binder.html"><TT>com.google.inject.Binder</TT></A>
+ {@code bindXXX()} methods and eventually defines the element. Note <strike>that
+</strike><span style="background: #FFFF00">that</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getStackTrace"><TT>.getStackTrace</TT></A><span style="background: #FFFF00">
+</span> lists <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/StackTraceElement.html"><TT>StackTraceElements</TT></A> in <strike>reverse
+</strike><span style="background: #FFFF00">reverse</span> chronological order. The <strike>first</strike><span style="background: #FFFF00">first
+</span> element (index zero) is the last method call and the <strike>last
+</strike><span style="background: #FFFF00">last</span> element is the first <strike>method</strike><span style="background: #FFFF00">method
+</span> invocation. In the cases where stack trace is not <strike>available
+</strike><span style="background: #FFFF00">available</span> (i.e.,the stack trace was <strike>not</strike><span style="background: #FFFF00">not
+</span> collected), it returns an empty array.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ElementVisitor!class"></A><a href="com.google.inject.spi.ElementVisitor.html" class="hiddenlink">Class <b>ElementVisitor</b></a><br><br><blockquote>Visit elements.
+
+ @param <V> any type to be returned by the visit method. Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementVisitor/Void.html"><TT>Void</TT></A> <strike>with
+</strike><span style="background: #FFFF00">with</span> <strike>    </strike>{@code return null}<span style="background: #FFFF00">
+ </span> <span style="background: #FFFF00">   </span>if no return type is needed.
+ <strike>
+ </strike>@since 2.0</blockquote>
+<A NAME="com.google.inject.spi.ElementVisitor.dmethod.visit(Binding&lt;T&gt;)"></A><a href="com.google.inject.spi.ElementVisitor.html" class="hiddenlink">Class <b>ElementVisitor</b></a>, <a href="com.google.inject.spi.ElementVisitor.html#com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.Binding<T>)" class="hiddenlink">V <b>visit(Binding&lt;T&gt;)</b></a><br><br><blockquote>Visit a mapping from a key (type and optional annotation) to the strategy for <strike>getting
+ instances</strike><span style="background: #FFFF00">getting instances
+</span> of the type.</blockquote>
+<A NAME="com.google.inject.spi.ElementVisitor.dmethod.visit(DisableCircularProxiesOption)"></A><a href="com.google.inject.spi.ElementVisitor.html" class="hiddenlink">Class <b>ElementVisitor</b></a>, <a href="com.google.inject.spi.ElementVisitor.html#com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.DisableCircularProxiesOption)" class="hiddenlink">V <b>visit(DisableCircularProxiesOption)</b></a><br><br><blockquote>Visit a disable circular proxies command.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@since 3.0</blockquote>
+<A NAME="com.google.inject.spi.ElementVisitor.dmethod.visit(RequireAtInjectOnConstructorsOption)"></A><a href="com.google.inject.spi.ElementVisitor.html" class="hiddenlink">Class <b>ElementVisitor</b></a>, <a href="com.google.inject.spi.ElementVisitor.html#com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.RequireAtInjectOnConstructorsOption)" class="hiddenlink">V <b>visit(RequireAtInjectOnConstructorsOption)</b></a><br><br><blockquote>Visit a require explicit {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Inject.html"><TT>Inject</TT></A> command.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@since 4.0</blockquote>
+<A NAME="com.google.inject.spi.ElementVisitor.dmethod.visit(RequireExplicitBindingsOption)"></A><a href="com.google.inject.spi.ElementVisitor.html" class="hiddenlink">Class <b>ElementVisitor</b></a>, <a href="com.google.inject.spi.ElementVisitor.html#com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.RequireExplicitBindingsOption)" class="hiddenlink">V <b>visit(RequireExplicitBindingsOption)</b></a><br><br><blockquote>Visit a require explicit bindings command.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@since 3.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.HasDependencies.dmethod.getDependencies()"></A><a href="com.google.inject.spi.HasDependencies.html" class="hiddenlink">Class <b>HasDependencies</b></a>, <a href="com.google.inject.spi.HasDependencies.html#com.google.inject.spi.HasDependencies.getDependencies_changed()" class="hiddenlink">Set&lt;Dependency&lt;?&gt;&gt; <b>getDependencies()</b></a><br><br><blockquote>Returns the known dependencies for this type. If this has dependencies whose values are not
+ known statically, a dependency for the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Injector.html"><TT>Injector</TT></A> will be
+ included in the returned set.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@return a possibly empty set</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forConstructor(Constructor&lt;T&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forConstructor_changed(java.lang.reflect.Constructor<T>)" class="hiddenlink">InjectionPoint <b>forConstructor(Constructor&lt;T&gt;)</b></a><br><br><blockquote>Returns a new injection point for the specified constructor. If the declaring type of {@code
+ constructor} is parameterized (such as {@code List<T>}), prefer the overload that includes a
+ type literal.
+
+ @param constructor any single constructor present on {@code type}.
+ <strike>
+ </strike>@since 3.0</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forConstructor(Constructor&lt;T&gt;, TypeLiteral&lt;? extends T&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forConstructor_changed(java.lang.reflect.Constructor<T>, com.google.inject.TypeLiteral<? extends T>)" class="hiddenlink">InjectionPoint <b>forConstructor(Constructor&lt;T&gt;, TypeLiteral&lt;? extends T&gt;)</b></a><br><br><blockquote>Returns a new injection point for the specified constructor of {@code type}.
+
+ @param constructor any single constructor present on {@code type}.
+ @param type the concrete type that defines {@code constructor}.
+ <strike>
+ </strike>@since 3.0</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forInstanceMethodsAndFields(Class&lt;?&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forInstanceMethodsAndFields_changed(java.lang.Class<?>)" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>forInstanceMethodsAndFields(Class&lt;?&gt;)</b></a><br><br><blockquote>Returns all instance method and field injection points on {@code type}.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.
+ @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+     <strike> </strike>a field with multiple binding annotations. The exception's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ConfigurationException.html#getPartialValue()"><TT>partial value</TT></A> is a {@code Set<InjectionPoint>}<strike>
+ </strike> <span style="background: #FFFF00">of
+</span>    <strike>of</strike> the valid injection points.</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forInstanceMethodsAndFields(TypeLiteral&lt;?&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forInstanceMethodsAndFields_changed(com.google.inject.TypeLiteral<?>)" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>forInstanceMethodsAndFields(TypeLiteral&lt;?&gt;)</b></a><br><br><blockquote>Returns all instance method and field injection points on {@code type}.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.
+ @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+     <strike> </strike>a field with multiple binding annotations. The exception's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ConfigurationException.html#getPartialValue()"><TT>partial value</TT></A> is a {@code Set<InjectionPoint>}<strike>
+ </strike> <span style="background: #FFFF00">of
+</span>    <strike>of</strike> the valid injection points.</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forMethod(Method, TypeLiteral&lt;T&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forMethod_changed(java.lang.reflect.Method, com.google.inject.TypeLiteral<T>)" class="hiddenlink">InjectionPoint <b>forMethod(Method, TypeLiteral&lt;T&gt;)</b></a><br><br><blockquote>Returns a new injection point for the specified method of {@code type}.<strike>
+</strike> This is useful <strike>for</strike><span style="background: #FFFF00">for
+</span> extensions that need to build dependency graphs <strike>from
+</strike><span style="background: #FFFF00">from</span> arbitrary methods.
+
+ @param method any single method present on {@code type}.
+ @param type the concrete type that defines {@code method}.<strike>
+
+</strike><span style="background: #FFFF00">
+</span> @since 4.0</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forStaticMethodsAndFields(Class&lt;?&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forStaticMethodsAndFields_changed(java.lang.Class<?>)" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>forStaticMethodsAndFields(Class&lt;?&gt;)</b></a><br><br><blockquote>Returns all static method and field injection points on {@code type}.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.
+ @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+     <strike> </strike>a field with multiple binding annotations. The exception's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ConfigurationException.html#getPartialValue()"><TT>partial value</TT></A> is a {@code Set<InjectionPoint>}<strike>
+ </strike> <span style="background: #FFFF00">of
+</span>    <strike>of</strike> the valid injection points.</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.forStaticMethodsAndFields(TypeLiteral&lt;?&gt;)"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forStaticMethodsAndFields_changed(com.google.inject.TypeLiteral<?>)" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>forStaticMethodsAndFields(TypeLiteral&lt;?&gt;)</b></a><br><br><blockquote>Returns all static method and field injection points on {@code type}.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.
+ @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+     <strike> </strike>a field with multiple binding annotations. The exception's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ConfigurationException.html#getPartialValue()"><TT>partial value</TT></A> is a {@code Set<InjectionPoint>}<strike>
+ </strike> <span style="background: #FFFF00">of
+</span>    <strike>of</strike> the valid injection points.</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.getDeclaringType()"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.getDeclaringType_changed()" class="hiddenlink">TypeLiteral&lt;?&gt; <b>getDeclaringType()</b></a><br><br><blockquote>Returns the generic type that defines this injection point. If the member exists on a
+ parameterized type, the result will include more type information than the member's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Member.html#getDeclaringClass()"><TT>raw declaring class</TT></A>.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@since 3.0</blockquote>
+<A NAME="com.google.inject.spi.InjectionPoint.dmethod.isToolable()"></A><a href="com.google.inject.spi.InjectionPoint.html" class="hiddenlink">Class <b>InjectionPoint</b></a>, <a href="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.isToolable_changed()" class="hiddenlink">boolean <b>isToolable()</b></a><br><br><blockquote>Returns true if the element is annotated with {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Toolable.html"><TT>Toolable</TT></A>.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@since 3.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.InjectionRequest!class"></A><a href="com.google.inject.spi.InjectionRequest.html" class="hiddenlink">Class <b>InjectionRequest</b></a><br><br><blockquote>A request to inject the instance fields and methods of an instance. Requests are created
+ explicitly in a module using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/InjectionRequest/com/google/inject/Binder.html#requestInjection(Object)"><TT> requestInjection()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     requestInjection(serviceInstance);</pre>
+
+ @author mikeward@google.com (Mike Ward)
+ @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.InjectionRequest.dmethod.getInjectionPoints()"></A><a href="com.google.inject.spi.InjectionRequest.html" class="hiddenlink">Class <b>InjectionRequest</b></a>, <a href="com.google.inject.spi.InjectionRequest.html#com.google.inject.spi.InjectionRequest.getInjectionPoints_changed()" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>getInjectionPoints()</b></a><br><br><blockquote>Returns the instance methods and fields of {@code instance} that will be injected to fulfill
+ this request.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.
+ @throws ConfigurationException if there is a malformed injection point on the class of {@code
+     <strike> </strike>instance}, such as a field with multiple binding annotations. The exception's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ConfigurationException.html#getPartialValue()"><TT>partial value</TT></A> is a {@code Set<InjectionPoint>}<strike>
+ </strike> <span style="background: #FFFF00">of
+</span>    <strike>of</strike> the valid injection points.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.InterceptorBinding!class"></A><a href="com.google.inject.spi.InterceptorBinding.html" class="hiddenlink">Class <b>InterceptorBinding</b></a><br><br><blockquote>Registration of interceptors for matching methods of matching classes. Instances are created
+ explicitly in a module using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/InterceptorBinding/com/google/inject/Binder.html#bindInterceptor( Matcher, Matcher,
+ MethodInterceptor[])"><TT>bindInterceptor()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     bindInterceptor(Matchers.subclassesOf(MyAction.class),
+         Matchers.annotatedWith(Transactional.class),
+         new MyTransactionInterceptor());</pre>
+
+ or from an injectable type listener using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/InterceptorBinding/TypeEncounter.html#bindInterceptor(Matcher,
+ org.aopalliance.intercept.MethodInterceptor[])"><TT>TypeEncounter.bindInterceptor()</TT></A>.
+
+ @author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.MembersInjectorLookup!class"></A><a href="com.google.inject.spi.MembersInjectorLookup.html" class="hiddenlink">Class <b>MembersInjectorLookup</b></a><br><br><blockquote>A lookup of the members injector for a type. Lookups are created explicitly in a module using
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/MembersInjectorLookup/com/google/inject/Binder.html#getMembersInjector(Class)"><TT>getMembersInjector()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     MembersInjector&lt;PaymentService&gt; membersInjector
+         = getMembersInjector(PaymentService.class);</pre>
+
+ @author crazybob@google.com (Bob Lee)
+ @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.MembersInjectorLookup.dmethod.getDelegate()"></A><a href="com.google.inject.spi.MembersInjectorLookup.html" class="hiddenlink">Class <b>MembersInjectorLookup</b></a>, <a href="com.google.inject.spi.MembersInjectorLookup.html#com.google.inject.spi.MembersInjectorLookup.getDelegate_changed()" class="hiddenlink">MembersInjector&lt;T&gt; <b>getDelegate()</b></a><br><br><blockquote>Returns the delegate members injector, or {@code null} if it has not yet been initialized.<strike>
+</strike> <strike>The</strike><span style="background: #FFFF00">The
+</span> delegate will be initialized when this element is processed, or otherwise used to <strike>create
+</strike><span style="background: #FFFF00">create</span> <strike>an</strike><span style="background: #FFFF00">an
+</span> injector.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.Message!class"></A><a href="com.google.inject.spi.Message.html" class="hiddenlink">Class <b>Message</b></a><br><br><blockquote>An error message and the context in which it occured. Messages are usually created internally by
+ Guice and its extensions. Messages can be created explicitly in a module using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/Message/com/google/inject/Binder.html#addError(Throwable)"><TT>addError()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     try {
+       bindPropertiesFromFile();
+     } catch (IOException e) {
+       addError(e);
+     }</pre>
+
+ @author crazybob@google.com (Bob Lee)</blockquote>
+<A NAME="com.google.inject.spi.Message.dmethod.getCause()"></A><a href="com.google.inject.spi.Message.html" class="hiddenlink">Class <b>Message</b></a>, <a href="com.google.inject.spi.Message.html#com.google.inject.spi.Message.getCause_changed()" class="hiddenlink">Throwable <b>getCause()</b></a><br><br><blockquote>Returns the throwable that caused this message, or {@code null} if <strike>this
+</strike><span style="background: #FFFF00">this</span> message was not <strike>caused</strike><span style="background: #FFFF00">caused
+</span> by a throwable.
+
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ModuleAnnotatedMethodScanner!class"></A><a href="com.google.inject.spi.ModuleAnnotatedMethodScanner.html" class="hiddenlink">Class <b>ModuleAnnotatedMethodScanner</b></a><br><br><blockquote>Allows extensions to scan modules for annotated methods and bind those <strike>methods
+</strike><span style="background: #FFFF00">methods</span> as providers,<span style="background: #FFFF00">
+</span> similar to {@code @Provides} methods.
+
+ @since 4.0</blockquote>
+<A NAME="com.google.inject.spi.ModuleAnnotatedMethodScanner.dmethod.prepareMethod(Binder, Annotation, Key&lt;T&gt;, InjectionPoint)"></A><a href="com.google.inject.spi.ModuleAnnotatedMethodScanner.html" class="hiddenlink">Class <b>ModuleAnnotatedMethodScanner</b></a>, <a href="com.google.inject.spi.ModuleAnnotatedMethodScanner.html#com.google.inject.spi.ModuleAnnotatedMethodScanner.prepareMethod_changed(com.google.inject.Binder, java.lang.annotation.Annotation, com.google.inject.Key<T>, com.google.inject.spi.InjectionPoint)" class="hiddenlink">Key&lt;T&gt; <b>prepareMethod(Binder, Annotation, Key&lt;T&gt;, InjectionPoint)</b></a><br><br><blockquote>Prepares a method for binding. This {@code key} parameter is the key discovered from looking at
+ the binding annotation and return value of the method. Implementations can modify the key to
+ instead bind to another key. For example, Multibinder may want to <strike>change
+</strike><span style="background: #FFFF00">change</span> {@code @<strike>SetProvides</strike><span style="background: #FFFF00">SetProvides
+</span> String provideFoo()} to bind into a unique Key within the <strike>multibinder
+</strike><span style="background: #FFFF00">multibinder</span> instead of binding {@<strike>code</strike><span style="background: #FFFF00">code
+</span> String}.
+
+ <p>The injection point and annotation are provided in case the implementation wants to set the
+ key based on the property of the annotation or if any additional preparation is needed for any
+ of the dependencies. The annotation is guaranteed to be an instance of one the classes returned
+ by <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#annotationClasses"><TT>.annotationClasses</TT></A>.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ModuleAnnotatedMethodScannerBinding!class"></A><a href="com.google.inject.spi.ModuleAnnotatedMethodScannerBinding.html" class="hiddenlink">Class <b>ModuleAnnotatedMethodScannerBinding</b></a><br><br><blockquote>Represents a call to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ModuleAnnotatedMethodScannerBinding/Binder.html#scanModulesForAnnotatedMethods"><TT>Binder.scanModulesForAnnotatedMethods</TT></A> in a module.<strike>
+ 
+</strike><span style="background: #FFFF00">
+
+</span> @author sameb@google.com (Sam Berlin)
+ @since 4.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProviderInstanceBinding.dmethod.getProviderInstance()"></A><a href="com.google.inject.spi.ProviderInstanceBinding.html" class="hiddenlink">Class <b>ProviderInstanceBinding</b></a>, <a href="com.google.inject.spi.ProviderInstanceBinding.html#com.google.inject.spi.ProviderInstanceBinding.getProviderInstance_changed()" class="hiddenlink">Provider&lt;? extends T&gt; <b>getProviderInstance()</b></a><br><br><blockquote>If the user supplied a JSR330 binding, then this will wrap that one. To always return the
+ user-supplied provider, use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getUserSuppliedProvider"><TT>.getUserSuppliedProvider</TT></A>.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <strike>
+ </strike>@deprecated Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getUserSuppliedProvider"><TT>.getUserSuppliedProvider</TT></A> instead.</blockquote>
+<A NAME="com.google.inject.spi.ProviderInstanceBinding.dmethod.getUserSuppliedProvider()"></A><a href="com.google.inject.spi.ProviderInstanceBinding.html" class="hiddenlink">Class <b>ProviderInstanceBinding</b></a>, <a href="com.google.inject.spi.ProviderInstanceBinding.html#com.google.inject.spi.ProviderInstanceBinding.getUserSuppliedProvider_changed()" class="hiddenlink">Provider&lt;? extends T&gt; <b>getUserSuppliedProvider()</b></a><br><br><blockquote>Returns the user-supplied, unscoped provider.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> @since 4.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProviderLookup!class"></A><a href="com.google.inject.spi.ProviderLookup.html" class="hiddenlink">Class <b>ProviderLookup</b></a><br><br><blockquote>A lookup of the provider for a type. Lookups are created explicitly in a module <strike>using
+</strike><span style="background: #FFFF00">using</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProviderLookup/com/google/inject/Binder.html#getProvider(Class)"><TT>getProvider()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     Provider&lt;PaymentService&gt; paymentServiceProvider
+         = getProvider(PaymentService.class);</pre>
+
+ @author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProviderWithExtensionVisitor!class"></A><a href="com.google.inject.spi.ProviderWithExtensionVisitor.html" class="hiddenlink">Class <b>ProviderWithExtensionVisitor</b></a><br><br><blockquote>A Provider that is part of an extension which supports a <strike>custom
+</strike><span style="background: #FFFF00">custom</span> BindingTargetVisitor.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike> 
+ </strike>When an extension binds a provider instance, the provider can implement <strike>this
+</strike><span style="background: #FFFF00">this</span> interface <strike>to</strike><span style="background: #FFFF00">to
+</span> allow users using <strike>the
+</strike><span style="background: #FFFF00">the</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProviderWithExtensionVisitor/Binding.html#acceptTargetVisitor(BindingTargetVisitor)"><TT>Binding.acceptTargetVisitor(BindingTargetVisitor)</TT></A> method to visit a
+ custom visitor designed for that extension. A typical implementation <strike>within
+</strike><span style="background: #FFFF00">within</span> the extension <strike>would</strike><span style="background: #FFFF00">would
+</span> look <strike>like
+</strike><span style="background: #FFFF00">like
+
+</span> <pre><strike> </strike>
+ &lt;V, B> V acceptExtensionVisitor(BindingTargetVisitor&lt;B, V> visitor, ProviderInstanceBinding&lt;? extends B> binding) {
+   if(visitor instanceof MyCustomExtensionVisitor) {
+     return ((MyCustomExtensionVisitor&lt;B, V>)visitor).visitCustomExtension(customProperties, binding);
+   } else {
+     return visitor.visit(binding);
+   }
+ }</pre><strike> 
+</strike><span style="background: #FFFF00">
+
+</span> 'MyCustomExtensionVisitor' in the example above would be an interface <strike>the
+</strike><span style="background: #FFFF00">the</span> extension provides <strike>that</strike><span style="background: #FFFF00">that
+</span> users can implement in order to be notified of <strike>custom
+</strike><span style="background: #FFFF00">custom</span> extension information. These <strike>visitor</strike><span style="background: #FFFF00">visitor
+</span> interfaces must extend <strike>from
+</strike><span style="background: #FFFF00">from</span> BindingTargetVisitor.
+
+ @since 3.0
+ @author sameb@google.com (Sam Berlin)</blockquote>
+<A NAME="com.google.inject.spi.ProviderWithExtensionVisitor.dmethod.acceptExtensionVisitor(BindingTargetVisitor&lt;B, V&gt;, ProviderInstanceBinding&lt;? extends B&gt;)"></A><a href="com.google.inject.spi.ProviderWithExtensionVisitor.html" class="hiddenlink">Class <b>ProviderWithExtensionVisitor</b></a>, <a href="com.google.inject.spi.ProviderWithExtensionVisitor.html#com.google.inject.spi.ProviderWithExtensionVisitor.acceptExtensionVisitor_changed(com.google.inject.spi.BindingTargetVisitor<B, V>, com.google.inject.spi.ProviderInstanceBinding<? extends B>)" class="hiddenlink">V <b>acceptExtensionVisitor(BindingTargetVisitor&lt;B, V&gt;, ProviderInstanceBinding&lt;? extends B&gt;)</b></a><br><br><blockquote>Instructs the extension determine if the visitor is an instance of a <strike>custom
+</strike><span style="background: #FFFF00">custom</span> extension visitor,<span style="background: #FFFF00">
+</span> and if so, visit it using that method. If the visitor <strike>is
+</strike><span style="background: #FFFF00">is</span> not an instance of the <strike>custom</strike><span style="background: #FFFF00">custom
+</span> extension visitor, this method <b>MUST</b><strike>
+</strike> call visitor.visit(binding).<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike> 
+ </strike>Due to issues with generics, the type parameters of this method do <strike>not
+</strike><span style="background: #FFFF00">not</span> relate to the type <strike>of</strike><span style="background: #FFFF00">of
+</span> the provider. In practice, the 'B' type will <strike>always
+</strike><span style="background: #FFFF00">always</span> be a supertype of 'T'.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProvidesMethodBinding!class"></A><a href="com.google.inject.spi.ProvidesMethodBinding.html" class="hiddenlink">Class <b>ProvidesMethodBinding</b></a><br><br><blockquote>An {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodBinding/Provides.html"><TT>Provides</TT></A> binding or binding produced by <strike>a
+</strike><span style="background: #FFFF00">a</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodBinding/ModuleAnnotatedMethodScanner.html"><TT>ModuleAnnotatedMethodScanner</TT></A>.
+
+ @since 4.0
+ @author sameb@google.com (Sam Berlin)</blockquote>
+<A NAME="com.google.inject.spi.ProvidesMethodBinding.dmethod.getAnnotation()"></A><a href="com.google.inject.spi.ProvidesMethodBinding.html" class="hiddenlink">Class <b>ProvidesMethodBinding</b></a>, <a href="com.google.inject.spi.ProvidesMethodBinding.html#com.google.inject.spi.ProvidesMethodBinding.getAnnotation_changed()" class="hiddenlink">Annotation <b>getAnnotation()</b></a><br><br><blockquote>Returns the annotation that caused this binding to be created. For {@code @Provides} methods,
+ this is an instance of the {@code @Provides} annotation. For bindings <strike>from
+</strike><span style="background: #FFFF00">from</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ModuleAnnotatedMethodScanner.html"><TT>ModuleAnnotatedMethodScanner</TT></A>, this is the annotation that caused the scanner to <strike>produce
+</strike><span style="background: #FFFF00">produce</span> <strike>the</strike><span style="background: #FFFF00">the
+</span> binding.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProvidesMethodTargetVisitor!class"></A><a href="com.google.inject.spi.ProvidesMethodTargetVisitor.html" class="hiddenlink">Class <b>ProvidesMethodTargetVisitor</b></a><br><br><blockquote>A visitor for the {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodTargetVisitor/Provides.html"><TT>Provides</TT></A> bindings.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>If your <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodTargetVisitor/com/google/inject/spi/BindingTargetVisitor.html"><TT><span style="background: #FFFF00">com.google.inject.spi.</span>BindingTargetVisitor</TT></A> implements this interface, <strike>bindings</strike><span style="background: #FFFF00">bindings
+</span> created by <strike>using
+</strike><span style="background: #FFFF00">using</span> {@code @Provides} will be visited through this interface.
+
+ @since 4.0
+ @author sameb@google.com (Sam Berlin)</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProvisionListener!class"></A><a href="com.google.inject.spi.ProvisionListener.html" class="hiddenlink">Class <b>ProvisionListener</b></a><br><br><blockquote>Listens for provisioning of objects. Useful for gathering timing <strike>information
+</strike><span style="background: #FFFF00">information</span> about provisioning,<span style="background: #FFFF00">
+</span> post-provision initialization, and more.<strike>
+ 
+</strike><span style="background: #FFFF00">
+
+</span> @author sameb@google.com (Sam Berlin)
+ @since 4.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProvisionListener.ProvisionInvocation.dmethod.getBinding()"></A><a href="com.google.inject.spi.ProvisionListener.ProvisionInvocation.html" class="hiddenlink">Class <b>ProvisionListener.ProvisionInvocation</b></a>, <a href="com.google.inject.spi.ProvisionListener.ProvisionInvocation.html#com.google.inject.spi.ProvisionListener.ProvisionInvocation.getBinding_changed()" class="hiddenlink">Binding&lt;T&gt; <b>getBinding()</b></a><br><br><blockquote>Returns the Binding this is provisioning.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>You must not call <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Provider.html#get()"><TT>Provider.get()</TT></A> on the provider returned <strike>by
+</strike><span style="background: #FFFF00">by</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Binding.html#getProvider"><TT>Binding.getProvider</TT></A>, otherwise you will get confusing error messages.</blockquote>
 <A NAME="com.google.inject.spi.ProvisionListener.ProvisionInvocation.dmethod.getDependencyChain()"></A><a href="com.google.inject.spi.ProvisionListener.ProvisionInvocation.html" class="hiddenlink">Class <b>ProvisionListener.ProvisionInvocation</b></a>, <a href="com.google.inject.spi.ProvisionListener.ProvisionInvocation.html#com.google.inject.spi.ProvisionListener.ProvisionInvocation.getDependencyChain_changed()" class="hiddenlink">List&lt;DependencyAndSource&gt; <b>getDependencyChain()</b></a><br><br><blockquote>Returns the dependency chain that led to this object being provisioned.<span style="background: #FFFF00">
 
  @deprecated This method is planned for removal in Guice 4.4.  Some use cases can be replaced
  by inferring the current chain via ThreadLocals in the listener, other use cases can use
  the static dependency graph.  For example,
- <pre>{@code    
+ <pre>{@code
    bindListener(Matchers.any(), new MyListener());
    ...
-   
+
    private static final class MyListener implements ProvisionListener {
-     private final ThreadLocal<ArrayDeque<Binding<?>>> bindingStack = 
+     private final ThreadLocal<ArrayDeque<Binding<?>>> bindingStack =
          new ThreadLocal<ArrayDeque<Binding<?>>>() {
            {@literal @}Override protected ArrayDeque<Binding<?>> initialValue() {
              return new ArrayDeque<();
@@ -87,13 +584,165 @@ Similarly, documentation which was inherited from another class or interface is 
        // Inspect the binding stack...
      }
    }
- 
+
  }<pre>
- 
+
  In this example the bindingStack thread local will contain a data structure that is very
  similar to the data returned by this list.  The main differences are that linked keys are
  not in the stack, but such edges do exist in the static dependency graph (inspectable via
  <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/HasDependencies.html#getDependencies()"><TT>HasDependencies.getDependencies()</TT></A>), so you could infer some of the missing edges..</span></blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProvisionListener.dmethod.onProvision(ProvisionInvocation&lt;T&gt;)"></A><a href="com.google.inject.spi.ProvisionListener.html" class="hiddenlink">Class <b>ProvisionListener</b></a>, <a href="com.google.inject.spi.ProvisionListener.html#com.google.inject.spi.ProvisionListener.onProvision_changed(com.google.inject.spi.ProvisionListener.ProvisionInvocation<T>)" class="hiddenlink">void <b>onProvision(ProvisionInvocation&lt;T&gt;)</b></a><br><br><blockquote>Invoked by Guice when an object requires provisioning. Provisioning <strike>occurs
+</strike><span style="background: #FFFF00">occurs</span> when Guice <strike>locates</strike><span style="background: #FFFF00">locates
+</span> and injects the dependencies for a binding. For <strike>types
+</strike><span style="background: #FFFF00">types</span> bound to a Provider, <strike>provisioning</strike><span style="background: #FFFF00">provisioning
+</span> encapsulates the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Provider.html#get"><TT>Provider.get</TT></A><strike>
+</strike> method. For toInstance or constant bindings, <strike>provisioning encapsulates
+</strike><span style="background: #FFFF00">provisioning
+ encapsulates</span> the injecting of {@literal @}{@code Inject}ed fields or methods.<strike>
+</strike> For other types,<span style="background: #FFFF00">
+</span> provisioning encapsulates the construction of <strike>the
+</strike><span style="background: #FFFF00">the</span> object. If a type is bound within a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Scope.html"><TT>Scope</TT></A>, provisioning depends <strike>on
+</strike><span style="background: #FFFF00">on</span> the scope. Types bound in Singleton scope will only <strike>be</strike><span style="background: #FFFF00">be
+</span> provisioned once.<strike>
+</strike> Types bound in no scope will be provisioned every time they are injected.
+ Other scopes define their own behavior for provisioning.<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <p><strike>
+ </strike>To perform the provision, call <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvisionInvocation.html#provision()"><TT>ProvisionInvocation.provision()</TT></A>.<strike>
+</strike> If you do <strike>not</strike><span style="background: #FFFF00">not
+</span> explicitly call provision, it will be automatically done <strike>after
+</strike><span style="background: #FFFF00">after</span> this method returns. <strike> </strike>It is <strike>an</strike><span style="background: #FFFF00">an
+</span> error to call provision more than once.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ScopeBinding!class"></A><a href="com.google.inject.spi.ScopeBinding.html" class="hiddenlink">Class <b>ScopeBinding</b></a><br><br><blockquote>Registration of a scope annotation with the scope that implements it. Instances are created
+ explicitly in a module using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ScopeBinding/com/google/inject/Binder.html#bindScope(Class, Scope)"><TT>bindScope()</TT></A>
+ statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     Scope recordScope = new RecordScope();
+     bindScope(RecordScoped.class, new RecordScope());</pre>
+
+ @author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.StaticInjectionRequest!class"></A><a href="com.google.inject.spi.StaticInjectionRequest.html" class="hiddenlink">Class <b>StaticInjectionRequest</b></a><br><br><blockquote>A request to inject the static fields and methods of a type. Requests are <strike>created
+</strike><span style="background: #FFFF00">created</span> explicitly in <strike>a</strike><span style="background: #FFFF00">a
+</span> module using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/StaticInjectionRequest/com/google/inject/Binder.html#requestStaticInjection(Class[])"><TT> requestStaticInjection()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     requestStaticInjection(MyLegacyService.class);</pre>
+
+ @author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.StaticInjectionRequest.dmethod.getInjectionPoints()"></A><a href="com.google.inject.spi.StaticInjectionRequest.html" class="hiddenlink">Class <b>StaticInjectionRequest</b></a>, <a href="com.google.inject.spi.StaticInjectionRequest.html#com.google.inject.spi.StaticInjectionRequest.getInjectionPoints_changed()" class="hiddenlink">Set&lt;InjectionPoint&gt; <b>getInjectionPoints()</b></a><br><br><blockquote>Returns the static methods and fields of {@code type} that will be injected to fulfill this
+ request.
+
+ @return a possibly empty set of injection points. The set has a specified iteration order. All
+     <strike> </strike>fields are returned and then all methods. Within the fields, supertype fields are returned
+     <strike> </strike>before subtype fields. Similarly, supertype methods are returned before subtype methods.
+ @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+     <strike> </strike>a field with multiple binding annotations. The exception's <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ConfigurationException.html#getPartialValue()"><TT>partial value</TT></A> is a {@code Set<InjectionPoint>}<strike>
+ </strike> <span style="background: #FFFF00">of
+</span>    <strike>of</strike> the valid injection points.</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.Toolable!class"></A><a href="com.google.inject.spi.Toolable.html" class="hiddenlink">Class <b>Toolable</b></a><br><br><blockquote>Instructs an <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/Toolable/Injector.html"><TT>Injector</TT></A> running in <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/Toolable/Stage.html#TOOL"><TT>Stage.TOOL</TT></A> that a method should be injected.
+ This is typically useful for for extensions to Guice that perform additional validation in an
+ injected method or field. <strike> </strike>This only applies to objects that are already constructed <strike>when
+ bindings</strike><span style="background: #FFFF00">when bindings
+</span> are created (ie., something bound using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/Toolable/com/google/inject/binder/LinkedBindingBuilder.html#toProvider"><TT>toProvider</TT></A>, <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/Toolable/com/google/inject/binder/LinkedBindingBuilder.html#toInstance"><TT>toInstance</TT></A>, or <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/Toolable/com/google/inject/Binder.html#requestInjection"><TT>requestInjection</TT></A>.<strike>
+ 
+</strike><span style="background: #FFFF00">
+
+</span> @author sberlin@gmail.com (Sam Berlin)
+ @since 3.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.TypeConverterBinding!class"></A><a href="com.google.inject.spi.TypeConverterBinding.html" class="hiddenlink">Class <b>TypeConverterBinding</b></a><br><br><blockquote>Registration of type converters for matching target types. Instances are <strike>created
+</strike><span style="background: #FFFF00">created</span> explicitly in <strike>a</strike><span style="background: #FFFF00">a
+</span> module using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/TypeConverterBinding/com/google/inject/Binder.html#convertToTypes(Matcher, TypeConverter)"><TT><span style="background: #FFFF00"> </span>convertToTypes()</TT></A> statements:<strike>
+</strike><span style="background: #FFFF00">
+
+</span> <pre>
+     convertToTypes(Matchers.only(TypeLiteral.get(DateTime.class)), new DateTimeConverter());<span style="background: #FFFF00">
+ </span></pre>
+
+ @author jessewilson@google.com (Jesse Wilson)
+ @since 2.0</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.TypeEncounter!class"></A><a href="com.google.inject.spi.TypeEncounter.html" class="hiddenlink">Class <b>TypeEncounter</b></a><br><br><blockquote>Context of an injectable type encounter. Enables reporting errors, registering injection
+ listeners and binding method interceptors for injectable type {@code I}. It is an error to <strike>use
+ an</strike><span style="background: #FFFF00">use an
+</span> encounter after the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/TypeEncounter/TypeListener.html#hear(TypeLiteral, TypeEncounter)"><TT>hear()</TT></A> method has
+ returned.
+
+ @param <I> the injectable type encountered
+ @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.TypeEncounter.dmethod.addError(String, Object[])"></A><a href="com.google.inject.spi.TypeEncounter.html" class="hiddenlink">Class <b>TypeEncounter</b></a>, <a href="com.google.inject.spi.TypeEncounter.html#com.google.inject.spi.TypeEncounter.addError_changed(java.lang.String, java.lang.Object[])" class="hiddenlink">void <b>addError(String, Object[])</b></a><br><br><blockquote>Records an error message for type {@code I} which will be presented to the user at a later
+ time. Unlike throwing an exception, this enable us to continue configuring the Injector and
+ discover more errors. Uses <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/String.html#format(String, Object[])"><TT>String.format(String, Object[])</TT></A> to insert the <strike>arguments
+ into</strike><span style="background: #FFFF00">arguments into
+</span> the message.</blockquote>
+<A NAME="com.google.inject.spi.TypeEncounter.dmethod.bindInterceptor(Matcher&lt;Method&gt;, MethodInterceptor[])"></A><a href="com.google.inject.spi.TypeEncounter.html" class="hiddenlink">Class <b>TypeEncounter</b></a>, <a href="com.google.inject.spi.TypeEncounter.html#com.google.inject.spi.TypeEncounter.bindInterceptor_changed(com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])" class="hiddenlink">void <b>bindInterceptor(Matcher&lt;Method&gt;, MethodInterceptor[])</b></a><br><br><blockquote>Binds method interceptor[s] to methods matched in type {@code I} and its supertypes. <strike>A
+ method</strike><span style="background: #FFFF00">A method
+</span> is eligible for interception if:
+
+ <ul>
+ <strike> </strike><li>Guice created the instance the method is <strike>on
+ </strike><span style="background: #FFFF00">on
+</span> <li>Neither the enclosing type nor the method is <strike>final
+ </strike><span style="background: #FFFF00">final
+</span> <li>And the method is package-private or more <strike>accessible
+</strike><span style="background: #FFFF00">accessible
+</span> </ul>
+
+ @param methodMatcher matches methods the interceptor should apply to. <strike>For
+ </strike><span style="background: #FFFF00">For</span> <strike>   </strike>example: {@<strike>code</strike><span style="background: #FFFF00">code
+    </span> annotatedWith(Transactional.class)}.
+ @param interceptors to bind</blockquote>
+<A NAME="com.google.inject.spi.TypeEncounter.dmethod.getMembersInjector(Class&lt;T&gt;)"></A><a href="com.google.inject.spi.TypeEncounter.html" class="hiddenlink">Class <b>TypeEncounter</b></a>, <a href="com.google.inject.spi.TypeEncounter.html#com.google.inject.spi.TypeEncounter.getMembersInjector_changed(java.lang.Class<T>)" class="hiddenlink">MembersInjector&lt;T&gt; <b>getMembersInjector(Class&lt;T&gt;)</b></a><br><br><blockquote>Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type {@code T}. The returned members injector will not be valid until the main
+ injector has been created. The members injector will throw an {@code IllegalStateException}<strike>
+</strike> <strike>if</strike><span style="background: #FFFF00">if
+</span> you try to use it beforehand.
+
+ @param type type to get members injector for</blockquote>
+<A NAME="com.google.inject.spi.TypeEncounter.dmethod.getMembersInjector(TypeLiteral&lt;T&gt;)"></A><a href="com.google.inject.spi.TypeEncounter.html" class="hiddenlink">Class <b>TypeEncounter</b></a>, <a href="com.google.inject.spi.TypeEncounter.html#com.google.inject.spi.TypeEncounter.getMembersInjector_changed(com.google.inject.TypeLiteral<T>)" class="hiddenlink">MembersInjector&lt;T&gt; <b>getMembersInjector(TypeLiteral&lt;T&gt;)</b></a><br><br><blockquote>Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type {@code T}. The returned members injector will not be valid until the main
+ injector has been created. The members injector will throw an {@code IllegalStateException}<strike>
+</strike> <strike>if</strike><span style="background: #FFFF00">if
+</span> you try to use it beforehand.
+
+ @param typeLiteral type to get members injector for</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.spi.TypeListener!class"></A><a href="com.google.inject.spi.TypeListener.html" class="hiddenlink">Class <b>TypeListener</b></a><br><br><blockquote>Listens for Guice to encounter injectable types. If a given type has its constructor injected in
+ one situation but only its methods and fields injected in another, Guice will notify this
+ listener once.
+
+ <p>Useful for extra type checking, <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/TypeListener/lain.html"><TT>TypeEncounter#register(InjectionListener)
+ registering injection listeners</TT></A>, and <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/TypeListener/lain.html"><TT>TypeEncounter#bindInterceptor(
+ com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])<strike>
+</strike> binding <strike>method</strike><span style="background: #FFFF00">method
+</span> interceptors</TT></A>.<strike>
+ 
+</strike><span style="background: #FFFF00">
+
+</span> @since 2.0</blockquote>
+<A NAME="com.google.inject.spi.TypeListener.dmethod.hear(TypeLiteral&lt;I&gt;, TypeEncounter&lt;I&gt;)"></A><a href="com.google.inject.spi.TypeListener.html" class="hiddenlink">Class <b>TypeListener</b></a>, <a href="com.google.inject.spi.TypeListener.html#com.google.inject.spi.TypeListener.hear_changed(com.google.inject.TypeLiteral<I>, com.google.inject.spi.TypeEncounter<I>)" class="hiddenlink">void <b>hear(TypeLiteral&lt;I&gt;, TypeEncounter&lt;I&gt;)</b></a><br><br><blockquote>Invoked when Guice encounters a new type eligible for constructor or members injection.<strike>
+</strike> <strike>Called</strike><span style="background: #FFFF00">Called
+</span> during injector creation (or afterwards if Guice encounters a type at run time <strike>and
+</strike><span style="background: #FFFF00">and</span> creates <strike>a</strike><span style="background: #FFFF00">a
+</span> JIT binding).
+
+ @param type encountered by Guice
+ @param encounter context of this encounter, enables reporting errors, registering injection
+     listeners and binding method interceptors for {@code type}.<strike>
+
+</strike><span style="background: #FFFF00">
+</span> @param <I> the injectable type</blockquote>
+<hr align="left" width="100%">
 
 </BODY>
 </HTML>

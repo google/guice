@@ -105,26 +105,25 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public interface <span class="typeNameLabel">ProviderWithExtensionVisitor&lt;T&gt;</span>
 extends <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</pre>
-<div class="block">A Provider that is part of an extension which supports a custom
- BindingTargetVisitor.
- <p> 
- When an extension binds a provider instance, the provider can implement this
- interface to allow users using the
- <a href="../../../../com/google/inject/Binding.html#acceptTargetVisitor-com.google.inject.spi.BindingTargetVisitor-"><code>Binding.acceptTargetVisitor(BindingTargetVisitor)</code></a> method to visit a
- custom visitor designed for that extension. A typical implementation within
- the extension would look like
- <pre> 
+<div class="block">A Provider that is part of an extension which supports a custom BindingTargetVisitor.
+
+ <p>When an extension binds a provider instance, the provider can implement this interface to
+ allow users using the <a href="../../../../com/google/inject/Binding.html#acceptTargetVisitor-com.google.inject.spi.BindingTargetVisitor-"><code>Binding.acceptTargetVisitor(BindingTargetVisitor)</code></a> method to visit a
+ custom visitor designed for that extension. A typical implementation within the extension would
+ look like
+
+ <pre>
  &lt;V, B> V acceptExtensionVisitor(BindingTargetVisitor&lt;B, V> visitor, ProviderInstanceBinding&lt;? extends B> binding) {
    if(visitor instanceof MyCustomExtensionVisitor) {
      return ((MyCustomExtensionVisitor&lt;B, V>)visitor).visitCustomExtension(customProperties, binding);
    } else {
      return visitor.visit(binding);
    }
- }</pre> 
- 'MyCustomExtensionVisitor' in the example above would be an interface the
- extension provides that users can implement in order to be notified of custom
- extension information. These visitor interfaces must extend from
- BindingTargetVisitor.</div>
+ }</pre>
+
+ 'MyCustomExtensionVisitor' in the example above would be an interface the extension provides that
+ users can implement in order to be notified of custom extension information. These visitor
+ interfaces must extend from BindingTargetVisitor.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
@@ -151,8 +150,8 @@ extends <a href="../../../../com/google/inject/Provider.html" title="interface i
 <td class="colFirst"><code>&lt;B,V&gt;&nbsp;V</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderWithExtensionVisitor.html#acceptExtensionVisitor-com.google.inject.spi.BindingTargetVisitor-com.google.inject.spi.ProviderInstanceBinding-">acceptExtensionVisitor</a></span>(<a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;B,V&gt;&nbsp;visitor,
                       <a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html" title="interface in com.google.inject.spi">ProviderInstanceBinding</a>&lt;? extends B&gt;&nbsp;binding)</code>
-<div class="block">Instructs the extension determine if the visitor is an instance of a custom
- extension visitor, and if so, visit it using that method.</div>
+<div class="block">Instructs the extension determine if the visitor is an instance of a custom extension visitor,
+ and if so, visit it using that method.</div>
 </td>
 </tr>
 </table>
@@ -185,14 +184,12 @@ extends <a href="../../../../com/google/inject/Provider.html" title="interface i
 <h4>acceptExtensionVisitor</h4>
 <pre>&lt;B,V&gt;&nbsp;V&nbsp;acceptExtensionVisitor(<a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;B,V&gt;&nbsp;visitor,
                                <a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html" title="interface in com.google.inject.spi">ProviderInstanceBinding</a>&lt;? extends B&gt;&nbsp;binding)</pre>
-<div class="block">Instructs the extension determine if the visitor is an instance of a custom
- extension visitor, and if so, visit it using that method. If the visitor is
- not an instance of the custom extension visitor, this method <b>MUST</b>
- call visitor.visit(binding).
- <p> 
- Due to issues with generics, the type parameters of this method do not
- relate to the type of the provider. In practice, the 'B' type will always
- be a supertype of 'T'.</div>
+<div class="block">Instructs the extension determine if the visitor is an instance of a custom extension visitor,
+ and if so, visit it using that method. If the visitor is not an instance of the custom
+ extension visitor, this method <b>MUST</b> call visitor.visit(binding).
+
+ <p>Due to issues with generics, the type parameters of this method do not relate to the type of
+ the provider. In practice, the 'B' type will always be a supertype of 'T'.</div>
 </li>
 </ul>
 </li>
