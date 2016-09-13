@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,11 @@ package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
+import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
+import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static com.google.inject.internal.SpiUtils.assertSetVisitor;
 import static com.google.inject.internal.SpiUtils.instance;
 import static com.google.inject.internal.SpiUtils.providerInstance;
-import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
-import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -84,13 +84,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class MultibinderTest extends TestCase {
 
-  final TypeLiteral<Optional<String>> optionalOfString =
-      new TypeLiteral<Optional<String>>() {};
+  final TypeLiteral<Optional<String>> optionalOfString = new TypeLiteral<Optional<String>>() {};
   final TypeLiteral<Map<String, String>> mapOfStringString =
       new TypeLiteral<Map<String, String>>() {};
   final TypeLiteral<Set<String>> setOfString = new TypeLiteral<Set<String>>() {};
@@ -103,21 +100,25 @@ public class MultibinderTest extends TestCase {
       new TypeLiteral<Collection<Provider<String>>>() {};
 
   public void testMultibinderAggregatesMultipleModules() {
-    Module abc = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-        multibinder.addBinding().toInstance("C");
-      }
-    };
-    Module de = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("D");
-        multibinder.addBinding().toInstance("E");
-      }
-    };
+    Module abc =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toInstance("C");
+          }
+        };
+    Module de =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("D");
+            multibinder.addBinding().toInstance("E");
+          }
+        };
 
     Injector injector = Guice.createInjector(abc, de);
     Key<Set<String>> setKey = Key.get(setOfString);
@@ -125,69 +126,101 @@ public class MultibinderTest extends TestCase {
     Set<String> results = setOf("A", "B", "C", "D", "E");
 
     assertEquals(results, abcde);
-    assertSetVisitor(setKey, stringType, setOf(abc, de), BOTH, false, 0,
-        instance("A"), instance("B"), instance("C"), instance("D"), instance("E"));
+    assertSetVisitor(
+        setKey,
+        stringType,
+        setOf(abc, de),
+        BOTH,
+        false,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"),
+        instance("D"),
+        instance("E"));
   }
 
   public void testMultibinderAggregationForAnnotationInstance() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder
-            = Multibinder.newSetBinder(binder(), String.class, Names.named("abc"));
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder =
+                Multibinder.newSetBinder(binder(), String.class, Names.named("abc"));
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
 
-        multibinder = Multibinder.newSetBinder(binder(), String.class, Names.named("abc"));
-        multibinder.addBinding().toInstance("C");
-      }
-    };
+            multibinder = Multibinder.newSetBinder(binder(), String.class, Names.named("abc"));
+            multibinder.addBinding().toInstance("C");
+          }
+        };
     Injector injector = Guice.createInjector(module);
 
     Key<Set<String>> setKey = Key.get(setOfString, Names.named("abc"));
     Set<String> abc = injector.getInstance(setKey);
     Set<String> results = setOf("A", "B", "C");
     assertEquals(results, abc);
-    assertSetVisitor(setKey, stringType, setOf(module), BOTH, false, 0,
-        instance("A"), instance("B"), instance("C"));
+    assertSetVisitor(
+        setKey,
+        stringType,
+        setOf(module),
+        BOTH,
+        false,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"));
   }
 
   public void testMultibinderAggregationForAnnotationType() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder
-            = Multibinder.newSetBinder(binder(), String.class, Abc.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder =
+                Multibinder.newSetBinder(binder(), String.class, Abc.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
 
-        multibinder = Multibinder.newSetBinder(binder(), String.class, Abc.class);
-        multibinder.addBinding().toInstance("C");
-      }
-    };
+            multibinder = Multibinder.newSetBinder(binder(), String.class, Abc.class);
+            multibinder.addBinding().toInstance("C");
+          }
+        };
     Injector injector = Guice.createInjector(module);
 
     Key<Set<String>> setKey = Key.get(setOfString, Abc.class);
     Set<String> abcde = injector.getInstance(setKey);
     Set<String> results = setOf("A", "B", "C");
     assertEquals(results, abcde);
-    assertSetVisitor(setKey, stringType, setOf(module), BOTH, false, 0,
-        instance("A"), instance("B"), instance("C"));
+    assertSetVisitor(
+        setKey,
+        stringType,
+        setOf(module),
+        BOTH,
+        false,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"));
   }
 
   public void testMultibinderWithMultipleAnnotationValueSets() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> abcMultibinder
-            = Multibinder.newSetBinder(binder(), String.class, named("abc"));
-        abcMultibinder.addBinding().toInstance("A");
-        abcMultibinder.addBinding().toInstance("B");
-        abcMultibinder.addBinding().toInstance("C");
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> abcMultibinder =
+                Multibinder.newSetBinder(binder(), String.class, named("abc"));
+            abcMultibinder.addBinding().toInstance("A");
+            abcMultibinder.addBinding().toInstance("B");
+            abcMultibinder.addBinding().toInstance("C");
 
-        Multibinder<String> deMultibinder
-            = Multibinder.newSetBinder(binder(), String.class, named("de"));
-        deMultibinder.addBinding().toInstance("D");
-        deMultibinder.addBinding().toInstance("E");
-      }
-    };
+            Multibinder<String> deMultibinder =
+                Multibinder.newSetBinder(binder(), String.class, named("de"));
+            deMultibinder.addBinding().toInstance("D");
+            deMultibinder.addBinding().toInstance("E");
+          }
+        };
     Injector injector = Guice.createInjector(module);
 
     Key<Set<String>> abcSetKey = Key.get(setOfString, named("abc"));
@@ -198,27 +231,37 @@ public class MultibinderTest extends TestCase {
     assertEquals(abcResults, abc);
     Set<String> deResults = setOf("D", "E");
     assertEquals(deResults, de);
-    assertSetVisitor(abcSetKey, stringType, setOf(module), BOTH, false, 1,
-        instance("A"), instance("B"), instance("C"));
-    assertSetVisitor(deSetKey, stringType, setOf(module), BOTH, false, 1,
-        instance("D"), instance("E"));
+    assertSetVisitor(
+        abcSetKey,
+        stringType,
+        setOf(module),
+        BOTH,
+        false,
+        1,
+        instance("A"),
+        instance("B"),
+        instance("C"));
+    assertSetVisitor(
+        deSetKey, stringType, setOf(module), BOTH, false, 1, instance("D"), instance("E"));
   }
 
   public void testMultibinderWithMultipleAnnotationTypeSets() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> abcMultibinder
-            = Multibinder.newSetBinder(binder(), String.class, Abc.class);
-        abcMultibinder.addBinding().toInstance("A");
-        abcMultibinder.addBinding().toInstance("B");
-        abcMultibinder.addBinding().toInstance("C");
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> abcMultibinder =
+                Multibinder.newSetBinder(binder(), String.class, Abc.class);
+            abcMultibinder.addBinding().toInstance("A");
+            abcMultibinder.addBinding().toInstance("B");
+            abcMultibinder.addBinding().toInstance("C");
 
-        Multibinder<String> deMultibinder
-            = Multibinder.newSetBinder(binder(), String.class, De.class);
-        deMultibinder.addBinding().toInstance("D");
-        deMultibinder.addBinding().toInstance("E");
-      }
-    };
+            Multibinder<String> deMultibinder =
+                Multibinder.newSetBinder(binder(), String.class, De.class);
+            deMultibinder.addBinding().toInstance("D");
+            deMultibinder.addBinding().toInstance("E");
+          }
+        };
     Injector injector = Guice.createInjector(module);
 
     Key<Set<String>> abcSetKey = Key.get(setOfString, Abc.class);
@@ -229,68 +272,80 @@ public class MultibinderTest extends TestCase {
     assertEquals(abcResults, abc);
     Set<String> deResults = setOf("D", "E");
     assertEquals(deResults, de);
-    assertSetVisitor(abcSetKey, stringType, setOf(module), BOTH, false, 1,
-        instance("A"), instance("B"), instance("C"));
-    assertSetVisitor(deSetKey, stringType, setOf(module), BOTH, false, 1,
-        instance("D"), instance("E"));
+    assertSetVisitor(
+        abcSetKey,
+        stringType,
+        setOf(module),
+        BOTH,
+        false,
+        1,
+        instance("A"),
+        instance("B"),
+        instance("C"));
+    assertSetVisitor(
+        deSetKey, stringType, setOf(module), BOTH, false, 1, instance("D"), instance("E"));
   }
 
   public void testMultibinderWithMultipleSetTypes() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class)
-            .addBinding().toInstance("A");
-        Multibinder.newSetBinder(binder(), Integer.class)
-            .addBinding().toInstance(1);
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("A");
+            Multibinder.newSetBinder(binder(), Integer.class).addBinding().toInstance(1);
+          }
+        };
     Injector injector = Guice.createInjector(module);
 
     assertEquals(setOf("A"), injector.getInstance(Key.get(setOfString)));
     assertEquals(setOf(1), injector.getInstance(Key.get(setOfInteger)));
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(module), BOTH, false, 1,
-        instance("A"));
-    assertSetVisitor(Key.get(setOfInteger), intType, setOf(module), BOTH, false, 1,
-        instance(1));
+    assertSetVisitor(
+        Key.get(setOfString), stringType, setOf(module), BOTH, false, 1, instance("A"));
+    assertSetVisitor(Key.get(setOfInteger), intType, setOf(module), BOTH, false, 1, instance(1));
   }
 
   public void testMultibinderWithEmptySet() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class);
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder.newSetBinder(binder(), String.class);
+          }
+        };
     Injector injector = Guice.createInjector(module);
 
     Set<String> set = injector.getInstance(Key.get(setOfString));
     assertEquals(Collections.emptySet(), set);
-    assertSetVisitor(Key.get(setOfString), stringType,
-        setOf(module), BOTH, false, 0);
+    assertSetVisitor(Key.get(setOfString), stringType, setOf(module), BOTH, false, 0);
   }
 
   public void testMultibinderSetIsUnmodifiable() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class)
-            .addBinding().toInstance("A");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("A");
+              }
+            });
 
     Set<String> set = injector.getInstance(Key.get(setOfString));
     try {
       set.clear();
       fail();
-    } catch(UnsupportedOperationException expected) {
+    } catch (UnsupportedOperationException expected) {
     }
   }
 
   public void testMultibinderSetIsSerializable() throws IOException, ClassNotFoundException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class)
-            .addBinding().toInstance("A");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("A");
+              }
+            });
 
     Set<String> set = injector.getInstance(Key.get(setOfString));
     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -300,8 +355,8 @@ public class MultibinderTest extends TestCase {
     } finally {
       objectOutputStream.close();
     }
-    ObjectInputStream objectInputStream = new ObjectInputStream(
-        new ByteArrayInputStream(byteStream.toByteArray()));
+    ObjectInputStream objectInputStream =
+        new ObjectInputStream(new ByteArrayInputStream(byteStream.toByteArray()));
     try {
       Object setCopy = objectInputStream.readObject();
       assertEquals(set, setCopy);
@@ -333,38 +388,52 @@ public class MultibinderTest extends TestCase {
     assertEquals(setOf(1), injector.getInstance(Key.get(setOfInteger)));
     assertEquals(setOf(2), injector.getInstance(Key.get(setOfInteger)));
     assertEquals(setOf(3), injector.getInstance(Key.get(setOfInteger)));
-    assertSetVisitor(Key.get(setOfInteger), intType, setOf(module), BOTH, false, 0,
-        providerInstance(1));
+    assertSetVisitor(
+        Key.get(setOfInteger), intType, setOf(module), BOTH, false, 0, providerInstance(1));
   }
 
   public void testMultibinderSetForbidsDuplicateElements() {
-    Module module1 = new AbstractModule() {
-      @Override protected void configure() {
-        final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toProvider(Providers.of("A"));
-      }
-    };
-    Module module2 = new AbstractModule() {
-      @Override protected void configure() {
-        final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-      }
-    };
+    Module module1 =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            final Multibinder<String> multibinder =
+                Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toProvider(Providers.of("A"));
+          }
+        };
+    Module module2 =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            final Multibinder<String> multibinder =
+                Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+          }
+        };
     Injector injector = Guice.createInjector(module1, module2);
 
     try {
       injector.getInstance(Key.get(setOfString));
       fail();
     } catch (ProvisionException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Set injection failed due to duplicated element \"A\"",
           "Bound at " + module1.getClass().getName(),
           "Bound at " + module2.getClass().getName());
     }
 
     // But we can still visit the module!
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(module1, module2), MODULE, false, 0,
-        instance("A"), instance("A"));
+    assertSetVisitor(
+        Key.get(setOfString),
+        stringType,
+        setOf(module1, module2),
+        MODULE,
+        false,
+        0,
+        instance("A"),
+        instance("A"));
   }
 
   public void testMultibinderSetShowsBothElementsIfToStringDifferent() {
@@ -373,38 +442,46 @@ public class MultibinderTest extends TestCase {
     class ValueType {
       int a;
       int b;
+
       ValueType(int a, int b) {
         this.a = a;
         this.b = b;
       }
+
       @Override
       public boolean equals(Object obj) {
         return (obj instanceof ValueType) && (((ValueType) obj).a == a);
       }
+
       @Override
       public int hashCode() {
         return a;
       }
+
       @Override
       public String toString() {
         return String.format("ValueType(%d,%d)", a, b);
       }
     }
 
-    Module module1 = new AbstractModule() {
-      @Override protected void configure() {
-        final Multibinder<ValueType> multibinder =
-            Multibinder.newSetBinder(binder(), ValueType.class);
-        multibinder.addBinding().toProvider(Providers.of(new ValueType(1, 2)));
-      }
-    };
-    Module module2 = new AbstractModule() {
-      @Override protected void configure() {
-        final Multibinder<ValueType> multibinder =
-            Multibinder.newSetBinder(binder(), ValueType.class);
-        multibinder.addBinding().toInstance(new ValueType(1, 3));
-      }
-    };
+    Module module1 =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            final Multibinder<ValueType> multibinder =
+                Multibinder.newSetBinder(binder(), ValueType.class);
+            multibinder.addBinding().toProvider(Providers.of(new ValueType(1, 2)));
+          }
+        };
+    Module module2 =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            final Multibinder<ValueType> multibinder =
+                Multibinder.newSetBinder(binder(), ValueType.class);
+            multibinder.addBinding().toInstance(new ValueType(1, 3));
+          }
+        };
     Injector injector = Guice.createInjector(module1, module2);
 
     TypeLiteral<ValueType> valueType = TypeLiteral.get(ValueType.class);
@@ -413,7 +490,8 @@ public class MultibinderTest extends TestCase {
       injector.getInstance(Key.get(setOfValueType));
       fail();
     } catch (ProvisionException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Set injection failed due to multiple elements comparing equal:",
           "\"ValueType(1,2)\"",
           "bound at " + module1.getClass().getName(),
@@ -422,113 +500,167 @@ public class MultibinderTest extends TestCase {
     }
 
     // But we can still visit the module!
-    assertSetVisitor(Key.get(setOfValueType), valueType, setOf(module1, module2), MODULE, false, 0,
-        instance(new ValueType(1, 2)), instance(new ValueType(1, 3)));
+    assertSetVisitor(
+        Key.get(setOfValueType),
+        valueType,
+        setOf(module1, module2),
+        MODULE,
+        false,
+        0,
+        instance(new ValueType(1, 2)),
+        instance(new ValueType(1, 3)));
   }
 
   public void testMultibinderSetPermitDuplicateElements() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-      }
-    };
-    Module bc = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.permitDuplicates();
-        multibinder.addBinding().toInstance("B");
-        multibinder.addBinding().toInstance("C");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+          }
+        };
+    Module bc =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toInstance("C");
+          }
+        };
     Injector injector = Guice.createInjector(ab, bc);
 
     assertEquals(setOf("A", "B", "C"), injector.getInstance(Key.get(setOfString)));
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(ab, bc), BOTH, true, 0,
-        instance("A"), instance("B"), instance("C"));
+    assertSetVisitor(
+        Key.get(setOfString),
+        stringType,
+        setOf(ab, bc),
+        BOTH,
+        true,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"));
   }
 
   public void testMultibinderSetPermitDuplicateElementsFromOtherModule() {
     // This module duplicates a binding for "B", which would normally be an error.
     // Because module cd is also installed and the Multibinder<String>
     // in cd sets permitDuplicates, there should be no error.
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-        multibinder.addBinding().toProvider(Providers.of("B"));
-      }
-    };
-    Module cd = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.permitDuplicates();
-        multibinder.addBinding().toInstance("C");
-        multibinder.addBinding().toInstance("D");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toProvider(Providers.of("B"));
+          }
+        };
+    Module cd =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("C");
+            multibinder.addBinding().toInstance("D");
+          }
+        };
     Injector injector = Guice.createInjector(ab, cd);
 
     assertEquals(setOf("A", "B", "C", "D"), injector.getInstance(Key.get(setOfString)));
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(ab, cd), BOTH, true, 0,
-        instance("A"), instance("B"), providerInstance("B"), instance("C"), instance("D"));
+    assertSetVisitor(
+        Key.get(setOfString),
+        stringType,
+        setOf(ab, cd),
+        BOTH,
+        true,
+        0,
+        instance("A"),
+        instance("B"),
+        providerInstance("B"),
+        instance("C"),
+        instance("D"));
   }
 
   public void testMultibinderSetPermitDuplicateCallsToPermitDuplicates() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.permitDuplicates();
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-      }
-    };
-    Module bc = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.permitDuplicates();
-        multibinder.addBinding().toInstance("B");
-        multibinder.addBinding().toInstance("C");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+          }
+        };
+    Module bc =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toInstance("C");
+          }
+        };
     Injector injector = Guice.createInjector(ab, bc);
 
     assertEquals(setOf("A", "B", "C"), injector.getInstance(Key.get(setOfString)));
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(ab, bc), BOTH, true, 0,
-        instance("A"), instance("B"), instance("C"));
+    assertSetVisitor(
+        Key.get(setOfString),
+        stringType,
+        setOf(ab, bc),
+        BOTH,
+        true,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"));
   }
 
   public void testMultibinderSetForbidsNullElements() {
-    Module m = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class)
-            .addBinding().toProvider(Providers.<String>of(null));
-      }
-    };
+    Module m =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder.newSetBinder(binder(), String.class)
+                .addBinding()
+                .toProvider(Providers.<String>of(null));
+          }
+        };
     Injector injector = Guice.createInjector(m);
 
     try {
       injector.getInstance(Key.get(setOfString));
       fail();
-    } catch(ProvisionException expected) {
-      assertContains(expected.getMessage(),
+    } catch (ProvisionException expected) {
+      assertContains(
+          expected.getMessage(),
           "1) Set injection failed due to null element bound at: "
-          + m.getClass().getName() + ".configure(");
+              + m.getClass().getName()
+              + ".configure(");
     }
   }
 
   public void testSourceLinesInMultibindings() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          Multibinder.newSetBinder(binder(), Integer.class).addBinding();
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              Multibinder.newSetBinder(binder(), Integer.class).addBinding();
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), true,
+      assertContains(
+          expected.getMessage(),
+          true,
           "No implementation for java.lang.Integer",
           "at " + getClass().getName());
     }
@@ -539,15 +671,18 @@ public class MultibinderTest extends TestCase {
    * really care about the underlying structure of those bindings, which are implementation details.
    */
   public void testMultibinderDependencies() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+                multibinder.addBinding().toInstance("A");
+                multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
 
-        bindConstant().annotatedWith(Names.named("b")).to("B");
-      }
-    });
+                bindConstant().annotatedWith(Names.named("b")).to("B");
+              }
+            });
 
     Binding<Set<String>> binding = injector.getBinding(new Key<Set<String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;
@@ -563,15 +698,19 @@ public class MultibinderTest extends TestCase {
    * really care about the underlying structure of those bindings, which are implementation details.
    */
   public void testMultibinderDependenciesInToolStage() {
-    Injector injector = Guice.createInjector(Stage.TOOL, new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
+    Injector injector =
+        Guice.createInjector(
+            Stage.TOOL,
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+                multibinder.addBinding().toInstance("A");
+                multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
 
-        bindConstant().annotatedWith(Names.named("b")).to("B");
-      }
-    });
+                bindConstant().annotatedWith(Names.named("b")).to("B");
+              }
+            });
 
     Binding<Set<String>> binding = injector.getBinding(new Key<Set<String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;
@@ -586,17 +725,22 @@ public class MultibinderTest extends TestCase {
     // the Key of @Named("b") String=B
     for (Dependency<?> dependency : withDependencies.getDependencies()) {
       Binding<?> b = injector.getBinding(dependency.getKey());
-      if(b instanceof InstanceBinding) {
-        if(instanceBinding != null) {
-          fail("Already have an instance binding of: " + instanceBinding + ", and now want to add: " + b);
+      if (b instanceof InstanceBinding) {
+        if (instanceBinding != null) {
+          fail(
+              "Already have an instance binding of: "
+                  + instanceBinding
+                  + ", and now want to add: "
+                  + b);
         } else {
-          instanceBinding = (InstanceBinding)b;
+          instanceBinding = (InstanceBinding) b;
         }
-      } else if(b instanceof LinkedKeyBinding) {
-        if(linkedBinding != null) {
-          fail("Already have a linked binding of: " + linkedBinding + ", and now want to add: " + b);
+      } else if (b instanceof LinkedKeyBinding) {
+        if (linkedBinding != null) {
+          fail(
+              "Already have a linked binding of: " + linkedBinding + ", and now want to add: " + b);
         } else {
-          linkedBinding = (LinkedKeyBinding)b;
+          linkedBinding = (LinkedKeyBinding) b;
         }
       } else {
         fail("Unexpected dependency of: " + dependency);
@@ -611,38 +755,46 @@ public class MultibinderTest extends TestCase {
   }
 
   /**
-   * Our implementation maintains order, but doesn't guarantee it in the API spec.
-   * TODO: specify the iteration order?
+   * Our implementation maintains order, but doesn't guarantee it in the API spec. TODO: specify the
+   * iteration order?
    */
   public void testBindOrderEqualsIterationOrder() {
-    Injector injector = Guice.createInjector(
-        new AbstractModule() {
-          @Override protected void configure() {
-            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-            multibinder.addBinding().toInstance("leonardo");
-            multibinder.addBinding().toInstance("donatello");
-            install(new AbstractModule() {
-              @Override protected void configure() {
-                Multibinder.newSetBinder(binder(), String.class)
-                    .addBinding().toInstance("michaelangelo");
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+                multibinder.addBinding().toInstance("leonardo");
+                multibinder.addBinding().toInstance("donatello");
+                install(
+                    new AbstractModule() {
+                      @Override
+                      protected void configure() {
+                        Multibinder.newSetBinder(binder(), String.class)
+                            .addBinding()
+                            .toInstance("michaelangelo");
+                      }
+                    });
+              }
+            },
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("raphael");
               }
             });
-          }
-        },
-        new AbstractModule() {
-          @Override protected void configure() {
-            Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("raphael");
-          }
-        });
 
     List<String> inOrder = ImmutableList.copyOf(injector.getInstance(Key.get(setOfString)));
     assertEquals(ImmutableList.of("leonardo", "donatello", "michaelangelo", "raphael"), inOrder);
   }
 
-  @Retention(RUNTIME) @BindingAnnotation
+  @Retention(RUNTIME)
+  @BindingAnnotation
   @interface Abc {}
 
-  @Retention(RUNTIME) @BindingAnnotation
+  @Retention(RUNTIME)
+  @BindingAnnotation
   @interface De {}
 
   private <T> Set<T> setOf(T... elements) {
@@ -651,143 +803,174 @@ public class MultibinderTest extends TestCase {
     return result;
   }
 
-  /**
-   * With overrides, we should get the union of all multibindings.
-   */
+  /** With overrides, we should get the union of all multibindings. */
   public void testModuleOverrideAndMultibindings() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-      }
-    };
-    Module cd = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("C");
-        multibinder.addBinding().toInstance("D");
-      }
-    };
-    Module ef = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("E");
-        multibinder.addBinding().toInstance("F");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+          }
+        };
+    Module cd =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("C");
+            multibinder.addBinding().toInstance("D");
+          }
+        };
+    Module ef =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("E");
+            multibinder.addBinding().toInstance("F");
+          }
+        };
 
     Module abcd = Modules.override(ab).with(cd);
     Injector injector = Guice.createInjector(abcd, ef);
-    assertEquals(ImmutableSet.of("A", "B", "C", "D", "E", "F"),
-        injector.getInstance(Key.get(setOfString)));
+    assertEquals(
+        ImmutableSet.of("A", "B", "C", "D", "E", "F"), injector.getInstance(Key.get(setOfString)));
 
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(abcd, ef), BOTH, false, 0,
-        instance("A"), instance("B"), instance("C"), instance("D"), instance("E"), instance("F"));
+    assertSetVisitor(
+        Key.get(setOfString),
+        stringType,
+        setOf(abcd, ef),
+        BOTH,
+        false,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"),
+        instance("D"),
+        instance("E"),
+        instance("F"));
   }
 
-  /**
-   * With overrides, we should get the union of all multibindings.
-   */
+  /** With overrides, we should get the union of all multibindings. */
   public void testModuleOverrideAndMultibindingsWithPermitDuplicates() {
-    Module abc = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-        multibinder.addBinding().toInstance("C");
-        multibinder.permitDuplicates();
-      }
-    };
-    Module cd = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("C");
-        multibinder.addBinding().toInstance("D");
-        multibinder.permitDuplicates();
-      }
-    };
-    Module ef = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("E");
-        multibinder.addBinding().toInstance("F");
-        multibinder.permitDuplicates();
-      }
-    };
+    Module abc =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toInstance("C");
+            multibinder.permitDuplicates();
+          }
+        };
+    Module cd =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("C");
+            multibinder.addBinding().toInstance("D");
+            multibinder.permitDuplicates();
+          }
+        };
+    Module ef =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("E");
+            multibinder.addBinding().toInstance("F");
+            multibinder.permitDuplicates();
+          }
+        };
 
     Module abcd = Modules.override(abc).with(cd);
     Injector injector = Guice.createInjector(abcd, ef);
-    assertEquals(ImmutableSet.of("A", "B", "C", "D", "E", "F"),
-        injector.getInstance(Key.get(setOfString)));
+    assertEquals(
+        ImmutableSet.of("A", "B", "C", "D", "E", "F"), injector.getInstance(Key.get(setOfString)));
 
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(abcd, ef), BOTH, true, 0,
-        instance("A"), instance("B"), instance("C"), instance("D"), instance("E"), instance("F"));
+    assertSetVisitor(
+        Key.get(setOfString),
+        stringType,
+        setOf(abcd, ef),
+        BOTH,
+        true,
+        0,
+        instance("A"),
+        instance("B"),
+        instance("C"),
+        instance("D"),
+        instance("E"),
+        instance("F"));
   }
 
-  /**
-   * Doubly-installed modules should not conflict, even when one is overridden.
-   */
+  /** Doubly-installed modules should not conflict, even when one is overridden. */
   public void testModuleOverrideRepeatedInstallsAndMultibindings_toInstance() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toInstance("A");
-        multibinder.addBinding().toInstance("B");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+          }
+        };
 
     // Guice guarantees this assertion, as the same module cannot be installed twice.
-    assertEquals(ImmutableSet.of("A", "B"),
-        Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
+    assertEquals(
+        ImmutableSet.of("A", "B"), Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
 
     // Guice will only guarantee this assertion if Multibinder ensures the bindings match.
     Injector injector = Guice.createInjector(ab, Modules.override(ab).with(ab));
-    assertEquals(ImmutableSet.of("A", "B"),
-        injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableSet.of("A", "B"), injector.getInstance(Key.get(setOfString)));
   }
 
   public void testModuleOverrideRepeatedInstallsAndMultibindings_toKey() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Key<String> aKey = Key.get(String.class, Names.named("A_string"));
-        Key<String> bKey = Key.get(String.class, Names.named("B_string"));
-        bind(aKey).toInstance("A");
-        bind(bKey).toInstance("B");
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Key<String> aKey = Key.get(String.class, Names.named("A_string"));
+            Key<String> bKey = Key.get(String.class, Names.named("B_string"));
+            bind(aKey).toInstance("A");
+            bind(bKey).toInstance("B");
 
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().to(aKey);
-        multibinder.addBinding().to(bKey);
-      }
-    };
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().to(aKey);
+            multibinder.addBinding().to(bKey);
+          }
+        };
 
     // Guice guarantees this assertion, as the same module cannot be installed twice.
-    assertEquals(ImmutableSet.of("A", "B"),
-        Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
+    assertEquals(
+        ImmutableSet.of("A", "B"), Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
 
     // Guice will only guarantee this assertion if Multibinder ensures the bindings match.
     Injector injector = Guice.createInjector(ab, Modules.override(ab).with(ab));
-    assertEquals(ImmutableSet.of("A", "B"),
-        injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableSet.of("A", "B"), injector.getInstance(Key.get(setOfString)));
   }
 
   public void testModuleOverrideRepeatedInstallsAndMultibindings_toProviderInstance() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toProvider(Providers.of("A"));
-        multibinder.addBinding().toProvider(Providers.of("B"));
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toProvider(Providers.of("A"));
+            multibinder.addBinding().toProvider(Providers.of("B"));
+          }
+        };
 
     // Guice guarantees this assertion, as the same module cannot be installed twice.
-    assertEquals(ImmutableSet.of("A", "B"),
-        Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
+    assertEquals(
+        ImmutableSet.of("A", "B"), Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
 
     // Guice will only guarantee this assertion if Multibinder ensures the bindings match.
     Injector injector = Guice.createInjector(ab, Modules.override(ab).with(ab));
-    assertEquals(ImmutableSet.of("A", "B"),
-        injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableSet.of("A", "B"), injector.getInstance(Key.get(setOfString)));
   }
 
   private static class AStringProvider implements Provider<String> {
@@ -805,33 +988,34 @@ public class MultibinderTest extends TestCase {
   }
 
   public void testModuleOverrideRepeatedInstallsAndMultibindings_toProviderKey() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toProvider(Key.get(AStringProvider.class));
-        multibinder.addBinding().toProvider(Key.get(BStringProvider.class));
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toProvider(Key.get(AStringProvider.class));
+            multibinder.addBinding().toProvider(Key.get(BStringProvider.class));
+          }
+        };
 
     // Guice guarantees this assertion, as the same module cannot be installed twice.
-    assertEquals(ImmutableSet.of("A", "B"),
-        Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
+    assertEquals(
+        ImmutableSet.of("A", "B"), Guice.createInjector(ab, ab).getInstance(Key.get(setOfString)));
 
     // Guice will only guarantee this assertion if Multibinder ensures the bindings match.
     Injector injector = Guice.createInjector(ab, Modules.override(ab).with(ab));
-    assertEquals(ImmutableSet.of("A", "B"),
-        injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableSet.of("A", "B"), injector.getInstance(Key.get(setOfString)));
   }
 
   private static class StringGrabber {
     private final String string;
 
-    @SuppressWarnings("unused")  // Found by reflection
+    @SuppressWarnings("unused") // Found by reflection
     public StringGrabber(@Named("A_string") String string) {
       this.string = string;
     }
 
-    @SuppressWarnings("unused")  // Found by reflection
+    @SuppressWarnings("unused") // Found by reflection
     public StringGrabber(@Named("B_string") String string, int unused) {
       this.string = string;
     }
@@ -862,35 +1046,41 @@ public class MultibinderTest extends TestCase {
 
   public void testModuleOverrideRepeatedInstallsAndMultibindings_toConstructor() {
     TypeLiteral<Set<StringGrabber>> setOfStringGrabber = new TypeLiteral<Set<StringGrabber>>() {};
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Key<String> aKey = Key.get(String.class, Names.named("A_string"));
-        Key<String> bKey = Key.get(String.class, Names.named("B_string"));
-        bind(aKey).toInstance("A");
-        bind(bKey).toInstance("B");
-        bind(Integer.class).toInstance(0);  // used to disambiguate constructors
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Key<String> aKey = Key.get(String.class, Names.named("A_string"));
+            Key<String> bKey = Key.get(String.class, Names.named("B_string"));
+            bind(aKey).toInstance("A");
+            bind(bKey).toInstance("B");
+            bind(Integer.class).toInstance(0); // used to disambiguate constructors
 
-        Multibinder<StringGrabber> multibinder =
-            Multibinder.newSetBinder(binder(), StringGrabber.class);
-        try {
-          multibinder.addBinding().toConstructor(
-              StringGrabber.class.getConstructor(String.class));
-          multibinder.addBinding().toConstructor(
-              StringGrabber.class.getConstructor(String.class, int.class));
-        } catch (NoSuchMethodException e) {
-          fail("No such method: " + e.getMessage());
-        }
-      }
-    };
+            Multibinder<StringGrabber> multibinder =
+                Multibinder.newSetBinder(binder(), StringGrabber.class);
+            try {
+              multibinder
+                  .addBinding()
+                  .toConstructor(StringGrabber.class.getConstructor(String.class));
+              multibinder
+                  .addBinding()
+                  .toConstructor(StringGrabber.class.getConstructor(String.class, int.class));
+            } catch (NoSuchMethodException e) {
+              fail("No such method: " + e.getMessage());
+            }
+          }
+        };
 
     // Guice guarantees this assertion, as the same module cannot be installed twice.
-    assertEquals(ImmutableSet.of("A", "B"),
+    assertEquals(
+        ImmutableSet.of("A", "B"),
         StringGrabber.values(
             Guice.createInjector(ab, ab).getInstance(Key.get(setOfStringGrabber))));
 
     // Guice will only guarantee this assertion if Multibinder ensures the bindings match.
     Injector injector = Guice.createInjector(ab, Modules.override(ab).with(ab));
-    assertEquals(ImmutableSet.of("A", "B"),
+    assertEquals(
+        ImmutableSet.of("A", "B"),
         StringGrabber.values(injector.getInstance(Key.get(setOfStringGrabber))));
   }
 
@@ -899,44 +1089,50 @@ public class MultibinderTest extends TestCase {
    * explicitly bound in {@link Scopes#NO_SCOPE}.
    */
   public void testDuplicateUnscopedBindings() {
-    Module singleBinding = new AbstractModule() {
-      @Override protected void configure() {
-        bind(Integer.class).to(Key.get(Integer.class, named("A")));
-        bind(Integer.class).to(Key.get(Integer.class, named("A"))).in(Scopes.NO_SCOPE);
-      }
+    Module singleBinding =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Integer.class).to(Key.get(Integer.class, named("A")));
+            bind(Integer.class).to(Key.get(Integer.class, named("A"))).in(Scopes.NO_SCOPE);
+          }
 
-      @Provides @Named("A")
-      int provideInteger() {
-        return 5;
-      }
-    };
-    Module multibinding = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<Integer> multibinder = Multibinder.newSetBinder(binder(), Integer.class);
-        multibinder.addBinding().to(Key.get(Integer.class, named("A")));
-        multibinder.addBinding().to(Key.get(Integer.class, named("A"))).in(Scopes.NO_SCOPE);
-      }
-    };
+          @Provides
+          @Named("A")
+          int provideInteger() {
+            return 5;
+          }
+        };
+    Module multibinding =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<Integer> multibinder = Multibinder.newSetBinder(binder(), Integer.class);
+            multibinder.addBinding().to(Key.get(Integer.class, named("A")));
+            multibinder.addBinding().to(Key.get(Integer.class, named("A"))).in(Scopes.NO_SCOPE);
+          }
+        };
 
-    assertEquals(5,
-        (int) Guice.createInjector(singleBinding).getInstance(Integer.class));
-    assertEquals(ImmutableSet.of(5),
+    assertEquals(5, (int) Guice.createInjector(singleBinding).getInstance(Integer.class));
+    assertEquals(
+        ImmutableSet.of(5),
         Guice.createInjector(singleBinding, multibinding).getInstance(Key.get(setOfInteger)));
   }
 
-  /**
-   * Ensure key hash codes are fixed at injection time, not binding time.
-   */
+  /** Ensure key hash codes are fixed at injection time, not binding time. */
   public void testKeyHashCodesFixedAtInjectionTime() {
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<List<String>> multibinder = Multibinder.newSetBinder(binder(), listOfStrings);
-        List<String> list = Lists.newArrayList();
-        multibinder.addBinding().toInstance(list);
-        list.add("A");
-        list.add("B");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<List<String>> multibinder =
+                Multibinder.newSetBinder(binder(), listOfStrings);
+            List<String> list = Lists.newArrayList();
+            multibinder.addBinding().toInstance(list);
+            list.add("A");
+            list.add("B");
+          }
+        };
 
     Injector injector = Guice.createInjector(ab);
     for (Entry<Key<?>, Binding<?>> entry : injector.getAllBindings().entrySet()) {
@@ -950,27 +1146,30 @@ public class MultibinderTest extends TestCase {
         clonedKey = Key.get(bindingKey.getTypeLiteral());
       }
       assertEquals(bindingKey, clonedKey);
-      assertEquals("Incorrect hashcode for " + bindingKey + " -> " + entry.getValue(),
-          bindingKey.hashCode(), clonedKey.hashCode());
+      assertEquals(
+          "Incorrect hashcode for " + bindingKey + " -> " + entry.getValue(),
+          bindingKey.hashCode(),
+          clonedKey.hashCode());
     }
   }
 
-  /**
-   * Ensure bindings do not rehash their keys once returned from {@link Elements#getElements}.
-   */
+  /** Ensure bindings do not rehash their keys once returned from {@link Elements#getElements}. */
   public void testBindingKeysFixedOnReturnFromGetElements() {
     final List<String> list = Lists.newArrayList();
-    Module ab = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<List<String>> multibinder = Multibinder.newSetBinder(binder(), listOfStrings);
-        multibinder.addBinding().toInstance(list);
-        list.add("A");
-        list.add("B");
-      }
-    };
+    Module ab =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<List<String>> multibinder =
+                Multibinder.newSetBinder(binder(), listOfStrings);
+            multibinder.addBinding().toInstance(list);
+            list.add("A");
+            list.add("B");
+          }
+        };
 
-    InstanceBinding<?> binding = Iterables.getOnlyElement(
-        Iterables.filter(Elements.getElements(ab), InstanceBinding.class));
+    InstanceBinding<?> binding =
+        Iterables.getOnlyElement(Iterables.filter(Elements.getElements(ab), InstanceBinding.class));
     Key<?> keyBefore = binding.getKey();
     assertEquals(listOfStrings, keyBefore.getTypeLiteral());
 
@@ -988,13 +1187,16 @@ public class MultibinderTest extends TestCase {
     // We initially bind two equal lists
     final List<String> list1 = Lists.newArrayList();
     final List<String> list2 = Lists.newArrayList();
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<List<String>> multibinder = Multibinder.newSetBinder(binder(), listOfStrings);
-        multibinder.addBinding().toInstance(list1);
-        multibinder.addBinding().toInstance(list2);
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<List<String>> multibinder =
+                Multibinder.newSetBinder(binder(), listOfStrings);
+            multibinder.addBinding().toInstance(list1);
+            multibinder.addBinding().toInstance(list2);
+          }
+        };
     List<Element> elements = Elements.getElements(module);
 
     // Now we change the lists so they no longer match, and create the injector.
@@ -1032,13 +1234,16 @@ public class MultibinderTest extends TestCase {
     // We initially bind two distinct lists
     final List<String> list1 = Lists.newArrayList("A");
     final List<String> list2 = Lists.newArrayList("B");
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<List<String>> multibinder = Multibinder.newSetBinder(binder(), listOfStrings);
-        multibinder.addBinding().toInstance(list1);
-        multibinder.addBinding().toInstance(list2);
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<List<String>> multibinder =
+                Multibinder.newSetBinder(binder(), listOfStrings);
+            multibinder.addBinding().toInstance(list1);
+            multibinder.addBinding().toInstance(list2);
+          }
+        };
     List<Element> elements = Elements.getElements(module);
 
     // Now we change the lists so they compare equal, and create the injector.
@@ -1053,8 +1258,9 @@ public class MultibinderTest extends TestCase {
 
     // The set will contain just one of the two lists.
     // (In fact, it will be the first one we bound, but we don't promise that, so we won't test it.)
-    assertTrue(ImmutableSet.of(ImmutableList.of("A")).equals(set)
-        || ImmutableSet.of(ImmutableList.of("B")).equals(set));
+    assertTrue(
+        ImmutableSet.of(ImmutableList.of("A")).equals(set)
+            || ImmutableSet.of(ImmutableList.of("B")).equals(set));
   }
 
   @BindingAnnotation
@@ -1067,18 +1273,23 @@ public class MultibinderTest extends TestCase {
     Method m = MultibinderTest.class.getDeclaredMethod("testMultibinderMatching");
     assertNotNull(m);
     final Annotation marker = m.getAnnotation(Marker.class);
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override public void configure() {
-        Multibinder<Integer> mb1 = Multibinder.newSetBinder(binder(), Integer.class, Marker.class);
-        Multibinder<Integer> mb2 = Multibinder.newSetBinder(binder(), Integer.class, marker);
-        mb1.addBinding().toInstance(1);
-        mb2.addBinding().toInstance(2);
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              public void configure() {
+                Multibinder<Integer> mb1 =
+                    Multibinder.newSetBinder(binder(), Integer.class, Marker.class);
+                Multibinder<Integer> mb2 =
+                    Multibinder.newSetBinder(binder(), Integer.class, marker);
+                mb1.addBinding().toInstance(1);
+                mb2.addBinding().toInstance(2);
 
-        // This assures us that the two binders are equivalent, so we expect the instance added to
-        // each to have been added to one set.
-        assertEquals(mb1, mb2);
-      }
-    });
+                // This assures us that the two binders are equivalent, so we expect the instance added to
+                // each to have been added to one set.
+                assertEquals(mb1, mb2);
+              }
+            });
     TypeLiteral<Set<Integer>> t = new TypeLiteral<Set<Integer>>() {};
     Set<Integer> s1 = injector.getInstance(Key.get(t, Marker.class));
     Set<Integer> s2 = injector.getInstance(Key.get(t, marker));
@@ -1099,20 +1310,25 @@ public class MultibinderTest extends TestCase {
 
   // See issue 670
   public void testSetAndMapValueAreDistinct() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class)
-            .addBinding().toInstance("A");
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("A");
 
-        MapBinder.newMapBinder(binder(), String.class, String.class)
-            .addBinding("B").toInstance("b");
+                MapBinder.newMapBinder(binder(), String.class, String.class)
+                    .addBinding("B")
+                    .toInstance("b");
 
-        OptionalBinder.newOptionalBinder(binder(), String.class)
-            .setDefault().toInstance("C");
-        OptionalBinder.newOptionalBinder(binder(), String.class)
-            .setBinding().toInstance("D");
-      }
-    });
+                OptionalBinder.newOptionalBinder(binder(), String.class)
+                    .setDefault()
+                    .toInstance("C");
+                OptionalBinder.newOptionalBinder(binder(), String.class)
+                    .setBinding()
+                    .toInstance("D");
+              }
+            });
 
     assertEquals(ImmutableSet.of("A"), injector.getInstance(Key.get(setOfString)));
     assertEquals(ImmutableMap.of("B", "b"), injector.getInstance(Key.get(mapOfStringString)));
@@ -1121,18 +1337,22 @@ public class MultibinderTest extends TestCase {
 
   // See issue 670
   public void testSetAndMapValueAreDistinctInSpi() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder.newSetBinder(binder(), String.class)
-            .addBinding().toInstance("A");
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("A");
 
-        MapBinder.newMapBinder(binder(), String.class, String.class)
-            .addBinding("B").toInstance("b");
-        
-        OptionalBinder.newOptionalBinder(binder(), String.class)
-            .setDefault().toInstance("C");
-      }
-    });
+                MapBinder.newMapBinder(binder(), String.class, String.class)
+                    .addBinding("B")
+                    .toInstance("b");
+
+                OptionalBinder.newOptionalBinder(binder(), String.class)
+                    .setDefault()
+                    .toInstance("C");
+              }
+            });
     Collector collector = new Collector();
     Binding<Map<String, String>> mapbinding = injector.getBinding(Key.get(mapOfStringString));
     mapbinding.acceptTargetVisitor(collector);
@@ -1150,9 +1370,10 @@ public class MultibinderTest extends TestCase {
     // (but because of the OptionalBinder, there's 2 ProviderInstanceBindings also).
     // We also know the InstanceBindings will be in the order: A, b, C because that's
     // how we bound them, and binding order is preserved.
-    List<Binding<String>> bindings = FluentIterable.from(injector.findBindingsByType(stringType))
-        .filter(Predicates.instanceOf(InstanceBinding.class))
-        .toList();
+    List<Binding<String>> bindings =
+        FluentIterable.from(injector.findBindingsByType(stringType))
+            .filter(Predicates.instanceOf(InstanceBinding.class))
+            .toList();
     assertEquals(bindings.toString(), 3, bindings.size());
     Binding<String> a = bindings.get(0);
     Binding<String> b = bindings.get(1);
@@ -1176,14 +1397,17 @@ public class MultibinderTest extends TestCase {
   }
 
   public void testMultibinderCanInjectCollectionOfProviders() {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toProvider(Providers.of("A"));
-        multibinder.addBinding().toProvider(Providers.of("B"));
-        multibinder.addBinding().toInstance("C");
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            final Multibinder<String> multibinder =
+                Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toProvider(Providers.of("A"));
+            multibinder.addBinding().toProvider(Providers.of("B"));
+            multibinder.addBinding().toInstance("C");
+          }
+        };
     Collection<String> expectedValues = ImmutableList.of("A", "B", "C");
 
     Injector injector = Guice.createInjector(module);
@@ -1199,15 +1423,17 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderCanInjectCollectionOfProvidersWithAnnotation() {
     final Annotation ann = Names.named("foo");
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        final Multibinder<String> multibinder =
-            Multibinder.newSetBinder(binder(), String.class, ann);
-        multibinder.addBinding().toProvider(Providers.of("A"));
-        multibinder.addBinding().toProvider(Providers.of("B"));
-        multibinder.addBinding().toInstance("C");
-      }
-    };
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            final Multibinder<String> multibinder =
+                Multibinder.newSetBinder(binder(), String.class, ann);
+            multibinder.addBinding().toProvider(Providers.of("A"));
+            multibinder.addBinding().toProvider(Providers.of("B"));
+            multibinder.addBinding().toInstance("C");
+          }
+        };
     Collection<String> expectedValues = ImmutableList.of("A", "B", "C");
 
     Injector injector = Guice.createInjector(module);
@@ -1224,18 +1450,21 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibindingProviderDependencies() {
     final Annotation setAnn = Names.named("foo");
-    Injector injector = Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          Multibinder<String> multibinder =
-              Multibinder.newSetBinder(binder(), String.class, setAnn);
-          multibinder.addBinding().toInstance("a");
-          multibinder.addBinding().toInstance("b");
-        }
-      });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder<String> multibinder =
+                    Multibinder.newSetBinder(binder(), String.class, setAnn);
+                multibinder.addBinding().toInstance("a");
+                multibinder.addBinding().toInstance("b");
+              }
+            });
     HasDependencies providerBinding =
-      (HasDependencies) injector.getBinding(new Key<Collection<Provider<String>>>(setAnn) {});
+        (HasDependencies) injector.getBinding(new Key<Collection<Provider<String>>>(setAnn) {});
     HasDependencies setBinding =
-      (HasDependencies) injector.getBinding(new Key<Set<String>>(setAnn) {});
+        (HasDependencies) injector.getBinding(new Key<Set<String>>(setAnn) {});
     // sanity check the size
     assertEquals(setBinding.getDependencies().toString(), 2, setBinding.getDependencies().size());
     Set<Dependency<?>> expected = Sets.newHashSet();
@@ -1247,21 +1476,26 @@ public class MultibinderTest extends TestCase {
     }
     assertEquals(expected, providerBinding.getDependencies());
   }
-  
+
   public void testEmptyMultibinder() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          Multibinder.newSetBinder(binder(), String.class);
-        }
-      });
-    assertEquals(ImmutableSet.of(), injector.getInstance(new Key<Set<String>>(){}));
-    assertEquals(ImmutableList.of(),
-        injector.getInstance(new Key<Collection<Provider<String>>>(){}));
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class);
+              }
+            });
+    assertEquals(ImmutableSet.of(), injector.getInstance(new Key<Set<String>>() {}));
+    assertEquals(
+        ImmutableList.of(), injector.getInstance(new Key<Collection<Provider<String>>>() {}));
   }
 
   private static final class ObjectWithInjectionPoint {
     boolean setterHasBeenCalled;
-    @Inject void setter(String dummy) {
+
+    @Inject
+    void setter(String dummy) {
       setterHasBeenCalled = true;
     }
   }
@@ -1271,22 +1505,25 @@ public class MultibinderTest extends TestCase {
   public void testMultibinderDependsOnInstanceBindingWithInjectionPoints() {
     Guice.createInjector(
         new AbstractModule() {
-      private Provider<Set<ObjectWithInjectionPoint>> provider;
+          private Provider<Set<ObjectWithInjectionPoint>> provider;
 
-      @Override protected void configure() {
-        bind(Object.class).toInstance(this);  // force setter() to be injected first
-        bind(String.class).toInstance("foo");
-        this.provider = getProvider(new Key<Set<ObjectWithInjectionPoint>>() {});
-        Multibinder.newSetBinder(binder(), ObjectWithInjectionPoint.class).addBinding()
-            .toInstance(new ObjectWithInjectionPoint());
-      }
+          @Override
+          protected void configure() {
+            bind(Object.class).toInstance(this); // force setter() to be injected first
+            bind(String.class).toInstance("foo");
+            this.provider = getProvider(new Key<Set<ObjectWithInjectionPoint>>() {});
+            Multibinder.newSetBinder(binder(), ObjectWithInjectionPoint.class)
+                .addBinding()
+                .toInstance(new ObjectWithInjectionPoint());
+          }
 
-      @Inject void setter(String s) {
-        for (ObjectWithInjectionPoint item : provider.get()) {
-          assertTrue(item.setterHasBeenCalled);
-        }
-      }
-    });
+          @Inject
+          void setter(String s) {
+            for (ObjectWithInjectionPoint item : provider.get()) {
+              assertTrue(item.setterHasBeenCalled);
+            }
+          }
+        });
   }
 
   private <T> Collection<T> collectValues(

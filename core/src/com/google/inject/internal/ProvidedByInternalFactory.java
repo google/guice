@@ -14,46 +14,41 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.internal;
-
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.inject.Key;
 import com.google.inject.ProvidedBy;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
-
 import javax.inject.Provider;
 
 /**
  * An {@link InternalFactory} for {@literal @}{@link ProvidedBy} bindings.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
-class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
-    implements DelayedInitialize {
-  
+class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements DelayedInitialize {
+
   private final Class<?> rawType;
   private final Class<? extends Provider<?>> providerType;
   private final Key<? extends Provider<T>> providerKey;
   private BindingImpl<? extends Provider<T>> providerBinding;
   private ProvisionListenerStackCallback<T> provisionCallback;
-  
+
   ProvidedByInternalFactory(
       Class<?> rawType,
       Class<? extends Provider<?>> providerType,
       Key<? extends Provider<T>> providerKey) {
     super(providerKey);
     this.rawType = rawType;
-    this.providerType = providerType; 
+    this.providerType = providerType;
     this.providerKey = providerKey;
   }
-  
+
   void setProvisionListenerCallback(ProvisionListenerStackCallback<T> listener) {
     provisionCallback = listener;
   }
-  
+
   @Override
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     providerBinding =
@@ -71,17 +66,20 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
     context.pushState(localProviderKey, localProviderBinding.getSource());
     try {
       errors = errors.withSource(localProviderKey);
-      Provider<? extends T> provider = localProviderBinding.getInternalFactory().get(
-          errors, context, dependency, true);
+      Provider<? extends T> provider =
+          localProviderBinding.getInternalFactory().get(errors, context, dependency, true);
       return circularGet(provider, errors, context, dependency, provisionCallback);
     } finally {
       context.popState();
     }
   }
-  
+
   @Override
-  protected T provision(javax.inject.Provider<? extends T> provider, Errors errors,
-      Dependency<?> dependency, ConstructionContext<T> constructionContext)
+  protected T provision(
+      javax.inject.Provider<? extends T> provider,
+      Errors errors,
+      Dependency<?> dependency,
+      ConstructionContext<T> constructionContext)
       throws ErrorsException {
     try {
       Object o = super.provision(provider, errors, dependency, constructionContext);

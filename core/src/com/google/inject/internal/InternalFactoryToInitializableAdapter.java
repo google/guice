@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +22,11 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderInstanceBinding;
 
 /**
- * Adapts {@link ProviderInstanceBinding} providers, ensuring circular proxies
- * fail (or proxy) properly.
- * 
+ * Adapts {@link ProviderInstanceBinding} providers, ensuring circular proxies fail (or proxy)
+ * properly.
+ *
  * @author sameb@google.com (Sam Berlin)
-*/
+ */
 final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
 
   private final ProvisionListenerStackCallback<T> provisionCallback;
@@ -34,7 +34,8 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
 
   public InternalFactoryToInitializableAdapter(
       Initializable<? extends javax.inject.Provider<? extends T>> initializable,
-      Object source, ProvisionListenerStackCallback<T> provisionCallback) {
+      Object source,
+      ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
     this.provisionCallback = provisionCallback;
     this.initializable = checkNotNull(initializable, "provider");
@@ -43,21 +44,25 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    return circularGet(initializable.get(errors), errors, context, dependency,
-        provisionCallback);
+    return circularGet(initializable.get(errors), errors, context, dependency, provisionCallback);
   }
-  
+
   @Override
-  protected T provision(javax.inject.Provider<? extends T> provider, Errors errors,
-      Dependency<?> dependency, ConstructionContext<T> constructionContext) throws ErrorsException {
+  protected T provision(
+      javax.inject.Provider<? extends T> provider,
+      Errors errors,
+      Dependency<?> dependency,
+      ConstructionContext<T> constructionContext)
+      throws ErrorsException {
     try {
       return super.provision(provider, errors, dependency, constructionContext);
-    } catch(RuntimeException userException) {
+    } catch (RuntimeException userException) {
       throw errors.withSource(source).errorInProvider(userException).toException();
     }
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return initializable.toString();
   }
 }

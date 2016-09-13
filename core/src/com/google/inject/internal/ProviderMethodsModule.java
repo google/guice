@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,31 +68,27 @@ public final class ProviderMethodsModule implements Module {
   private final boolean skipFastClassGeneration;
   private final ModuleAnnotatedMethodScanner scanner;
 
-  private ProviderMethodsModule(Object delegate, boolean skipFastClassGeneration,
-      ModuleAnnotatedMethodScanner scanner) {
+  private ProviderMethodsModule(
+      Object delegate, boolean skipFastClassGeneration, ModuleAnnotatedMethodScanner scanner) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
     this.skipFastClassGeneration = skipFastClassGeneration;
     this.scanner = scanner;
   }
 
-  /**
-   * Returns a module which creates bindings for provider methods from the given module.
-   */
+  /** Returns a module which creates bindings for provider methods from the given module. */
   public static Module forModule(Module module) {
     return forObject(module, false, PROVIDES_BUILDER);
   }
 
-  /**
-   * Returns a module which creates bindings methods in the module that match the scanner.
-   */
+  /** Returns a module which creates bindings methods in the module that match the scanner. */
   public static Module forModule(Object module, ModuleAnnotatedMethodScanner scanner) {
     return forObject(module, false, scanner);
   }
 
   /**
-   * Returns a module which creates bindings for provider methods from the given object.
-   * This is useful notably for <a href="http://code.google.com/p/google-gin/">GIN</a>
+   * Returns a module which creates bindings for provider methods from the given object. This is
+   * useful notably for <a href="http://code.google.com/p/google-gin/">GIN</a>
    *
    * <p>This will skip bytecode generation for provider methods, since it is assumed that callers
    * are only interested in Module metadata.
@@ -101,8 +97,8 @@ public final class ProviderMethodsModule implements Module {
     return forObject(object, true, PROVIDES_BUILDER);
   }
 
-  private static Module forObject(Object object, boolean skipFastClassGeneration,
-      ModuleAnnotatedMethodScanner scanner) {
+  private static Module forObject(
+      Object object, boolean skipFastClassGeneration, ModuleAnnotatedMethodScanner scanner) {
     // avoid infinite recursion, since installing a module always installs itself
     if (object instanceof ProviderMethodsModule) {
       return Modules.EMPTY_MODULE;
@@ -133,7 +129,8 @@ public final class ProviderMethodsModule implements Module {
         // synthetic overrides in some cases where we don't want to generate an error (e.g.
         // increasing visibility of a subclass).
         if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
-            && !method.isBridge() && !method.isSynthetic()) {
+            && !method.isBridge()
+            && !method.isSynthetic()) {
           methodsBySignature.put(new Signature(method), method);
         }
         Optional<Annotation> annotation = isProvider(binder, method);
@@ -155,11 +152,17 @@ public final class ProviderMethodsModule implements Module {
         }
         // now we know matching signature is in a subtype of method.getDeclaringClass()
         if (overrides(matchingSignature, method)) {
-          String annotationString = provider.getAnnotation().annotationType() == Provides.class
-              ? "@Provides" : "@" + provider.getAnnotation().annotationType().getCanonicalName();
+          String annotationString =
+              provider.getAnnotation().annotationType() == Provides.class
+                  ? "@Provides"
+                  : "@" + provider.getAnnotation().annotationType().getCanonicalName();
           binder.addError(
-              "Overriding " + annotationString + " methods is not allowed."
-                  + "\n\t" + annotationString + " method: %s\n\toverridden by: %s",
+              "Overriding "
+                  + annotationString
+                  + " methods is not allowed."
+                  + "\n\t"
+                  + annotationString
+                  + " method: %s\n\toverridden by: %s",
               method,
               matchingSignature);
           break;
@@ -172,7 +175,7 @@ public final class ProviderMethodsModule implements Module {
   /**
    * Returns true if the method is a provider.
    *
-   * Synthetic bridge methods are excluded. Starting with JDK 8, javac copies annotations onto
+   * <p>Synthetic bridge methods are excluded. Starting with JDK 8, javac copies annotations onto
    * bridge methods (which always have erased signatures).
    */
   private Optional<Annotation> isProvider(Binder binder, Method method) {
@@ -184,8 +187,9 @@ public final class ProviderMethodsModule implements Module {
       Annotation foundAnnotation = method.getAnnotation(annotationClass);
       if (foundAnnotation != null) {
         if (annotation != null) {
-          binder.addError("More than one annotation claimed by %s on method %s."
-              + " Methods can only have one annotation claimed per scanner.",
+          binder.addError(
+              "More than one annotation claimed by %s on method %s."
+                  + " Methods can only have one annotation claimed per scanner.",
               scanner, method);
           return Optional.absent();
         }
@@ -216,7 +220,8 @@ public final class ProviderMethodsModule implements Module {
       this.hashCode = name.hashCode() + 31 * Arrays.hashCode(parameters);
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       if (obj instanceof Signature) {
         Signature other = (Signature) obj;
         return other.name.equals(name) && Arrays.equals(parameters, other.parameters);
@@ -224,7 +229,8 @@ public final class ProviderMethodsModule implements Module {
       return false;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return hashCode;
     }
   }
@@ -243,8 +249,8 @@ public final class ProviderMethodsModule implements Module {
     return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
   }
 
-  private <T> ProviderMethod<T> createProviderMethod(Binder binder, Method method,
-      Annotation annotation) {
+  private <T> ProviderMethod<T> createProviderMethod(
+      Binder binder, Method method, Annotation annotation) {
     binder = binder.withSource(method);
     Errors errors = new Errors(method);
 
@@ -255,11 +261,11 @@ public final class ProviderMethodsModule implements Module {
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
     try {
       key = scanner.prepareMethod(binder, annotation, key, point);
-    } catch(Throwable t) {
+    } catch (Throwable t) {
       binder.addError(t);
     }
-    Class<? extends Annotation> scopeAnnotation
-        = Annotations.findScopeAnnotation(errors, method.getAnnotations());
+    Class<? extends Annotation> scopeAnnotation =
+        Annotations.findScopeAnnotation(errors, method.getAnnotations());
     for (Message message : errors.getMessages()) {
       binder.addError(message);
     }
@@ -278,13 +284,15 @@ public final class ProviderMethodsModule implements Module {
     return bindingAnnotation == null ? Key.get(type) : Key.get(type, bindingAnnotation);
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     return o instanceof ProviderMethodsModule
         && ((ProviderMethodsModule) o).delegate == delegate
         && ((ProviderMethodsModule) o).scanner == scanner;
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return delegate.hashCode();
   }
 }

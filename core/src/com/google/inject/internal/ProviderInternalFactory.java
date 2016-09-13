@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
-
 import javax.inject.Provider;
 
 /**
- * Base class for InternalFactories that are used by Providers, to handle
- * circular dependencies.
+ * Base class for InternalFactories that are used by Providers, to handle circular dependencies.
  *
  * @author sameb@google.com (Sam Berlin)
  */
 abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
-  
+
   protected final Object source;
-  
+
   ProviderInternalFactory(Object source) {
     this.source = checkNotNull(source, "source");
   }
-  
-  protected T circularGet(final Provider<? extends T> provider, final Errors errors,
-      InternalContext context, final Dependency<?> dependency,
+
+  protected T circularGet(
+      final Provider<? extends T> provider,
+      final Errors errors,
+      InternalContext context,
+      final Dependency<?> dependency,
       /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
-      throws ErrorsException {    
+      throws ErrorsException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
-        Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
-        // TODO: if we can't proxy this object, can we proxy the other object?
-        @SuppressWarnings("unchecked")
-        T proxyType = (T) constructionContext.createProxy(
-            errors, context.getInjectorOptions(), expectedType);
-        return proxyType;
+      Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
+      // TODO: if we can't proxy this object, can we proxy the other object?
+      @SuppressWarnings("unchecked")
+      T proxyType =
+          (T) constructionContext.createProxy(errors, context.getInjectorOptions(), expectedType);
+      return proxyType;
     }
 
     // Optimization: Don't go through the callback stack if no one's listening.
@@ -77,11 +77,15 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
   }
 
   /**
-   * Provisions a new instance. Subclasses should override this to catch
-   * exceptions & rethrow as ErrorsExceptions.
+   * Provisions a new instance. Subclasses should override this to catch exceptions & rethrow as
+   * ErrorsExceptions.
    */
-  protected T provision(Provider<? extends T> provider, Errors errors, Dependency<?> dependency,
-      ConstructionContext<T> constructionContext) throws ErrorsException {
+  protected T provision(
+      Provider<? extends T> provider,
+      Errors errors,
+      Dependency<?> dependency,
+      ConstructionContext<T> constructionContext)
+      throws ErrorsException {
     T t = errors.checkForNull(provider.get(), source, dependency);
     constructionContext.setProxyDelegates(t);
     return t;

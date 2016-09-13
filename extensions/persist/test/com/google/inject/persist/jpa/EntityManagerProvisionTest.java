@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +22,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-
-import junit.framework.TestCase;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import junit.framework.TestCase;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -60,14 +58,17 @@ public class EntityManagerProvisionTest extends TestCase {
     dao.persist(te);
 
     //im not sure this hack works...
-    assertFalse("Duplicate entity managers crossing-scope",
+    assertFalse(
+        "Duplicate entity managers crossing-scope",
         dao.lastEm.equals(injector.getInstance(EntityManager.class)));
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
-    assertFalse("EntityManager wasnt closed and reopened properly around txn"
-        + " (persistent object persists)", dao.contains(te));
+    assertFalse(
+        "EntityManager wasnt closed and reopened properly around txn"
+            + " (persistent object persists)",
+        dao.contains(te));
   }
 
   public void testEntityManagerLifecyclePerTxn2() {
@@ -80,14 +81,17 @@ public class EntityManagerProvisionTest extends TestCase {
     dao.persist(te);
 
     //im not sure this hack works...
-    assertFalse("Duplicate entity managers crossing-scope",
+    assertFalse(
+        "Duplicate entity managers crossing-scope",
         dao.lastEm.equals(injector.getInstance(EntityManager.class)));
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
-    assertFalse("EntityManager wasnt closed and reopened properly around txn"
-        + " (persistent object persists)", dao.contains(te));
+    assertFalse(
+        "EntityManager wasnt closed and reopened properly around txn"
+            + " (persistent object persists)",
+        dao.contains(te));
   }
 
   public static class JpaDao {
@@ -96,7 +100,7 @@ public class EntityManagerProvisionTest extends TestCase {
 
     @Inject
     public JpaDao(Provider<EntityManager> em) {
-     this.em = em;
+      this.em = em;
     }
 
     @Transactional

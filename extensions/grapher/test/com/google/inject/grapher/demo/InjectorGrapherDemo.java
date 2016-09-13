@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,22 +21,24 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.google.inject.grapher.graphviz.GraphvizGrapher;
 import com.google.inject.grapher.graphviz.GraphvizModule;
-
 import java.io.File;
 import java.io.PrintWriter;
 
 /**
- * Application that instantiates {@link BackToTheFutureModule} and graphs it,
- * writing the output to a DOT-formatted file (filename specified on the
- * command line).
+ * Application that instantiates {@link BackToTheFutureModule} and graphs it, writing the output to
+ * a DOT-formatted file (filename specified on the command line).
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class InjectorGrapherDemo {
   public static void main(String[] args) throws Exception {
     // TODO(phopkins): Switch to Stage.TOOL when issue 297 is fixed.
-    Injector demoInjector = Guice.createInjector(Stage.DEVELOPMENT,
-        new BackToTheFutureModule(), new MultibinderModule(), new PrivateTestModule());
+    Injector demoInjector =
+        Guice.createInjector(
+            Stage.DEVELOPMENT,
+            new BackToTheFutureModule(),
+            new MultibinderModule(),
+            new PrivateTestModule());
     PrintWriter out = new PrintWriter(new File(args[0]), "UTF-8");
 
     Injector injector = Guice.createInjector(new GraphvizModule());

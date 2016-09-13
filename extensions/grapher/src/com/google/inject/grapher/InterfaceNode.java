@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,15 +28,18 @@ public class InterfaceNode extends Node {
     super(id, source);
   }
 
-  @Override public Node copy(NodeId id) {
+  @Override
+  public Node copy(NodeId id) {
     return new InterfaceNode(id, getSource());
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     return (obj instanceof InterfaceNode) && super.equals(obj);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "InterfaceNode{id=" + getId() + " source=" + getSource() + "}";
   }
 }

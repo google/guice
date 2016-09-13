@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 
@@ -35,9 +34,8 @@ public class SpringIntegration {
   private SpringIntegration() {}
 
   /**
-   * Creates a provider which looks up objects from Spring using the given name.
-   * Expects a binding to {@link
-   * org.springframework.beans.factory.BeanFactory}. Example usage:
+   * Creates a provider which looks up objects from Spring using the given name. Expects a binding
+   * to {@link org.springframework.beans.factory.BeanFactory}. Example usage:
    *
    * <pre>
    * bind(DataSource.class)
@@ -49,12 +47,11 @@ public class SpringIntegration {
   }
 
   /**
-   * Binds all Spring beans from the given factory by name. For a Spring bean
-   * named "foo", this method creates a binding to the bean's type and
-   * {@code @Named("foo")}.
+   * Binds all Spring beans from the given factory by name. For a Spring bean named "foo", this
+   * method creates a binding to the bean's type and {@code @Named("foo")}.
    *
    * @see com.google.inject.name.Named
-   * @see com.google.inject.name.Names#named(String) 
+   * @see com.google.inject.name.Names#named(String)
    */
   public static void bindAll(Binder binder, ListableBeanFactory beanFactory) {
     binder = binder.skipSources(SpringIntegration.class);
@@ -65,21 +62,17 @@ public class SpringIntegration {
     }
   }
 
-  static <T> void bindBean(Binder binder, ListableBeanFactory beanFactory,
-      String name, Class<T> type) {
-    SpringProvider<T> provider
-        = SpringProvider.newInstance(type, name);
+  static <T> void bindBean(
+      Binder binder, ListableBeanFactory beanFactory, String name, Class<T> type) {
+    SpringProvider<T> provider = SpringProvider.newInstance(type, name);
     try {
       provider.initialize(beanFactory);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       binder.addError(e);
       return;
     }
 
-    binder.bind(type)
-        .annotatedWith(Names.named(name))
-        .toProvider(provider);
+    binder.bind(type).annotatedWith(Names.named(name)).toProvider(provider);
   }
 
   static class SpringProvider<T> implements Provider<T> {
@@ -101,8 +94,8 @@ public class SpringIntegration {
     void initialize(BeanFactory beanFactory) {
       this.beanFactory = beanFactory;
       if (!beanFactory.isTypeMatch(name, type)) {
-        throw new ClassCastException("Spring bean named '" + name
-            + "' does not implement " + type.getName() + ".");
+        throw new ClassCastException(
+            "Spring bean named '" + name + "' does not implement " + type.getName() + ".");
       }
       singleton = beanFactory.isSingleton(name);
     }

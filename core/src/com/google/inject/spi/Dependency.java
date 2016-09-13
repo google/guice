@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import com.google.inject.internal.MoreTypes;
-
 import java.util.List;
 import java.util.Set;
 
@@ -58,9 +57,7 @@ public final class Dependency<T> {
     return new Dependency<T>(null, MoreTypes.canonicalizeKey(key), true, -1);
   }
 
-  /**
-   * Returns the dependencies from the given injection points.
-   */
+  /** Returns the dependencies from the given injection points. */
   public static Set<Dependency<?>> forInjectionPoints(Set<InjectionPoint> injectionPoints) {
     List<Dependency<?>> dependencies = Lists.newArrayList();
     for (InjectionPoint injectionPoint : injectionPoints) {
@@ -69,16 +66,12 @@ public final class Dependency<T> {
     return ImmutableSet.copyOf(dependencies);
   }
 
-  /**
-   * Returns the key to the binding that satisfies this dependency.
-   */
+  /** Returns the key to the binding that satisfies this dependency. */
   public Key<T> getKey() {
     return this.key;
   }
 
-  /**
-   * Returns true if null is a legal value for this dependency.
-   */
+  /** Returns true if null is a legal value for this dependency. */
   public boolean isNullable() {
     return nullable;
   }
@@ -100,11 +93,13 @@ public final class Dependency<T> {
     return parameterIndex;
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return Objects.hashCode(injectionPoint, parameterIndex, key);
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     if (o instanceof Dependency) {
       Dependency dependency = (Dependency) o;
       return Objects.equal(injectionPoint, dependency.injectionPoint)
@@ -115,7 +110,8 @@ public final class Dependency<T> {
     }
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(key);
     if (injectionPoint != null) {

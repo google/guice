@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,8 @@ import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 
 /**
- * A placeholder which enables us to swap in the real factory once the injector is created.
- * Used for a linked binding, so that getting the linked binding returns the link's factory.
+ * A placeholder which enables us to swap in the real factory once the injector is created. Used for
+ * a linked binding, so that getting the linked binding returns the link's factory.
  */
 final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
 
@@ -44,7 +44,9 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
   @Override
   public void notify(final Errors errors) {
     try {
-      targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
+      targetFactory =
+          injector.getInternalFactory(
+              targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -62,7 +64,8 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
     }
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(FactoryProxy.class)
         .add("key", key)
         .add("provider", targetFactory)

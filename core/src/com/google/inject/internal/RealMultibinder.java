@@ -38,28 +38,22 @@ import java.util.Set;
 /**
  * The actual multibinder plays several roles:
  *
- * <p>As a Multibinder, it acts as a factory for LinkedBindingBuilders for
- * each of the set's elements. Each binding is given an annotation that
- * identifies it as a part of this set.
+ * <p>As a Multibinder, it acts as a factory for LinkedBindingBuilders for each of the set's
+ * elements. Each binding is given an annotation that identifies it as a part of this set.
  *
- * <p>As a Module, it installs the binding to the set itself. As a module,
- * this implements equals() and hashcode() in order to trick Guice into
- * executing its configure() method only once. That makes it so that
- * multiple multibinders can be created for the same target collection, but
- * only one is bound. Since the list of bindings is retrieved from the
- * injector itself (and not the multibinder), each multibinder has access to
- * all contributions from all multibinders.
+ * <p>As a Module, it installs the binding to the set itself. As a module, this implements equals()
+ * and hashcode() in order to trick Guice into executing its configure() method only once. That
+ * makes it so that multiple multibinders can be created for the same target collection, but only
+ * one is bound. Since the list of bindings is retrieved from the injector itself (and not the
+ * multibinder), each multibinder has access to all contributions from all multibinders.
  *
  * <p>As a Provider, this constructs the set instances.
  *
- * <p>We use a subclass to hide 'implements Module, Provider' from the public
- * API.
+ * <p>We use a subclass to hide 'implements Module, Provider' from the public API.
  */
 public final class RealMultibinder<T> implements Module {
 
-  /**
-   * Implementation of newSetBinder.
-   */
+  /** Implementation of newSetBinder. */
   public static <T> RealMultibinder<T> newRealSetBinder(Binder binder, Key<T> key) {
     binder = binder.skipSources(RealMultibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, key);
@@ -98,21 +92,24 @@ public final class RealMultibinder<T> implements Module {
     this.bindingSelection = new BindingSelection<T>(key);
   }
 
-  @Override public void configure(Binder binder) {
+  @Override
+  public void configure(Binder binder) {
     checkConfiguration(!bindingSelection.isInitialized(), "Multibinder was already initialized");
-    binder.bind(bindingSelection.getSetKey())
+    binder
+        .bind(bindingSelection.getSetKey())
         .toProvider(new RealMultibinderProvider<T>(bindingSelection));
     Provider<Collection<Provider<T>>> collectionOfProvidersProvider =
         new RealMultibinderCollectionOfProvidersProvider<T>(bindingSelection);
-    binder.bind(bindingSelection.getCollectionOfProvidersKey())
+    binder
+        .bind(bindingSelection.getCollectionOfProvidersKey())
         .toProvider(collectionOfProvidersProvider);
 
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to javax Provider in the value (since the guice Provider implements
     // javax Provider).
     @SuppressWarnings("unchecked")
-    Provider<Collection<javax.inject.Provider<T>>> javaxProvider
-        = (Provider) collectionOfProvidersProvider;
+    Provider<Collection<javax.inject.Provider<T>>> javaxProvider =
+        (Provider) collectionOfProvidersProvider;
     binder.bind(bindingSelection.getCollectionOfJavaxProvidersKey()).toProvider(javaxProvider);
   }
 
@@ -120,12 +117,11 @@ public final class RealMultibinder<T> implements Module {
     binder.install(new PermitDuplicatesModule(bindingSelection.getPermitDuplicatesKey()));
   }
 
-  /**
-   * Adds a new entry to the set and returns the key for it.
-   */
+  /** Adds a new entry to the set and returns the key for it. */
   Key<T> getKeyForNewItem() {
     checkConfiguration(!bindingSelection.isInitialized(), "Multibinder was already initialized");
-    return Key.get(bindingSelection.getElementTypeLiteral(),
+    return Key.get(
+        bindingSelection.getElementTypeLiteral(),
         new RealElement(bindingSelection.getSetName(), MULTIBINDER, ""));
   }
 
@@ -201,8 +197,8 @@ public final class RealMultibinder<T> implements Module {
         SingleParameterInjector<T> parameterInjector = localInjectors[i];
         T newValue = parameterInjector.inject(errors, context);
         if (newValue == null) {
-          errors.addMessage("Set injection failed due to null element bound at: %s",
-              bindings.get(i).getSource());
+          errors.addMessage(
+              "Set injection failed due to null element bound at: %s", bindings.get(i).getSource());
           throw errors.toException();
         }
         boolean uniqueValue = result.add(newValue);
@@ -214,9 +210,9 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @SuppressWarnings("unchecked")
-    @Override public <B, V> V acceptExtensionVisitor(
-        BindingTargetVisitor<B, V> visitor,
-        ProviderInstanceBinding<? extends B> binding) {
+    @Override
+    public <B, V> V acceptExtensionVisitor(
+        BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
         return ((MultibindingsTargetVisitor<Set<T>, V>) visitor).visit(this);
       } else {
@@ -225,7 +221,10 @@ public final class RealMultibinder<T> implements Module {
     }
 
     private static <T> ErrorsException newDuplicateValuesException(
-        List<Binding<T>> bindings, LinkedHashSet<T> results, Binding<T> newBinding, T newValue,
+        List<Binding<T>> bindings,
+        LinkedHashSet<T> results,
+        Binding<T> newBinding,
+        T newValue,
         Errors errors) {
       // Find the duplicate binding
       // To do this we take advantage of the fact that results has the same order as bindings,
@@ -249,31 +248,29 @@ public final class RealMultibinder<T> implements Module {
         errors.addMessage(
             "Set injection failed due to duplicated element \"%s\""
                 + "\n    Bound at %s\n    Bound at %s",
-            newValue,
-            duplicateBinding.getSource(),
-            newBinding.getSource());
+            newValue, duplicateBinding.getSource(), newBinding.getSource());
       } else {
         // When the value strings don't match, include them both as they may be useful for debugging
         errors.addMessage(
             "Set injection failed due to multiple elements comparing equal:"
                 + "\n    \"%s\"\n        bound at %s"
                 + "\n    \"%s\"\n        bound at %s",
-            oldValue,
-            duplicateBinding.getSource(),
-            newValue,
-            newBinding.getSource());
+            oldValue, duplicateBinding.getSource(), newValue, newBinding.getSource());
       }
       return errors.toException();
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       return obj instanceof RealMultibinderProvider
           && bindingSelection.equals(((RealMultibinderProvider<?>) obj).bindingSelection);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return bindingSelection.hashCode();
     }
+
     @Override
     public Key<Set<T>> getSetKey() {
       return bindingSelection.getSetKey();
@@ -324,6 +321,7 @@ public final class RealMultibinder<T> implements Module {
 
     /** whether duplicates are allowed. Possibly configured by a different instance */
     private boolean permitDuplicates;
+
     private SingleParameterInjector<T>[] parameterinjectors;
 
     BindingSelection(Key<T> key) {
@@ -412,8 +410,8 @@ public final class RealMultibinder<T> implements Module {
     Key<Boolean> getPermitDuplicatesKey() {
       Key<Boolean> local = permitDuplicatesKey;
       if (local == null) {
-        local = permitDuplicatesKey =
-            Key.get(Boolean.class, named(toString() + " permits duplicates"));
+        local =
+            permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
       }
       return local;
     }
@@ -429,8 +427,9 @@ public final class RealMultibinder<T> implements Module {
     Key<Collection<javax.inject.Provider<T>>> getCollectionOfJavaxProvidersKey() {
       Key<Collection<javax.inject.Provider<T>>> local = collectionOfJavaxProvidersKey;
       if (local == null) {
-        local = collectionOfJavaxProvidersKey =
-            setKey.ofType(collectionOfJavaxProvidersOf(elementType));
+        local =
+            collectionOfJavaxProvidersKey =
+                setKey.ofType(collectionOfJavaxProvidersOf(elementType));
       }
       return local;
     }
@@ -487,29 +486,36 @@ public final class RealMultibinder<T> implements Module {
           && ((Element) key.getAnnotation()).type() == MULTIBINDER;
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       if (obj instanceof BindingSelection) {
         return setKey.equals(((BindingSelection<?>) obj).setKey);
       }
       return false;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return setKey.hashCode();
     }
 
-    @Override public String toString() {
-      return (getSetName().isEmpty()  ? "" : getSetName() + " ")
-          + "Multibinder<" + elementType + ">";
+    @Override
+    public String toString() {
+      return (getSetName().isEmpty() ? "" : getSetName() + " ")
+          + "Multibinder<"
+          + elementType
+          + ">";
     }
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     return o instanceof RealMultibinder
         && ((RealMultibinder<?>) o).bindingSelection.equals(bindingSelection);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return bindingSelection.hashCode();
   }
 
@@ -520,7 +526,7 @@ public final class RealMultibinder<T> implements Module {
     private ImmutableList<Provider<T>> collectionOfProviders;
 
     RealMultibinderCollectionOfProvidersProvider(BindingSelection<T> bindingSelection) {
-      super(InitializationTiming.DELAYED);  // See comment in RealMultibinderProvider
+      super(InitializationTiming.DELAYED); // See comment in RealMultibinderProvider
       this.bindingSelection = bindingSelection;
     }
 
@@ -540,29 +546,31 @@ public final class RealMultibinder<T> implements Module {
       return collectionOfProviders;
     }
 
-    @Override public Set<Dependency<?>> getDependencies() {
+    @Override
+    public Set<Dependency<?>> getDependencies() {
       return bindingSelection.getProviderDependencies();
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       return obj instanceof RealMultibinderCollectionOfProvidersProvider
           && bindingSelection.equals(
               ((RealMultibinderCollectionOfProvidersProvider<?>) obj).bindingSelection);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return bindingSelection.hashCode();
     }
   }
 
   /**
-   * We install the permit duplicates configuration as its own binding, all by itself. This way,
-   * if only one of a multibinder's users remember to call permitDuplicates(), they're still
-   * permitted.
+   * We install the permit duplicates configuration as its own binding, all by itself. This way, if
+   * only one of a multibinder's users remember to call permitDuplicates(), they're still permitted.
    *
-   * This is like setting a global variable in the injector so that each instance of the
-   * multibinder will have the same value for permitDuplicates, even if it is only set
-   * on one of them.
+   * <p>This is like setting a global variable in the injector so that each instance of the
+   * multibinder will have the same value for permitDuplicates, even if it is only set on one of
+   * them.
    */
   private static class PermitDuplicatesModule extends AbstractModule {
     private final Key<Boolean> key;
@@ -571,16 +579,18 @@ public final class RealMultibinder<T> implements Module {
       this.key = key;
     }
 
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       bind(key).toInstance(true);
     }
 
-    @Override public boolean equals(Object o) {
-      return o instanceof PermitDuplicatesModule
-          && ((PermitDuplicatesModule) o).key.equals(key);
+    @Override
+    public boolean equals(Object o) {
+      return o instanceof PermitDuplicatesModule && ((PermitDuplicatesModule) o).key.equals(key);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return getClass().hashCode() ^ key.hashCode();
     }
   }

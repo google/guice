@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,6 @@ import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -79,17 +78,16 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   void configure(Binder binder) {
     binder = binder.withSource(method);
 
-    SecondaryBinder<?, ?> sbinder = 
-        ThrowingProviderBinder.create(binder)
-          .bind(checkedProvider, key.getTypeLiteral());
-    if(key.getAnnotation() != null) {
+    SecondaryBinder<?, ?> sbinder =
+        ThrowingProviderBinder.create(binder).bind(checkedProvider, key.getTypeLiteral());
+    if (key.getAnnotation() != null) {
       sbinder = sbinder.annotatedWith(key.getAnnotation());
-    } else if(key.getAnnotationType() != null) {
+    } else if (key.getAnnotationType() != null) {
       sbinder = sbinder.annotatedWith(key.getAnnotationType());
     }
     sbinder.scopeExceptions(scopeExceptions);
     ScopedBindingBuilder sbbuilder = sbinder.toProviderMethod(this);
-    if(scopeAnnotation != null) {
+    if (scopeAnnotation != null) {
       sbbuilder.in(scopeAnnotation);
     }
 
@@ -98,7 +96,7 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
       // misplaced @Exposed, calling this will add an error to the binder's error queue
       ((PrivateBinder) binder).expose(sbinder.getKey());
     }
-    
+
     CheckedProvideUtils.validateExceptions(
         binder, exceptionTypes, sbinder.getExceptionTypes(), checkedProvider);
   }
@@ -112,17 +110,17 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
 
     try {
       // We know this cast is safe becase T is the method's return type.
-      @SuppressWarnings({ "unchecked", "UnnecessaryLocalVariable" })
+      @SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
       T result = (T) method.invoke(instance, parameters);
       return result;
     } catch (IllegalAccessException e) {
       throw new AssertionError(e);
     } catch (InvocationTargetException e) {
       Throwable t = e.getCause();
-      if(t instanceof Exception) {
-        throw (Exception)t;
-      } else if(t instanceof Error) {
-        throw (Error)t;
+      if (t instanceof Exception) {
+        throw (Exception) t;
+      } else if (t instanceof Error) {
+        throw (Error) t;
       } else {
         throw new IllegalStateException(t);
       }
@@ -134,7 +132,8 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
     return dependencies;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "@CheckedProvides " + StackTraceElements.forMember(method);
   }
 }

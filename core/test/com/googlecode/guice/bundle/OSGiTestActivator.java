@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,23 +24,21 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.matcher.AbstractMatcher;
-
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Random;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Random;
-
 /**
  * Test Guice from inside an OSGi bundle activator.
- * 
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-@SuppressWarnings("unused") public class OSGiTestActivator
-    implements BundleActivator {
+@SuppressWarnings("unused")
+public class OSGiTestActivator implements BundleActivator {
 
   // varying visibilities to test our code-generation support
 
@@ -54,18 +52,21 @@ import java.util.Random;
 
   private interface D {}
 
-  public static class AA
-      implements A {
+  public static class AA implements A {
 
     public AA() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -76,18 +77,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  protected static class AB
-      implements A {
+  protected static class AB implements A {
 
     public AB() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -98,18 +102,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  static class AC
-      implements A {
+  static class AC implements A {
 
     public AC() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -120,18 +127,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  private static class AD
-      implements A {
+  private static class AD implements A {
 
     public AD() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -142,18 +152,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  public static class BA
-      implements B {
+  public static class BA implements B {
 
     protected BA() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -164,18 +177,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  protected static class BB
-      implements B {
+  protected static class BB implements B {
 
     protected BB() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -186,18 +202,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  static class BC
-      implements B {
+  static class BC implements B {
 
     protected BC() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -208,18 +227,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  private static class BD
-      implements B {
+  private static class BD implements B {
 
     protected BD() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -230,18 +252,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  public static class CA
-      implements C {
+  public static class CA implements C {
 
     CA() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -252,18 +277,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  protected static class CB
-      implements C {
+  protected static class CB implements C {
 
     CB() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -274,18 +302,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  static class CC
-      implements C {
+  static class CC implements C {
 
     CC() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -296,40 +327,21 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  private static class CD
-      implements C {
+  private static class CD implements C {
 
     CD() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
-
-    @Inject public Undefined a;
-
-    @Inject protected Undefined b;
-
-    @Inject Undefined c;
-
-    @Inject private Undefined d;
-  }
-
-  public static class DA
-      implements D {
-
-    @Inject private DA() {}
-
-    @Inject public void setA(Undefined undefined) {}
-
-    @Inject protected void setB(Undefined undefined) {}
-
-    @Inject void setC(Undefined undefined) {}
-
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -340,40 +352,22 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  protected static class DB
-      implements D {
+  public static class DA implements D {
 
-    @Inject private DB() {}
+    @Inject
+    private DA() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
-
-    @Inject public Undefined a;
-
-    @Inject protected Undefined b;
-
-    @Inject Undefined c;
-
-    @Inject private Undefined d;
-  }
-
-  static class DC
-      implements D {
-
-    @Inject private DC() {}
-
-    @Inject public void setA(Undefined undefined) {}
-
-    @Inject protected void setB(Undefined undefined) {}
-
-    @Inject void setC(Undefined undefined) {}
-
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -384,18 +378,73 @@ import java.util.Random;
     @Inject private Undefined d;
   }
 
-  private static class DD
-      implements D {
+  protected static class DB implements D {
+
+    @Inject
+    private DB() {}
+
+    @Inject
+    public void setA(Undefined undefined) {}
+
+    @Inject
+    protected void setB(Undefined undefined) {}
+
+    @Inject
+    void setC(Undefined undefined) {}
+
+    @Inject
+    private void setD(Undefined undefined) {}
+
+    @Inject public Undefined a;
+
+    @Inject protected Undefined b;
+
+    @Inject Undefined c;
+
+    @Inject private Undefined d;
+  }
+
+  static class DC implements D {
+
+    @Inject
+    private DC() {}
+
+    @Inject
+    public void setA(Undefined undefined) {}
+
+    @Inject
+    protected void setB(Undefined undefined) {}
+
+    @Inject
+    void setC(Undefined undefined) {}
+
+    @Inject
+    private void setD(Undefined undefined) {}
+
+    @Inject public Undefined a;
+
+    @Inject protected Undefined b;
+
+    @Inject Undefined c;
+
+    @Inject private Undefined d;
+  }
+
+  private static class DD implements D {
 
     private DD() {}
 
-    @Inject public void setA(Undefined undefined) {}
+    @Inject
+    public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(Undefined undefined) {}
+    @Inject
+    protected void setB(Undefined undefined) {}
 
-    @Inject void setC(Undefined undefined) {}
+    @Inject
+    void setC(Undefined undefined) {}
 
-    @Inject private void setD(Undefined undefined) {}
+    @Inject
+    private void setD(Undefined undefined) {}
 
     @Inject public Undefined a;
 
@@ -407,14 +456,16 @@ import java.util.Random;
   }
 
   enum Visibility {
-    PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE
+    PUBLIC,
+    PROTECTED,
+    PACKAGE_PRIVATE,
+    PRIVATE
   }
 
   static final Class<?>[] TEST_CLAZZES = {A.class, B.class, C.class, D.class};
 
   // registers all the class combinations
-  static class TestModule
-      extends AbstractModule {
+  static class TestModule extends AbstractModule {
 
     final Bundle bundle;
 
@@ -422,7 +473,9 @@ import java.util.Random;
       this.bundle = bundle;
     }
 
-    @Override @SuppressWarnings("unchecked") protected void configure() {
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void configure() {
       for (Class<?> api : TEST_CLAZZES) {
         for (Visibility visibility : Visibility.values()) {
           try {
@@ -440,11 +493,11 @@ import java.util.Random;
     }
   }
 
-/*if[AOP]*/
+  /*if[AOP]*/
   // applies method-interception to classes with enough visibility
-  static class InterceptorModule
-      extends AbstractModule {
-    @Override protected void configure() {
+  static class InterceptorModule extends AbstractModule {
+    @Override
+    protected void configure() {
       bindInterceptor(
           new AbstractMatcher<Class<?>>() {
             @Override
@@ -489,25 +542,25 @@ import java.util.Random;
     final Bundle bundle = context.getBundle();
 
     Injector injector = Guice.createInjector(new TestModule(bundle));
-/*if[AOP]*/
+    /*if[AOP]*/
     Injector aopInjector = Guice.createInjector(new TestModule(bundle), new InterceptorModule());
-/*end[AOP]*/
+    /*end[AOP]*/
 
     // test code-generation support
     for (Class<?> api : TEST_CLAZZES) {
       for (Visibility vis : Visibility.values()) {
         injector.getInstance(Key.get(api, named(vis.name())));
-/*if[AOP]*/
+        /*if[AOP]*/
         aopInjector.getInstance(Key.get(api, named(vis.name())));
-/*end[AOP]*/
+        /*end[AOP]*/
       }
     }
 
     // test injection of system class (issue 343)
     injector.getInstance(Random.class);
-/*if[AOP]*/
+    /*if[AOP]*/
     aopInjector.getInstance(Random.class);
-/*end[AOP]*/
+    /*end[AOP]*/
   }
 
   // called from OSGi when bundle stops

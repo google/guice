@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,14 +39,13 @@ import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
-
 import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * A partially-initialized injector. See {@link InternalInjectorCreator}, which
- * uses this to build a tree of injectors in batch.
- * 
+ * A partially-initialized injector. See {@link InternalInjectorCreator}, which uses this to build a
+ * tree of injectors in batch.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 final class InjectorShell {
@@ -80,7 +79,7 @@ final class InjectorShell {
 
     /** null unless this exists in a {@link Binder#newPrivateBinder private environment} */
     private PrivateElementsImpl privateElements;
-    
+
     Builder stage(Stage stage) {
       this.stage = stage;
       return this;
@@ -105,7 +104,7 @@ final class InjectorShell {
         this.modules.add(module);
       }
     }
-    
+
     Stage getStage() {
       return options.stage;
     }
@@ -136,12 +135,12 @@ final class InjectorShell {
         modules.add(0, new InheritedScannersModule(parent.state));
       }
       elements.addAll(Elements.getElements(stage, modules));
-      
+
       // Look for injector-changing options
       InjectorOptionsProcessor optionsProcessor = new InjectorOptionsProcessor(errors);
       optionsProcessor.process(null, elements);
       options = optionsProcessor.getOptions(stage, options);
-      
+
       InjectorImpl injector = new InjectorImpl(parent, state, options);
       if (privateElements != null) {
         privateElements.initInjector(injector);
@@ -179,7 +178,7 @@ final class InjectorShell {
       bindStage(injector, stage);
       bindInjector(injector);
       bindLogger(injector);
-      
+
       // Process all normal bindings, then UntargettedBindings.
       // This is necessary because UntargettedBindings can create JIT bindings
       // and need all their other dependencies set up ahead of time.
@@ -213,15 +212,21 @@ final class InjectorShell {
   }
 
   /**
-   * The Injector is a special case because we allow both parent and child injectors to both have
-   * a binding for that key.
+   * The Injector is a special case because we allow both parent and child injectors to both have a
+   * binding for that key.
    */
   private static void bindInjector(InjectorImpl injector) {
     Key<Injector> key = Key.get(Injector.class);
     InjectorFactory injectorFactory = new InjectorFactory(injector);
-    injector.state.putBinding(key,
-        new ProviderInstanceBindingImpl<Injector>(injector, key, SourceProvider.UNKNOWN_SOURCE,
-            injectorFactory, Scoping.UNSCOPED, injectorFactory,
+    injector.state.putBinding(
+        key,
+        new ProviderInstanceBindingImpl<Injector>(
+            injector,
+            key,
+            SourceProvider.UNKNOWN_SOURCE,
+            injectorFactory,
+            Scoping.UNSCOPED,
+            injectorFactory,
             ImmutableSet.<InjectionPoint>of()));
   }
 
@@ -257,10 +262,16 @@ final class InjectorShell {
   private static void bindLogger(InjectorImpl injector) {
     Key<Logger> key = Key.get(Logger.class);
     LoggerFactory loggerFactory = new LoggerFactory();
-    injector.state.putBinding(key,
-        new ProviderInstanceBindingImpl<Logger>(injector, key,
-            SourceProvider.UNKNOWN_SOURCE, loggerFactory, Scoping.UNSCOPED,
-            loggerFactory, ImmutableSet.<InjectionPoint>of()));
+    injector.state.putBinding(
+        key,
+        new ProviderInstanceBindingImpl<Logger>(
+            injector,
+            key,
+            SourceProvider.UNKNOWN_SOURCE,
+            loggerFactory,
+            Scoping.UNSCOPED,
+            loggerFactory,
+            ImmutableSet.<InjectionPoint>of()));
   }
 
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
@@ -283,16 +294,17 @@ final class InjectorShell {
       return "Provider<Logger>";
     }
   }
-  
+
   private static void bindStage(InjectorImpl injector, Stage stage) {
     Key<Stage> key = Key.get(Stage.class);
-    InstanceBindingImpl<Stage> stageBinding = new InstanceBindingImpl<Stage>(
-        injector,
-        key,
-        SourceProvider.UNKNOWN_SOURCE,
-        new ConstantFactory<Stage>(Initializables.of(stage)),
-        ImmutableSet.<InjectionPoint>of(),
-        stage);
+    InstanceBindingImpl<Stage> stageBinding =
+        new InstanceBindingImpl<Stage>(
+            injector,
+            key,
+            SourceProvider.UNKNOWN_SOURCE,
+            new ConstantFactory<Stage>(Initializables.of(stage)),
+            ImmutableSet.<InjectionPoint>of(),
+            stage);
     injector.state.putBinding(key, stageBinding);
   }
 

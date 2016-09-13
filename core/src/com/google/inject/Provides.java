@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,5 +30,7 @@ import java.lang.annotation.Target;
  * @author crazybob@google.com (Bob Lee)
  * @since 2.0
  */
-@Documented @Target(METHOD) @Retention(RUNTIME)
+@Documented
+@Target(METHOD)
+@Retention(RUNTIME)
 public @interface Provides {}

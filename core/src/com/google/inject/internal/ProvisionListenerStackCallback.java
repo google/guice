@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.ProvisionException;
-import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProvisionListener;
-
 import java.util.List;
 import java.util.Set;
 
@@ -33,15 +31,16 @@ import java.util.Set;
  * @author sameb@google.com (Sam Berlin)
  */
 final class ProvisionListenerStackCallback<T> {
-  
+
   private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0];
+
   @SuppressWarnings("rawtypes")
   private static final ProvisionListenerStackCallback<?> EMPTY_CALLBACK =
       new ProvisionListenerStackCallback(null /* unused, so ok */, ImmutableList.of());
 
   private final ProvisionListener[] listeners;
   private final Binding<T> binding;
-  
+
   @SuppressWarnings("unchecked")
   public static <T> ProvisionListenerStackCallback<T> emptyListener() {
     return (ProvisionListenerStackCallback<T>) EMPTY_CALLBACK;
@@ -56,7 +55,7 @@ final class ProvisionListenerStackCallback<T> {
       this.listeners = deDuplicated.toArray(new ProvisionListener[deDuplicated.size()]);
     }
   }
-  
+
   public boolean hasListeners() {
     return listeners.length > 0;
   }
@@ -67,18 +66,22 @@ final class ProvisionListenerStackCallback<T> {
     RuntimeException caught = null;
     try {
       provision.provision();
-    } catch(RuntimeException t) {
+    } catch (RuntimeException t) {
       caught = t;
     }
-    
+
     if (provision.exceptionDuringProvision != null) {
       throw provision.exceptionDuringProvision;
     } else if (caught != null) {
-      Object listener = provision.erredListener != null ?
-          provision.erredListener.getClass() : "(unknown)";
+      Object listener =
+          provision.erredListener != null ? provision.erredListener.getClass() : "(unknown)";
       throw errors
-          .errorInUserCode(caught, "Error notifying ProvisionListener %s of %s.%n"
-              + " Reason: %s", listener, binding.getKey(), caught)
+          .errorInUserCode(
+              caught,
+              "Error notifying ProvisionListener %s of %s.%n Reason: %s",
+              listener,
+              binding.getKey(),
+              caught)
           .toException();
     } else {
       return provision.result;
@@ -117,7 +120,7 @@ final class ProvisionListenerStackCallback<T> {
           // Make sure we don't return the provisioned object if there were any errors
           // injecting its field/method dependencies.
           errors.throwIfNewErrors(numErrorsBefore);
-        } catch(ErrorsException ee) {
+        } catch (ErrorsException ee) {
           exceptionDuringProvision = ee;
           throw new ProvisionException(errors.merge(ee.getErrors()).getMessages());
         }
@@ -125,7 +128,7 @@ final class ProvisionListenerStackCallback<T> {
         int currentIdx = index;
         try {
           listeners[index].onProvision(this);
-        } catch(RuntimeException re) {
+        } catch (RuntimeException re) {
           erredListener = listeners[currentIdx];
           throw re;
         }
@@ -138,7 +141,7 @@ final class ProvisionListenerStackCallback<T> {
       }
       return result;
     }
-    
+
     @Override
     public Binding<T> getBinding() {
       // TODO(sameb): Because so many places cast directly to BindingImpl & subclasses,
@@ -146,7 +149,7 @@ final class ProvisionListenerStackCallback<T> {
       // if someone calls that they'll get strange errors.
       return binding;
     }
-    
+
     @Deprecated
     @Override
     public List<DependencyAndSource> getDependencyChain() {

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.name;
 
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
@@ -25,21 +24,19 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class NamesTest extends TestCase {
 
-  @Named("foo") private String foo;
+  @Named("foo")
+  private String foo;
+
   private Named namedFoo;
-  
+
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -75,8 +72,8 @@ public class NamesTest extends TestCase {
   }
 
   public void testBindPropertiesUsingMap() {
-    final Map<String, String> properties = ImmutableMap.of(
-        "SanJose", "Sharks", "Edmonton", "Oilers");
+    final Map<String, String> properties =
+        ImmutableMap.of("SanJose", "Sharks", "Edmonton", "Oilers");
 
     Injector injector =
         Guice.createInjector(

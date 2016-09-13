@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,23 +21,18 @@ import static com.google.inject.Asserts.assertNotSerializable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.util.Types;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
+import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class TypeLiteralTest extends TestCase {
 
   public void testWithParameterizedType() {
     TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {};
-    TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
-        Types.listOf(String.class)) {};
+    TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(Types.listOf(String.class)) {};
     assertEqualsBothWays(a, b);
   }
 
@@ -79,15 +74,16 @@ public class TypeLiteralTest extends TestCase {
     try {
       new TypeLiteral() {};
       fail();
-    } catch (RuntimeException e) { /* expected */ }
+    } catch (RuntimeException e) {
+      /* expected */
+    }
   }
 
   public void testTypesInvolvingArraysForEquality() {
     TypeLiteral<String[]> stringArray = new TypeLiteral<String[]>() {};
     assertEquals(stringArray, new TypeLiteral<String[]>() {});
 
-    TypeLiteral<List<String[]>> listOfStringArray
-        = new TypeLiteral<List<String[]>>() {};
+    TypeLiteral<List<String[]>> listOfStringArray = new TypeLiteral<List<String[]>>() {};
     assertEquals(listOfStringArray, new TypeLiteral<List<String[]>>() {});
   }
 
@@ -108,25 +104,43 @@ public class TypeLiteralTest extends TestCase {
       TypeLiteral.get(Types.subtypeOf(Runnable.class));
       fail();
     } catch (IllegalArgumentException expected) {
-      Asserts.assertContains(expected.getMessage(), "Expected a Class, ParameterizedType, or "
-          + "GenericArrayType, but <? extends java.lang.Runnable> is of type "
-          + "com.google.inject.internal.MoreTypes$WildcardTypeImpl");
+      Asserts.assertContains(
+          expected.getMessage(),
+          "Expected a Class, ParameterizedType, or "
+              + "GenericArrayType, but <? extends java.lang.Runnable> is of type "
+              + "com.google.inject.internal.MoreTypes$WildcardTypeImpl");
     }
   }
 
   /**
-   * Unlike Key, TypeLiteral retains full type information and differentiates
-   * between {@code int.class} and {@code Integer.class}.
+   * Unlike Key, TypeLiteral retains full type information and differentiates between {@code
+   * int.class} and {@code Integer.class}.
    */
   public void testDifferentiationBetweenWrappersAndPrimitives() {
-    Class[] primitives = new Class[] {
-        boolean.class, byte.class, short.class, int.class, long.class,
-        float.class, double.class, char.class, void.class
-    };
-    Class[] wrappers = new Class[] {
-        Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
-        Float.class, Double.class, Character.class, Void.class
-    };
+    Class[] primitives =
+        new Class[] {
+          boolean.class,
+          byte.class,
+          short.class,
+          int.class,
+          long.class,
+          float.class,
+          double.class,
+          char.class,
+          void.class
+        };
+    Class[] wrappers =
+        new Class[] {
+          Boolean.class,
+          Byte.class,
+          Short.class,
+          Integer.class,
+          Long.class,
+          Float.class,
+          Double.class,
+          Character.class,
+          Void.class
+        };
 
     for (int t = 0; t < primitives.length; t++) {
       @SuppressWarnings("unchecked")
@@ -147,8 +161,8 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testTypeVariableWithNoBound() {
-    TypeVariable<Class<HasTypeParameters>>[] typeVariables
-        = HasTypeParameters.class.getTypeParameters();
+    TypeVariable<Class<HasTypeParameters>>[] typeVariables =
+        HasTypeParameters.class.getTypeParameters();
 
     TypeLiteral<?> aTl = TypeLiteral.get(typeVariables[0]);
     assertEquals(Object.class, aTl.getRawType());
@@ -162,8 +176,8 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testTypeVariablesWithSingleBound() {
-    TypeVariable<Class<HasTypeParameters>>[] typeVariables
-        = HasTypeParameters.class.getTypeParameters();
+    TypeVariable<Class<HasTypeParameters>>[] typeVariables =
+        HasTypeParameters.class.getTypeParameters();
 
     TypeLiteral<?> cTl = TypeLiteral.get(typeVariables[2]);
     assertEquals(Object.class, cTl.getRawType());
@@ -177,8 +191,8 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testTypeVariableWithMultipleBounds() {
-    TypeVariable<Class<HasTypeParameters>>[] typeVariables
-        = HasTypeParameters.class.getTypeParameters();
+    TypeVariable<Class<HasTypeParameters>>[] typeVariables =
+        HasTypeParameters.class.getTypeParameters();
 
     TypeLiteral<?> bTl = TypeLiteral.get(typeVariables[1]);
     assertEquals(Object.class, bTl.getRawType());
@@ -186,13 +200,16 @@ public class TypeLiteralTest extends TestCase {
     TypeVariable<?> bTv = (TypeVariable) bTl.getType();
     assertEquals(HasTypeParameters.class, bTv.getGenericDeclaration());
     assertEquals("B", bTv.getName());
-    assertEquals(ImmutableList.<Type>of(Types.listOf(typeVariables[0]), Runnable.class),
+    assertEquals(
+        ImmutableList.<Type>of(Types.listOf(typeVariables[0]), Runnable.class),
         ImmutableList.copyOf(bTv.getBounds()));
     assertEquals("B", bTv.toString());
     assertEqualsBothWays(bTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[1]));
   }
 
   static class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
-    A a; B b; C c;
+    A a;
+    B b;
+    C c;
   }
 }

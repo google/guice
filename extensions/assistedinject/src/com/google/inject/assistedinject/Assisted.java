@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -32,11 +31,13 @@ import java.lang.annotation.Target;
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-@BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+@BindingAnnotation
+@Target({FIELD, PARAMETER, METHOD})
+@Retention(RUNTIME)
 public @interface Assisted {
 
   /**
-   * The unique name for this parameter. This is matched to the {@literal @Assisted} constructor 
+   * The unique name for this parameter. This is matched to the {@literal @Assisted} constructor
    * parameter with the same value. Names are not necessary when the parameter types are distinct.
    */
   String value() default "";

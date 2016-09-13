@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +18,18 @@ package com.google.inject.grapher.graphviz;
 
 /**
  * Enum for the shapes that are most interesting for Guice graphing.
- * <p>
- * See: http://www.graphviz.org/doc/info/shapes.html
- * 
+ *
+ * <p>See: http://www.graphviz.org/doc/info/shapes.html
+ *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public enum NodeShape {
   BOX("box"),
   ELLIPSE("ellipse"),
   NONE("none");
-  
+
   private final String shape;
-  
+
   NodeShape(String shape) {
     this.shape = shape;
   }

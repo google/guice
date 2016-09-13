@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,7 @@ import com.google.inject.Stage;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ScopeBinding;
-
 import java.lang.annotation.Annotation;
-import java.lang.ref.WeakReference;
 
 /**
  * References a scope, either directly (as a scope instance), or indirectly (as a scope annotation).
@@ -42,98 +40,121 @@ public abstract class Scoping {
    * No scoping annotation has been applied. Note that this is different from {@code
    * in(Scopes.NO_SCOPE)}, where the 'NO_SCOPE' has been explicitly applied.
    */
-  public static final Scoping UNSCOPED = new Scoping() {
-    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
-      return visitor.visitNoScoping();
-    }
+  public static final Scoping UNSCOPED =
+      new Scoping() {
+        @Override
+        public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+          return visitor.visitNoScoping();
+        }
 
-    @Override public Scope getScopeInstance() {
-      return Scopes.NO_SCOPE;
-    }
+        @Override
+        public Scope getScopeInstance() {
+          return Scopes.NO_SCOPE;
+        }
 
-    @Override public String toString() {
-      return Scopes.NO_SCOPE.toString();
-    }
+        @Override
+        public String toString() {
+          return Scopes.NO_SCOPE.toString();
+        }
 
-    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
-      // do nothing
-    }
-  };
+        @Override
+        public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+          // do nothing
+        }
+      };
 
-  public static final Scoping SINGLETON_ANNOTATION = new Scoping() {
-    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
-      return visitor.visitScopeAnnotation(Singleton.class);
-    }
+  public static final Scoping SINGLETON_ANNOTATION =
+      new Scoping() {
+        @Override
+        public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+          return visitor.visitScopeAnnotation(Singleton.class);
+        }
 
-    @Override public Class<? extends Annotation> getScopeAnnotation() {
-      return Singleton.class;
-    }
+        @Override
+        public Class<? extends Annotation> getScopeAnnotation() {
+          return Singleton.class;
+        }
 
-    @Override public String toString() {
-      return Singleton.class.getName();
-    }
+        @Override
+        public String toString() {
+          return Singleton.class.getName();
+        }
 
-    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
-      scopedBindingBuilder.in(Singleton.class);
-    }
-  };
+        @Override
+        public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+          scopedBindingBuilder.in(Singleton.class);
+        }
+      };
 
-  public static final Scoping SINGLETON_INSTANCE = new Scoping() {
-    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
-      return visitor.visitScope(Scopes.SINGLETON);
-    }
+  public static final Scoping SINGLETON_INSTANCE =
+      new Scoping() {
+        @Override
+        public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+          return visitor.visitScope(Scopes.SINGLETON);
+        }
 
-    @Override public Scope getScopeInstance() {
-      return Scopes.SINGLETON;
-    }
+        @Override
+        public Scope getScopeInstance() {
+          return Scopes.SINGLETON;
+        }
 
-    @Override public String toString() {
-      return Scopes.SINGLETON.toString();
-    }
+        @Override
+        public String toString() {
+          return Scopes.SINGLETON.toString();
+        }
 
-    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
-      scopedBindingBuilder.in(Scopes.SINGLETON);
-    }
-  };
+        @Override
+        public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+          scopedBindingBuilder.in(Scopes.SINGLETON);
+        }
+      };
 
-  public static final Scoping EAGER_SINGLETON = new Scoping() {
-    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
-      return visitor.visitEagerSingleton();
-    }
+  public static final Scoping EAGER_SINGLETON =
+      new Scoping() {
+        @Override
+        public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+          return visitor.visitEagerSingleton();
+        }
 
-    @Override public Scope getScopeInstance() {
-      return Scopes.SINGLETON;
-    }
+        @Override
+        public Scope getScopeInstance() {
+          return Scopes.SINGLETON;
+        }
 
-    @Override public String toString() {
-      return "eager singleton";
-    }
+        @Override
+        public String toString() {
+          return "eager singleton";
+        }
 
-    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
-      scopedBindingBuilder.asEagerSingleton();
-    }
-  };
+        @Override
+        public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+          scopedBindingBuilder.asEagerSingleton();
+        }
+      };
 
   public static Scoping forAnnotation(final Class<? extends Annotation> scopingAnnotation) {
-    if (scopingAnnotation == Singleton.class
-        || scopingAnnotation == javax.inject.Singleton.class) {
+    if (scopingAnnotation == Singleton.class || scopingAnnotation == javax.inject.Singleton.class) {
       return SINGLETON_ANNOTATION;
     }
 
     return new Scoping() {
-      @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+      @Override
+      public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
         return visitor.visitScopeAnnotation(scopingAnnotation);
       }
 
-      @Override public Class<? extends Annotation> getScopeAnnotation() {
+      @Override
+      public Class<? extends Annotation> getScopeAnnotation() {
         return scopingAnnotation;
       }
 
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return scopingAnnotation.getName();
       }
 
-      @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      @Override
+      public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
         scopedBindingBuilder.in(scopingAnnotation);
       }
     };
@@ -145,19 +166,23 @@ public abstract class Scoping {
     }
 
     return new Scoping() {
-      @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+      @Override
+      public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
         return visitor.visitScope(scope);
       }
 
-      @Override public Scope getScopeInstance() {
+      @Override
+      public Scope getScopeInstance() {
         return scope;
       }
 
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return scope.toString();
       }
 
-      @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      @Override
+      public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
         scopedBindingBuilder.in(scope);
       }
     };
@@ -179,9 +204,7 @@ public abstract class Scoping {
     return getScopeInstance() == Scopes.NO_SCOPE;
   }
 
-  /**
-   * Returns true if this scope is a singleton that should be loaded eagerly in {@code stage}.
-   */
+  /** Returns true if this scope is a singleton that should be loaded eagerly in {@code stage}. */
   public boolean isEagerSingleton(Stage stage) {
     if (this == EAGER_SINGLETON) {
       return true;
@@ -194,31 +217,27 @@ public abstract class Scoping {
     return false;
   }
 
-  /**
-   * Returns the scope instance, or {@code null} if that isn't known for this instance.
-   */
+  /** Returns the scope instance, or {@code null} if that isn't known for this instance. */
   public Scope getScopeInstance() {
     return null;
   }
 
-  /**
-   * Returns the scope annotation, or {@code null} if that isn't known for this instance.
-   */
+  /** Returns the scope annotation, or {@code null} if that isn't known for this instance. */
   public Class<? extends Annotation> getScopeAnnotation() {
     return null;
   }
-  
+
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof Scoping) {
-      Scoping o = (Scoping)obj;
+    if (obj instanceof Scoping) {
+      Scoping o = (Scoping) obj;
       return Objects.equal(getScopeAnnotation(), o.getScopeAnnotation())
-        && Objects.equal(getScopeInstance(), o.getScopeInstance());
+          && Objects.equal(getScopeInstance(), o.getScopeInstance());
     } else {
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getScopeAnnotation(), getScopeInstance());
@@ -231,8 +250,12 @@ public abstract class Scoping {
   private Scoping() {}
 
   /** Scopes an internal factory. */
-  static <T> InternalFactory<? extends T> scope(Key<T> key, InjectorImpl injector,
-      InternalFactory<? extends T> creator, Object source, Scoping scoping) {
+  static <T> InternalFactory<? extends T> scope(
+      Key<T> key,
+      InjectorImpl injector,
+      InternalFactory<? extends T> creator,
+      Object source,
+      Scoping scoping) {
 
     if (scoping.isNoScope()) {
       return creator;
@@ -240,11 +263,11 @@ public abstract class Scoping {
 
     Scope scope = scoping.getScopeInstance();
 
-    // NOTE: SingletonScope relies on the fact that we are passing a 
-    // ProviderToInternalFactoryAdapter here.  If you change the type make sure to update 
+    // NOTE: SingletonScope relies on the fact that we are passing a
+    // ProviderToInternalFactoryAdapter here.  If you change the type make sure to update
     // SingletonScope as well.
-    Provider<T> scoped
-        = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
+    Provider<T> scoped =
+        scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
     return new InternalFactoryToProviderAdapter<T>(scoped, source);
   }
 

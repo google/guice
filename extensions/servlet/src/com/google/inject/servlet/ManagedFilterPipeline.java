@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +23,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
@@ -45,7 +43,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Singleton
-class ManagedFilterPipeline implements FilterPipeline{
+class ManagedFilterPipeline implements FilterPipeline {
   private final FilterDefinition[] filterDefinitions;
   private final ManagedServletPipeline servletPipeline;
   private final Provider<ServletContext> servletContext;
@@ -59,7 +57,9 @@ class ManagedFilterPipeline implements FilterPipeline{
       TypeLiteral.get(FilterDefinition.class);
 
   @Inject
-  public ManagedFilterPipeline(Injector injector, ManagedServletPipeline servletPipeline,
+  public ManagedFilterPipeline(
+      Injector injector,
+      ManagedServletPipeline servletPipeline,
       Provider<ServletContext> servletContext) {
     this.injector = injector;
     this.servletPipeline = servletPipeline;
@@ -71,16 +71,16 @@ class ManagedFilterPipeline implements FilterPipeline{
   /**
    * Introspects the injector and collects all instances of bound {@code List<FilterDefinition>}
    * into a master list.
-   * 
-   * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
-   * that preserves insertion order in entry-set iterators.
+   *
+   * <p>We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map that
+   * preserves insertion order in entry-set iterators.
    */
   private FilterDefinition[] collectFilterDefinitions(Injector injector) {
     List<FilterDefinition> filterDefinitions = Lists.newArrayList();
     for (Binding<FilterDefinition> entry : injector.findBindingsByType(FILTER_DEFS)) {
       filterDefinitions.add(entry.getProvider().get());
     }
-    
+
     // Copy to a fixed-size array for speed of iteration.
     return filterDefinitions.toArray(new FilterDefinition[filterDefinitions.size()]);
   }
@@ -89,8 +89,7 @@ class ManagedFilterPipeline implements FilterPipeline{
   public synchronized void initPipeline(ServletContext servletContext) throws ServletException {
 
     //double-checked lock, prevents duplicate initialization
-    if (initialized)
-      return;
+    if (initialized) return;
 
     // Used to prevent duplicate initialization.
     Set<Filter> initializedSoFar = Sets.newIdentityHashSet();
@@ -120,23 +119,22 @@ class ManagedFilterPipeline implements FilterPipeline{
     //obtain the servlet pipeline to dispatch against
     new FilterChainInvocation(filterDefinitions, servletPipeline, proceedingFilterChain)
         .doFilter(withDispatcher(request, servletPipeline), response);
-
   }
 
   /**
    * Used to create an proxy that dispatches either to the guice-servlet pipeline or the regular
    * pipeline based on uri-path match. This proxy also provides minimal forwarding support.
    *
-   * We cannot forward from a web.xml Servlet/JSP to a guice-servlet (because the filter pipeline
+   * <p>We cannot forward from a web.xml Servlet/JSP to a guice-servlet (because the filter pipeline
    * is not called again). However, we can wrap requests with our own dispatcher to forward the
    * *other* way. web.xml Servlets/JSPs can forward to themselves as per normal.
    *
-   * This is not a problem cuz we intend for people to migrate from web.xml to guice-servlet,
+   * <p>This is not a problem cuz we intend for people to migrate from web.xml to guice-servlet,
    * incrementally, but not the other way around (which, we should actively discourage).
    */
-  @SuppressWarnings({ "JavaDoc", "deprecation" })
-  private ServletRequest withDispatcher(ServletRequest servletRequest,
-      final ManagedServletPipeline servletPipeline) {
+  @SuppressWarnings({"JavaDoc", "deprecation"})
+  private ServletRequest withDispatcher(
+      ServletRequest servletRequest, final ManagedServletPipeline servletPipeline) {
 
     // don't wrap the request if there are no servlets mapped. This prevents us from inserting our
     // wrapper unless it's actually going to be used. This is necessary for compatibility for apps

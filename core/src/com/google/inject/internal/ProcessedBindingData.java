@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,36 +17,33 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
 
 /**
- * Keeps track of creation listeners & uninitialized bindings,
- * so they can be processed after bindings are recorded.
- * 
+ * Keeps track of creation listeners & uninitialized bindings, so they can be processed after
+ * bindings are recorded.
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 class ProcessedBindingData {
-  
+
   private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final List<Runnable> uninitializedBindings = Lists.newArrayList();
   private final List<Runnable> delayedUninitializedBindings = Lists.newArrayList();
-  
+
   void addCreationListener(CreationListener listener) {
     creationListeners.add(listener);
   }
-  
+
   void addUninitializedBinding(Runnable runnable) {
     uninitializedBindings.add(runnable);
   }
-  
+
   void addDelayedUninitializedBinding(Runnable runnable) {
     delayedUninitializedBindings.add(runnable);
   }
-  
-  /**
-   * Initialize bindings.  This may be done eagerly
-   */
+
+  /** Initialize bindings. This may be done eagerly */
   void initializeBindings() {
     for (Runnable initializer : uninitializedBindings) {
       initializer.run();
@@ -55,7 +52,7 @@ class ProcessedBindingData {
 
   /**
    * Runs creation listeners.
-   * 
+   *
    * <p>TODO(lukes): figure out exactly why this case exists.
    */
   void runCreationListeners(Errors errors) {
@@ -65,9 +62,9 @@ class ProcessedBindingData {
   }
 
   /**
-   * Initialized bindings that need to be delayed until after all injection points and other 
-   * bindings are processed.  The main current usecase for this is resolving Optional 
-   * dependencies for OptionalBinder bindings.
+   * Initialized bindings that need to be delayed until after all injection points and other
+   * bindings are processed. The main current usecase for this is resolving Optional dependencies
+   * for OptionalBinder bindings.
    */
   void initializeDelayedBindings() {
     for (Runnable initializer : delayedUninitializedBindings) {

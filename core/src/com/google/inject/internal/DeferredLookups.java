@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ProviderLookup;
-
 import java.util.List;
 
 /**
@@ -41,9 +40,7 @@ final class DeferredLookups implements Lookups {
     this.injector = injector;
   }
 
-  /**
-   * Initialize the specified lookups, either immediately or when the injector is created.
-   */
+  /** Initialize the specified lookups, either immediately or when the injector is created. */
   void initialize(Errors errors) {
     injector.lookups = injector;
     new LookupProcessor(errors).process(injector, lookups);

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,15 +22,11 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.name.Named;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class BoundInstanceInjectionTest extends TestCase {
 
   public void testInstancesAreInjected() throws CreationException {
@@ -51,6 +47,7 @@ public class BoundInstanceInjectionTest extends TestCase {
 
   static class O {
     int fromMethod;
+
     @Inject
     void setInt(int i) {
       this.fromMethod = i;
@@ -93,8 +90,11 @@ public class BoundInstanceInjectionTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      Asserts.assertContains(expected.getMessage(), MalformedInjectable.class.getName(),
-          ".doublyAnnotated() has more than one ", "annotation annotated with @BindingAnnotation: ",
+      Asserts.assertContains(
+          expected.getMessage(),
+          MalformedInjectable.class.getName(),
+          ".doublyAnnotated() has more than one ",
+          "annotation annotated with @BindingAnnotation: ",
           Named.class.getName() + " and " + Another.class.getName());
     }
   }
@@ -110,18 +110,23 @@ public class BoundInstanceInjectionTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      Asserts.assertContains(expected.getMessage(), MalformedProvider.class.getName(),
-          ".doublyAnnotated() has more than one ", "annotation annotated with @BindingAnnotation: ",
+      Asserts.assertContains(
+          expected.getMessage(),
+          MalformedProvider.class.getName(),
+          ".doublyAnnotated() has more than one ",
+          "annotation annotated with @BindingAnnotation: ",
           Named.class.getName() + " and " + Another.class.getName());
     }
   }
 
   static class MalformedInjectable {
-    @Inject void doublyAnnotated(@Named("a") @Another String unused) {}
+    @Inject
+    void doublyAnnotated(@Named("a") @Another String unused) {}
   }
 
   static class MalformedProvider implements Provider<String> {
-    @Inject void doublyAnnotated(@Named("a") @Another String s) {}
+    @Inject
+    void doublyAnnotated(@Named("a") @Another String s) {}
 
     @Override
     public String get() {
@@ -129,6 +134,8 @@ public class BoundInstanceInjectionTest extends TestCase {
     }
   }
 
-  @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+  @BindingAnnotation
+  @Target({FIELD, PARAMETER, METHOD})
+  @Retention(RUNTIME)
   public @interface Another {}
 }

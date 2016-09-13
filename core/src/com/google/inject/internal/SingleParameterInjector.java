@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,9 @@ package com.google.inject.internal;
 
 import com.google.inject.spi.Dependency;
 
-/**
- * Resolves a single parameter, to be used in a constructor or method invocation.
- */
+/** Resolves a single parameter, to be used in a constructor or method invocation. */
 final class SingleParameterInjector<T> {
-  private static final Object[] NO_ARGUMENTS = {}; 
+  private static final Object[] NO_ARGUMENTS = {};
 
   private final Dependency<T> dependency;
   private final Object source;
@@ -44,11 +42,10 @@ final class SingleParameterInjector<T> {
     }
   }
 
-  /**
-   * Returns an array of parameter values.
-   */
-  static Object[] getAll(Errors errors, InternalContext context,
-      SingleParameterInjector<?>[] parameterInjectors) throws ErrorsException {
+  /** Returns an array of parameter values. */
+  static Object[] getAll(
+      Errors errors, InternalContext context, SingleParameterInjector<?>[] parameterInjectors)
+      throws ErrorsException {
     if (parameterInjectors == null) {
       return NO_ARGUMENTS;
     }
@@ -58,7 +55,7 @@ final class SingleParameterInjector<T> {
     int size = parameterInjectors.length;
     Object[] parameters = new Object[size];
 
-    // optimization: use manual for/each to save allocating an iterator here  
+    // optimization: use manual for/each to save allocating an iterator here
     for (int i = 0; i < size; i++) {
       SingleParameterInjector<?> parameterInjector = parameterInjectors[i];
       try {

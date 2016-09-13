@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -41,12 +40,12 @@ public class CompositeService {
   private final Set<Key<? extends Service>> services = Sets.newLinkedHashSet();
 
   /**
-   * Represents the state of this composite service. Will equal FAILED
-   * even if only one component service fails to start or stop. In other
-   * words, all component services must start successfully for this
-   * service to be considered started and similarly for stopped.
+   * Represents the state of this composite service. Will equal FAILED even if only one component
+   * service fails to start or stop. In other words, all component services must start successfully
+   * for this service to be considered started and similarly for stopped.
    */
   private volatile Service.State compositeState;
+
   private boolean composed;
 
   @Inject
@@ -59,7 +58,8 @@ public class CompositeService {
   }
 
   public CompositeService add(Key<? extends Service> service) {
-    Preconditions.checkState(!composed,
+    Preconditions.checkState(
+        !composed,
         "Cannot reuse a CompositeService after it has been compose()d. Please create a new one.");
     // Verify that the binding exists. Throws an exception if not.
     injector.getBinding(service);
@@ -69,7 +69,8 @@ public class CompositeService {
   }
 
   public Service compose() {
-    Preconditions.checkState(!composed,
+    Preconditions.checkState(
+        !composed,
         "Cannot reuse a CompositeService after it has been compose()d. Please create a new one.");
     composed = true;
 
@@ -104,8 +105,8 @@ public class CompositeService {
     };
   }
 
-  private FutureTask<Service.State> futureGet(final List<Future<Service.State>> tasks,
-      final Service.State state) {
+  private FutureTask<Service.State> futureGet(
+      final List<Future<Service.State>> tasks, final Service.State state) {
     return new FutureTask<Service.State>(
         new Callable<Service.State>() {
           @Override

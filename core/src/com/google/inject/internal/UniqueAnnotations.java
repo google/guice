@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,21 +19,19 @@ package com.google.inject.internal;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class UniqueAnnotations {
   private UniqueAnnotations() {}
+
   private static final AtomicInteger nextUniqueValue = new AtomicInteger(1);
 
   /**
-   * Returns an annotation instance that is not equal to any other annotation
-   * instances, for use in creating distinct {@link com.google.inject.Key}s.
+   * Returns an annotation instance that is not equal to any other annotation instances, for use in
+   * creating distinct {@link com.google.inject.Key}s.
    */
   public static Annotation create() {
     return create(nextUniqueValue.getAndIncrement());
@@ -68,7 +66,8 @@ public class UniqueAnnotations {
     };
   }
 
-  @Retention(RUNTIME) @BindingAnnotation
+  @Retention(RUNTIME)
+  @BindingAnnotation
   @interface Internal {
     int value();
   }

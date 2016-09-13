@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,13 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 class EnergySourceProvider implements Provider<EnergySource> {
-  @Inject void setSources(@Nuclear EnergySource nuclear, @Renewable EnergySource renewable) {}
-  
+  @Inject
+  void setSources(@Nuclear EnergySource nuclear, @Renewable EnergySource renewable) {}
+
   // This will demonstrate a ConvertedConstantBinding.
-  @Inject void setYear(@Named("year") int year) {}
-  
+  @Inject
+  void setYear(@Named("year") int year) {}
+
   @Override
   public EnergySource get() {
     return null;

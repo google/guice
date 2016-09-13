@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Google Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,6 @@ import static junit.framework.Assert.assertTrue;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.util.Set;
 
 /**
@@ -54,8 +53,8 @@ public final class WeakKeySetUtils {
     assertNull(set.getSources(Key.get(Integer.class)));
   }
 
-  public static void assertInSet(WeakKeySet set, Key<?> key, int expectedSources,
-      Object... sources) {
+  public static void assertInSet(
+      WeakKeySet set, Key<?> key, int expectedSources, Object... sources) {
     assertTrue(set.contains(key));
     assertEquals(expectedSources, set.getSources(key).size());
     for (Object source : sources) {

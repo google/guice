@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,13 +22,10 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
-
-import junit.framework.TestCase;
-
 import java.util.Date;
+import junit.framework.TestCase;
 
 /**
  * Test for Struts2Factory
@@ -55,30 +52,30 @@ public class Struts2FactoryTest extends TestCase {
             @Override
             protected void configureServlets() {
               // Struts 2 setup
-              bind(StrutsPrepareAndExecuteFilter.class).in(Singleton.class);
+              bind(StrutsPrepareAndExecuteFilter.class)
+                  .in(com.google.inject.Singleton.class);
               filter("/*").through(StrutsPrepareAndExecuteFilter.class);
             }
           },
-          module
-      );
+          module);
     }
-
   }
 
   public void testStruts2Factory() {
     Struts2Factory s2Factory = new Struts2Factory();
-    TestListener testListener = new TestListener(new AbstractModule() {
-      @Override
-      protected void configure() {
-      }
+    TestListener testListener =
+        new TestListener(
+            new AbstractModule() {
+              @Override
+              protected void configure() {}
 
-      @Provides @SuppressWarnings("unused")
-      Date provideDate() {
-        return TODAY;
-      }
-    });
+              @Provides
+              @SuppressWarnings("unused")
+              Date provideDate() {
+                return TODAY;
+              }
+            });
     assertEquals(TODAY, testListener.getInjector().getInstance(Date.class));
     assertEquals(TODAY, s2Factory.buildBean(Date.class, null));
   }
-
 }

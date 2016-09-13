@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.google.inject.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -33,8 +32,7 @@ import javax.servlet.ServletResponse;
 public class DummyFilterImpl implements Filter {
   int num;
 
-  public DummyFilterImpl() {
-  }
+  public DummyFilterImpl() {}
 
   public DummyFilterImpl(int num) {
     this.num = num;

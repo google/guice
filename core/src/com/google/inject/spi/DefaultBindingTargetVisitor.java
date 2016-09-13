@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,17 +22,14 @@ import com.google.inject.Binding;
  * No-op visitor for subclassing. All interface methods simply delegate to {@link
  * #visitOther(Binding)}, returning its result.
  *
- * @param <V> any type to be returned by the visit method. Use {@link Void} with
- *     {@code return null} if no return type is needed.
- *
+ * @param <V> any type to be returned by the visit method. Use {@link Void} with {@code return null}
+ *     if no return type is needed.
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
 public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTargetVisitor<T, V> {
 
-  /**
-   * Default visit implementation. Returns {@code null}.
-   */
+  /** Default visit implementation. Returns {@code null}. */
   protected V visitOther(Binding<? extends T> binding) {
     return null;
   }

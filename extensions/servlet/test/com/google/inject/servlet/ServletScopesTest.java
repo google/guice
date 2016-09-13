@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,14 +36,12 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.util.Providers;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
+import junit.framework.TestCase;
 
 /**
  * Tests for {@link ServletScopes}.
@@ -60,30 +58,32 @@ public class ServletScopesTest extends TestCase {
     final Key<String> f = Key.get(String.class, named("F"));
     final Key<String> g = Key.get(String.class, named("G"));
 
-    Module requestScopedBindings = new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(a).to(b);
-        bind(b).to(c);
-        bind(c).toProvider(Providers.of("c")).in(ServletScopes.REQUEST);
-        bind(d).toProvider(Providers.of("d")).in(RequestScoped.class);
-        bind(e).to(AnnotatedRequestScopedClass.class);
-        install(new PrivateModule() {
+    Module requestScopedBindings =
+        new AbstractModule() {
           @Override
           protected void configure() {
-            bind(f).toProvider(Providers.of("f")).in(RequestScoped.class);
-            expose(f);
+            bind(a).to(b);
+            bind(b).to(c);
+            bind(c).toProvider(Providers.of("c")).in(ServletScopes.REQUEST);
+            bind(d).toProvider(Providers.of("d")).in(RequestScoped.class);
+            bind(e).to(AnnotatedRequestScopedClass.class);
+            install(
+                new PrivateModule() {
+                  @Override
+                  protected void configure() {
+                    bind(f).toProvider(Providers.of("f")).in(RequestScoped.class);
+                    expose(f);
+                  }
+                });
           }
-        });
-      }
 
-      @Provides
-      @Named("G")
-      @RequestScoped
-      String provideG() {
-        return "g";
-      }
-    };
+          @Provides
+          @Named("G")
+          @RequestScoped
+          String provideG() {
+            return "g";
+          }
+        };
 
     @SuppressWarnings("unchecked") // we know the module contains only bindings
     List<Element> moduleBindings = Elements.getElements(requestScopedBindings);
@@ -120,34 +120,36 @@ public class ServletScopesTest extends TestCase {
     final Key<String> i = Key.get(String.class, named("I"));
     final Key<String> j = Key.get(String.class, named("J"));
 
-    Module requestScopedBindings = new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(a).to(b);
-        bind(b).to(c);
-        bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
-        bind(d).toInstance("d");
-        bind(e).toProvider(Providers.of("e")).asEagerSingleton();
-        bind(f).toProvider(Providers.of("f")).in(Scopes.SINGLETON);
-        bind(g).toProvider(Providers.of("g")).in(Singleton.class);
-        bind(h).toProvider(Providers.of("h")).in(CustomScoped.class);
-        bindScope(CustomScoped.class, Scopes.NO_SCOPE);
-        install(new PrivateModule() {
+    Module requestScopedBindings =
+        new AbstractModule() {
           @Override
           protected void configure() {
-            bind(i).toProvider(Providers.of("i")).in(CustomScoped.class);
-            expose(i);
+            bind(a).to(b);
+            bind(b).to(c);
+            bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
+            bind(d).toInstance("d");
+            bind(e).toProvider(Providers.of("e")).asEagerSingleton();
+            bind(f).toProvider(Providers.of("f")).in(Scopes.SINGLETON);
+            bind(g).toProvider(Providers.of("g")).in(Singleton.class);
+            bind(h).toProvider(Providers.of("h")).in(CustomScoped.class);
+            bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+            install(
+                new PrivateModule() {
+                  @Override
+                  protected void configure() {
+                    bind(i).toProvider(Providers.of("i")).in(CustomScoped.class);
+                    expose(i);
+                  }
+                });
           }
-        });
-      }
 
-      @Provides
-      @Named("J")
-      @CustomScoped
-      String provideJ() {
-        return "j";
-      }
-    };
+          @Provides
+          @Named("J")
+          @CustomScoped
+          String provideJ() {
+            return "j";
+          }
+        };
 
     @SuppressWarnings("unchecked") // we know the module contains only bindings
     List<Element> moduleBindings = Elements.getElements(requestScopedBindings);
@@ -179,7 +181,7 @@ public class ServletScopesTest extends TestCase {
   @RequestScoped
   static class AnnotatedRequestScopedClass {}
 
-  @Target({ ElementType.TYPE, ElementType.METHOD })
+  @Target({ElementType.TYPE, ElementType.METHOD})
   @Retention(RUNTIME)
   @ScopeAnnotation
   private @interface CustomScoped {}

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +18,7 @@ package com.google.inject.persist;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -29,38 +27,37 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Apply this filter to enable the HTTP Request unit of work and to have
- * guice-persist manage the lifecycle of active units of work.
- * The filter automatically starts and stops the relevant {@link PersistService}
- * upon {@link javax.servlet.Filter#init(javax.servlet.FilterConfig)} and
- * {@link javax.servlet.Filter#destroy()} respectively.
+ * Apply this filter to enable the HTTP Request unit of work and to have guice-persist manage the
+ * lifecycle of active units of work. The filter automatically starts and stops the relevant {@link
+ * PersistService} upon {@link javax.servlet.Filter#init(javax.servlet.FilterConfig)} and {@link
+ * javax.servlet.Filter#destroy()} respectively.
  *
- * <p> To be able to use the open session-in-view pattern (i.e. work per request),
- * register this filter <b>once</b> in your Guice {@code ServletModule}. It is
- * important that you register this filter before any other filter.
+ * <p>To be able to use the open session-in-view pattern (i.e. work per request), register this
+ * filter <b>once</b> in your Guice {@code ServletModule}. It is important that you register this
+ * filter before any other filter.
  *
- * For multiple providers, you should register this filter once per provider, inside
- * a private module for each persist module installed (this must be the same private
- * module where the specific persist module is itself installed).
+ * <p>For multiple providers, you should register this filter once per provider, inside a private
+ * module for each persist module installed (this must be the same private module where the specific
+ * persist module is itself installed).
  *
- * <p>
- * Example configuration:
+ * <p>Example configuration:
+ *
  * <pre>{@code
- *  public class MyModule extends ServletModule {
- *    public void configureServlets() {
- *      filter("/*").through(PersistFilter.class);
+ * public class MyModule extends ServletModule {
+ *   public void configureServlets() {
+ *     filter("/*").through(PersistFilter.class);
  *
- *      serve("/index.html").with(MyHtmlServlet.class);
- *      // Etc.
- *    }
- *  }
+ *     serve("/index.html").with(MyHtmlServlet.class);
+ *     // Etc.
+ *   }
+ * }
  * }</pre>
- * <p>
- * This filter is thread safe and allows you to create injectors concurrently
- * and deploy multiple guice-persist modules within the same injector, or even
- * multiple injectors with persist modules withing the same JVM or web app.
- * <p>
- * This filter requires the Guice Servlet extension.
+ *
+ * <p>This filter is thread safe and allows you to create injectors concurrently and deploy multiple
+ * guice-persist modules within the same injector, or even multiple injectors with persist modules
+ * withing the same JVM or web app.
+ *
+ * <p>This filter requires the Guice Servlet extension.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */

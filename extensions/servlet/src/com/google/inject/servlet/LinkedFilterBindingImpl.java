@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,12 @@ package com.google.inject.servlet;
 
 import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
-
 import java.util.Map;
-
 import javax.servlet.Filter;
 
 /**
  * Default implementation of LinkedFilterBinding.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends Filter>>
@@ -42,14 +40,14 @@ class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends
   public Key<? extends Filter> getLinkedKey() {
     return getTarget();
   }
-  
-  @Override public String toString() {
+
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(LinkedFilterBinding.class)
-      .add("pattern", getPattern())
-      .add("initParams", getInitParams())
-      .add("uriPatternType", getUriPatternType())
-      .add("linkedFilterKey", getLinkedKey())
-      .toString();
+        .add("pattern", getPattern())
+        .add("initParams", getInitParams())
+        .add("uriPatternType", getUriPatternType())
+        .add("linkedFilterKey", getLinkedKey())
+        .toString();
   }
-  
 }

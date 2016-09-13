@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,15 +23,12 @@ import com.google.inject.Provider;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.finder.Finder;
-
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
 import javax.persistence.EntityManager;
+import junit.framework.TestCase;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -66,7 +63,8 @@ public class DynamicFinderTest extends TestCase {
     dao.persist(te);
 
     //im not sure this hack works...
-    assertFalse("Duplicate entity managers crossing-scope",
+    assertFalse(
+        "Duplicate entity managers crossing-scope",
         dao.lastEm.equals(injector.getInstance(EntityManager.class)));
 
     List<JpaTestEntity> list = injector.getInstance(JpaFinder.class).listAll();
@@ -87,7 +85,7 @@ public class DynamicFinderTest extends TestCase {
 
     @Inject
     public JpaDao(Provider<EntityManager> em) {
-     this.em = em;
+      this.em = em;
     }
 
     @Transactional

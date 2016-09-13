@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,13 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.Module;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates methods of a {@link Module} to add items to a {@link Multibinder}.
- * The method's return type and binding annotation determines what Optional this will
- * contribute to. For example,
+ * Annotates methods of a {@link Module} to add items to a {@link Multibinder}. The method's return
+ * type and binding annotation determines what Optional this will contribute to. For example,
  *
  * <pre>
  * {@literal @}ProvidesIntoOptional(DEFAULT)
@@ -40,8 +38,8 @@ import java.lang.annotation.Target;
  * String provideBarUrl(BarManager bm) { return bm.getUrl(); }
  * </pre>
  *
- * will set the default value of {@code @Named("url") Optional<String>} to foo's URL,
- * and then override it to bar's URL.
+ * will set the default value of {@code @Named("url") Optional<String>} to foo's URL, and then
+ * override it to bar's URL.
  *
  * @author sameb@google.com (Sam Berlin)
  * @since 4.0
@@ -50,9 +48,7 @@ import java.lang.annotation.Target;
 @Target(METHOD)
 @Retention(RUNTIME)
 public @interface ProvidesIntoOptional {
-  /**
-   * @since 4.0
-   */
+  /** @since 4.0 */
   enum Type {
     /** Corresponds to {@link OptionalBinder#setBinding}. */
     ACTUAL,

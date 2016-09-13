@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,14 +25,9 @@ import java.lang.annotation.Annotation;
  */
 public interface AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  LinkedBindingBuilder<T> annotatedWith(
-      Class<? extends Annotation> annotationType);
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  LinkedBindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   LinkedBindingBuilder<T> annotatedWith(Annotation annotation);
 }

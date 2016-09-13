@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.matcher.Matcher;
-
 import java.util.List;
 
 /**
@@ -36,9 +35,8 @@ public final class ProvisionListenerBinding implements Element {
   private final Matcher<? super Binding<?>> bindingMatcher;
   private final List<ProvisionListener> listeners;
 
-  ProvisionListenerBinding(Object source,
-      Matcher<? super Binding<?>> bindingMatcher,
-      ProvisionListener[] listeners) {
+  ProvisionListenerBinding(
+      Object source, Matcher<? super Binding<?>> bindingMatcher, ProvisionListener[] listeners) {
     this.source = source;
     this.bindingMatcher = bindingMatcher;
     this.listeners = ImmutableList.copyOf(listeners);
@@ -51,7 +49,7 @@ public final class ProvisionListenerBinding implements Element {
 
   /**
    * Returns the binding matcher which chooses which bindings the listener should be notified of.
-   */  
+   */
   public Matcher<? super Binding<?>> getBindingMatcher() {
     return bindingMatcher;
   }
@@ -68,7 +66,8 @@ public final class ProvisionListenerBinding implements Element {
 
   @Override
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).bindListener(bindingMatcher,
-        listeners.toArray(new ProvisionListener[listeners.size()]));
+    binder
+        .withSource(getSource())
+        .bindListener(bindingMatcher, listeners.toArray(new ProvisionListener[listeners.size()]));
   }
 }

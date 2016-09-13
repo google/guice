@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +49,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -94,9 +93,9 @@ public final class Errors implements Serializable {
   /** When a binding is not found, show at most this many bindings that have some similarities */
   private static final int MAX_RELATED_TYPES_REPORTED = 3;
 
-  /** 
-   * Throws a ConfigurationException with an NullPointerExceptions as the cause if the given 
-   * reference is {@code null}. 
+  /**
+   * Throws a ConfigurationException with an NullPointerExceptions as the cause if the given
+   * reference is {@code null}.
    */
   static <T> T checkNotNull(T reference, String name) {
     if (reference != null) {
@@ -104,13 +103,12 @@ public final class Errors implements Serializable {
     }
 
     NullPointerException npe = new NullPointerException(name);
-    throw new ConfigurationException(ImmutableSet.of(
-        new Message(npe.toString(), npe)));
+    throw new ConfigurationException(ImmutableSet.of(new Message(npe.toString(), npe)));
   }
 
   /**
-   * Throws a ConfigurationException with a formatted {@link Message} if this condition is 
-   * {@code false}.
+   * Throws a ConfigurationException with a formatted {@link Message} if this condition is {@code
+   * false}.
    */
   static void checkConfiguration(boolean condition, String format, Object... args) {
     if (condition) {
@@ -120,9 +118,9 @@ public final class Errors implements Serializable {
     throw new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
   }
 
- /**
-   * If the key is unknown and it is one of these types, it generally means there is
-   * a missing annotation.
+  /**
+   * If the key is unknown and it is one of these types, it generally means there is a missing
+   * annotation.
    */
   private static final ImmutableSet<Class<?>> COMMON_AMBIGUOUS_TYPES =
       ImmutableSet.<Class<?>>builder()
@@ -134,24 +132,16 @@ public final class Errors implements Serializable {
   private static final Set<Dependency<?>> warnedDependencies =
       Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
-  /**
-   * The root errors object. Used to access the list of error messages.
-   */
+  /** The root errors object. Used to access the list of error messages. */
   private final Errors root;
 
-  /**
-   * The parent errors object. Used to obtain the chain of source objects.
-   */
+  /** The parent errors object. Used to obtain the chain of source objects. */
   private final Errors parent;
 
-  /**
-   * The leaf source for errors added here.
-   */
+  /** The leaf source for errors added here. */
   private final Object source;
 
-  /**
-   * null unless (root == this) and error messages exist. Never an empty list.
-   */
+  /** null unless (root == this) and error messages exist. Never an empty list. */
   private List<Message> errors; // lazy, use getErrorsForAdd()
 
   public Errors() {
@@ -172,9 +162,7 @@ public final class Errors implements Serializable {
     this.source = source;
   }
 
-  /**
-   * Returns an instance that uses {@code source} as a reference point for newly added errors.
-   */
+  /** Returns an instance that uses {@code source} as a reference point for newly added errors. */
   public Errors withSource(Object source) {
     return source == this.source || source == SourceProvider.UNKNOWN_SOURCE
         ? this
@@ -182,17 +170,21 @@ public final class Errors implements Serializable {
   }
 
   /**
-   * We use a fairly generic error message here. The motivation is to share the
-   * same message for both bind time errors:
+   * We use a fairly generic error message here. The motivation is to share the same message for
+   * both bind time errors:
+   *
    * <pre><code>Guice.createInjector(new AbstractModule() {
    *   public void configure() {
    *     bind(Runnable.class);
    *   }
    * }</code></pre>
+   *
    * ...and at provide-time errors:
+   *
    * <pre><code>Guice.createInjector().getInstance(Runnable.class);</code></pre>
-   * Otherwise we need to know who's calling when resolving a just-in-time
-   * binding, which makes things unnecessarily complex.
+   *
+   * Otherwise we need to know who's calling when resolving a just-in-time binding, which makes
+   * things unnecessarily complex.
    */
   public Errors missingImplementation(Key key) {
     return addMessage("No implementation for %s was bound.", key);
@@ -238,8 +230,7 @@ public final class Errors implements Serializable {
         if (have.contains(want) || want.contains(have)) {
           Formatter fmt = new Formatter();
           formatSource(fmt, bindingMap.get(bindingKey).getSource());
-          String match = String.format("%s bound%s", convert(bindingKey),
-              fmt.toString());
+          String match = String.format("%s bound%s", convert(bindingKey), fmt.toString());
           possibleMatches.add(match);
           // TODO: Consider a check that if there are more than some number of results,
           // don't suggest any.
@@ -260,7 +251,9 @@ public final class Errors implements Serializable {
 
     // If where are no possibilities to suggest, then handle the case of missing
     // annotations on simple types. This is usually a bad idea.
-    if (sameTypes.isEmpty() && possibleMatches.isEmpty() && key.getAnnotation() == null
+    if (sameTypes.isEmpty()
+        && possibleMatches.isEmpty()
+        && key.getAnnotation() == null
         && COMMON_AMBIGUOUS_TYPES.contains(key.getTypeLiteral().getRawType())) {
       // We don't recommend using such simple types without annotations.
       sb.append(format("%nThe key seems very generic, did you forget an annotation?"));
@@ -276,46 +269,67 @@ public final class Errors implements Serializable {
   public Errors jitDisabledInParent(Key<?> key) {
     return addMessage(
         "Explicit bindings are required and %s would be bound in a parent injector.%n"
-        + "Please add an explicit binding for it, either in the child or the parent.",
+            + "Please add an explicit binding for it, either in the child or the parent.",
         key);
   }
 
   public Errors atInjectRequired(Class clazz) {
     return addMessage(
         "Explicit @Inject annotations are required on constructors,"
-        + " but %s has no constructors annotated with @Inject.",
+            + " but %s has no constructors annotated with @Inject.",
         clazz);
   }
 
-  public Errors converterReturnedNull(String stringValue, Object source,
-      TypeLiteral<?> type, TypeConverterBinding typeConverterBinding) {
-    return addMessage("Received null converting '%s' (bound at %s) to %s%n"
-        + " using %s.",
+  public Errors converterReturnedNull(
+      String stringValue,
+      Object source,
+      TypeLiteral<?> type,
+      TypeConverterBinding typeConverterBinding) {
+    return addMessage(
+        "Received null converting '%s' (bound at %s) to %s%n using %s.",
         stringValue, convert(source), type, typeConverterBinding);
   }
 
-  public Errors conversionTypeError(String stringValue, Object source, TypeLiteral<?> type,
-      TypeConverterBinding typeConverterBinding, Object converted) {
-    return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
-        + " using %s.%n"
-        + " Converter returned %s.",
+  public Errors conversionTypeError(
+      String stringValue,
+      Object source,
+      TypeLiteral<?> type,
+      TypeConverterBinding typeConverterBinding,
+      Object converted) {
+    return addMessage(
+        "Type mismatch converting '%s' (bound at %s) to %s%n"
+            + " using %s.%n"
+            + " Converter returned %s.",
         stringValue, convert(source), type, typeConverterBinding, converted);
   }
 
-  public Errors conversionError(String stringValue, Object source,
-      TypeLiteral<?> type, TypeConverterBinding typeConverterBinding, RuntimeException cause) {
-    return errorInUserCode(cause, "Error converting '%s' (bound at %s) to %s%n"
-        + " using %s.%n"
-        + " Reason: %s",
-        stringValue, convert(source), type, typeConverterBinding, cause);
+  public Errors conversionError(
+      String stringValue,
+      Object source,
+      TypeLiteral<?> type,
+      TypeConverterBinding typeConverterBinding,
+      RuntimeException cause) {
+    return errorInUserCode(
+        cause,
+        "Error converting '%s' (bound at %s) to %s%n using %s.%n Reason: %s",
+        stringValue,
+        convert(source),
+        type,
+        typeConverterBinding,
+        cause);
   }
 
-  public Errors ambiguousTypeConversion(String stringValue, Object source, TypeLiteral<?> type,
-      TypeConverterBinding a, TypeConverterBinding b) {
-    return addMessage("Multiple converters can convert '%s' (bound at %s) to %s:%n"
-        + " %s and%n"
-        + " %s.%n"
-        + " Please adjust your type converter configuration to avoid overlapping matches.",
+  public Errors ambiguousTypeConversion(
+      String stringValue,
+      Object source,
+      TypeLiteral<?> type,
+      TypeConverterBinding a,
+      TypeConverterBinding b) {
+    return addMessage(
+        "Multiple converters can convert '%s' (bound at %s) to %s:%n"
+            + " %s and%n"
+            + " %s.%n"
+            + " Please adjust your type converter configuration to avoid overlapping matches.",
         stringValue, convert(source), type, a, b);
   }
 
@@ -323,8 +337,8 @@ public final class Errors implements Serializable {
     return addMessage("Binding to Provider is not allowed.");
   }
 
-  public Errors subtypeNotProvided(Class<? extends javax.inject.Provider<?>> providerType,
-      Class<?> type) {
+  public Errors subtypeNotProvided(
+      Class<? extends javax.inject.Provider<?>> providerType, Class<?> type) {
     return addMessage("%s doesn't provide instances of %s.", providerType, type);
   }
 
@@ -349,8 +363,9 @@ public final class Errors implements Serializable {
   }
 
   public Errors optionalConstructor(Constructor constructor) {
-    return addMessage("%s is annotated @Inject(optional=true), "
-        + "but constructors cannot be optional.", constructor);
+    return addMessage(
+        "%s is annotated @Inject(optional=true), but constructors cannot be optional.",
+        constructor);
   }
 
   public Errors cannotBindToGuiceType(String simpleName) {
@@ -363,13 +378,17 @@ public final class Errors implements Serializable {
 
   public Errors scopeAnnotationOnAbstractType(
       Class<? extends Annotation> scopeAnnotation, Class<?> type, Object source) {
-    return addMessage("%s is annotated with %s, but scope annotations are not supported "
-        + "for abstract types.%n Bound at %s.", type, scopeAnnotation, convert(source));
+    return addMessage(
+        "%s is annotated with %s, but scope annotations are not supported "
+            + "for abstract types.%n Bound at %s.",
+        type, scopeAnnotation, convert(source));
   }
 
   public Errors misplacedBindingAnnotation(Member member, Annotation bindingAnnotation) {
-    return addMessage("%s is annotated with %s, but binding annotations should be applied "
-        + "to its parameters instead.", member, bindingAnnotation);
+    return addMessage(
+        "%s is annotated with %s, but binding annotations should be applied "
+            + "to its parameters instead.",
+        member, bindingAnnotation);
   }
 
   private static final String CONSTRUCTOR_RULES =
@@ -377,22 +396,24 @@ public final class Errors implements Serializable {
           + "annotated with @Inject or a zero-argument constructor that is not private.";
 
   public Errors missingConstructor(Class<?> implementation) {
-    return addMessage("Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES,
-        implementation);
+    return addMessage(
+        "Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES, implementation);
   }
 
   public Errors tooManyConstructors(Class<?> implementation) {
-    return addMessage("%s has more than one constructor annotated with @Inject. "
-        + CONSTRUCTOR_RULES, implementation);
+    return addMessage(
+        "%s has more than one constructor annotated with @Inject. " + CONSTRUCTOR_RULES,
+        implementation);
   }
 
   public Errors constructorNotDefinedByType(Constructor<?> constructor, TypeLiteral<?> type) {
     return addMessage("%s does not define %s", type, constructor);
   }
 
-  public Errors duplicateScopes(ScopeBinding existing,
-      Class<? extends Annotation> annotationType, Scope scope) {
-    return addMessage("Scope %s is already bound to %s at %s.%n Cannot bind %s.",
+  public Errors duplicateScopes(
+      ScopeBinding existing, Class<? extends Annotation> annotationType, Scope scope) {
+    return addMessage(
+        "Scope %s is already bound to %s at %s.%n Cannot bind %s.",
         existing.getScope(), annotationType, existing.getSource(), scope);
   }
 
@@ -405,16 +426,19 @@ public final class Errors implements Serializable {
   }
 
   public Errors cannotInjectInnerClass(Class<?> type) {
-    return addMessage("Injecting into inner classes is not supported.  "
-        + "Please use a 'static' class (top-level or nested) instead of %s.", type);
+    return addMessage(
+        "Injecting into inner classes is not supported.  "
+            + "Please use a 'static' class (top-level or nested) instead of %s.",
+        type);
   }
 
-  public Errors duplicateBindingAnnotations(Member member,
-      Class<? extends Annotation> a, Class<? extends Annotation> b) {
-    return addMessage("%s has more than one annotation annotated with @BindingAnnotation: "
-        + "%s and %s", member, a, b);
+  public Errors duplicateBindingAnnotations(
+      Member member, Class<? extends Annotation> a, Class<? extends Annotation> b) {
+    return addMessage(
+        "%s has more than one annotation annotated with @BindingAnnotation: %s and %s",
+        member, a, b);
   }
-  
+
   public Errors staticInjectionOnInterface(Class<?> clazz) {
     return addMessage("%s is an interface, but interfaces have no static injection points.", clazz);
   }
@@ -447,9 +471,10 @@ public final class Errors implements Serializable {
   public Errors bindingAlreadySet(Key<?> key, Object source) {
     return addMessage("A binding to %s was already configured at %s.", key, convert(source));
   }
-  
+
   public Errors jitBindingAlreadySet(Key<?> key) {
-    return addMessage("A just-in-time binding to %s was already configured on a parent injector.", key);
+    return addMessage(
+        "A just-in-time binding to %s was already configured on a parent injector.", key);
   }
 
   public Errors childBindingAlreadySet(Key<?> key, Set<Object> sources) {
@@ -461,19 +486,20 @@ public final class Errors implements Serializable {
         allSources.format("%n    bound at %s", source);
       }
     }
-    Errors errors = addMessage(
-        "Unable to create binding for %s."
-      + " It was already configured on one or more child injectors or private modules"
-      + "%s%n"
-      + "  If it was in a PrivateModule, did you forget to expose the binding?",
-        key, allSources.out());
+    Errors errors =
+        addMessage(
+            "Unable to create binding for %s."
+                + " It was already configured on one or more child injectors or private modules"
+                + "%s%n"
+                + "  If it was in a PrivateModule, did you forget to expose the binding?",
+            key, allSources.out());
     return errors;
   }
 
   public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {
     return addMessage(
-        "A binding to %s was already configured at %s and an error was thrown " 
-      + "while checking duplicate bindings.  Error: %s",
+        "A binding to %s was already configured at %s and an error was thrown "
+            + "while checking duplicate bindings.  Error: %s",
         key, convert(source), t);
   }
 
@@ -481,12 +507,15 @@ public final class Errors implements Serializable {
     return errorInUserCode(cause, "Error injecting method, %s", cause);
   }
 
-  public Errors errorNotifyingTypeListener(TypeListenerBinding listener,
-      TypeLiteral<?> type, Throwable cause) {
-    return errorInUserCode(cause,
-        "Error notifying TypeListener %s (bound at %s) of %s.%n"
-        + " Reason: %s",
-        listener.getListener(), convert(listener.getSource()), type, cause);
+  public Errors errorNotifyingTypeListener(
+      TypeListenerBinding listener, TypeLiteral<?> type, Throwable cause) {
+    return errorInUserCode(
+        cause,
+        "Error notifying TypeListener %s (bound at %s) of %s.%n Reason: %s",
+        listener.getListener(),
+        convert(listener.getSource()),
+        type,
+        cause);
   }
 
   public Errors errorInjectingConstructor(Throwable cause) {
@@ -500,24 +529,28 @@ public final class Errors implements Serializable {
 
   public Errors errorInUserInjector(
       MembersInjector<?> listener, TypeLiteral<?> type, RuntimeException cause) {
-    return errorInUserCode(cause, "Error injecting %s using %s.%n"
-        + " Reason: %s", type, listener, cause);
+    return errorInUserCode(
+        cause, "Error injecting %s using %s.%n Reason: %s", type, listener, cause);
   }
 
   public Errors errorNotifyingInjectionListener(
       InjectionListener<?> listener, TypeLiteral<?> type, RuntimeException cause) {
-    return errorInUserCode(cause, "Error notifying InjectionListener %s of %s.%n"
-        + " Reason: %s", listener, type, cause);
+    return errorInUserCode(
+        cause,
+        "Error notifying InjectionListener %s of %s.%n Reason: %s",
+        listener,
+        type,
+        cause);
   }
 
   public Errors exposedButNotBound(Key<?> key) {
     return addMessage("Could not expose() %s, it must be explicitly bound.", key);
   }
-  
+
   public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
     return addMessage("%s cannot be used as a key; It is not fully specified.", typeLiteral);
   }
-  
+
   public Errors errorEnhancingClass(Class<?> clazz, Throwable cause) {
     return errorInUserCode(cause, "Unable to method intercept: %s", clazz);
   }
@@ -543,13 +576,13 @@ public final class Errors implements Serializable {
       return addMessage(cause, messageFormat, arguments);
     }
   }
-  
+
   private Throwable unwrap(Throwable runtimeException) {
-   if(runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
-     return runtimeException.getCause();
-   } else {
-     return runtimeException;
-   }
+    if (runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
+      return runtimeException.getCause();
+    } else {
+      return runtimeException;
+    }
   }
 
   public Errors cannotInjectRawProvider() {
@@ -608,12 +641,13 @@ public final class Errors implements Serializable {
     List<Object> sources = Lists.newArrayList();
     sources.addAll(getSources());
     List<Object> messageSources = message.getSources();
-    // It is possible that the end of getSources() and the beginning of message.getSources() are 
+    // It is possible that the end of getSources() and the beginning of message.getSources() are
     // equivalent, in this case we should drop the repeated source when joining the lists.  The
     // most likely scenario where this would happen is when a scoped binding throws an exception,
-    // due to the fact that InternalFactoryToProviderAdapter applies the binding source when 
+    // due to the fact that InternalFactoryToProviderAdapter applies the binding source when
     // merging errors.
-    if (!sources.isEmpty() && !messageSources.isEmpty() 
+    if (!sources.isEmpty()
+        && !messageSources.isEmpty()
         && Objects.equal(messageSources.get(0), sources.get(sources.size() - 1))) {
       messageSources = messageSources.subList(1, messageSources.size());
     }
@@ -727,7 +761,8 @@ public final class Errors implements Serializable {
           fmt.format("Caused by: %s", Throwables.getStackTraceAsString(cause));
         } else {
           int causeIdx = causes.get(causeEquivalence);
-          fmt.format("Caused by: %s (same stack trace as error #%s)",
+          fmt.format(
+              "Caused by: %s (same stack trace as error #%s)",
               cause.getClass().getName(), causeIdx);
         }
       }
@@ -801,8 +836,7 @@ public final class Errors implements Serializable {
         continue;
       }
 
-      if (onlyCause != null 
-          && !ThrowableEquivalence.INSTANCE.equivalent(onlyCause, messageCause)) {
+      if (onlyCause != null && !ThrowableEquivalence.INSTANCE.equivalent(onlyCause, messageCause)) {
         return null;
       }
 
@@ -816,7 +850,7 @@ public final class Errors implements Serializable {
     return root.errors == null ? 0 : root.errors.size();
   }
 
-  private static abstract class Converter<T> {
+  private abstract static class Converter<T> {
 
     final Class<T> type;
 
@@ -835,37 +869,42 @@ public final class Errors implements Serializable {
     abstract String toString(T t);
   }
 
-  private static final Collection<Converter<?>> converters = ImmutableList.of(
-      new Converter<Class>(Class.class) {
-        @Override public String toString(Class c) {
-          return c.getName();
-        }
-      },
-      new Converter<Member>(Member.class) {
-        @Override public String toString(Member member) {
-          return Classes.toString(member);
-        }
-      },
-      new Converter<Key>(Key.class) {
-        @Override public String toString(Key key) {
-          if (key.getAnnotationType() != null) {
-            return key.getTypeLiteral() + " annotated with "
-                + (key.getAnnotation() != null ? key.getAnnotation() : key.getAnnotationType());
-          } else {
-            return key.getTypeLiteral().toString();
-          }
-        }
-      });
+  private static final Collection<Converter<?>> converters =
+      ImmutableList.of(
+          new Converter<Class>(Class.class) {
+            @Override
+            public String toString(Class c) {
+              return c.getName();
+            }
+          },
+          new Converter<Member>(Member.class) {
+            @Override
+            public String toString(Member member) {
+              return Classes.toString(member);
+            }
+          },
+          new Converter<Key>(Key.class) {
+            @Override
+            public String toString(Key key) {
+              if (key.getAnnotationType() != null) {
+                return key.getTypeLiteral()
+                    + " annotated with "
+                    + (key.getAnnotation() != null ? key.getAnnotation() : key.getAnnotationType());
+              } else {
+                return key.getTypeLiteral().toString();
+              }
+            }
+          });
 
   public static Object convert(Object o) {
     ElementSource source = null;
     if (o instanceof ElementSource) {
-      source = (ElementSource)o;
-      o = source.getDeclaringSource(); 
+      source = (ElementSource) o;
+      o = source.getDeclaringSource();
     }
     return convert(o, source);
   }
-  
+
   public static Object convert(Object o, ElementSource source) {
     for (Converter<?> converter : converters) {
       if (converter.appliesTo(o)) {
@@ -874,7 +913,7 @@ public final class Errors implements Serializable {
     }
     return appendModules(o, source);
   }
-  
+
   private static Object appendModules(Object source, ElementSource elementSource) {
     String modules = moduleSourceString(elementSource);
     if (modules.length() == 0) {
@@ -883,7 +922,7 @@ public final class Errors implements Serializable {
       return source + modules;
     }
   }
-  
+
   private static String moduleSourceString(ElementSource elementSource) {
     // if we only have one module (or don't know what they are), then don't bother
     // reporting it, because the source already is going to report exactly that module.
@@ -892,14 +931,14 @@ public final class Errors implements Serializable {
     }
     List<String> modules = Lists.newArrayList(elementSource.getModuleClassNames());
     // Insert any original element sources w/ module info into the path.
-    while(elementSource.getOriginalElementSource() != null) {
+    while (elementSource.getOriginalElementSource() != null) {
       elementSource = elementSource.getOriginalElementSource();
       modules.addAll(0, elementSource.getModuleClassNames());
     }
     if (modules.size() <= 1) {
       return "";
     }
-    
+
     // Ideally we'd do:
     //    return Joiner.on(" -> ")
     //        .appendTo(new StringBuilder(" (via modules: "), Lists.reverse(modules))
@@ -910,7 +949,7 @@ public final class Errors implements Serializable {
       builder.append(modules.get(i));
       if (i != 0) {
         builder.append(" -> ");
-      }      
+      }
     }
     builder.append(")");
     return builder.toString();
@@ -919,12 +958,12 @@ public final class Errors implements Serializable {
   public static void formatSource(Formatter formatter, Object source) {
     ElementSource elementSource = null;
     if (source instanceof ElementSource) {
-      elementSource = (ElementSource)source;
+      elementSource = (ElementSource) source;
       source = elementSource.getDeclaringSource();
     }
     formatSource(formatter, source, elementSource);
   }
-  
+
   public static void formatSource(Formatter formatter, Object source, ElementSource elementSource) {
     String modules = moduleSourceString(elementSource);
     if (source instanceof Dependency) {
@@ -960,8 +999,11 @@ public final class Errors implements Serializable {
     }
   }
 
-  public static void formatInjectionPoint(Formatter formatter, Dependency<?> dependency,
-      InjectionPoint injectionPoint, ElementSource elementSource) {
+  public static void formatInjectionPoint(
+      Formatter formatter,
+      Dependency<?> dependency,
+      InjectionPoint injectionPoint,
+      ElementSource elementSource) {
     Member member = injectionPoint.getMember();
     Class<? extends Member> memberType = Classes.memberType(member);
 
@@ -978,7 +1020,7 @@ public final class Errors implements Serializable {
       formatSource(formatter, injectionPoint.getMember());
     }
   }
-  
+
   private static String formatParameter(Dependency<?> dependency) {
     int ordinal = dependency.getParameterIndex() + 1;
     return String.format(
@@ -990,7 +1032,7 @@ public final class Errors implements Serializable {
 
   /**
    * Maps {@code 1} to the string {@code "1st"} ditto for all non-negative numbers
-   * 
+   *
    * @see <a href="https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers">
    *     https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers</a>
    */
@@ -1018,14 +1060,16 @@ public final class Errors implements Serializable {
   static class ThrowableEquivalence extends Equivalence<Throwable> {
     static final ThrowableEquivalence INSTANCE = new ThrowableEquivalence();
 
-    @Override protected boolean doEquivalent(Throwable a, Throwable b) {
+    @Override
+    protected boolean doEquivalent(Throwable a, Throwable b) {
       return a.getClass().equals(b.getClass())
           && Objects.equal(a.getMessage(), b.getMessage())
           && Arrays.equals(a.getStackTrace(), b.getStackTrace())
           && equivalent(a.getCause(), b.getCause());
     }
 
-    @Override protected int doHash(Throwable t) {
+    @Override
+    protected int doHash(Throwable t) {
       return Objects.hashCode(t.getClass().hashCode(), t.getMessage(), hash(t.getCause()));
     }
   }

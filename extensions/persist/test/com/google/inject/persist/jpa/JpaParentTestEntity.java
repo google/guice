@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,40 +18,38 @@ package com.google.inject.persist.jpa;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 /**
- * Created with IntelliJ IDEA.
- * On: 2/06/2007
+ * Created with IntelliJ IDEA. On: 2/06/2007
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  * @since 1.0
  */
 @Entity
 public class JpaParentTestEntity {
-    private Long id;
-    private List<JpaTestEntity> children = new ArrayList<JpaTestEntity>();
+  private Long id;
+  private List<JpaTestEntity> children = new ArrayList<JpaTestEntity>();
 
-    @Id
-    @GeneratedValue
-    public Long getId() {
-        return id;
-    }
+  @Id
+  @GeneratedValue
+  public Long getId() {
+    return id;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    @OneToMany
-    public List<JpaTestEntity> getChildren() {
-        return children;
-    }
+  @OneToMany
+  public List<JpaTestEntity> getChildren() {
+    return children;
+  }
 
-    public void setChildren(List<JpaTestEntity> children) {
-        this.children = children;
-    }
+  public void setChildren(List<JpaTestEntity> children) {
+    this.children = children;
+  }
 }

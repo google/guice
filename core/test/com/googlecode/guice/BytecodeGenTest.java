@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,25 +24,19 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-
 import com.googlecode.guice.BytecodeGenTest.LogCreator;
 import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePrivate;
-
-import junit.framework.TestCase;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
-
 import javax.inject.Inject;
+import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * This test is in a separate package so we can test package-level visibility
- * with confidence.
+ * This test is in a separate package so we can test package-level visibility with confidence.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
@@ -95,17 +89,16 @@ public class BytecodeGenTest extends TestCase {
   public void testEnhancerNaming() {
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     PublicUserOfPackagePrivate pupp = injector.getInstance(PublicUserOfPackagePrivate.class);
-    assertTrue(pupp.getClass().getName().startsWith(
-        PublicUserOfPackagePrivate.class.getName() + "$$EnhancerByGuice$$"));
+    assertTrue(
+        pupp.getClass()
+            .getName()
+            .startsWith(PublicUserOfPackagePrivate.class.getName() + "$$EnhancerByGuice$$"));
   }
 
   // TODO(sameb): Figure out how to test FastClass naming tests.
 
-  /**
-   * Custom URL classloader with basic visibility rules
-   */
-  static class TestVisibilityClassLoader
-      extends URLClassLoader {
+  /** Custom URL classloader with basic visibility rules */
+  static class TestVisibilityClassLoader extends URLClassLoader {
 
     final boolean hideInternals;
 
@@ -119,9 +112,9 @@ public class BytecodeGenTest extends TestCase {
     }
 
     /**
-     * Classic parent-delegating classloaders are meant to override findClass.
-     * However, non-delegating classloaders (as used in OSGi) instead override
-     * loadClass to provide support for "class-space" separation.
+     * Classic parent-delegating classloaders are meant to override findClass. However,
+     * non-delegating classloaders (as used in OSGi) instead override loadClass to provide support
+     * for "class-space" separation.
      */
     @Override
     protected Class<?> loadClass(final String name, final boolean resolve)
@@ -165,6 +158,7 @@ public class BytecodeGenTest extends TestCase {
 
   /** as loaded by another class loader */
   private Class<ProxyTest> proxyTestClass;
+
   private Class<ProxyTestImpl> realClass;
   private Module testModule;
 
@@ -191,9 +185,9 @@ public class BytecodeGenTest extends TestCase {
   }
 
   /**
-   * Note: this class must be marked as public or protected so that the Guice
-   * custom classloader will intercept it. Private and implementation classes
-   * are not intercepted by the custom classloader.
+   * Note: this class must be marked as public or protected so that the Guice custom classloader
+   * will intercept it. Private and implementation classes are not intercepted by the custom
+   * classloader.
    *
    * @see com.google.inject.internal.BytecodeGen.Visibility
    */
@@ -210,8 +204,8 @@ public class BytecodeGenTest extends TestCase {
   }
 
   public void testProxyClassLoading() throws Exception {
-    Object testObject = Guice.createInjector(interceptorModule, testModule)
-        .getInstance(proxyTestClass);
+    Object testObject =
+        Guice.createInjector(interceptorModule, testModule).getInstance(proxyTestClass);
 
     // verify method interception still works
     Method m = realClass.getMethod("sayHello");
@@ -238,8 +232,8 @@ public class BytecodeGenTest extends TestCase {
   }
 
   public void testProxyClassUnloading() {
-    Object testObject = Guice.createInjector(interceptorModule, testModule)
-        .getInstance(proxyTestClass);
+    Object testObject =
+        Guice.createInjector(interceptorModule, testModule).getInstance(proxyTestClass);
     assertNotNull(testObject.getClass().getClassLoader());
     assertNotSame(testObject.getClass().getClassLoader(), systemClassLoader);
 
@@ -287,8 +281,7 @@ public class BytecodeGenTest extends TestCase {
     }
   }
 
-  static class Hidden {
-  }
+  static class Hidden {}
 
   public static class HiddenMethodReturn {
     public Hidden method() {
@@ -297,15 +290,15 @@ public class BytecodeGenTest extends TestCase {
   }
 
   public static class HiddenMethodParameter {
-    public void method(Hidden h) {
-    }
+    public void method(Hidden h) {}
   }
 
   public void testClassLoaderBridging() throws Exception {
     ClassLoader testClassLoader = new TestVisibilityClassLoader(false);
 
     Class hiddenMethodReturnClass = testClassLoader.loadClass(HiddenMethodReturn.class.getName());
-    Class hiddenMethodParameterClass = testClassLoader.loadClass(HiddenMethodParameter.class.getName());
+    Class hiddenMethodParameterClass =
+        testClassLoader.loadClass(HiddenMethodParameter.class.getName());
 
     Injector injector = Guice.createInjector(noopInterceptorModule);
 
@@ -338,20 +331,24 @@ public class BytecodeGenTest extends TestCase {
     // this prevents the use of fastclass for all but the public types (where the bridge
     // classloader can be used).
     MultipleVersionsOfGuiceClassLoader fakeLoader = new MultipleVersionsOfGuiceClassLoader();
-    injector.getInstance(fakeLoader.loadLogCreatorType(PublicInject.class))
+    injector
+        .getInstance(fakeLoader.loadLogCreatorType(PublicInject.class))
         .assertIsFastClassInvoked();
-    injector.getInstance(fakeLoader.loadLogCreatorType(ProtectedInject.class))
+    injector
+        .getInstance(fakeLoader.loadLogCreatorType(ProtectedInject.class))
         .assertIsReflectionInvoked();
-    injector.getInstance(fakeLoader.loadLogCreatorType(PackagePrivateInject.class))
+    injector
+        .getInstance(fakeLoader.loadLogCreatorType(PackagePrivateInject.class))
         .assertIsReflectionInvoked();
-    injector.getInstance(fakeLoader.loadLogCreatorType(PrivateInject.class))
+    injector
+        .getInstance(fakeLoader.loadLogCreatorType(PrivateInject.class))
         .assertIsReflectionInvoked();
   }
 
   // This classloader simulates an OSGI environment where a bundle has a conflicting definition of
   // cglib (or guice).  This is sort of the opposite of the BridgeClassloader and is meant to test
   // its use.
-  static class MultipleVersionsOfGuiceClassLoader extends URLClassLoader  {
+  static class MultipleVersionsOfGuiceClassLoader extends URLClassLoader {
     MultipleVersionsOfGuiceClassLoader() {
       this((URLClassLoader) MultipleVersionsOfGuiceClassLoader.class.getClassLoader());
     }
@@ -366,9 +363,9 @@ public class BytecodeGenTest extends TestCase {
     }
 
     /**
-     * Classic parent-delegating classloaders are meant to override findClass.
-     * However, non-delegating classloaders (as used in OSGi) instead override
-     * loadClass to provide support for "class-space" separation.
+     * Classic parent-delegating classloaders are meant to override findClass. However,
+     * non-delegating classloaders (as used in OSGi) instead override loadClass to provide support
+     * for "class-space" separation.
      */
     @Override
     protected Class<?> loadClass(final String name, final boolean resolve)
@@ -405,6 +402,7 @@ public class BytecodeGenTest extends TestCase {
 
   public static class LogCreator {
     final Throwable caller;
+
     public LogCreator() {
       this.caller = new Throwable();
     }
@@ -435,18 +433,22 @@ public class BytecodeGenTest extends TestCase {
   }
 
   public static class PublicInject extends LogCreator {
-    @Inject public PublicInject() {}
+    @Inject
+    public PublicInject() {}
   }
 
   static class PackagePrivateInject extends LogCreator {
-    @Inject PackagePrivateInject() {}
+    @Inject
+    PackagePrivateInject() {}
   }
 
   protected static class ProtectedInject extends LogCreator {
-    @Inject protected ProtectedInject() {}
+    @Inject
+    protected ProtectedInject() {}
   }
 
   private static class PrivateInject extends LogCreator {
-    @Inject private PrivateInject() {}
+    @Inject
+    private PrivateInject() {}
   }
 }

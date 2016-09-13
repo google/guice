@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,29 +27,25 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.BindException;
 import java.rmi.RemoteException;
+import junit.framework.TestCase;
 
-/**
- * Test methods for {@link CheckedProviderMethodsModule}.
- */
+/** Test methods for {@link CheckedProviderMethodsModule}. */
 public class CheckedProviderMethodsModuleTest extends TestCase {
 
-  private final TypeLiteral<RpcProvider<String>> rpcProviderOfString
-      = new TypeLiteral<RpcProvider<String>>() { };
-  private final TypeLiteral<RpcProvider<Integer>> rpcProviderOfInteger
-      = new TypeLiteral<RpcProvider<Integer>>() { };
-  private final TypeLiteral<RpcProvider<Long>> rpcProviderOfLong
-      = new TypeLiteral<RpcProvider<Long>>() { };
-  private final TypeLiteral<RpcProvider<Float>> rpcProviderOfFloat
-      = new TypeLiteral<RpcProvider<Float>>() { };
-  private final TypeLiteral<RpcProvider<Pair<Double, String>>> rpcProviderOfPair
-      = new TypeLiteral<RpcProvider<Pair<Double, String>>>() { };
+  private final TypeLiteral<RpcProvider<String>> rpcProviderOfString =
+      new TypeLiteral<RpcProvider<String>>() {};
+  private final TypeLiteral<RpcProvider<Integer>> rpcProviderOfInteger =
+      new TypeLiteral<RpcProvider<Integer>>() {};
+  private final TypeLiteral<RpcProvider<Long>> rpcProviderOfLong =
+      new TypeLiteral<RpcProvider<Long>>() {};
+  private final TypeLiteral<RpcProvider<Float>> rpcProviderOfFloat =
+      new TypeLiteral<RpcProvider<Float>>() {};
+  private final TypeLiteral<RpcProvider<Pair<Double, String>>> rpcProviderOfPair =
+      new TypeLiteral<RpcProvider<Pair<Double, String>>>() {};
 
   private final TestScope testScope = new TestScope();
 
@@ -60,8 +56,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
 
   @Retention(RetentionPolicy.RUNTIME)
   @BindingAnnotation
-  @interface TestAnnotation {
-  }
+  @interface TestAnnotation {}
 
   class TestModule extends AbstractModule {
 
@@ -79,12 +74,14 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
       return "Works";
     }
 
-    @CheckedProvides(RpcProvider.class) @TestScope.Scoped
+    @CheckedProvides(RpcProvider.class)
+    @TestScope.Scoped
     int getSomeIntegerFromServer() {
       return nextIntToReturn;
     }
 
-    @CheckedProvides(RpcProvider.class) @TestAnnotation
+    @CheckedProvides(RpcProvider.class)
+    @TestAnnotation
     long getSomeLongFromServer() {
       return 0xffL;
     }
@@ -116,46 +113,44 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
       install(ThrowingProviderBinder.forModule(this));
     }
 
-    @CheckedProvides(RpcProvider.class) @Named("fruit") @Exposed
+    @CheckedProvides(RpcProvider.class)
+    @Named("fruit")
+    @Exposed
     String provideApples() {
       return "apple";
     }
   }
-  
 
   public void testNoAnnotationNoScope() throws BindException, RemoteException {
     Injector injector = Guice.createInjector(new TestModule());
-    RpcProvider<String> provider = injector
-        .getInstance(Key.get(rpcProviderOfString));
+    RpcProvider<String> provider = injector.getInstance(Key.get(rpcProviderOfString));
     assertEquals("Works", provider.get());
   }
 
   public void testWithScope() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
-    RpcProvider<Integer> provider = injector
-        .getInstance(Key.get(rpcProviderOfInteger));
+    RpcProvider<Integer> provider = injector.getInstance(Key.get(rpcProviderOfInteger));
 
-    assertEquals((Integer)100, provider.get());
+    assertEquals((Integer) 100, provider.get());
     testModule.setNextIntToReturn(120);
-    assertEquals((Integer)100, provider.get());
+    assertEquals((Integer) 100, provider.get());
     testScope.beginNewScope();
-    assertEquals((Integer)120, provider.get());
+    assertEquals((Integer) 120, provider.get());
   }
 
   public void testWithAnnotation() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
-    RpcProvider<Long> provider = injector
-        .getInstance(Key.get(rpcProviderOfLong, TestAnnotation.class));
-    assertEquals((Long)0xffL, provider.get());
+    RpcProvider<Long> provider =
+        injector.getInstance(Key.get(rpcProviderOfLong, TestAnnotation.class));
+    assertEquals((Long) 0xffL, provider.get());
   }
 
   public void testWithInjectedParameters() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
-    RpcProvider<Pair<Double, String>> provider = injector
-        .getInstance(Key.get(rpcProviderOfPair));
+    RpcProvider<Pair<Double, String>> provider = injector.getInstance(Key.get(rpcProviderOfPair));
     Pair<Double, String> pair = provider.get();
     assertEquals(pair.first, 4.0d, 0.0);
   }
@@ -163,8 +158,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
   public void testWithThrownException() {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
-    RpcProvider<Float> provider = injector
-        .getInstance(Key.get(rpcProviderOfFloat));
+    RpcProvider<Float> provider = injector.getInstance(Key.get(rpcProviderOfFloat));
     try {
       provider.get();
       fail();
@@ -178,18 +172,17 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
   public void testExposedMethod() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
-    RpcProvider<String> provider = injector
-        .getInstance(Key.get(rpcProviderOfString, Names.named("fruit")));
+    RpcProvider<String> provider =
+        injector.getInstance(Key.get(rpcProviderOfString, Names.named("fruit")));
     assertEquals("apple", provider.get());
-
   }
-  
+
   private static class Pair<A, B> {
     A first;
     B second;
 
     Pair(A a, B b) {
-      this.first= a;
+      this.first = a;
       this.second = b;
     }
   }

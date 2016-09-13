@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2013 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,15 @@
  */
 package com.google.inject.servlet;
 
-import junit.framework.AssertionFailedError;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
-import junit.framework.TestCase;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 public class ContinuingHttpServletRequestTest extends TestCase {
 
@@ -42,19 +41,16 @@ public class ContinuingHttpServletRequestTest extends TestCase {
 
     verify(delegate);
   }
-  
+
   public void testReturnDelegateCookies() {
-    Cookie[] cookies = new Cookie[]{
-        new Cookie("testName1", TEST_VALUE_1),
-        new Cookie("testName2", "testValue2")
-    };
+    Cookie[] cookies =
+        new Cookie[] {new Cookie("testName1", TEST_VALUE_1), new Cookie("testName2", "testValue2")};
     HttpServletRequest delegate = createMock(HttpServletRequest.class);
     expect(delegate.getCookies()).andStubReturn(cookies);
 
     replay(delegate);
 
-    ContinuingHttpServletRequest continuingRequest = new ContinuingHttpServletRequest(
-        delegate);
+    ContinuingHttpServletRequest continuingRequest = new ContinuingHttpServletRequest(delegate);
 
     assertCookieArraysEqual(cookies, continuingRequest.getCookies());
 
@@ -76,8 +72,8 @@ public class ContinuingHttpServletRequestTest extends TestCase {
     assertEquals(DEFAULT_MAX_AGE, continuingRequest.getCookies()[1].getMaxAge());
 
     // Perform a snapshot of the snapshot.
-    ContinuingHttpServletRequest furtherContinuingRequest = new ContinuingHttpServletRequest(
-        continuingRequest);
+    ContinuingHttpServletRequest furtherContinuingRequest =
+        new ContinuingHttpServletRequest(continuingRequest);
 
     // The cookies should be fixed.
     assertCookieArraysEqual(continuingRequest.getCookies(), furtherContinuingRequest.getCookies());

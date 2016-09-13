@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ package com.google.inject.example;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
 
@@ -37,18 +36,13 @@ class JndiProvider<T> implements Provider<T> {
   public T get() {
     try {
       return type.cast(context.lookup(name));
-    }
-    catch (NamingException e) {
+    } catch (NamingException e) {
       throw new RuntimeException(e);
     }
   }
 
-  /**
-   * Creates a JNDI provider for the given
-   * type and name.
-   */
-  static <T> Provider<T> fromJndi(
-      Class<T> type, String name) {
+  /** Creates a JNDI provider for the given type and name. */
+  static <T> Provider<T> fromJndi(Class<T> type, String name) {
     return new JndiProvider<T>(type, name);
   }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,9 +66,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class ElementsTest extends TestCase {
 
   // Binder fidelity tests
@@ -76,23 +74,24 @@ public class ElementsTest extends TestCase {
   public void testAddMessageErrorCommand() {
     checkModule(
         new AbstractModule() {
-          @Override protected void configure() {
+          @Override
+          protected void configure() {
             addError("Message %s %d %s", "A", 5, "C");
           }
         },
-
         new FailingElementVisitor() {
-          @Override public Void visit(Message command) {
+          @Override
+          public Void visit(Message command) {
             assertEquals("Message A 5 C", command.getMessage());
             assertNull(command.getCause());
-            assertContains(command.getSources().toString(),
+            assertContains(
+                command.getSources().toString(),
                 ElementsTest.class.getName(),
                 getDeclaringSourcePart(ElementsTest.class));
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
-        }
-    );
+        });
   }
 
   public void testAddThrowableErrorCommand() {
@@ -302,12 +301,14 @@ public class ElementsTest extends TestCase {
   }
 
   public void testBindKeysNoAnnotations() {
-    FailingElementVisitor keyChecker = new FailingElementVisitor() {
-      @Override public <T> Void visit(Binding<T> command) {
-        assertEquals(Key.get(String.class), command.getKey());
-        return null;
-      }
-    };
+    FailingElementVisitor keyChecker =
+        new FailingElementVisitor() {
+          @Override
+          public <T> Void visit(Binding<T> command) {
+            assertEquals(Key.get(String.class), command.getKey());
+            return null;
+          }
+        };
 
     checkModule(
         new AbstractModule() {
@@ -324,12 +325,14 @@ public class ElementsTest extends TestCase {
   }
 
   public void testBindKeysWithAnnotationType() {
-    FailingElementVisitor annotationChecker = new FailingElementVisitor() {
-      @Override public <T> Void visit(Binding<T> command) {
-        assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
-        return null;
-      }
-    };
+    FailingElementVisitor annotationChecker =
+        new FailingElementVisitor() {
+          @Override
+          public <T> Void visit(Binding<T> command) {
+            assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
+            return null;
+          }
+        };
 
     checkModule(
         new AbstractModule() {
@@ -346,13 +349,14 @@ public class ElementsTest extends TestCase {
   }
 
   public void testBindKeysWithAnnotationInstance() {
-    FailingElementVisitor annotationChecker = new FailingElementVisitor() {
-      @Override public <T> Void visit(Binding<T> command) {
-        assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
-        return null;
-      }
-    };
-
+    FailingElementVisitor annotationChecker =
+        new FailingElementVisitor() {
+          @Override
+          public <T> Void visit(Binding<T> command) {
+            assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
+            return null;
+          }
+        };
 
     checkModule(
         new AbstractModule() {
@@ -374,7 +378,7 @@ public class ElementsTest extends TestCase {
             return "A";
           }
         };
-    
+
     final javax.inject.Provider<Integer> intJavaxProvider =
         new javax.inject.Provider<Integer>() {
           @Override
@@ -382,7 +386,7 @@ public class ElementsTest extends TestCase {
             return 42;
           }
         };
-    
+
     final javax.inject.Provider<Double> doubleJavaxProvider =
         new javax.inject.Provider<Double>() {
           @javax.inject.Inject String string;
@@ -780,7 +784,7 @@ public class ElementsTest extends TestCase {
             throw new UnsupportedOperationException();
           }
         };
-    
+
     checkModule(
         new AbstractModule() {
           @Override
@@ -868,12 +872,12 @@ public class ElementsTest extends TestCase {
           }
         });
   }
-  
+
   public void testElementInitialization() {
-    final AtomicReference<Provider<String>> providerFromBinder
-        = new AtomicReference<Provider<String>>();
-    final AtomicReference<MembersInjector<String>> membersInjectorFromBinder
-        = new AtomicReference<MembersInjector<String>>();
+    final AtomicReference<Provider<String>> providerFromBinder =
+        new AtomicReference<Provider<String>>();
+    final AtomicReference<MembersInjector<String>> membersInjectorFromBinder =
+        new AtomicReference<MembersInjector<String>>();
 
     final AtomicReference<String> lastInjected = new AtomicReference<String>();
     final MembersInjector<String> stringInjector =
@@ -1345,9 +1349,7 @@ public class ElementsTest extends TestCase {
     assertEquals(1, aConfigureCount.get());
   }
 
-  /**
-   * Ensures the module performs the commands consistent with {@code visitors}.
-   */
+  /** Ensures the module performs the commands consistent with {@code visitors}. */
   protected void checkModule(Module module, ElementVisitor<?>... visitors) {
     List<Element> elements = Elements.getElements(module);
     assertEquals(elements.size(), visitors.length);
@@ -1359,13 +1361,13 @@ public class ElementsTest extends TestCase {
       ElementVisitor<?> visitor = visitors[i];
       Element element = elements.get(i);
       if (!(element instanceof Message)) {
-          ElementSource source = (ElementSource) element.getSource();
-          assertFalse(source.getModuleClassNames().isEmpty());
-          if (isIncludeStackTraceComplete()) {
-            assertTrue(source.getStackTrace().length > 0);
-          } else {
-            assertEquals(0, source.getStackTrace().length);
-          }
+        ElementSource source = (ElementSource) element.getSource();
+        assertFalse(source.getModuleClassNames().isEmpty());
+        if (isIncludeStackTraceComplete()) {
+          assertTrue(source.getStackTrace().length > 0);
+        } else {
+          assertEquals(0, source.getStackTrace().length);
+        }
       }
       if (!(visitor instanceof ExternalFailureVisitor)) {
         assertContains(element.getSource().toString(), getDeclaringSourcePart(ElementsTest.class));
@@ -1395,11 +1397,14 @@ public class ElementsTest extends TestCase {
   abstract static class ExternalFailureVisitor extends FailingElementVisitor {}
 
   @Retention(RUNTIME)
-  @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
   @BindingAnnotation
-  public @interface SampleAnnotation { }
+  public @interface SampleAnnotation {}
 
-  public enum CoinSide { HEADS, TAILS }
+  public enum CoinSide {
+    HEADS,
+    TAILS
+  }
 
   static class A<T> {
     @Inject Stage stage;
@@ -1407,11 +1412,16 @@ public class ElementsTest extends TestCase {
 
   static class B<T> {
     @Inject Stage stage;
+
     B(T t) {}
   }
 
   static class C {
-    @Inject @Named("foo") @SampleAnnotation String a;
+    @Inject
+    @Named("foo")
+    @SampleAnnotation
+    String a;
+
     C(@Named("bar") @SampleAnnotation Integer b) {}
   }
 }

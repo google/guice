@@ -41,17 +41,24 @@ public class ModuleTest extends TestCase {
     public void configure(Binder binder) {
       binder.bind(W.class);
     }
-    @Override public boolean equals(Object obj) {
+
+    @Override
+    public boolean equals(Object obj) {
       return obj.getClass() == D.class; // we're all equal in the eyes of guice
     }
-    @Override public int hashCode() {
+
+    @Override
+    public int hashCode() {
       return D.class.hashCode();
     }
   }
 
   static class X {}
+
   static class Y {}
+
   static class Z {}
+
   static class W {}
 
   public void testDiamond() throws Exception {

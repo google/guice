@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,14 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.Module;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates methods of a {@link Module} to add items to a {@link MapBinder}.
- * The method's return type, binding annotation and additional key annotation determines
- * what Map this will contribute to. For example,
+ * Annotates methods of a {@link Module} to add items to a {@link MapBinder}. The method's return
+ * type, binding annotation and additional key annotation determines what Map this will contribute
+ * to. For example,
  *
  * <pre>
  * {@literal @}ProvidesIntoMap
@@ -42,12 +41,12 @@ import java.lang.annotation.Target;
  * Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
  * </pre>
  *
- * will add two items to the {@code @Named("urls") Map<String, Plugin>} map. The key 'Foo'
- * will map to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method.
- * The values are bound as providers and will be evaluated at injection time.
+ * will add two items to the {@code @Named("urls") Map<String, Plugin>} map. The key 'Foo' will map
+ * to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. The values
+ * are bound as providers and will be evaluated at injection time.
  *
- * <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive
- * types and annotation instances are supported as keys.
+ * <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive types
+ * and annotation instances are supported as keys.
  *
  * @author sameb@google.com (Sam Berlin)
  * @since 4.0
@@ -55,5 +54,4 @@ import java.lang.annotation.Target;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-public @interface ProvidesIntoMap {
-}
+public @interface ProvidesIntoMap {}

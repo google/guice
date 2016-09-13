@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ package com.google.inject.servlet;
 import javax.servlet.http.HttpServlet;
 
 /**
- * A binding to a single instance of a servlet. 
+ * A binding to a single instance of a servlet.
  *
  * @author sameb@google.com
  * @since 3.0
@@ -28,5 +28,4 @@ public interface InstanceServletBinding extends ServletModuleBinding {
 
   /** Returns the servlet instance that will be used. */
   HttpServlet getServletInstance();
-
 }

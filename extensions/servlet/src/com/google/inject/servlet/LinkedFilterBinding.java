@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,10 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Key;
-
 import javax.servlet.Filter;
 
 /**
- * A linked binding to a filter. 
+ * A linked binding to a filter.
  *
  * @author sameb@google.com
  * @since 3.0
@@ -30,5 +29,4 @@ public interface LinkedFilterBinding extends ServletModuleBinding {
 
   /** Returns the key used to lookup the filter instance. */
   Key<? extends Filter> getLinkedKey();
-
 }

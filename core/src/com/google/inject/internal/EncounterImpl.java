@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,13 +30,10 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 final class EncounterImpl<T> implements TypeEncounter<T> {
 
   private final Errors errors;
@@ -59,9 +56,7 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
 
   /*if[AOP]*/
   ImmutableList<MethodAspect> getAspects() {
-    return aspects == null
-        ? ImmutableList.<MethodAspect>of()
-        : ImmutableList.copyOf(aspects);
+    return aspects == null ? ImmutableList.<MethodAspect>of() : ImmutableList.copyOf(aspects);
   }
 
   @Override

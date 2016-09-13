@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,14 +22,12 @@ import com.google.inject.Scopes;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
-
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -70,17 +68,13 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
   @Override
   public <B, V> V acceptExtensionVisitor(
       BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
-    if(visitor instanceof ServletModuleTargetVisitor) {
-      if(filterInstance != null) {
-        return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
-            new InstanceFilterBindingImpl(initParams,
-                filterInstance,
-                patternMatcher));
+    if (visitor instanceof ServletModuleTargetVisitor) {
+      if (filterInstance != null) {
+        return ((ServletModuleTargetVisitor<B, V>) visitor)
+            .visit(new InstanceFilterBindingImpl(initParams, filterInstance, patternMatcher));
       } else {
-        return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
-            new LinkedFilterBindingImpl(initParams,
-                filterKey,
-                patternMatcher));
+        return ((ServletModuleTargetVisitor<B, V>) visitor)
+            .visit(new LinkedFilterBindingImpl(initParams, filterKey, patternMatcher));
       }
     } else {
       return visitor.visit(binding);
@@ -91,13 +85,16 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     return uri != null && patternMatcher.matches(uri);
   }
 
-  public void init(final ServletContext servletContext, Injector injector,
-      Set<Filter> initializedSoFar) throws ServletException {
+  public void init(
+      final ServletContext servletContext, Injector injector, Set<Filter> initializedSoFar)
+      throws ServletException {
 
     // This absolutely must be a singleton, and so is only initialized once.
     if (!Scopes.isSingleton(injector.getBinding(filterKey))) {
-      throw new ServletException("Filters must be bound as singletons. "
-        + filterKey + " was not bound in singleton scope.");
+      throw new ServletException(
+          "Filters must be bound as singletons. "
+              + filterKey
+              + " was not bound in singleton scope.");
     }
 
     Filter filter = injector.getInstance(filterKey);

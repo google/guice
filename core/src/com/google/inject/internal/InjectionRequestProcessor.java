@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.Stage;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
-
 import java.util.List;
 import java.util.Set;
 
@@ -44,12 +43,14 @@ final class InjectionRequestProcessor extends AbstractProcessor {
     this.initializer = initializer;
   }
 
-  @Override public Boolean visit(StaticInjectionRequest request) {
+  @Override
+  public Boolean visit(StaticInjectionRequest request) {
     staticInjections.add(new StaticInjection(injector, request));
     return true;
   }
 
-  @Override public Boolean visit(InjectionRequest<?> request) {
+  @Override
+  public Boolean visit(InjectionRequest<?> request) {
     Set<InjectionPoint> injectionPoints;
     try {
       injectionPoints = request.getInjectionPoints();
@@ -103,12 +104,12 @@ final class InjectionRequestProcessor extends AbstractProcessor {
         injectionPoints = e.getPartialValue();
       }
       if (injectionPoints != null) {
-        memberInjectors = injector.membersInjectorStore.getInjectors(
-            injectionPoints, errorsForMember);
+        memberInjectors =
+            injector.membersInjectorStore.getInjectors(injectionPoints, errorsForMember);
       } else {
         memberInjectors = ImmutableList.of();
       }
-      
+
       errors.merge(errorsForMember);
     }
 

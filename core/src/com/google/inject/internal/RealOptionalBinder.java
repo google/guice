@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,6 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.internal.InternalProviderInstanceBindingImpl.InitializationTiming;
 import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.multibindings.OptionalBinderBinding;
@@ -54,8 +53,8 @@ import java.util.Set;
 import javax.inject.Qualifier;
 
 /**
- * The actual OptionalBinder plays several roles.  It implements Module to hide that
- * fact from the public API, and installs the various bindings that are exposed to the user.
+ * The actual OptionalBinder plays several roles. It implements Module to hide that fact from the
+ * public API, and installs the various bindings that are exposed to the user.
  */
 public final class RealOptionalBinder<T> implements Module {
   public static <T> RealOptionalBinder<T> newRealOptionalBinder(Binder binder, Key<T> type) {
@@ -69,6 +68,7 @@ public final class RealOptionalBinder<T> implements Module {
   private static final Class<?> JAVA_OPTIONAL_CLASS;
   private static final Object JAVA_OPTIONAL_EMPTY;
   private static final Method JAVA_OPTIONAL_OF_METHOD;
+
   static {
     Class<?> optional = null;
     Object emptyObject = null;
@@ -92,8 +92,8 @@ public final class RealOptionalBinder<T> implements Module {
   }
 
   /**
-   * Returns java.util.Optional.empty() if the parameter is null, calls
-   * {@link #invokeJavaOptionalOf} otherwise.
+   * Returns java.util.Optional.empty() if the parameter is null, calls {@link
+   * #invokeJavaOptionalOf} otherwise.
    */
   private static Object invokeJavaOptionalOfNullable(Object o) {
     if (o == null) {
@@ -116,14 +116,12 @@ public final class RealOptionalBinder<T> implements Module {
   }
 
   @SuppressWarnings("unchecked")
-  static <T> TypeLiteral<Optional<T>> optionalOf(
-      TypeLiteral<T> type) {
-    return (TypeLiteral<Optional<T>>) TypeLiteral.get(
-        Types.newParameterizedType(Optional.class,  type.getType()));
+  static <T> TypeLiteral<Optional<T>> optionalOf(TypeLiteral<T> type) {
+    return (TypeLiteral<Optional<T>>)
+        TypeLiteral.get(Types.newParameterizedType(Optional.class, type.getType()));
   }
 
-  static <T> TypeLiteral<?> javaOptionalOf(
-      TypeLiteral<T> type) {
+  static <T> TypeLiteral<?> javaOptionalOf(TypeLiteral<T> type) {
     checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
     return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS, type.getType()));
   }
@@ -131,28 +129,33 @@ public final class RealOptionalBinder<T> implements Module {
   @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Optional<javax.inject.Provider<T>>> optionalOfJavaxProvider(
       TypeLiteral<T> type) {
-    return (TypeLiteral<Optional<javax.inject.Provider<T>>>) TypeLiteral.get(
-        Types.newParameterizedType(Optional.class,
-            newParameterizedType(javax.inject.Provider.class, type.getType())));
+    return (TypeLiteral<Optional<javax.inject.Provider<T>>>)
+        TypeLiteral.get(
+            Types.newParameterizedType(
+                Optional.class, newParameterizedType(javax.inject.Provider.class, type.getType())));
   }
 
-  static <T> TypeLiteral<?> javaOptionalOfJavaxProvider(
-      TypeLiteral<T> type) {
+  static <T> TypeLiteral<?> javaOptionalOfJavaxProvider(TypeLiteral<T> type) {
     checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
-    return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS,
-        newParameterizedType(javax.inject.Provider.class, type.getType())));
+    return TypeLiteral.get(
+        Types.newParameterizedType(
+            JAVA_OPTIONAL_CLASS,
+            newParameterizedType(javax.inject.Provider.class, type.getType())));
   }
 
   @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Optional<Provider<T>>> optionalOfProvider(TypeLiteral<T> type) {
-    return (TypeLiteral<Optional<Provider<T>>>) TypeLiteral.get(Types.newParameterizedType(
-        Optional.class, newParameterizedType(Provider.class, type.getType())));
+    return (TypeLiteral<Optional<Provider<T>>>)
+        TypeLiteral.get(
+            Types.newParameterizedType(
+                Optional.class, newParameterizedType(Provider.class, type.getType())));
   }
 
   static <T> TypeLiteral<?> javaOptionalOfProvider(TypeLiteral<T> type) {
     checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
-    return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS,
-        newParameterizedType(Provider.class, type.getType())));
+    return TypeLiteral.get(
+        Types.newParameterizedType(
+            JAVA_OPTIONAL_CLASS, newParameterizedType(Provider.class, type.getType())));
   }
 
   @SuppressWarnings("unchecked")
@@ -161,8 +164,11 @@ public final class RealOptionalBinder<T> implements Module {
     return (Key<Provider<T>>) key.ofType(providerT);
   }
 
-  enum Source { DEFAULT, ACTUAL }
-  
+  enum Source {
+    DEFAULT,
+    ACTUAL
+  }
+
   @Retention(RUNTIME)
   @Qualifier
   @interface Default {
@@ -188,13 +194,14 @@ public final class RealOptionalBinder<T> implements Module {
    * bindings.
    */
   private void addDirectTypeBinding(Binder binder) {
-    binder.bind(bindingSelection.getDirectKey())
+    binder
+        .bind(bindingSelection.getDirectKey())
         .toProvider(new RealDirectTypeProvider<T>(bindingSelection));
   }
 
   /**
    * Returns the key to use for the default binding.
-   * 
+   *
    * <p>As a side effect this installs support for the 'direct type', so a binding for {@code T}
    * will be made available.
    */
@@ -210,7 +217,7 @@ public final class RealOptionalBinder<T> implements Module {
 
   /**
    * Returns the key to use for the actual binding, overrides the default if set.
-   * 
+   *
    * <p>As a side effect this installs support for the 'direct type', so a binding for {@code T}
    * will be made available.
    */
@@ -224,7 +231,8 @@ public final class RealOptionalBinder<T> implements Module {
     return binder.bind(getKeyForActualBinding());
   }
 
-  @Override public void configure(Binder binder) {
+  @Override
+  public void configure(Binder binder) {
     bindingSelection.checkNotInitialized();
     Key<T> key = bindingSelection.getDirectKey();
     // Every OptionalBinder get's the following types bound
@@ -239,7 +247,8 @@ public final class RealOptionalBinder<T> implements Module {
     // * java.util.Optional<T>
     InternalProviderInstanceBindingImpl.Factory<Optional<Provider<T>>> optionalProviderFactory =
         new RealOptionalProviderProvider<T>(bindingSelection);
-    binder.bind(key.ofType(optionalOfProvider(key.getTypeLiteral())))
+    binder
+        .bind(key.ofType(optionalOfProvider(key.getTypeLiteral())))
         .toProvider(optionalProviderFactory);
 
     // Provider is assignable to javax.inject.Provider and the provider that the factory contains
@@ -248,11 +257,13 @@ public final class RealOptionalBinder<T> implements Module {
     InternalProviderInstanceBindingImpl.Factory<Optional<javax.inject.Provider<T>>>
         optionalJavaxProviderFactory =
             (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
-    binder.bind(key.ofType(optionalOfJavaxProvider(key.getTypeLiteral())))
+    binder
+        .bind(key.ofType(optionalOfJavaxProvider(key.getTypeLiteral())))
         .toProvider(optionalJavaxProviderFactory);
 
     Key<Optional<T>> optionalKey = key.ofType(optionalOf(key.getTypeLiteral()));
-    binder.bind(optionalKey)
+    binder
+        .bind(optionalKey)
         .toProvider(new RealOptionalKeyProvider<T>(bindingSelection, optionalKey));
 
     // Bind the java-8 types if we know them.
@@ -266,22 +277,24 @@ public final class RealOptionalBinder<T> implements Module {
       TypeLiteral<?> typeLiteral = key.getTypeLiteral();
       InternalProviderInstanceBindingImpl.Factory<Object> javaOptionalProviderFactory =
           new JavaOptionalProviderProvider(bindingSelection);
-      binder.bind(key.ofType(javaOptionalOfProvider(typeLiteral)))
+      binder
+          .bind(key.ofType(javaOptionalOfProvider(typeLiteral)))
           .toProvider((Provider) javaOptionalProviderFactory);
       // Provider is assignable to javax.inject.Provider and the provider that the factory contains
       // cannot be modified so we can use some rawtypes hackery to share the same implementation.
-      binder.bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
+      binder
+          .bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
           .toProvider((Provider) javaOptionalProviderFactory);
       Key<?> javaOptionalKey = key.ofType(javaOptionalOf(typeLiteral));
-      binder.bind(javaOptionalKey)
+      binder
+          .bind(javaOptionalKey)
           .toProvider(new JavaOptionalProvider(bindingSelection, javaOptionalKey));
     }
   }
 
   /** Provides the binding for java.util.Optional<T>. */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static final class JavaOptionalProvider
-      extends RealOptionalBinderProviderWithDependencies
+  private static final class JavaOptionalProvider extends RealOptionalBinderProviderWithDependencies
       implements ProviderWithExtensionVisitor, OptionalBinderBinding {
 
     private final Key<?> optionalKey;
@@ -294,7 +307,8 @@ public final class RealOptionalBinder<T> implements Module {
       this.optionalKey = optionalKey;
     }
 
-    @Override void doInitialize() {
+    @Override
+    void doInitialize() {
       if (bindingSelection.getBinding() != null) {
         target = bindingSelection.getBinding().getInternalFactory();
         targetDependency = bindingSelection.getDependency();
@@ -321,13 +335,15 @@ public final class RealOptionalBinder<T> implements Module {
       return invokeJavaOptionalOfNullable(result);
     }
 
-    @Override public Set<Dependency<?>> getDependencies() {
+    @Override
+    public Set<Dependency<?>> getDependencies() {
       return bindingSelection.dependencies;
     }
 
     @SuppressWarnings("unchecked")
-    @Override public Object acceptExtensionVisitor(BindingTargetVisitor visitor,
-        ProviderInstanceBinding binding) {
+    @Override
+    public Object acceptExtensionVisitor(
+        BindingTargetVisitor visitor, ProviderInstanceBinding binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
         return ((MultibindingsTargetVisitor) visitor).visit(this);
       } else {
@@ -335,19 +351,23 @@ public final class RealOptionalBinder<T> implements Module {
       }
     }
 
-    @Override public boolean containsElement(Element element) {
+    @Override
+    public boolean containsElement(Element element) {
       return bindingSelection.containsElement(element);
     }
 
-    @Override public Binding<?> getActualBinding() {
+    @Override
+    public Binding<?> getActualBinding() {
       return bindingSelection.getActualBinding();
     }
 
-    @Override public Binding<?> getDefaultBinding() {
+    @Override
+    public Binding<?> getDefaultBinding() {
       return bindingSelection.getDefaultBinding();
     }
 
-    @Override public Key getKey() {
+    @Override
+    public Key getKey() {
       return optionalKey;
     }
   }
@@ -362,7 +382,8 @@ public final class RealOptionalBinder<T> implements Module {
       super(bindingSelection);
     }
 
-    @Override void doInitialize() {
+    @Override
+    void doInitialize() {
       if (bindingSelection.getBinding() == null) {
         value = JAVA_OPTIONAL_EMPTY;
       } else {
@@ -370,12 +391,13 @@ public final class RealOptionalBinder<T> implements Module {
       }
     }
 
-    @Override protected Object doProvision(
-        Errors errors, InternalContext context, Dependency dependency) {
+    @Override
+    protected Object doProvision(Errors errors, InternalContext context, Dependency dependency) {
       return value;
     }
 
-    @Override public Set<Dependency<?>> getDependencies() {
+    @Override
+    public Set<Dependency<?>> getDependencies() {
       return bindingSelection.providerDependencies();
     }
   }
@@ -401,8 +423,9 @@ public final class RealOptionalBinder<T> implements Module {
       this.targetFactory = targetBinding.getInternalFactory();
     }
 
-    @Override protected T doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) throws ErrorsException {
+    @Override
+    protected T doProvision(Errors errors, InternalContext context, Dependency<?> dependency)
+        throws ErrorsException {
       // This is what linked bindings do (see FactoryProxy), and we are pretty similar.
       context.pushState(targetKey, targetSource);
       try {
@@ -412,7 +435,8 @@ public final class RealOptionalBinder<T> implements Module {
       }
     }
 
-    @Override public Set<Dependency<?>> getDependencies() {
+    @Override
+    public Set<Dependency<?>> getDependencies() {
       return bindingSelection.dependencies;
     }
   }
@@ -426,7 +450,8 @@ public final class RealOptionalBinder<T> implements Module {
       super(bindingSelection);
     }
 
-    @Override void doInitialize() {
+    @Override
+    void doInitialize() {
       if (bindingSelection.getBinding() == null) {
         value = Optional.absent();
       } else {
@@ -434,12 +459,14 @@ public final class RealOptionalBinder<T> implements Module {
       }
     }
 
-    @Override protected Optional<Provider<T>> doProvision(
+    @Override
+    protected Optional<Provider<T>> doProvision(
         Errors errors, InternalContext context, Dependency<?> dependency) {
       return value;
     }
 
-    @Override public Set<Dependency<?>> getDependencies() {
+    @Override
+    public Set<Dependency<?>> getDependencies() {
       return bindingSelection.providerDependencies();
     }
   }
@@ -447,8 +474,7 @@ public final class RealOptionalBinder<T> implements Module {
   /** Provides the binding for Optional<T>. */
   private static final class RealOptionalKeyProvider<T>
       extends RealOptionalBinderProviderWithDependencies<T, Optional<T>>
-      implements ProviderWithExtensionVisitor<Optional<T>>,
-          OptionalBinderBinding<Optional<T>> {
+      implements ProviderWithExtensionVisitor<Optional<T>>, OptionalBinderBinding<Optional<T>> {
 
     private final Key<Optional<T>> optionalKey;
 
@@ -462,14 +488,16 @@ public final class RealOptionalBinder<T> implements Module {
       this.optionalKey = optionalKey;
     }
 
-    @Override void doInitialize() {
+    @Override
+    void doInitialize() {
       if (bindingSelection.getBinding() != null) {
         delegate = bindingSelection.getBinding().getInternalFactory();
         targetDependency = bindingSelection.getDependency();
       }
     }
 
-    @Override protected Optional<T> doProvision(
+    @Override
+    protected Optional<T> doProvision(
         Errors errors, InternalContext context, Dependency<?> currentDependency)
         throws ErrorsException {
       InternalFactory<? extends T> local = delegate;
@@ -491,14 +519,15 @@ public final class RealOptionalBinder<T> implements Module {
       return Optional.fromNullable(result);
     }
 
-    @Override public Set<Dependency<?>> getDependencies() {
+    @Override
+    public Set<Dependency<?>> getDependencies() {
       return bindingSelection.dependencies();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <B, R> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
-        ProviderInstanceBinding<? extends B> binding) {
+    public <B, R> R acceptExtensionVisitor(
+        BindingTargetVisitor<B, R> visitor, ProviderInstanceBinding<? extends B> binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
         return ((MultibindingsTargetVisitor<Optional<T>, R>) visitor).visit(this);
       } else {
@@ -506,19 +535,23 @@ public final class RealOptionalBinder<T> implements Module {
       }
     }
 
-    @Override public Key<Optional<T>> getKey() {
+    @Override
+    public Key<Optional<T>> getKey() {
       return optionalKey;
     }
 
-    @Override public Binding<?> getActualBinding() {
+    @Override
+    public Binding<?> getActualBinding() {
       return bindingSelection.getActualBinding();
     }
 
-    @Override public Binding<?> getDefaultBinding() {
+    @Override
+    public Binding<?> getDefaultBinding() {
       return bindingSelection.getDefaultBinding();
     }
 
-    @Override public boolean containsElement(Element element) {
+    @Override
+    public boolean containsElement(Element element) {
       return bindingSelection.containsElement(element);
     }
   }
@@ -587,8 +620,7 @@ public final class RealOptionalBinder<T> implements Module {
         actualBinding = userBinding;
       }
       if (binding != null) {
-        dependencies =
-            ImmutableSet.<Dependency<?>>of(Dependency.get(binding.getKey()));
+        dependencies = ImmutableSet.<Dependency<?>>of(Dependency.get(binding.getKey()));
         providerDependencies =
             ImmutableSet.<Dependency<?>>of(Dependency.get(providerOf(binding.getKey())));
       } else {
@@ -645,12 +677,12 @@ public final class RealOptionalBinder<T> implements Module {
     ImmutableSet<Dependency<?>> dependencies() {
       return dependencies;
     }
-    
-    /** 
+
+    /**
      * Returns the Dependency for the target binding, throws NoSuchElementException if no target
      * exists.
-     * 
-     * <p>Calls to this method should typically be guarded by checking if {@link #getBinding()} 
+     *
+     * <p>Calls to this method should typically be guarded by checking if {@link #getBinding()}
      * returns {@code null}.
      */
     Dependency<?> getDependency() {
@@ -678,27 +710,29 @@ public final class RealOptionalBinder<T> implements Module {
       return false; // cannot match;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
       return o instanceof BindingSelection && ((BindingSelection) o).key.equals(key);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return key.hashCode();
     }
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     return o instanceof RealOptionalBinder
         && ((RealOptionalBinder<?>) o).bindingSelection.equals(bindingSelection);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return bindingSelection.hashCode();
   }
 
-  /**
-   * A base class for ProviderWithDependencies that need equality based on a specific object.
-   */
+  /** A base class for ProviderWithDependencies that need equality based on a specific object. */
   private abstract static class RealOptionalBinderProviderWithDependencies<T, P>
       extends InternalProviderInstanceBindingImpl.Factory<P> {
     protected final BindingSelection<T> bindingSelection;
@@ -711,27 +745,30 @@ public final class RealOptionalBinder<T> implements Module {
       this.bindingSelection = bindingSelection;
     }
 
-    @Override final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    @Override
+    final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
       bindingSelection.initialize(injector);
       doInitialize();
     }
 
     /**
-     * Initialize the factory.  BindingSelection is guaranteed to be initialized at this point and
+     * Initialize the factory. BindingSelection is guaranteed to be initialized at this point and
      * this will be called prior to any provisioning.
      */
     abstract void doInitialize();
 
-    @Override public boolean equals(Object obj) {
-      return obj != null && this.getClass() == obj.getClass()
+    @Override
+    public boolean equals(Object obj) {
+      return obj != null
+          && this.getClass() == obj.getClass()
           && bindingSelection.equals(
               ((RealOptionalBinderProviderWithDependencies<?, ?>) obj).bindingSelection);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return bindingSelection.hashCode();
     }
-
   }
 
   static class DefaultImpl extends BaseAnnotation implements Default {
@@ -760,14 +797,16 @@ public final class RealOptionalBinder<T> implements Module {
       return this.value;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       // This is specified in java.lang.Annotation.
       return (127 * "value".hashCode()) ^ value.hashCode();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
       // We check against each annotation type instead of BaseAnnotation
-      // so that we can compare against generated annotation implementations. 
+      // so that we can compare against generated annotation implementations.
       if (o instanceof Actual && clazz == Actual.class) {
         Actual other = (Actual) o;
         return value.equals(other.value());
@@ -778,11 +817,13 @@ public final class RealOptionalBinder<T> implements Module {
       return false;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "@" + clazz.getName() + (value.isEmpty() ? "" : "(value=" + value + ")");
     }
 
-    @Override public Class<? extends Annotation> annotationType() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
       return clazz;
     }
 

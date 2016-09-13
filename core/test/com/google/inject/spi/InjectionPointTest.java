@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,16 +42,16 @@ import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class InjectionPointTest extends TestCase {
 
   public @Inject @Named("a") String foo;
+
   public @Inject void bar(@Named("b") String param) {}
 
   public static class Constructable {
-    @Inject public Constructable(@Named("c") String param) {}
+    @Inject
+    public Constructable(@Named("c") String param) {}
   }
 
   public void testFieldInjectionPoint() throws NoSuchFieldException, IOException, ErrorsException {
@@ -66,14 +66,18 @@ public class InjectionPointTest extends TestCase {
     assertNotSerializable(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]@"
-        + getClass().getName() + ".foo", dependency.toString());
+    assertEquals(
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]@"
+            + getClass().getName()
+            + ".foo",
+        dependency.toString());
     assertEquals(fooField, dependency.getInjectionPoint().getMember());
     assertEquals(-1, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("a")), dependency.getKey());
     assertFalse(dependency.isNullable());
     assertNotSerializable(dependency);
-    assertEqualsBothWays(dependency,
+    assertEqualsBothWays(
+        dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, fooField, false).getDependencies()));
   }
 
@@ -89,19 +93,23 @@ public class InjectionPointTest extends TestCase {
     assertNotSerializable(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]@"
-        + getClass().getName() + ".bar()[0]", dependency.toString());
+    assertEquals(
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]@"
+            + getClass().getName()
+            + ".bar()[0]",
+        dependency.toString());
     assertEquals(barMethod, dependency.getInjectionPoint().getMember());
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("b")), dependency.getKey());
     assertFalse(dependency.isNullable());
     assertNotSerializable(dependency);
-    assertEqualsBothWays(dependency,
+    assertEqualsBothWays(
+        dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, barMethod, false).getDependencies()));
   }
 
-  public void testConstructorInjectionPoint() throws NoSuchMethodException, IOException,
-      ErrorsException {
+  public void testConstructorInjectionPoint()
+      throws NoSuchMethodException, IOException, ErrorsException {
     TypeLiteral<?> typeLiteral = TypeLiteral.get(Constructable.class);
 
     Constructor<?> constructor = Constructable.class.getConstructor(String.class);
@@ -113,20 +121,24 @@ public class InjectionPointTest extends TestCase {
     assertNotSerializable(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]@"
-        + Constructable.class.getName() + ".<init>()[0]", dependency.toString());
+    assertEquals(
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]@"
+            + Constructable.class.getName()
+            + ".<init>()[0]",
+        dependency.toString());
     assertEquals(constructor, dependency.getInjectionPoint().getMember());
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("c")), dependency.getKey());
     assertFalse(dependency.isNullable());
     assertNotSerializable(dependency);
-    assertEqualsBothWays(dependency,
-        getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
+    assertEqualsBothWays(
+        dependency, getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
   }
 
   public void testUnattachedDependency() throws IOException {
     Dependency<String> dependency = Dependency.get(Key.get(String.class, named("d")));
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=d)]",
+    assertEquals(
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=d)]",
         dependency.toString());
     assertNull(dependency.getInjectionPoint());
     assertEquals(-1, dependency.getParameterIndex());
@@ -149,7 +161,9 @@ public class InjectionPointTest extends TestCase {
       InjectionPoint.forConstructor(constructor, new TypeLiteral<LinkedHashSet<String>>() {});
       fail("Expected ConfigurationException");
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(), "java.util.LinkedHashSet<java.lang.String>",
+      assertContains(
+          expected.getMessage(),
+          "java.util.LinkedHashSet<java.lang.String>",
           " does not define java.util.HashSet.<init>()",
           "  while locating java.util.LinkedHashSet<java.lang.String>");
     }
@@ -158,7 +172,9 @@ public class InjectionPointTest extends TestCase {
       InjectionPoint.forConstructor((Constructor) constructor, new TypeLiteral<Set<String>>() {});
       fail("Expected ConfigurationException");
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(), "java.util.Set<java.lang.String>",
+      assertContains(
+          expected.getMessage(),
+          "java.util.Set<java.lang.String>",
           " does not define java.util.HashSet.<init>()",
           "  while locating java.util.Set<java.lang.String>");
     }
@@ -174,9 +190,10 @@ public class InjectionPointTest extends TestCase {
     Field instanceField = HasInjections.class.getField("instanceField");
 
     TypeLiteral<HasInjections> type = TypeLiteral.get(HasInjections.class);
-    assertEquals(ImmutableSet.of(
-        new InjectionPoint(type, instanceMethod, false),
-        new InjectionPoint(type, instanceField, false)),
+    assertEquals(
+        ImmutableSet.of(
+            new InjectionPoint(type, instanceMethod, false),
+            new InjectionPoint(type, instanceField, false)),
         InjectionPoint.forInstanceMethodsAndFields(HasInjections.class));
   }
 
@@ -184,27 +201,37 @@ public class InjectionPointTest extends TestCase {
     Method staticMethod = HasInjections.class.getMethod("staticMethod", String.class);
     Field staticField = HasInjections.class.getField("staticField");
 
-    Set<InjectionPoint> injectionPoints = InjectionPoint.forStaticMethodsAndFields(
-        HasInjections.class);
-    assertEquals(ImmutableSet.of(
-        new InjectionPoint(TypeLiteral.get(HasInjections.class), staticMethod, false),
-        new InjectionPoint(TypeLiteral.get(HasInjections.class), staticField, false)),
+    Set<InjectionPoint> injectionPoints =
+        InjectionPoint.forStaticMethodsAndFields(HasInjections.class);
+    assertEquals(
+        ImmutableSet.of(
+            new InjectionPoint(TypeLiteral.get(HasInjections.class), staticMethod, false),
+            new InjectionPoint(TypeLiteral.get(HasInjections.class), staticField, false)),
         injectionPoints);
   }
 
   static class HasInjections {
-    @Inject public static void staticMethod(@Named("a") String a) {}
-    @Inject @Named("c") public static String staticField;
-    @Inject public void instanceMethod(@Named("d") String d) {}
-    @Inject @Named("f") public String instanceField;
+    @Inject
+    public static void staticMethod(@Named("a") String a) {}
+
+    @Inject
+    @Named("c")
+    public static String staticField;
+
+    @Inject
+    public void instanceMethod(@Named("d") String d) {}
+
+    @Inject
+    @Named("f")
+    public String instanceField;
   }
 
   public void testAddForParameterizedInjections() {
     TypeLiteral<?> type = new TypeLiteral<ParameterizedInjections<String>>() {};
 
     InjectionPoint constructor = InjectionPoint.forConstructorOf(type);
-    assertEquals(new Key<Map<String, String>>() {},
-        getOnlyElement(constructor.getDependencies()).getKey());
+    assertEquals(
+        new Key<Map<String, String>>() {}, getOnlyElement(constructor.getDependencies()).getKey());
 
     InjectionPoint field = getOnlyElement(InjectionPoint.forInstanceMethodsAndFields(type));
     assertEquals(new Key<Set<String>>() {}, getOnlyElement(field.getDependencies()).getKey());
@@ -212,15 +239,15 @@ public class InjectionPointTest extends TestCase {
 
   static class ParameterizedInjections<T> {
     @Inject Set<T> setOfTees;
-    @Inject public ParameterizedInjections(Map<T, T> map) {}
+
+    @Inject
+    public ParameterizedInjections(Map<T, T> map) {}
   }
 
   public void testSignature() throws Exception {
-    Signature fooA = new Signature(Foo.class.getDeclaredMethod(
-        "a", String.class, int.class));
+    Signature fooA = new Signature(Foo.class.getDeclaredMethod("a", String.class, int.class));
     Signature fooB = new Signature(Foo.class.getDeclaredMethod("b"));
-    Signature barA = new Signature(Bar.class.getDeclaredMethod(
-        "a", String.class, int.class));
+    Signature barA = new Signature(Bar.class.getDeclaredMethod("a", String.class, int.class));
     Signature barB = new Signature(Bar.class.getDeclaredMethod("b"));
 
     assertEquals(fooA.hashCode(), barA.hashCode());
@@ -231,22 +258,32 @@ public class InjectionPointTest extends TestCase {
 
   static class Foo {
     void a(String s, int i) {}
+
     int b() {
       return 0;
     }
   }
+
   static class Bar {
     public void a(String s, int i) {}
+
     void b() {}
   }
-  
+
   public void testOverrideBehavior() {
     Set<InjectionPoint> points;
 
     points = InjectionPoint.forInstanceMethodsAndFields(Super.class);
     assertEquals(points.toString(), 6, points.size());
-    assertPoints(points, Super.class, "atInject", "gInject", "privateAtAndPublicG",
-        "privateGAndPublicAt", "atFirstThenG", "gFirstThenAt");
+    assertPoints(
+        points,
+        Super.class,
+        "atInject",
+        "gInject",
+        "privateAtAndPublicG",
+        "privateGAndPublicAt",
+        "atFirstThenG",
+        "gFirstThenAt");
 
     points = InjectionPoint.forInstanceMethodsAndFields(Sub.class);
     assertEquals(points.toString(), 7, points.size());
@@ -255,9 +292,14 @@ public class InjectionPointTest extends TestCase {
     assertPoints(points, Super.class, "privateAtAndPublicG", "privateGAndPublicAt", "gInject");
     // Subclass also has the "private" methods, but they do not override
     // the superclass' methods, and it now owns the inject2 methods.
-    assertPoints(points, Sub.class, "privateAtAndPublicG", "privateGAndPublicAt",
-        "atFirstThenG", "gFirstThenAt");
-    
+    assertPoints(
+        points,
+        Sub.class,
+        "privateAtAndPublicG",
+        "privateGAndPublicAt",
+        "atFirstThenG",
+        "gFirstThenAt");
+
     points = InjectionPoint.forInstanceMethodsAndFields(SubSub.class);
     assertEquals(points.toString(), 6, points.size());
     // Superclass still has all the injection points it did before..
@@ -266,39 +308,36 @@ public class InjectionPointTest extends TestCase {
     // javax.inject.Inject and was overrode without an annotation, which means it
     // disappears.  (It was guice @Inject in Super, but it was private there, so it doesn't
     // effect the annotations of the subclasses.)
-    assertPoints(points, Sub.class, "privateAtAndPublicG", "atFirstThenG", "gFirstThenAt");    
+    assertPoints(points, Sub.class, "privateAtAndPublicG", "atFirstThenG", "gFirstThenAt");
   }
-  
+
   /**
-   * This test serves two purposes:
-   *   1) It makes sure that the bridge methods javax generates don't stop
-   *   us from injecting superclass methods in the case of javax.inject.Inject.
-   *   This would happen prior to java8 (where javac didn't copy annotations
-   *   from the superclass into the subclass method when it generated the
-   *   bridge methods).
-   *   
-   *   2) It makes sure that the methods we're going to inject have the correct
-   *   generic types.  Java8 copies the annotations from super to subclasses,
-   *   but it doesn't copy the generic type information.  Guice would naively
-   *   consider the subclass an injectable method and eject the superclass
-   *   from the 'overrideIndex', leaving only a class with improper generic types.
+   * This test serves two purposes: 1) It makes sure that the bridge methods javax generates don't
+   * stop us from injecting superclass methods in the case of javax.inject.Inject. This would happen
+   * prior to java8 (where javac didn't copy annotations from the superclass into the subclass
+   * method when it generated the bridge methods).
+   *
+   * <p>2) It makes sure that the methods we're going to inject have the correct generic types.
+   * Java8 copies the annotations from super to subclasses, but it doesn't copy the generic type
+   * information. Guice would naively consider the subclass an injectable method and eject the
+   * superclass from the 'overrideIndex', leaving only a class with improper generic types.
    */
   public void testSyntheticBridgeMethodsInSubclasses() {
     Set<InjectionPoint> points;
-    
+
     points = InjectionPoint.forInstanceMethodsAndFields(RestrictedSuper.class);
     assertPointDependencies(points, new TypeLiteral<Provider<String>>() {});
     assertEquals(points.toString(), 2, points.size());
     assertPoints(points, RestrictedSuper.class, "jInject", "gInject");
-    
+
     points = InjectionPoint.forInstanceMethodsAndFields(ExposedSub.class);
     assertPointDependencies(points, new TypeLiteral<Provider<String>>() {});
     assertEquals(points.toString(), 2, points.size());
     assertPoints(points, RestrictedSuper.class, "jInject", "gInject");
   }
-  
-  private void assertPoints(Iterable<InjectionPoint> points, Class<?> clazz,
-      String... methodNames) {
+
+  private void assertPoints(
+      Iterable<InjectionPoint> points, Class<?> clazz, String... methodNames) {
     Set<String> methods = new HashSet<String>();
     for (InjectionPoint point : points) {
       if (point.getDeclaringType().getRawType() == clazz) {
@@ -307,10 +346,10 @@ public class InjectionPointTest extends TestCase {
     }
     assertEquals(points.toString(), ImmutableSet.copyOf(methodNames), methods);
   }
-  
+
   /** Asserts that each injection point has the specified dependencies, in the given order. */
-  private void assertPointDependencies(Iterable<InjectionPoint> points,
-      TypeLiteral<?>... literals) {
+  private void assertPointDependencies(
+      Iterable<InjectionPoint> points, TypeLiteral<?>... literals) {
     for (InjectionPoint point : points) {
       assertEquals(literals.length, point.getDependencies().size());
       for (Dependency<?> dep : point.getDependencies()) {
@@ -318,18 +357,27 @@ public class InjectionPointTest extends TestCase {
       }
     }
   }
-  
+
   static class Super {
-    @javax.inject.Inject public void atInject() {}
-    @com.google.inject.Inject public void gInject() {}
+    @javax.inject.Inject
+    public void atInject() {}
 
-    @javax.inject.Inject private void privateAtAndPublicG() {}
-    @com.google.inject.Inject private void privateGAndPublicAt() {}
+    @com.google.inject.Inject
+    public void gInject() {}
 
-    @javax.inject.Inject public void atFirstThenG() {}
-    @com.google.inject.Inject public void gFirstThenAt() {}
+    @javax.inject.Inject
+    private void privateAtAndPublicG() {}
+
+    @com.google.inject.Inject
+    private void privateGAndPublicAt() {}
+
+    @javax.inject.Inject
+    public void atFirstThenG() {}
+
+    @com.google.inject.Inject
+    public void gFirstThenAt() {}
   }
-  
+
   static class Sub extends Super {
     @Override
     @SuppressWarnings("OverridesJavaxInjectableMethod")
@@ -338,24 +386,30 @@ public class InjectionPointTest extends TestCase {
     @Override
     @SuppressWarnings("OverridesGuiceInjectableMethod")
     public void gInject() {}
-    
-    @com.google.inject.Inject public void privateAtAndPublicG() {}
-    @javax.inject.Inject public void privateGAndPublicAt() {}
-    
+
     @com.google.inject.Inject
-    @Override 
-    public void atFirstThenG() {}
-    
+    public void privateAtAndPublicG() {}
+
     @javax.inject.Inject
-    @Override 
+    public void privateGAndPublicAt() {}
+
+    @com.google.inject.Inject
+    @Override
+    public void atFirstThenG() {}
+
+    @javax.inject.Inject
+    @Override
     public void gFirstThenAt() {}
   }
-  
+
   static class SubSub extends Sub {
     @SuppressWarnings("OverridesGuiceInjectableMethod")
-    @Override public void privateAtAndPublicG() {}
+    @Override
+    public void privateAtAndPublicG() {}
+
     @SuppressWarnings("OverridesJavaxInjectableMethod")
-    @Override public void privateGAndPublicAt() {}
+    @Override
+    public void privateGAndPublicAt() {}
 
     @SuppressWarnings("OverridesGuiceInjectableMethod")
     @Override
@@ -365,12 +419,15 @@ public class InjectionPointTest extends TestCase {
     @Override
     public void gFirstThenAt() {}
   }
-  
+
   static class RestrictedSuper {
-    @com.google.inject.Inject public void gInject(Provider<String> p) {}
-    @javax.inject.Inject public void jInject(Provider<String> p) {}
+    @com.google.inject.Inject
+    public void gInject(Provider<String> p) {}
+
+    @javax.inject.Inject
+    public void jInject(Provider<String> p) {}
   }
-  
+
   public static class ExposedSub extends RestrictedSuper {
     // The subclass may generate bridge/synthetic methods to increase the visibility
     // of the superclass methods, since the superclass was package-private but this is public.

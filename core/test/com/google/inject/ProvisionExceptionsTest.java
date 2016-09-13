@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,8 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
+import junit.framework.TestCase;
 
 /**
  * Tests that ProvisionExceptions are readable and clearly indicate to the user what went wrong with
@@ -31,51 +29,58 @@ import java.io.IOException;
  * @author sameb@google.com (Sam Berlin)
  */
 public class ProvisionExceptionsTest extends TestCase {
-  
+
   public void testConstructorRuntimeException() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindConstant().annotatedWith(Names.named("runtime")).to(true);
-        bind(Exploder.class).to(Explosion.class);
-        bind(Tracer.class).to(TracerImpl.class);        
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(Names.named("runtime")).to(true);
+                bind(Exploder.class).to(Explosion.class);
+                bind(Tracer.class).to(TracerImpl.class);
+              }
+            });
     try {
       injector.getInstance(Tracer.class);
       fail();
-    } catch(ProvisionException pe) {
+    } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
-      Asserts.assertContains(pe.getMessage(),
-          "1) Error injecting constructor", "java.lang.IllegalStateException: boom!");
+      Asserts.assertContains(
+          pe.getMessage(),
+          "1) Error injecting constructor",
+          "java.lang.IllegalStateException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
-      assertEquals(IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+      assertEquals(
+          IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
-  
+
   public void testConstructorCheckedException() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bindConstant().annotatedWith(Names.named("runtime")).to(false);
-        bind(Exploder.class).to(Explosion.class);
-        bind(Tracer.class).to(TracerImpl.class);        
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(Names.named("runtime")).to(false);
+                bind(Exploder.class).to(Explosion.class);
+                bind(Tracer.class).to(TracerImpl.class);
+              }
+            });
     try {
       injector.getInstance(Tracer.class);
       fail();
-    } catch(ProvisionException pe) {
+    } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
-      Asserts.assertContains(pe.getMessage(),
-          "1) Error injecting constructor", "java.io.IOException: boom!");
+      Asserts.assertContains(
+          pe.getMessage(), "1) Error injecting constructor", "java.io.IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
       assertEquals(IOException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
-  
+
   public void testCustomProvidersRuntimeException() {
     Injector injector =
         Guice.createInjector(
@@ -96,88 +101,102 @@ public class ProvisionExceptionsTest extends TestCase {
     try {
       injector.getInstance(Tracer.class);
       fail();
-    } catch(ProvisionException pe) {
+    } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
-      Asserts.assertContains(pe.getMessage(),
-          "1) Error in custom provider", "java.lang.IllegalStateException: boom!");
+      Asserts.assertContains(
+          pe.getMessage(), "1) Error in custom provider", "java.lang.IllegalStateException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
-      assertEquals(IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+      assertEquals(
+          IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
-  
+
   public void testProviderMethodRuntimeException() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Tracer.class).to(TracerImpl.class);        
-      }
-      @Provides Exploder exploder() {
-        return Explosion.createRuntime();
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Tracer.class).to(TracerImpl.class);
+              }
+
+              @Provides
+              Exploder exploder() {
+                return Explosion.createRuntime();
+              }
+            });
     try {
       injector.getInstance(Tracer.class);
       fail();
-    } catch(ProvisionException pe) {
+    } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
-      Asserts.assertContains(pe.getMessage(),
-          "1) Error in custom provider", "java.lang.IllegalStateException: boom!");
+      Asserts.assertContains(
+          pe.getMessage(), "1) Error in custom provider", "java.lang.IllegalStateException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
-      assertEquals(IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+      assertEquals(
+          IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
-  
+
   public void testProviderMethodCheckedException() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(Tracer.class).to(TracerImpl.class);        
-      }
-      @Provides Exploder exploder() throws IOException {
-        return Explosion.createChecked();
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Tracer.class).to(TracerImpl.class);
+              }
+
+              @Provides
+              Exploder exploder() throws IOException {
+                return Explosion.createChecked();
+              }
+            });
     try {
       injector.getInstance(Tracer.class);
       fail();
-    } catch(ProvisionException pe) {
+    } catch (ProvisionException pe) {
       pe.printStackTrace();
       // Make sure our initial error message gives the user exception.
-      Asserts.assertContains(pe.getMessage(),
-          "1) Error in custom provider", "java.io.IOException: boom!");
+      Asserts.assertContains(
+          pe.getMessage(), "1) Error in custom provider", "java.io.IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
       assertEquals(IOException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
-  
+
   private static interface Exploder {}
+
   public static class Explosion implements Exploder {
-    @Inject public Explosion(@Named("runtime") boolean runtime) throws IOException {
-      if(runtime) {
+    @Inject
+    public Explosion(@Named("runtime") boolean runtime) throws IOException {
+      if (runtime) {
         throw new IllegalStateException("boom!");
       } else {
         throw new IOException("boom!");
       }
     }
-    
+
     public static Explosion createRuntime() {
       try {
         return new Explosion(true);
-      } catch(IOException iox) {
+      } catch (IOException iox) {
         throw new RuntimeException();
-      }      
+      }
     }
-    
+
     public static Explosion createChecked() throws IOException {
       return new Explosion(false);
     }
   }
+
   private static interface Tracer {}
+
   private static class TracerImpl implements Tracer {
-    @Inject TracerImpl(Exploder explosion) {
-    }
+    @Inject
+    TracerImpl(Exploder explosion) {}
   }
 }

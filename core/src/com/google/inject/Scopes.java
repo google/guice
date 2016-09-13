@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@ import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.internal.SingletonScope;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ExposedBinding;
-
 import java.lang.annotation.Annotation;
 
 /**
@@ -33,9 +32,7 @@ public class Scopes {
 
   private Scopes() {}
 
-  /**
-   * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
-   */
+  /** One instance per {@link Injector}. Also see {@code @}{@link Singleton}. */
   public static final Scope SINGLETON = new SingletonScope();
 
   /**
@@ -107,8 +104,8 @@ public class Scopes {
           binding = injector.getBinding(linkedBinding.getLinkedKey());
           continue;
         }
-      } else if(binding instanceof ExposedBinding) {
-        ExposedBinding<?> exposedBinding = (ExposedBinding)binding;
+      } else if (binding instanceof ExposedBinding) {
+        ExposedBinding<?> exposedBinding = (ExposedBinding) binding;
         Injector injector = exposedBinding.getPrivateElements().getInjector();
         if (injector != null) {
           binding = injector.getBinding(exposedBinding.getKey());
@@ -121,7 +118,6 @@ public class Scopes {
   }
 
   /**
-
    * Returns true if {@code binding} has the given scope. If the binding is a {@link
    * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
    * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
@@ -132,8 +128,8 @@ public class Scopes {
    * @param scopeAnnotation scope annotation class
    * @since 4.0
    */
-  public static boolean isScoped(Binding<?> binding, final Scope scope,
-      final Class<? extends Annotation> scopeAnnotation) {
+  public static boolean isScoped(
+      Binding<?> binding, final Scope scope, final Class<? extends Annotation> scopeAnnotation) {
     do {
       boolean matches =
           binding.acceptScopingVisitor(
@@ -170,8 +166,8 @@ public class Scopes {
           binding = injector.getBinding(linkedBinding.getLinkedKey());
           continue;
         }
-      } else if(binding instanceof ExposedBinding) {
-        ExposedBinding<?> exposedBinding = (ExposedBinding)binding;
+      } else if (binding instanceof ExposedBinding) {
+        ExposedBinding<?> exposedBinding = (ExposedBinding) binding;
         Injector injector = exposedBinding.getPrivateElements().getInjector();
         if (injector != null) {
           binding = injector.getBinding(exposedBinding.getKey());
@@ -184,12 +180,11 @@ public class Scopes {
   }
 
   /**
-   * Returns true if the object is a proxy for a circular dependency,
-   * constructed by Guice because it encountered a circular dependency. Scope
-   * implementations should be careful to <b>not cache circular proxies</b>,
-   * because the proxies are not intended for general purpose use. (They are
-   * designed just to fulfill the immediate injection, not all injections.
-   * Caching them can lead to IllegalArgumentExceptions or ClassCastExceptions.)
+   * Returns true if the object is a proxy for a circular dependency, constructed by Guice because
+   * it encountered a circular dependency. Scope implementations should be careful to <b>not cache
+   * circular proxies</b>, because the proxies are not intended for general purpose use. (They are
+   * designed just to fulfill the immediate injection, not all injections. Caching them can lead to
+   * IllegalArgumentExceptions or ClassCastExceptions.)
    *
    * @since 4.0
    */

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-
 import javax.inject.Provider;
 
 /**
@@ -43,6 +42,7 @@ import javax.inject.Provider;
  */
 public final class MiniGuice {
   private static final Object UNINITIALIZED = new Object();
+
   private MiniGuice() {}
 
   private final Map<Key, Provider<?>> bindings = new HashMap<Key, Provider<?>>();
@@ -50,27 +50,25 @@ public final class MiniGuice {
   private final Set<Key> singletons = new HashSet<Key>();
 
   /**
-   * Creates an injector defined by {@code modules} and immediately uses it to
-   * create an instance of {@code type}. The modules can be of any type, and
-   * must contain {@code @Provides} methods.
+   * Creates an injector defined by {@code modules} and immediately uses it to create an instance of
+   * {@code type}. The modules can be of any type, and must contain {@code @Provides} methods.
    *
    * <p>The following injection features are supported:
+   *
    * <ul>
-   *   <li>Field injection. A class may have any number of field injections, and
-   *       fields may be of any visibility. Static fields will be injected each
-   *       time an instance is injected.
-   *   <li>Constructor injection. A class may have a single {@code
-   *       @Inject}-annotated constructor. Classes that have fields injected
-   *       may omit the {@link @Inject} annotation if they have a public
-   *       no-arguments constructor.
-   *   <li>Injection of {@code @Provides} method parameters.
-   *   <li>{@code @Provides} methods annotated {@code @Singleton}.
-   *   <li>Constructor-injected classes annotated {@code @Singleton}.
-   *   <li>Injection of {@link Provider}s.
-   *   <li>Binding annotations on injected parameters and fields.
-   *   <li>Guice annotations.
-   *   <li>JSR 330 annotations.
-   *   <li>Eager loading of singletons.
+   * <li>Field injection. A class may have any number of field injections, and fields may be of any
+   *     visibility. Static fields will be injected each time an instance is injected.
+   * <li>Constructor injection. A class may have a single {@code @Inject}-annotated constructor.
+   *     Classes that have fields injected may omit the {@link @Inject} annotation if they have a
+   *     public no-arguments constructor.
+   * <li>Injection of {@code @Provides} method parameters.
+   * <li>{@code @Provides} methods annotated {@code @Singleton}.
+   * <li>Constructor-injected classes annotated {@code @Singleton}.
+   * <li>Injection of {@link Provider}s.
+   * <li>Binding annotations on injected parameters and fields.
+   * <li>Guice annotations.
+   * <li>JSR 330 annotations.
+   * <li>Eager loading of singletons.
    * </ul>
    *
    * <p><strong>Note that method injection is not supported.</strong>
@@ -101,8 +99,9 @@ public final class MiniGuice {
               return value;
             }
           };
-      providerBindings.put(new Key(new ProviderType(javax.inject.Provider.class, key.type),
-          key.annotation), providerProvider);
+      providerBindings.put(
+          new Key(new ProviderType(javax.inject.Provider.class, key.type), key.annotation),
+          providerProvider);
     }
     bindings.putAll(providerBindings);
   }
@@ -110,7 +109,7 @@ public final class MiniGuice {
   private void requireKey(Key key, Object requiredBy) {
     if (key.type instanceof ParameterizedType
         && (((ParameterizedType) key.type).getRawType() == Provider.class
-        || ((ParameterizedType) key.type).getRawType() == javax.inject.Provider.class)) {
+            || ((ParameterizedType) key.type).getRawType() == javax.inject.Provider.class)) {
       Type type = ((ParameterizedType) key.type).getActualTypeArguments()[0];
       key = new Key(type, key.annotation);
     }
@@ -150,8 +149,9 @@ public final class MiniGuice {
   }
 
   private void addProviderMethodBinding(Key key, final Object instance, final Method method) {
-    final Key[] parameterKeys = parametersToKeys(
-        method, method.getGenericParameterTypes(), method.getParameterAnnotations());
+    final Key[] parameterKeys =
+        parametersToKeys(
+            method, method.getGenericParameterTypes(), method.getParameterAnnotations());
     method.setAccessible(true);
     final Provider<Object> unscoped =
         new Provider<Object>() {
@@ -225,14 +225,14 @@ public final class MiniGuice {
     }
     if (injectedConstructor == null) {
       if (fieldKeys.length == 0) {
-        throw new IllegalArgumentException("No injectable constructor on "
-            + type + " required by " + requiredBy);
+        throw new IllegalArgumentException(
+            "No injectable constructor on " + type + " required by " + requiredBy);
       }
       try {
         injectedConstructor = type.getConstructor();
       } catch (NoSuchMethodException e) {
-        throw new IllegalArgumentException("No injectable constructor on "
-            + type + " required by " + requiredBy);
+        throw new IllegalArgumentException(
+            "No injectable constructor on " + type + " required by " + requiredBy);
       }
     }
 
@@ -240,8 +240,11 @@ public final class MiniGuice {
      * Create a provider that invokes the constructor and sets its fields.
      */
     final Constructor<?> constructor = injectedConstructor;
-    final Key[] parameterKeys = parametersToKeys(
-        constructor, constructor.getGenericParameterTypes(), constructor.getParameterAnnotations());
+    final Key[] parameterKeys =
+        parametersToKeys(
+            constructor,
+            constructor.getGenericParameterTypes(),
+            constructor.getParameterAnnotations());
     final Provider<Object> unscoped =
         new Provider<Object>() {
           @Override
@@ -336,13 +339,15 @@ public final class MiniGuice {
       this.annotation = annotation;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
       return o instanceof Key
           && ((Key) o).type.equals(type)
           && equal(annotation, ((Key) o).annotation);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       int result = type.hashCode();
       if (annotation != null) {
         result += (37 * annotation.hashCode());
@@ -350,7 +355,8 @@ public final class MiniGuice {
       return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "key[type=" + type + ",annotation=" + annotation + "]";
     }
   }
@@ -381,7 +387,7 @@ public final class MiniGuice {
 
     @Override
     public Type[] getActualTypeArguments() {
-      return new Type[] { typeArgument };
+      return new Type[] {typeArgument};
     }
 
     @Override
@@ -389,7 +395,8 @@ public final class MiniGuice {
       return null;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
       if (o instanceof ParameterizedType) {
         ParameterizedType that = (ParameterizedType) o;
         return Arrays.equals(getActualTypeArguments(), that.getActualTypeArguments())
@@ -398,7 +405,8 @@ public final class MiniGuice {
       return false;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
       return Arrays.hashCode(getActualTypeArguments()) ^ rawType.hashCode();
     }
   }

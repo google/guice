@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,9 +25,7 @@ import com.google.common.base.Objects;
  * @since 4.0 (since 2.0 as an interface)
  */
 public class BindingEdge extends Edge {
-  /**
-   * Classification for what kind of binding this edge represents.
-   */
+  /** Classification for what kind of binding this edge represents. */
   public enum Type {
     /** Binding is to an instance or class of the binding's same type. */
     NORMAL,
@@ -48,7 +46,8 @@ public class BindingEdge extends Edge {
     return type;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (!(obj instanceof BindingEdge)) {
       return false;
     }
@@ -56,15 +55,18 @@ public class BindingEdge extends Edge {
     return super.equals(other) && Objects.equal(type, other.type);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return 31 * super.hashCode() + Objects.hashCode(type);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "BindingEdge{fromId=" + getFromId() + " toId=" + getToId() + " type=" + type + "}";
   }
 
-  @Override public Edge copy(NodeId fromId, NodeId toId) {
+  @Override
+  public Edge copy(NodeId fromId, NodeId toId) {
     return new BindingEdge(fromId, toId, type);
   }
 }

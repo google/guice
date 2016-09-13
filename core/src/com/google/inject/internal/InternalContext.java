@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,15 +21,13 @@ import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
-
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Internal context. Used to coordinate injections and support circular
- * dependencies.
+ * Internal context. Used to coordinate injections and support circular dependencies.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -51,6 +49,7 @@ final class InternalContext {
    * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
    */
   private Object[] dependencyStack = new Object[16];
+
   private int dependencyStackSize = 0;
 
   InternalContext(InjectorOptions options) {
@@ -63,8 +62,8 @@ final class InternalContext {
 
   @SuppressWarnings("unchecked")
   <T> ConstructionContext<T> getConstructionContext(Object key) {
-    ConstructionContext<T> constructionContext
-        = (ConstructionContext<T>) constructionContexts.get(key);
+    ConstructionContext<T> constructionContext =
+        (ConstructionContext<T>) constructionContexts.get(key);
     if (constructionContext == null) {
       constructionContext = new ConstructionContext<T>();
       constructionContexts.put(key, constructionContext);

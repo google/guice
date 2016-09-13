@@ -11,9 +11,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Helper methods to verify the correctness of CheckedProvider interfaces.
- */
+/** Helper methods to verify the correctness of CheckedProvider interfaces. */
 final class ProviderChecker {
 
   private ProviderChecker() {}

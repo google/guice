@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,17 +20,15 @@ import com.google.inject.spi.BindingTargetVisitor;
 
 /**
  * A visitor for the AssistedInject extension.
- * <p>
- * If your {@link BindingTargetVisitor} implements this interface, bindings created by using
+ *
+ * <p>If your {@link BindingTargetVisitor} implements this interface, bindings created by using
  * {@link FactoryModuleBuilder} will be visited through this interface.
  *
  * @since 3.0
  * @author ramakrishna@google.com (Ramakrishna Rajanna)
  */
 public interface AssistedInjectTargetVisitor<T, V> extends BindingTargetVisitor<T, V> {
-  
-  /**
-   * Visits an {@link AssistedInjectBinding} created through {@link FactoryModuleBuilder}.
-   */
+
+  /** Visits an {@link AssistedInjectBinding} created through {@link FactoryModuleBuilder}. */
   V visit(AssistedInjectBinding<? extends T> assistedInjectBinding);
 }

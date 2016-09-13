@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +16,11 @@
 
 package com.google.inject;
 
-
-import junit.framework.TestCase;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 
 public class BindingOrderTest extends TestCase {
 
@@ -40,11 +36,13 @@ public class BindingOrderTest extends TestCase {
   }
 
   public static class BoundFirst {
-    @Inject public BoundFirst(BoundSecond boundSecond) { }
+    @Inject
+    public BoundFirst(BoundSecond boundSecond) {}
   }
 
-  interface BoundSecond { }
-  static class BoundSecondImpl implements BoundSecond { }
+  interface BoundSecond {}
+
+  static class BoundSecondImpl implements BoundSecond {}
 
   public void testBindingOrderAndScopes() {
     Injector injector =
@@ -105,5 +103,5 @@ public class BindingOrderTest extends TestCase {
     @Inject B b;
   }
 
-  static class B { }
+  static class B {}
 }

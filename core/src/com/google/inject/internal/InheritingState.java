@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,25 +31,21 @@ import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
-
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 final class InheritingState implements State {
 
   private final State parent;
 
   // Must be a linked hashmap in order to preserve order of bindings in Modules.
   private final Map<Key<?>, Binding<?>> explicitBindingsMutable = Maps.newLinkedHashMap();
-  private final Map<Key<?>, Binding<?>> explicitBindings
-      = Collections.unmodifiableMap(explicitBindingsMutable);
+  private final Map<Key<?>, Binding<?>> explicitBindings =
+      Collections.unmodifiableMap(explicitBindingsMutable);
   private final Map<Class<? extends Annotation>, ScopeBinding> scopes = Maps.newHashMap();
   private final List<TypeConverterBinding> converters = Lists.newArrayList();
   /*if[AOP]*/
@@ -156,7 +152,7 @@ final class InheritingState implements State {
     result.addAll(typeListenerBindings);
     return result;
   }
-  
+
   @Override
   public void addProvisionListener(ProvisionListenerBinding listenerBinding) {
     provisionListenerBindings.add(listenerBinding);
@@ -197,7 +193,7 @@ final class InheritingState implements State {
   public boolean isBlacklisted(Key<?> key) {
     return blacklistedKeys.contains(key);
   }
-  
+
   @Override
   public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
     return blacklistedKeys.getSources(key);

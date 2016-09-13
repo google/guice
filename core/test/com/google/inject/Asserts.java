@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.inject;
 
 import static com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
@@ -29,9 +28,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.testing.GcFinalization;
-
-import junit.framework.Assert;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,29 +36,33 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import junit.framework.Assert;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class Asserts {
   private Asserts() {}
 
   /**
-   * Returns the String that would appear in an error message for this chain of classes 
-   * as modules.
+   * Returns the String that would appear in an error message for this chain of classes as modules.
    */
   public static String asModuleChain(Class... classes) {
-    return Joiner.on(" -> ").appendTo(new StringBuilder(" (via modules: "),
-        Iterables.transform(ImmutableList.copyOf(classes), new Function<Class, String>() {
-          @Override
-          public String apply(Class input) {
-            return input.getName();
-          }
-        })).append(")").toString();
+    return Joiner.on(" -> ")
+        .appendTo(
+            new StringBuilder(" (via modules: "),
+            Iterables.transform(
+                ImmutableList.copyOf(classes),
+                new Function<Class, String>() {
+                  @Override
+                  public String apply(Class input) {
+                    return input.getName();
+                  }
+                }))
+        .append(")")
+        .toString();
   }
 
   /**
-   * Returns the source file appears in error messages based on {@link 
+   * Returns the source file appears in error messages based on {@link
    * #getIncludeStackTraceOption()} value.
    */
   public static String getDeclaringSourcePart(Class clazz) {
@@ -89,9 +89,8 @@ public class Asserts {
   }
 
   /**
-   * Fails unless {@code expected.equals(actual)}, {@code
-   * actual.equals(expected)} and their hash codes are equal. This is useful
-   * for testing the equals method itself.
+   * Fails unless {@code expected.equals(actual)}, {@code actual.equals(expected)} and their hash
+   * codes are equal. This is useful for testing the equals method itself.
    */
   public static void assertEqualsBothWays(Object expected, Object actual) {
     assertNotNull(expected);
@@ -101,17 +100,14 @@ public class Asserts {
     assertEquals("hashCode", expected.hashCode(), actual.hashCode());
   }
 
-  /**
-   * Fails unless {@code text} includes all {@code substrings}, in order,
-   * no duplicates
-   */
+  /** Fails unless {@code text} includes all {@code substrings}, in order, no duplicates */
   public static void assertContains(String text, String... substrings) {
     assertContains(text, false, substrings);
   }
 
   /**
-   * Fails unless {@code text} includes all {@code substrings}, in order,
-   * and optionally {@code allowDuplicates}.
+   * Fails unless {@code text} includes all {@code substrings}, in order, and optionally {@code
+   * allowDuplicates}.
    */
   public static void assertContains(String text, boolean allowDuplicates, String... substrings) {
     /*if[NO_AOP]
@@ -124,31 +120,29 @@ public class Asserts {
     int startingFrom = 0;
     for (String substring : substrings) {
       int index = text.indexOf(substring, startingFrom);
-      assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"", text, substring),
+      assertTrue(
+          String.format("Expected \"%s\" to contain substring \"%s\"", text, substring),
           index >= startingFrom);
       startingFrom = index + substring.length();
     }
 
-    if (! allowDuplicates) {
+    if (!allowDuplicates) {
       String lastSubstring = substrings[substrings.length - 1];
-      assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
-          text, lastSubstring), text.indexOf(lastSubstring, startingFrom) == -1);
+      assertTrue(
+          String.format(
+              "Expected \"%s\" to contain substring \"%s\" only once),", text, lastSubstring),
+          text.indexOf(lastSubstring, startingFrom) == -1);
     }
   }
 
-  /**
-   * Fails unless {@code object} doesn't equal itself when reserialized.
-   */
-  public static void assertEqualWhenReserialized(Object object)
-      throws IOException {
+  /** Fails unless {@code object} doesn't equal itself when reserialized. */
+  public static void assertEqualWhenReserialized(Object object) throws IOException {
     Object reserialized = reserialize(object);
     assertEquals(object, reserialized);
     assertEquals(object.hashCode(), reserialized.hashCode());
   }
 
-  /**
-   * Fails unless {@code object} has the same toString value when reserialized.
-   */
+  /** Fails unless {@code object} has the same toString value when reserialized. */
   public static void assertSimilarWhenReserialized(Object object) throws IOException {
     Object reserialized = reserialize(object);
     assertEquals(object.toString(), reserialized.toString());

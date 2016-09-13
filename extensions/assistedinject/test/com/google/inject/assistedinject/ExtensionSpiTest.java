@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,13 +35,11 @@ import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 /**
  * Tests for AssistedInject Spi.
@@ -53,9 +51,9 @@ public class ExtensionSpiTest extends TestCase {
   public final void testSpiOnElements() throws Exception {
     AssistedInjectSpiVisitor visitor = new AssistedInjectSpiVisitor();
     Integer count = 0;
-    for(Element element : Elements.getElements(new Module())) {
-      if(element instanceof Binding) {
-        assertEquals(count++, ((Binding<?>)element).acceptTargetVisitor(visitor));
+    for (Element element : Elements.getElements(new Module())) {
+      if (element instanceof Binding) {
+        assertEquals(count++, ((Binding<?>) element).acceptTargetVisitor(visitor));
       }
     }
     validateVisitor(visitor);
@@ -65,7 +63,7 @@ public class ExtensionSpiTest extends TestCase {
     AssistedInjectSpiVisitor visitor = new AssistedInjectSpiVisitor();
     Integer count = 0;
     Injector injector = Guice.createInjector(new Module());
-    for(Binding<?> binding : injector.getBindings().values()) {
+    for (Binding<?> binding : injector.getBindings().values()) {
       assertEquals(count++, binding.acceptTargetVisitor(visitor));
     }
     validateVisitor(visitor);
@@ -74,52 +72,62 @@ public class ExtensionSpiTest extends TestCase {
   private void validateVisitor(AssistedInjectSpiVisitor visitor) throws Exception {
     assertEquals(1, visitor.assistedBindingCount);
     List<AssistedMethod> assistedMethods =
-        Lists.newArrayList(Iterables.getOnlyElement(
-            visitor.assistedInjectBindings).getAssistedMethods());
+        Lists.newArrayList(
+            Iterables.getOnlyElement(visitor.assistedInjectBindings).getAssistedMethods());
     assertEquals(7, assistedMethods.size());
     assertEquals(1, visitor.assistedBindingCount);
     assertEquals(1, visitor.assistedInjectBindings.size());
 
     // Validate for each of the methods in AnimalFactory
-    
+
     Set<String> names = Sets.newHashSet();
     for (AssistedMethod method : assistedMethods) {
       String name = method.getFactoryMethod().getName();
       names.add(name);
-      if (name.equals("createAStrangeCatAsAnimal")) {        
-        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());        
+      if (name.equals("createAStrangeCatAsAnimal")) {
+        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());
       } else if (name.equals("createStrangeCatWithConstructorForOwner")) {
-        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());     
+        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());
       } else if (name.equals("createStrangeCatWithConstructorForAge")) {
-        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());        
+        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());
       } else if (name.equals("createCatWithANonAssistedDependency")) {
-        validateAssistedMethod(method, name, CatWithAName.class,
-            ImmutableList.<Key<?>>of(Key.get(String.class, named("catName2"))));        
+        validateAssistedMethod(
+            method,
+            name,
+            CatWithAName.class,
+            ImmutableList.<Key<?>>of(Key.get(String.class, named("catName2"))));
       } else if (name.equals("createCat")) {
-        validateAssistedMethod(method, name, Cat.class, ImmutableList.<Key<?>>of());        
+        validateAssistedMethod(method, name, Cat.class, ImmutableList.<Key<?>>of());
       } else if (name.equals("createASimpleCatAsAnimal")) {
         validateAssistedMethod(method, name, SimpleCat.class, ImmutableList.<Key<?>>of());
       } else if (name.equals("createCatWithNonAssistedDependencies")) {
-        List<Key<?>> dependencyKeys = ImmutableList.<Key<?>>of(
-            Key.get(String.class, named("catName1")),
-            Key.get(String.class, named("petName")),        
-            Key.get(Integer.class, named("age")));
-        validateAssistedMethod(method, name, ExplodingCat.class, dependencyKeys);        
+        List<Key<?>> dependencyKeys =
+            ImmutableList.<Key<?>>of(
+                Key.get(String.class, named("catName1")),
+                Key.get(String.class, named("petName")),
+                Key.get(Integer.class, named("age")));
+        validateAssistedMethod(method, name, ExplodingCat.class, dependencyKeys);
       } else {
         fail("Invalid method: " + method);
       }
     }
-    assertEquals(names, ImmutableSet.of("createAStrangeCatAsAnimal",
-        "createStrangeCatWithConstructorForOwner",
-        "createStrangeCatWithConstructorForAge",
-        "createCatWithANonAssistedDependency",
-        "createCat",
-        "createASimpleCatAsAnimal",
-        "createCatWithNonAssistedDependencies"));
+    assertEquals(
+        names,
+        ImmutableSet.of(
+            "createAStrangeCatAsAnimal",
+            "createStrangeCatWithConstructorForOwner",
+            "createStrangeCatWithConstructorForAge",
+            "createCatWithANonAssistedDependency",
+            "createCat",
+            "createASimpleCatAsAnimal",
+            "createCatWithNonAssistedDependencies"));
   }
 
-  private void validateAssistedMethod(AssistedMethod assistedMethod, String factoryMethodName,
-                                      Class clazz, List<Key<?>> dependencyKeys){
+  private void validateAssistedMethod(
+      AssistedMethod assistedMethod,
+      String factoryMethodName,
+      Class clazz,
+      List<Key<?>> dependencyKeys) {
     assertEquals(factoryMethodName, assistedMethod.getFactoryMethod().getName());
     assertEquals(clazz, assistedMethod.getImplementationConstructor().getDeclaringClass());
     assertEquals(dependencyKeys.size(), assistedMethod.getDependencies().size());
@@ -129,40 +137,55 @@ public class ExtensionSpiTest extends TestCase {
     assertEquals(clazz, assistedMethod.getImplementationType().getType());
   }
 
-
   interface AnimalFactory {
     Cat createCat(String owner);
+
     CatWithAName createCatWithANonAssistedDependency(String owner);
-    @Named("SimpleCat") Animal createASimpleCatAsAnimal(String owner);
+
+    @Named("SimpleCat")
+    Animal createASimpleCatAsAnimal(String owner);
+
     Animal createAStrangeCatAsAnimal(String owner);
+
     StrangeCat createStrangeCatWithConstructorForOwner(String owner);
+
     StrangeCat createStrangeCatWithConstructorForAge(Integer age);
+
     ExplodingCat createCatWithNonAssistedDependencies(String owner);
   }
 
   interface Animal {}
 
   private static class Cat implements Animal {
-    @Inject Cat(@Assisted String owner) {}
+    @Inject
+    Cat(@Assisted String owner) {}
   }
 
   private static class SimpleCat implements Animal {
-    @Inject SimpleCat(@Assisted String owner) {
-    }
+    @Inject
+    SimpleCat(@Assisted String owner) {}
   }
 
   private static class StrangeCat implements Animal {
-    @AssistedInject StrangeCat(@Assisted String owner) {}
-    @AssistedInject StrangeCat(@Assisted Integer age) {}
+    @AssistedInject
+    StrangeCat(@Assisted String owner) {}
+
+    @AssistedInject
+    StrangeCat(@Assisted Integer age) {}
   }
 
   private static class ExplodingCat implements Animal {
-    @Inject public ExplodingCat(@Named("catName1") String name, @Assisted String owner,
-                                @Named("age") Integer age, @Named("petName") String petName) {}
+    @Inject
+    public ExplodingCat(
+        @Named("catName1") String name,
+        @Assisted String owner,
+        @Named("age") Integer age,
+        @Named("petName") String petName) {}
   }
 
   private static class CatWithAName extends Cat {
-    @Inject CatWithAName(@Assisted String owner, @Named("catName2") String name) {
+    @Inject
+    CatWithAName(@Assisted String owner, @Named("catName2") String name) {
       super(owner);
     }
   }
@@ -174,21 +197,21 @@ public class ExtensionSpiTest extends TestCase {
       bind(String.class).annotatedWith(named("catName2")).toInstance("kitty2");
       bind(String.class).annotatedWith(named("petName")).toInstance("pussy");
       bind(Integer.class).annotatedWith(named("age")).toInstance(12);
-      install(new FactoryModuleBuilder()
-        .implement(Animal.class, StrangeCat.class)
-        .implement(Animal.class, named("SimpleCat"), SimpleCat.class)
-        .build(AnimalFactory.class));
+      install(
+          new FactoryModuleBuilder()
+              .implement(Animal.class, StrangeCat.class)
+              .implement(Animal.class, named("SimpleCat"), SimpleCat.class)
+              .build(AnimalFactory.class));
     }
   }
 
   public static class AssistedInjectSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
       implements AssistedInjectTargetVisitor<Object, Integer> {
 
-    private final Set<Class> allowedClasses = 
-      ImmutableSet.<Class> of(
-        Injector.class, Stage.class, Logger.class,
-        String.class, Integer.class);
-    
+    private final Set<Class> allowedClasses =
+        ImmutableSet.<Class>of(
+            Injector.class, Stage.class, Logger.class, String.class, Integer.class);
+
     private int assistedBindingCount = 0;
     private int currentCount = 0;
     private List<AssistedInjectBinding<?>> assistedInjectBindings = Lists.newArrayList();
@@ -202,7 +225,7 @@ public class ExtensionSpiTest extends TestCase {
 
     @Override
     protected Integer visitOther(Binding<? extends Object> binding) {
-      if(!allowedClasses.contains(binding.getKey().getTypeLiteral().getRawType())) {
+      if (!allowedClasses.contains(binding.getKey().getTypeLiteral().getRawType())) {
         throw new AssertionFailedError("invalid other binding: " + binding);
       }
       return currentCount++;

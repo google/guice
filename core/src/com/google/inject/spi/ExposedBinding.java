@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,9 +27,7 @@ import com.google.inject.Binding;
  */
 public interface ExposedBinding<T> extends Binding<T>, HasDependencies {
 
-  /**
-   * Returns the enclosed environment that holds the original binding.
-   */
+  /** Returns the enclosed environment that holds the original binding. */
   PrivateElements getPrivateElements();
 
   /** Unsupported. Always throws {@link UnsupportedOperationException}. */

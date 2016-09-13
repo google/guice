@@ -55,7 +55,8 @@ public final class CheckedProvidersTest extends TestCase {
     try {
       provider.get();
       fail();
-    } catch (FooException expected) {}
+    } catch (FooException expected) {
+    }
   }
 
   public void testThrowingCheckedProviderTypeLiteral_get_throwsException() {
@@ -64,7 +65,8 @@ public final class CheckedProvidersTest extends TestCase {
     try {
       provider.get();
       fail();
-    } catch (FooException expected) {}
+    } catch (FooException expected) {
+    }
   }
 
   private interface MoreMethodsCheckedProvider<T> extends CheckedProvider<T> {
@@ -84,8 +86,7 @@ public final class CheckedProvidersTest extends TestCase {
 
     try {
       CheckedProviders.of(
-          new TypeLiteral<MoreMethodsCheckedProvider<String>>() {},
-          "SHOW ME WHAT YOU GOT");
+          new TypeLiteral<MoreMethodsCheckedProvider<String>>() {}, "SHOW ME WHAT YOU GOT");
       fail("Expected an exception to be thrown");
     } catch (IllegalArgumentException e) {
       assertThat(e).hasMessage(message);

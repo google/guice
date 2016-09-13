@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +19,9 @@ package com.google.inject.internal;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
-
 import java.lang.reflect.Field;
 
-/**
- * Sets an injectable field.
- */
+/** Sets an injectable field. */
 final class SingleFieldInjector implements SingleMemberInjector {
   final Field field;
   final InjectionPoint injectionPoint;

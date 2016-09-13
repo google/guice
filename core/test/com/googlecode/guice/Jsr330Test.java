@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +50,8 @@ public class Jsr330Test extends TestCase {
   private final D d = new D();
   private final E e = new E();
 
-  @Override protected void setUp() throws Exception {
+  @Override
+  protected void setUp() throws Exception {
     J.nextInstanceId = 0;
     K.nextInstanceId = 0;
   }
@@ -150,7 +151,7 @@ public class Jsr330Test extends TestCase {
     assertNotSame(c, injector.getInstance(C.class));
     assertNotSame(h, injector.getInstance(H.class));
   }
-  
+
   public void testSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -184,7 +185,7 @@ public class Jsr330Test extends TestCase {
     assertEquals(1, J.nextInstanceId);
     assertEquals(1, K.nextInstanceId);
   }
-  
+
   public void testScopesIsSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -211,8 +212,8 @@ public class Jsr330Test extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "1) Injected field " + L.class.getName() + ".b cannot be final.");
+      assertContains(
+          expected.getMessage(), "1) Injected field " + L.class.getName() + ".b cannot be final.");
     }
   }
 
@@ -227,7 +228,8 @@ public class Jsr330Test extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Injected method " + AbstractM.class.getName() + ".setB() cannot be abstract.");
     }
   }
@@ -243,8 +245,11 @@ public class Jsr330Test extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "1) Injected method " + N.class.getName()
-          + ".setB() cannot declare type parameters of its own.");
+      assertContains(
+          expected.getMessage(),
+          "1) Injected method "
+              + N.class.getName()
+              + ".setB() cannot declare type parameters of its own.");
     }
   }
 
@@ -259,10 +264,9 @@ public class Jsr330Test extends TestCase {
   }
 
   /**
-   * This test verifies that we can compile bindings to provider instances
-   * whose compile-time type implements javax.inject.Provider but not
-   * com.google.inject.Provider. For binary compatibility, we don't (and won't)
-   * support binding to instances of javax.inject.Provider.
+   * This test verifies that we can compile bindings to provider instances whose compile-time type
+   * implements javax.inject.Provider but not com.google.inject.Provider. For binary compatibility,
+   * we don't (and won't) support binding to instances of javax.inject.Provider.
    */
   public void testBindProviderClass() {
     Injector injector =
@@ -278,7 +282,7 @@ public class Jsr330Test extends TestCase {
                     .toProvider(TypeLiteral.get(BProvider.class));
               }
             });
-    
+
     injector.getInstance(Key.get(B.class));
     injector.getInstance(Key.get(B.class, Names.named("1")));
     injector.getInstance(Key.get(B.class, Names.named("2")));
@@ -305,10 +309,10 @@ public class Jsr330Test extends TestCase {
 
     // when you guicify the Guice-friendly, it's a no-op
     assertSame(guicified, Providers.guicify(guicified));
-    
+
     assertFalse(guicified instanceof HasDependencies);
   }
-  
+
   public void testGuicifyWithDependencies() {
     Provider<String> jsr330Provider =
         new Provider<String>() {
@@ -325,35 +329,36 @@ public class Jsr330Test extends TestCase {
             return d + "-" + i;
           }
         };
-    
-    final com.google.inject.Provider<String> guicified =
-        Providers.guicify(jsr330Provider);
+
+    final com.google.inject.Provider<String> guicified = Providers.guicify(jsr330Provider);
     assertTrue(guicified instanceof HasDependencies);
-    Set<Dependency<?>> actual = ((HasDependencies)guicified).getDependencies();
+    Set<Dependency<?>> actual = ((HasDependencies) guicified).getDependencies();
     validateDependencies(actual, jsr330Provider.getClass());
-    
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(String.class).toProvider(guicified);
-        bind(int.class).toInstance(1);
-        bind(double.class).toInstance(2.0d);
-      }
-    });
-    
+
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toProvider(guicified);
+                bind(int.class).toInstance(1);
+                bind(double.class).toInstance(2.0d);
+              }
+            });
+
     Binding<String> binding = injector.getBinding(String.class);
     assertEquals("2.0-1", binding.getProvider().get());
     validateDependencies(actual, jsr330Provider.getClass());
   }
-  
+
   private void validateDependencies(Set<Dependency<?>> actual, Class<?> owner) {
     assertEquals(actual.toString(), 2, actual.size());
     Dependency<?> dDep = null;
     Dependency<?> iDep = null;
-    for(Dependency<?> dep : actual) {
-      if(dep.getKey().equals(Key.get(Double.class))) {
+    for (Dependency<?> dep : actual) {
+      if (dep.getKey().equals(Key.get(Double.class))) {
         dDep = dep;
-      } else if(dep.getKey().equals(Key.get(Integer.class))) {
+      } else if (dep.getKey().equals(Key.get(Integer.class))) {
         iDep = dep;
       }
     }
@@ -362,7 +367,7 @@ public class Jsr330Test extends TestCase {
     assertEquals(TypeLiteral.get(owner), dDep.getInjectionPoint().getDeclaringType());
     assertEquals("d", dDep.getInjectionPoint().getMember().getName());
     assertEquals(-1, dDep.getParameterIndex());
-    
+
     assertEquals(TypeLiteral.get(owner), iDep.getInjectionPoint().getDeclaringType());
     assertEquals("injectMe", iDep.getInjectionPoint().getMember().getName());
     assertEquals(0, iDep.getParameterIndex());
@@ -374,19 +379,24 @@ public class Jsr330Test extends TestCase {
     D d;
     E e;
 
-    @Inject A(B b) {
+    @Inject
+    A(B b) {
       this.b = b;
     }
 
-    @Inject void injectD(D d, E e) {
+    @Inject
+    void injectD(D d, E e) {
       this.d = d;
       this.e = e;
     }
   }
 
   static class B {}
+
   static class C {}
+
   static class D {}
+
   static class E {}
 
   static class F {
@@ -395,17 +405,20 @@ public class Jsr330Test extends TestCase {
     D d;
     E e;
 
-    @Inject F(@Named("jodie") B b) {
+    @Inject
+    F(@Named("jodie") B b) {
       this.b = b;
     }
 
-    @Inject void injectD(@Red D d, @Named("jesse") E e) {
+    @Inject
+    void injectD(@Red D d, @Named("jesse") E e) {
       this.d = d;
       this.e = e;
     }
   }
 
-  @Qualifier @Retention(RUNTIME)
+  @Qualifier
+  @Retention(RUNTIME)
   @interface Red {}
 
   public static final Red RED =
@@ -432,17 +445,20 @@ public class Jsr330Test extends TestCase {
     Provider<D> dProvider;
     Provider<E> eProvider;
 
-    @Inject G(@Named("jodie") Provider<B> bProvider) {
+    @Inject
+    G(@Named("jodie") Provider<B> bProvider) {
       this.bProvider = bProvider;
     }
 
-    @Inject void injectD(@Red Provider<D> dProvider, Provider<E> eProvider) {
+    @Inject
+    void injectD(@Red Provider<D> dProvider, Provider<E> eProvider) {
       this.dProvider = dProvider;
       this.eProvider = eProvider;
     }
   }
 
-  @javax.inject.Scope @Retention(RUNTIME)
+  @javax.inject.Scope
+  @Retention(RUNTIME)
   @interface TestScoped {}
 
   static class TestScope implements Scope {
@@ -491,7 +507,7 @@ public class Jsr330Test extends TestCase {
     final B b = null;
   }
 
-  static abstract class AbstractM {
+  abstract static class AbstractM {
     @SuppressWarnings("InjectJavaxInjectOnAbstractMethod")
     @Inject
     abstract void setB(B b);
@@ -504,11 +520,13 @@ public class Jsr330Test extends TestCase {
   }
 
   static class N {
-    @Inject <T> void setB(B b) {}
+    @Inject
+    <T> void setB(B b) {}
   }
 
   static class P {
-    @Inject B setB(B b) {
+    @Inject
+    B setB(B b) {
       return b;
     }
   }

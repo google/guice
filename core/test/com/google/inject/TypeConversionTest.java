@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,29 +26,29 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeConverterBinding;
-
+import java.lang.annotation.Retention;
+import java.util.Date;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import java.lang.annotation.Retention;
-import java.util.Date;
-
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class TypeConversionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface NumericValue {}
+  @BindingAnnotation
+  @interface NumericValue {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface BooleanValue {}
+  @BindingAnnotation
+  @interface BooleanValue {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface EnumValue {}
+  @BindingAnnotation
+  @interface EnumValue {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface ClassName {}
+  @BindingAnnotation
+  @interface ClassName {}
 
   public static class Foo {
     @Inject @BooleanValue Boolean booleanField;
@@ -70,16 +70,21 @@ public class TypeConversionTest extends TestCase {
   }
 
   public enum Bar {
-    TEE, BAZ, BOB
+    TEE,
+    BAZ,
+    BOB
   }
 
   public void testOneConstantInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindConstant().annotatedWith(NumericValue.class).to("5");
-        bind(Simple.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(NumericValue.class).to("5");
+                bind(Simple.class);
+              }
+            });
 
     Simple simple = injector.getInstance(Simple.class);
     assertEquals(5, simple.i);
@@ -90,64 +95,68 @@ public class TypeConversionTest extends TestCase {
   }
 
   public void testConstantInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindConstant().annotatedWith(NumericValue.class).to("5");
-        bindConstant().annotatedWith(BooleanValue.class).to("true");
-        bindConstant().annotatedWith(EnumValue.class).to("TEE");
-        bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(NumericValue.class).to("5");
+                bindConstant().annotatedWith(BooleanValue.class).to("true");
+                bindConstant().annotatedWith(EnumValue.class).to("TEE");
+                bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
+              }
+            });
 
     Foo foo = injector.getInstance(Foo.class);
 
     checkNumbers(
-      foo.integerField,
-      foo.primitiveIntField,
-      foo.longField,
-      foo.primitiveLongField,
-      foo.byteField,
-      foo.primitiveByteField,
-      foo.shortField,
-      foo.primitiveShortField,
-      foo.floatField,
-      foo.primitiveFloatField,
-      foo.doubleField,
-      foo.primitiveDoubleField
-    );
+        foo.integerField,
+        foo.primitiveIntField,
+        foo.longField,
+        foo.primitiveLongField,
+        foo.byteField,
+        foo.primitiveByteField,
+        foo.shortField,
+        foo.primitiveShortField,
+        foo.floatField,
+        foo.primitiveFloatField,
+        foo.doubleField,
+        foo.primitiveDoubleField);
 
     assertEquals(Bar.TEE, foo.enumField);
     assertEquals(Foo.class, foo.classField);
   }
 
   public void testConstantInjectionWithExplicitBindingsRequired() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        binder().requireExplicitBindings();
-        bind(Foo.class);
-        bindConstant().annotatedWith(NumericValue.class).to("5");
-        bindConstant().annotatedWith(BooleanValue.class).to("true");
-        bindConstant().annotatedWith(EnumValue.class).to("TEE");
-        bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder().requireExplicitBindings();
+                bind(Foo.class);
+                bindConstant().annotatedWith(NumericValue.class).to("5");
+                bindConstant().annotatedWith(BooleanValue.class).to("true");
+                bindConstant().annotatedWith(EnumValue.class).to("TEE");
+                bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
+              }
+            });
 
     Foo foo = injector.getInstance(Foo.class);
 
     checkNumbers(
-      foo.integerField,
-      foo.primitiveIntField,
-      foo.longField,
-      foo.primitiveLongField,
-      foo.byteField,
-      foo.primitiveByteField,
-      foo.shortField,
-      foo.primitiveShortField,
-      foo.floatField,
-      foo.primitiveFloatField,
-      foo.doubleField,
-      foo.primitiveDoubleField
-    );
+        foo.integerField,
+        foo.primitiveIntField,
+        foo.longField,
+        foo.primitiveLongField,
+        foo.byteField,
+        foo.primitiveByteField,
+        foo.shortField,
+        foo.primitiveShortField,
+        foo.floatField,
+        foo.primitiveFloatField,
+        foo.doubleField,
+        foo.primitiveDoubleField);
 
     assertEquals(Bar.TEE, foo.enumField);
     assertEquals(Foo.class, foo.classField);
@@ -160,13 +169,15 @@ public class TypeConversionTest extends TestCase {
   }
 
   static class OuterErrorModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       install(new InnerErrorModule());
     }
   }
 
   static class InnerErrorModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       bindConstant().annotatedWith(NumericValue.class).to("invalid");
     }
   }
@@ -177,8 +188,10 @@ public class TypeConversionTest extends TestCase {
       injector.getInstance(InvalidInteger.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
-          "Error converting 'invalid' (bound at " + InnerErrorModule.class.getName()
+      assertContains(
+          expected.getMessage(),
+          "Error converting 'invalid' (bound at "
+              + InnerErrorModule.class.getName()
               + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterErrorModule.class, InnerErrorModule.class),
           "using TypeConverter<Integer> which matches identicalTo(class java.lang.Integer)"
@@ -192,11 +205,14 @@ public class TypeConversionTest extends TestCase {
   }
 
   public void testInvalidCharacter() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindConstant().annotatedWith(NumericValue.class).to("invalid");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(NumericValue.class).to("invalid");
+              }
+            });
 
     try {
       injector.getInstance(InvalidCharacter.class);
@@ -213,11 +229,14 @@ public class TypeConversionTest extends TestCase {
   }
 
   public void testInvalidEnum() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bindConstant().annotatedWith(NumericValue.class).to("invalid");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(NumericValue.class).to("invalid");
+              }
+            });
 
     try {
       injector.getInstance(InvalidEnum.class);
@@ -234,12 +253,15 @@ public class TypeConversionTest extends TestCase {
   }
 
   public void testToInstanceIsTreatedLikeConstant() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(String.class).toInstance("5");
-        bind(LongHolder.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("5");
+                bind(LongHolder.class);
+              }
+            });
 
     assertEquals(5L, (long) injector.getInstance(LongHolder.class).foo);
   }
@@ -251,27 +273,33 @@ public class TypeConversionTest extends TestCase {
   public void testCustomTypeConversion() throws CreationException {
     final Date result = new Date();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)) , mockTypeConverter(result));
-        bindConstant().annotatedWith(NumericValue.class).to("Today");
-        bind(DateHolder.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                convertToTypes(
+                    Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(result));
+                bindConstant().annotatedWith(NumericValue.class).to("Today");
+                bind(DateHolder.class);
+              }
+            });
 
     assertSame(result, injector.getInstance(DateHolder.class).date);
 
     Binding<Date> binding = injector.getBinding(Key.get(Date.class, NumericValue.class));
     assertTrue(binding instanceof ConvertedConstantBinding<?>);
 
-    TypeConverterBinding converterBinding = ((ConvertedConstantBinding<?>)binding).getTypeConverterBinding();
+    TypeConverterBinding converterBinding =
+        ((ConvertedConstantBinding<?>) binding).getTypeConverterBinding();
     assertEquals("CustomConverter", converterBinding.getTypeConverter().toString());
 
     assertTrue(injector.getTypeConverterBindings().contains(converterBinding));
   }
 
   static class InvalidCustomValueModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), failingTypeConverter());
       bindConstant().annotatedWith(NumericValue.class).to("invalid");
       bind(DateHolder.class);
@@ -286,11 +314,15 @@ public class TypeConversionTest extends TestCase {
     } catch (CreationException expected) {
       Throwable cause = Iterables.getOnlyElement(expected.getErrorMessages()).getCause();
       assertTrue(cause instanceof UnsupportedOperationException);
-      assertContains(expected.getMessage(),
-          "1) Error converting 'invalid' (bound at ", getClass().getName(),
-          getDeclaringSourcePart(getClass()), "to java.util.Date",
+      assertContains(
+          expected.getMessage(),
+          "1) Error converting 'invalid' (bound at ",
+          getClass().getName(),
+          getDeclaringSourcePart(getClass()),
+          "to java.util.Date",
           "using BrokenConverter which matches only(java.util.Date) ",
-          "(bound at " + getClass().getName(), getDeclaringSourcePart(getClass()),
+          "(bound at " + getClass().getName(),
+          getDeclaringSourcePart(getClass()),
           "Reason: java.lang.UnsupportedOperationException: Cannot convert",
           "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
@@ -298,22 +330,26 @@ public class TypeConversionTest extends TestCase {
 
   static class OuterModule extends AbstractModule {
     private final Module converterModule;
+
     OuterModule(Module converterModule) {
       this.converterModule = converterModule;
     }
 
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       install(new InnerModule(converterModule));
     }
   }
 
   static class InnerModule extends AbstractModule {
     private final Module converterModule;
+
     InnerModule(Module converterModule) {
       this.converterModule = converterModule;
     }
 
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       install(converterModule);
       bindConstant().annotatedWith(NumericValue.class).to("foo");
       bind(DateHolder.class);
@@ -321,7 +357,8 @@ public class TypeConversionTest extends TestCase {
   }
 
   class ConverterNullModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(null));
     }
   }
@@ -331,7 +368,8 @@ public class TypeConversionTest extends TestCase {
       Guice.createInjector(new OuterModule(new ConverterNullModule()));
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Received null converting 'foo' (bound at ",
           getClass().getName(),
           getDeclaringSourcePart(getClass()),
@@ -347,7 +385,8 @@ public class TypeConversionTest extends TestCase {
   }
 
   class ConverterCustomModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(-1));
     }
   }
@@ -357,7 +396,8 @@ public class TypeConversionTest extends TestCase {
       Guice.createInjector(new OuterModule(new ConverterCustomModule()));
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) Type mismatch converting 'foo' (bound at ",
           getClass().getName(),
           getDeclaringSourcePart(getClass()),
@@ -388,12 +428,15 @@ public class TypeConversionTest extends TestCase {
           }
         };
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), converter);
-        bindConstant().annotatedWith(NumericValue.class).to("unused");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), converter);
+                bindConstant().annotatedWith(NumericValue.class).to("unused");
+              }
+            });
 
     Date first = injector.getInstance(Key.get(Date.class, NumericValue.class));
     Date second = injector.getInstance(Key.get(Date.class, NumericValue.class));
@@ -401,13 +444,15 @@ public class TypeConversionTest extends TestCase {
   }
 
   class OuterAmbiguousModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       install(new InnerAmbiguousModule());
     }
   }
 
   class InnerAmbiguousModule extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       install(new Ambiguous1Module());
       install(new Ambiguous2Module());
       bindConstant().annotatedWith(NumericValue.class).to("foo");
@@ -416,13 +461,15 @@ public class TypeConversionTest extends TestCase {
   }
 
   class Ambiguous1Module extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(new Date()));
     }
   }
 
   class Ambiguous2Module extends AbstractModule {
-    @Override protected void configure() {
+    @Override
+    protected void configure() {
       convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(new Date()));
     }
   }
@@ -432,8 +479,10 @@ public class TypeConversionTest extends TestCase {
       Guice.createInjector(new OuterAmbiguousModule());
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "1) Multiple converters can convert 'foo' (bound at ", getClass().getName(),
+      assertContains(
+          expected.getMessage(),
+          "1) Multiple converters can convert 'foo' (bound at ",
+          getClass().getName(),
           getDeclaringSourcePart(getClass()),
           asModuleChain(OuterAmbiguousModule.class, InnerAmbiguousModule.class),
           "to java.util.Date:",
@@ -486,18 +535,21 @@ public class TypeConversionTest extends TestCase {
   }
 
   public void testCannotConvertUnannotatedBindings() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(String.class).toInstance("55");
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("55");
+              }
+            });
 
     try {
       injector.getInstance(Integer.class);
       fail("Converted an unannotated String to an Integer");
     } catch (ConfigurationException expected) {
-      Asserts.assertContains(expected.getMessage(),
-          "Could not find a suitable constructor in java.lang.Integer.");
+      Asserts.assertContains(
+          expected.getMessage(), "Could not find a suitable constructor in java.lang.Integer.");
     }
   }
 }

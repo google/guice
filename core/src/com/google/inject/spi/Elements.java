@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +50,6 @@ import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.matcher.Matcher;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -69,41 +68,35 @@ import java.util.Set;
  */
 public final class Elements {
 
-  private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
-      = new DefaultBindingTargetVisitor<Object, Object>() {
-    @Override public Object visit(InstanceBinding<?> binding) {
-      return binding.getInstance();
-    }
+  private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR =
+      new DefaultBindingTargetVisitor<Object, Object>() {
+        @Override
+        public Object visit(InstanceBinding<?> binding) {
+          return binding.getInstance();
+        }
 
-    @Override protected Object visitOther(Binding<?> binding) {
-      throw new IllegalArgumentException();
-    }
-  };
+        @Override
+        protected Object visitOther(Binding<?> binding) {
+          throw new IllegalArgumentException();
+        }
+      };
 
-  /**
-   * Records the elements executed by {@code modules}.
-   */
+  /** Records the elements executed by {@code modules}. */
   public static List<Element> getElements(Module... modules) {
     return getElements(Stage.DEVELOPMENT, Arrays.asList(modules));
   }
 
-  /**
-   * Records the elements executed by {@code modules}.
-   */
+  /** Records the elements executed by {@code modules}. */
   public static List<Element> getElements(Stage stage, Module... modules) {
     return getElements(stage, Arrays.asList(modules));
   }
 
-  /**
-   * Records the elements executed by {@code modules}.
-   */
+  /** Records the elements executed by {@code modules}. */
   public static List<Element> getElements(Iterable<? extends Module> modules) {
     return getElements(Stage.DEVELOPMENT, modules);
   }
 
-  /**
-   * Records the elements executed by {@code modules}.
-   */
+  /** Records the elements executed by {@code modules}. */
   public static List<Element> getElements(Stage stage, Iterable<? extends Module> modules) {
     RecordingBinder binder = new RecordingBinder(stage);
     for (Module module : modules) {
@@ -133,9 +126,7 @@ public final class Elements {
     }
   }
 
-  /**
-   * Returns the module composed of {@code elements}.
-   */
+  /** Returns the module composed of {@code elements}. */
   public static Module getModule(final Iterable<? extends Element> elements) {
     return new ElementsAsModule(elements);
   }
@@ -164,11 +155,13 @@ public final class Elements {
     private final Object source;
     /** The current modules stack */
     private ModuleSource moduleSource = null;
+
     private final SourceProvider sourceProvider;
     private final Set<ModuleAnnotatedMethodScanner> scanners;
 
     /** The binder where exposed bindings will be created */
     private final RecordingBinder parent;
+
     private final PrivateElementsImpl privateElements;
 
     /** All children private binders, so we can scan through them. */
@@ -180,9 +173,14 @@ public final class Elements {
       this.scanners = Sets.newLinkedHashSet();
       this.elements = Lists.newArrayList();
       this.source = null;
-      this.sourceProvider = SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
-          Elements.class, RecordingBinder.class, AbstractModule.class,
-          ConstantBindingBuilderImpl.class, AbstractBindingBuilder.class, BindingBuilder.class);
+      this.sourceProvider =
+          SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
+              Elements.class,
+              RecordingBinder.class,
+              AbstractModule.class,
+              ConstantBindingBuilderImpl.class,
+              AbstractBindingBuilder.class,
+              BindingBuilder.class);
       this.parent = null;
       this.privateElements = null;
       this.privateBinders = Lists.newArrayList();
@@ -225,8 +223,8 @@ public final class Elements {
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         org.aopalliance.intercept.MethodInterceptor... interceptors) {
-      elements.add(new InterceptorBinding(
-          getElementSource(), classMatcher, methodMatcher, interceptors));
+      elements.add(
+          new InterceptorBinding(getElementSource(), classMatcher, methodMatcher, interceptors));
     }
     /*end[AOP]*/
 
@@ -243,14 +241,16 @@ public final class Elements {
 
     @Override
     public <T> void requestInjection(TypeLiteral<T> type, T instance) {
-      elements.add(new InjectionRequest<T>(getElementSource(), MoreTypes.canonicalizeForKey(type),
-          instance));
+      elements.add(
+          new InjectionRequest<T>(
+              getElementSource(), MoreTypes.canonicalizeForKey(type), instance));
     }
 
     @Override
     public <T> MembersInjector<T> getMembersInjector(final TypeLiteral<T> typeLiteral) {
-      final MembersInjectorLookup<T> element = new MembersInjectorLookup<T>(getElementSource(),
-          MoreTypes.canonicalizeForKey(typeLiteral));
+      final MembersInjectorLookup<T> element =
+          new MembersInjectorLookup<T>(
+              getElementSource(), MoreTypes.canonicalizeForKey(typeLiteral));
       elements.add(element);
       return element.getMembersInjector();
     }
@@ -264,7 +264,7 @@ public final class Elements {
     public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
       elements.add(new TypeListenerBinding(getElementSource(), listener, typeMatcher));
     }
-    
+
     @Override
     public void bindListener(
         Matcher<? super Binding<?>> bindingMatcher, ProvisionListener... listeners) {
@@ -279,10 +279,9 @@ public final class Elements {
     }
 
     /**
-     * Applies all scanners to the modules we've installed. We skip certain
-     * PrivateModules because store them in more than one Modules map and only
-     * want to process them through one of the maps.  (They're stored in both
-     * maps to prevent a module from being installed more than once.)
+     * Applies all scanners to the modules we've installed. We skip certain PrivateModules because
+     * store them in more than one Modules map and only want to process them through one of the
+     * maps. (They're stored in both maps to prevent a module from being installed more than once.)
      */
     void scanForAnnotatedMethods() {
       for (ModuleAnnotatedMethodScanner scanner : scanners) {
@@ -297,7 +296,7 @@ public final class Elements {
           moduleSource = entry.getValue().moduleSource;
           try {
             info.binder.install(ProviderMethodsModule.forModule(module, scanner));
-          } catch(RuntimeException e) {
+          } catch (RuntimeException e) {
             Collection<Message> messages = Errors.getMessagesFromThrowable(e);
             if (!messages.isEmpty()) {
               elements.addAll(messages);
@@ -493,11 +492,14 @@ public final class Elements {
 
     private <T> AnnotatedElementBuilder exposeInternal(Key<T> key) {
       if (privateElements == null) {
-        addError("Cannot expose %s on a standard binder. "
-            + "Exposed bindings are only applicable to private binders.", key);
+        addError(
+            "Cannot expose %s on a standard binder. "
+                + "Exposed bindings are only applicable to private binders.",
+            key);
         return new AnnotatedElementBuilder() {
           @Override
           public void annotatedWith(Class<? extends Annotation> annotationType) {}
+
           @Override
           public void annotatedWith(Annotation annotation) {}
         };
@@ -536,9 +538,9 @@ public final class Elements {
         declaringSource = originalSource.getDeclaringSource();
       }
       IncludeStackTraceOption stackTraceOption = getIncludeStackTraceOption();
-      if (stackTraceOption == IncludeStackTraceOption.COMPLETE ||
-          (stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE
-          && declaringSource == null)) {
+      if (stackTraceOption == IncludeStackTraceOption.COMPLETE
+          || (stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE
+              && declaringSource == null)) {
         callStack = new Throwable().getStackTrace();
       }
       if (stackTraceOption == IncludeStackTraceOption.COMPLETE) {
@@ -546,8 +548,8 @@ public final class Elements {
       }
       if (declaringSource == null) {
         // So 'source' and 'originalSource' are null otherwise declaringSource has some value
-        if (stackTraceOption == IncludeStackTraceOption.COMPLETE ||
-            stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
+        if (stackTraceOption == IncludeStackTraceOption.COMPLETE
+            || stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
           // With the above conditions and assignments 'callStack' is non-null
           declaringSource = sourceProvider.get(callStack);
         } else { // or if (stackTraceOption == IncludeStackTraceOptions.OFF)
@@ -556,14 +558,13 @@ public final class Elements {
         }
       }
       // Build the binding call stack
-      return new ElementSource(
-          originalSource, declaringSource, moduleSource, partialCallStack);
+      return new ElementSource(originalSource, declaringSource, moduleSource, partialCallStack);
     }
 
     /**
      * Removes the {@link #moduleSource} call stack from the beginning of current call stack. It
-     * also removes the last two elements in order to make {@link #install(Module)} the last call
-     * in the call stack.
+     * also removes the last two elements in order to make {@link #install(Module)} the last call in
+     * the call stack.
      */
     private StackTraceElement[] getPartialCallStack(StackTraceElement[] callStack) {
       int toSkip = 0;
@@ -578,7 +579,8 @@ public final class Elements {
       return partialCallStack;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "Binder";
     }
   }

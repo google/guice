@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,20 +17,22 @@
 package com.google.inject.grapher;
 
 import com.google.inject.Key;
-
 import java.lang.reflect.Member;
 
 /**
- * Interface for a service that provides nice {@link String}s that we can
- * display in the graph for the types that come up in
- * {@link com.google.inject.Binding}s.
+ * Interface for a service that provides nice {@link String}s that we can display in the graph for
+ * the types that come up in {@link com.google.inject.Binding}s.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public interface NameFactory {
   String getMemberName(Member member);
+
   String getClassName(Key<?> key);
+
   String getInstanceName(Object instance);
+
   String getAnnotationName(Key<?> key);
+
   String getSourceName(Object source);
 }

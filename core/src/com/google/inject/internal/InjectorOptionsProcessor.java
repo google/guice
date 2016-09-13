@@ -53,11 +53,11 @@ class InjectorOptionsProcessor extends AbstractProcessor {
     jitDisabled = true;
     return true;
   }
-  
+
   @Override
   public Boolean visit(RequireAtInjectOnConstructorsOption option) {
     atInjectRequired = true;
-    return true;    
+    return true;
   }
 
   @Override
@@ -68,7 +68,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
 
   InjectorOptions getOptions(Stage stage, InjectorOptions parentOptions) {
     checkNotNull(stage, "stage must be set");
-    if(parentOptions == null) {
+    if (parentOptions == null) {
       return new InjectorOptions(
           stage,
           jitDisabled,
@@ -85,5 +85,4 @@ class InjectorOptionsProcessor extends AbstractProcessor {
           exactBindingAnnotationsRequired || parentOptions.exactBindingAnnotationsRequired);
     }
   }
-
 }

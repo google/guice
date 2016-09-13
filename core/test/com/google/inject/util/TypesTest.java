@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.google.inject.util;
 
@@ -36,9 +35,7 @@ import java.util.Set;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class TypesTest extends TestCase {
 
   // generic types for comparison
@@ -76,7 +73,7 @@ public class TypesTest extends TestCase {
   }
 
   public void testDefensiveCopies() {
-    Type[] arguments = new Type[] { String.class, Integer.class };
+    Type[] arguments = new Type[] {String.class, Integer.class};
     ParameterizedType parameterizedType = Types.newParameterizedType(Map.class, arguments);
     arguments[0] = null;
     assertEquals(String.class, parameterizedType.getActualTypeArguments()[0]);
@@ -85,17 +82,20 @@ public class TypesTest extends TestCase {
   }
 
   public void testTypeWithOwnerType() {
-    ParameterizedType actual = Types.newParameterizedTypeWithOwner(
-        TypesTest.class, Inner.class, Float.class, Double.class);
+    ParameterizedType actual =
+        Types.newParameterizedTypeWithOwner(
+            TypesTest.class, Inner.class, Float.class, Double.class);
     assertEquals(TypesTest.class, actual.getOwnerType());
     assertEqualsBothWays(innerFloatDouble, actual);
     // The JDK prints this out as:
     //     com.google.inject.util.TypesTest.com.google.inject.util.TypesTest$Inner<java.lang.Float, java.lang.Double>
     // and we think that's wrong, so the assertEquals comparison is worthless. :-(
-//    assertEquals(innerFloatDouble.toString(), actual.toString());
-    
+    //    assertEquals(innerFloatDouble.toString(), actual.toString());
+
     // We think the correct comparison is:
-    assertEquals("com.google.inject.util.TypesTest$Inner<java.lang.Float, java.lang.Double>", actual.toString());
+    assertEquals(
+        "com.google.inject.util.TypesTest$Inner<java.lang.Float, java.lang.Double>",
+        actual.toString());
   }
 
   public void testTypeParametersMustNotBePrimitives() {
@@ -103,8 +103,8 @@ public class TypesTest extends TestCase {
       Types.newParameterizedType(Map.class, String.class, int.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(),
-          "Primitive types are not allowed in type parameters: int");
+      assertContains(
+          expected.getMessage(), "Primitive types are not allowed in type parameters: int");
     }
   }
 
@@ -124,22 +124,22 @@ public class TypesTest extends TestCase {
     assertEqualWhenReserialized(supertypeOf(CharSequence.class));
     assertEqualWhenReserialized(subtypeOf(CharSequence.class));
   }
-  
+
   public void testWildcardBoundsMustNotBePrimitives() {
     try {
       supertypeOf(int.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(),
-          "Primitive types are not allowed in wildcard bounds: int");
+      assertContains(
+          expected.getMessage(), "Primitive types are not allowed in wildcard bounds: int");
     }
 
     try {
       subtypeOf(int.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(),
-          "Primitive types are not allowed in wildcard bounds: int");
+      assertContains(
+          expected.getMessage(), "Primitive types are not allowed in wildcard bounds: int");
     }
   }
 
@@ -149,13 +149,13 @@ public class TypesTest extends TestCase {
   }
 
   public void testEqualsAndHashcode() {
-    ParameterizedType parameterizedType
-        = Types.newParameterizedType(Map.class, String.class, Integer.class);
+    ParameterizedType parameterizedType =
+        Types.newParameterizedType(Map.class, String.class, Integer.class);
     assertEqualsBothWays(mapStringInteger, parameterizedType);
     assertEquals(mapStringInteger.toString(), parameterizedType.toString());
 
-    GenericArrayType genericArrayType = Types.arrayOf(Types.arrayOf(
-        Types.newParameterizedType(Set.class, String.class)));
+    GenericArrayType genericArrayType =
+        Types.arrayOf(Types.arrayOf(Types.newParameterizedType(Set.class, String.class)));
     assertEqualsBothWays(setStringArray, genericArrayType);
     assertEquals(setStringArray.toString(), genericArrayType.toString());
   }
@@ -163,41 +163,37 @@ public class TypesTest extends TestCase {
   public void testToString() {
     Assert.assertEquals("java.lang.String", MoreTypes.typeToString(String.class));
     assertEquals("java.util.Set<java.lang.String>[][]", MoreTypes.typeToString(setStringArray));
-    assertEquals("java.util.Map<java.lang.String, java.lang.Integer>",
+    assertEquals(
+        "java.util.Map<java.lang.String, java.lang.Integer>",
         MoreTypes.typeToString(mapStringInteger));
-    assertEquals("java.util.List<java.util.Set<java.lang.String>[][]>",
+    assertEquals(
+        "java.util.List<java.util.Set<java.lang.String>[][]>",
         MoreTypes.typeToString(listSetStringArray));
-    assertEquals(innerFloatDouble.toString(),
-        MoreTypes.typeToString(innerFloatDouble));
+    assertEquals(innerFloatDouble.toString(), MoreTypes.typeToString(innerFloatDouble));
   }
 
   static class Owning<A> {}
 
-  /**
-   * Ensure that owning types are required when necessary, and forbidden
-   * otherwise.
-   */
+  /** Ensure that owning types are required when necessary, and forbidden otherwise. */
   public void testCanonicalizeRequiresOwnerTypes() {
     try {
       Types.newParameterizedType(Owning.class, String.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(),
-          "No owner type for enclosed " + Owning.class);
+      assertContains(expected.getMessage(), "No owner type for enclosed " + Owning.class);
     }
 
     try {
       Types.newParameterizedTypeWithOwner(Object.class, Set.class, String.class);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
-      assertContains(expected.getMessage(),
-          "Owner type for unenclosed " + Set.class);
+      assertContains(expected.getMessage(), "Owner type for unenclosed " + Set.class);
     }
   }
 
   @SuppressWarnings("UnusedDeclaration")
   class Inner<T1, T2> {}
-  
+
   public void testInnerParameterizedEvenWithZeroArgs() {
     TypeLiteral<Outer<String>.Inner> type = new TypeLiteral<Outer<String>.Inner>() {};
     assertEqualsBothWays(outerInner, type.getType());

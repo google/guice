@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,24 +17,20 @@
 package com.google.inject.spi;
 
 import com.google.inject.Scope;
-
 import java.lang.annotation.Annotation;
 
 /**
- * No-op visitor for subclassing. All interface methods simply delegate to
- * {@link #visitOther()}, returning its result.
+ * No-op visitor for subclassing. All interface methods simply delegate to {@link #visitOther()},
+ * returning its result.
  *
- * @param <V> any type to be returned by the visit method. Use {@link Void} with
- *     {@code return null} if no return type is needed.
- * 
+ * @param <V> any type to be returned by the visit method. Use {@link Void} with {@code return null}
+ *     if no return type is needed.
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
 public class DefaultBindingScopingVisitor<V> implements BindingScopingVisitor<V> {
 
-  /**
-   * Default visit implementation. Returns {@code null}.
-   */
+  /** Default visit implementation. Returns {@code null}. */
   protected V visitOther() {
     return null;
   }

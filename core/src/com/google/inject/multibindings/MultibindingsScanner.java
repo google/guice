@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,22 +35,23 @@ public class MultibindingsScanner {
    * Returns a module that, when installed, will scan all modules for methods with the annotations
    * {@literal @}{@link ProvidesIntoMap}, {@literal @}{@link ProvidesIntoSet}, and
    * {@literal @}{@link ProvidesIntoOptional}.
-   * 
-   * <p>This is a convenience method, equivalent to doing
-   * {@code binder().scanModulesForAnnotatedMethods(MultibindingsScanner.scanner())}.
+   *
+   * <p>This is a convenience method, equivalent to doing {@code
+   * binder().scanModulesForAnnotatedMethods(MultibindingsScanner.scanner())}.
    */
   public static Module asModule() {
     return new AbstractModule() {
-      @Override protected void configure() {
+      @Override
+      protected void configure() {
         binder().scanModulesForAnnotatedMethods(MultibindingsMethodScanner.INSTANCE);
       }
     };
   }
-  
+
   /**
    * Returns a {@link ModuleAnnotatedMethodScanner} that, when bound, will scan all modules for
-   * methods with the annotations {@literal @}{@link ProvidesIntoMap},
-   * {@literal @}{@link ProvidesIntoSet}, and {@literal @}{@link ProvidesIntoOptional}.
+   * methods with the annotations {@literal @}{@link ProvidesIntoMap}, {@literal @}{@link
+   * ProvidesIntoSet}, and {@literal @}{@link ProvidesIntoOptional}.
    */
   public static ModuleAnnotatedMethodScanner scanner() {
     return MultibindingsMethodScanner.INSTANCE;

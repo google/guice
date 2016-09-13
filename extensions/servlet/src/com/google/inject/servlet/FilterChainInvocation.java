@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,9 @@ package com.google.inject.servlet;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -35,19 +33,19 @@ import javax.servlet.http.HttpServletResponse;
  * A Filter chain impl which basically passes itself to the "current" filter and iterates the chain
  * on {@code doFilter()}. Modeled on something similar in Apache Tomcat.
  *
- * Following this, it attempts to dispatch to guice-servlet's registered servlets using the
+ * <p>Following this, it attempts to dispatch to guice-servlet's registered servlets using the
  * ManagedServletPipeline.
  *
- * And the end, it proceeds to the web.xml (default) servlet filter chain, if needed.
+ * <p>And the end, it proceeds to the web.xml (default) servlet filter chain, if needed.
  *
  * @author Dhanji R. Prasanna
  * @since 1.0
  */
 class FilterChainInvocation implements FilterChain {
-  
-  private static final Set<String> SERVLET_INTERNAL_METHODS = ImmutableSet.of(
-      FilterChainInvocation.class.getName() + ".doFilter");
-  
+
+  private static final Set<String> SERVLET_INTERNAL_METHODS =
+      ImmutableSet.of(FilterChainInvocation.class.getName() + ".doFilter");
+
   private final FilterDefinition[] filterDefinitions;
   private final FilterChain proceedingChain;
   private final ManagedServletPipeline servletPipeline;
@@ -57,8 +55,10 @@ class FilterChainInvocation implements FilterChain {
   // whether or not we've caught an exception & cleaned up stack traces
   private boolean cleanedStacks = false;
 
-  public FilterChainInvocation(FilterDefinition[] filterDefinitions,
-      ManagedServletPipeline servletPipeline, FilterChain proceedingChain) {
+  public FilterChainInvocation(
+      FilterDefinition[] filterDefinitions,
+      ManagedServletPipeline servletPipeline,
+      FilterChain proceedingChain) {
 
     this.filterDefinitions = filterDefinitions;
     this.servletPipeline = servletPipeline;
@@ -71,8 +71,8 @@ class FilterChainInvocation implements FilterChain {
     GuiceFilter.Context previous = GuiceFilter.localContext.get();
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     HttpServletResponse response = (HttpServletResponse) servletResponse;
-    HttpServletRequest originalRequest
-        = (previous != null) ? previous.getOriginalRequest() : request;
+    HttpServletRequest originalRequest =
+        (previous != null) ? previous.getOriginalRequest() : request;
     GuiceFilter.localContext.set(new GuiceFilter.Context(originalRequest, request, response));
     try {
       Filter filter = findNextFilter(request);
@@ -107,8 +107,8 @@ class FilterChainInvocation implements FilterChain {
   }
 
   /**
-   * Iterates over the remaining filter definitions.
-   * Returns the first applicable filter, or null if none apply.
+   * Iterates over the remaining filter definitions. Returns the first applicable filter, or null if
+   * none apply.
    */
   private Filter findNextFilter(HttpServletRequest request) {
     while (++index < filterDefinitions.length) {
@@ -119,10 +119,10 @@ class FilterChainInvocation implements FilterChain {
     }
     return null;
   }
-  
+
   /**
-   * Removes stacktrace elements related to AOP internal mechanics from the
-   * throwable's stack trace and any causes it may have.
+   * Removes stacktrace elements related to AOP internal mechanics from the throwable's stack trace
+   * and any causes it may have.
    */
   private void pruneStacktrace(Throwable throwable) {
     for (Throwable t = throwable; t != null; t = t.getCause()) {

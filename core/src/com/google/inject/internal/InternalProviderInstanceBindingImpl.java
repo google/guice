@@ -1,7 +1,5 @@
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -20,17 +18,18 @@ import com.google.inject.spi.ProviderWithExtensionVisitor;
 final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindingImpl<T>
     implements DelayedInitialize {
   enum InitializationTiming {
-    /** This factory can be initialized eagerly.  This should be the case for most things. */
+    /** This factory can be initialized eagerly. This should be the case for most things. */
     EAGER,
 
     /**
      * Initialization of this factory should be delayed until after all other static initialization
-     * completes.  This will be useful for factories that need to call 
-     * {@link InjectorImpl#getExistingBinding(Key)} to not create jit bindings, but also want to be
-     * able to conditionally consume jit bindings created by other other bindings. 
+     * completes. This will be useful for factories that need to call {@link
+     * InjectorImpl#getExistingBinding(Key)} to not create jit bindings, but also want to be able to
+     * conditionally consume jit bindings created by other other bindings.
      */
     DELAYED;
   }
+
   private final Factory<T> originalFactory;
 
   InternalProviderInstanceBindingImpl(
@@ -50,7 +49,7 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
         ImmutableSet.<InjectionPoint>of());
     this.originalFactory = originalFactory;
   }
-  
+
   InitializationTiming getInitializationTiming() {
     return originalFactory.initializationTiming;
   }
@@ -80,9 +79,9 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     }
     /**
      * The binding source.
-     * 
+     *
      * <p>May be useful for augmenting runtime error messages.
-     * 
+     *
      * <p>Note: this will return {#code null} until {@link #initialize(InjectorImpl, Errors)} has
      * already been called.
      */
@@ -107,25 +106,26 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
       return local.get();
     }
 
-    @Override public T get(
+    @Override
+    public T get(
         final Errors errors,
         final InternalContext context,
         final Dependency<?> dependency,
         boolean linked)
         throws ErrorsException {
       if (provisionCallback == null) {
-          return doProvision(errors, context, dependency);
-        } else {
-          return provisionCallback.provision(
-              errors,
-              context,
-              new ProvisionCallback<T>() {
-                @Override
-                public T call() throws ErrorsException {
-                  return doProvision(errors, context, dependency);
-                }
-              });
-        }
+        return doProvision(errors, context, dependency);
+      } else {
+        return provisionCallback.provision(
+            errors,
+            context,
+            new ProvisionCallback<T>() {
+              @Override
+              public T call() throws ErrorsException {
+                return doProvision(errors, context, dependency);
+              }
+            });
+      }
     }
     /**
      * Creates an object to be injected.

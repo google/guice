@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,5 +30,7 @@ import java.lang.annotation.Target;
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-@Target(ElementType.METHOD) @Retention(RUNTIME) @Documented
+@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Documented
 public @interface Exposed {}

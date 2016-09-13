@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,25 +18,22 @@ package com.google.inject.servlet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.internal.UniqueAnnotations;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.Filter;
 
 /**
- * Builds the guice module that binds configured filters, with their
- * wrapper FilterDefinitions. Is part of the binding EDSL. All Filters
- * and Servlets are always bound as singletons.
+ * Builds the guice module that binds configured filters, with their wrapper FilterDefinitions. Is
+ * part of the binding EDSL. All Filters and Servlets are always bound as singletons.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class FiltersModuleBuilder {
-  
+
   private final Binder binder;
-  
+
   public FiltersModuleBuilder(Binder binder) {
     this.binder = binder;
   }
@@ -92,7 +89,7 @@ class FiltersModuleBuilder {
 
     @Override
     public void through(Class<? extends Filter> filterKey, Map<String, String> initParams) {
-      
+
       // Careful you don't accidentally make this method recursive, thank you IntelliJ IDEA!
       through(Key.get(filterKey), initParams);
     }
@@ -101,10 +98,9 @@ class FiltersModuleBuilder {
     public void through(Key<? extends Filter> filterKey, Map<String, String> initParams) {
       through(filterKey, initParams, null);
     }
-    
-    private void through(Key<? extends Filter> filterKey,
-        Map<String, String> initParams,
-        Filter filterInstance) {
+
+    private void through(
+        Key<? extends Filter> filterKey, Map<String, String> initParams, Filter filterInstance) {
       for (UriPatternMatcher pattern : uriPatterns) {
         binder
             .bind(FilterDefinition.class)

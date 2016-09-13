@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,11 +26,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -41,10 +37,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import junit.framework.TestCase;
 
 /**
- * Tests the FilterPipeline that dispatches to guice-managed servlets,
- * is a full integration test, with a real injector.
+ * Tests the FilterPipeline that dispatches to guice-managed servlets, is a full integration test,
+ * with a real injector.
  *
  * @author Dhanji R. Prasanna (dhanji gmail com)
  */
@@ -63,19 +60,21 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
   public final void testDispatchRequestToManagedPipelineServlets()
       throws ServletException, IOException {
-    final Injector injector = Guice.createInjector(new ServletModule() {
+    final Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
 
-      @Override
-      protected void configureServlets() {
-        serve("/*").with(TestServlet.class);
+              @Override
+              protected void configureServlets() {
+                serve("/*").with(TestServlet.class);
 
-        // These servets should never fire... (ordering test)
-        serve("*.html").with(NeverServlet.class);
-        serve("/test/*").with(Key.get(NeverServlet.class));
-        serve("/index/*").with(Key.get(NeverServlet.class));
-        serve("*.jsp").with(Key.get(NeverServlet.class));
-      }
-    });
+                // These servets should never fire... (ordering test)
+                serve("*.html").with(NeverServlet.class);
+                serve("/test/*").with(Key.get(NeverServlet.class));
+                serve("/index/*").with(Key.get(NeverServlet.class));
+                serve("*.jsp").with(Key.get(NeverServlet.class));
+              }
+            });
 
     final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
 
@@ -84,12 +83,8 @@ public class ServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI())
-        .andReturn("/index.html")
-        .times(1);
-    expect(requestMock.getContextPath())
-        .andReturn("")
-        .anyTimes();
+    expect(requestMock.getRequestURI()).andReturn("/index.html").times(1);
+    expect(requestMock.getContextPath()).andReturn("").anyTimes();
 
     //dispatch request
     replay(requestMock);
@@ -100,29 +95,35 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
     verify(requestMock);
 
-    assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
-            + services + "; destroys: " + destroys,
+    assertTrue(
+        "lifecycle states did not fire correct number of times-- inits: "
+            + inits
+            + "; dos: "
+            + services
+            + "; destroys: "
+            + destroys,
         inits == 2 && services == 1 && destroys == 2);
   }
 
   public final void testDispatchRequestToManagedPipelineWithFilter()
       throws ServletException, IOException {
-    final Injector injector = Guice.createInjector(new ServletModule() {
+    final Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
 
-      @Override
-      protected void configureServlets() {
-        filter("/*").through(TestFilter.class);
+              @Override
+              protected void configureServlets() {
+                filter("/*").through(TestFilter.class);
 
-        serve("/*").with(TestServlet.class);
+                serve("/*").with(TestServlet.class);
 
-        // These servets should never fire...
-        serve("*.html").with(NeverServlet.class);
-        serve("/test/*").with(Key.get(NeverServlet.class));
-        serve("/index/*").with(Key.get(NeverServlet.class));
-        serve("*.jsp").with(Key.get(NeverServlet.class));
-
-      }
-    });
+                // These servets should never fire...
+                serve("*.html").with(NeverServlet.class);
+                serve("/test/*").with(Key.get(NeverServlet.class));
+                serve("/index/*").with(Key.get(NeverServlet.class));
+                serve("*.jsp").with(Key.get(NeverServlet.class));
+              }
+            });
 
     final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
 
@@ -131,12 +132,8 @@ public class ServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI())
-        .andReturn("/index.html")
-        .times(2);
-    expect(requestMock.getContextPath())
-        .andReturn("")
-        .anyTimes();
+    expect(requestMock.getRequestURI()).andReturn("/index.html").times(2);
+    expect(requestMock.getContextPath()).andReturn("").anyTimes();
 
     //dispatch request
     replay(requestMock);
@@ -147,8 +144,15 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
     verify(requestMock);
 
-    assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
-            + services + "; destroys: " + destroys + "; doFilters: " + doFilters,
+    assertTrue(
+        "lifecycle states did not fire correct number of times-- inits: "
+            + inits
+            + "; dos: "
+            + services
+            + "; destroys: "
+            + destroys
+            + "; doFilters: "
+            + doFilters,
         inits == 3 && services == 1 && destroys == 3 && doFilters == 1);
   }
 
@@ -211,7 +215,6 @@ public class ServletDispatchIntegrationTest extends TestCase {
     }
   }
 
-
   @Singleton
   public static class ForwardingServlet extends HttpServlet {
     @Override
@@ -219,8 +222,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
         throws IOException, ServletException {
       final HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-      request.getRequestDispatcher("/blah.jsp")
-          .forward(servletRequest, servletResponse);
+      request.getRequestDispatcher("/blah.jsp").forward(servletRequest, servletResponse);
     }
   }
 
@@ -244,22 +246,19 @@ public class ServletDispatchIntegrationTest extends TestCase {
   }
 
   public void testForwardUsingRequestDispatcher() throws IOException, ServletException {
-    Guice.createInjector(new ServletModule() {
-      @Override
-      protected void configureServlets() {
-        serve("/").with(ForwardingServlet.class);
-        serve("/blah.jsp").with(ForwardedServlet.class);
-      }
-    });
+    Guice.createInjector(
+        new ServletModule() {
+          @Override
+          protected void configureServlets() {
+            serve("/").with(ForwardingServlet.class);
+            serve("/blah.jsp").with(ForwardedServlet.class);
+          }
+        });
 
     final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
     HttpServletResponse responseMock = createMock(HttpServletResponse.class);
-    expect(requestMock.getRequestURI())
-        .andReturn("/")
-        .anyTimes();
-    expect(requestMock.getContextPath())
-        .andReturn("")
-        .anyTimes();
+    expect(requestMock.getRequestURI()).andReturn("/").anyTimes();
+    expect(requestMock.getContextPath()).andReturn("").anyTimes();
 
     requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     expect(requestMock.getAttribute(REQUEST_DISPATCHER_REQUEST)).andReturn(true);
@@ -270,24 +269,24 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
     replay(requestMock, responseMock);
 
-    new GuiceFilter()
-        .doFilter(requestMock, responseMock,
-            createMock(FilterChain.class));
+    new GuiceFilter().doFilter(requestMock, responseMock, createMock(FilterChain.class));
 
     assertEquals("Incorrect number of forwards", 1, ForwardedServlet.forwardedTo);
     verify(requestMock, responseMock);
   }
 
   public final void testQueryInRequestUri_regex() throws Exception {
-    final Injector injector = Guice.createInjector(new ServletModule() {
+    final Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
 
-      @Override
-      protected void configureServlets() {
-        filterRegex("(.)*\\.html").through(TestFilter.class);
+              @Override
+              protected void configureServlets() {
+                filterRegex("(.)*\\.html").through(TestFilter.class);
 
-        serveRegex("(.)*\\.html").with(TestServlet.class);
-      }
-    });
+                serveRegex("(.)*\\.html").with(TestServlet.class);
+              }
+            });
 
     final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
 
@@ -296,12 +295,8 @@ public class ServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI())
-        .andReturn("/index.html?query=params")
-        .atLeastOnce();
-    expect(requestMock.getContextPath())
-        .andReturn("")
-        .anyTimes();
+    expect(requestMock.getRequestURI()).andReturn("/index.html?query=params").atLeastOnce();
+    expect(requestMock.getContextPath()).andReturn("").anyTimes();
 
     //dispatch request
     replay(requestMock);
@@ -317,15 +312,17 @@ public class ServletDispatchIntegrationTest extends TestCase {
   }
 
   public final void testQueryInRequestUri() throws Exception {
-    final Injector injector = Guice.createInjector(new ServletModule() {
+    final Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
 
-      @Override
-      protected void configureServlets() {
-        filter("/index.html").through(TestFilter.class);
+              @Override
+              protected void configureServlets() {
+                filter("/index.html").through(TestFilter.class);
 
-        serve("/index.html").with(TestServlet.class);
-      }
-    });
+                serve("/index.html").with(TestServlet.class);
+              }
+            });
 
     final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
 
@@ -334,12 +331,8 @@ public class ServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI())
-        .andReturn("/index.html?query=params")
-        .atLeastOnce();
-    expect(requestMock.getContextPath())
-        .andReturn("")
-        .anyTimes();
+    expect(requestMock.getRequestURI()).andReturn("/index.html?query=params").atLeastOnce();
+    expect(requestMock.getContextPath()).andReturn("").anyTimes();
 
     //dispatch request
     replay(requestMock);

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,9 +37,6 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -50,6 +47,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TooManyListenersException;
+import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
@@ -57,11 +55,13 @@ import java.util.TooManyListenersException;
  */
 @SuppressWarnings("deprecation")
 public class ThrowingProviderTest extends TestCase {
-  @Target(METHOD) @Retention(RUNTIME) @BindingAnnotation
-  @interface NotExceptionScoping { };
+  @Target(METHOD)
+  @Retention(RUNTIME)
+  @BindingAnnotation
+  @interface NotExceptionScoping {};
 
-  private final TypeLiteral<RemoteProvider<String>> remoteProviderOfString
-      = new TypeLiteral<RemoteProvider<String>>() { };
+  private final TypeLiteral<RemoteProvider<String>> remoteProviderOfString =
+      new TypeLiteral<RemoteProvider<String>>() {};
   private final MockRemoteProvider<String> mockRemoteProvider = new MockRemoteProvider<String>();
   private final TestScope testScope = new TestScope();
   private Injector bindInjector =
@@ -110,14 +110,13 @@ public class ThrowingProviderTest extends TestCase {
   public void testExceptionsThrown_Bind() {
     tExceptionsThrown(bindInjector);
   }
-  
+
   public void testExceptionsThrown_Provides() {
     tExceptionsThrown(providesInjector);
   }
-  
+
   private void tExceptionsThrown(Injector injector) {
-    RemoteProvider<String> remoteProvider = 
-      injector.getInstance(Key.get(remoteProviderOfString));
+    RemoteProvider<String> remoteProvider = injector.getInstance(Key.get(remoteProviderOfString));
 
     mockRemoteProvider.throwOnNextGet("kaboom!");
     try {
@@ -131,24 +130,25 @@ public class ThrowingProviderTest extends TestCase {
   public void testValuesScoped_Bind() throws RemoteException {
     tValuesScoped(bindInjector, null);
   }
-  
+
   public void testValuesScoped_Provides() throws RemoteException {
     tValuesScoped(providesInjector, null);
   }
-  
+
   public void testValuesScopedWhenNotExceptionScoping_Bind() throws RemoteException {
     tValuesScoped(bindInjector, NotExceptionScoping.class);
   }
-  
+
   public void testValuesScopedWhenNotExceptionScoping_Provides() throws RemoteException {
     tValuesScoped(providesInjector, NotExceptionScoping.class);
   }
-  
-  private void tValuesScoped(Injector injector, Class<? extends Annotation> annotation) 
+
+  private void tValuesScoped(Injector injector, Class<? extends Annotation> annotation)
       throws RemoteException {
-    Key<RemoteProvider<String>> key = annotation != null ? 
-        Key.get(remoteProviderOfString, annotation) :
-        Key.get(remoteProviderOfString);
+    Key<RemoteProvider<String>> key =
+        annotation != null
+            ? Key.get(remoteProviderOfString, annotation)
+            : Key.get(remoteProviderOfString);
     RemoteProvider<String> remoteProvider = injector.getInstance(key);
 
     mockRemoteProvider.setNextToReturn("A");
@@ -164,14 +164,13 @@ public class ThrowingProviderTest extends TestCase {
   public void testExceptionsScoped_Bind() {
     tExceptionsScoped(bindInjector);
   }
-  
+
   public void testExceptionsScoped_Provides() {
     tExceptionsScoped(providesInjector);
   }
-  
+
   private void tExceptionsScoped(Injector injector) {
-    RemoteProvider<String> remoteProvider = 
-        injector.getInstance(Key.get(remoteProviderOfString));
+    RemoteProvider<String> remoteProvider = injector.getInstance(Key.get(remoteProviderOfString));
 
     mockRemoteProvider.throwOnNextGet("A");
     try {
@@ -180,7 +179,7 @@ public class ThrowingProviderTest extends TestCase {
     } catch (RemoteException expected) {
       assertEquals("A", expected.getMessage());
     }
-    
+
     mockRemoteProvider.throwOnNextGet("B");
     try {
       remoteProvider.get();
@@ -193,13 +192,13 @@ public class ThrowingProviderTest extends TestCase {
   public void testExceptionsNotScopedWhenNotExceptionScoping_Bind() {
     tExceptionsNotScopedWhenNotExceptionScoping(bindInjector);
   }
-  
+
   public void testExceptionsNotScopedWhenNotExceptionScoping_Provides() {
     tExceptionsNotScopedWhenNotExceptionScoping(providesInjector);
   }
-  
+
   private void tExceptionsNotScopedWhenNotExceptionScoping(Injector injector) {
-    RemoteProvider<String> remoteProvider = 
+    RemoteProvider<String> remoteProvider =
         injector.getInstance(Key.get(remoteProviderOfString, NotExceptionScoping.class));
 
     mockRemoteProvider.throwOnNextGet("A");
@@ -209,7 +208,7 @@ public class ThrowingProviderTest extends TestCase {
     } catch (RemoteException expected) {
       assertEquals("A", expected.getMessage());
     }
-    
+
     mockRemoteProvider.throwOnNextGet("B");
     try {
       remoteProvider.get();
@@ -218,7 +217,7 @@ public class ThrowingProviderTest extends TestCase {
       assertEquals("B", expected.getMessage());
     }
   }
-  
+
   public void testAnnotations_Bind() throws RemoteException {
     final MockRemoteProvider<String> mockRemoteProviderA = new MockRemoteProvider<String>();
     final MockRemoteProvider<String> mockRemoteProviderB = new MockRemoteProvider<String>();
@@ -239,7 +238,7 @@ public class ThrowingProviderTest extends TestCase {
             });
     tAnnotations(bindInjector, mockRemoteProviderA, mockRemoteProviderB);
   }
-  
+
   public void testAnnotations_Provides() throws RemoteException {
     final MockRemoteProvider<String> mockRemoteProviderA = new MockRemoteProvider<String>();
     final MockRemoteProvider<String> mockRemoteProviderB = new MockRemoteProvider<String>();
@@ -266,29 +265,28 @@ public class ThrowingProviderTest extends TestCase {
             });
     tAnnotations(providesInjector, mockRemoteProviderA, mockRemoteProviderB);
   }
-  
-  private void tAnnotations(Injector injector, MockRemoteProvider<String> mockA,
-      MockRemoteProvider<String> mockB) throws RemoteException {
+
+  private void tAnnotations(
+      Injector injector, MockRemoteProvider<String> mockA, MockRemoteProvider<String> mockB)
+      throws RemoteException {
     mockA.setNextToReturn("A");
     mockB.setNextToReturn("B");
-    assertEquals("A", 
-        injector.getInstance(Key.get(remoteProviderOfString, Names.named("a"))).get());
+    assertEquals(
+        "A", injector.getInstance(Key.get(remoteProviderOfString, Names.named("a"))).get());
 
-    assertEquals("B", 
-        injector.getInstance(Key.get(remoteProviderOfString)).get());
+    assertEquals("B", injector.getInstance(Key.get(remoteProviderOfString)).get());
   }
-  
+
   public void testUndeclaredExceptions_Bind() throws RemoteException {
     tUndeclaredExceptions(bindInjector);
   }
-  
+
   public void testUndeclaredExceptions_Provides() throws RemoteException {
     tUndeclaredExceptions(providesInjector);
   }
 
-  private void tUndeclaredExceptions(Injector injector) throws RemoteException { 
-    RemoteProvider<String> remoteProvider = 
-        injector.getInstance(Key.get(remoteProviderOfString));
+  private void tUndeclaredExceptions(Injector injector) throws RemoteException {
+    RemoteProvider<String> remoteProvider = injector.getInstance(Key.get(remoteProviderOfString));
     mockRemoteProvider.throwOnNextGet(new IndexOutOfBoundsException("A"));
     try {
       remoteProvider.get();
@@ -322,11 +320,10 @@ public class ThrowingProviderTest extends TestCase {
               }
             });
 
-    assertEquals("A",
-        bindInjector.getInstance(Key.get(remoteProviderOfString)).get());
+    assertEquals("A", bindInjector.getInstance(Key.get(remoteProviderOfString)).get());
   }
 
-  static class SubMockRemoteProvider extends MockRemoteProvider<String> { }
+  static class SubMockRemoteProvider extends MockRemoteProvider<String> {}
 
   public void testBindingToNonInterfaceType_Bind() throws RemoteException {
     try {
@@ -341,11 +338,12 @@ public class ThrowingProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(MockRemoteProvider.class.getName() + " must be an interface",
+      assertEquals(
+          MockRemoteProvider.class.getName() + " must be an interface",
           Iterables.getOnlyElement(expected.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testBindingToNonInterfaceType_Provides() throws RemoteException {
     try {
       Guice.createInjector(
@@ -363,11 +361,12 @@ public class ThrowingProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(MockRemoteProvider.class.getName() + " must be an interface",
+      assertEquals(
+          MockRemoteProvider.class.getName() + " must be an interface",
           Iterables.getOnlyElement(expected.getErrorMessages()).getMessage());
     }
-  }  
-  
+  }
+
   public void testBindingToSubSubInterface_Bind() throws RemoteException {
     try {
       bindInjector =
@@ -381,11 +380,13 @@ public class ThrowingProviderTest extends TestCase {
               });
       fail();
     } catch (CreationException expected) {
-      assertEquals(SubRemoteProvider.class.getName() + " must extend CheckedProvider (and only CheckedProvider)",
+      assertEquals(
+          SubRemoteProvider.class.getName()
+              + " must extend CheckedProvider (and only CheckedProvider)",
           Iterables.getOnlyElement(expected.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testBindingToSubSubInterface_Provides() throws RemoteException {
     try {
       Guice.createInjector(
@@ -403,12 +404,14 @@ public class ThrowingProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(SubRemoteProvider.class.getName() + " must extend CheckedProvider (and only CheckedProvider)",
+      assertEquals(
+          SubRemoteProvider.class.getName()
+              + " must extend CheckedProvider (and only CheckedProvider)",
           Iterables.getOnlyElement(expected.getErrorMessages()).getMessage());
     }
-  }    
+  }
 
-  interface SubRemoteProvider extends RemoteProvider<String> { }
+  interface SubRemoteProvider extends RemoteProvider<String> {}
 
   public void testBindingToInterfaceWithExtraMethod_Bind() throws RemoteException {
     try {
@@ -423,12 +426,14 @@ public class ThrowingProviderTest extends TestCase {
               });
       fail();
     } catch (CreationException expected) {
-      assertEquals(RemoteProviderWithExtraMethod.class.getName() + " may not declare any new methods, but declared " 
-          + RemoteProviderWithExtraMethod.class.getDeclaredMethods()[0].toGenericString(),
+      assertEquals(
+          RemoteProviderWithExtraMethod.class.getName()
+              + " may not declare any new methods, but declared "
+              + RemoteProviderWithExtraMethod.class.getDeclaredMethods()[0].toGenericString(),
           Iterables.getOnlyElement(expected.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testBindingToInterfaceWithExtraMethod_Provides() throws RemoteException {
     try {
       Guice.createInjector(
@@ -446,12 +451,14 @@ public class ThrowingProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(RemoteProviderWithExtraMethod.class.getName() + " may not declare any new methods, but declared " 
-          + RemoteProviderWithExtraMethod.class.getDeclaredMethods()[0].toGenericString(),
+      assertEquals(
+          RemoteProviderWithExtraMethod.class.getName()
+              + " may not declare any new methods, but declared "
+              + RemoteProviderWithExtraMethod.class.getDeclaredMethods()[0].toGenericString(),
           Iterables.getOnlyElement(expected.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testDependencies_Bind() {
     bindInjector =
         Guice.createInjector(
@@ -467,17 +474,19 @@ public class ThrowingProviderTest extends TestCase {
                     .to(DependentRemoteProvider.class);
               }
             });
-    
+
     HasDependencies hasDependencies =
-        (HasDependencies)bindInjector.getBinding(Key.get(remoteProviderOfString));
-    hasDependencies = 
-        (HasDependencies)bindInjector.getBinding(
-            Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
+        (HasDependencies) bindInjector.getBinding(Key.get(remoteProviderOfString));
+    hasDependencies =
+        (HasDependencies)
+            bindInjector.getBinding(
+                Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
     // Make sure that that is dependent on DependentRemoteProvider.
-    assertEquals(Dependency.get(Key.get(DependentRemoteProvider.class)), 
+    assertEquals(
+        Dependency.get(Key.get(DependentRemoteProvider.class)),
         Iterables.getOnlyElement(hasDependencies.getDependencies()));
     // And make sure DependentRemoteProvider has the proper dependencies.
-    hasDependencies = (HasDependencies)bindInjector.getBinding(DependentRemoteProvider.class);
+    hasDependencies = (HasDependencies) bindInjector.getBinding(DependentRemoteProvider.class);
     Set<Key<?>> dependencyKeys =
         ImmutableSet.copyOf(
             Iterables.transform(
@@ -488,10 +497,15 @@ public class ThrowingProviderTest extends TestCase {
                     return from.getKey();
                   }
                 }));
-    assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class), Key.get(Integer.class),
-        Key.get(Long.class), Key.get(Double.class)), dependencyKeys);
+    assertEquals(
+        ImmutableSet.<Key<?>>of(
+            Key.get(String.class),
+            Key.get(Integer.class),
+            Key.get(Long.class),
+            Key.get(Double.class)),
+        dependencyKeys);
   }
-  
+
   public void testDependencies_Provides() {
     providesInjector =
         Guice.createInjector(
@@ -511,16 +525,19 @@ public class ThrowingProviderTest extends TestCase {
                 return null;
               }
             });
-    
+
     HasDependencies hasDependencies =
-        (HasDependencies)providesInjector.getBinding(Key.get(remoteProviderOfString));
+        (HasDependencies) providesInjector.getBinding(Key.get(remoteProviderOfString));
     // RemoteProvider<String> is dependent on the provider method..
-    hasDependencies = 
-        (HasDependencies)providesInjector.getBinding(
-            Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
+    hasDependencies =
+        (HasDependencies)
+            providesInjector.getBinding(
+                Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
     // And the provider method has our real dependencies..
-    hasDependencies = (HasDependencies)providesInjector.getBinding(
-        Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
+    hasDependencies =
+        (HasDependencies)
+            providesInjector.getBinding(
+                Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
     Set<Key<?>> dependencyKeys =
         ImmutableSet.copyOf(
             Iterables.transform(
@@ -531,34 +548,40 @@ public class ThrowingProviderTest extends TestCase {
                     return from.getKey();
                   }
                 }));
-    assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class), Key.get(Integer.class),
-        Key.get(Long.class), Key.get(Double.class)), dependencyKeys);
-  }  
+    assertEquals(
+        ImmutableSet.<Key<?>>of(
+            Key.get(String.class),
+            Key.get(Integer.class),
+            Key.get(Long.class),
+            Key.get(Double.class)),
+        dependencyKeys);
+  }
 
   interface RemoteProviderWithExtraMethod<T> extends ThrowingProvider<T, RemoteException> {
     T get(T defaultValue) throws RemoteException;
   }
 
-  interface RemoteProvider<T> extends ThrowingProvider<T, RemoteException> { }
-  
+  interface RemoteProvider<T> extends ThrowingProvider<T, RemoteException> {}
+
   static class DependentRemoteProvider<T> implements RemoteProvider<T> {
     @Inject double foo;
-    
-    @Inject public DependentRemoteProvider(String foo, int bar) {
-    }
-    
-    @Inject void initialize(long foo) {}
-    
+
+    @Inject
+    public DependentRemoteProvider(String foo, int bar) {}
+
+    @Inject
+    void initialize(long foo) {}
+
     @Override
     public T get() throws RemoteException {
       return null;
     }
   }
-  
+
   static class MockRemoteProvider<T> implements RemoteProvider<T> {
     Exception nextToThrow;
     T nextToReturn;
-    
+
     public void throwOnNextGet(String message) {
       throwOnNextGet(new RemoteException(message));
     }
@@ -570,7 +593,7 @@ public class ThrowingProviderTest extends TestCase {
     public void setNextToReturn(T nextToReturn) {
       this.nextToReturn = nextToReturn;
     }
-    
+
     @Override
     public T get() throws RemoteException {
       if (nextToThrow instanceof RemoteException) {
@@ -602,10 +625,10 @@ public class ThrowingProviderTest extends TestCase {
                         });
               }
             });
-    
+
     assertEquals("A", bindInjector.getInstance(StringRemoteProvider.class).get());
   }
-  
+
   public void testBindingToInterfaceWithBoundValueType_Provides() throws RemoteException {
     providesInjector =
         Guice.createInjector(
@@ -621,11 +644,11 @@ public class ThrowingProviderTest extends TestCase {
                 return "A";
               }
             });
-    
+
     assertEquals("A", providesInjector.getInstance(StringRemoteProvider.class).get());
   }
 
-  interface StringRemoteProvider extends ThrowingProvider<String, RemoteException> { }
+  interface StringRemoteProvider extends ThrowingProvider<String, RemoteException> {}
 
   public void testBindingToInterfaceWithGeneric_Bind() throws RemoteException {
     bindInjector =
@@ -645,11 +668,11 @@ public class ThrowingProviderTest extends TestCase {
               }
             });
 
-    Key<RemoteProvider<List<String>>> key
-        = Key.get(new TypeLiteral<RemoteProvider<List<String>>>() { });
+    Key<RemoteProvider<List<String>>> key =
+        Key.get(new TypeLiteral<RemoteProvider<List<String>>>() {});
     assertEquals(Arrays.asList("A", "B"), bindInjector.getInstance(key).get());
   }
-  
+
   public void testBindingToInterfaceWithGeneric_Provides() throws RemoteException {
     providesInjector =
         Guice.createInjector(
@@ -666,11 +689,11 @@ public class ThrowingProviderTest extends TestCase {
               }
             });
 
-    Key<RemoteProvider<List<String>>> key
-        = Key.get(new TypeLiteral<RemoteProvider<List<String>>>() { });
+    Key<RemoteProvider<List<String>>> key =
+        Key.get(new TypeLiteral<RemoteProvider<List<String>>>() {});
     assertEquals(Arrays.asList("A", "B"), providesInjector.getInstance(key).get());
   }
-  
+
   public void testProviderMethodWithWrongException() {
     try {
       Guice.createInjector(
@@ -687,14 +710,18 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(InterruptedException.class.getName() + " is not compatible with the exceptions (["
-          + RemoteException.class + "]) declared in the CheckedProvider interface ("
-          + RemoteProvider.class.getName() + ")",
+    } catch (CreationException ce) {
+      assertEquals(
+          InterruptedException.class.getName()
+              + " is not compatible with the exceptions (["
+              + RemoteException.class
+              + "]) declared in the CheckedProvider interface ("
+              + RemoteProvider.class.getName()
+              + ")",
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testProviderMethodWithSubclassOfExceptionIsOk() {
     providesInjector =
         Guice.createInjector(
@@ -710,9 +737,9 @@ public class ThrowingProviderTest extends TestCase {
                 throw new AccessException("boo!");
               }
             });
-    
-    RemoteProvider<String> remoteProvider = 
-      providesInjector.getInstance(Key.get(remoteProviderOfString));
+
+    RemoteProvider<String> remoteProvider =
+        providesInjector.getInstance(Key.get(remoteProviderOfString));
 
     try {
       remoteProvider.get();
@@ -722,7 +749,7 @@ public class ThrowingProviderTest extends TestCase {
       assertEquals("boo!", expected.getMessage());
     }
   }
-  
+
   public void testProviderMethodWithSuperclassFails() {
     try {
       Guice.createInjector(
@@ -739,14 +766,18 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(IOException.class.getName() + " is not compatible with the exceptions (["
-          + RemoteException.class + "]) declared in the CheckedProvider interface ("
-          + RemoteProvider.class.getName() + ")",
+    } catch (CreationException ce) {
+      assertEquals(
+          IOException.class.getName()
+              + " is not compatible with the exceptions (["
+              + RemoteException.class
+              + "]) declared in the CheckedProvider interface ("
+              + RemoteProvider.class.getName()
+              + ")",
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testProviderMethodWithRuntimeExceptionsIsOk() throws RemoteException {
     providesInjector =
         Guice.createInjector(
@@ -762,9 +793,9 @@ public class ThrowingProviderTest extends TestCase {
                 throw new RuntimeException("boo!");
               }
             });
-    
-    RemoteProvider<String> remoteProvider = 
-      providesInjector.getInstance(Key.get(remoteProviderOfString));
+
+    RemoteProvider<String> remoteProvider =
+        providesInjector.getInstance(Key.get(remoteProviderOfString));
 
     try {
       remoteProvider.get();
@@ -773,7 +804,7 @@ public class ThrowingProviderTest extends TestCase {
       assertEquals("boo!", expected.getCause().getMessage());
     }
   }
-  
+
   public void testProviderMethodWithManyExceptions() {
     try {
       Guice.createInjector(
@@ -792,21 +823,29 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
+    } catch (CreationException ce) {
       // The only two that should fail are Interrupted & TooManyListeners.. the rest are OK.
       List<Message> errors = ImmutableList.copyOf(ce.getErrorMessages());
-      assertEquals(InterruptedException.class.getName() + " is not compatible with the exceptions (["
-          + RemoteException.class + "]) declared in the CheckedProvider interface ("
-          + RemoteProvider.class.getName() + ")",
+      assertEquals(
+          InterruptedException.class.getName()
+              + " is not compatible with the exceptions (["
+              + RemoteException.class
+              + "]) declared in the CheckedProvider interface ("
+              + RemoteProvider.class.getName()
+              + ")",
           errors.get(0).getMessage());
-      assertEquals(TooManyListenersException.class.getName() + " is not compatible with the exceptions (["
-          + RemoteException.class + "]) declared in the CheckedProvider interface ("
-          + RemoteProvider.class.getName() + ")",
+      assertEquals(
+          TooManyListenersException.class.getName()
+              + " is not compatible with the exceptions (["
+              + RemoteException.class
+              + "]) declared in the CheckedProvider interface ("
+              + RemoteProvider.class.getName()
+              + ")",
           errors.get(1).getMessage());
       assertEquals(2, errors.size());
     }
   }
-  
+
   public void testMoreTypeParameters() {
     try {
       Guice.createInjector(
@@ -823,12 +862,14 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(TooManyTypeParameters.class.getName() + " has more than one generic type parameter: [T, P]",
+    } catch (CreationException ce) {
+      assertEquals(
+          TooManyTypeParameters.class.getName()
+              + " has more than one generic type parameter: [T, P]",
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
-    }    
+    }
   }
-  
+
   public void testWrongThrowingProviderType() {
     try {
       Guice.createInjector(
@@ -845,14 +886,15 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(WrongThrowingProviderType.class.getName() 
-          + " does not properly extend CheckedProvider, the first type parameter of CheckedProvider "
-          + "(java.lang.String) is not a generic type",
+    } catch (CreationException ce) {
+      assertEquals(
+          WrongThrowingProviderType.class.getName()
+              + " does not properly extend CheckedProvider, the first type parameter of CheckedProvider "
+              + "(java.lang.String) is not a generic type",
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
-    }    
+    }
   }
-  
+
   public void testOneMethodThatIsntGet() {
     try {
       Guice.createInjector(
@@ -869,13 +911,15 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(OneNoneGetMethod.class.getName() 
-          + " may not declare any new methods, but declared " + Classes.toString(OneNoneGetMethod.class.getDeclaredMethods()[0]),
+    } catch (CreationException ce) {
+      assertEquals(
+          OneNoneGetMethod.class.getName()
+              + " may not declare any new methods, but declared "
+              + Classes.toString(OneNoneGetMethod.class.getDeclaredMethods()[0]),
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testManyMethods() {
     try {
       Guice.createInjector(
@@ -892,13 +936,15 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(ManyMethods.class.getName() 
-          + " may not declare any new methods, but declared " + Arrays.asList(ManyMethods.class.getDeclaredMethods()),
+    } catch (CreationException ce) {
+      assertEquals(
+          ManyMethods.class.getName()
+              + " may not declare any new methods, but declared "
+              + Arrays.asList(ManyMethods.class.getDeclaredMethods()),
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testIncorrectPredefinedType_Bind() {
     try {
       Guice.createInjector(
@@ -917,13 +963,14 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(StringRemoteProvider.class.getName() 
-          + " expects the value type to be java.lang.String, but it was java.lang.Integer",
+    } catch (CreationException ce) {
+      assertEquals(
+          StringRemoteProvider.class.getName()
+              + " expects the value type to be java.lang.String, but it was java.lang.Integer",
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
-  
+
   public void testIncorrectPredefinedType_Provides() {
     try {
       Guice.createInjector(
@@ -940,25 +987,26 @@ public class ThrowingProviderTest extends TestCase {
             }
           });
       fail();
-    } catch(CreationException ce) {
-      assertEquals(StringRemoteProvider.class.getName() 
-          + " expects the value type to be java.lang.String, but it was java.lang.Integer",
+    } catch (CreationException ce) {
+      assertEquals(
+          StringRemoteProvider.class.getName()
+              + " expects the value type to be java.lang.String, but it was java.lang.Integer",
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
-  
-  private static interface TooManyTypeParameters<T, P> extends ThrowingProvider<T, Exception> {    
-  }
-  
-  private static interface WrongThrowingProviderType<T> extends ThrowingProvider<String, Exception> {    
-  }
-  
+
+  private static interface TooManyTypeParameters<T, P> extends ThrowingProvider<T, Exception> {}
+
+  private static interface WrongThrowingProviderType<T>
+      extends ThrowingProvider<String, Exception> {}
+
   private static interface OneNoneGetMethod<T> extends ThrowingProvider<T, Exception> {
     T bar();
   }
-  
+
   private static interface ManyMethods<T> extends ThrowingProvider<T, Exception> {
     T bar();
+
     String baz();
   }
 }

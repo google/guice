@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.ElementSource;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -31,9 +30,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * Reasonable implementation for {@link NameFactory}. Mostly takes various
- * {@link Object#toString()}s and strips package names out of them so that
- * they'll fit on the graph.
+ * Reasonable implementation for {@link NameFactory}. Mostly takes various {@link
+ * Object#toString()}s and strips package names out of them so that they'll fit on the graph.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
@@ -45,7 +43,7 @@ public class ShortNameFactory implements NameFactory {
     } else if (member instanceof Method) {
       return "#" + member.getName() + "(...)";
     } else {
-      return member.getName();      
+      return member.getName();
     }
   }
 
@@ -59,7 +57,7 @@ public class ShortNameFactory implements NameFactory {
       String annotationString = annotation.toString();
       String canonicalName = annotationType.getName();
       String simpleName = annotationType.getSimpleName();
- 
+
       return annotationString.replace(canonicalName, simpleName).replace("()", "");
     } else if (annotationType != null) {
       return "@" + annotationType.getSimpleName();
@@ -133,8 +131,8 @@ public class ShortNameFactory implements NameFactory {
   }
 
   /**
-   * Eliminates runs of lowercase characters and numbers separated by periods.
-   * Seems to remove packages from fully-qualified type names pretty well.
+   * Eliminates runs of lowercase characters and numbers separated by periods. Seems to remove
+   * packages from fully-qualified type names pretty well.
    */
   private String stripPackages(String str) {
     return str.replaceAll("(^|[< .\\(])([a-z0-9]+\\.)*", "$1");

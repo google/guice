@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,16 +33,20 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
   final T instance;
   final ImmutableSet<InjectionPoint> injectionPoints;
 
-  public InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Set<InjectionPoint> injectionPoints,
+  public InstanceBindingImpl(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Set<InjectionPoint> injectionPoints,
       T instance) {
     super(injector, key, source, internalFactory, Scoping.EAGER_SINGLETON);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.instance = instance;
   }
 
-  public InstanceBindingImpl(Object source, Key<T> key, Scoping scoping,
-      Set<InjectionPoint> injectionPoints, T instance) {
+  public InstanceBindingImpl(
+      Object source, Key<T> key, Scoping scoping, Set<InjectionPoint> injectionPoints, T instance) {
     super(source, key, scoping);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.instance = instance;
@@ -86,7 +90,8 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
     binder.withSource(getSource()).bind(getKey()).toInstance(instance);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(InstanceBinding.class)
         .add("key", getKey())
         .add("source", getSource())
@@ -96,11 +101,11 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
 
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof InstanceBindingImpl) {
-      InstanceBindingImpl<?> o = (InstanceBindingImpl<?>)obj;
+    if (obj instanceof InstanceBindingImpl) {
+      InstanceBindingImpl<?> o = (InstanceBindingImpl<?>) obj;
       return getKey().equals(o.getKey())
-        && getScoping().equals(o.getScoping())
-        && Objects.equal(instance, o.instance);
+          && getScoping().equals(o.getScoping())
+          && Objects.equal(instance, o.instance);
     } else {
       return false;
     }

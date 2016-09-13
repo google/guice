@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,26 +21,21 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
 import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.DynamicFinder;
 import com.google.inject.persist.finder.Finder;
-import com.google.inject.util.Providers;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * JPA provider for guice persist.
@@ -51,15 +46,16 @@ public final class JpaPersistModule extends PersistModule {
   private final String jpaUnit;
 
   public JpaPersistModule(String jpaUnit) {
-    Preconditions.checkArgument(null != jpaUnit && jpaUnit.length() > 0,
-        "JPA unit name must be a non-empty string.");
+    Preconditions.checkArgument(
+        null != jpaUnit && jpaUnit.length() > 0, "JPA unit name must be a non-empty string.");
     this.jpaUnit = jpaUnit;
   }
 
-  private Map<?,?> properties;
+  private Map<?, ?> properties;
   private MethodInterceptor transactionInterceptor;
 
-  @Override protected void configurePersistence() {
+  @Override
+  protected void configurePersistence() {
     bindConstant().annotatedWith(Jpa.class).to(jpaUnit);
 
     bind(JpaPersistService.class).in(Singleton.class);
@@ -79,22 +75,25 @@ public final class JpaPersistModule extends PersistModule {
     }
   }
 
-  @Override protected MethodInterceptor getTransactionInterceptor() {
+  @Override
+  protected MethodInterceptor getTransactionInterceptor() {
     return transactionInterceptor;
   }
 
-  @Provides @Jpa Map<?, ?> provideProperties() {
+  @Provides
+  @Jpa
+  Map<?, ?> provideProperties() {
     return properties;
   }
 
   /**
    * Configures the JPA persistence provider with a set of properties.
-   * 
-   * @param properties A set of name value pairs that configure a JPA persistence
-   *     provider as per the specification.
+   *
+   * @param properties A set of name value pairs that configure a JPA persistence provider as per
+   *     the specification.
    * @since 4.0 (since 3.0 with a parameter type of {@code java.util.Properties})
    */
-  public JpaPersistModule properties(Map<?,?> properties) {
+  public JpaPersistModule properties(Map<?, ?> properties) {
     this.properties = properties;
     return this;
   }
@@ -164,9 +163,12 @@ public final class JpaPersistModule extends PersistModule {
     requestInjection(finderInvoker);
 
     @SuppressWarnings("unchecked") // Proxy must produce instance of type given.
-    T proxy = (T) Proxy
-        .newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[] { iface },
-            finderInvoker);
+    T proxy =
+        (T)
+            Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class<?>[] {iface},
+                finderInvoker);
 
     bind(iface).toInstance(proxy);
   }
@@ -181,8 +183,12 @@ public final class JpaPersistModule extends PersistModule {
     for (Method method : iface.getMethods()) {
       DynamicFinder finder = DynamicFinder.from(method);
       if (null == finder) {
-        addError("Dynamic Finder methods must be annotated with @Finder, but " + iface
-            + "." + method.getName() + " was not");
+        addError(
+            "Dynamic Finder methods must be annotated with @Finder, but "
+                + iface
+                + "."
+                + method.getName()
+                + " was not");
         valid = false;
       }
     }

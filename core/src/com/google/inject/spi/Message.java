@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.util.SourceProvider;
-
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
@@ -32,6 +31,7 @@ import java.util.List;
  * An error message and the context in which it occured. Messages are usually created internally by
  * Guice and its extensions. Messages can be created explicitly in a module using {@link
  * com.google.inject.Binder#addError(Throwable) addError()} statements:
+ *
  * <pre>
  *     try {
  *       bindPropertiesFromFile();
@@ -46,18 +46,14 @@ public final class Message implements Serializable, Element {
   private final Throwable cause;
   private final List<Object> sources;
 
-  /**
-   * @since 2.0
-   */
+  /** @since 2.0 */
   public Message(List<Object> sources, String message, Throwable cause) {
     this.sources = ImmutableList.copyOf(sources);
     this.message = checkNotNull(message, "message");
     this.cause = cause;
   }
 
-  /**
-   * @since 4.0
-   */
+  /** @since 4.0 */
   public Message(String message, Throwable cause) {
     this(ImmutableList.of(), message, cause);
   }
@@ -82,9 +78,7 @@ public final class Message implements Serializable, Element {
     return sources;
   }
 
-  /**
-   * Gets the error message text.
-   */
+  /** Gets the error message text. */
   public String getMessage() {
     return message;
   }
@@ -96,8 +90,8 @@ public final class Message implements Serializable, Element {
   }
 
   /**
-   * Returns the throwable that caused this message, or {@code null} if this
-   * message was not caused by a throwable.
+   * Returns the throwable that caused this message, or {@code null} if this message was not caused
+   * by a throwable.
    *
    * @since 2.0
    */
@@ -105,15 +99,18 @@ public final class Message implements Serializable, Element {
     return cause;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return message;
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return Objects.hashCode(message, cause, sources);
   }
 
-  @Override public boolean equals(Object o) {
+  @Override
+  public boolean equals(Object o) {
     if (!(o instanceof Message)) {
       return false;
     }

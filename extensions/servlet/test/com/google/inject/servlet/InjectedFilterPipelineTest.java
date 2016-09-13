@@ -13,11 +13,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -26,10 +22,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import junit.framework.TestCase;
 
 /**
- * Exactly the same as {@linkplain com.google.inject.servlet.FilterPipelineTest} except
- * that we test that the static pipeline is not used.
+ * Exactly the same as {@linkplain com.google.inject.servlet.FilterPipelineTest} except that we test
+ * that the static pipeline is not used.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -39,40 +36,43 @@ public class InjectedFilterPipelineTest extends TestCase {
 
   @Override
   public final void setUp() {
-    injector1 = Guice.createInjector(new ServletModule() {
+    injector1 =
+        Guice.createInjector(
+            new ServletModule() {
 
-      @Override
-      protected void configureServlets() {
-          filter("/*").through(TestFilter.class);
-          filter("*.html").through(TestFilter.class);
-          filter("/*").through(Key.get(TestFilter.class));
-          filter("*.jsp").through(Key.get(TestFilter.class));
+              @Override
+              protected void configureServlets() {
+                filter("/*").through(TestFilter.class);
+                filter("*.html").through(TestFilter.class);
+                filter("/*").through(Key.get(TestFilter.class));
+                filter("*.jsp").through(Key.get(TestFilter.class));
 
-          // These filters should never fire
-          filter("/index/*").through(Key.get(NeverFilter.class));
-          filter("/public/login/*").through(Key.get(NeverFilter.class));
-      }
-    });
+                // These filters should never fire
+                filter("/index/*").through(Key.get(NeverFilter.class));
+                filter("/public/login/*").through(Key.get(NeverFilter.class));
+              }
+            });
 
     // Test second injector with exactly opposite pipeline config
-    injector2 = Guice.createInjector(new ServletModule() {
+    injector2 =
+        Guice.createInjector(
+            new ServletModule() {
 
-      @Override
-      protected void configureServlets() {
-          // These filters should never fire
-          filter("*.html").through(NeverFilter.class);
-          filter("/non-jsp/*").through(Key.get(NeverFilter.class));
+              @Override
+              protected void configureServlets() {
+                // These filters should never fire
+                filter("*.html").through(NeverFilter.class);
+                filter("/non-jsp/*").through(Key.get(NeverFilter.class));
 
-          // only these filters fire.
-          filter("/index/*").through(Key.get(TestFilter.class));
-          filter("/public/login/*").through(Key.get(TestFilter.class));
-      }
-    });
+                // only these filters fire.
+                filter("/index/*").through(Key.get(TestFilter.class));
+                filter("/public/login/*").through(Key.get(TestFilter.class));
+              }
+            });
   }
 
   @Override
-  public final void tearDown() {
-  }
+  public final void tearDown() {}
 
   public final void testDispatchThruInjectedGuiceFilter() throws ServletException, IOException {
 
@@ -84,16 +84,12 @@ public class InjectedFilterPipelineTest extends TestCase {
 
     //begin mock script ***
 
-    expect(filterConfig.getServletContext())
-        .andReturn(servletContext)
-        .once();
+    expect(filterConfig.getServletContext()).andReturn(servletContext).once();
 
     expect(request.getRequestURI())
         .andReturn("/non-jsp/login.html") // use a path that will fail in injector2
         .anyTimes();
-    expect(request.getContextPath())
-        .andReturn("")
-        .anyTimes();
+    expect(request.getContextPath()).andReturn("").anyTimes();
 
     //at the end, proceed down webapp's normal filter chain
     proceedingFilterChain.doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
@@ -111,11 +107,6 @@ public class InjectedFilterPipelineTest extends TestCase {
     //assert expectations
     verify(filterConfig, servletContext, request, proceedingFilterChain);
 
-
-
-
-
-
     // reset mocks and run them against the other injector
     reset(filterConfig, servletContext, request, proceedingFilterChain);
 
@@ -124,15 +115,11 @@ public class InjectedFilterPipelineTest extends TestCase {
 
     //begin mock script ***
 
-    expect(filterConfig.getServletContext())
-        .andReturn(servletContext)
-        .once();
+    expect(filterConfig.getServletContext()).andReturn(servletContext).once();
     expect(request.getRequestURI())
-            .andReturn("/public/login/login.jsp") // use a path that will fail in injector1
-            .anyTimes();
-    expect(request.getContextPath())
-        .andReturn("")
+        .andReturn("/public/login/login.jsp") // use a path that will fail in injector1
         .anyTimes();
+    expect(request.getContextPath()).andReturn("").anyTimes();
 
     //at the end, proceed down webapp's normal filter chain
     proceedingFilterChain2.doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());

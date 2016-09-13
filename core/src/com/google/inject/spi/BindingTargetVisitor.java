@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,8 @@ package com.google.inject.spi;
 /**
  * Visits each of the strategies used to find an instance to satisfy an injection.
  *
- * @param <V> any type to be returned by the visit method. Use {@link Void} with
- *     {@code return null} if no return type is needed.
+ * @param <V> any type to be returned by the visit method. Use {@link Void} with {@code return null}
+ *     if no return type is needed.
  * @since 2.0
  */
 public interface BindingTargetVisitor<T, V> {
@@ -45,8 +45,8 @@ public interface BindingTargetVisitor<T, V> {
   V visit(ProviderKeyBinding<? extends T> binding);
 
   /**
-   * Visit a linked key binding. The other key's binding is used to resolve injections. This
-   * target is found in both module and injector bindings.
+   * Visit a linked key binding. The other key's binding is used to resolve injections. This target
+   * is found in both module and injector bindings.
    */
   V visit(LinkedKeyBinding<? extends T> binding);
 
@@ -57,8 +57,8 @@ public interface BindingTargetVisitor<T, V> {
   V visit(ExposedBinding<? extends T> binding);
 
   /**
-   * Visit an untargetted binding. This target is found only on module bindings. It indicates
-   * that the injector should use its implicit binding strategies to resolve injections.
+   * Visit an untargetted binding. This target is found only on module bindings. It indicates that
+   * the injector should use its implicit binding strategies to resolve injections.
    */
   V visit(UntargettedBinding<? extends T> binding);
 
@@ -69,8 +69,8 @@ public interface BindingTargetVisitor<T, V> {
   V visit(ConstructorBinding<? extends T> binding);
 
   /**
-   * Visit a binding created from converting a bound instance to a new type. The source binding
-   * has the same binding annotation but a different type. This target is found only on injector
+   * Visit a binding created from converting a bound instance to a new type. The source binding has
+   * the same binding annotation but a different type. This target is found only on injector
    * bindings.
    */
   V visit(ConvertedConstantBinding<? extends T> binding);

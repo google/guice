@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,19 +23,21 @@ import java.util.List;
 
 /**
  * Alias creator that creates an alias for each {@link ProviderBinding}. These {@link Binding}s
- * arise from an {@link InjectionPoint} for the {@link Provider} interface. Since this isn't
- * very interesting information, we don't render this binding on the graph, and just alias the two
- * nodes.
+ * arise from an {@link InjectionPoint} for the {@link Provider} interface. Since this isn't very
+ * interesting information, we don't render this binding on the graph, and just alias the two nodes.
  *
  * @author bojand@google.com (Bojan Djordjevic)
  */
 final class ProviderAliasCreator implements AliasCreator {
-  @Override public Iterable<Alias> createAliases(Iterable<Binding<?>> bindings) {
+  @Override
+  public Iterable<Alias> createAliases(Iterable<Binding<?>> bindings) {
     List<Alias> aliases = Lists.newArrayList();
     for (Binding<?> binding : bindings) {
       if (binding instanceof ProviderBinding) {
-        aliases.add(new Alias(NodeId.newTypeId(binding.getKey()),
-            NodeId.newTypeId(((ProviderBinding<?>) binding).getProvidedKey())));
+        aliases.add(
+            new Alias(
+                NodeId.newTypeId(binding.getKey()),
+                NodeId.newTypeId(((ProviderBinding<?>) binding).getProvidedKey())));
       }
     }
     return aliases;

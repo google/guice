@@ -25,17 +25,20 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.ProviderKeyBinding;
-
 import java.util.Set;
 
-final class LinkedProviderBindingImpl<T>
-    extends BindingImpl<T> implements ProviderKeyBinding<T>, HasDependencies, DelayedInitialize {
+final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
+    implements ProviderKeyBinding<T>, HasDependencies, DelayedInitialize {
 
   final Key<? extends javax.inject.Provider<? extends T>> providerKey;
   final DelayedInitialize delayedInitializer;
 
-  private LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Scoping scoping,
+  private LinkedProviderBindingImpl(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
       DelayedInitialize delayedInitializer) {
     super(injector, key, source, internalFactory, scoping);
@@ -43,25 +46,36 @@ final class LinkedProviderBindingImpl<T>
     this.delayedInitializer = delayedInitializer;
   }
 
-  public LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Scoping scoping,
+  public LinkedProviderBindingImpl(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey) {
     this(injector, key, source, internalFactory, scoping, providerKey, null);
   }
 
-  LinkedProviderBindingImpl(Object source, Key<T> key, Scoping scoping,
+  LinkedProviderBindingImpl(
+      Object source,
+      Key<T> key,
+      Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey) {
     super(source, key, scoping);
     this.providerKey = providerKey;
     this.delayedInitializer = null;
   }
 
-  static <T> LinkedProviderBindingImpl<T> createWithInitializer(InjectorImpl injector, Key<T> key,
-      Object source, InternalFactory<? extends T> internalFactory, Scoping scoping,
+  static <T> LinkedProviderBindingImpl<T> createWithInitializer(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
       DelayedInitialize delayedInitializer) {
-    return new LinkedProviderBindingImpl<T>(injector, key, source, internalFactory, scoping,
-        providerKey, delayedInitializer);
+    return new LinkedProviderBindingImpl<T>(
+        injector, key, source, internalFactory, scoping, providerKey, delayedInitializer);
   }
 
   @Override
@@ -98,11 +112,12 @@ final class LinkedProviderBindingImpl<T>
 
   @Override
   public void applyTo(Binder binder) {
-    getScoping().applyTo(binder.withSource(getSource())
-        .bind(getKey()).toProvider(getProviderKey()));
+    getScoping()
+        .applyTo(binder.withSource(getSource()).bind(getKey()).toProvider(getProviderKey()));
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(ProviderKeyBinding.class)
         .add("key", getKey())
         .add("source", getSource())
@@ -113,11 +128,11 @@ final class LinkedProviderBindingImpl<T>
 
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof LinkedProviderBindingImpl) {
-      LinkedProviderBindingImpl<?> o = (LinkedProviderBindingImpl<?>)obj;
+    if (obj instanceof LinkedProviderBindingImpl) {
+      LinkedProviderBindingImpl<?> o = (LinkedProviderBindingImpl<?>) obj;
       return getKey().equals(o.getKey())
-        && getScoping().equals(o.getScoping())
-        && Objects.equal(providerKey, o.providerKey);
+          && getScoping().equals(o.getScoping())
+          && Objects.equal(providerKey, o.providerKey);
     } else {
       return false;
     }
