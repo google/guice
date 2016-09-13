@@ -52,7 +52,8 @@ public class Struts2FactoryTest extends TestCase {
             @Override
             protected void configureServlets() {
               // Struts 2 setup
-              bind(StrutsPrepareAndExecuteFilter.class).in(Singleton.class);
+              bind(StrutsPrepareAndExecuteFilter.class)
+                  .in(com.google.inject.Singleton.class);
               filter("/*").through(StrutsPrepareAndExecuteFilter.class);
             }
           },
