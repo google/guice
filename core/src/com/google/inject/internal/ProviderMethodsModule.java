@@ -18,8 +18,8 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -48,8 +48,10 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ProviderMethodsModule implements Module {
+  private static final ImmutableSet<Class<Provides>> PROVIDES_ANNOTATIONS =
+      ImmutableSet.of(Provides.class);
 
-  private static ModuleAnnotatedMethodScanner PROVIDES_BUILDER =
+  private static final ModuleAnnotatedMethodScanner PROVIDES_BUILDER =
       new ModuleAnnotatedMethodScanner() {
         @Override
         public <T> Key<T> prepareMethod(
@@ -59,7 +61,7 @@ public final class ProviderMethodsModule implements Module {
 
         @Override
         public Set<? extends Class<? extends Annotation>> annotationClasses() {
-          return ImmutableSet.of(Provides.class);
+          return PROVIDES_ANNOTATIONS;
         }
       };
 
@@ -112,75 +114,91 @@ public final class ProviderMethodsModule implements Module {
   }
 
   @Override
-  public synchronized void configure(Binder binder) {
+  public void configure(Binder binder) {
     for (ProviderMethod<?> providerMethod : getProviderMethods(binder)) {
       providerMethod.configure(binder);
     }
   }
 
   public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
-    List<ProviderMethod<?>> result = Lists.newArrayList();
-    Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
+    List<ProviderMethod<?>> result = null;
+    // The highest class in the type hierarchy that contained a provider method definition.
+    Class<?> superMostClass = delegate.getClass();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
-        // private/static methods cannot override or be overridden by other methods, so there is no
-        // point in indexing them.
-        // Skip synthetic methods and bridge methods since java will automatically generate
-        // synthetic overrides in some cases where we don't want to generate an error (e.g.
-        // increasing visibility of a subclass).
-        if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
-            && !method.isBridge()
-            && !method.isSynthetic()) {
-          methodsBySignature.put(new Signature(method), method);
-        }
-        Optional<Annotation> annotation = isProvider(binder, method);
-        if (annotation.isPresent()) {
-          result.add(createProviderMethod(binder, method, annotation.get()));
+        Annotation annotation = getAnnotation(binder, method);
+        if (annotation != null) {
+          if (result == null) {
+            result = Lists.newArrayList();
+          }
+          result.add(createProviderMethod(binder, method, annotation));
+          superMostClass = c;
         }
       }
     }
-    // we have found all the providers and now need to identify if any were overridden
-    // In the worst case this will have O(n^2) in the number of @Provides methods, but that is only
-    // assuming that every method is an override, in general it should be very quick.
-    for (ProviderMethod<?> provider : result) {
-      Method method = provider.getMethod();
-      for (Method matchingSignature : methodsBySignature.get(new Signature(method))) {
-        // matching signature is in the same class or a super class, therefore method cannot be
-        // overridding it.
-        if (matchingSignature.getDeclaringClass().isAssignableFrom(method.getDeclaringClass())) {
-          continue;
+    if (result == null) {
+      // We didn't find anything
+      return ImmutableList.of();
+    }
+    // We have found some provider methods, now we need to check if any were overridden.
+    // We do this as a separate pass to avoid calculating all the signatures when there are no
+    // provides methods, or when all provides methods are defined in a single class.
+    Multimap<Signature, Method> methodsBySignature = null;
+    // We can stop scanning when we see superMostClass, since no superclass method can override
+    // a method in a subclass.  Corrollary, if superMostClass == delegate.getClass(), there can be
+    // no overrides of a provides method.
+    for (Class<?> c = delegate.getClass(); c != superMostClass; c = c.getSuperclass()) {
+      for (Method method : c.getDeclaredMethods()) {
+        if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
+            && !method.isBridge()
+            && !method.isSynthetic()) {
+          if (methodsBySignature == null) {
+            methodsBySignature = HashMultimap.create();
+          }
+          methodsBySignature.put(new Signature(typeLiteral, method), method);
         }
-        // now we know matching signature is in a subtype of method.getDeclaringClass()
-        if (overrides(matchingSignature, method)) {
-          String annotationString =
-              provider.getAnnotation().annotationType() == Provides.class
-                  ? "@Provides"
-                  : "@" + provider.getAnnotation().annotationType().getCanonicalName();
-          binder.addError(
-              "Overriding "
-                  + annotationString
-                  + " methods is not allowed."
-                  + "\n\t"
-                  + annotationString
-                  + " method: %s\n\toverridden by: %s",
-              method,
-              matchingSignature);
-          break;
+      }
+    }
+    if (methodsBySignature != null) {
+      // we have found all the signatures and now need to identify if any were overridden
+      // In the worst case this will have O(n^2) in the number of @Provides methods, but that is
+      // only assuming that every method is an override, in general it should be very quick.
+      for (ProviderMethod<?> provider : result) {
+        Method method = provider.getMethod();
+        for (Method matchingSignature :
+            methodsBySignature.get(new Signature(typeLiteral, method))) {
+          // matching signature is in the same class or a super class, therefore method cannot be
+          // overridding it.
+          if (matchingSignature.getDeclaringClass().isAssignableFrom(method.getDeclaringClass())) {
+            continue;
+          }
+          // now we know matching signature is in a subtype of method.getDeclaringClass()
+          if (overrides(matchingSignature, method)) {
+            String annotationString =
+                provider.getAnnotation().annotationType() == Provides.class
+                    ? "@Provides"
+                    : "@" + provider.getAnnotation().annotationType().getCanonicalName();
+            binder.addError(
+                "Overriding "
+                    + annotationString
+                    + " methods is not allowed."
+                    + "\n\t"
+                    + annotationString
+                    + " method: %s\n\toverridden by: %s",
+                method,
+                matchingSignature);
+            break;
+          }
         }
       }
     }
     return result;
   }
 
-  /**
-   * Returns true if the method is a provider.
-   *
-   * <p>Synthetic bridge methods are excluded. Starting with JDK 8, javac copies annotations onto
-   * bridge methods (which always have erased signatures).
-   */
-  private Optional<Annotation> isProvider(Binder binder, Method method) {
+  /** Returns the annotation that is claimed by the scanner, or null if there is none. */
+  private Annotation getAnnotation(Binder binder, Method method) {
     if (method.isBridge() || method.isSynthetic()) {
-      return Optional.absent();
+      return null;
     }
     Annotation annotation = null;
     for (Class<? extends Annotation> annotationClass : scanner.annotationClasses()) {
@@ -191,20 +209,20 @@ public final class ProviderMethodsModule implements Module {
               "More than one annotation claimed by %s on method %s."
                   + " Methods can only have one annotation claimed per scanner.",
               scanner, method);
-          return Optional.absent();
+          return null;
         }
         annotation = foundAnnotation;
       }
     }
-    return Optional.fromNullable(annotation);
+    return annotation;
   }
 
-  private final class Signature {
+  private static final class Signature {
     final Class<?>[] parameters;
     final String name;
     final int hashCode;
 
-    Signature(Method method) {
+    Signature(TypeLiteral<?> typeLiteral, Method method) {
       this.name = method.getName();
       // We need to 'resolve' the parameters against the actual class type in case this method uses
       // type parameters.  This is so we can detect overrides of generic superclass methods where
