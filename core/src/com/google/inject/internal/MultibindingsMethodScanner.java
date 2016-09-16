@@ -40,13 +40,14 @@ import java.util.Set;
  */
 public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScanner {
   public static final MultibindingsMethodScanner INSTANCE = new MultibindingsMethodScanner();
+  private static final ImmutableSet<Class<? extends Annotation>> ANNOTATIONS =
+      ImmutableSet.of(ProvidesIntoSet.class, ProvidesIntoMap.class, ProvidesIntoOptional.class);
 
   private MultibindingsMethodScanner() {}
 
   @Override
   public Set<? extends Class<? extends Annotation>> annotationClasses() {
-    return ImmutableSet.of(
-        ProvidesIntoSet.class, ProvidesIntoMap.class, ProvidesIntoOptional.class);
+    return ANNOTATIONS;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"}) // mapKey doesn't know its key type

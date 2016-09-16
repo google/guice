@@ -37,11 +37,13 @@ import java.util.Set;
  * @author cgruber@google.com (Christian Gruber)
  */
 final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
-  static DaggerMethodScanner INSTANCE = new DaggerMethodScanner();
+  static final DaggerMethodScanner INSTANCE = new DaggerMethodScanner();
+  private static final ImmutableSet<Class<Provides>> ANNOTATIONS =
+      ImmutableSet.of(dagger.Provides.class);
 
   @Override
   public Set<? extends Class<? extends Annotation>> annotationClasses() {
-    return ImmutableSet.of(dagger.Provides.class);
+    return ANNOTATIONS;
   }
 
   @Override
