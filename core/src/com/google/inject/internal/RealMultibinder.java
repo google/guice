@@ -135,7 +135,7 @@ public final class RealMultibinder<T> implements Module {
     return bindingSelection.getSetKey();
   }
 
-  public TypeLiteral<?> getElementTypeLiteral() {
+  TypeLiteral<T> getElementTypeLiteral() {
     return bindingSelection.getElementTypeLiteral();
   }
 

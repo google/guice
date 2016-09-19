@@ -886,7 +886,7 @@ public class MapBinderTest extends TestCase {
     }
   }
 
-  /** We just want to make sure that mapbinder's binding depends on the underlying multibinder. */
+  /** Check that the dependencies are correct. */
   public void testMultibinderDependencies() {
     Injector injector =
         Guice.createInjector(
@@ -904,9 +904,23 @@ public class MapBinderTest extends TestCase {
 
     Binding<Map<Integer, String>> binding = injector.getBinding(new Key<Map<Integer, String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;
-    Key<?> setKey = new Key<Set<Map.Entry<Integer, Provider<String>>>>() {};
-    assertEquals(
-        ImmutableSet.<Dependency<?>>of(Dependency.get(setKey)), withDependencies.getDependencies());
+    Set<Dependency<?>> actualDependencies = withDependencies.getDependencies();
+
+    // We expect two dependencies, because the dependencies are annotated with
+    // Element, which has a uniqueId, it's difficult to directly compare them.
+    // Instead we will manually compare all the fields except the uniqueId
+    assertEquals(2, actualDependencies.size());
+    for (Dependency<?> dependency : actualDependencies) {
+      Key<?> key = dependency.getKey();
+      assertEquals(new TypeLiteral<String>() {}, key.getTypeLiteral());
+      Annotation annotation = dependency.getKey().getAnnotation();
+      assertTrue(annotation instanceof Element);
+      Element element = (Element) annotation;
+      assertEquals("", element.setName());
+      assertEquals(Element.Type.MAPBINDER, element.type());
+      assertEquals("java.lang.Integer", element.keyType());
+    }
+
     Set<String> elements = Sets.newHashSet();
     elements.addAll(recurseForDependencies(injector, withDependencies));
     assertEquals(ImmutableSet.of("A", "B"), elements);
@@ -926,7 +940,7 @@ public class MapBinderTest extends TestCase {
     return elements;
   }
 
-  /** We just want to make sure that mapbinder's binding depends on the underlying multibinder. */
+  /** Check that the dependencies are correct in the Tool Stage. */
   public void testMultibinderDependenciesInToolStage() {
     Injector injector =
         Guice.createInjector(
@@ -945,14 +959,25 @@ public class MapBinderTest extends TestCase {
 
     Binding<Map<Integer, String>> binding = injector.getBinding(new Key<Map<Integer, String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;
-    Key<?> setKey = new Key<Set<Map.Entry<Integer, Provider<String>>>>() {};
-    assertEquals(
-        ImmutableSet.<Dependency<?>>of(Dependency.get(setKey)), withDependencies.getDependencies());
+    Set<Dependency<?>> actualDependencies = withDependencies.getDependencies();
+
+    // We expect two dependencies, because the dependencies are annotated with
+    // Element, which has a uniqueId, it's difficult to directly compare them.
+    // Instead we will manually compare all the fields except the uniqueId
+    assertEquals(2, actualDependencies.size());
+    for (Dependency<?> dependency : actualDependencies) {
+      Key<?> key = dependency.getKey();
+      assertEquals(new TypeLiteral<String>() {}, key.getTypeLiteral());
+      Annotation annotation = dependency.getKey().getAnnotation();
+      assertTrue(annotation instanceof Element);
+      Element element = (Element) annotation;
+      assertEquals("", element.setName());
+      assertEquals(Element.Type.MAPBINDER, element.type());
+      assertEquals("java.lang.Integer", element.keyType());
+    }
   }
 
-  /**
-   * Our implementation maintains order, but doesn't guarantee it in the API spec.
-   */
+  /** Our implementation maintains order, but doesn't guarantee it in the API spec. */
   // TODO: specify the iteration order
   public void testBindOrderEqualsIterationOrder() {
     Injector injector =
