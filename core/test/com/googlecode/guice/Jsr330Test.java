@@ -508,7 +508,7 @@ public class Jsr330Test extends TestCase {
   }
 
   abstract static class AbstractM {
-    @SuppressWarnings("InjectJavaxInjectOnAbstractMethod")
+    @SuppressWarnings("JavaxInjectOnAbstractMethod")
     @Inject
     abstract void setB(B b);
   }
