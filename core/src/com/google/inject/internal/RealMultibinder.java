@@ -29,9 +29,6 @@ import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -190,23 +187,32 @@ public final class RealMultibinder<T> implements Module {
         // if localInjectors == null, then we have no bindings so return the empty set.
         return ImmutableSet.of();
       }
-      boolean localPermitsDuplicates = permitDuplicates;
-      int size = localInjectors.length;
-      LinkedHashSet<T> result = Sets.newLinkedHashSetWithExpectedSize(size);
-      for (int i = 0; i < size; i++) {
+      // Ideally we would just add to an ImmutableSet.Builder, but if we did that and there were
+      // duplicates we wouldn't be able to tell which one was the duplicate.  So to manage this we
+      // first put everything into an array and then construct the set.  This way if something gets
+      // dropped we can figure out what it is.
+      @SuppressWarnings("unchecked")
+      T[] values = (T[]) new Object[localInjectors.length];
+      for (int i = 0; i < localInjectors.length; i++) {
         SingleParameterInjector<T> parameterInjector = localInjectors[i];
         T newValue = parameterInjector.inject(errors, context);
         if (newValue == null) {
-          errors.addMessage(
-              "Set injection failed due to null element bound at: %s", bindings.get(i).getSource());
-          throw errors.toException();
+          throw newNullEntryException(i, errors);
         }
-        boolean uniqueValue = result.add(newValue);
-        if (!uniqueValue && !localPermitsDuplicates) {
-          throw newDuplicateValuesException(bindings, result, bindings.get(i), newValue, errors);
-        }
+        values[i] = newValue;
       }
-      return Collections.unmodifiableSet(result);
+      ImmutableSet<T> set = ImmutableSet.copyOf(values);
+      // There are fewer items in the set than the array.  Figure out which one got dropped.
+      if (!permitDuplicates && set.size() < values.length) {
+        throw newDuplicateValuesException(set, values, errors);
+      }
+      return set;
+    }
+
+    private ErrorsException newNullEntryException(int i, Errors errors) {
+      errors.addMessage(
+          "Set injection failed due to null element bound at: %s", bindings.get(i).getSource());
+      return errors.toException();
     }
 
     @SuppressWarnings("unchecked")
@@ -220,27 +226,30 @@ public final class RealMultibinder<T> implements Module {
       }
     }
 
-    private static <T> ErrorsException newDuplicateValuesException(
-        List<Binding<T>> bindings,
-        LinkedHashSet<T> results,
-        Binding<T> newBinding,
-        T newValue,
-        Errors errors) {
+    private ErrorsException newDuplicateValuesException(
+        ImmutableSet<T> set, T[] values, Errors errors) {
+      // TODO(lukes): consider reporting all duplicate values, the easiest way would be to rebuild
+      // a new set and detect dupes as we go
       // Find the duplicate binding
-      // To do this we take advantage of the fact that results has the same order as bindings,
-      // so that once we find a matching value in the result set, we know the binding
-      // for it will have the same index.
-      Iterator<T> itr = results.iterator();
-      Binding<T> duplicateBinding = null;
-      T oldValue = null;
-      for (int i = 0; itr.hasNext(); i++) {
-        T current = itr.next();
-        if (current.equals(newValue)) {
-          oldValue = current;
-          duplicateBinding = bindings.get(i);
+      // To do this we take advantage of the fact that set, values and bindings all have the same
+      // ordering for a non-empty prefix of the set.
+      // First we scan for the first item dropped from the set.
+      int newBindingIndex = 0;
+      for (T item : set) {
+        if (item != values[newBindingIndex]) {
           break;
         }
+        newBindingIndex++;
       }
+      // once we exit the loop newBindingIndex will point at the first item in values that was
+      // dropped.
+
+      Binding<T> newBinding = bindings.get(newBindingIndex);
+      T newValue = values[newBindingIndex];
+      // Now we scan again to find the index of the value, we are guaranteed to find it.
+      int oldBindingIndex = set.asList().indexOf(newValue);
+      T oldValue = values[oldBindingIndex];
+      Binding<T> duplicateBinding = bindings.get(oldBindingIndex);
       String oldString = oldValue.toString();
       String newString = newValue.toString();
       if (Objects.equal(oldString, newString)) {
