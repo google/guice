@@ -79,6 +79,16 @@ class JpaPersistService implements Provider<EntityManager>, PersistService {
     entityManager.set(emFactory.createEntityManager());
   }
 
+  /**
+   * Clears old enitymanager when unitofwork begins
+   */
+  void beginNew() {
+    if (isWorking()) {
+      entityManager.get().clear();
+    }
+    begin();
+  }
+
   void end() {
     EntityManager em = entityManager.get();
 
@@ -145,5 +155,7 @@ class JpaPersistService implements Provider<EntityManager>, PersistService {
   @Target(ElementType.PARAMETER)
   private @interface Nullable {
   }
+
+
 
 }

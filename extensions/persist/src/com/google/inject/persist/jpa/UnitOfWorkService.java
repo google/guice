@@ -55,7 +55,7 @@ public class UnitOfWorkService implements UnitOfWork {
   private void doBegin(boolean nestedCall) {
     int level = getLevel();
     if (level == 0) {
-      emProvider.begin();
+      emProvider.beginNew();
       didWeStartWork.set(1);
     } else {
       didWeStartWork.set(level + 1);
