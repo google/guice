@@ -101,7 +101,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
             // the processor was constructed w/ it
             Initializable<T> ref =
                 initializer.requestInjection(
-                    injector, instance, (Binding<T>) binding, source, injectionPoints);
+                    injector, null, instance, (Binding<T>) binding, source, injectionPoints);
             ConstantFactory<? extends T> factory = new ConstantFactory<T>(ref);
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
@@ -124,7 +124,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
             Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
             Initializable<? extends javax.inject.Provider<? extends T>> initializable =
                 initializer.<javax.inject.Provider<? extends T>>requestInjection(
-                    injector, provider, null, source, injectionPoints);
+                    injector, null, provider, null, source, injectionPoints);
             // always visited with Binding<T>
             @SuppressWarnings("unchecked")
             InternalFactory<T> factory =

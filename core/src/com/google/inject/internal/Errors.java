@@ -443,6 +443,10 @@ public final class Errors implements Serializable {
     return addMessage("%s is an interface, but interfaces have no static injection points.", clazz);
   }
 
+  public Errors requestInjectionWithDifferentTypes(TypeLiteral<?> type1, TypeLiteral<?> type2) {
+    return addMessage("Requested injection for the same object with different types: %s and %s", type1, type2);
+  }
+
   public Errors cannotInjectFinalField(Field field) {
     return addMessage("Injected field %s cannot be final.", field);
   }

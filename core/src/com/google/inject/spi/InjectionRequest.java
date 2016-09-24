@@ -72,7 +72,7 @@ public final class InjectionRequest<T> implements Element {
    *     the valid injection points.
    */
   public Set<InjectionPoint> getInjectionPoints() throws ConfigurationException {
-    return InjectionPoint.forInstanceMethodsAndFields(instance.getClass());
+    return InjectionPoint.forInstanceMethodsAndFields(type);
   }
 
   @Override
