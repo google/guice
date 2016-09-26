@@ -29,6 +29,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -47,12 +48,16 @@ import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.RealMapBinder.ProviderMapEntry;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.MapBinderBinding;
 import com.google.inject.name.Names;
+import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Elements;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 import com.google.inject.util.Types;
@@ -1360,5 +1365,226 @@ public class MapBinderTest extends TestCase {
 
     Asserts.awaitClear(weakRef);
     WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testGetEntries() {
+    List<com.google.inject.spi.Element> elements =
+        Elements.getElements(new MapBinderWithTwoEntriesModule());
+
+    // Get the MapBinderBinding
+    MapBinderBinding<?> mapBinderBinding = getMapBinderBinding(elements);
+
+    // Execute the call to getEntries
+    List<Map.Entry<?, Binding<?>>> mapEntries = mapBinderBinding.getEntries(elements);
+
+    // Assert on the results
+    Map.Entry<?, Binding<?>> firstEntry = mapEntries.get(0);
+    assertEquals("keyOne", firstEntry.getKey());
+    Binding<?> firstBinding = firstEntry.getValue();
+    assertEquals("valueOne", ((InstanceBinding) firstBinding).getInstance());
+
+    Map.Entry<?, Binding<?>> secondEntry = mapEntries.get(1);
+    assertEquals("keyTwo", secondEntry.getKey());
+    Binding<?> secondBinding = secondEntry.getValue();
+    assertEquals("valueTwo", ((InstanceBinding) secondBinding).getInstance());
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testGetEntriesWithDuplicateKeys() {
+    // Set up the module
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            MapBinder<String, String> mapBinder =
+                MapBinder.newMapBinder(binder(), String.class, String.class);
+            mapBinder.addBinding("A").toInstance("a1");
+            mapBinder.addBinding("A").toInstance("a2");
+            mapBinder.permitDuplicates();
+          }
+        };
+
+    // Get the MapBinderBinding
+    List<com.google.inject.spi.Element> elements = Elements.getElements(module);
+    MapBinderBinding<?> mapBinderBinding = getMapBinderBinding(elements);
+
+    // Execute the call to getEntries
+    List<Map.Entry<?, Binding<?>>> mapEntries = mapBinderBinding.getEntries(elements);
+
+    // Assert on the results
+    Map.Entry<?, Binding<?>> firstEntry = mapEntries.get(0);
+    assertEquals("A", firstEntry.getKey());
+    Binding<?> firstBinding = firstEntry.getValue();
+    assertEquals("a1", ((InstanceBinding) firstBinding).getInstance());
+
+    Map.Entry<?, Binding<?>> secondEntry = mapEntries.get(1);
+    assertEquals("A", secondEntry.getKey());
+    Binding<?> secondBinding = secondEntry.getValue();
+    assertEquals("a2", ((InstanceBinding) secondBinding).getInstance());
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testGetEntriesWithDuplicateValues() {
+    // Set up the module
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            MapBinder<String, String> mapBinder =
+                MapBinder.newMapBinder(binder(), String.class, String.class);
+            mapBinder.addBinding("A").toInstance("a");
+            mapBinder.addBinding("A").toInstance("a");
+          }
+        };
+
+    // Get the MapBinderBinding
+    List<com.google.inject.spi.Element> elements = Elements.getElements(module);
+    MapBinderBinding<?> mapBinderBinding = getMapBinderBinding(elements);
+
+    // Execute the call to getEntries
+    List<Map.Entry<?, Binding<?>>> mapEntries = mapBinderBinding.getEntries(elements);
+
+    // Assert on the results
+    Map.Entry<?, Binding<?>> firstEntry = mapEntries.get(0);
+    assertEquals("A", firstEntry.getKey());
+    Binding<?> firstBinding = firstEntry.getValue();
+    assertEquals("a", ((InstanceBinding) firstBinding).getInstance());
+
+    Map.Entry<?, Binding<?>> secondEntry = mapEntries.get(1);
+    assertEquals("A", secondEntry.getKey());
+    Binding<?> secondBinding = secondEntry.getValue();
+    assertEquals("a", ((InstanceBinding) secondBinding).getInstance());
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testGetEntriesMissingProviderMapEntry() {
+    List<com.google.inject.spi.Element> elements =
+        Lists.newArrayList(Elements.getElements(new MapBinderWithTwoEntriesModule()));
+
+    // Get the MapBinderBinding
+    MapBinderBinding<?> mapBinderBinding = getMapBinderBinding(elements);
+
+    // Remove the ProviderMapEntry for "a" from the elements
+    com.google.inject.spi.Element providerMapEntryForA = getProviderMapEntry("keyOne", elements);
+    boolean removeSuccessful = elements.remove(providerMapEntryForA);
+    assertTrue(removeSuccessful);
+
+    // Execute the call to getEntries, we expect it to fail
+    try {
+      mapBinderBinding.getEntries(elements);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(
+          expected.getMessage(),
+          "Expected a 1:1 mapping from map keys to values.",
+          "Found these Bindings that were missing an associated entry:",
+          "java.lang.String",
+          "bound at:",
+          "MapBinderWithTwoEntriesModule");
+    }
+  }
+
+  /**
+   * Will find and return the {@link com.google.inject.spi.Element} that is a {@link
+   * ProviderMapEntry} with a key that matches the one supplied by the user in {@code k}.
+   *
+   * <p>Will return {@code null} if it cannot be found.
+   */
+  private static com.google.inject.spi.Element getProviderMapEntry(
+      Object kToFind, Iterable<com.google.inject.spi.Element> elements) {
+    for (com.google.inject.spi.Element element : elements) {
+      if (element instanceof ProviderInstanceBinding) {
+        javax.inject.Provider<?> usp =
+            ((ProviderInstanceBinding<?>) element).getUserSuppliedProvider();
+        if (usp instanceof ProviderMapEntry) {
+          ProviderMapEntry<?, ?> pme = (ProviderMapEntry<?, ?>) usp;
+
+          // Check if the key from the ProviderMapEntry matches the one we're looking for
+          if (kToFind.equals(pme.getKey())) {
+            return element;
+          }
+        }
+      }
+    }
+    // No matching ProviderMapEntry found
+    return null;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testGetEntriesMissingBindingForValue() {
+    List<com.google.inject.spi.Element> elements =
+        Lists.newArrayList(Elements.getElements(new MapBinderWithTwoEntriesModule()));
+
+    // Get the MapBinderBinding
+    MapBinderBinding<?> mapBinderBinding = getMapBinderBinding(elements);
+
+    // Remove the ProviderMapEntry for "a" from the elements
+    com.google.inject.spi.Element bindingForA = getInstanceBindingForValue("valueOne", elements);
+    boolean removeSuccessful = elements.remove(bindingForA);
+    assertTrue(removeSuccessful);
+
+    // Execute the call to getEntries, we expect it to fail
+    try {
+      mapBinderBinding.getEntries(elements);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(
+          expected.getMessage(),
+          "Expected a 1:1 mapping from map keys to values.",
+          "Found these map keys without a corresponding value:",
+          "keyOne",
+          "bound at:",
+          "MapBinderWithTwoEntriesModule");
+    }
+  }
+
+  /**
+   * Will find and return the {@link com.google.inject.spi.Element} that is an {@link
+   * InstanceBinding} and binds {@code vToFind}.
+   */
+  private static com.google.inject.spi.Element getInstanceBindingForValue(
+      Object vToFind, Iterable<com.google.inject.spi.Element> elements) {
+    for (com.google.inject.spi.Element element : elements) {
+      if (element instanceof InstanceBinding) {
+        Object instanceFromBinding = ((InstanceBinding<?>) element).getInstance();
+        if (vToFind.equals(instanceFromBinding)) {
+          return element;
+        }
+      }
+    }
+    // No matching binding found
+    return null;
+  }
+
+  /** A simple module with a MapBinder with two entries. */
+  private static final class MapBinderWithTwoEntriesModule extends AbstractModule {
+    @Override
+    protected void configure() {
+      MapBinder<String, String> mapBinder =
+          MapBinder.newMapBinder(binder(), String.class, String.class);
+      mapBinder.addBinding("keyOne").toInstance("valueOne");
+      mapBinder.addBinding("keyTwo").toInstance("valueTwo");
+    }
+  }
+
+  /**
+   * Given an {@link Iterable} of elements, return the one that is a {@link MapBinderBinding}, or
+   * {@code null} if it cannot be found.
+   */
+  private static MapBinderBinding<?> getMapBinderBinding(
+      Iterable<com.google.inject.spi.Element> elements) {
+    final Collector collector = new Collector();
+    for (com.google.inject.spi.Element element : elements) {
+      element.acceptVisitor(
+          new DefaultElementVisitor<Void>() {
+            @Override
+            public <T> Void visit(Binding<T> binding) {
+              binding.acceptTargetVisitor(collector);
+              return null;
+            }
+          });
+    }
+    return collector.mapbinding;
   }
 }
