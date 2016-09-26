@@ -13,11 +13,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -853,6 +855,112 @@ public final class RealMapBinder<K, V> implements Module {
       } else {
         throw new UnsupportedOperationException("getEntries() not supported for module bindings");
       }
+    }
+
+    @Override
+    public List<Map.Entry<?, Binding<?>>> getEntries(Iterable<? extends Element> elements) {
+      // Iterate over the elements, building up the below maps
+      // This is a preprocessing step allowing us to only iterate over elements
+      // once and have O(n) runtime
+      ImmutableMultimap.Builder<K, Key<V>> keyToValueKeyBuilder = ImmutableMultimap.builder();
+      ImmutableMap.Builder<Key<V>, Binding<V>> valueKeyToBindingBuilder = ImmutableMap.builder();
+      ImmutableMap.Builder<Key<V>, K> valueKeyToKeyBuilder = ImmutableMap.builder();
+      ImmutableMap.Builder<Key<V>, Binding<Map.Entry<K, Provider<V>>>>
+          valueKeyToEntryBindingBuilder = ImmutableMap.builder();
+      for (Element element : elements) {
+        if (element instanceof Binding) {
+          Binding<?> binding = (Binding<?>) element;
+          if (bindingSelection.matchesValueKey(binding.getKey())
+              && binding.getKey().getTypeLiteral().equals(bindingSelection.valueType)) {
+            // Safe because of the check on the type literal above
+            @SuppressWarnings("unchecked")
+            Binding<V> typedBinding = (Binding<V>) binding;
+            Key<V> typedKey = typedBinding.getKey();
+            valueKeyToBindingBuilder.put(typedKey, typedBinding);
+          }
+        }
+
+        if (element instanceof ProviderInstanceBinding
+            && bindingSelection.getEntrySetBinder().containsElement(element)) {
+          // Safe because of the instanceof check, and containsElement() check
+          @SuppressWarnings({"unchecked", "rawtypes"})
+          ProviderInstanceBinding<Map.Entry<K, Provider<V>>> entryBinding =
+              (ProviderInstanceBinding) element;
+
+          // Safe because of the check for containsElement() above
+          @SuppressWarnings("unchecked")
+          Provider<Map.Entry<K, Provider<V>>> typedProvider =
+              (Provider<Map.Entry<K, Provider<V>>>) entryBinding.getUserSuppliedProvider();
+          Provider<Map.Entry<K, Provider<V>>> userSuppliedProvider = typedProvider;
+
+          if (userSuppliedProvider instanceof ProviderMapEntry) {
+            // Safe because of the instanceof check
+            @SuppressWarnings("unchecked")
+            ProviderMapEntry<K, V> typedUserSuppliedProvider =
+                (ProviderMapEntry<K, V>) userSuppliedProvider;
+            ProviderMapEntry<K, V> entry = typedUserSuppliedProvider;
+
+            keyToValueKeyBuilder.put(entry.getKey(), entry.getValueKey());
+            valueKeyToEntryBindingBuilder.put(entry.getValueKey(), entryBinding);
+            valueKeyToKeyBuilder.put(entry.getValueKey(), entry.getKey());
+          }
+        }
+      }
+
+      ImmutableMultimap<K, Key<V>> keyToValueKey = keyToValueKeyBuilder.build();
+      ImmutableMap<Key<V>, K> valueKeyToKey = valueKeyToKeyBuilder.build();
+      ImmutableMap<Key<V>, Binding<V>> valueKeyToBinding = valueKeyToBindingBuilder.build();
+      ImmutableMap<Key<V>, Binding<Map.Entry<K, Provider<V>>>> valueKeyToEntryBinding =
+          valueKeyToEntryBindingBuilder.build();
+
+      // Check that there is a 1:1 mapping from keys from the ProviderMapEntrys to the
+      // keys from the Bindings.
+      Set<Key<V>> keysFromProviderMapEntrys = Sets.newHashSet(keyToValueKey.values());
+      Set<Key<V>> keysFromBindings = valueKeyToBinding.keySet();
+
+      if (!keysFromProviderMapEntrys.equals(keysFromBindings)) {
+        Set<Key<V>> keysOnlyFromProviderMapEntrys =
+            Sets.difference(keysFromProviderMapEntrys, keysFromBindings);
+        Set<Key<V>> keysOnlyFromBindings =
+            Sets.difference(keysFromBindings, keysFromProviderMapEntrys);
+
+        StringBuilder sb = new StringBuilder("Expected a 1:1 mapping from map keys to values.");
+
+        if (!keysOnlyFromBindings.isEmpty()) {
+          sb.append(
+              Errors.format("%nFound these Bindings that were missing an associated entry:%n"));
+          for (Key<V> key : keysOnlyFromBindings) {
+            sb.append(
+                Errors.format("  %s bound at: %s%n", key, valueKeyToBinding.get(key).getSource()));
+          }
+        }
+
+        if (!keysOnlyFromProviderMapEntrys.isEmpty()) {
+          sb.append(Errors.format("%nFound these map keys without a corresponding value:%n"));
+          for (Key<V> key : keysOnlyFromProviderMapEntrys) {
+            sb.append(
+                Errors.format(
+                    "  '%s' bound at: %s%n",
+                    valueKeyToKey.get(key), valueKeyToEntryBinding.get(key).getSource()));
+          }
+        }
+
+        throw new IllegalArgumentException(sb.toString());
+      }
+
+      // Now that we have the two maps, generate the result map
+      ImmutableList.Builder<Map.Entry<?, Binding<?>>> resultBuilder = ImmutableList.builder();
+      for (Map.Entry<K, Key<V>> entry : keyToValueKey.entries()) {
+        Binding<?> binding = valueKeyToBinding.get(entry.getValue());
+        // No null check for binding needed because of the above check to make sure all the
+        // values in keyToValueKey are present as keys in valueKeyToBinding
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Map.Entry<?, Binding<?>> newEntry =
+            (Map.Entry) Maps.immutableEntry(entry.getKey(), binding);
+        resultBuilder.add(newEntry);
+      }
+      return resultBuilder.build();
     }
 
     @Override

@@ -318,7 +318,7 @@ public class SpiUtils {
       Iterable<? extends Module> modules,
       boolean allowDuplicates,
       int expectedMapBindings,
-      MapResult... results) {
+      MapResult<?, ?>... results) {
     Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
     Visitor<T> visitor = new Visitor<T>();
     MapBinderBinding<T> mapbinder = null;
@@ -334,9 +334,37 @@ public class SpiUtils {
     }
     assertNotNull(mapbinder);
 
+    List<MapResult<?, ?>> mapResults = Lists.newArrayList(results);
+
+    // Make sure the entries returned from getEntries(elements) are correct.
+    // Because getEntries() can return duplicates, make sure to continue searching, even
+    // after we find one match.
+    List<Map.Entry<?, Binding<?>>> entries = Lists.newArrayList(mapbinder.getEntries(elements));
+    for (MapResult<?, ?> result : mapResults) {
+      List<Map.Entry<?, Binding<?>>> foundEntries = Lists.newArrayList();
+      for (Map.Entry<?, Binding<?>> entry : entries) {
+        Object key = entry.getKey();
+        Binding<?> value = entry.getValue();
+        if (key.equals(result.k) && matches(value, result.v)) {
+          assertTrue(
+              "mapBinder doesn't contain: " + entry.getValue(),
+              mapbinder.containsElement(entry.getValue()));
+          foundEntries.add(entry);
+        }
+      }
+      assertTrue(
+          "Could not find entry: " + result + " in remaining entries: " + entries,
+          !foundEntries.isEmpty());
+
+      entries.removeAll(foundEntries);
+    }
+
+    assertTrue(
+        "Found all entries of: " + mapResults + ", but more were left over: " + entries,
+        entries.isEmpty());
+
     assertEquals(keyType, mapbinder.getKeyTypeLiteral());
     assertEquals(valueType, mapbinder.getValueTypeLiteral());
-    List<MapResult> mapResults = Lists.newArrayList(results);
 
     Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
     Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));

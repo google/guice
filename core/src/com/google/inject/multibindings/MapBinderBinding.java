@@ -75,6 +75,23 @@ public interface MapBinderBinding<T> {
   List<Map.Entry<?, Binding<?>>> getEntries();
 
   /**
+   * Similar to {@link #getEntries()}, but can be used on a MapBinderBinding retrieved from {@link
+   * Elements#getElements}.
+   *
+   * <p>One way to use this is to pass in the results of {@link Elements#getElements} as the {@code
+   * elements} parameter.
+   *
+   * <p>This differs from {@link #getEntries()} in that it will return duplicates if they are
+   * present in the {@code elements} passed in. This does not run the normal Guice de-duplication
+   * that {@link #getEntries()} does.
+   *
+   * @throws IllegalArgumentException if the provided elements contain partial map entries. If the
+   *     elements come from {@link Elements#getElements} on a module with a MapBinder, there will be
+   *     a 1:1 relationship and no exception will be thrown.
+   */
+  List<Map.Entry<?, Binding<?>>> getEntries(Iterable<? extends Element> elements);
+
+  /**
    * Returns true if the MapBinder permits duplicates. This is only supported on bindings returned
    * from an injector. This will throw {@link UnsupportedOperationException} if it is called on a
    * MapBinderBinding retrieved from {@link Elements#getElements}.
