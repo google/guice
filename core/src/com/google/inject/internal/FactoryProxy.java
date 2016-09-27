@@ -58,7 +58,7 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
     Key<? extends T> localTargetKey = targetKey;
     context.pushState(localTargetKey, source);
     try {
-      return targetFactory.get(errors.withSource(localTargetKey), context, dependency, true);
+    return targetFactory.get(errors.withSource(localTargetKey), context, dependency, true);
     } finally {
       context.popState();
     }

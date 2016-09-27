@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.ProvisionException;
-import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProvisionListener;
 import java.util.List;
 import java.util.Set;
@@ -152,8 +151,9 @@ final class ProvisionListenerStackCallback<T> {
 
     @Deprecated
     @Override
-    public List<DependencyAndSource> getDependencyChain() {
+    public List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
       return context.getDependencyChain();
     }
+
   }
 }

@@ -27,7 +27,6 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
-import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.util.Providers;
@@ -625,10 +624,11 @@ public class ProvisionListenerTest extends TestCase {
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       List<Class<?>> actual = Lists.newArrayList();
-      for (DependencyAndSource dep : provision.getDependencyChain()) {
+      for (com.google.inject.spi.DependencyAndSource dep : provision.getDependencyChain()) {
         actual.add(dep.getDependency().getKey().getRawType());
       }
       assertEquals(expected, actual);
+
       provisionList.add(provision.getBinding().getKey().getRawType());
     }
   }
@@ -791,6 +791,7 @@ public class ProvisionListenerTest extends TestCase {
       assertContains(
           provision.getDependencyChain().get(1).getBindingSource(),
           notifyType.getName() + ".class(");
+
     }
   }
 

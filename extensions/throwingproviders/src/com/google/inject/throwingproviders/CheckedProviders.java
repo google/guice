@@ -113,7 +113,7 @@ public final class CheckedProviders {
       TypeLiteral<P> providerType, Optional<T> value, InvocationHandler handler) {
     // TODO(eatnumber1): Understand why TypeLiteral#getRawType returns a Class<? super T> rather
     // than a Class<T> and remove this unsafe cast.
-    Class<P> providerRaw = (Class<P>) providerType.getRawType();
+    Class<P> providerRaw = (Class) providerType.getRawType();
     return generateProvider(providerRaw, value, handler);
   }
 
@@ -168,7 +168,7 @@ public final class CheckedProviders {
       TypeLiteral<P> providerType, Class<? extends Throwable> throwable) {
     // TODO(eatnumber1): Understand why TypeLiteral#getRawType returns a Class<? super T> rather
     // than a Class<T> and remove this unsafe cast.
-    Class<P> providerRaw = (Class<P>) providerType.getRawType();
+    Class<P> providerRaw = (Class) providerType.getRawType();
     checkThrowable(providerRaw, throwable);
     return generateProvider(
         providerType, Optional.<T>absent(), ThrowingHandler.forClass(throwable));

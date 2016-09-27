@@ -208,15 +208,15 @@ public final class InternalInjectorCreator {
                 @Override
                 public Void call(InternalContext context) {
                   Dependency previous = context.pushDependency(dependency, binding.getSource());
+
                   Errors errorsForBinding = errors.withSource(dependency);
                   try {
                     binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
                   } catch (ErrorsException e) {
                     errorsForBinding.merge(e.getErrors());
                   } finally {
-                    context.popStateAndSetDependency(previous);
-                  }
-
+                      context.popStateAndSetDependency(previous);
+                    }
                   return null;
                 }
               });

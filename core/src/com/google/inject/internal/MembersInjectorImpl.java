@@ -95,23 +95,25 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
           public Void call(final InternalContext context) throws ErrorsException {
             context.pushState(key, source);
             try {
-              if (provisionCallback != null) {
-                provisionCallback.provision(
-                    errors,
-                    context,
-                    new ProvisionCallback<T>() {
-                      @Override
-                      public T call() {
-                        injectMembers(instance, errors, context, toolableOnly);
-                        return instance;
-                      }
-                    });
-              } else {
-                injectMembers(instance, errors, context, toolableOnly);
-              }
+
+            if (provisionCallback != null) {
+              provisionCallback.provision(
+                  errors,
+                  context,
+                  new ProvisionCallback<T>() {
+                    @Override
+                    public T call() {
+                      injectMembers(instance, errors, context, toolableOnly);
+                      return instance;
+                    }
+                  });
+            } else {
+              injectMembers(instance, errors, context, toolableOnly);
+            }
             } finally {
               context.popState();
             }
+
             return null;
           }
         });
