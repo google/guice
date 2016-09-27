@@ -1,11 +1,17 @@
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory.ReentrantCycleDetectingLock;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import junit.framework.TestCase;
@@ -170,5 +176,73 @@ public class CycleDetectingLockTest extends TestCase {
 
     assertTrue("Deadlock should get detected", deadlockADetected || deadlockBDetected);
     assertTrue("One deadlock should get detected", deadlockADetected != deadlockBDetected);
+  }
+
+  /**
+   * Verifies that factories deadlocks report the correct cycles.
+   *
+   * <pre>
+   *   Thread 1: takes locks a, b
+   *   Thread 2: takes locks b, c
+   *   Thread 3: takes locks c, a
+   * </pre>
+   *
+   * <p>In order to ensure a deadlock, each thread will wait on a barrier right after grabbing the
+   * first lock.
+   */
+
+  public void testCycleReporting() throws Exception {
+    final CycleDetectingLockFactory<String> factory = new CycleDetectingLockFactory<String>();
+    final CycleDetectingLock<String> lockA = factory.create("a");
+    final CycleDetectingLock<String> lockB = factory.create("b");
+    final CycleDetectingLock<String> lockC = factory.create("c");
+    final CyclicBarrier barrier = new CyclicBarrier(3);
+    ImmutableList<Future<ListMultimap<Long, String>>> futures =
+        ImmutableList.of(
+            grabLocksInThread(lockA, lockB, barrier),
+            grabLocksInThread(lockB, lockC, barrier),
+            grabLocksInThread(lockC, lockA, barrier));
+
+    // At least one of the threads will report a lock cycle, it is possible that they all will, but
+    // there is no guarantee, so we just scan for the first thread that reported a cycle
+    ListMultimap<Long, String> cycle = null;
+    for (Future<ListMultimap<Long, String>> future : futures) {
+      ListMultimap<Long, String> value = future.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+      if (!value.isEmpty()) {
+        cycle = value;
+        break;
+      }
+    }
+    // We don't really care about the keys in the multimap, but we want to make sure that all locks
+    // were reported in the right order.
+    assertEquals(6, cycle.size());
+    Collection<List<String>> edges = Multimaps.asMap(cycle).values();
+    assertTrue(edges.contains(ImmutableList.of("a", "b")));
+    assertTrue(edges.contains(ImmutableList.of("b", "c")));
+    assertTrue(edges.contains(ImmutableList.of("c", "a")));
+  }
+
+  private static <T> Future<ListMultimap<Long, T>> grabLocksInThread(
+      final CycleDetectingLock<T> lock1,
+      final CycleDetectingLock<T> lock2,
+      final CyclicBarrier barrier) {
+    FutureTask<ListMultimap<Long, T>> future =
+        new FutureTask<ListMultimap<Long, T>>(
+            new Callable<ListMultimap<Long, T>>() {
+              @Override
+              public ListMultimap<Long, T> call() throws Exception {
+                assertTrue(lock1.lockOrDetectPotentialLocksCycle().isEmpty());
+                barrier.await();
+                ListMultimap<Long, T> cycle = lock2.lockOrDetectPotentialLocksCycle();
+                if (cycle == null) {
+                  lock2.unlock();
+                }
+                lock1.unlock();
+                return cycle;
+              }
+            });
+    Thread thread = new Thread(future);
+    thread.start();
+    return future;
   }
 }

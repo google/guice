@@ -22,14 +22,18 @@ import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.spi.DefaultBindingScopingVisitor;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.util.Providers;
@@ -39,9 +43,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import junit.framework.TestCase;
 
@@ -1179,36 +1181,21 @@ public class ScopesTest extends TestCase {
               }
             });
 
-    Future<I0> firstThreadResult =
-        Executors.newSingleThreadExecutor()
-            .submit(
-                new Callable<I0>() {
-                  @Override
-                  public I0 call() {
-                    Thread.currentThread().setName("I0.class");
-                    return injector.getInstance(I0.class);
-                  }
-                });
-    Future<J0> secondThreadResult =
-        Executors.newSingleThreadExecutor()
-            .submit(
-                new Callable<J0>() {
-                  @Override
-                  public J0 call() {
-                    Thread.currentThread().setName("J0.class");
-                    return injector.getInstance(J0.class);
-                  }
-                });
-    Future<K0> thirdThreadResult =
-        Executors.newSingleThreadExecutor()
-            .submit(
-                new Callable<K0>() {
-                  @Override
-                  public K0 call() {
-                    Thread.currentThread().setName("K0.class");
-                    return injector.getInstance(K0.class);
-                  }
-                });
+    FutureTask<I0> firstThreadResult = new FutureTask<I0>(fetchClass(injector, I0.class));
+    Thread i0Thread = new Thread(firstThreadResult, "I0.class");
+    // we need to call toString() now, because the toString() changes after the thread exits.
+    String i0ThreadString = i0Thread.toString();
+    i0Thread.start();
+
+    FutureTask<J0> secondThreadResult = new FutureTask<J0>(fetchClass(injector, J0.class));
+    Thread j0Thread = new Thread(secondThreadResult, "J0.class");
+    String j0ThreadString = j0Thread.toString();
+    j0Thread.start();
+
+    FutureTask<K0> thirdThreadResult = new FutureTask<K0>(fetchClass(injector, K0.class));
+    Thread k0Thread = new Thread(thirdThreadResult, "K0.class");
+    String k0ThreadString = k0Thread.toString();
+    k0Thread.start();
 
     // using separate threads to avoid potential deadlock on the main thread
     // waiting twice as much to be sure that both would time out in their respective barriers
@@ -1235,27 +1222,27 @@ public class ScopesTest extends TestCase {
     }
 
     // verification of error messages generated
-    assertEquals(firstException.getClass(), ProvisionException.class);
-    assertEquals(secondException.getClass(), ProvisionException.class);
-    assertEquals(thirdException.getClass(), ProvisionException.class);
-    List<String> errorMessages =
-        Lists.newArrayList(
-            String.format(
-                    "%s\n%s\n%s",
-                    firstException.getMessage(),
-                    secondException.getMessage(),
-                    thirdException.getMessage())
-                .split("\\n\\n"));
-    Collections.sort(
-        errorMessages,
-        new Comparator<String>() {
-          @Override
-          public int compare(String s1, String s2) {
-            return s2.length() - s1.length();
-          }
-        });
-    // this is brittle, but turns out that second to longest message spans all threads
-    String errorMessage = errorMessages.get(1);
+    List<Message> errors = new ArrayList<Message>();
+    errors.addAll(((ProvisionException) firstException).getErrorMessages());
+    errors.addAll(((ProvisionException) secondException).getErrorMessages());
+    errors.addAll(((ProvisionException) thirdException).getErrorMessages());
+    // We want to find the longest error reported for a cycle spanning multiple threads
+    Message spanningError = null;
+    for (Message error : errors) {
+      if (error.getMessage().contains("Encountered circular dependency spanning several threads")) {
+        if (spanningError == null
+            || spanningError.getMessage().length() < error.getMessage().length()) {
+          spanningError = error;
+        }
+      }
+    }
+    if (spanningError == null) {
+      fail(
+          "Couldn't find multi thread circular dependency error: "
+              + Joiner.on("\n\n").join(errors));
+    }
+
+    String errorMessage = spanningError.getMessage();
     assertContains(
         errorMessage,
         "Encountered circular dependency spanning several threads. Tried proxying "
@@ -1270,37 +1257,45 @@ public class ScopesTest extends TestCase {
         "Both K0 and I0 can not be a part of a dependency cycle",
         errorMessage.contains(K0.class.getName()) && errorMessage.contains(I0.class.getName()));
 
-    List<String> firstErrorLineForThread = new ArrayList<String>();
-    boolean addNextLine = false;
+    ListMultimap<String, String> threadToSingletons = ArrayListMultimap.create();
+    boolean inSingletonsList = false;
+    String currentThread = null;
     for (String errorLine : errorMessage.split("\\n")) {
-      if (errorLine.contains("in thread")) {
-        addNextLine = true;
-        firstErrorLineForThread.add(errorLine);
-      } else if (addNextLine) {
-        addNextLine = false;
-        firstErrorLineForThread.add(errorLine);
+      if (errorLine.startsWith("Thread[")) {
+        inSingletonsList = true;
+        currentThread =
+            errorLine.substring(
+                0, errorLine.indexOf(" is holding locks the following singletons in the cycle:"));
+      } else if (inSingletonsList) {
+        if (errorLine.startsWith("\tat ")) {
+          inSingletonsList = false;
+        } else {
+          threadToSingletons.put(currentThread, errorLine);
+        }
       }
     }
+
+    assertEquals("All threads should be in the cycle", 3, threadToSingletons.keySet().size());
+
+    // NOTE:  J0,K0,I0 are not reported because their locks are not part of the cycle.
     assertEquals(
-        "we expect to see [T1, $A, T2, $B, T3, $C, T1, $A]", 8, firstErrorLineForThread.size());
+        threadToSingletons.get(j0ThreadString),
+        ImmutableList.of(J1.class.getName(), J2.class.getName(), K1.class.getName()));
     assertEquals(
-        "first four elements should be different",
-        6,
-        new HashSet<String>(firstErrorLineForThread.subList(0, 6)).size());
-    assertEquals(firstErrorLineForThread.get(6), firstErrorLineForThread.get(0));
-    assertEquals(firstErrorLineForThread.get(7), firstErrorLineForThread.get(1));
-    assertFalse(
-        "K0 thread could not be blocked by J0",
-        firstErrorLineForThread.get(0).contains("J0")
-            && firstErrorLineForThread.get(2).contains("K0"));
-    assertFalse(
-        "J0 thread could not be blocked by I0",
-        firstErrorLineForThread.get(0).contains("I0")
-            && firstErrorLineForThread.get(2).contains("J0"));
-    assertFalse(
-        "I0 thread could not be blocked by K0",
-        firstErrorLineForThread.get(0).contains("K0")
-            && firstErrorLineForThread.get(2).contains("I0"));
+        threadToSingletons.get(k0ThreadString),
+        ImmutableList.of(K1.class.getName(), K2.class.getName(), I1.class.getName()));
+    assertEquals(
+        threadToSingletons.get(i0ThreadString),
+        ImmutableList.of(I1.class.getName(), I2.class.getName(), J1.class.getName()));
+  }
+
+  private static <T> Callable<T> fetchClass(final Injector injector, final Class<T> clazz) {
+    return new Callable<T>() {
+      @Override
+      public T call() {
+        return injector.getInstance(clazz);
+      }
+    };
   }
 
   // Test for https://github.com/google/guice/issues/1032

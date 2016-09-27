@@ -37,8 +37,9 @@ interface CycleDetectingLock<ID> {
    * successfully owned, returns an empty map indicating no detected potential deadlocks.
    *
    * <p>Otherwise, a map indicating threads involved in a potential deadlock are returned. Map is
-   * ordered by dependency cycle and lists locks for each thread that are part of the loop in order.
-   * Returned map is created atomically.
+   * ordered by dependency cycle and lists locks for each thread that are part of the loop in order,
+   * the last lock in the list is the one that the thread is currently waiting for. Returned map is
+   * created atomically.
    *
    * <p>In case no cycle is detected performance is O(threads creating singletons), in case cycle is
    * detected performance is O(singleton locks).
@@ -147,13 +148,16 @@ interface CycleDetectingLock<ID> {
         final long currentThreadId = Thread.currentThread().getId();
         synchronized (CycleDetectingLockFactory.class) {
           checkState();
+          // Add this lock to the waiting map to ensure it is included in any reported lock cycle.
+          lockThreadIsWaitingOn.put(currentThreadId, this);
           ListMultimap<Long, ID> locksInCycle = detectPotentialLocksCycle();
           if (!locksInCycle.isEmpty()) {
+            // We aren't actually going to wait for this lock, so remove it from the map.
+            lockThreadIsWaitingOn.remove(currentThreadId);
             // potential deadlock is found, we don't try to take this lock
             return locksInCycle;
           }
 
-          lockThreadIsWaitingOn.put(currentThreadId, this);
         }
 
         // this may be blocking, but we don't expect it to cause a deadlock
@@ -256,34 +260,35 @@ interface CycleDetectingLock<ID> {
                   }
                 });
         // lock that is a part of a potential locks cycle, starts with current lock
-        ReentrantCycleDetectingLock lockOwnerWaitingOn = this;
+        ReentrantCycleDetectingLock<?> lockOwnerWaitingOn = this;
         // try to find a dependency path between lock's owner thread and a current thread
         while (lockOwnerWaitingOn != null && lockOwnerWaitingOn.lockOwnerThreadId != null) {
           Long threadOwnerThreadWaits = lockOwnerWaitingOn.lockOwnerThreadId;
           // in case locks cycle exists lock we're waiting for is part of it
-          potentialLocksCycle.putAll(
-              threadOwnerThreadWaits,
-              getAllLockIdsAfter(threadOwnerThreadWaits, lockOwnerWaitingOn));
-
+          lockOwnerWaitingOn =
+              addAllLockIdsAfter(threadOwnerThreadWaits, lockOwnerWaitingOn, potentialLocksCycle);
           if (threadOwnerThreadWaits == currentThreadId) {
             // owner thread depends on current thread, cycle detected
             return potentialLocksCycle;
           }
-          // going for the next thread we wait on indirectly
-          lockOwnerWaitingOn = lockThreadIsWaitingOn.get(threadOwnerThreadWaits);
         }
         // no dependency path from an owner thread to a current thread
         return ImmutableListMultimap.of();
       }
 
-      /** Return locks owned by a thread after a lock specified, inclusive. */
-      private List<ID> getAllLockIdsAfter(long threadId, ReentrantCycleDetectingLock lock) {
-        List<ID> ids = Lists.newArrayList();
+      /**
+       * Adds all locks held by the given thread that are after the given lock and then returns the
+       * lock the thread is currently waiting on, if any
+       */
+      private ReentrantCycleDetectingLock<?> addAllLockIdsAfter(
+          long threadId,
+          ReentrantCycleDetectingLock<?> lock,
+          ListMultimap<Long, ID> potentialLocksCycle) {
         boolean found = false;
         Collection<ReentrantCycleDetectingLock<?>> ownedLocks = locksOwnedByThread.get(threadId);
         Preconditions.checkNotNull(
             ownedLocks, "Internal error: No locks were found taken by a thread");
-        for (ReentrantCycleDetectingLock ownedLock : ownedLocks) {
+        for (ReentrantCycleDetectingLock<?> ownedLock : ownedLocks) {
           if (ownedLock == lock) {
             found = true;
           }
@@ -294,13 +299,20 @@ interface CycleDetectingLock<ID> {
             // same factory it has to have same type as the current lock.
             @SuppressWarnings("unchecked")
             ID userLockId = (ID) ownedLock.userLockId;
-            ids.add(userLockId);
+            potentialLocksCycle.put(threadId, userLockId);
           }
         }
         Preconditions.checkState(
             found,
             "Internal error: We can not find locks that created a cycle that we detected");
-        return ids;
+        ReentrantCycleDetectingLock<?> unownedLock = lockThreadIsWaitingOn.get(threadId);
+        // If this thread is waiting for a lock add it to the cycle and return it
+        if (unownedLock != null && unownedLock.lockFactory == this.lockFactory) {
+          @SuppressWarnings("unchecked")
+          ID typed = (ID) unownedLock.userLockId;
+          potentialLocksCycle.put(threadId, typed);
+        }
+        return unownedLock;
       }
 
       @Override
