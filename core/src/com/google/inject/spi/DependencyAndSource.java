@@ -28,7 +28,11 @@ import java.lang.reflect.Member;
  *
  * @author sameb@google.com (Sam Berlin)
  * @since 4.0
+ * @deprecated The only use of this object is for {@link
+ *     ProvisionListener.ProvisionInvocation#getDependencyChain()} which is also deprecated. This
+ *     object will also be removed in Guice 4.4.
  */
+@Deprecated
 public final class DependencyAndSource {
   private final Dependency<?> dependency;
   private final Object source;

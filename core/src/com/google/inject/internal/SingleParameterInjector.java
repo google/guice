@@ -36,7 +36,7 @@ final class SingleParameterInjector<T> {
     Dependency<T> localDependency = dependency;
     Dependency previous = context.pushDependency(localDependency, source);
     try {
-      return factory.get(errors.withSource(localDependency), context, localDependency, false);
+    return factory.get(errors.withSource(localDependency), context, localDependency, false);
     } finally {
       context.popStateAndSetDependency(previous);
     }

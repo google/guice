@@ -16,14 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.DependencyAndSource;
-import java.util.Arrays;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,6 +46,7 @@ final class InternalContext {
   private Object[] dependencyStack = new Object[16];
 
   private int dependencyStackSize = 0;
+
 
   InternalContext(InjectorOptions options) {
     this.options = options;
@@ -83,27 +79,32 @@ final class InternalContext {
     return previous;
   }
 
+
   /** Pops the current state & sets the new dependency. */
   void popStateAndSetDependency(Dependency<?> newDependency) {
     popState();
     this.dependency = newDependency;
   }
 
+
   /** Adds to the state without setting the dependency. */
-  void pushState(Key<?> key, Object source) {
+  void pushState(com.google.inject.Key<?> key, Object source) {
     doPushState(key, source);
   }
+
 
   private void doPushState(Object dependencyOrKey, Object source) {
     int localSize = dependencyStackSize;
     Object[] localStack = dependencyStack;
     if (localStack.length < localSize + 2) {
-      localStack = dependencyStack = Arrays.copyOf(localStack, (localStack.length * 3) / 2 + 2);
+      localStack = dependencyStack =
+        java.util.Arrays.copyOf(localStack, (localStack.length * 3) / 2 + 2);
     }
     localStack[localSize++] = dependencyOrKey;
     localStack[localSize++] = source;
     dependencyStackSize = localSize;
   }
+
 
   /** Pops from the state without setting a dependency. */
   void popState() {
@@ -114,19 +115,22 @@ final class InternalContext {
     dependencyStackSize -= 2;
   }
 
+
   /** Returns the current dependency chain (all the state stored in the dependencyStack). */
-  List<DependencyAndSource> getDependencyChain() {
-    ImmutableList.Builder<DependencyAndSource> builder = ImmutableList.builder();
+  java.util.List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
+    com.google.common.collect.ImmutableList.Builder<com.google.inject.spi.DependencyAndSource>
+        builder = com.google.common.collect.ImmutableList.builder();
     for (int i = 0; i < dependencyStackSize; i += 2) {
       Object evenEntry = dependencyStack[i];
       Dependency<?> dependency;
-      if (evenEntry instanceof Key) {
-        dependency = Dependency.get((Key<?>) evenEntry);
+      if (evenEntry instanceof com.google.inject.Key) {
+        dependency = Dependency.get((com.google.inject.Key<?>) evenEntry);
       } else {
         dependency = (Dependency<?>) evenEntry;
       }
-      builder.add(new DependencyAndSource(dependency, dependencyStack[i + 1]));
+      builder.add(new com.google.inject.spi.DependencyAndSource(dependency, dependencyStack[i + 1]));
     }
     return builder.build();
   }
+
 }

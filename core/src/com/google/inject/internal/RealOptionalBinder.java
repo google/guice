@@ -323,12 +323,12 @@ public final class RealOptionalBinder<T> implements Module {
         return JAVA_OPTIONAL_EMPTY;
       }
       Dependency<?> localDependency = targetDependency;
-      Dependency previous = context.pushDependency(localDependency, getSource());
       Object result;
+      Dependency previous = context.pushDependency(localDependency, getSource());
       try {
-        // See comments in RealOptionalKeyProvider, about how localDependency may be more specific
-        // than what we actually need.
-        result = local.get(errors.withSource(localDependency), context, localDependency, false);
+      // See comments in RealOptionalKeyProvider, about how localDependency may be more specific
+      // than what we actually need.
+      result = local.get(errors.withSource(localDependency), context, localDependency, false);
       } finally {
         context.popStateAndSetDependency(previous);
       }
@@ -429,7 +429,7 @@ public final class RealOptionalBinder<T> implements Module {
       // This is what linked bindings do (see FactoryProxy), and we are pretty similar.
       context.pushState(targetKey, targetSource);
       try {
-        return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
+      return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
       } finally {
         context.popState();
       }
@@ -505,14 +505,14 @@ public final class RealOptionalBinder<T> implements Module {
         return Optional.absent();
       }
       Dependency<?> localDependency = targetDependency;
-      Dependency previous = context.pushDependency(localDependency, getSource());
       T result;
+      Dependency previous = context.pushDependency(localDependency, getSource());
       try {
-        // currentDependency is Optional<? super T>, so we really just need to set the target
-        // dependency to ? super T, but we are currently setting it to T.  We could hypothetically
-        // make it easier for our delegate to generate proxies by modifying the dependency, but that
-        // would also require us to rewrite the key on each call.  So for now we don't do it.
-        result = local.get(errors.withSource(localDependency), context, localDependency, false);
+      // currentDependency is Optional<? super T>, so we really just need to set the target
+      // dependency to ? super T, but we are currently setting it to T.  We could hypothetically
+      // make it easier for our delegate to generate proxies by modifying the dependency, but that
+      // would also require us to rewrite the key on each call.  So for now we don't do it.
+      result = local.get(errors.withSource(localDependency), context, localDependency, false);
       } finally {
         context.popStateAndSetDependency(previous);
       }

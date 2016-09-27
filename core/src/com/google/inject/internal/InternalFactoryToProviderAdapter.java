@@ -35,7 +35,6 @@ final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    // TODO(sameb): Does this need to push state into the context?
     try {
       return errors.checkForNull(provider.get(), source, dependency);
     } catch (RuntimeException userException) {

@@ -19,7 +19,6 @@ package com.google.inject.spi;
 import com.google.inject.Binding;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import java.util.List;
 
 /**
  * Listens for provisioning of objects. Useful for gathering timing information about provisioning,
@@ -100,6 +99,7 @@ public interface ProvisionListener {
      * {@link HasDependencies#getDependencies()}), so you could infer some of the missing edges..
      */
     @Deprecated
-    public abstract List<DependencyAndSource> getDependencyChain();
+    public abstract java.util.List<DependencyAndSource> getDependencyChain();
+
   }
 }

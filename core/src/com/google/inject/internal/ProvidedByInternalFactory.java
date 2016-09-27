@@ -65,7 +65,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
     Key<? extends Provider<T>> localProviderKey = providerKey;
     context.pushState(localProviderKey, localProviderBinding.getSource());
     try {
-      errors = errors.withSource(localProviderKey);
+    errors = errors.withSource(localProviderKey);
       Provider<? extends T> provider =
           localProviderBinding.getInternalFactory().get(errors, context, dependency, true);
       return circularGet(provider, errors, context, dependency, provisionCallback);
