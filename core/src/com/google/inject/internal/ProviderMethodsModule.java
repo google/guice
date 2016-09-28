@@ -38,7 +38,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Creates bindings to methods annotated with {@literal @}{@link Provides}. Use the scope and
@@ -48,23 +47,6 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ProviderMethodsModule implements Module {
-  private static final ImmutableSet<Class<Provides>> PROVIDES_ANNOTATIONS =
-      ImmutableSet.of(Provides.class);
-
-  private static final ModuleAnnotatedMethodScanner PROVIDES_BUILDER =
-      new ModuleAnnotatedMethodScanner() {
-        @Override
-        public <T> Key<T> prepareMethod(
-            Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
-          return key;
-        }
-
-        @Override
-        public Set<? extends Class<? extends Annotation>> annotationClasses() {
-          return PROVIDES_ANNOTATIONS;
-        }
-      };
-
   private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
   private final boolean skipFastClassGeneration;
@@ -80,7 +62,7 @@ public final class ProviderMethodsModule implements Module {
 
   /** Returns a module which creates bindings for provider methods from the given module. */
   public static Module forModule(Module module) {
-    return forObject(module, false, PROVIDES_BUILDER);
+    return forObject(module, false, ProvidesMethodScanner.INSTANCE);
   }
 
   /** Returns a module which creates bindings methods in the module that match the scanner. */
@@ -96,7 +78,7 @@ public final class ProviderMethodsModule implements Module {
    * are only interested in Module metadata.
    */
   public static Module forObject(Object object) {
-    return forObject(object, true, PROVIDES_BUILDER);
+    return forObject(object, true, ProvidesMethodScanner.INSTANCE);
   }
 
   private static Module forObject(

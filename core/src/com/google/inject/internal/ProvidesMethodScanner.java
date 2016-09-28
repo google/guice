@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapKey;
 import com.google.inject.multibindings.ProvidesIntoMap;
@@ -32,18 +33,19 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 /**
- * A {@link ModuleAnnotatedMethodScanner} that handles the {@link ProvidesIntoSet}, {@link
- * ProvidesIntoMap} and {@link ProvidesIntoOptional}.
+ * A {@link ModuleAnnotatedMethodScanner} that handles the {@Provides}, {@link ProvidesIntoSet},
+ * {@link ProvidesIntoMap} and {@link ProvidesIntoOptional} annotations.
  *
- * <p>The public interface is currently {@link com.google.inject.multibindings.MultibindingsScanner}
- * but this should eventually be installed by default.
+ * <p>This is the default scanner used by ProviderMethodsModule and handles all the built in
+ * annotations.
  */
-public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScanner {
-  public static final MultibindingsMethodScanner INSTANCE = new MultibindingsMethodScanner();
+final class ProvidesMethodScanner extends ModuleAnnotatedMethodScanner {
+  static final ProvidesMethodScanner INSTANCE = new ProvidesMethodScanner();
   private static final ImmutableSet<Class<? extends Annotation>> ANNOTATIONS =
-      ImmutableSet.of(ProvidesIntoSet.class, ProvidesIntoMap.class, ProvidesIntoOptional.class);
+      ImmutableSet.of(
+          Provides.class, ProvidesIntoSet.class, ProvidesIntoMap.class, ProvidesIntoOptional.class);
 
-  private MultibindingsMethodScanner() {}
+  private ProvidesMethodScanner() {}
 
   @Override
   public Set<? extends Class<? extends Annotation>> annotationClasses() {
@@ -56,6 +58,13 @@ public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScann
       Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
     Method method = (Method) injectionPoint.getMember();
     AnnotationOrError mapKey = findMapKeyAnnotation(binder, method);
+    if (annotation instanceof Provides) {
+      if (mapKey.annotation != null) {
+        binder.addError("Found a MapKey annotation on non map binding at %s.", method);
+      }
+      // no key rewriting for plain old @Provides
+      return key;
+    }
     if (annotation instanceof ProvidesIntoSet) {
       if (mapKey.annotation != null) {
         binder.addError("Found a MapKey annotation on non map binding at %s.", method);

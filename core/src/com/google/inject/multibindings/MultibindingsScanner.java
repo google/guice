@@ -16,19 +16,25 @@
 
 package com.google.inject.multibindings;
 
-import com.google.inject.AbstractModule;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Binder;
+import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.internal.MultibindingsMethodScanner;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
+import com.google.inject.util.Modules;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  * Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.
  *
  * @since 4.0
+ * @deprecated This functionality is installed by default. All references to this can be safely
+ *     removed. This class will be removed in Guice 4.4
  */
+@Deprecated
 public class MultibindingsScanner {
-  // TODO(lukes): eliminate this class and install by default in createInjector
-
   private MultibindingsScanner() {}
 
   /**
@@ -38,22 +44,32 @@ public class MultibindingsScanner {
    *
    * <p>This is a convenience method, equivalent to doing {@code
    * binder().scanModulesForAnnotatedMethods(MultibindingsScanner.scanner())}.
+   *
+   * @deprecated This functionality is now installed by default. All references/installations can be
+   *     eliminated.
    */
+  @Deprecated
   public static Module asModule() {
-    return new AbstractModule() {
-      @Override
-      protected void configure() {
-        binder().scanModulesForAnnotatedMethods(MultibindingsMethodScanner.INSTANCE);
-      }
-    };
+    return Modules.EMPTY_MODULE;
   }
 
   /**
-   * Returns a {@link ModuleAnnotatedMethodScanner} that, when bound, will scan all modules for
-   * methods with the annotations {@literal @}{@link ProvidesIntoMap}, {@literal @}{@link
-   * ProvidesIntoSet}, and {@literal @}{@link ProvidesIntoOptional}.
+   * @deprecated This method returns an empty scanner since the preexisting functionality is
+   *     installed by default.
    */
+  @Deprecated
   public static ModuleAnnotatedMethodScanner scanner() {
-    return MultibindingsMethodScanner.INSTANCE;
+    return new ModuleAnnotatedMethodScanner() {
+      @Override
+      public Set<? extends Class<? extends Annotation>> annotationClasses() {
+        return ImmutableSet.of();
+      }
+
+      @Override
+      public <T> Key<T> prepareMethod(
+          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+        throw new IllegalStateException("Unexpected annotation: " + annotation);
+      }
+    };
   }
 }
