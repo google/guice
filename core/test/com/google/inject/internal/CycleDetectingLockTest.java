@@ -197,7 +197,7 @@ public class CycleDetectingLockTest extends TestCase {
     final CycleDetectingLock<String> lockB = factory.create("b");
     final CycleDetectingLock<String> lockC = factory.create("c");
     final CyclicBarrier barrier = new CyclicBarrier(3);
-    ImmutableList<Future<ListMultimap<Long, String>>> futures =
+    ImmutableList<Future<ListMultimap<Thread, String>>> futures =
         ImmutableList.of(
             grabLocksInThread(lockA, lockB, barrier),
             grabLocksInThread(lockB, lockC, barrier),
@@ -205,9 +205,10 @@ public class CycleDetectingLockTest extends TestCase {
 
     // At least one of the threads will report a lock cycle, it is possible that they all will, but
     // there is no guarantee, so we just scan for the first thread that reported a cycle
-    ListMultimap<Long, String> cycle = null;
-    for (Future<ListMultimap<Long, String>> future : futures) {
-      ListMultimap<Long, String> value = future.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+    ListMultimap<Thread, String> cycle = null;
+    for (Future<ListMultimap<Thread, String>> future : futures) {
+      ListMultimap<Thread, String> value =
+          future.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
       if (!value.isEmpty()) {
         cycle = value;
         break;
@@ -222,18 +223,18 @@ public class CycleDetectingLockTest extends TestCase {
     assertTrue(edges.contains(ImmutableList.of("c", "a")));
   }
 
-  private static <T> Future<ListMultimap<Long, T>> grabLocksInThread(
+  private static <T> Future<ListMultimap<Thread, T>> grabLocksInThread(
       final CycleDetectingLock<T> lock1,
       final CycleDetectingLock<T> lock2,
       final CyclicBarrier barrier) {
-    FutureTask<ListMultimap<Long, T>> future =
-        new FutureTask<ListMultimap<Long, T>>(
-            new Callable<ListMultimap<Long, T>>() {
+    FutureTask<ListMultimap<Thread, T>> future =
+        new FutureTask<ListMultimap<Thread, T>>(
+            new Callable<ListMultimap<Thread, T>>() {
               @Override
-              public ListMultimap<Long, T> call() throws Exception {
+              public ListMultimap<Thread, T> call() throws Exception {
                 assertTrue(lock1.lockOrDetectPotentialLocksCycle().isEmpty());
                 barrier.await();
-                ListMultimap<Long, T> cycle = lock2.lockOrDetectPotentialLocksCycle();
+                ListMultimap<Thread, T> cycle = lock2.lockOrDetectPotentialLocksCycle();
                 if (cycle == null) {
                   lock2.unlock();
                 }
