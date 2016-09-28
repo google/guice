@@ -115,9 +115,6 @@ final class BindingProcessor extends AbstractBindingProcessor {
           public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
             prepareBinding();
             javax.inject.Provider<? extends T> provider = binding.getUserSuppliedProvider();
-            // TODO(lukes): add support for multibinder/mapbinder/optionalbinder here as well
-            // this may require extracting some generic interface instead of testing for specific
-            // implementations.
             if (provider instanceof InternalProviderInstanceBindingImpl.Factory) {
               @SuppressWarnings("unchecked")
               InternalProviderInstanceBindingImpl.Factory<T> asProviderMethod =
