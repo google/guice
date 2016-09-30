@@ -103,7 +103,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Fragment-Host>com.google.inject</Fragment-Host>
+            <Fragment-Host>com.google.inject;bundle-version=${project.version}</Fragment-Host>
           </instructions>
         </configuration>
       </plugin>
