@@ -35,10 +35,7 @@ import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
-import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.ProviderInstanceBinding;
-import com.google.inject.spi.ProviderLookup;
-import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
@@ -283,12 +280,7 @@ public final class RealMapBinder<K, V> implements Module {
             bindingSelection.getValueType(),
             new RealElement(
                 entrySetBinder.getSetName(), MAPBINDER, bindingSelection.getKeyType().toString()));
-    // TODO(user): Convert ProviderMapEntry to an InternalFactory
-    // when this happens, we can remove the ProviderLookup check in
-    // BindingSelection.containsElement()
-    entrySetBinder
-        .addBinding()
-        .toProvider(new ProviderMapEntry<K, V>(key, binder.getProvider(valueKey), valueKey));
+    entrySetBinder.addBinding().toProvider(new ProviderMapEntry<K, V>(key, valueKey));
     return valueKey;
   }
 
@@ -551,8 +543,6 @@ public final class RealMapBinder<K, V> implements Module {
       Key<?> key;
       if (element instanceof Binding) {
         key = ((Binding<?>) element).getKey();
-      } else if (element instanceof ProviderLookup) {
-        key = ((ProviderLookup<?>) element).getKey();
       } else {
         return false; // cannot match;
       }
@@ -1178,70 +1168,63 @@ public final class RealMapBinder<K, V> implements Module {
     }
   }
 
-  /**
-   * A Provider that Map.Entry that is also a Provider. The key is the entry in the map this
-   * corresponds to and the value is the provider of the user's binding. This returns itself as the
-   * Provider.get value.
-   */
+  /** A factory for a {@code Map.Entry<K, Provider<V>>}. */
+  //VisibleForTesting
   static final class ProviderMapEntry<K, V>
-      implements ProviderWithDependencies<Map.Entry<K, Provider<V>>>, Map.Entry<K, Provider<V>> {
+      extends InternalProviderInstanceBindingImpl.Factory<Map.Entry<K, Provider<V>>> {
     private final K key;
-    private final Provider<V> provider;
     private final Key<V> valueKey;
+    private Map.Entry<K, Provider<V>> entry;
 
-    ProviderMapEntry(K key, Provider<V> provider, Key<V> valueKey) {
+    ProviderMapEntry(K key, Key<V> valueKey) {
+      super(InitializationTiming.EAGER);
       this.key = key;
-      this.provider = provider;
       this.valueKey = valueKey;
     }
 
     @Override
-    public Map.Entry<K, Provider<V>> get() {
-      return this;
+    public Set<Dependency<?>> getDependencies() {
+      // The dependencies are Key<Provider<V>>
+      return ImmutableSet.<Dependency<?>>of(Dependency.get(getKeyOfProvider(valueKey)));
     }
 
     @Override
-    public Set<Dependency<?>> getDependencies() {
-      return ((HasDependencies) provider).getDependencies();
+    void initialize(InjectorImpl injector, Errors errors) {
+      Binding<V> valueBinding = injector.getExistingBinding(valueKey);
+      entry = Maps.immutableEntry(key, valueBinding.getProvider());
     }
 
-    public Key<V> getValueKey() {
+    @Override
+    protected Map.Entry<K, Provider<V>> doProvision(
+        Errors errors, InternalContext context, Dependency<?> dependency) {
+      return entry;
+    }
+
+    K getKey() {
+      return key;
+    }
+
+    Key<V> getValueKey() {
       return valueKey;
     }
 
     @Override
-    public K getKey() {
-      return key;
-    }
-
-    @Override
-    public Provider<V> getValue() {
-      return provider;
-    }
-
-    @Override
-    public Provider<V> setValue(Provider<V> value) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean equals(Object obj) {
-      if (obj instanceof Map.Entry) {
-        @SuppressWarnings("rawtypes")
-        Map.Entry o = (Map.Entry) obj;
-        return Objects.equal(key, o.getKey()) && Objects.equal(provider, o.getValue());
+      if (obj instanceof ProviderMapEntry) {
+        ProviderMapEntry<?, ?> o = (ProviderMapEntry<?, ?>) obj;
+        return key.equals(o.key) && valueKey.equals(o.valueKey);
       }
       return false;
     }
 
     @Override
     public int hashCode() {
-      return key.hashCode() ^ provider.hashCode();
+      return Objects.hashCode(key, valueKey);
     }
 
     @Override
     public String toString() {
-      return "ProviderMapEntry(" + key + ", " + provider + ")";
+      return "ProviderMapEntry(" + key + ", " + valueKey + ")";
     }
   }
 
