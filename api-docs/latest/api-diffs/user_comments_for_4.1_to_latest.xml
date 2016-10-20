@@ -394,6 +394,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Provider.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.ProvisionException"/>
   <text>
     InsertCommentsHere
@@ -863,6 +869,12 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.multibindings.MapBinderBinding.containsElement_changed(com.google.inject.spi.Element)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.getEntries_added(java.lang.Iterable&lt;? extends com.google.inject.spi.Element&gt;)"/>
   <text>
     InsertCommentsHere
   </text>

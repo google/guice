@@ -329,9 +329,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MultibindingsScanner.html#asModule--">asModule()</a></span> - Static method in class com.google.inject.multibindings.<a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings">MultibindingsScanner</a></dt>
 <dd>
-<div class="block">Returns a module that, when installed, will scan all modules for methods with the annotations
- @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a>, @<a href="com/google/inject/multibindings/ProvidesIntoSet.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoSet</code></a>, and
- @<a href="com/google/inject/multibindings/ProvidesIntoOptional.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoOptional</code></a>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">This functionality is now installed by default. All references/installations can be
+     eliminated.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/testing/throwingproviders/CheckedProviderSubject.html#assertThat-P-">assertThat(P)</a></span> - Static method in class com.google.inject.testing.throwingproviders.<a href="com/google/inject/testing/throwingproviders/CheckedProviderSubject.html" title="class in com.google.inject.testing.throwingproviders">CheckedProviderSubject</a></dt>
 <dd>&nbsp;</dd>
@@ -846,11 +847,15 @@
 </dd>
 <dt><a href="com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi"><span class="typeNameLink">DependencyAndSource</span></a> - Class in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
 <dd>
-<div class="block">A combination of a <a href="com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi"><code>Dependency</code></a> and the <a href="com/google/inject/spi/Element.html#getSource--"><code>source</code></a> where the
- dependency was bound.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">The only use of this object is for <a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--"><code>ProvisionListener.ProvisionInvocation.getDependencyChain()</code></a> which is also deprecated. This
+     object will also be removed in Guice 4.4.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/DependencyAndSource.html#DependencyAndSource-com.google.inject.spi.Dependency-java.lang.Object-">DependencyAndSource(Dependency&lt;?&gt;, Object)</a></span> - Constructor for class com.google.inject.spi.<a href="com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><a href="com/google/inject/grapher/DependencyEdge.html" title="class in com.google.inject.grapher"><span class="typeNameLink">DependencyEdge</span></a> - Class in <a href="com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></dt>
 <dd>
 <div class="block">Edge from a class or <a href="com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi"><code>InjectionPoint</code></a> to the interface node that will satisfy the
@@ -1227,6 +1232,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/DependencyAndSource.html#getBindingSource--">getBindingSource()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns a string describing where this dependency was bound.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#getCause--">getCause()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
@@ -1293,6 +1299,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/DependencyAndSource.html#getDependency--">getDependency()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns the Dependency, if one exists.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#getDependency--">getDependency()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
@@ -1378,6 +1385,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MapBinderBinding.html#getEntries--">getEntries()</a></span> - Method in interface com.google.inject.multibindings.<a href="com/google/inject/multibindings/MapBinderBinding.html" title="interface in com.google.inject.multibindings">MapBinderBinding</a></dt>
 <dd>
 <div class="block">Returns all entries in the Map.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MapBinderBinding.html#getEntries-java.lang.Iterable-">getEntries(Iterable&lt;? extends Element&gt;)</a></span> - Method in interface com.google.inject.multibindings.<a href="com/google/inject/multibindings/MapBinderBinding.html" title="interface in com.google.inject.multibindings">MapBinderBinding</a></dt>
+<dd>
+<div class="block">Similar to <a href="com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>MapBinderBinding.getEntries()</code></a>, but can be used on a MapBinderBinding retrieved from <a href="com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/ConfigurationException.html#getErrorMessages--">getErrorMessages()</a></span> - Method in exception com.google.inject.<a href="com/google/inject/ConfigurationException.html" title="class in com.google.inject">ConfigurationException</a></dt>
 <dd>
@@ -2478,7 +2489,10 @@
 </dd>
 <dt><a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings"><span class="typeNameLink">MultibindingsScanner</span></a> - Class in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
 <dd>
-<div class="block">Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">This functionality is installed by default. All references to this can be safely
+     removed. This class will be removed in Guice 4.4</span></div>
+</div>
 </dd>
 <dt><a href="com/google/inject/multibindings/MultibindingsTargetVisitor.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">MultibindingsTargetVisitor</span></a>&lt;<a href="com/google/inject/multibindings/MultibindingsTargetVisitor.html" title="type parameter in MultibindingsTargetVisitor">T</a>,<a href="com/google/inject/multibindings/MultibindingsTargetVisitor.html" title="type parameter in MultibindingsTargetVisitor">V</a>&gt; - Interface in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
 <dd>
@@ -3057,8 +3071,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MultibindingsScanner.html#scanner--">scanner()</a></span> - Static method in class com.google.inject.multibindings.<a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings">MultibindingsScanner</a></dt>
 <dd>
-<div class="block">Returns a <a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><code>ModuleAnnotatedMethodScanner</code></a> that, when bound, will scan all modules for
- methods with the annotations @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a>, @<a href="com/google/inject/multibindings/ProvidesIntoSet.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoSet</code></a>, and @<a href="com/google/inject/multibindings/ProvidesIntoOptional.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoOptional</code></a>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">This method returns an empty scanner since the preexisting functionality is
+     installed by default.</span></div>
+</div>
 </dd>
 <dt><a href="com/google/inject/Scope.html" title="interface in com.google.inject"><span class="typeNameLink">Scope</span></a> - Interface in <a href="com/google/inject/package-summary.html">com.google.inject</a></dt>
 <dd>
@@ -3447,7 +3463,9 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Dependency.html#toString--">toString()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/DependencyAndSource.html#toString--">toString()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">DependencyAndSource</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ElementSource.html#toString--">toString()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ElementSource.html" title="class in com.google.inject.spi">ElementSource</a></dt>
 <dd>
 <div class="block">Returns <code>getDeclaringSource().toString()</code> value.</div>

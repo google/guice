@@ -1009,6 +1009,12 @@ Similarly, documentation which was inherited from another class or interface is 
 
 </strike><span style="background: #FFFF00">provides
 </span> @author crazybob@google.com (Bob Lee)</blockquote>
+<A NAME="com.google.inject.Provider.dmethod.get()"></A><a href="com.google.inject.Provider.html" class="hiddenlink">Class <b>Provider</b></a>, <a href="com.google.inject.Provider.html#com.google.inject.Provider.get_changed()" class="hiddenlink">T <b>get()</b></a><br><br><blockquote>Provides an instance of {@code T}.<strike> Must never return {@code null}.</strike>
+
+ @throws OutOfScopeException when an attempt is made to access a scoped object while the scope
+     in question is not currently active
+ @throws ProvisionException if an instance cannot be provided. Such exceptions include messages
+     and throwables to describe why provision failed.</blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.ProvisionException!class"></A><a href="com.google.inject.ProvisionException.html" class="hiddenlink">Class <b>ProvisionException</b></a><br><br><blockquote>Indicates that there was a runtime failure while providing an instance.<strike>
 

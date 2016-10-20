@@ -137,11 +137,13 @@ Similarly, documentation which was inherited from another class or interface is 
 <hr align="left" width="100%">
 <A NAME="com.google.inject.spi.DependencyAndSource!class"></A><a href="com.google.inject.spi.DependencyAndSource.html" class="hiddenlink">Class <b>DependencyAndSource</b></a><br><br><blockquote>A combination of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DependencyAndSource/Dependency.html"><TT>Dependency</TT></A> and the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DependencyAndSource/Binding.html#getSource()"><TT><strike> </strike>source</TT></A> where <strike>the</strike><span style="background: #FFFF00">the
 </span> dependency was bound.<strike>
- 
 </strike><span style="background: #FFFF00">
 
-</span> @author sameb@google.com (Sam Berlin)
- @since 4.0</blockquote>
+</span> <strike>
+ </strike>@author sameb@google.com (Sam Berlin)
+ @since 4.<strike>0</strike><span style="background: #FFFF00">0
+ @deprecated The only use of this object is for <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/DependencyAndSource/ProvisionListener/ProvisionInvocation.html#getDependencyChain()"><TT>ProvisionListener.ProvisionInvocation.getDependencyChain()</TT></A> which is also deprecated. This
+     object will also be removed in Guice 4.4.</span></blockquote>
 <A NAME="com.google.inject.spi.DependencyAndSource.dmethod.getBindingSource()"></A><a href="com.google.inject.spi.DependencyAndSource.html" class="hiddenlink">Class <b>DependencyAndSource</b></a>, <a href="com.google.inject.spi.DependencyAndSource.html#com.google.inject.spi.DependencyAndSource.getBindingSource_changed()" class="hiddenlink">String <b>getBindingSource()</b></a><br><br><blockquote>Returns a string describing where this dependency was bound. If the <strike>binding
 </strike><span style="background: #FFFF00">binding</span> was just-in-time,<span style="background: #FFFF00">
 </span> there is no valid binding source, so this describes <strike>the

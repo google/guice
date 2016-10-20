@@ -407,6 +407,11 @@ Similarly, documentation which was inherited from another class or interface is 
 </strike><span style="background: #FFFF00">a</span> key of <code>Set&lt;String></code>, then this will always return a list of type
  <code>List&lt;Binding&lt;String>></code>.</blockquote>
 <hr align="left" width="100%">
+<A NAME="com.google.inject.multibindings.MultibindingsScanner!class"></A><a href="com.google.inject.multibindings.MultibindingsScanner.html" class="hiddenlink">Class <b>MultibindingsScanner</b></a><br><br><blockquote>Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.
+
+ @since 4.<strike>0</strike><span style="background: #FFFF00">0
+ @deprecated This functionality is installed by default. All references to this can be safely
+     removed. This class will be removed in Guice 4.4</span></blockquote>
 <A NAME="com.google.inject.multibindings.MultibindingsScanner.dmethod.asModule()"></A><a href="com.google.inject.multibindings.MultibindingsScanner.html" class="hiddenlink">Class <b>MultibindingsScanner</b></a>, <a href="com.google.inject.multibindings.MultibindingsScanner.html#com.google.inject.multibindings.MultibindingsScanner.asModule_changed()" class="hiddenlink">Module <b>asModule()</b></a><br><br><blockquote>Returns a module that, when installed, will scan all modules for methods with the annotations
  {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvidesIntoMap.html"><TT>ProvidesIntoMap</TT></A>, {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvidesIntoSet.html"><TT>ProvidesIntoSet</TT></A>, and
  {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvidesIntoOptional.html"><TT>ProvidesIntoOptional</TT></A>.<strike>
@@ -415,10 +420,14 @@ Similarly, documentation which was inherited from another class or interface is 
 </span> <strike>
  </strike><p>This is a convenience method, equivalent to <strike>doing
 </strike><span style="background: #FFFF00">doing</span> {@<strike>code</strike><span style="background: #FFFF00">code
-</span> binder().scanModulesForAnnotatedMethods(MultibindingsScanner.scanner())}.</blockquote>
-<A NAME="com.google.inject.multibindings.MultibindingsScanner.dmethod.scanner()"></A><a href="com.google.inject.multibindings.MultibindingsScanner.html" class="hiddenlink">Class <b>MultibindingsScanner</b></a>, <a href="com.google.inject.multibindings.MultibindingsScanner.html#com.google.inject.multibindings.MultibindingsScanner.scanner_changed()" class="hiddenlink">ModuleAnnotatedMethodScanner <b>scanner()</b></a><br><br><blockquote>Returns a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ModuleAnnotatedMethodScanner.html"><TT>ModuleAnnotatedMethodScanner</TT></A> that, when bound, will scan all modules for
- methods with the annotations {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvidesIntoMap.html"><TT>ProvidesIntoMap</TT></A>,<strike>
-</strike> {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvidesIntoSet.html"><TT>ProvidesIntoSet</TT></A>, and {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ProvidesIntoOptional.html"><TT>ProvidesIntoOptional</TT></A>.</blockquote>
+</span> binder().scanModulesForAnnotatedMethods(MultibindingsScanner.scanner())}.<span style="background: #FFFF00">
+
+ @deprecated This functionality is now installed by default. All references/installations can be
+     eliminated.</span></blockquote>
+<A NAME="com.google.inject.multibindings.MultibindingsScanner.dmethod.scanner()"></A><a href="com.google.inject.multibindings.MultibindingsScanner.html" class="hiddenlink">Class <b>MultibindingsScanner</b></a>, <a href="com.google.inject.multibindings.MultibindingsScanner.html#com.google.inject.multibindings.MultibindingsScanner.scanner_changed()" class="hiddenlink">ModuleAnnotatedMethodScanner <b>scanner()</b></a><br><br><blockquote><strike>Returns a ModuleAnnotatedMethodScanner that,</strike><span style="background: #FFFF00">@deprecated</span> <strike>when</strike><span style="background: #FFFF00">This</span> <strike>bound,</strike><span style="background: #FFFF00">method</span> <strike>will scan all modules for
+ methods with the annotations</strike><span style="background: #FFFF00">returns an empty scanner since the preexisting functionality is
+</span> <strike>{@literal</strike> <strike>@}ProvidesIntoMap,
+</strike> <strike>{@literal</strike> <strike>@}ProvidesIntoSet,</strike> <strike>and</strike><span style="background: #FFFF00">installed</span> <strike>{@literal</strike><span style="background: #FFFF00">by</span> <strike>@}ProvidesIntoOptional</strike><span style="background: #FFFF00">default</span>.</blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.multibindings.MultibindingsTargetVisitor!class"></A><a href="com.google.inject.multibindings.MultibindingsTargetVisitor.html" class="hiddenlink">Class <b>MultibindingsTargetVisitor</b></a><br><br><blockquote>A visitor for the multibinder extension.<strike>
 </strike><span style="background: #FFFF00">

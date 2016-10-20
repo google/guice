@@ -108,13 +108,25 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/inject/spi/DependencyAndSource.html" title="class in com.google.inject.spi">com.google.inject.spi.DependencyAndSource</a>
+<div class="block"><span class="deprecationComment">The only use of this object is for <a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--"><code>ProvisionListener.ProvisionInvocation.getDependencyChain()</code></a> which is also deprecated. This
+     object will also be removed in Guice 4.4.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/inject/assistedinject/FactoryProvider.html" title="class in com.google.inject.assistedinject">com.google.inject.assistedinject.FactoryProvider</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/inject/assistedinject/FactoryModuleBuilder.html" title="class in com.google.inject.assistedinject"><code>FactoryModuleBuilder</code></a> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/inject/struts2/GuiceObjectFactory.html" title="class in com.google.inject.struts2">com.google.inject.struts2.GuiceObjectFactory</a>
 <div class="block"><span class="deprecationComment">Use <a href="com/google/inject/struts2/Struts2Factory.html" title="class in com.google.inject.struts2"><code>Struts2Factory</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings">com.google.inject.multibindings.MultibindingsScanner</a>
+<div class="block"><span class="deprecationComment">This functionality is installed by default. All references to this can be safely
+     removed. This class will be removed in Guice 4.4</span></div>
 </td>
 </tr>
 </tbody>
@@ -133,16 +145,22 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/inject/multibindings/MultibindingsScanner.html#asModule--">com.google.inject.multibindings.MultibindingsScanner.asModule()</a>
+<div class="block"><span class="deprecationComment">This functionality is now installed by default. All references/installations can be
+     eliminated.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html#bind-java.lang.Class-java.lang.reflect.Type-">com.google.inject.throwingproviders.ThrowingProviderBinder.bind(Class&lt;P&gt;, Type)</a>
 <div class="block"><span class="deprecationComment">Use <a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html#bind-java.lang.Class-java.lang.Class-"><code>ThrowingProviderBinder.bind(Class, Class)</code></a> or <a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html#bind-java.lang.Class-com.google.inject.TypeLiteral-"><code>ThrowingProviderBinder.bind(Class, TypeLiteral)</code></a> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/inject/servlet/ServletScopes.html#continueRequest-java.util.concurrent.Callable-java.util.Map-">com.google.inject.servlet.ServletScopes.continueRequest(Callable&lt;T&gt;, Map&lt;Key&lt;?&gt;, Object&gt;)</a>
 <div class="block"><span class="deprecationComment">You probably want to use <code>transferRequest</code> instead</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--">com.google.inject.spi.ProvisionListener.ProvisionInvocation.getDependencyChain()</a>
 <div class="block"><span class="deprecationComment">This method is planned for removal in Guice 4.4.  Some use cases can be replaced
  by inferring the current chain via ThreadLocals in the listener, other use cases can use
@@ -177,9 +195,15 @@
  <a href="com/google/inject/spi/HasDependencies.html#getDependencies--"><code>HasDependencies.getDependencies()</code></a>), so you could infer some of the missing edges..</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/inject/spi/ProviderInstanceBinding.html#getProviderInstance--">com.google.inject.spi.ProviderInstanceBinding.getProviderInstance()</a>
 <div class="block"><span class="deprecationComment">Use <a href="com/google/inject/spi/ProviderInstanceBinding.html#getUserSuppliedProvider--"><code>ProviderInstanceBinding.getUserSuppliedProvider()</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/inject/multibindings/MultibindingsScanner.html#scanner--">com.google.inject.multibindings.MultibindingsScanner.scanner()</a>
+<div class="block"><span class="deprecationComment">This method returns an empty scanner since the preexisting functionality is
+     installed by default.</span></div>
 </td>
 </tr>
 </tbody>
