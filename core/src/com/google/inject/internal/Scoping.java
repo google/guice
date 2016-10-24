@@ -63,6 +63,33 @@ public abstract class Scoping {
         }
       };
 
+  /**
+   * No scoping annotation has been applied explicitly. Note that this is is the same as {@code
+   * in(Scopes.NO_SCOPE)}.
+   */
+  private static final Scoping EXPLICITLY_UNSCOPED =
+      new Scoping() {
+        @Override
+        public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+          return visitor.visitNoScoping();
+        }
+
+        @Override
+        public Scope getScopeInstance() {
+          return Scopes.NO_SCOPE;
+        }
+
+        @Override
+        public String toString() {
+          return Scopes.NO_SCOPE.toString();
+        }
+
+        @Override
+        public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+          scopedBindingBuilder.in(Scopes.NO_SCOPE);
+        }
+      };
+
   public static final Scoping SINGLETON_ANNOTATION =
       new Scoping() {
         @Override
@@ -163,6 +190,8 @@ public abstract class Scoping {
   public static Scoping forInstance(final Scope scope) {
     if (scope == Scopes.SINGLETON) {
       return SINGLETON_INSTANCE;
+    } else if (scope == Scopes.NO_SCOPE) {
+      return EXPLICITLY_UNSCOPED;
     }
 
     return new Scoping() {

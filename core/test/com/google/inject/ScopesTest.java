@@ -1351,4 +1351,31 @@ public class ScopesTest extends TestCase {
               });
     }
   }
+
+  public void testForInstanceOfNoScopingReturnsUnscoped() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(AImpl.class).in(Scopes.NO_SCOPE);
+              }
+            });
+
+    assertTrue(
+        injector
+            .getBinding(Key.get(AImpl.class))
+            .acceptScopingVisitor(
+                new DefaultBindingScopingVisitor<Boolean>() {
+                  @Override
+                  protected Boolean visitOther() {
+                    return false;
+                  }
+
+                  @Override
+                  public Boolean visitNoScoping() {
+                    return true;
+                  }
+                }));
+  }
 }
