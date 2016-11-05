@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InstanceBinding;
-
 import java.lang.annotation.Annotation;
 import java.util.List;
 
@@ -35,14 +34,15 @@ import java.util.List;
 public abstract class AbstractBindingBuilder<T> {
 
   public static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more than once.";
-  public static final String SINGLE_INSTANCE_AND_SCOPE
-      = "Setting the scope is not permitted when binding to a single instance.";
+  public static final String SINGLE_INSTANCE_AND_SCOPE =
+      "Setting the scope is not permitted when binding to a single instance.";
   public static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
-  public static final String BINDING_TO_NULL = "Binding to null instances is not allowed. "
-      + "Use toProvider(Providers.of(null)) if this is your intended behaviour.";
+  public static final String BINDING_TO_NULL =
+      "Binding to null instances is not allowed. "
+          + "Use toProvider(Providers.of(null)) if this is your intended behaviour.";
   public static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more than once.";
-  public static final String ANNOTATION_ALREADY_SPECIFIED
-      = "More than one annotation is specified for this binding.";
+  public static final String ANNOTATION_ALREADY_SPECIFIED =
+      "More than one annotation is specified for this binding.";
 
   protected static final Key<?> NULL_KEY = Key.get(Void.class);
 
@@ -73,16 +73,15 @@ public abstract class AbstractBindingBuilder<T> {
   protected BindingImpl<T> annotatedWithInternal(Class<? extends Annotation> annotationType) {
     checkNotNull(annotationType, "annotationType");
     checkNotAnnotated();
-    return setBinding(binding.withKey(
-        Key.get(this.binding.getKey().getTypeLiteral(), annotationType)));
+    return setBinding(
+        binding.withKey(Key.get(this.binding.getKey().getTypeLiteral(), annotationType)));
   }
 
   /** Sets the binding to a copy with the specified annotation on the bound key */
   protected BindingImpl<T> annotatedWithInternal(Annotation annotation) {
     checkNotNull(annotation, "annotation");
     checkNotAnnotated();
-    return setBinding(binding.withKey(
-        Key.get(this.binding.getKey().getTypeLiteral(), annotation)));
+    return setBinding(binding.withKey(Key.get(this.binding.getKey().getTypeLiteral(), annotation)));
   }
 
   public void in(final Class<? extends Annotation> scopeAnnotation) {

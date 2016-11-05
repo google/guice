@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +19,11 @@ package com.google.inject.grapher.demo;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @BindingAnnotation
 @interface Renewable {}

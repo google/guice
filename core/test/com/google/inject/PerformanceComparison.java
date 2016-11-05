@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,21 +20,19 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
 
+import java.lang.annotation.Retention;
+import java.text.DecimalFormat;
+import java.util.concurrent.Callable;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import java.lang.annotation.Retention;
-import java.text.DecimalFormat;
-import java.util.concurrent.Callable;
-
 /**
- * A semi-useless microbenchmark. Spring and Guice constuct the same object
- * graph a bunch of times, and we see who can construct the most per second.
- * As of this writing Guice is more than 50X faster. Also useful for comparing 
- * pure Java configuration options.
+ * A semi-useless microbenchmark. Spring and Guice constuct the same object graph a bunch of times,
+ * and we see who can construct the most per second. As of this writing Guice is more than 50X
+ * faster. Also useful for comparing pure Java configuration options.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -49,7 +47,7 @@ public class PerformanceComparison {
 
     for (int i2 = 0; i2 < 10; i2++) {
       iterate(springFactory, "Spring:  ");
-      iterate(juiceFactory,  "Guice:   ");
+      iterate(juiceFactory, "Guice:   ");
       iterate(byHandFactory, "By Hand: ");
 
       System.err.println();
@@ -59,88 +57,99 @@ public class PerformanceComparison {
 
     for (int i2 = 0; i2 < 10; i2++) {
       concurrentlyIterate(springFactory, "Spring:  ");
-      concurrentlyIterate(juiceFactory,  "Guice:   ");
+      concurrentlyIterate(juiceFactory, "Guice:   ");
       concurrentlyIterate(byHandFactory, "By Hand: ");
 
       System.err.println();
     }
   }
 
-  static final Callable<Foo> springFactory = new Callable<Foo>() {
+  static final Callable<Foo> springFactory =
+      new Callable<Foo>() {
 
-    final DefaultListableBeanFactory beanFactory;
+        final DefaultListableBeanFactory beanFactory;
 
-    {
-      beanFactory = new DefaultListableBeanFactory();
+        {
+          beanFactory = new DefaultListableBeanFactory();
 
-      RootBeanDefinition tee = new RootBeanDefinition(TeeImpl.class, true);
-      tee.setLazyInit(true);
-      ConstructorArgumentValues teeValues = new ConstructorArgumentValues();
-      teeValues.addGenericArgumentValue("test");
-      tee.setConstructorArgumentValues(teeValues);
+          RootBeanDefinition tee = new RootBeanDefinition(TeeImpl.class, true);
+          tee.setLazyInit(true);
+          ConstructorArgumentValues teeValues = new ConstructorArgumentValues();
+          teeValues.addGenericArgumentValue("test");
+          tee.setConstructorArgumentValues(teeValues);
 
-      RootBeanDefinition bar = new RootBeanDefinition(BarImpl.class, false);
-      ConstructorArgumentValues barValues = new ConstructorArgumentValues();
-      barValues.addGenericArgumentValue(new RuntimeBeanReference("tee"));
-      barValues.addGenericArgumentValue(5);
-      bar.setConstructorArgumentValues(barValues);
+          RootBeanDefinition bar = new RootBeanDefinition(BarImpl.class, false);
+          ConstructorArgumentValues barValues = new ConstructorArgumentValues();
+          barValues.addGenericArgumentValue(new RuntimeBeanReference("tee"));
+          barValues.addGenericArgumentValue(5);
+          bar.setConstructorArgumentValues(barValues);
 
-      RootBeanDefinition foo = new RootBeanDefinition(Foo.class, false);
-      MutablePropertyValues fooValues = new MutablePropertyValues();
-      fooValues.addPropertyValue("i", 5);
-      fooValues.addPropertyValue("bar", new RuntimeBeanReference("bar"));
-      fooValues.addPropertyValue("copy", new RuntimeBeanReference("bar"));
-      fooValues.addPropertyValue("s", "test");
-      foo.setPropertyValues(fooValues);
+          RootBeanDefinition foo = new RootBeanDefinition(Foo.class, false);
+          MutablePropertyValues fooValues = new MutablePropertyValues();
+          fooValues.addPropertyValue("i", 5);
+          fooValues.addPropertyValue("bar", new RuntimeBeanReference("bar"));
+          fooValues.addPropertyValue("copy", new RuntimeBeanReference("bar"));
+          fooValues.addPropertyValue("s", "test");
+          foo.setPropertyValues(fooValues);
 
-      beanFactory.registerBeanDefinition("foo", foo);
-      beanFactory.registerBeanDefinition("bar", bar);
-      beanFactory.registerBeanDefinition("tee", tee);
-    }
+          beanFactory.registerBeanDefinition("foo", foo);
+          beanFactory.registerBeanDefinition("bar", bar);
+          beanFactory.registerBeanDefinition("tee", tee);
+        }
 
-    public Foo call() throws Exception {
-      return (Foo) beanFactory.getBean("foo");
-    }
-  };
+        @Override
+        public Foo call() throws Exception {
+          return (Foo) beanFactory.getBean("foo");
+        }
+      };
 
-  static final Callable<Foo> juiceFactory = new Callable<Foo>() {
-    final Provider<Foo> fooProvider;
-    {
-      Injector injector;
-      try {
-        injector = Guice.createInjector(new AbstractModule() {
-          protected void configure() {
-            bind(Tee.class).to(TeeImpl.class);
-            bind(Bar.class).to(BarImpl.class);
-            bind(Foo.class);
-            bindConstant().annotatedWith(I.class).to(5);
-            bindConstant().annotatedWith(S.class).to("test");
+  static final Callable<Foo> juiceFactory =
+      new Callable<Foo>() {
+        final Provider<Foo> fooProvider;
+
+        {
+          Injector injector;
+          try {
+            injector =
+                Guice.createInjector(
+                    new AbstractModule() {
+                      @Override
+                      protected void configure() {
+                        bind(Tee.class).to(TeeImpl.class);
+                        bind(Bar.class).to(BarImpl.class);
+                        bind(Foo.class);
+                        bindConstant().annotatedWith(I.class).to(5);
+                        bindConstant().annotatedWith(S.class).to("test");
+                      }
+                    });
+          } catch (CreationException e) {
+            throw new RuntimeException(e);
           }
-        });
-      } catch (CreationException e) {
-        throw new RuntimeException(e);
-      }
-      fooProvider = injector.getProvider(Foo.class);
-    }
+          fooProvider = injector.getProvider(Foo.class);
+        }
 
-    public Foo call() throws Exception {
-      return fooProvider.get();
-    }
-  };
+        @Override
+        public Foo call() throws Exception {
+          return fooProvider.get();
+        }
+      };
 
-  static final Callable<Foo> byHandFactory = new Callable<Foo>() {
-    final Tee tee = new TeeImpl("test");
-    public Foo call() throws Exception {
-      Foo foo = new Foo();
-      foo.setI(5);
-      foo.setS("test");
-      Bar bar = new BarImpl(tee, 5);
-      Bar copy = new BarImpl(tee, 5);
-      foo.setBar(bar);
-      foo.setCopy(copy);
-      return foo;
-    }
-  };
+  static final Callable<Foo> byHandFactory =
+      new Callable<Foo>() {
+        final Tee tee = new TeeImpl("test");
+
+        @Override
+        public Foo call() throws Exception {
+          Foo foo = new Foo();
+          foo.setI(5);
+          foo.setS("test");
+          Bar bar = new BarImpl(tee, 5);
+          Bar copy = new BarImpl(tee, 5);
+          foo.setBar(bar);
+          foo.setCopy(copy);
+          return foo;
+        }
+      };
 
   static void validate(Callable<Foo> t) throws Exception {
     Foo foo = t.call();
@@ -161,16 +170,14 @@ public class PerformanceComparison {
     for (int i = 0; i < count; i++) {
       try {
         callable.call();
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
 
     time = System.currentTimeMillis() - time;
 
-    System.err.println(label
-        + format.format(count * 1000 / time) + " creations/s");
+    System.err.println(label + format.format(count * 1000 / time) + " creations/s");
   }
 
   static void concurrentlyIterate(final Callable<Foo> callable, String label) {
@@ -180,20 +187,20 @@ public class PerformanceComparison {
     Thread[] threads = new Thread[threadCount];
 
     for (int i = 0; i < threadCount; i++) {
-      threads[i] = new Thread() {
-        public void run() {
-          for (int i = 0; i < count; i++) {
-            try {
-              validate(callable);
+      threads[i] =
+          new Thread() {
+            @Override
+            public void run() {
+              for (int i = 0; i < count; i++) {
+                try {
+                  validate(callable);
+                } catch (Exception e) {
+                  throw new RuntimeException(e);
+                }
+              }
             }
-            catch (Exception e) {
-              throw new RuntimeException(e);
-            }
-          }
-        }
-      };
+          };
     }
-
 
     long time = System.currentTimeMillis();
 
@@ -204,16 +211,14 @@ public class PerformanceComparison {
     for (int i = 0; i < threadCount; i++) {
       try {
         threads[i].join();
-      }
-      catch (InterruptedException e) {
+      } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
     }
 
     time = System.currentTimeMillis() - time;
 
-    System.err.println(label
-        + format.format(count * 1000 / time) + " creations/s");
+    System.err.println(label + format.format(count * 1000 / time) + " creations/s");
   }
 
   public static class Foo {
@@ -247,6 +252,7 @@ public class PerformanceComparison {
   interface Bar {
 
     Tee getTee();
+
     int getI();
   }
 
@@ -261,10 +267,12 @@ public class PerformanceComparison {
       this.i = i;
     }
 
+    @Override
     public Tee getTee() {
       return tee;
     }
 
+    @Override
     public int getI() {
       return i;
     }
@@ -285,14 +293,17 @@ public class PerformanceComparison {
       this.s = s;
     }
 
+    @Override
     public String getS() {
       return s;
     }
   }
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface I {}
+  @BindingAnnotation
+  @interface I {}
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface S {}
+  @BindingAnnotation
+  @interface S {}
 }

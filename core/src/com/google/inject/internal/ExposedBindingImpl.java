@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,32 +25,39 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
-
 import java.util.Set;
 
 public final class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBinding<T> {
 
   private final PrivateElements privateElements;
 
-  public ExposedBindingImpl(InjectorImpl injector, Object source, Key<T> key,
-      InternalFactory<T> factory, PrivateElements privateElements) {
+  public ExposedBindingImpl(
+      InjectorImpl injector,
+      Object source,
+      Key<T> key,
+      InternalFactory<T> factory,
+      PrivateElements privateElements) {
     super(injector, key, source, factory, Scoping.UNSCOPED);
     this.privateElements = privateElements;
   }
 
+  @Override
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
   }
 
+  @Override
   public PrivateElements getPrivateElements() {
     return privateElements;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return MoreObjects.toStringHelper(ExposedBinding.class)
         .add("key", getKey())
         .add("source", getSource())
@@ -58,10 +65,11 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
         .toString();
   }
 
+  @Override
   public void applyTo(Binder binder) {
     throw new UnsupportedOperationException("This element represents a synthetic binding.");
   }
-  
+
   // Purposely does not override equals/hashcode, because exposed bindings are only equal to
   // themselves right now -- that is, there cannot be "duplicate" exposed bindings.
 }

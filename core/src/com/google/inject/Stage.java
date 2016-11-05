@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +26,8 @@ public enum Stage {
   /**
    * We're running in a tool (an IDE plugin for example). We need binding meta data but not a
    * functioning Injector. Do not inject members of instances. Do not load eager singletons. Do as
-   * little as possible so our tools run nice and snappy. Injectors created in this stage cannot
-   * be used to satisfy injections.
+   * little as possible so our tools run nice and snappy. Injectors created in this stage cannot be
+   * used to satisfy injections.
    */
   TOOL,
 
@@ -37,8 +37,6 @@ public enum Stage {
    */
   DEVELOPMENT,
 
-  /**
-   * We want to catch errors as early as possible and take performance hits up front.
-   */
+  /** We want to catch errors as early as possible and take performance hits up front. */
   PRODUCTION
 }

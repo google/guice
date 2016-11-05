@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,21 +17,22 @@
 package com.google.inject.throwingproviders;
 
 /**
- * Alternative to the Guice {@link com.google.inject.Provider} that throws
- * a checked Exception. Users may not inject {@code T} directly.
+ * Alternative to the Guice {@link com.google.inject.Provider} that throws a checked Exception.
+ * Users may not inject {@code T} directly.
  *
- * <p>This interface must be extended to use application-specific exception types.
- * Such subinterfaces may not define new methods, but may narrow the exception type.
+ * <p>This interface must be extended to use application-specific exception types. Such
+ * subinterfaces may not define new methods, but may narrow the exception type.
+ *
  * <pre>
- * public interface RemoteProvider&lt;T&gt; extends CheckedProvider&lt;T&gt; { 
+ * public interface RemoteProvider&lt;T&gt; extends CheckedProvider&lt;T&gt; {
  *   T get() throws CustomExceptionOne, CustomExceptionTwo;
  * }
  * </pre>
  *
- * <p>When this type is bound using {@link ThrowingProviderBinder}, the value returned
- * or exception thrown by {@link #get} will be scoped. As a consequence, {@link #get}
- * will invoked at most once within each scope.
- * 
+ * <p>When this type is bound using {@link ThrowingProviderBinder}, the value returned or exception
+ * thrown by {@link #get} will be scoped. As a consequence, {@link #get} will invoked at most once
+ * within each scope.
+ *
  * @since 3.0
  */
 public interface CheckedProvider<T> {

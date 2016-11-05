@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -36,6 +27,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Map;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Looks up line numbers for classes and their members.
@@ -67,7 +65,8 @@ final class LineNumbers {
         } finally {
           try {
             in.close();
-          } catch (IOException ignored) {}
+          } catch (IOException ignored) {
+          }
         }
       }
     }
@@ -88,11 +87,15 @@ final class LineNumbers {
    * @param member a field, constructor, or method belonging to the class used during construction
    * @return the wrapped line number, or null if not available
    * @throws IllegalArgumentException if the member does not belong to the class used during
-   * construction
+   *     construction
    */
   public Integer getLineNumber(Member member) {
-    Preconditions.checkArgument(type == member.getDeclaringClass(),
-        "Member %s belongs to %s, not %s", member, member.getDeclaringClass(), type);
+    Preconditions.checkArgument(
+        type == member.getDeclaringClass(),
+        "Member %s belongs to %s, not %s",
+        member,
+        member.getDeclaringClass(),
+        type);
     return lines.get(memberKey(member));
   }
 
@@ -114,7 +117,7 @@ final class LineNumbers {
     } else if (member instanceof Constructor) {
       StringBuilder sb = new StringBuilder().append("<init>(");
       for (Class param : ((Constructor) member).getParameterTypes()) {
-          sb.append(org.objectweb.asm.Type.getDescriptor(param));
+        sb.append(org.objectweb.asm.Type.getDescriptor(param));
       }
       return sb.append(")V").toString();
 
@@ -126,7 +129,7 @@ final class LineNumbers {
     /*if[NO_AOP]
     return "<NO_MEMBER_KEY>";
     end[NO_AOP]*/
-  }  
+  }
 
   private class LineNumberReader extends ClassVisitor {
 
@@ -138,13 +141,20 @@ final class LineNumbers {
       super(Opcodes.ASM5);
     }
 
-    public void visit(int version, int access, String name, String signature,
-        String superName, String[] interfaces) {
+    @Override
+    public void visit(
+        int version,
+        int access,
+        String name,
+        String signature,
+        String superName,
+        String[] interfaces) {
       this.name = name;
     }
 
-    public MethodVisitor visitMethod(int access, String name, String desc,
-        String signature, String[] exceptions) {
+    @Override
+    public MethodVisitor visitMethod(
+        int access, String name, String desc, String signature, String[] exceptions) {
       if ((access & Opcodes.ACC_PRIVATE) != 0) {
         return null;
       }
@@ -153,6 +163,7 @@ final class LineNumbers {
       return new LineNumberMethodVisitor();
     }
 
+    @Override
     public void visitSource(String source, String debug) {
       LineNumbers.this.source = source;
     }
@@ -169,17 +180,18 @@ final class LineNumbers {
       }
     }
 
-    public FieldVisitor visitField(int access, String name, String desc,
-        String signature, Object value) {
+    @Override
+    public FieldVisitor visitField(
+        int access, String name, String desc, String signature, Object value) {
       return null;
     }
 
+    @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
       return new LineNumberAnnotationVisitor();
     }
 
-    public AnnotationVisitor visitParameterAnnotation(int parameter,
-        String desc, boolean visible) {
+    public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
       return new LineNumberAnnotationVisitor();
     }
 
@@ -188,22 +200,27 @@ final class LineNumbers {
         super(Opcodes.ASM5);
       }
 
+      @Override
       public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         return new LineNumberAnnotationVisitor();
       }
 
+      @Override
       public AnnotationVisitor visitAnnotationDefault() {
         return new LineNumberAnnotationVisitor();
       }
 
-      public void visitFieldInsn(int opcode, String owner, String name,
-          String desc) {
-        if (opcode == Opcodes.PUTFIELD && LineNumberReader.this.name.equals(owner)
-            && !lines.containsKey(name) && line != -1) {
+      @Override
+      public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+        if (opcode == Opcodes.PUTFIELD
+            && LineNumberReader.this.name.equals(owner)
+            && !lines.containsKey(name)
+            && line != -1) {
           lines.put(name, line);
         }
       }
 
+      @Override
       public void visitLineNumber(int line, Label start) {
         LineNumberReader.this.visitLineNumber(line, start);
       }
@@ -213,17 +230,19 @@ final class LineNumbers {
       LineNumberAnnotationVisitor() {
         super(Opcodes.ASM5);
       }
+
+      @Override
       public AnnotationVisitor visitAnnotation(String name, String desc) {
         return this;
       }
+
+      @Override
       public AnnotationVisitor visitArray(String name) {
         return this;
       }
-      public void visitLocalVariable(String name, String desc, String signature,
-          Label start, Label end, int index) {
-      }
 
+      public void visitLocalVariable(
+          String name, String desc, String signature, Label start, Label end, int index) {}
     }
-
   }
 }

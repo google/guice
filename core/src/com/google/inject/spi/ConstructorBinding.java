@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -32,17 +31,15 @@ import java.util.Set;
  */
 public interface ConstructorBinding<T> extends Binding<T>, HasDependencies {
 
-  /**
-   * Gets the constructor this binding injects.
-   */
+  /** Gets the constructor this binding injects. */
   InjectionPoint getConstructor();
 
   /**
    * Returns all instance method and field injection points on {@code type}.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
-   *      fields are returned and then all methods. Within the fields, supertype fields are returned
-   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
    */
   Set<InjectionPoint> getInjectableMembers();
 

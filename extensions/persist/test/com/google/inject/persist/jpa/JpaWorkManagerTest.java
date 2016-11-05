@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,24 +22,21 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
-import org.hibernate.HibernateException;
-
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import junit.framework.TestCase;
+import org.hibernate.HibernateException;
 
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
 public class JpaWorkManagerTest extends TestCase {
   private Injector injector;
-  private static final String UNIQUE_TEXT_3 = JpaWorkManagerTest.class.getSimpleName()
-      + "CONSTRAINT_VIOLATING some other unique text" + new Date();
+  private static final String UNIQUE_TEXT_3 =
+      JpaWorkManagerTest.class.getSimpleName()
+          + "CONSTRAINT_VIOLATING some other unique text"
+          + new Date();
 
   @Override
   public void setUp() {
@@ -53,8 +50,8 @@ public class JpaWorkManagerTest extends TestCase {
   public void tearDown() {
     try {
       injector.getInstance(EntityManagerFactory.class).close();
-    } catch(HibernateException ex) {
-        // Expected if the persist service has already been stopped.
+    } catch (HibernateException ex) {
+      // Expected if the persist service has already been stopped.
     }
   }
 
@@ -64,14 +61,15 @@ public class JpaWorkManagerTest extends TestCase {
       injector.getInstance(TransactionalObject.class).runOperationInTxn();
     } finally {
       injector.getInstance(UnitOfWork.class).end();
-
     }
 
     injector.getInstance(UnitOfWork.class).begin();
     injector.getInstance(EntityManager.class).getTransaction().begin();
     try {
-      final Query query = injector.getInstance(EntityManager.class)
-          .createQuery("select e from JpaTestEntity as e where text = :text");
+      final Query query =
+          injector
+              .getInstance(EntityManager.class)
+              .createQuery("select e from JpaTestEntity as e where text = :text");
 
       query.setParameter("text", UNIQUE_TEXT_3);
       final Object o = query.getSingleResult();
@@ -80,8 +78,10 @@ public class JpaWorkManagerTest extends TestCase {
       assertTrue("Unknown type returned " + o.getClass(), o instanceof JpaTestEntity);
       JpaTestEntity ent = (JpaTestEntity) o;
 
-      assertEquals("Incorrect result returned or not persisted properly" + ent.getText(),
-          UNIQUE_TEXT_3, ent.getText());
+      assertEquals(
+          "Incorrect result returned or not persisted properly" + ent.getText(),
+          UNIQUE_TEXT_3,
+          ent.getText());
 
     } finally {
       injector.getInstance(EntityManager.class).getTransaction().commit();

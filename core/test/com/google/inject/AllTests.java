@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,24 +42,19 @@ import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.OverrideModuleTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-
 import com.googlecode.guice.GuiceTck;
 import com.googlecode.guice.Jsr330Test;
-
+import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import java.util.Set;
-
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class AllTests {
 
-  private static final Set<String> SUPPRESSED_TEST_NAMES = ImmutableSet.of(
-      "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
-      "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")"
-  );
+  private static final Set<String> SUPPRESSED_TEST_NAMES =
+      ImmutableSet.of(
+          "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
+          "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")");
 
   public static Test suite() {
     TestSuite suite = new TestSuite();
@@ -155,6 +150,13 @@ public class AllTests {
     // googlecode.guice
     suite.addTestSuite(com.googlecode.guice.OSGiContainerTest.class);
     suite.addTestSuite(Jsr330Test.class);
+
+    // multibindings tests
+    suite.addTestSuite(com.google.inject.internal.MapBinderTest.class);
+    suite.addTestSuite(com.google.inject.internal.MultibinderTest.class);
+    suite.addTestSuite(com.google.inject.internal.OptionalBinderTest.class);
+    suite.addTestSuite(com.google.inject.internal.RealElementTest.class);
+    suite.addTestSuite(com.google.inject.multibindings.ProvidesIntoTest.class);
 
     return SuiteUtils.removeSuppressedTests(suite, SUPPRESSED_TEST_NAMES);
   }

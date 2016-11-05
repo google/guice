@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,32 +16,30 @@
 
 package com.google.inject;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import java.util.Enumeration;
 import java.util.Set;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class SuiteUtils {
 
   public static TestSuite removeSuppressedTests(TestSuite suite, Set<String> suppressedTestNames) {
     TestSuite result = new TestSuite(suite.getName());
-  
-    for(Enumeration e = suite.tests(); e.hasMoreElements(); ) {
+
+    for (Enumeration e = suite.tests(); e.hasMoreElements(); ) {
       Test test = (Test) e.nextElement();
-  
+
       if (suppressedTestNames.contains(test.toString())) {
         continue;
       }
-  
+
       if (test instanceof TestSuite) {
         result.addTest(removeSuppressedTests((TestSuite) test, suppressedTestNames));
       } else {
         result.addTest(test);
       }
     }
-  
+
     return result;
   }
-
 }

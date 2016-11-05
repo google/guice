@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-
 import junit.framework.TestCase;
 
 /**
@@ -50,14 +49,15 @@ public class StaticInterfaceMethodsTest extends TestCase {
   }
 
   public void testAssistedInjection() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        install(new FactoryModuleBuilder().build(Factory.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(new FactoryModuleBuilder().build(Factory.class));
+              }
+            });
     Factory factory = injector.getInstance(Factory.class);
     assertEquals(1, factory.create(1).i);
   }
-
 }

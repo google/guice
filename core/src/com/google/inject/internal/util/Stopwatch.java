@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,9 +28,7 @@ public final class Stopwatch {
 
   private long start = System.currentTimeMillis();
 
-  /**
-   * Resets and returns elapsed time in milliseconds.
-   */
+  /** Resets and returns elapsed time in milliseconds. */
   public long reset() {
     long now = System.currentTimeMillis();
     try {
@@ -40,9 +38,7 @@ public final class Stopwatch {
     }
   }
 
-  /**
-   * Resets and logs elapsed time in milliseconds.
-   */
+  /** Resets and logs elapsed time in milliseconds. */
   public void resetAndLog(String label) {
     logger.fine(label + ": " + reset() + "ms");
   }

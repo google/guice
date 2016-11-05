@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,9 @@ import com.google.inject.Key;
 
 /**
  * ID of a node in the graph. An ID is given by a {@link Key} and a node type, which is used to
- * distinguish instances and implementation classes for the same key. For example
- * {@code bind(Integer.class).toInstance(42)} produces two nodes: an
- * interface node with the key of {@code Key<Integer>} and an instance node with the same
- * {@link Key} and value of 42.
+ * distinguish instances and implementation classes for the same key. For example {@code
+ * bind(Integer.class).toInstance(42)} produces two nodes: an interface node with the key of {@code
+ * Key<Integer>} and an instance node with the same {@link Key} and value of 42.
  *
  * @author bojand@google.com (Bojan Djordjevic)
  * @since 4.0
@@ -64,11 +63,13 @@ public final class NodeId {
     return key;
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return Objects.hashCode(key, nodeType);
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (obj == null || !(obj.getClass().equals(NodeId.class))) {
       return false;
     }
@@ -76,7 +77,8 @@ public final class NodeId {
     return Objects.equal(key, other.key) && Objects.equal(nodeType, other.nodeType);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "NodeId{nodeType=" + nodeType + " key=" + key + "}";
   }
 }

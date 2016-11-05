@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.name;
 
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
@@ -25,21 +24,20 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class NamesTest extends TestCase {
 
-  @Named("foo") private String foo;
+  @Named("foo")
+  private String foo;
+
   private Named namedFoo;
-  
+
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     namedFoo = getClass().getDeclaredField("foo").getAnnotation(Named.class);
@@ -60,25 +58,31 @@ public class NamesTest extends TestCase {
     teams.setProperty("SanJose", "Sharks");
     teams.setProperty("Edmonton", "Oilers");
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        Names.bindProperties(binder(), teams);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Names.bindProperties(binder(), teams);
+              }
+            });
 
     assertEquals("Sharks", injector.getInstance(Key.get(String.class, Names.named("SanJose"))));
     assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
   }
 
   public void testBindPropertiesUsingMap() {
-    final Map<String, String> properties = ImmutableMap.of(
-        "SanJose", "Sharks", "Edmonton", "Oilers");
+    final Map<String, String> properties =
+        ImmutableMap.of("SanJose", "Sharks", "Edmonton", "Oilers");
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        Names.bindProperties(binder(), properties);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Names.bindProperties(binder(), properties);
+              }
+            });
 
     assertEquals("Sharks", injector.getInstance(Key.get(String.class, Names.named("SanJose"))));
     assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
@@ -93,11 +97,14 @@ public class NamesTest extends TestCase {
     teams.setProperty("SanJose", "Sharks");
     teams.setProperty("Edmonton", "Oilers");
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        Names.bindProperties(binder(), teams);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                Names.bindProperties(binder(), teams);
+              }
+            });
 
     assertEquals("Pats", injector.getInstance(Key.get(String.class, Names.named("Regina"))));
     assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));

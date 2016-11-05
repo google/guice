@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Scope;
 import com.google.inject.spi.ScopeBinding;
-
 import java.lang.annotation.Annotation;
 
 /**
@@ -35,9 +34,11 @@ final class ScopeBindingProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visit(ScopeBinding command) {
+  @Override
+  public Boolean visit(ScopeBinding command) {
     Scope scope = checkNotNull(command.getScope(), "scope");
-    Class<? extends Annotation> annotationType = checkNotNull(command.getAnnotationType(), "annotation type");
+    Class<? extends Annotation> annotationType =
+        checkNotNull(command.getAnnotationType(), "annotation type");
 
     if (!Annotations.isScopeAnnotation(annotationType)) {
       errors.missingScopeAnnotation(annotationType);

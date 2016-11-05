@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,26 +22,21 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
+import junit.framework.TestCase;
 
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
 public class JoiningLocalTransactionsTest extends TestCase {
   private Injector injector;
-  private static final String UNIQUE_TEXT = JoiningLocalTransactionsTest.class + "some unique text"
-      + new Date();
-  private static final String TRANSIENT_UNIQUE_TEXT = JoiningLocalTransactionsTest.class
-      + "some other unique text" + new Date();
+  private static final String UNIQUE_TEXT =
+      JoiningLocalTransactionsTest.class + "some unique text" + new Date();
+  private static final String TRANSIENT_UNIQUE_TEXT =
+      JoiningLocalTransactionsTest.class + "some other unique text" + new Date();
 
   @Override
   public void setUp() {
@@ -59,27 +54,32 @@ public class JoiningLocalTransactionsTest extends TestCase {
   }
 
   public void testSimpleTransaction() {
-    injector.getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
+    injector
+        .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
         .runOperationInTxn();
 
     EntityManager em = injector.getInstance(EntityManager.class);
-    assertFalse("txn was not closed by transactional service",
-        em.getTransaction().isActive());
+    assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
 
     //test that the data has been stored
-    Object result = em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT).getSingleResult();
+    Object result =
+        em.createQuery("from JpaTestEntity where text = :text")
+            .setParameter("text", UNIQUE_TEXT)
+            .getSingleResult();
     injector.getInstance(UnitOfWork.class).end();
 
     assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
 
-    assertEquals("queried entity did not match--did automatic txn fail?", UNIQUE_TEXT,
+    assertEquals(
+        "queried entity did not match--did automatic txn fail?",
+        UNIQUE_TEXT,
         ((JpaTestEntity) result).getText());
   }
 
   public void testSimpleTransactionRollbackOnChecked() {
     try {
-      injector.getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
+      injector
+          .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
           .runOperationInTxnThrowingChecked();
     } catch (IOException e) {
       //ignore
@@ -88,21 +88,26 @@ public class JoiningLocalTransactionsTest extends TestCase {
 
     EntityManager em = injector.getInstance(EntityManager.class);
 
-    assertFalse("EM was not closed by transactional service (rollback didnt happen?)",
+    assertFalse(
+        "EM was not closed by transactional service (rollback didnt happen?)",
         em.getTransaction().isActive());
 
     //test that the data has been stored
     try {
-      Object result = em.createQuery("from JpaTestEntity where text = :text")
-          .setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
+      Object result =
+          em.createQuery("from JpaTestEntity where text = :text")
+              .setParameter("text", TRANSIENT_UNIQUE_TEXT)
+              .getSingleResult();
       injector.getInstance(UnitOfWork.class).end();
       fail("a result was returned! rollback sure didnt happen!!!");
-    } catch (NoResultException e) { }
+    } catch (NoResultException e) {
+    }
   }
 
   public void testSimpleTransactionRollbackOnUnchecked() {
     try {
-      injector.getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
+      injector
+          .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
           .runOperationInTxnThrowingUnchecked();
     } catch (RuntimeException re) {
       //ignore
@@ -110,15 +115,19 @@ public class JoiningLocalTransactionsTest extends TestCase {
     }
 
     EntityManager em = injector.getInstance(EntityManager.class);
-    assertFalse("Session was not closed by transactional service (rollback didnt happen?)",
+    assertFalse(
+        "Session was not closed by transactional service (rollback didnt happen?)",
         em.getTransaction().isActive());
 
     try {
-      Object result = em.createQuery("from JpaTestEntity where text = :text")
-          .setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
+      Object result =
+          em.createQuery("from JpaTestEntity where text = :text")
+              .setParameter("text", TRANSIENT_UNIQUE_TEXT)
+              .getSingleResult();
       injector.getInstance(UnitOfWork.class).end();
       fail("a result was returned! rollback sure didnt happen!!!");
-    } catch (NoResultException e) {}
+    } catch (NoResultException e) {
+    }
   }
 
   public static class TransactionalObject {

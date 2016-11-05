@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ public interface HasDependencies {
    * Returns the known dependencies for this type. If this has dependencies whose values are not
    * known statically, a dependency for the {@link com.google.inject.Injector Injector} will be
    * included in the returned set.
-   * 
+   *
    * @return a possibly empty set
    */
   Set<Dependency<?>> getDependencies();

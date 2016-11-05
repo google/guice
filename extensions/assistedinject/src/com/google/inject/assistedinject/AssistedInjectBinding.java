@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,19 +17,17 @@
 package com.google.inject.assistedinject;
 
 import com.google.inject.Key;
-
 import java.util.Collection;
 
 /**
  * A binding for a factory created by FactoryModuleBuilder.
- * 
+ *
  * @param <T> The fully qualified type of the factory.
- *  
  * @since 3.0
  * @author ramakrishna@google.com (Ramakrishna Rajanna)
  */
 public interface AssistedInjectBinding<T> {
-  
+
   /** Returns the {@link Key} for the factory binding. */
   Key<T> getKey();
 

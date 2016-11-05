@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,19 +19,18 @@ package com.google.inject.servlet;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a {@link GuiceFilter} that provides scope functionality, but
- * doesn't dispatch to {@link ServletModule} bound servlets or filters.
+ * Annotates a {@link GuiceFilter} that provides scope functionality, but doesn't dispatch to {@link
+ * ServletModule} bound servlets or filters.
  *
  * @author iqshum@google.com (Isaac Shum)
  * @since 4.0
  */
 @Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @BindingAnnotation
 public @interface ScopingOnly {}

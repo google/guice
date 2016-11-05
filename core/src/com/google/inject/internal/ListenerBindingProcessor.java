@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,12 +30,14 @@ final class ListenerBindingProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visit(TypeListenerBinding binding) {
+  @Override
+  public Boolean visit(TypeListenerBinding binding) {
     injector.state.addTypeListener(binding);
     return true;
   }
-  
-  @Override public Boolean visit(ProvisionListenerBinding binding) {
+
+  @Override
+  public Boolean visit(ProvisionListenerBinding binding) {
     injector.state.addProvisionListener(binding);
     return true;
   }

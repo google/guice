@@ -1,13 +1,10 @@
 package com.google.inject.spi;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import junit.framework.TestCase;
 
-import java.util.List;
-
-/**
- * Tests for {@link Message}.
- */
+/** Tests for {@link Message}. */
 public class MessageTest extends TestCase {
 
   public void testMessageHashCodeVariesWithSource() {
@@ -26,4 +23,3 @@ public class MessageTest extends TestCase {
     assertFalse(firstMessage.hashCode() == secondMessage.hashCode());
   }
 }
-

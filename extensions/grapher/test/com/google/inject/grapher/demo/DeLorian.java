@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,11 @@ import com.google.inject.Provider;
 
 class DeLorian {
   // We @Inject a Provider to demonstrate that the graph doesn't differentiate
-  // between a Provider<T> and just @Injecting T. 
+  // between a Provider<T> and just @Injecting T.
   @Inject @Driver Provider<Person> driver;
   @Inject FluxCapacitor fluxCapacitor;
   @Inject PrivateTestModule.Exposed exposed;
-  
+
   @Inject
   public void setEnergySource(EnergySource energySource) {}
 }

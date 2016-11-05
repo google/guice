@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,7 @@
 
 package com.google.inject.internal;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public interface CircularDependencyProxy {
   // marker interface
 }

@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>4.0.1-SNAPSHOT</version>
+  <version>4.1.1-SNAPSHOT</version>
 
   <name>Google Guice</name>
 
@@ -144,12 +144,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
+        <version>19.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>18.0</version>
+        <version>19.0</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
@@ -166,6 +166,17 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <artifactId>junit</artifactId>
         <version>4.11</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.truth</groupId>
+        <artifactId>truth</artifactId>
+        <version>0.28</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

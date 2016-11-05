@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,7 @@
 
 package com.google.inject.internal;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 interface ContextualCallable<T> {
   T call(InternalContext context) throws ErrorsException;
 }

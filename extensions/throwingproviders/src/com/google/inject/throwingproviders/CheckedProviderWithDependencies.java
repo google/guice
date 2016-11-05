@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +20,9 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder;
 
 /**
- * A checked provider with dependencies, so {@link HasDependencies} can be implemented
- * when using the {@link SecondaryBinder#using} methods.
- * 
+ * A checked provider with dependencies, so {@link HasDependencies} can be implemented when using
+ * the {@link SecondaryBinder#using} methods.
+ *
  * @author sameb@google.com (Sam Berlin)
  */
-interface CheckedProviderWithDependencies<T> extends CheckedProvider<T>, HasDependencies {
-
-}
+interface CheckedProviderWithDependencies<T> extends CheckedProvider<T>, HasDependencies {}

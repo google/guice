@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import com.google.inject.TypeLiteral;
 /**
  * A lookup of the members injector for a type. Lookups are created explicitly in a module using
  * {@link com.google.inject.Binder#getMembersInjector(Class) getMembersInjector()} statements:
+ *
  * <pre>
  *     MembersInjector&lt;PaymentService&gt; membersInjector
  *         = getMembersInjector(PaymentService.class);</pre>
@@ -44,17 +45,17 @@ public final class MembersInjectorLookup<T> implements Element {
     this.type = checkNotNull(type, "type");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
-  /**
-   * Gets the type containing the members to be injected.
-   */
+  /** Gets the type containing the members to be injected. */
   public TypeLiteral<T> getType() {
     return type;
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
@@ -69,14 +70,15 @@ public final class MembersInjectorLookup<T> implements Element {
     this.delegate = checkNotNull(delegate, "delegate");
   }
 
+  @Override
   public void applyTo(Binder binder) {
     initializeDelegate(binder.withSource(getSource()).getMembersInjector(type));
   }
 
   /**
-   * Returns the delegate members injector, or {@code null} if it has not yet been initialized.
-   * The delegate will be initialized when this element is processed, or otherwise used to create
-   * an injector.
+   * Returns the delegate members injector, or {@code null} if it has not yet been initialized. The
+   * delegate will be initialized when this element is processed, or otherwise used to create an
+   * injector.
    */
   public MembersInjector<T> getDelegate() {
     return delegate;
@@ -89,13 +91,18 @@ public final class MembersInjectorLookup<T> implements Element {
    */
   public MembersInjector<T> getMembersInjector() {
     return new MembersInjector<T>() {
+      @Override
       public void injectMembers(T instance) {
-        checkState(delegate != null,
-            "This MembersInjector cannot be used until the Injector has been created.");
-        delegate.injectMembers(instance);
+        MembersInjector<T> local = delegate;
+        if (local == null) {
+          throw new IllegalStateException(
+              "This MembersInjector cannot be used until the Injector has been created.");
+        }
+        local.injectMembers(instance);
       }
 
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return "MembersInjector<" + type + ">";
       }
     };

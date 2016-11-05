@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeListener;
 import com.google.inject.spi.TypeListenerBinding;
-
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
@@ -38,16 +37,16 @@ final class MembersInjectorStore {
   private final InjectorImpl injector;
   private final ImmutableList<TypeListenerBinding> typeListenerBindings;
 
-  private final FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>> cache
-      = new FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>>() {
-    @Override protected MembersInjectorImpl<?> create(TypeLiteral<?> type, Errors errors)
-        throws ErrorsException {
-      return createWithListeners(type, errors);
-    }
-  };
+  private final FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>> cache =
+      new FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>>() {
+        @Override
+        protected MembersInjectorImpl<?> create(TypeLiteral<?> type, Errors errors)
+            throws ErrorsException {
+          return createWithListeners(type, errors);
+        }
+      };
 
-  MembersInjectorStore(InjectorImpl injector,
-      List<TypeListenerBinding> typeListenerBindings) {
+  MembersInjectorStore(InjectorImpl injector, List<TypeListenerBinding> typeListenerBindings) {
     this.injector = injector;
     this.typeListenerBindings = ImmutableList.copyOf(typeListenerBindings);
   }
@@ -60,9 +59,7 @@ final class MembersInjectorStore {
     return !typeListenerBindings.isEmpty();
   }
 
-  /**
-   * Returns a new complete members injector with injection listeners registered.
-   */
+  /** Returns a new complete members injector with injection listeners registered. */
   @SuppressWarnings("unchecked") // the MembersInjector type always agrees with the passed type
   public <T> MembersInjectorImpl<T> get(TypeLiteral<T> key, Errors errors) throws ErrorsException {
     return (MembersInjectorImpl<T>) cache.get(key, errors);
@@ -74,16 +71,14 @@ final class MembersInjectorStore {
    * ImplicitBindingTest#testCircularJitBindingsLeaveNoResidue and
    * #testInstancesRequestingProvidersForThemselvesWithChildInjectors for examples of when this is
    * necessary.)
-   * 
-   * Returns true if the type was stored in the cache, false otherwise.
+   *
+   * <p>Returns true if the type was stored in the cache, false otherwise.
    */
   boolean remove(TypeLiteral<?> type) {
     return cache.remove(type);
   }
 
-  /**
-   * Creates a new members injector and attaches both injection listeners and method aspects.
-   */
+  /** Creates a new members injector and attaches both injection listeners and method aspects. */
   private <T> MembersInjectorImpl<T> createWithListeners(TypeLiteral<T> type, Errors errors)
       throws ErrorsException {
     int numErrorsBefore = errors.size();
@@ -117,20 +112,20 @@ final class MembersInjectorStore {
     return new MembersInjectorImpl<T>(injector, type, encounter, injectors);
   }
 
-  /**
-   * Returns the injectors for the specified injection points.
-   */
+  /** Returns the injectors for the specified injection points. */
   ImmutableList<SingleMemberInjector> getInjectors(
       Set<InjectionPoint> injectionPoints, Errors errors) {
     List<SingleMemberInjector> injectors = Lists.newArrayList();
     for (InjectionPoint injectionPoint : injectionPoints) {
       try {
-        Errors errorsForMember = injectionPoint.isOptional()
-            ? new Errors(injectionPoint)
-            : errors.withSource(injectionPoint);
-        SingleMemberInjector injector = injectionPoint.getMember() instanceof Field
-            ? new SingleFieldInjector(this.injector, injectionPoint, errorsForMember)
-            : new SingleMethodInjector(this.injector, injectionPoint, errorsForMember);
+        Errors errorsForMember =
+            injectionPoint.isOptional()
+                ? new Errors(injectionPoint)
+                : errors.withSource(injectionPoint);
+        SingleMemberInjector injector =
+            injectionPoint.getMember() instanceof Field
+                ? new SingleFieldInjector(this.injector, injectionPoint, errorsForMember)
+                : new SingleMethodInjector(this.injector, injectionPoint, errorsForMember);
         injectors.add(injector);
       } catch (ErrorsException ignoredForNow) {
         // ignored for now

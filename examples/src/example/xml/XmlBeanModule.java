@@ -1,9 +1,9 @@
 package example.xml;
 
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.Binder;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -47,8 +47,7 @@ public class XmlBeanModule implements Module {
 
       Reader in = new InputStreamReader(xmlUrl.openStream());
       Parsers.parse(in, beans.getContentHandler());
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       originalBinder.addError(e);
     }
   }
@@ -71,8 +70,7 @@ public class XmlBeanModule implements Module {
       Class<?> type;
       try {
         type = Class.forName(typeString);
-      }
-      catch (ClassNotFoundException e) {
+      } catch (ClassNotFoundException e) {
         sourced.addError(e);
         return;
       }
@@ -80,8 +78,7 @@ public class XmlBeanModule implements Module {
       // Look for a no-arg constructor.
       try {
         type.getConstructor();
-      }
-      catch (NoSuchMethodException e) {
+      } catch (NoSuchMethodException e) {
         sourced.addError("%s doesn't have a no-arg constructor.");
         return;
       }
@@ -135,21 +132,18 @@ public class XmlBeanModule implements Module {
       // Validate number of parameters.
       Type[] parameterTypes = setter.getGenericParameterTypes();
       if (parameterTypes.length != 1) {
-        sourced.addError("%s.%s() must take one argument.",
-            setterName, type.getName());
+        sourced.addError("%s.%s() must take one argument.", setterName, type.getName());
         return;
       }
 
       // Add property descriptor to builder.
       Provider<?> provider = sourced.getProvider(Key.get(parameterTypes[0]));
-      beanBuilder.properties.add(
-          new Property(setter, provider));
+      beanBuilder.properties.add(new Property(setter, provider));
     }
   }
 
   static String capitalize(String s) {
-    return Character.toUpperCase(s.charAt(0)) +
-        s.substring(1);
+    return Character.toUpperCase(s.charAt(0)) + s.substring(1);
   }
 
   static class Property {
@@ -165,18 +159,16 @@ public class XmlBeanModule implements Module {
     void setOn(Object o) {
       try {
         setter.invoke(o, provider.get());
-      }
-      catch (IllegalAccessException e) {
+      } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
-      }
-      catch (InvocationTargetException e) {
+      } catch (InvocationTargetException e) {
         throw new RuntimeException(e);
       }
     }
   }
 
   class BeanBuilder {
-    
+
     final List<Property> properties = new ArrayList<Property>();
     final Class<?> type;
 
@@ -189,8 +181,10 @@ public class XmlBeanModule implements Module {
     }
 
     <T> void addBinding(Class<T> type) {
-      originalBinder.withSource(xmlSource())
-          .bind(type).toProvider(new BeanProvider<T>(type, properties));
+      originalBinder
+          .withSource(xmlSource())
+          .bind(type)
+          .toProvider(new BeanProvider<T>(type, properties));
     }
   }
 
@@ -211,11 +205,9 @@ public class XmlBeanModule implements Module {
           property.setOn(t);
         }
         return t;
-      }
-      catch (InstantiationException e) {
+      } catch (InstantiationException e) {
         throw new RuntimeException(e);
-      }
-      catch (IllegalAccessException e) {
+      } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
       }
     }

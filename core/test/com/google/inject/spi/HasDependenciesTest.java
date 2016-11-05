@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,37 +24,38 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-
+import java.util.Set;
 import junit.framework.TestCase;
 
-import java.util.Set;
-
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class HasDependenciesTest extends TestCase {
 
-  /**
-   * When an instance implements HasDependencies, the injected dependencies aren't used.
-   */
+  /** When an instance implements HasDependencies, the injected dependencies aren't used. */
   public void testInstanceWithDependencies() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class).toInstance(new AWithDependencies());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).toInstance(new AWithDependencies());
+              }
+            });
 
     InstanceBinding<?> binding = (InstanceBinding<?>) injector.getBinding(A.class);
-    assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class))),
+    assertEquals(
+        ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class))),
         binding.getDependencies());
   }
 
   public void testInstanceWithoutDependencies() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class).toInstance(new A());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).toInstance(new A());
+              }
+            });
 
     InstanceBinding<?> binding = (InstanceBinding<?>) injector.getBinding(A.class);
     Dependency<?> onlyDependency = Iterables.getOnlyElement(binding.getDependencies());
@@ -62,11 +63,14 @@ public class HasDependenciesTest extends TestCase {
   }
 
   public void testProvider() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class).toProvider(new ProviderOfA());
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class).toProvider(new ProviderOfA());
+              }
+            });
 
     ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) injector.getBinding(A.class);
     Dependency<?> onlyDependency = Iterables.getOnlyElement(binding.getDependencies());
@@ -74,25 +78,30 @@ public class HasDependenciesTest extends TestCase {
   }
 
   static class A {
-    @Inject void injectUnusedDependencies(String unused) {}
+    @Inject
+    void injectUnusedDependencies(String unused) {}
   }
 
   static class ProviderOfA implements Provider<A> {
-    @Inject void injectUnusedDependencies(String unused) {}
+    @Inject
+    void injectUnusedDependencies(String unused) {}
 
+    @Override
     public A get() {
       throw new UnsupportedOperationException();
     }
   }
 
   static class AWithDependencies extends A implements HasDependencies {
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)));
     }
   }
 
-  static class ProviderOfAWithDependencies
-      extends ProviderOfA implements ProviderWithDependencies<A> {
+  static class ProviderOfAWithDependencies extends ProviderOfA
+      implements ProviderWithDependencies<A> {
+    @Override
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)));
     }

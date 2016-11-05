@@ -21,7 +21,6 @@ package com.google.inject;
  * presence or absence of an injectable constructor.
  *
  * @param <T> type to inject members of
- *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

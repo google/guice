@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +18,7 @@ package com.google.inject.struts2.example;
 
 import com.google.inject.servlet.SessionScoped;
 
-/**
- * Session-scoped counter.
- */
+/** Session-scoped counter. */
 @SessionScoped
 public class Counter {
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +18,10 @@ package com.google.inject.grapher.graphviz;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.grapher.NodeId;
-
 import java.util.List;
 
 /**
- * Data object to encapsulate the attributes of Graphviz edges that we're
- * interested in drawing.
+ * Data object to encapsulate the attributes of Graphviz edges that we're interested in drawing.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
@@ -32,7 +30,7 @@ public class GraphvizEdge {
   private String headPortId;
   private CompassPoint headCompassPoint;
   private List<ArrowType> arrowHead = ImmutableList.of(ArrowType.NORMAL);
-  
+
   private final NodeId tailNodeId;
   private String tailPortId;
   private CompassPoint tailCompassPoint;
@@ -61,7 +59,7 @@ public class GraphvizEdge {
   public CompassPoint getHeadCompassPoint() {
     return headCompassPoint;
   }
-  
+
   public void setHeadCompassPoint(CompassPoint headCompassPoint) {
     this.headCompassPoint = headCompassPoint;
   }
@@ -90,7 +88,7 @@ public class GraphvizEdge {
   public CompassPoint getTailCompassPoint() {
     return tailCompassPoint;
   }
-  
+
   public void setTailCompassPoint(CompassPoint tailCompassPoint) {
     this.tailCompassPoint = tailCompassPoint;
   }

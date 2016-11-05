@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Singleton;
-
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -25,6 +24,4 @@ import javax.servlet.http.HttpServlet;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 @Singleton
-public class DummyServlet extends HttpServlet {
-
-}
+public class DummyServlet extends HttpServlet {}

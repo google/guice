@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,17 +18,18 @@ package com.google.inject;
 
 import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class BoundProviderTest extends TestCase {
 
   public void testFooProvider() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(FooProvider.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).toProvider(FooProvider.class);
+              }
+            });
 
     Foo a = injector.getInstance(Foo.class);
     Foo b = injector.getInstance(Foo.class);
@@ -41,11 +42,14 @@ public class BoundProviderTest extends TestCase {
   }
 
   public void testSingletonFooProvider() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(SingletonFooProvider.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).toProvider(SingletonFooProvider.class);
+              }
+            });
 
     Foo a = injector.getInstance(Foo.class);
     Foo b = injector.getInstance(Foo.class);
@@ -79,6 +83,7 @@ public class BoundProviderTest extends TestCase {
       this.bar = bar;
     }
 
+    @Override
     public Foo get() {
       return new Foo(this.bar, count++);
     }
@@ -95,6 +100,7 @@ public class BoundProviderTest extends TestCase {
       this.bar = bar;
     }
 
+    @Override
     public Foo get() {
       return new Foo(this.bar, count++);
     }

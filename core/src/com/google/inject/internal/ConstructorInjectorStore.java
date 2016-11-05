@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,35 +29,33 @@ import com.google.inject.spi.InjectionPoint;
 final class ConstructorInjectorStore {
   private final InjectorImpl injector;
 
-  private final FailableCache<InjectionPoint, ConstructorInjector<?>>  cache
-      = new FailableCache<InjectionPoint, ConstructorInjector<?>> () {
-    @Override
-    protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
-        throws ErrorsException {
-      return createConstructor(constructorInjector, errors);
-    }
-  };
+  private final FailableCache<InjectionPoint, ConstructorInjector<?>> cache =
+      new FailableCache<InjectionPoint, ConstructorInjector<?>>() {
+        @Override
+        protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
+            throws ErrorsException {
+          return createConstructor(constructorInjector, errors);
+        }
+      };
 
   ConstructorInjectorStore(InjectorImpl injector) {
     this.injector = injector;
   }
 
-  /**
-   * Returns a new complete constructor injector with injection listeners registered.
-   */
+  /** Returns a new complete constructor injector with injection listeners registered. */
   public ConstructorInjector<?> get(InjectionPoint constructorInjector, Errors errors)
       throws ErrorsException {
     return cache.get(constructorInjector, errors);
   }
-  
+
   /**
    * Purges an injection point from the cache. Use this only if the cache is not actually valid and
    * needs to be purged. (See issue 319 and
    * ImplicitBindingTest#testCircularJitBindingsLeaveNoResidue and
    * #testInstancesRequestingProvidersForThemselvesWithChildInjectors for examples of when this is
    * necessary.)
-   * 
-   * Returns true if the injector for that point was stored in the cache, false otherwise.
+   *
+   * <p>Returns true if the injector for that point was stored in the cache, false otherwise.
    */
   boolean remove(InjectionPoint ip) {
     return cache.remove(ip);
@@ -67,18 +65,20 @@ final class ConstructorInjectorStore {
       throws ErrorsException {
     int numErrorsBefore = errors.size();
 
-    SingleParameterInjector<?>[] constructorParameterInjectors
-        = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
+    SingleParameterInjector<?>[] constructorParameterInjectors =
+        injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
 
     @SuppressWarnings("unchecked") // the injector type agrees with the injection point type
-    MembersInjectorImpl<T> membersInjector = (MembersInjectorImpl<T>) injector.membersInjectorStore
-        .get(injectionPoint.getDeclaringType(), errors);
+    MembersInjectorImpl<T> membersInjector =
+        (MembersInjectorImpl<T>)
+            injector.membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);
 
     /*if[AOP]*/
     ImmutableList<MethodAspect> injectorAspects = injector.state.getMethodAspects();
-    ImmutableList<MethodAspect> methodAspects = membersInjector.getAddedAspects().isEmpty()
-        ? injectorAspects
-        : ImmutableList.copyOf(concat(injectorAspects, membersInjector.getAddedAspects()));
+    ImmutableList<MethodAspect> methodAspects =
+        membersInjector.getAddedAspects().isEmpty()
+            ? injectorAspects
+            : ImmutableList.copyOf(concat(injectorAspects, membersInjector.getAddedAspects()));
     ConstructionProxyFactory<T> factory = new ProxyFactory<T>(injectionPoint, methodAspects);
     /*end[AOP]*/
     /*if[NO_AOP]
@@ -87,7 +87,10 @@ final class ConstructorInjectorStore {
 
     errors.throwIfNewErrors(numErrorsBefore);
 
-    return new ConstructorInjector<T>(membersInjector.getInjectionPoints(), factory.create(),
-        constructorParameterInjectors, membersInjector);
+    return new ConstructorInjector<T>(
+        membersInjector.getInjectionPoints(),
+        factory.create(),
+        constructorParameterInjectors,
+        membersInjector);
   }
 }

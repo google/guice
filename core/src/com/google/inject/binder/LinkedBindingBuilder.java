@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ package com.google.inject.binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-
 import java.lang.reflect.Constructor;
 
 /**
@@ -29,19 +28,13 @@ import java.lang.reflect.Constructor;
  */
 public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder to(Class<? extends T> implementation);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder to(TypeLiteral<? extends T> implementation);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder to(Key<? extends T> targetKey);
 
   /**
@@ -57,7 +50,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    * @see com.google.inject.Injector#injectMembers
    */
   ScopedBindingBuilder toProvider(Provider<? extends T> provider);
-  
+
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
    *
@@ -66,34 +59,26 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    */
   ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  ScopedBindingBuilder toProvider(
-      Class<? extends javax.inject.Provider<? extends T>> providerType);
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  ScopedBindingBuilder toProvider(Class<? extends javax.inject.Provider<? extends T>> providerType);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder toProvider(
       TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  ScopedBindingBuilder toProvider(
-      Key<? extends javax.inject.Provider<? extends T>> providerKey);
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  ScopedBindingBuilder toProvider(Key<? extends javax.inject.Provider<? extends T>> providerKey);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
-   * 
+   *
    * @since 3.0
    */
   <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
-   * 
+   *
    * @since 3.0
    */
   <S extends T> ScopedBindingBuilder toConstructor(

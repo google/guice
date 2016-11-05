@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,18 +19,17 @@ package com.google.inject.servlet;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Apply this to field or parameters of type {@code Map<String, String[]>}
- * when you want the HTTP request parameter map to be injected.
+ * Apply this to field or parameters of type {@code Map<String, String[]>} when you want the HTTP
+ * request parameter map to be injected.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 @Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @BindingAnnotation
 public @interface RequestParameters {}

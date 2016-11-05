@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
 import junit.framework.TestCase;
 
 /**
- * This test verifies the ways things are injected (ie. getInstance(),
- * injectMembers(), bind to instance, and bind to provider instance) for all
- * states of optional bindings (fields, methods, multiple-argument methods,
- * provider fields, provider methods, constructors).
+ * This test verifies the ways things are injected (ie. getInstance(), injectMembers(), bind to
+ * instance, and bind to provider instance) for all states of optional bindings (fields, methods,
+ * multiple-argument methods, provider fields, provider methods, constructors).
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -42,44 +39,51 @@ public class OptionalBindingTest extends TestCase {
   private static final F injectF = new F() {};
   private static final G injectG = new G() {};
 
-  private Module everythingModule = new AbstractModule() {
-    protected void configure() {
-      bind(A.class).toInstance(injectA);
-      bind(B.class).toInstance(injectB);
-      bind(C.class).toInstance(injectC);
-      bind(D.class).toInstance(injectD);
-      bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
-      bind(F.class).toInstance(injectF);
-      bind(G.class).toInstance(injectG);
-    }
-  };
+  private Module everythingModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(A.class).toInstance(injectA);
+          bind(B.class).toInstance(injectB);
+          bind(C.class).toInstance(injectC);
+          bind(D.class).toInstance(injectD);
+          bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
+          bind(F.class).toInstance(injectF);
+          bind(G.class).toInstance(injectG);
+        }
+      };
 
-  private Module partialModule = new AbstractModule() {
-    protected void configure() {
-      bind(C.class).toInstance(new C() {});
-    }
-  };
+  private Module partialModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(C.class).toInstance(new C() {});
+        }
+      };
 
-  private Module toInstanceModule = new AbstractModule() {
-    protected void configure() {
-      bind(HasOptionalInjections.class)
-          .toInstance(new HasOptionalInjections());
-    }
-  };
+  private Module toInstanceModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasOptionalInjections.class).toInstance(new HasOptionalInjections());
+        }
+      };
 
-  private Module toProviderInstanceModule = new AbstractModule() {
-    protected void configure() {
-      bind(HasOptionalInjections.class)
-          .toProvider(new HasOptionalInjectionsProvider());
-    }
-  };
+  private Module toProviderInstanceModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasOptionalInjections.class).toProvider(new HasOptionalInjectionsProvider());
+        }
+      };
 
-  private Module toProviderModule = new AbstractModule() {
-    protected void configure() {
-      bind(HasOptionalInjections.class)
-          .toProvider(HasOptionalInjectionsProvider.class);
-    }
-  };
+  private Module toProviderModule =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasOptionalInjections.class).toProvider(HasOptionalInjectionsProvider.class);
+        }
+      };
 
   public void testEverythingInjectorGetInstance() {
     Guice.createInjector(everythingModule)
@@ -94,9 +98,7 @@ public class OptionalBindingTest extends TestCase {
   }
 
   public void testNothingInjectorGetInstance() {
-    Guice.createInjector()
-        .getInstance(HasOptionalInjections.class)
-        .assertNothingInjected();
+    Guice.createInjector().getInstance(HasOptionalInjections.class).assertNothingInjected();
   }
 
   public void testEverythingInjectorInjectMembers() {
@@ -134,7 +136,7 @@ public class OptionalBindingTest extends TestCase {
         .getInstance(HasOptionalInjections.class)
         .assertNothingInjected();
   }
-  
+
   public void testEverythingInjectorToProviderInstance() {
     Guice.createInjector(everythingModule, toProviderInstanceModule)
         .getInstance(HasOptionalInjections.class)
@@ -173,36 +175,47 @@ public class OptionalBindingTest extends TestCase {
 
   static class HasOptionalInjections {
     A originalA = new A() {};
-    @Inject(optional=true) A a = originalA; // field injection
+
+    @Inject(optional = true)
+    A a = originalA; // field injection
+
     B b; // method injection with one argument
     C c; // method injection with two arguments
     D d; // method injection with two arguments
     E e; // annotated injection
-    @Inject(optional=true) Provider<F> fProvider; // provider
+
+    @Inject(optional = true)
+    Provider<F> fProvider; // provider
+
     Provider<G> gProvider; // method injection of provider
     boolean invoked0, invoked1, invoked2, invokedAnnotated, invokeProvider;
 
-    @Inject(optional=true) void methodInjectZeroArguments() {
+    @Inject(optional = true)
+    void methodInjectZeroArguments() {
       invoked0 = true;
     }
 
-    @Inject(optional=true) void methodInjectOneArgument(B b) {
+    @Inject(optional = true)
+    void methodInjectOneArgument(B b) {
       this.b = b;
       invoked1 = true;
     }
 
-    @Inject(optional=true) void methodInjectTwoArguments(C c, D d) {
+    @Inject(optional = true)
+    void methodInjectTwoArguments(C c, D d) {
       this.c = c;
       this.d = d;
       invoked2 = true;
     }
 
-    @Inject(optional=true) void methodInjectAnnotated(@Named("e") E e) {
+    @Inject(optional = true)
+    void methodInjectAnnotated(@Named("e") E e) {
       this.e = e;
       invokedAnnotated = true;
     }
 
-    @Inject(optional=true) void methodInjectProvider(Provider<G> gProvider) {
+    @Inject(optional = true)
+    void methodInjectProvider(Provider<G> gProvider) {
       this.gProvider = gProvider;
       invokeProvider = true;
     }
@@ -237,8 +250,9 @@ public class OptionalBindingTest extends TestCase {
     }
   }
 
-  static class HasOptionalInjectionsProvider
-      extends HasOptionalInjections implements Provider<HasOptionalInjections> {
+  static class HasOptionalInjectionsProvider extends HasOptionalInjections
+      implements Provider<HasOptionalInjections> {
+    @Override
     public HasOptionalInjections get() {
       return this;
     }
@@ -249,8 +263,10 @@ public class OptionalBindingTest extends TestCase {
       Guice.createInjector().getInstance(HasOptionalConstructor.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(), "OptionalBindingTest$HasOptionalConstructor.<init>() "
-          + "is annotated @Inject(optional=true), but constructors cannot be optional.");
+      assertContains(
+          expected.getMessage(),
+          "OptionalBindingTest$HasOptionalConstructor.<init>() "
+              + "is annotated @Inject(optional=true), but constructors cannot be optional.");
     }
   }
 
@@ -258,25 +274,27 @@ public class OptionalBindingTest extends TestCase {
     // Suppress compiler errors by the error-prone checker InjectedConstructorAnnotations,
     // which catches optional injected constructors.
     @SuppressWarnings("InjectedConstructorAnnotations")
-    @Inject(optional=true)
+    @Inject(optional = true)
     HasOptionalConstructor() {}
   }
 
-  @Inject(optional=true) static A staticInjectA;
+  @Inject(optional = true)
+  static A staticInjectA;
 
   public void testStaticInjection() {
     staticInjectA = injectA;
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        requestStaticInjection(OptionalBindingTest.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            requestStaticInjection(OptionalBindingTest.class);
+          }
+        });
     assertSame(staticInjectA, injectA);
   }
 
   /**
-   * Test for bug 107, where we weren't doing optional injection properly for
-   * indirect injections.
+   * Test for bug 107, where we weren't doing optional injection properly for indirect injections.
    */
   public void testIndirectOptionalInjection() {
     Indirect indirect = Guice.createInjector().getInstance(Indirect.class);
@@ -289,10 +307,16 @@ public class OptionalBindingTest extends TestCase {
   }
 
   interface A {}
+
   interface B {}
+
   interface C {}
+
   interface D {}
+
   interface E {}
+
   interface F {}
+
   interface G {}
 }

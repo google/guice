@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,5 +34,4 @@ public interface ProviderKeyBinding<T> extends Binding<T> {
    * Injector.getBinding(providerKey)}
    */
   Key<? extends javax.inject.Provider<? extends T>> getProviderKey();
-
 }
