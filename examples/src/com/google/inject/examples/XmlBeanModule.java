@@ -1,4 +1,4 @@
-package example.xml;
+package com.google.inject.examples;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;

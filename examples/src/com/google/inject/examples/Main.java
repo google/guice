@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package example.xml;
+package com.google.inject.examples;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;

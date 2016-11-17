@@ -1,4 +1,4 @@
-package example.xml;
+package com.google.inject.examples;
 
 import java.util.Collections;
 
