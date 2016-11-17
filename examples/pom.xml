@@ -45,6 +45,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <groupId>safesax</groupId>
             <version>1.0.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -85,7 +90,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
                   a manifest file for it, there's no MANIFEST.MF file where the parent configuration
                   is expecting it.
                   -->
-                <configuration combine.self="override" />
+                <configuration combine.self="override"/>
             </plugin>
         </plugins>
     </build>

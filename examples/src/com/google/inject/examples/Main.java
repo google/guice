@@ -19,29 +19,29 @@ package com.google.inject.examples;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import java.net.URL;
+import java.util.logging.Logger;
 
 /** */
 public class Main {
 
-  public static void main(String[] args) {
-    final URL xmlUrl = Main.class.getResource("phone.xml");
+    static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    Injector injector =
-        Guice.createInjector(
-            new AbstractModule() {
-              protected void configure() {
-                bind(Contacts.class).to(SimCard.class);
-                install(new XmlBeanModule(xmlUrl));
-              }
-            });
+    public static final String XML_FILE = "phone.xml";
 
-    Phone phone = injector.getInstance(Phone.class);
+    public static void main(String[] args) {
+        final URL xmlUrl = Main.class.getResource(XML_FILE);
 
-    if (phone.getContacts() == null) {
-      throw new AssertionError();
-    } else {
-      System.out.println("It worked!");
+        Injector injector = Guice.createInjector(new AppModule(xmlUrl));
+
+        Phone phone = injector.getInstance(Phone.class);
+
+        if (phone.getContacts() == null) {
+            throw new AssertionError();
+        } else {
+            logger.info("It worked!");
+        }
     }
-  }
+
 }
