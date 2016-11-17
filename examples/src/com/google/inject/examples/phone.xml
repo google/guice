@@ -1,5 +1,5 @@
 <beans>
-  <bean type="com.google.inject.examples.Phone">
+  <bean type="com.google.inject.examples.model.Phone">
     <property name="contacts"/>
   </bean>
 </beans>

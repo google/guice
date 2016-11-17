@@ -1,6 +1,7 @@
 package com.google.inject.examples;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.examples.memory.SimCard;
 
 import java.net.URL;
 

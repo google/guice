@@ -16,14 +16,17 @@
 
 package com.google.inject.examples;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.examples.model.Phone;
 
 import java.net.URL;
 import java.util.logging.Logger;
 
-/** */
+/**
+ * @author crazyboblee
+ * @author Adam Tomaja
+ */
 public class Main {
 
     static final Logger logger = Logger.getLogger(Main.class.getName());
