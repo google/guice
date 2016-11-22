@@ -60,7 +60,7 @@ import java.util.Set;
  *
  * <pre><code>class MyModule extends AbstractModule {
  *   configure() {
- *     ThrowingProviderBinder.install(this, binder());
+ *     install(ThrowingProviderBinder.forModule(this));
  *   }
  *
  *   {@literal @}CheckedProvides(RemoteProvider.class)
