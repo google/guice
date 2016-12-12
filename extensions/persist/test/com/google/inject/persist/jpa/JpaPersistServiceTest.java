@@ -32,6 +32,7 @@ public class JpaPersistServiceTest extends TestCase {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
+  private static final String SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT = "com.google.inject.persist.jpa.prohibitEntityManagerInjectionOutsideWorkUnit";
 
   private final JpaPersistService sut =
       new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
@@ -58,6 +59,30 @@ public class JpaPersistServiceTest extends TestCase {
     } catch (SimulatedException expected) {
       assertThat(sut.isWorking(), is(false));
     }
+  }
+
+  public void test_givenEntityManagerInjectionOutsideWorkUnitProhibited_whenEntityManagerAboutToInject_thenExceptionIsThrown() {
+    System.setProperty(SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT, "true");
+    sut.start(factory);
+
+    try {
+      sut.get();
+      fail("Exception expected");
+    }
+    catch (IllegalStateException expected) {
+      // nop
+    }
+  }
+
+  public void test_givenEntityManagerInjectionOutsideWorkUnitNotProhibited_whenEntityManagerAboutToInject_thenInjectionSucceeds() {
+    sut.start(factory);
+
+    assertNotNull(sut.get());
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    System.clearProperty(SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT);
   }
 
   private static class SimulatedException extends RuntimeException {}
