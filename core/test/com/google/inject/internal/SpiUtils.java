@@ -498,8 +498,8 @@ public class SpiUtils {
     if (allowDuplicates) {
       otherMatchesSize--; // allow for 1 duplicate binding
     }
-    // Multiply by 3 because each has a value, ProviderLookup, and Map.Entry
-    int expectedSize = (mapResults.size() + duplicates) * 3;
+    // Multiply by 2 because each has a value, and Map.Entry
+    int expectedSize = (mapResults.size() + duplicates) * 2;
     assertEquals(
         "incorrect number of contains, leftover matches:\n" + Joiner.on("\n\t").join(otherMatches),
         expectedSize,
