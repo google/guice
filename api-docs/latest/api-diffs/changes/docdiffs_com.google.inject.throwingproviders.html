@@ -158,12 +158,12 @@ Similarly, documentation which was inherited from another class or interface is 
 
 </span> <pre><code>class MyModule extends AbstractModule {
    configure() {
-     ThrowingProviderBinder.install(this, binder());
+     <span style="background: #FFFF00">install(</span>ThrowingProviderBinder.<strike>install</strike><span style="background: #FFFF00">forModule</span>(this<strike>, binder(</strike>));
    }<strike>
- </strike><span style="background: #FFFF00">
+   
+</strike><span style="background: #FFFF00">
 
-</span>  <strike>
-  </strike> {@literal @}CheckedProvides(RemoteProvider.class)
+</span>   {@literal @}CheckedProvides(RemoteProvider.class)
    {@literal @}RequestScope
    Customer provideCustomer(FlakyCustomerCreator creator) throws RemoteException {
      return creator.getCustomerOrThrow();
