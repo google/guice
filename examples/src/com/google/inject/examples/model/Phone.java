@@ -1,4 +1,6 @@
-package example.xml;
+package com.google.inject.examples.model;
+
+import com.google.inject.examples.Contacts;
 
 public class Phone {
 
