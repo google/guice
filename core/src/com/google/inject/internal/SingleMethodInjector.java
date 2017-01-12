@@ -93,7 +93,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
-      errors.withSource(injectionPoint).errorInjectingMethod(cause);
+      errors.merge(errors.withSource(injectionPoint).errorInjectingMethod(cause));
     }
   }
 }
