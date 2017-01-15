@@ -260,4 +260,47 @@ public class RequestInjectionTest extends TestCase {
               }
             });
   }
+
+  class NeedsThing<T> {
+      @Inject T thing;
+  }
+
+  public void testRequestInjectionWithParameterizedType() {
+    final NeedsThing<String> thing = new NeedsThing<String>();
+
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toInstance("hi");
+            requestInjection(new TypeLiteral<NeedsThing<String>>(){}, thing);
+          }
+        });
+
+    assertEquals("hi", thing.thing);
+  }
+
+  public void testMultipleInjectionRequestsWithDifferentTypes() {
+    final NeedsThing<String> thing = new NeedsThing<String>();
+    final TypeLiteral<NeedsThing<String>> type1 = new TypeLiteral<NeedsThing<String>>(){};
+    final TypeLiteral<NeedsThing<Integer>> type2 = new TypeLiteral<NeedsThing<Integer>>(){};
+
+    class MixTypes extends AbstractModule {
+      @Override
+      protected void configure() {
+        requestInjection(type1, thing);
+        requestInjection(type2, (NeedsThing) thing);
+      }
+    }
+
+    try {
+      Guice.createInjector(new MixTypes());
+      fail();
+    } catch (ConfigurationException expected) {
+      assertContains(
+          expected.getMessage(),
+          "1) Requested injection for the same object with different types: " + type1 + " and " + type2,
+          "at " + MixTypes.class.getName() + ".configure(");
+    }
+  }
 }

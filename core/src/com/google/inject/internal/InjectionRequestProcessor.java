@@ -59,9 +59,13 @@ final class InjectionRequestProcessor extends AbstractProcessor {
       injectionPoints = e.getPartialValue();
     }
 
-    initializer.requestInjection(
-        injector, request.getInstance(), null, request.getSource(), injectionPoints);
+    requestInjection(request, injectionPoints);
     return true;
+  }
+
+  private <T> void requestInjection(InjectionRequest<T> request, Set<InjectionPoint> injectionPoints) {
+    initializer.requestInjection(
+        injector, request.getType(), request.getInstance(), null, request.getSource(), injectionPoints);
   }
 
   void validate() {
