@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +40,8 @@ import java.util.Map.Entry;
 /**
  * {@link com.google.inject.grapher.InjectorGrapher} implementation that writes out a Graphviz DOT
  * file of the graph. Dependencies are bound in {@link GraphvizModule}.
- * <p>
- * Specify the {@link PrintWriter} to output to with {@link #setOut(PrintWriter)}.
+ *
+ * <p>Specify the {@link PrintWriter} to output to with {@link #setOut(PrintWriter)}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  * @since 4.0
@@ -55,13 +55,14 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
   private PrintWriter out;
   private String rankdir = "TB";
 
-  @Inject GraphvizGrapher(@Graphviz NameFactory nameFactory,
-      @Graphviz PortIdFactory portIdFactory) {
+  @Inject
+  GraphvizGrapher(@Graphviz NameFactory nameFactory, @Graphviz PortIdFactory portIdFactory) {
     this.nameFactory = nameFactory;
     this.portIdFactory = portIdFactory;
   }
 
-  @Override protected void reset() {
+  @Override
+  protected void reset() {
     nodes.clear();
     edges.clear();
   }
@@ -74,9 +75,10 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     this.rankdir = rankdir;
   }
 
-  @Override protected void postProcess() {
+  @Override
+  protected void postProcess() {
     start();
-    
+
     for (GraphvizNode node : nodes.values()) {
       renderNode(node);
     }
@@ -84,9 +86,9 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     for (GraphvizEdge edge : edges) {
       renderEdge(edge);
     }
-    
+
     finish();
-    
+
     out.flush();
   }
 
@@ -98,7 +100,7 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
 
   protected void start() {
     out.println("digraph injector {");
-    
+
     Map<String, String> attrs = getGraphAttributes();
     out.println("graph " + getAttrString(attrs) + ";");
   }
@@ -111,7 +113,7 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     Map<String, String> attrs = getNodeAttributes(node);
     out.println(node.getIdentifier() + " " + getAttrString(attrs));
   }
-  
+
   protected Map<String, String> getNodeAttributes(GraphvizNode node) {
     Map<String, String> attrs = Maps.newHashMap();
 
@@ -120,26 +122,25 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     attrs.put("margin", "\"0.02,0\"");
     attrs.put("shape", node.getShape().toString());
     attrs.put("style", node.getStyle().toString());
-    
+
     return attrs;
   }
 
   /**
-   * Creates the "label" for a node. This is a string of HTML that defines a
-   * table with a heading at the top and (in the case of
-   * {@link ImplementationNode}s) rows for each of the member fields.
+   * Creates the "label" for a node. This is a string of HTML that defines a table with a heading at
+   * the top and (in the case of {@link ImplementationNode}s) rows for each of the member fields.
    */
   protected String getNodeLabel(GraphvizNode node) {
     String cellborder = node.getStyle() == NodeStyle.INVISIBLE ? "1" : "0";
-    
+
     StringBuilder html = new StringBuilder();
     html.append("<");
     html.append("<table cellspacing=\"0\" cellpadding=\"5\" cellborder=\"");
     html.append(cellborder).append("\" border=\"0\">");
-    
+
     html.append("<tr>").append("<td align=\"left\" port=\"header\" ");
     html.append("bgcolor=\"" + node.getHeaderBackgroundColor() + "\">");
-    
+
     String subtitle = Joiner.on("<br align=\"left\"/>").join(node.getSubtitles());
     if (subtitle.length() != 0) {
       html.append("<font color=\"").append(node.getHeaderTextColor());
@@ -165,29 +166,35 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
 
   protected void renderEdge(GraphvizEdge edge) {
     Map<String, String> attrs = getEdgeAttributes(edge);
-    
-    String tailId = getEdgeEndPoint(nodes.get(edge.getTailNodeId()).getIdentifier(),
-        edge.getTailPortId(), edge.getTailCompassPoint());
 
-    String headId = getEdgeEndPoint(nodes.get(edge.getHeadNodeId()).getIdentifier(),
-        edge.getHeadPortId(), edge.getHeadCompassPoint());
-    
+    String tailId =
+        getEdgeEndPoint(
+            nodes.get(edge.getTailNodeId()).getIdentifier(),
+            edge.getTailPortId(),
+            edge.getTailCompassPoint());
+
+    String headId =
+        getEdgeEndPoint(
+            nodes.get(edge.getHeadNodeId()).getIdentifier(),
+            edge.getHeadPortId(),
+            edge.getHeadCompassPoint());
+
     out.println(tailId + " -> " + headId + " " + getAttrString(attrs));
   }
 
   protected Map<String, String> getEdgeAttributes(GraphvizEdge edge) {
     Map<String, String> attrs = Maps.newHashMap();
-    
+
     attrs.put("arrowhead", getArrowString(edge.getArrowHead()));
     attrs.put("arrowtail", getArrowString(edge.getArrowTail()));
     attrs.put("style", edge.getStyle().toString());
-    
+
     return attrs;
   }
-  
+
   private String getAttrString(Map<String, String> attrs) {
     List<String> attrList = Lists.newArrayList();
-    
+
     for (Entry<String, String> attr : attrs.entrySet()) {
       String value = attr.getValue();
 
@@ -195,14 +202,13 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
         attrList.add(attr.getKey() + "=" + value);
       }
     }
-    
+
     return "[" + Joiner.on(", ").join(attrList) + "]";
   }
 
   /**
-   * Turns a {@link List} of {@link ArrowType}s into a {@link String} that
-   * represents combining them. With Graphviz, that just means concatenating
-   * them.
+   * Turns a {@link List} of {@link ArrowType}s into a {@link String} that represents combining
+   * them. With Graphviz, that just means concatenating them.
    */
   protected String getArrowString(List<ArrowType> arrows) {
     return Joiner.on("").join(arrows);
@@ -210,15 +216,15 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
 
   protected String getEdgeEndPoint(String nodeId, String portId, CompassPoint compassPoint) {
     List<String> portStrings = Lists.newArrayList(nodeId);
-    
+
     if (portId != null) {
       portStrings.add(portId);
     }
-    
+
     if (compassPoint != null) {
       portStrings.add(compassPoint.toString());
     }
-    
+
     return Joiner.on(":").join(portStrings);
   }
 
@@ -234,7 +240,8 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     return escaped;
   }
 
-  @Override protected void newInterfaceNode(InterfaceNode node) {
+  @Override
+  protected void newInterfaceNode(InterfaceNode node) {
     // TODO(phopkins): Show the Module on the graph, which comes from the
     // class name when source is a StackTraceElement.
 
@@ -247,7 +254,8 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     addNode(gnode);
   }
 
-  @Override protected void newImplementationNode(ImplementationNode node) {
+  @Override
+  protected void newImplementationNode(ImplementationNode node) {
     NodeId nodeId = node.getId();
     GraphvizNode gnode = new GraphvizNode(nodeId);
     gnode.setStyle(NodeStyle.SOLID);
@@ -263,7 +271,8 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     addNode(gnode);
   }
 
-  @Override protected void newInstanceNode(InstanceNode node) {
+  @Override
+  protected void newInstanceNode(InstanceNode node) {
     NodeId nodeId = node.getId();
     GraphvizNode gnode = new GraphvizNode(nodeId);
     gnode.setStyle(NodeStyle.SOLID);
@@ -285,7 +294,8 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     addNode(gnode);
   }
 
-  @Override protected void newDependencyEdge(DependencyEdge edge) {
+  @Override
+  protected void newDependencyEdge(DependencyEdge edge) {
     GraphvizEdge gedge = new GraphvizEdge(edge.getFromId(), edge.getToId());
     InjectionPoint fromPoint = edge.getInjectionPoint();
     if (fromPoint == null) {
@@ -299,7 +309,8 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
     edges.add(gedge);
   }
 
-  @Override protected void newBindingEdge(BindingEdge edge) {
+  @Override
+  protected void newBindingEdge(BindingEdge edge) {
     GraphvizEdge gedge = new GraphvizEdge(edge.getFromId(), edge.getToId());
     gedge.setStyle(EdgeStyle.DASHED);
     switch (edge.getType()) {

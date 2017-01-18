@@ -1,9 +1,9 @@
 Guice
 ====
 
-**Latest release: [4.0](https://github.com/google/guice/wiki/Guice40)**
+**Latest release: [4.1](https://github.com/google/guice/wiki/Guice41)**
 
-**Documentation:** [User Guide](https://github.com/google/guice/wiki/Motivation), [4.0 javadocs](http://google.github.io/guice/api-docs/4.0/javadoc/index.html), [Latest javadocs](http://google.github.io/guice/api-docs/latest/javadoc/index.html) <br/>
+**Documentation:** [User Guide](https://github.com/google/guice/wiki/Motivation), [4.1 javadocs](http://google.github.io/guice/api-docs/4.1/javadoc/index.html), [Latest javadocs](http://google.github.io/guice/api-docs/latest/javadoc/index.html) <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/google/guice.png?branch=master)](https://travis-ci.org/google/guice) <br
 />
 **Mailing Lists:** [User Mailing List](http://groups.google.com/group/google-guice) <br/>

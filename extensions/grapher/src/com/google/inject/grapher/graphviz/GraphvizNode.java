@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +20,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.grapher.NodeId;
-
 import java.util.List;
 import java.util.Map;
 
 /**
- * Data object to encapsulate the attributes of Graphviz nodes that we're
- * interested in drawing.
+ * Data object to encapsulate the attributes of Graphviz nodes that we're interested in drawing.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
@@ -35,10 +33,10 @@ public class GraphvizNode {
 
   private NodeStyle style = NodeStyle.SOLID;
   private NodeShape shape = NodeShape.BOX;
-  
+
   private String title = "";
   private Map<Integer, String> subtitles = Maps.newTreeMap();
-  
+
   private String headerTextColor = "#000000";
   private String headerBackgroundColor = "#ffffff";
 
@@ -60,11 +58,11 @@ public class GraphvizNode {
   public NodeShape getShape() {
     return shape;
   }
-  
+
   public void setShape(NodeShape shape) {
     this.shape = shape;
   }
-  
+
   public NodeStyle getStyle() {
     return style;
   }

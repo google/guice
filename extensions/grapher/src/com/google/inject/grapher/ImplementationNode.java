@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,9 @@ import java.lang.reflect.Member;
 import java.util.Collection;
 
 /**
- * Node for types that have {@link com.google.inject.spi.Dependency}s and are
- * bound to {@link InterfaceNode}s. These nodes will often have fields for
- * {@link Member}s that are {@link com.google.inject.spi.InjectionPoint}s.
+ * Node for types that have {@link com.google.inject.spi.Dependency}s and are bound to {@link
+ * InterfaceNode}s. These nodes will often have fields for {@link Member}s that are {@link
+ * com.google.inject.spi.InjectionPoint}s.
  *
  * @see DependencyEdge
  * @author phopkins@gmail.com (Pete Hopkins)
@@ -41,7 +41,8 @@ public class ImplementationNode extends Node {
     return members;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (!(obj instanceof ImplementationNode)) {
       return false;
     }
@@ -49,16 +50,24 @@ public class ImplementationNode extends Node {
     return super.equals(other) && Objects.equal(members, other.members);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return 31 * super.hashCode() + Objects.hashCode(members);
   }
 
-  @Override public String toString() {
-    return "ImplementationNode{id=" + getId() + " source=" + getSource()
-        + " members=" + members + "}";
+  @Override
+  public String toString() {
+    return "ImplementationNode{id="
+        + getId()
+        + " source="
+        + getSource()
+        + " members="
+        + members
+        + "}";
   }
 
-  @Override public Node copy(NodeId id) {
+  @Override
+  public Node copy(NodeId id) {
     return new ImplementationNode(id, getSource(), getMembers());
   }
 }

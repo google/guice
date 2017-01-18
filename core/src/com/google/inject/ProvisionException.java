@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
-
 import java.util.Collection;
 
 /**
  * Indicates that there was a runtime failure while providing an instance.
+ *
  *
  * @author kevinb@google.com (Kevin Bourrillion)
  * @author jessewilson@google.com (Jesse Wilson)
@@ -56,7 +56,8 @@ public final class ProvisionException extends RuntimeException {
     return messages;
   }
 
-  @Override public String getMessage() {
+  @Override
+  public String getMessage() {
     return Errors.format("Unable to provision, see the following errors", messages);
   }
 

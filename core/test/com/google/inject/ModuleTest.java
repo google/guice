@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 public class ModuleTest extends TestCase {
 
   static class A implements Module {
+    @Override
     public void configure(Binder binder) {
       binder.bind(X.class);
       binder.install(new B());
@@ -20,6 +21,7 @@ public class ModuleTest extends TestCase {
   }
 
   static class B implements Module {
+    @Override
     public void configure(Binder binder) {
       binder.bind(Y.class);
       binder.install(new D());
@@ -27,6 +29,7 @@ public class ModuleTest extends TestCase {
   }
 
   static class C implements Module {
+    @Override
     public void configure(Binder binder) {
       binder.bind(Z.class);
       binder.install(new D());
@@ -34,20 +37,28 @@ public class ModuleTest extends TestCase {
   }
 
   static class D implements Module {
+    @Override
     public void configure(Binder binder) {
       binder.bind(W.class);
     }
-    @Override public boolean equals(Object obj) {
+
+    @Override
+    public boolean equals(Object obj) {
       return obj.getClass() == D.class; // we're all equal in the eyes of guice
     }
-    @Override public int hashCode() {
+
+    @Override
+    public int hashCode() {
       return D.class.hashCode();
     }
   }
 
   static class X {}
+
   static class Y {}
+
   static class Z {}
+
   static class W {}
 
   public void testDiamond() throws Exception {

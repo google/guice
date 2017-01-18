@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,9 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates annotations which are used for scoping. Only one such annotation
- * may apply to a single implementation class. You must also annotate scope
- * annotations with {@code @Retention(RUNTIME)}. For example:
+ * Annotates annotations which are used for scoping. Only one such annotation may apply to a single
+ * implementation class. You must also annotate scope annotations with {@code @Retention(RUNTIME)}.
+ * For example:
  *
  * <pre>
  *   {@code @}Retention(RUNTIME)

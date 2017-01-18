@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,31 +17,30 @@
 package com.google.inject.assistedinject;
 
 import com.google.inject.TypeLiteral;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * A list of {@link TypeLiteral}s to match an injectable Constructor's assited
- * parameter types to the corresponding factory method.
+ * A list of {@link TypeLiteral}s to match an injectable Constructor's assited parameter types to
+ * the corresponding factory method.
  *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class ParameterListKey {
-  
+
   private final List<Type> paramList;
-  
+
   public ParameterListKey(List<Type> paramList) {
     this.paramList = new ArrayList<Type>(paramList);
   }
-  
+
   public ParameterListKey(Type[] types) {
     this(Arrays.asList(types));
   }
-  
+
   @Override
   public boolean equals(Object o) {
     if (o == this) {
@@ -53,7 +52,7 @@ class ParameterListKey {
     ParameterListKey other = (ParameterListKey) o;
     return paramList.equals(other.paramList);
   }
-  
+
   @Override
   public int hashCode() {
     return paramList.hashCode();

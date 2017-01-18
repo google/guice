@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
@@ -57,11 +57,6 @@
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-jndi</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.inject.extensions</groupId>
-        <artifactId>guice-multibindings</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

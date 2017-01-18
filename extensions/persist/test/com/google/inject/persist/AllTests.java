@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,9 +32,7 @@ import com.google.inject.persist.jpa.PersistFilterManualServiceStartTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-/**
- * @author dhanji@gmail.com (Dhanji R. Prasanna)
- */
+/** @author dhanji@gmail.com (Dhanji R. Prasanna) */
 public class AllTests {
 
   public static Test suite() {

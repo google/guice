@@ -16,28 +16,32 @@
 package com.google.inject.mini;
 
 import com.google.inject.Provides;
-
-import junit.framework.TestCase;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import junit.framework.TestCase;
 
+@SuppressWarnings("ProvidesMethodOutsideOfModule")
 public final class MiniGuiceTest extends TestCase {
 
   public void testBasicInjection() {
-    G g = MiniGuice.inject(G.class, new Object() {
-      @Provides E provideE(F f) {
-        return new E(f);
-      }
-      @Provides F provideF() {
-        return new F();
-      }
-    });
+    G g =
+        MiniGuice.inject(
+            G.class,
+            new Object() {
+              @Provides
+              E provideE(F f) {
+                return new E(f);
+              }
+
+              @Provides
+              F provideF() {
+                return new F();
+              }
+            });
 
     assertNotNull(g.a);
     assertNotNull(g.b);
@@ -48,25 +52,30 @@ public final class MiniGuiceTest extends TestCase {
   }
 
   static class A {
-    @Inject A() {}
+    @Inject
+    A() {}
   }
 
   static class B {
-    @Inject B() {}
+    @Inject
+    B() {}
   }
 
   @Singleton
   static class C {
-    @Inject C() {}
+    @Inject
+    C() {}
   }
 
   @Singleton
   static class D {
-    @Inject D() {}
+    @Inject
+    D() {}
   }
 
   static class E {
     F f;
+
     E(F f) {
       this.f = f;
     }
@@ -80,12 +89,14 @@ public final class MiniGuiceTest extends TestCase {
     C c;
     D d;
     @Inject E e;
-    @Inject G(C c, D d) {
+
+    @Inject
+    G(C c, D d) {
       this.c = c;
       this.d = d;
     }
   }
-  
+
   public void testProviderInjection() {
     H h = MiniGuice.inject(H.class);
     assertNotNull(h.aProvider.get());
@@ -95,42 +106,60 @@ public final class MiniGuiceTest extends TestCase {
 
   static class H {
     @Inject Provider<A> aProvider;
-    @Inject H() {}
+
+    @Inject
+    H() {}
   }
-  
+
   public void testSingletons() {
-    J j = MiniGuice.inject(J.class, new Object() {
-      @Provides @Singleton F provideK() {
-        return new F();
-      }
-    });
+    J j =
+        MiniGuice.inject(
+            J.class,
+            new Object() {
+              @Provides
+              @Singleton
+              F provideK() {
+                return new F();
+              }
+            });
     assertSame(j.fProvider.get(), j.fProvider.get());
     assertSame(j.iProvider.get(), j.iProvider.get());
   }
 
   @Singleton
   static class I {
-    @Inject I() {}
+    @Inject
+    I() {}
   }
 
   static class J {
     @Inject Provider<F> fProvider;
     @Inject Provider<I> iProvider;
-    @Inject J() {}
+
+    @Inject
+    J() {}
   }
 
   public void testBindingAnnotations() {
     final A one = new A();
     final A two = new A();
 
-    K k = MiniGuice.inject(K.class, new Object() {
-      @Provides @Named("one") A getOne() {
-        return one;
-      }
-      @Provides @Named("two") A getTwo() {
-        return two;
-      }
-    });
+    K k =
+        MiniGuice.inject(
+            K.class,
+            new Object() {
+              @Provides
+              @Named("one")
+              A getOne() {
+                return one;
+              }
+
+              @Provides
+              @Named("two")
+              A getTwo() {
+                return two;
+              }
+            });
 
     assertNotNull(k.a);
     assertSame(one, k.aOne);
@@ -139,21 +168,33 @@ public final class MiniGuiceTest extends TestCase {
 
   public static class K {
     @Inject A a;
-    @Inject @Named("one") A aOne;
-    @Inject @Named("two") A aTwo;
+
+    @Inject
+    @Named("one")
+    A aOne;
+
+    @Inject
+    @Named("two")
+    A aTwo;
   }
-  
+
   public void testSingletonBindingAnnotationAndProvider() {
     final AtomicReference<A> a1 = new AtomicReference<A>();
     final AtomicReference<A> a2 = new AtomicReference<A>();
 
-    L l = MiniGuice.inject(L.class, new Object() {
-      @Provides @Singleton @Named("one") F provideF(Provider<A> aProvider) {
-        a1.set(aProvider.get());
-        a2.set(aProvider.get());
-        return new F();
-      }
-    });
+    L l =
+        MiniGuice.inject(
+            L.class,
+            new Object() {
+              @Provides
+              @Singleton
+              @Named("one")
+              F provideF(Provider<A> aProvider) {
+                a1.set(aProvider.get());
+                a2.set(aProvider.get());
+                return new F();
+              }
+            });
 
     assertNotNull(a1.get());
     assertNotNull(a2.get());
@@ -163,16 +204,24 @@ public final class MiniGuiceTest extends TestCase {
 
   @Singleton
   public static class L {
-    @Inject @Named("one") F f;
+    @Inject
+    @Named("one")
+    F f;
+
     @Inject Provider<L> lProvider;
   }
 
   public void testSingletonInGraph() {
-    M m = MiniGuice.inject(M.class, new Object() {
-      @Provides @Singleton F provideF() {
-        return new F();
-      }
-    });
+    M m =
+        MiniGuice.inject(
+            M.class,
+            new Object() {
+              @Provides
+              @Singleton
+              F provideF() {
+                return new F();
+              }
+            });
 
     assertSame(m.f1, m.f2);
     assertSame(m.f1, m.n1.f1);
@@ -205,41 +254,53 @@ public final class MiniGuiceTest extends TestCase {
   }
 
   public static class O {
-    @Inject @Named("a") A a;
+    @Inject
+    @Named("a")
+    A a;
   }
 
   public void testSubclasses() {
-    Q q = MiniGuice.inject(Q.class, new Object() {
-      @Provides F provideF() {
-        return new F();
-      }
-    });
+    Q q =
+        MiniGuice.inject(
+            Q.class,
+            new Object() {
+              @Provides
+              F provideF() {
+                return new F();
+              }
+            });
 
     assertNotNull(q.f);
   }
-  
+
   public static class P {
     @Inject F f;
   }
 
   public static class Q extends P {
-    @Inject Q() {}
+    @Inject
+    Q() {}
   }
-  
+
   public void testSingletonsAreEager() {
     final AtomicBoolean sInjected = new AtomicBoolean();
 
     R.injected = false;
-    MiniGuice.inject(A.class, new Object() {
-      @Provides F provideF(R r) {
-        return new F();
-      }
+    MiniGuice.inject(
+        A.class,
+        new Object() {
+          @Provides
+          F provideF(R r) {
+            return new F();
+          }
 
-      @Provides @Singleton S provideS() {
-        sInjected.set(true);
-        return new S();
-      }
-    });
+          @Provides
+          @Singleton
+          S provideS() {
+            sInjected.set(true);
+            return new S();
+          }
+        });
 
     assertTrue(R.injected);
     assertTrue(sInjected.get());
@@ -248,7 +309,9 @@ public final class MiniGuiceTest extends TestCase {
   @Singleton
   static class R {
     static boolean injected = false;
-    @Inject R() {
+
+    @Inject
+    R() {
       injected = true;
     }
   }

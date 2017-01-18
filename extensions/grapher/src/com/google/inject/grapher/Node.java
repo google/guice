@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +26,8 @@ import com.google.common.base.Objects;
  */
 public abstract class Node {
   /**
-   * When set to true, the source object is ignored in {@link #equals} and {@link #hashCode}.
-   * Only used in tests.
+   * When set to true, the source object is ignored in {@link #equals} and {@link #hashCode}. Only
+   * used in tests.
    */
   static boolean ignoreSourceInComparisons = false;
 
@@ -47,7 +47,8 @@ public abstract class Node {
     return source;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (!(obj instanceof Node)) {
       return false;
     }
@@ -56,7 +57,8 @@ public abstract class Node {
         && (ignoreSourceInComparisons || Objects.equal(source, other.source));
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return ignoreSourceInComparisons ? id.hashCode() : Objects.hashCode(id, source);
   }
 

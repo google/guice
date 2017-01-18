@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,24 +20,24 @@ import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.Inject;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * A version of {@literal @}{@link Inject} designed for ThrowingProviders.  Use by:
+ * A version of {@literal @}{@link Inject} designed for ThrowingProviders. Use by:
+ *
  * <pre><code>ThrowingProviderBinder.create(binder())
  *    .bind(RemoteProvider.class, Customer.class)
  *    .providing(CustomerImpl.class);
  * </code></pre>
+ *
  * where CustomerImpl has a constructor annotated with ThrowingInject.
  *
  * @author sameb@google.com (Sam Berlin)
  * @since 4.0
  */
-@Target({ CONSTRUCTOR })
+@Target({CONSTRUCTOR})
 @Retention(RUNTIME)
 @Documented
-public @interface ThrowingInject {
-}
+public @interface ThrowingInject {}

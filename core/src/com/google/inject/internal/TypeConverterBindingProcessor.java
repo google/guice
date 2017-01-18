@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeConverterBinding;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -51,79 +50,97 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
     convertToPrimitiveType(injector, float.class, Float.class);
     convertToPrimitiveType(injector, double.class, Double.class);
 
-    convertToClass(injector, Character.class, new TypeConverter() {
-      public Object convert(String value, TypeLiteral<?> toType) {
-        value = value.trim();
-        if (value.length() != 1) {
-          throw new RuntimeException("Length != 1.");
-        }
-        return value.charAt(0);
-      }
-
-      @Override public String toString() {
-        return "TypeConverter<Character>";
-      }
-    });
-
-    convertToClasses(injector, Matchers.subclassesOf(Enum.class), new TypeConverter() {
-      @SuppressWarnings("unchecked")
-      public Object convert(String value, TypeLiteral<?> toType) {
-          return Enum.valueOf((Class) toType.getRawType(), value);
-        }
-
-        @Override public String toString() {
-          return "TypeConverter<E extends Enum<E>>";
-        }
-      });
-
-    internalConvertToTypes(injector, new AbstractMatcher<TypeLiteral<?>>() {
-        public boolean matches(TypeLiteral<?> typeLiteral) {
-          return typeLiteral.getRawType() == Class.class;
-        }
-
-        @Override public String toString() {
-          return "Class<?>";
-        }
-      },
-      new TypeConverter() {
-        @SuppressWarnings("unchecked")
-        public Object convert(String value, TypeLiteral<?> toType) {
-          try {
-            return Class.forName(value);
-          } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
+    convertToClass(
+        injector,
+        Character.class,
+        new TypeConverter() {
+          @Override
+          public Object convert(String value, TypeLiteral<?> toType) {
+            value = value.trim();
+            if (value.length() != 1) {
+              throw new RuntimeException("Length != 1.");
+            }
+            return value.charAt(0);
           }
-        }
 
-        @Override public String toString() {
-          return "TypeConverter<Class<?>>";
-        }
-      }
-    );
+          @Override
+          public String toString() {
+            return "TypeConverter<Character>";
+          }
+        });
+
+    convertToClasses(
+        injector,
+        Matchers.subclassesOf(Enum.class),
+        new TypeConverter() {
+          @Override
+          @SuppressWarnings("unchecked")
+          public Object convert(String value, TypeLiteral<?> toType) {
+            return Enum.valueOf((Class) toType.getRawType(), value);
+          }
+
+          @Override
+          public String toString() {
+            return "TypeConverter<E extends Enum<E>>";
+          }
+        });
+
+    internalConvertToTypes(
+        injector,
+        new AbstractMatcher<TypeLiteral<?>>() {
+          @Override
+          public boolean matches(TypeLiteral<?> typeLiteral) {
+            return typeLiteral.getRawType() == Class.class;
+          }
+
+          @Override
+          public String toString() {
+            return "Class<?>";
+          }
+        },
+        new TypeConverter() {
+          @Override
+          @SuppressWarnings("unchecked")
+          public Object convert(String value, TypeLiteral<?> toType) {
+            try {
+              return Class.forName(value);
+            } catch (ClassNotFoundException e) {
+              throw new RuntimeException(e.getMessage());
+            }
+          }
+
+          @Override
+          public String toString() {
+            return "TypeConverter<Class<?>>";
+          }
+        });
   }
 
-  private static <T> void convertToPrimitiveType(InjectorImpl injector, Class<T> primitiveType,
-      final Class<T> wrapperType) {
+  private static <T> void convertToPrimitiveType(
+      InjectorImpl injector, Class<T> primitiveType, final Class<T> wrapperType) {
     try {
-      final Method parser = wrapperType.getMethod(
-          "parse" + capitalize(primitiveType.getName()), String.class);
+      final Method parser =
+          wrapperType.getMethod("parse" + capitalize(primitiveType.getName()), String.class);
 
-      TypeConverter typeConverter = new TypeConverter() {
-        @SuppressWarnings("unchecked")
-        public Object convert(String value, TypeLiteral<?> toType) {
-          try {
-            return parser.invoke(null, value);
-          } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
-          } catch (InvocationTargetException e) {
-            throw new RuntimeException(e.getTargetException().getMessage());
-          }
-        }
+      TypeConverter typeConverter =
+          new TypeConverter() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object convert(String value, TypeLiteral<?> toType) {
+              try {
+                return parser.invoke(null, value);
+              } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+              } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getTargetException().getMessage());
+              }
+            }
 
-        @Override public String toString() {
-          return "TypeConverter<" + wrapperType.getSimpleName() + ">";
-        }
-      };
+            @Override
+            public String toString() {
+              return "TypeConverter<" + wrapperType.getSimpleName() + ">";
+            }
+          };
 
       convertToClass(injector, wrapperType, typeConverter);
     } catch (NoSuchMethodException e) {
@@ -131,51 +148,54 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
     }
   }
 
-  private static <T> void convertToClass(InjectorImpl injector, Class<T> type,
-      TypeConverter converter) {
+  private static <T> void convertToClass(
+      InjectorImpl injector, Class<T> type, TypeConverter converter) {
     convertToClasses(injector, Matchers.identicalTo(type), converter);
   }
 
-  private static void convertToClasses(InjectorImpl injector,
-      final Matcher<? super Class<?>> typeMatcher, TypeConverter converter) {
-    internalConvertToTypes(injector, new AbstractMatcher<TypeLiteral<?>>() {
-      public boolean matches(TypeLiteral<?> typeLiteral) {
-        Type type = typeLiteral.getType();
-        if (!(type instanceof Class)) {
-          return false;
-        }
-        Class<?> clazz = (Class<?>) type;
-        return typeMatcher.matches(clazz);
-      }
+  private static void convertToClasses(
+      InjectorImpl injector, final Matcher<? super Class<?>> typeMatcher, TypeConverter converter) {
+    internalConvertToTypes(
+        injector,
+        new AbstractMatcher<TypeLiteral<?>>() {
+          @Override
+          public boolean matches(TypeLiteral<?> typeLiteral) {
+            Type type = typeLiteral.getType();
+            if (!(type instanceof Class)) {
+              return false;
+            }
+            Class<?> clazz = (Class<?>) type;
+            return typeMatcher.matches(clazz);
+          }
 
-      @Override public String toString() {
-        return typeMatcher.toString();
-      }
-    }, converter);
+          @Override
+          public String toString() {
+            return typeMatcher.toString();
+          }
+        },
+        converter);
   }
 
-  private static void internalConvertToTypes(InjectorImpl injector,
-      Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter converter) {
+  private static void internalConvertToTypes(
+      InjectorImpl injector, Matcher<? super TypeLiteral<?>> typeMatcher, TypeConverter converter) {
     injector.state.addConverter(
         new TypeConverterBinding(SourceProvider.UNKNOWN_SOURCE, typeMatcher, converter));
   }
 
-  @Override public Boolean visit(TypeConverterBinding command) {
-    injector.state.addConverter(new TypeConverterBinding(
-        command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
+  @Override
+  public Boolean visit(TypeConverterBinding command) {
+    injector.state.addConverter(
+        new TypeConverterBinding(
+            command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
     return true;
   }
-  
+
   private static String capitalize(String s) {
     if (s.length() == 0) {
       return s;
     }
     char first = s.charAt(0);
     char capitalized = Character.toUpperCase(first);
-    return (first == capitalized)
-        ? s
-        : capitalized + s.substring(1);
+    return (first == capitalized) ? s : capitalized + s.substring(1);
   }
-
 }

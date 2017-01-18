@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,9 +30,11 @@ final class InterceptorBindingProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visit(InterceptorBinding command) {
-    injector.state.addMethodAspect(new MethodAspect(
-        command.getClassMatcher(), command.getMethodMatcher(), command.getInterceptors()));
+  @Override
+  public Boolean visit(InterceptorBinding command) {
+    injector.state.addMethodAspect(
+        new MethodAspect(
+            command.getClassMatcher(), command.getMethodMatcher(), command.getInterceptors()));
     return true;
   }
 }

@@ -17,19 +17,17 @@
 package com.google.inject;
 
 import com.google.inject.internal.InternalInjectorCreator;
-
 import java.util.Arrays;
 
 /**
- * The entry point to the Guice framework. Creates {@link Injector}s from
- * {@link Module}s.
+ * The entry point to the Guice framework. Creates {@link Injector}s from {@link Module}s.
  *
- * <p>Guice supports a model of development that draws clear boundaries between
- * APIs, Implementations of these APIs, Modules which configure these
- * implementations, and finally Applications which consist of a collection of
- * Modules. It is the Application, which typically defines your {@code main()}
- * method, that bootstraps the Guice Injector using the {@code Guice} class, as
- * in this example:
+ * <p>Guice supports a model of development that draws clear boundaries between APIs,
+ * Implementations of these APIs, Modules which configure these implementations, and finally
+ * Applications which consist of a collection of Modules. It is the Application, which typically
+ * defines your {@code main()} method, that bootstraps the Guice Injector using the {@code Guice}
+ * class, as in this example:
+ *
  * <pre>
  *     public class FooApplication {
  *       public static void main(String[] args) {
@@ -52,50 +50,40 @@ public final class Guice {
   private Guice() {}
 
   /**
-   * Creates an injector for the given set of modules. This is equivalent to
-   * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
+   * Creates an injector for the given set of modules. This is equivalent to calling {@link
+   * #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
    *
-   * @throws CreationException if one or more errors occur during injector
-   *     construction
+   * @throws CreationException if one or more errors occur during injector construction
    */
   public static Injector createInjector(Module... modules) {
     return createInjector(Arrays.asList(modules));
   }
 
   /**
-   * Creates an injector for the given set of modules. This is equivalent to
-   * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
+   * Creates an injector for the given set of modules. This is equivalent to calling {@link
+   * #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
    *
-   * @throws CreationException if one or more errors occur during injector
-   *     creation
+   * @throws CreationException if one or more errors occur during injector creation
    */
   public static Injector createInjector(Iterable<? extends Module> modules) {
     return createInjector(Stage.DEVELOPMENT, modules);
   }
 
   /**
-   * Creates an injector for the given set of modules, in a given development
-   * stage.
+   * Creates an injector for the given set of modules, in a given development stage.
    *
-   * @throws CreationException if one or more errors occur during injector
-   *     creation.
+   * @throws CreationException if one or more errors occur during injector creation.
    */
   public static Injector createInjector(Stage stage, Module... modules) {
     return createInjector(stage, Arrays.asList(modules));
   }
 
   /**
-   * Creates an injector for the given set of modules, in a given development
-   * stage.
+   * Creates an injector for the given set of modules, in a given development stage.
    *
-   * @throws CreationException if one or more errors occur during injector
-   *     construction
+   * @throws CreationException if one or more errors occur during injector construction
    */
-  public static Injector createInjector(Stage stage,
-      Iterable<? extends Module> modules) {
-    return new InternalInjectorCreator()
-        .stage(stage)
-        .addModules(modules)
-        .build();
+  public static Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
+    return new InternalInjectorCreator().stage(stage).addModules(modules).build();
   }
 }

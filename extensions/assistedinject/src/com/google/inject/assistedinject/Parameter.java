@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.Annotations;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -35,7 +34,7 @@ import java.lang.reflect.Type;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class Parameter {
-  
+
   private final Type type;
   private final boolean isAssisted;
   private final Annotation bindingAnnotation;
@@ -53,7 +52,7 @@ class Parameter {
   public boolean isProvidedByFactory() {
     return isAssisted;
   }
-  
+
   public Type getType() {
     return type;
   }
@@ -79,16 +78,15 @@ class Parameter {
     return false;
   }
 
-  /**
-   * Returns the Guice {@link Key} for this parameter.
-   */
+  /** Returns the Guice {@link Key} for this parameter. */
   public Object getValue(Injector injector) {
     if (null == provider) {
       synchronized (this) {
         if (null == provider) {
-          provider = isProvider
-              ? injector.getProvider(getBindingForType(getProvidedType(type)))
-              : injector.getProvider(getPrimaryBindingKey());
+          provider =
+              isProvider
+                  ? injector.getProvider(getBindingForType(getProvidedType(type)))
+                  : injector.getProvider(getPrimaryBindingKey());
         }
       }
     }
@@ -112,11 +110,10 @@ class Parameter {
   }
 
   /**
-   * Replace annotation instances with annotation types, this is only
-   * appropriate for testing if a key is bound and not for injecting.
+   * Replace annotation instances with annotation types, this is only appropriate for testing if a
+   * key is bound and not for injecting.
    *
-   * See Guice bug 125,
-   * https://github.com/google/guice/issues/125
+   * <p>See Guice bug 125, https://github.com/google/guice/issues/125
    */
   public Key<?> fixAnnotations(Key<?> key) {
     return key.getAnnotation() == null
@@ -125,9 +122,7 @@ class Parameter {
   }
 
   Key<?> getPrimaryBindingKey() {
-    return isProvider
-        ? getBindingForType(getProvidedType(type))
-        : getBindingForType(type);
+    return isProvider ? getBindingForType(getProvidedType(type)) : getBindingForType(type);
   }
 
   private Type getProvidedType(Type type) {
@@ -140,14 +135,12 @@ class Parameter {
   }
 
   private Key<?> getBindingForType(Type type) {
-    return bindingAnnotation != null
-        ? Key.get(type, bindingAnnotation)
-        : Key.get(type);
+    return bindingAnnotation != null ? Key.get(type, bindingAnnotation) : Key.get(type);
   }
 
   /**
-   * Returns the unique binding annotation from the specified list, or
-   * {@code null} if there are none.
+   * Returns the unique binding annotation from the specified list, or {@code null} if there are
+   * none.
    *
    * @throws IllegalStateException if multiple binding annotations exist.
    */
@@ -155,8 +148,11 @@ class Parameter {
     Annotation bindingAnnotation = null;
     for (Annotation annotation : annotations) {
       if (Annotations.isBindingAnnotation(annotation.annotationType())) {
-        checkArgument(bindingAnnotation == null,
-            "Parameter has multiple binding annotations: %s and %s", bindingAnnotation, annotation);
+        checkArgument(
+            bindingAnnotation == null,
+            "Parameter has multiple binding annotations: %s and %s",
+            bindingAnnotation,
+            annotation);
         bindingAnnotation = annotation;
       }
     }

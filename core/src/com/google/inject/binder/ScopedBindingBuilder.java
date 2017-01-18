@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.google.inject.binder;
 
 import com.google.inject.Scope;
-
 import java.lang.annotation.Annotation;
 
 /**
@@ -27,20 +26,15 @@ import java.lang.annotation.Annotation;
  */
 public interface ScopedBindingBuilder {
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   void in(Class<? extends Annotation> scopeAnnotation);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
+  /** See the EDSL examples at {@link com.google.inject.Binder}. */
   void in(Scope scope);
 
   /**
-   * Instructs the {@link com.google.inject.Injector} to eagerly initialize this
-   * singleton-scoped binding upon creation. Useful for application
-   * initialization logic.  See the EDSL examples at
+   * Instructs the {@link com.google.inject.Injector} to eagerly initialize this singleton-scoped
+   * binding upon creation. Useful for application initialization logic. See the EDSL examples at
    * {@link com.google.inject.Binder}.
    */
   void asEagerSingleton();

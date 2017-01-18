@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
-
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
-
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -37,21 +35,18 @@ import javax.management.ObjectName;
 public class Manager {
 
   /**
-   * Registers all the bindings of an Injector with the platform MBean server.
-   * Consider using the name of your root {@link Module} class as the domain.
+   * Registers all the bindings of an Injector with the platform MBean server. Consider using the
+   * name of your root {@link Module} class as the domain.
    */
-  public static void manage(
-      String domain,
-      Injector injector) {
+  public static void manage(String domain, Injector injector) {
     manage(ManagementFactory.getPlatformMBeanServer(), domain, injector);
   }
 
   /**
-   * Registers all the bindings of an Injector with the given MBean server.
-   * Consider using the name of your root {@link Module} class as the domain.
+   * Registers all the bindings of an Injector with the given MBean server. Consider using the name
+   * of your root {@link Module} class as the domain.
    */
-  public static void manage(MBeanServer server, String domain,
-      Injector injector) {
+  public static void manage(MBeanServer server, String domain, Injector injector) {
     // Register each binding independently.
     for (Binding<?> binding : injector.getBindings().values()) {
       // Construct the name manually so we can ensure proper ordering of the
@@ -63,23 +58,18 @@ public class Manager {
       Annotation annotation = key.getAnnotation();
       if (annotation != null) {
         name.append(",annotation=").append(quote(annotation.toString()));
-      }
-      else {
+      } else {
         Class<? extends Annotation> annotationType = key.getAnnotationType();
         if (annotationType != null) {
-          name.append(",annotation=")
-              .append(quote("@" + annotationType.getName()));
+          name.append(",annotation=").append(quote("@" + annotationType.getName()));
         }
       }
 
       try {
-        server.registerMBean(new ManagedBinding(binding),
-            new ObjectName(name.toString()));
-      }
-      catch (MalformedObjectNameException e) {
+        server.registerMBean(new ManagedBinding(binding), new ObjectName(name.toString()));
+      } catch (MalformedObjectNameException e) {
         throw new RuntimeException("Bad object name: " + name, e);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
@@ -90,13 +80,13 @@ public class Manager {
     return ObjectName.quote(value).replace(',', ';');
   }
 
-  /**
-   * Run with no arguments for usage instructions.
-   */
+  /** Run with no arguments for usage instructions. */
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
-      System.err.println("Usage: java -Dcom.sun.management.jmxremote "
-          + Manager.class.getName() + " [module class name]");
+      System.err.println(
+          "Usage: java -Dcom.sun.management.jmxremote "
+              + Manager.class.getName()
+              + " [module class name]");
       System.err.println("Then run 'jconsole' to connect.");
       System.exit(1);
     }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,6 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -47,33 +46,39 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     super(binder, elements, source, key);
   }
 
+  @Override
   public BindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType) {
     annotatedWithInternal(annotationType);
     return this;
   }
 
+  @Override
   public BindingBuilder<T> annotatedWith(Annotation annotation) {
     annotatedWithInternal(annotation);
     return this;
   }
 
+  @Override
   public BindingBuilder<T> to(Class<? extends T> implementation) {
     return to(Key.get(implementation));
   }
 
+  @Override
   public BindingBuilder<T> to(TypeLiteral<? extends T> implementation) {
     return to(Key.get(implementation));
   }
 
+  @Override
   public BindingBuilder<T> to(Key<? extends T> linkedKey) {
     checkNotNull(linkedKey, "linkedKey");
     checkNotTargetted();
     BindingImpl<T> base = getBinding();
-    setBinding(new LinkedBindingImpl<T>(
-        base.getSource(), base.getKey(), base.getScoping(), linkedKey));
+    setBinding(
+        new LinkedBindingImpl<T>(base.getSource(), base.getKey(), base.getScoping(), linkedKey));
     return this;
   }
 
+  @Override
   public void toInstance(T instance) {
     checkNotTargetted();
 
@@ -92,14 +97,17 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     }
 
     BindingImpl<T> base = getBinding();
-    setBinding(new InstanceBindingImpl<T>(
-        base.getSource(), base.getKey(), Scoping.EAGER_SINGLETON, injectionPoints, instance));
+    setBinding(
+        new InstanceBindingImpl<T>(
+            base.getSource(), base.getKey(), Scoping.EAGER_SINGLETON, injectionPoints, instance));
   }
 
+  @Override
   public BindingBuilder<T> toProvider(Provider<? extends T> provider) {
     return toProvider((javax.inject.Provider<T>) provider);
   }
 
+  @Override
   public BindingBuilder<T> toProvider(javax.inject.Provider<? extends T> provider) {
     checkNotNull(provider, "provider");
     checkNotTargetted();
@@ -114,38 +122,45 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     }
 
     BindingImpl<T> base = getBinding();
-    setBinding(new ProviderInstanceBindingImpl<T>(
-        base.getSource(), base.getKey(), base.getScoping(), injectionPoints, provider));
+    setBinding(
+        new ProviderInstanceBindingImpl<T>(
+            base.getSource(), base.getKey(), base.getScoping(), injectionPoints, provider));
     return this;
   }
 
+  @Override
   public BindingBuilder<T> toProvider(
       Class<? extends javax.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
+  @Override
   public BindingBuilder<T> toProvider(
       TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
+  @Override
   public BindingBuilder<T> toProvider(
       Key<? extends javax.inject.Provider<? extends T>> providerKey) {
     checkNotNull(providerKey, "providerKey");
     checkNotTargetted();
 
     BindingImpl<T> base = getBinding();
-    setBinding(new LinkedProviderBindingImpl<T>(
-        base.getSource(), base.getKey(), base.getScoping(), providerKey));
+    setBinding(
+        new LinkedProviderBindingImpl<T>(
+            base.getSource(), base.getKey(), base.getScoping(), providerKey));
     return this;
   }
 
+  @Override
   public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor) {
     return toConstructor(constructor, TypeLiteral.get(constructor.getDeclaringClass()));
   }
 
-  public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor,
-      TypeLiteral<? extends S> type) {
+  @Override
+  public <S extends T> ScopedBindingBuilder toConstructor(
+      Constructor<S> constructor, TypeLiteral<? extends S> type) {
     checkNotNull(constructor, "constructor");
     checkNotNull(type, "type");
     checkNotTargetted();
@@ -162,16 +177,22 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
     try {
       InjectionPoint constructorPoint = InjectionPoint.forConstructor(constructor, type);
-      setBinding(new ConstructorBindingImpl<T>(base.getKey(), base.getSource(), base.getScoping(),
-          constructorPoint, injectionPoints));
+      setBinding(
+          new ConstructorBindingImpl<T>(
+              base.getKey(),
+              base.getSource(),
+              base.getScoping(),
+              constructorPoint,
+              injectionPoints));
     } catch (ConfigurationException e) {
       copyErrorsToBinder(e);
     }
 
     return this;
   }
-  
-  @Override public String toString() {
+
+  @Override
+  public String toString() {
     return "BindingBuilder<" + getBinding().getKey().getTypeLiteral() + ">";
   }
 

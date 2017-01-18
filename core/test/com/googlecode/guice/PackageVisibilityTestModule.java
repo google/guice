@@ -11,8 +11,11 @@ public class PackageVisibilityTestModule extends AbstractModule {
   }
 
   public static class PublicUserOfPackagePrivate {
-    @Inject public PublicUserOfPackagePrivate(PackagePrivateInterface ppi) {}
-    @Inject public void acceptPackagePrivateParameter(PackagePrivateInterface ppi) {}
+    @Inject
+    public PublicUserOfPackagePrivate(PackagePrivateInterface ppi) {}
+
+    @Inject
+    public void acceptPackagePrivateParameter(PackagePrivateInterface ppi) {}
   }
 
   interface PackagePrivateInterface {}

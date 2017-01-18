@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,10 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 /**
- * Module that adds a variety of different kinds of {@link Bindings} to be used
- * to generate a comprehensive sample graph.
- * 
- * @see InjectorGrapherDemo
+ * Module that adds a variety of different kinds of {@link Bindings} to be used to generate a
+ * comprehensive sample graph.
  *
+ * @see InjectorGrapherDemo
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class BackToTheFutureModule extends AbstractModule {
@@ -41,10 +40,10 @@ public class BackToTheFutureModule extends AbstractModule {
 
     bind(Person.class).annotatedWith(Driver.class).to(MartyMcFly.class).in(Singleton.class);
     bind(Person.class).annotatedWith(Inventor.class).to(DocBrown.class).in(Singleton.class);
-    
+
     bindConstant().annotatedWith(Names.named("year")).to("1955");
   }
-  
+
   @Provides
   public FluxCapacitor provideFluxCapacitor(EnergySource energySource) {
     return null;

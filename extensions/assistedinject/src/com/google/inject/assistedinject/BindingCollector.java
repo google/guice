@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Message;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -36,8 +35,8 @@ class BindingCollector {
 
   public BindingCollector addBinding(Key<?> key, TypeLiteral<?> target) {
     if (bindings.containsKey(key)) {
-      throw new ConfigurationException(ImmutableSet.of(
-          new Message("Only one implementation can be specified for " + key)));
+      throw new ConfigurationException(
+          ImmutableSet.of(new Message("Only one implementation can be specified for " + key)));
     }
 
     bindings.put(key, target);

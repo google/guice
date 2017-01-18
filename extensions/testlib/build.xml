@@ -4,10 +4,23 @@
 
   <import file="../../common.xml"/>
 
+  <target name="compile" description="Compile Java source." depends="common.compile">
+    <!--
+      Build the throwingproviders extension using an ant subtask. This could be
+      accomplished using either the "include" [1] directive, or extension points [2],
+      but both were introduced in Ant 1.8 and we're using ant 1.6. This does
+      mean that we will compile guice-throwingproviders twice.
+      [1]: https://ant.apache.org/manual/Tasks/include.html
+      [2]: https://ant.apache.org/manual/targets.html#extension-points
+    -->
+    <ant antfile="../throwingproviders/build.xml" target="compile"/>
+  </target>
+
   <path id="compile.classpath">
     <fileset dir="${lib.dir}" includes="*.jar"/>
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
     <pathelement path="../../build/classes"/>
+    <pathelement path="../throwingproviders/build/classes"/>
   </path>
 
   <target name="jar" depends="compile, manifest" description="Build jar.">

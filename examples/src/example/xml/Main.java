@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,26 +16,25 @@
 
 package example.xml;
 
-import com.google.inject.Guice;
 import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.net.URL;
 
-/**
- *
- *
- */
+/** */
 public class Main {
 
   public static void main(String[] args) {
     final URL xmlUrl = Main.class.getResource("phone.xml");
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Contacts.class).to(SimCard.class);
-        install(new XmlBeanModule(xmlUrl));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              protected void configure() {
+                bind(Contacts.class).to(SimCard.class);
+                install(new XmlBeanModule(xmlUrl));
+              }
+            });
 
     Phone phone = injector.getInstance(Phone.class);
 

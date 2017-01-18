@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,9 @@ package com.googlecode.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Provides;
-
+import javax.inject.Named;
 import junit.framework.Test;
 import junit.framework.TestCase;
-
 import org.atinject.tck.Tck;
 import org.atinject.tck.auto.Car;
 import org.atinject.tck.auto.Convertible;
@@ -36,25 +35,31 @@ import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.Cupholder;
 import org.atinject.tck.auto.accessories.SpareTire;
 
-import javax.inject.Named;
-
 public class GuiceTck extends TestCase {
 
   public static Test suite() {
-    return Tck.testsFor(Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Car.class).to(Convertible.class);
-        bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
-        bind(Engine.class).to(V8Engine.class);
-        bind(Cupholder.class);
-        bind(Tire.class);
-        bind(FuelTank.class);
-        requestStaticInjection(Convertible.class, SpareTire.class);
-      }
+    return Tck.testsFor(
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    bind(Car.class).to(Convertible.class);
+                    bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
+                    bind(Engine.class).to(V8Engine.class);
+                    bind(Cupholder.class);
+                    bind(Tire.class);
+                    bind(FuelTank.class);
+                    requestStaticInjection(Convertible.class, SpareTire.class);
+                  }
 
-      @Provides @Named("spare") Tire provideSpareTire(SpareTire spare) {
-        return spare;
-      }
-    }).getInstance(Car.class), true, true);
+                  @Provides
+                  @Named("spare")
+                  Tire provideSpareTire(SpareTire spare) {
+                    return spare;
+                  }
+                })
+            .getInstance(Car.class),
+        true,
+        true);
   }
 }

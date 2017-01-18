@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import java.lang.reflect.Member;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class PortIdFactoryImpl implements PortIdFactory {
+  @Override
   public String getPortId(Member member) {
     return "m_" + Integer.toHexString(member.hashCode());
   }

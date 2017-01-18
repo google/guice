@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,18 +22,15 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
-
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import junit.framework.TestCase;
 
 /**
  * Created with IntelliJ IDEA. On: 2/06/2007
  *
- * For instance, a session-per-request strategy will control the opening and closing of the EM at
+ * <p>For instance, a session-per-request strategy will control the opening and closing of the EM at
  * its own (manual) discretion. As opposed to a transactional unit of work.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -62,14 +59,17 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
     //pretend that the request was started here
     EntityManager em = injector.getInstance(EntityManager.class);
 
-    JpaTestEntity entity = injector
+    JpaTestEntity entity =
+        injector
+            .getInstance(ManualLocalTransactionsWithCustomMatcherTest.TransactionalObject.class)
+            .runOperationInTxn();
+    injector
         .getInstance(ManualLocalTransactionsWithCustomMatcherTest.TransactionalObject.class)
-        .runOperationInTxn();
-    injector.getInstance(ManualLocalTransactionsWithCustomMatcherTest.TransactionalObject.class)
         .runOperationInTxn2();
 
     //persisted entity should remain in the same em (which should still be open)
-    assertTrue("EntityManager  appears to have been closed across txns!",
+    assertTrue(
+        "EntityManager  appears to have been closed across txns!",
         injector.getInstance(EntityManager.class).contains(entity));
     assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
     assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
@@ -78,10 +78,14 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
 
     //try to query them back out
     em = injector.getInstance(EntityManager.class);
-    assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT).getSingleResult());
-    assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT_2).getSingleResult());
+    assertNotNull(
+        em.createQuery("from JpaTestEntity where text = :text")
+            .setParameter("text", UNIQUE_TEXT)
+            .getSingleResult());
+    assertNotNull(
+        em.createQuery("from JpaTestEntity where text = :text")
+            .setParameter("text", UNIQUE_TEXT_2)
+            .getSingleResult());
     em.close();
   }
 
@@ -103,6 +107,5 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
       entity.setText(UNIQUE_TEXT_2);
       em.persist(entity);
     }
-
   }
 }

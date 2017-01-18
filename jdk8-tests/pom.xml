@@ -19,7 +19,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <parent>
     <artifactId>guice-parent</artifactId>
     <groupId>com.google.inject</groupId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -31,6 +31,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

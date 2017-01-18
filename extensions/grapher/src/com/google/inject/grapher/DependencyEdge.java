@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +42,8 @@ public class DependencyEdge extends Edge {
     return injectionPoint;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (!(obj instanceof DependencyEdge)) {
       return false;
     }
@@ -50,16 +51,24 @@ public class DependencyEdge extends Edge {
     return super.equals(other) && Objects.equal(injectionPoint, other.injectionPoint);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return 31 * super.hashCode() + Objects.hashCode(injectionPoint);
   }
 
-  @Override public String toString() {
-    return "DependencyEdge{fromId=" + getFromId() + " toId=" + getToId()
-        + " injectionPoint=" + injectionPoint + "}";
+  @Override
+  public String toString() {
+    return "DependencyEdge{fromId="
+        + getFromId()
+        + " toId="
+        + getToId()
+        + " injectionPoint="
+        + injectionPoint
+        + "}";
   }
 
-  @Override public Edge copy(NodeId fromId, NodeId toId) {
+  @Override
+  public Edge copy(NodeId fromId, NodeId toId) {
     return new DependencyEdge(fromId, toId, injectionPoint);
   }
 }
