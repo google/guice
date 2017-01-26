@@ -432,7 +432,7 @@ final class FactoryProvider2<F>
 
   @Override
   public Set<Dependency<?>> getDependencies() {
-    Set<Dependency<?>> combinedDeps = new HashSet<Dependency<?>>();
+    Set<Dependency<?>> combinedDeps = new HashSet<>();
     for (AssistData data : assistDataByMethod.values()) {
       combinedDeps.addAll(data.dependencies);
     }

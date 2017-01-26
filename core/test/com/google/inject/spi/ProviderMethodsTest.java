@@ -449,7 +449,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   }
 
   public void testInjectsJustOneLogger() {
-    AtomicReference<Logger> loggerRef = new AtomicReference<Logger>();
+    AtomicReference<Logger> loggerRef = new AtomicReference<>();
     Injector injector = Guice.createInjector(new FooModule(loggerRef));
 
     assertNull(loggerRef.get());

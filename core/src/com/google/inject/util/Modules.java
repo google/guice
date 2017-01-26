@@ -190,7 +190,7 @@ public final class Modules {
       }
 
       final Binder binder = baseBinder.skipSources(this.getClass());
-      final LinkedHashSet<Element> elements = new LinkedHashSet<Element>(baseElements);
+      final LinkedHashSet<Element> elements = new LinkedHashSet<>(baseElements);
       final Module scannersModule = extractScanners(elements);
       final List<Element> overrideElements =
           Elements.getElements(

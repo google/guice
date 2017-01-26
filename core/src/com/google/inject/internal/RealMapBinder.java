@@ -257,7 +257,7 @@ public final class RealMapBinder<K, V> implements Module {
       TypeLiteral<V> valueType,
       Key<Map<K, V>> mapKey,
       RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
-    this.bindingSelection = new BindingSelection<K, V>(keyType, valueType, mapKey, entrySetBinder);
+    this.bindingSelection = new BindingSelection<>(keyType, valueType, mapKey, entrySetBinder);
     this.binder = binder;
     this.entrySetBinder = entrySetBinder;
   }
@@ -309,7 +309,7 @@ public final class RealMapBinder<K, V> implements Module {
         (Provider) providerMapProvider;
     binder.bind(bindingSelection.getJavaxProviderMapKey()).toProvider(javaxProviderMapProvider);
 
-    RealMapProvider<K, V> mapProvider = new RealMapProvider<K, V>(bindingSelection);
+    RealMapProvider<K, V> mapProvider = new RealMapProvider<>(bindingSelection);
     binder.bind(bindingSelection.getMapKey()).toProvider(mapProvider);
 
     // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
@@ -420,7 +420,7 @@ public final class RealMapBinder<K, V> implements Module {
       // we have those, it's easy to iterate through them to organize them by K.
       Map<K, ImmutableSet.Builder<Binding<V>>> bindingMultimapMutable =
           new LinkedHashMap<K, ImmutableSet.Builder<Binding<V>>>();
-      Map<K, Binding<V>> bindingMapMutable = new LinkedHashMap<K, Binding<V>>();
+      Map<K, Binding<V>> bindingMapMutable = new LinkedHashMap<>();
       Multimap<K, Indexer.IndexedBinding> index = HashMultimap.create();
       Indexer indexer = new Indexer(injector);
       Multimap<K, Binding<V>> duplicates = null;
@@ -1134,7 +1134,7 @@ public final class RealMapBinder<K, V> implements Module {
               (SingleParameterInjector<V>[])
                   injector.getParametersInjectors(dependenciesForKey, errors);
 
-          perKeyDatas[i] = new PerKeyData<K, V>(entry.getKey(), bindingsArray, injectors);
+          perKeyDatas[i] = new PerKeyData<>(entry.getKey(), bindingsArray, injectors);
           i++;
         }
 

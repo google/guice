@@ -529,7 +529,7 @@ public class FactoryModuleBuilderTest extends TestCase {
 
   private void validateDependencies(Set<Key<?>> expectedKeys, Binding<?> binding) {
     Set<Dependency<?>> dependencies = ((HasDependencies) binding).getDependencies();
-    Set<Key<?>> actualKeys = new HashSet<Key<?>>();
+    Set<Key<?>> actualKeys = new HashSet<>();
     for (Dependency<?> dependency : dependencies) {
       actualKeys.add(dependency.getKey());
     }

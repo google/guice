@@ -49,7 +49,7 @@ public class ServletScopes {
    * this scope map if no http request is available, and requires {@link #scopeRequest} to be called
    * as an alternative.
    */
-  private static final ThreadLocal<Context> requestScopeContext = new ThreadLocal<Context>();
+  private static final ThreadLocal<Context> requestScopeContext = new ThreadLocal<>();
 
   /** A sentinel attribute value representing null. */
   enum NullObject {

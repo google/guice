@@ -142,7 +142,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     mockResponse.resetBuffer();
     expectLastCall().once();
 
-    final List<String> paths = new ArrayList<String>();
+    final List<String> paths = new ArrayList<>();
     final HttpServlet mockServlet =
         new HttpServlet() {
           @Override

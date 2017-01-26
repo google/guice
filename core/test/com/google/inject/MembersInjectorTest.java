@@ -94,7 +94,7 @@ public class MembersInjectorTest extends TestCase {
           }
         });
 
-    A<C> injectableA = new A<C>();
+    A<C> injectableA = new A<>();
     aMembersInjectorReference.get().injectMembers(injectableA);
     assertSame(myFavouriteC, injectableA.t);
     assertSame(myFavouriteC, injectableA.b.c);
@@ -122,7 +122,7 @@ public class MembersInjectorTest extends TestCase {
         injector.getMembersInjector(new TypeLiteral<A<C>>() {});
     MembersInjector<B> bMembersInjector = injector.getMembersInjector(B.class);
 
-    A<C> injectableA = new A<C>();
+    A<C> injectableA = new A<>();
     aMembersInjector.injectMembers(injectableA);
     assertSame(myFavouriteC, injectableA.t);
     assertSame(myFavouriteC, injectableA.b.c);
@@ -183,7 +183,7 @@ public class MembersInjectorTest extends TestCase {
                 })
             .getInstance(InjectsMembersInjector.class);
 
-    A<C> a = new A<C>();
+    A<C> a = new A<>();
     injectsMembersInjector.aMembersInjector.injectMembers(a);
     assertSame(myFavouriteC, a.t);
     assertSame(myFavouriteC, a.b.c);
@@ -250,7 +250,7 @@ public class MembersInjectorTest extends TestCase {
     MembersInjector<A<C>> membersInjector =
         injector.getInstance(new Key<MembersInjector<A<C>>>() {});
 
-    A<C> a = new A<C>();
+    A<C> a = new A<>();
     membersInjector.injectMembers(a);
     assertSame(myFavouriteC, a.t);
     assertSame(myFavouriteC, a.b.c);

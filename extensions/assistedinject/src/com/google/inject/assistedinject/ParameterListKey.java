@@ -34,7 +34,7 @@ class ParameterListKey {
   private final List<Type> paramList;
 
   public ParameterListKey(List<Type> paramList) {
-    this.paramList = new ArrayList<Type>(paramList);
+    this.paramList = new ArrayList<>(paramList);
   }
 
   public ParameterListKey(Type[] types) {

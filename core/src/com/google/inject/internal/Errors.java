@@ -197,7 +197,7 @@ public final class Errors implements Serializable {
     sb.append(format("No implementation for %s was bound.", key));
 
     // Keys which have similar strings as the desired key
-    List<String> possibleMatches = new ArrayList<String>();
+    List<String> possibleMatches = new ArrayList<>();
 
     // Check for other keys that may have the same type,
     // but not the same annotation

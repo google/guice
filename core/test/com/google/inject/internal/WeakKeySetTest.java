@@ -67,7 +67,7 @@ public class WeakKeySetTest extends TestCase {
     Key<Integer> key = Key.get(Integer.class);
     Object source = new Object();
 
-    WeakReference<Key<Integer>> weakKeyRef = new WeakReference<Key<Integer>>(key);
+    WeakReference<Key<Integer>> weakKeyRef = new WeakReference<>(key);
 
     set.add(key, state, source);
     assertInSet(set, key, 1, source);
@@ -88,7 +88,7 @@ public class WeakKeySetTest extends TestCase {
     Key<Integer> key = Key.get(Integer.class);
     Object source = null;
 
-    WeakReference<Key<Integer>> weakKeyRef = new WeakReference<Key<Integer>>(key);
+    WeakReference<Key<Integer>> weakKeyRef = new WeakReference<>(key);
 
     set.add(key, state, source);
     assertInSet(set, key, 1, source);
@@ -118,10 +118,10 @@ public class WeakKeySetTest extends TestCase {
     set.add(key2, state2, source2);
     assertInSet(set, key2, 2, source1, source2);
 
-    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
-    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
-    WeakReference<Object> weakSource1Ref = new WeakReference<Object>(source1);
-    WeakReference<Object> weakSource2Ref = new WeakReference<Object>(source2);
+    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<>(key1);
+    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<>(key2);
+    WeakReference<Object> weakSource1Ref = new WeakReference<>(source1);
+    WeakReference<Object> weakSource2Ref = new WeakReference<>(source2);
 
     Key<Integer> key = key1 = key2 = Key.get(Integer.class);
     state1 = null;
@@ -166,8 +166,8 @@ public class WeakKeySetTest extends TestCase {
     set.add(key2, state2, source2);
     assertInSet(set, key2, 2, source1, source2);
 
-    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
-    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
+    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<>(key1);
+    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<>(key2);
 
     Key<Integer> key = key1 = key2 = Key.get(Integer.class);
 
@@ -195,9 +195,9 @@ public class WeakKeySetTest extends TestCase {
     assertInSet(set, key2, 1, source);
     assertInSet(set, key1, 1, source);
 
-    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
-    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
-    WeakReference<Object> weakSourceRef = new WeakReference<Object>(source);
+    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<>(key1);
+    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<>(key2);
+    WeakReference<Object> weakSourceRef = new WeakReference<>(source);
 
     Key<Integer> key = key1 = key2 = Key.get(Integer.class);
     state1 = null;
@@ -237,9 +237,9 @@ public class WeakKeySetTest extends TestCase {
     // Same source so still only one value.
     assertInSet(set, key2, 1, source);
 
-    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
-    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
-    WeakReference<Object> weakSourceRef = new WeakReference<Object>(source);
+    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<>(key1);
+    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<>(key2);
+    WeakReference<Object> weakSourceRef = new WeakReference<>(source);
 
     Key<Integer> key = key1 = key2 = Key.get(Integer.class);
     state1 = null;
@@ -289,12 +289,12 @@ public class WeakKeySetTest extends TestCase {
     set.add(key3, state3, source3);
     assertInSet(set, key1, 3, source1, source2, source3);
 
-    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
-    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
-    WeakReference<Key<Integer>> weakKey3Ref = new WeakReference<Key<Integer>>(key3);
-    WeakReference<Object> weakSource1Ref = new WeakReference<Object>(source1);
-    WeakReference<Object> weakSource2Ref = new WeakReference<Object>(source2);
-    WeakReference<Object> weakSource3Ref = new WeakReference<Object>(source3);
+    WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<>(key1);
+    WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<>(key2);
+    WeakReference<Key<Integer>> weakKey3Ref = new WeakReference<>(key3);
+    WeakReference<Object> weakSource1Ref = new WeakReference<>(source1);
+    WeakReference<Object> weakSource2Ref = new WeakReference<>(source2);
+    WeakReference<Object> weakSource3Ref = new WeakReference<>(source3);
 
     Key<Integer> key = key1 = key2 = key3 = Key.get(Integer.class);
     state1 = null;
@@ -350,7 +350,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(String.class).toInstance("bar");
               }
             });
-    WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
+    WeakReference<Injector> weakRef = new WeakReference<>(childInjector);
     assertBlacklisted(parentInjector, Key.get(String.class));
 
     // Clear the ref, GC, and ensure that we are no longer blacklisting.
@@ -379,7 +379,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(String.class).toInstance("foo");
               }
             });
-    WeakReference<Injector> weakRef1 = new WeakReference<Injector>(childInjector1);
+    WeakReference<Injector> weakRef1 = new WeakReference<>(childInjector1);
     assertBlacklisted(parentInjector, Key.get(String.class));
     assertNotBlacklisted(parentInjector, Key.get(Long.class));
 
@@ -391,7 +391,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(Long.class).toInstance(6L);
               }
             });
-    WeakReference<Injector> weakRef2 = new WeakReference<Injector>(childInjector2);
+    WeakReference<Injector> weakRef2 = new WeakReference<>(childInjector2);
     assertBlacklisted(parentInjector, Key.get(String.class));
     assertBlacklisted(parentInjector, Key.get(Long.class));
 
@@ -427,7 +427,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(String.class).toInstance("foo");
               }
             });
-    WeakReference<Injector> weakRef1 = new WeakReference<Injector>(childInjector1);
+    WeakReference<Injector> weakRef1 = new WeakReference<>(childInjector1);
     assertBlacklisted(parentInjector, Key.get(String.class));
 
     Injector childInjector2 =
@@ -438,7 +438,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(String.class).toInstance("bar");
               }
             });
-    WeakReference<Injector> weakRef2 = new WeakReference<Injector>(childInjector2);
+    WeakReference<Injector> weakRef2 = new WeakReference<>(childInjector2);
     assertBlacklisted(parentInjector, Key.get(String.class));
 
     // Clear ref1, GC, and ensure that we still blacklist.

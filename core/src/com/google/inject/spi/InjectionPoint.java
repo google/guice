@@ -38,7 +38,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -566,14 +565,14 @@ public final class InjectionPoint {
       if (bySignature == null) {
         // We encountered a method in a subclass. Time to index the
         // methods in the parent class.
-        bySignature = new HashMap<Signature, List<InjectableMethod>>();
+        bySignature = new HashMap<>();
         for (InjectableMember member = injectableMembers.head;
             member != null;
             member = member.next) {
           if (!(member instanceof InjectableMethod)) continue;
           InjectableMethod im = (InjectableMethod) member;
           if (im.isFinal()) continue;
-          List<InjectableMethod> methods = new ArrayList<InjectableMethod>();
+          List<InjectableMethod> methods = new ArrayList<>();
           methods.add(im);
           bySignature.put(new Signature(im.method), methods);
         }
@@ -624,7 +623,7 @@ public final class InjectionPoint {
                 : new Signature(injectableMethod.method);
         List<InjectableMethod> methods = bySignature.get(signature);
         if (methods == null) {
-          methods = new ArrayList<InjectableMethod>();
+          methods = new ArrayList<>();
           bySignature.put(signature, methods);
         }
         methods.add(injectableMethod);
@@ -789,7 +788,7 @@ public final class InjectionPoint {
   }
 
   private static List<TypeLiteral<?>> hierarchyFor(TypeLiteral<?> type) {
-    List<TypeLiteral<?>> hierarchy = new ArrayList<TypeLiteral<?>>();
+    List<TypeLiteral<?>> hierarchy = new ArrayList<>();
     TypeLiteral<?> current = type;
     while (current.getRawType() != Object.class) {
       hierarchy.add(current);

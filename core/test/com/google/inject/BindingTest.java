@@ -634,7 +634,7 @@ public class BindingTest extends TestCase {
     }
   }
 
-  private static List<Butter> butters = new ArrayList<Butter>();
+  private static List<Butter> butters = new ArrayList<>();
 
   private static interface Sandwitch {};
 

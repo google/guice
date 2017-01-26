@@ -528,7 +528,7 @@ public class ProvisionListenerTest extends TestCase {
   private static class CountAndCaptureExceptionListener implements ProvisionListener {
     int beforeProvision = 0;
     int afterProvision = 0;
-    AtomicReference<RuntimeException> capture = new AtomicReference<RuntimeException>();
+    AtomicReference<RuntimeException> capture = new AtomicReference<>();
 
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {

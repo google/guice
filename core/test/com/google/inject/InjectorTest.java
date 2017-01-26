@@ -424,7 +424,7 @@ public class InjectorTest extends TestCase {
 
   public void testJitBindingFromAnotherThreadDuringInjection() {
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    final AtomicReference<JustInTime> got = new AtomicReference<JustInTime>();
+    final AtomicReference<JustInTime> got = new AtomicReference<>();
 
     Guice.createInjector(
         new AbstractModule() {

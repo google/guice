@@ -79,10 +79,10 @@ final class ConstructorInjectorStore {
         membersInjector.getAddedAspects().isEmpty()
             ? injectorAspects
             : ImmutableList.copyOf(concat(injectorAspects, membersInjector.getAddedAspects()));
-    ConstructionProxyFactory<T> factory = new ProxyFactory<T>(injectionPoint, methodAspects);
+    ConstructionProxyFactory<T> factory = new ProxyFactory<>(injectionPoint, methodAspects);
     /*end[AOP]*/
     /*if[NO_AOP]
-    ConstructionProxyFactory<T> factory = new DefaultConstructionProxyFactory<T>(injectionPoint);
+    ConstructionProxyFactory<T> factory = new DefaultConstructionProxyFactory<>(injectionPoint);
     end[NO_AOP]*/
 
     errors.throwIfNewErrors(numErrorsBefore);

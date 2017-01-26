@@ -285,7 +285,7 @@ public class FilterDispatchIntegrationTest extends TestCase {
   public static class TestServlet extends HttpServlet {
     public static final String FORWARD_FROM = "/index.html";
     public static final String FORWARD_TO = "/forwarded.html";
-    public List<String> processedUris = new ArrayList<String>();
+    public List<String> processedUris = new ArrayList<>();
 
     @Override
     protected void service(

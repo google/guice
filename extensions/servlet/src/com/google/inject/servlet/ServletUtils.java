@@ -77,7 +77,7 @@ final class ServletUtils {
     // 1. decode and normalize safe percent escaped characters.  e.g. %70 -> 'p'
     // 2. decode and interpret dangerous character sequences. e.g. /%2E/ -> '/./' -> '/'
     // 3. preserve dangerous encoded characters. e.g. '/%2F/' -> '///' -> '/%2F'
-    List<String> segments = new ArrayList<String>();
+    List<String> segments = new ArrayList<>();
     for (String segment : SLASH_SPLITTER.split(path)) {
       // This decodes all non-special characters from the path segment.  so if someone passes
       // /%2E/foo we will normalize it to /./foo and then /foo

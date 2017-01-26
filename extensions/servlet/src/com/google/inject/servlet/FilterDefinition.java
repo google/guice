@@ -47,7 +47,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
   private final Filter filterInstance;
 
   // always set after init is called.
-  private final AtomicReference<Filter> filter = new AtomicReference<Filter>();
+  private final AtomicReference<Filter> filter = new AtomicReference<>();
 
   public FilterDefinition(
       Key<? extends Filter> filterKey,

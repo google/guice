@@ -32,7 +32,7 @@ import javax.persistence.OneToMany;
 @Entity
 public class JpaParentTestEntity {
   private Long id;
-  private List<JpaTestEntity> children = new ArrayList<JpaTestEntity>();
+  private List<JpaTestEntity> children = new ArrayList<>();
 
   @Id
   @GeneratedValue

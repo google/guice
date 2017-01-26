@@ -40,7 +40,7 @@ public class CycleDetectingLockTest extends TestCase {
     final CyclicBarrier signal1 = new CyclicBarrier(2);
     final CyclicBarrier signal2 = new CyclicBarrier(2);
     final CyclicBarrier signal3 = new CyclicBarrier(2);
-    final CycleDetectingLockFactory<String> lockFactory = new CycleDetectingLockFactory<String>();
+    final CycleDetectingLockFactory<String> lockFactory = new CycleDetectingLockFactory<>();
     final CycleDetectingLock<String> lockA =
         new ReentrantCycleDetectingLock<String>(
             lockFactory,
@@ -131,9 +131,9 @@ public class CycleDetectingLockTest extends TestCase {
    */
 
   public void testCycleDetectingLockFactoriesDoNotDeadlock() throws Exception {
-    final CycleDetectingLockFactory<String> factoryA = new CycleDetectingLockFactory<String>();
+    final CycleDetectingLockFactory<String> factoryA = new CycleDetectingLockFactory<>();
     final CycleDetectingLock<String> lockA = factoryA.create("A");
-    final CycleDetectingLockFactory<String> factoryB = new CycleDetectingLockFactory<String>();
+    final CycleDetectingLockFactory<String> factoryB = new CycleDetectingLockFactory<>();
     final CycleDetectingLock<String> lockB = factoryB.create("B");
     final CyclicBarrier eachThreadAcquiredFirstLock = new CyclicBarrier(2);
     Future<Boolean> threadA =
@@ -192,7 +192,7 @@ public class CycleDetectingLockTest extends TestCase {
    */
 
   public void testCycleReporting() throws Exception {
-    final CycleDetectingLockFactory<String> factory = new CycleDetectingLockFactory<String>();
+    final CycleDetectingLockFactory<String> factory = new CycleDetectingLockFactory<>();
     final CycleDetectingLock<String> lockA = factory.create("a");
     final CycleDetectingLock<String> lockB = factory.create("b");
     final CycleDetectingLock<String> lockC = factory.create("c");

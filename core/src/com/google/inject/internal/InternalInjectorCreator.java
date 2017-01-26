@@ -191,7 +191,7 @@ public final class InternalInjectorCreator {
    * while we're binding these singletons are not be eager.
    */
   void loadEagerSingletons(InjectorImpl injector, Stage stage, final Errors errors) {
-    List<BindingImpl<?>> candidateBindings = new ArrayList<BindingImpl<?>>();
+    List<BindingImpl<?>> candidateBindings = new ArrayList<>();
     @SuppressWarnings("unchecked") // casting Collection<Binding> to Collection<BindingImpl> is safe
     Collection<BindingImpl<?>> bindingsAtThisLevel =
         (Collection) injector.state.getExplicitBindingsThisLevel().values();

@@ -121,7 +121,7 @@ public class MethodInterceptionTest extends TestCase {
   }
 
   public void testGetThis() {
-    final AtomicReference<Object> lastTarget = new AtomicReference<Object>();
+    final AtomicReference<Object> lastTarget = new AtomicReference<>();
 
     Injector injector =
         Guice.createInjector(

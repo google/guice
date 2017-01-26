@@ -61,7 +61,7 @@ final class InternalContext {
     ConstructionContext<T> constructionContext =
         (ConstructionContext<T>) constructionContexts.get(key);
     if (constructionContext == null) {
-      constructionContext = new ConstructionContext<T>();
+      constructionContext = new ConstructionContext<>();
       constructionContexts.put(key, constructionContext);
     }
     return constructionContext;

@@ -86,7 +86,7 @@ public class EagerSingletonTest extends TestCase {
   public void testJustInTimeEagerSingletons_multipleThreads() throws Exception {
     // in order to make the data race more likely we need a lot of jit bindings.  The easiest thing
     // is just to 'copy' out class for B a bunch of times.
-    final List<Class<?>> jitBindings = new ArrayList<Class<?>>();
+    final List<Class<?>> jitBindings = new ArrayList<>();
     for (int i = 0; i < 1000; i++) {
       jitBindings.add(copyClass(B.class));
     }

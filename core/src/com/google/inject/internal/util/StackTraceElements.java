@@ -55,9 +55,8 @@ public class StackTraceElements {
   /*end[AOP]*/
 
   private static final ConcurrentMap<InMemoryStackTraceElement, InMemoryStackTraceElement>
-      elementCache = new ConcurrentHashMap<InMemoryStackTraceElement, InMemoryStackTraceElement>();
-  private static final ConcurrentMap<String, String> stringCache =
-      new ConcurrentHashMap<String, String>();
+      elementCache = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<String, String> stringCache = new ConcurrentHashMap<>();
 
   private static final String UNKNOWN_SOURCE = "Unknown Source";
 

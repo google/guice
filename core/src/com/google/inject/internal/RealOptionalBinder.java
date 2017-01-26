@@ -59,7 +59,7 @@ import javax.inject.Qualifier;
 public final class RealOptionalBinder<T> implements Module {
   public static <T> RealOptionalBinder<T> newRealOptionalBinder(Binder binder, Key<T> type) {
     binder = binder.skipSources(RealOptionalBinder.class);
-    RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<T>(binder, type);
+    RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<>(binder, type);
     binder.install(optionalBinder);
     return optionalBinder;
   }
@@ -185,7 +185,7 @@ public final class RealOptionalBinder<T> implements Module {
   private final Binder binder;
 
   private RealOptionalBinder(Binder binder, Key<T> typeKey) {
-    this.bindingSelection = new BindingSelection<T>(typeKey);
+    this.bindingSelection = new BindingSelection<>(typeKey);
     this.binder = binder;
   }
 

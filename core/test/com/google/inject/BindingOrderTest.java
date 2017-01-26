@@ -61,7 +61,7 @@ public class BindingOrderTest extends TestCase {
   public void testBindingWithExtraThreads() throws InterruptedException {
     final CountDownLatch ready = new CountDownLatch(1);
     final CountDownLatch done = new CountDownLatch(1);
-    final AtomicReference<B> ref = new AtomicReference<B>();
+    final AtomicReference<B> ref = new AtomicReference<>();
 
     final Object createsAThread =
         new Object() {

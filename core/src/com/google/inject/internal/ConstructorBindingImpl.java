@@ -66,7 +66,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       InjectionPoint constructorInjectionPoint,
       Set<InjectionPoint> injectionPoints) {
     super(source, key, scoping);
-    this.factory = new Factory<T>(false, key);
+    this.factory = new Factory<>(false, key);
     ConstructionProxy<T> constructionProxy =
         new DefaultConstructionProxyFactory<T>(constructorInjectionPoint).create();
     this.constructorInjectionPoint = constructorInjectionPoint;
@@ -134,7 +134,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
     errors.throwIfNewErrors(numErrors);
 
-    Factory<T> factoryFactory = new Factory<T>(failIfNotLinked, key);
+    Factory<T> factoryFactory = new Factory<>(failIfNotLinked, key);
     InternalFactory<? extends T> scopedFactory =
         Scoping.scope(key, injector, factoryFactory, source, scoping);
 

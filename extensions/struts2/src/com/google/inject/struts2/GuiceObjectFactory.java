@@ -46,7 +46,7 @@ public class GuiceObjectFactory extends ObjectFactory {
   Module module;
   volatile Injector injector;
   boolean developmentMode = false;
-  List<ProvidedInterceptor> interceptors = new ArrayList<ProvidedInterceptor>();
+  List<ProvidedInterceptor> interceptors = new ArrayList<>();
 
   @Override
   public boolean isNoArgConstructorRequired() {
@@ -71,7 +71,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     this.developmentMode = developmentMode.trim().equals("true");
   }
 
-  Set<Class<?>> boundClasses = new HashSet<Class<?>>();
+  Set<Class<?>> boundClasses = new HashSet<>();
 
   @Override
   public Class getClassInstance(String name) throws ClassNotFoundException {

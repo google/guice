@@ -512,7 +512,7 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   public void testBindParameterizedTypeFails() {
-    ParameterizedObject<Integer> instance = new ParameterizedObject<Integer>(0);
+    ParameterizedObject<Integer> instance = new ParameterizedObject<>(0);
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 

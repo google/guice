@@ -1433,7 +1433,7 @@ public class OptionalBinderTest extends TestCase {
                     .toInstance(4);
               }
             });
-    WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
+    WeakReference<Injector> weakRef = new WeakReference<>(childInjector);
     WeakKeySetUtils.assertBlacklisted(parentInjector, Key.get(Integer.class));
 
     // Clear the ref, GC, and ensure that we are no longer blacklisting.

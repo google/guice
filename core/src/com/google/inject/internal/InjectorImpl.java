@@ -136,7 +136,7 @@ final class InjectorImpl implements Injector, Lookups {
       // No ThreadLocal.initialValue(), as that would cause classloader leaks. See
       // https://github.com/google/guice/issues/288#issuecomment-48216933,
       // https://github.com/google/guice/issues/288#issuecomment-48216944
-      localContext = new ThreadLocal<Object[]>();
+      localContext = new ThreadLocal<>();
     }
   }
 
@@ -805,7 +805,7 @@ final class InjectorImpl implements Injector, Lookups {
     // Look up the target binding.
     final Key<? extends T> targetKey = Key.get(subclass);
     Object source = rawType;
-    FactoryProxy<T> factory = new FactoryProxy<T>(this, key, targetKey, source);
+    FactoryProxy<T> factory = new FactoryProxy<>(this, key, targetKey, source);
     factory.notify(errors); // causes the factory to initialize itself internally
     return new LinkedBindingImpl<T>(
         this,

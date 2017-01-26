@@ -47,7 +47,7 @@ class FiltersModuleBuilder {
   }
 
   private List<UriPatternMatcher> parsePatterns(UriPatternType type, List<String> patterns) {
-    List<UriPatternMatcher> patternMatchers = new ArrayList<UriPatternMatcher>();
+    List<UriPatternMatcher> patternMatchers = new ArrayList<>();
     for (String pattern : patterns) {
       UriPatternMatcher matcher = null;
       try {

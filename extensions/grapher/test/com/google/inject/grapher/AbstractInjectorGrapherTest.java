@@ -170,7 +170,7 @@ public class AbstractInjectorGrapherTest extends TestCase {
   }
 
   public void testProviderBindings() throws Exception {
-    final Wrapper<Provider<A2>> wrapper = new Wrapper<Provider<A2>>();
+    final Wrapper<Provider<A2>> wrapper = new Wrapper<>();
     grapher.graph(
         Guice.createInjector(
             new AbstractModule() {

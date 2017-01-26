@@ -68,10 +68,10 @@ final class ConstructionContext<T> {
     }
 
     if (invocationHandlers == null) {
-      invocationHandlers = new ArrayList<DelegatingInvocationHandler<T>>();
+      invocationHandlers = new ArrayList<>();
     }
 
-    DelegatingInvocationHandler<T> invocationHandler = new DelegatingInvocationHandler<T>();
+    DelegatingInvocationHandler<T> invocationHandler = new DelegatingInvocationHandler<>();
     invocationHandlers.add(invocationHandler);
 
     // TODO: if I create a proxy which implements all the interfaces of

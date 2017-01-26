@@ -37,7 +37,7 @@ class TestScope implements Scope {
   @ScopeAnnotation
   public @interface Scoped {}
 
-  private Map<Key, Object> inScopeObjectsMap = new HashMap<Key, Object>();
+  private Map<Key, Object> inScopeObjectsMap = new HashMap<>();
 
   @Override
   public <T> Provider<T> scope(final Key<T> key, final Provider<T> provider) {
@@ -56,6 +56,6 @@ class TestScope implements Scope {
   }
 
   public void beginNewScope() {
-    inScopeObjectsMap = new HashMap<Key, Object>();
+    inScopeObjectsMap = new HashMap<>();
   }
 }
