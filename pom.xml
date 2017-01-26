@@ -265,14 +265,14 @@ See the Apache License Version 2.0 for the specific language governing permissio
           </executions>
         </plugin>
         <!--
-         | Make sure we only use Java6 methods
+         | Make sure we only use Java7 methods
         -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.7</source>
+            <target>1.7</target>
           </configuration>
         </plugin>
         <plugin>
@@ -282,13 +282,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <configuration>
             <signature>
               <groupId>org.codehaus.mojo.signature</groupId>
-              <artifactId>java16</artifactId>
+              <artifactId>java17</artifactId>
               <version>1.0</version>
             </signature>
           </configuration>
           <executions>
             <execution>
-              <id>check-java-1.6-compat</id>
+              <id>check-java-1.7-compat</id>
               <phase>process-classes</phase>
               <goals>
                 <goal>check</goal>
