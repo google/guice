@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -31,6 +29,7 @@ import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.TypeConverterBinding;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -192,12 +191,15 @@ public final class InternalInjectorCreator {
    * while we're binding these singletons are not be eager.
    */
   void loadEagerSingletons(InjectorImpl injector, Stage stage, final Errors errors) {
+    List<BindingImpl<?>> candidateBindings = new ArrayList<BindingImpl<?>>();
     @SuppressWarnings("unchecked") // casting Collection<Binding> to Collection<BindingImpl> is safe
-    Iterable<BindingImpl<?>> candidateBindings =
-        ImmutableList.copyOf(
-            Iterables.concat(
-                (Collection) injector.state.getExplicitBindingsThisLevel().values(),
-                injector.jitBindings.values()));
+    Collection<BindingImpl<?>> bindingsAtThisLevel =
+        (Collection) injector.state.getExplicitBindingsThisLevel().values();
+    candidateBindings.addAll(bindingsAtThisLevel);
+    synchronized (injector.state.lock()) {
+      // jit bindings must be accessed while holding the lock.
+      candidateBindings.addAll(injector.jitBindings.values());
+    }
     for (final BindingImpl<?> binding : candidateBindings) {
       if (isEagerSingleton(injector, binding, stage)) {
         try {
