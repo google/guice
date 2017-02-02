@@ -30,7 +30,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
- * A semi-useless microbenchmark. Spring and Guice constuct the same object graph a bunch of times,
+ * A semi-useless microbenchmark. Spring and Guice construct the same object graph a bunch of times,
  * and we see who can construct the most per second. As of this writing Guice is more than 50X
  * faster. Also useful for comparing pure Java configuration options.
  *

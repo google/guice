@@ -82,7 +82,7 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
      *
      * <p>May be useful for augmenting runtime error messages.
      *
-     * <p>Note: this will return {#code null} until {@link #initialize(InjectorImpl, Errors)} has
+     * <p>Note: this will return {@code null} until {@link #initialize(InjectorImpl, Errors)} has
      * already been called.
      */
     final Object getSource() {

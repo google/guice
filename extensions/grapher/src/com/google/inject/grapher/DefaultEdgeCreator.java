@@ -96,7 +96,7 @@ final class DefaultEdgeCreator implements EdgeCreator {
     }
 
     /**
-     * Visitor for {@link InstanceBinding}. We then render any dependency edgess that the instance
+     * Visitor for {@link InstanceBinding}. We then render any dependency edges that the instance
      * may have, which come either from {@link InjectionPoint}s (method and field) on the instance,
      * or on {@link Dependency}s the instance declares through the {@link HasDependencies}
      * interface.

@@ -178,7 +178,7 @@ public class ServletModule extends AbstractModule {
    * <h3>Binding Keys</h3>
    *
    * You can also bind keys rather than classes. This lets you hide implementations with
-   * package-local visbility and expose them using only a Guice module and an annotation:
+   * package-local visibility and expose them using only a Guice module and an annotation:
    *
    * <pre>
    *  ...

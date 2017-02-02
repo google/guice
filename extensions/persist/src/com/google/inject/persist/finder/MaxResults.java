@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotate any dynamic finder method's integer argument with this to pass in the maximum size of
- * returned result window. Usefule for paging result sets. Complement of {@link FirstResult}.
+ * returned result window. Useful for paging result sets. Complement of {@link FirstResult}.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */

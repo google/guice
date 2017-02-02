@@ -815,7 +815,7 @@ public final class InjectionPoint {
     return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
   }
 
-  /** A method signature. Used to handle method overridding. */
+  /** A method signature. Used to handle method overriding. */
   static class Signature {
 
     final String name;

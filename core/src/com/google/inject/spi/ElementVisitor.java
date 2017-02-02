@@ -58,7 +58,7 @@ public interface ElementVisitor<V> {
   /** Visit a lookup of the members injector. */
   <T> V visit(MembersInjectorLookup<T> lookup);
 
-  /** Visit an error message and the context in which it occured. */
+  /** Visit an error message and the context in which it occurred. */
   V visit(Message message);
 
   /**

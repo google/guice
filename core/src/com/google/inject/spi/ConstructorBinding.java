@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A binding to the constructor of a concrete clss. To resolve injections, an instance is
+ * A binding to the constructor of a concrete class. To resolve injections, an instance is
  * instantiated by invoking the constructor.
  *
  * @author jessewilson@google.com (Jesse Wilson)

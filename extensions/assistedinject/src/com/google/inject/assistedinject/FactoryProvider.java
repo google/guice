@@ -146,7 +146,7 @@ import java.util.Set;
  * <h3>Backwards compatibility using {@literal @}AssistedInject</h3>
  *
  * Instead of the {@literal @}Inject annotation, you may annotate the constructed classes with
- * {@literal @}{@link AssistedInject}. This triggers a limited backwards-compatability mode.
+ * {@literal @}{@link AssistedInject}. This triggers a limited backwards-compatibility mode.
  *
  * <p>Instead of matching factory method arguments to constructor parameters using their names, the
  * <strong>parameters are matched by their order</strong>. The first factory method argument is used

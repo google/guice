@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * <pre>
  * {@literal @}ProvidesIntoSet
  * {@literal @}Named("urls")
- * String provideFooUrl(FooManager fm) { returm fm.getUrl(); }
+ * String provideFooUrl(FooManager fm) { return fm.getUrl(); }
  *
  * {@literal @}ProvidesIntoSet
  * {@literal @}Named("urls")

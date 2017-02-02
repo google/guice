@@ -164,7 +164,7 @@ public final class ElementSource {
    * {@code bindXXX()} methods and eventually defines the element. Note that {@link #getStackTrace}
    * lists {@link StackTraceElement StackTraceElements} in reverse chronological order. The first
    * element (index zero) is the last method call and the last element is the first method
-   * invocation. In the cases where stack trace is not available (i.e.,the stack trace was not
+   * invocation. In the cases where stack trace is not available (i.e., the stack trace was not
    * collected), it returns an empty array.
    */
   public StackTraceElement[] getStackTrace() {
