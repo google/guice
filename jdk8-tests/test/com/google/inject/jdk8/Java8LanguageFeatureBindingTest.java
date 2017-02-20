@@ -62,8 +62,6 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               public Callable<String> provideCallable() {
@@ -79,8 +77,6 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               public Callable<String> provideCallable() {

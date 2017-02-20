@@ -55,8 +55,6 @@ public class DaggerAdapterTest extends TestCase {
       return i.toString();
     }
 
-    @Override
-    protected void configure() {}
   }
 
   public void testInteractionWithGuiceModules() {

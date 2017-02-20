@@ -49,8 +49,6 @@ public class ProvidesIntoTest extends TestCase {
         Guice.createInjector(
             MultibindingsScanner.asModule(),
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @ProvidesIntoSet
               @Named("foo")
@@ -243,8 +241,6 @@ public class ProvidesIntoTest extends TestCase {
             MultibindingsScanner.asModule(),
             MultibindingsScanner.asModule(),
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @ProvidesIntoSet
               String provideFoo() {
@@ -263,8 +259,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testArrayKeys_unwrapValuesTrue() {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoMap
           @ArrayUnwrappedKey({1, 2})
@@ -317,8 +311,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testArrayKeys_unwrapValuesFalse() throws Exception {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoMap
           @ArrayWrappedKey(number = {1, 2})
@@ -345,8 +337,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testProvidesIntoSetWithMapKey() {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoSet
           @TestEnumKey(TestEnum.A)
@@ -370,8 +360,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testProvidesIntoOptionalWithMapKey() {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoOptional(Type.ACTUAL)
           @TestEnumKey(TestEnum.A)
@@ -395,8 +383,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testProvidesIntoMapWithoutMapKey() {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoMap
           String provideFoo() {
@@ -423,8 +409,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testMoreThanOneMapKeyAnnotation() {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoMap
           @TestEnumKey(TestEnum.A)
@@ -451,8 +435,6 @@ public class ProvidesIntoTest extends TestCase {
   public void testMapKeyMissingValueMethod() {
     Module m =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @ProvidesIntoMap
           @MissingValueMethod

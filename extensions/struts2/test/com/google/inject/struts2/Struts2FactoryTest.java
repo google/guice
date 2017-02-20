@@ -66,8 +66,6 @@ public class Struts2FactoryTest extends TestCase {
     TestListener testListener =
         new TestListener(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               @SuppressWarnings("unused")

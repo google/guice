@@ -49,8 +49,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
   public void testScanning() throws Exception {
     Module module =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @TestProvides
           @Named("foo")
@@ -88,8 +86,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                 .skipSources(getClass())
                 .install(
                     new AbstractModule() {
-                      @Override
-                      protected void configure() {}
 
                       @TestProvides
                       @Named("foo")
@@ -112,8 +108,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                 .withSource("source")
                 .install(
                     new AbstractModule() {
-                      @Override
-                      protected void configure() {}
 
                       @TestProvides
                       @Named("foo")
@@ -130,8 +124,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
   public void testMoreThanOneClaimedAnnotationFails() throws Exception {
     Module module =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @TestProvides
           @TestProvides2
@@ -252,8 +244,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
       return "Foo";
     }
 
-    @Override
-    protected void configure() {}
   }
 
   public void testChildInjectorInheritsScanner() {
@@ -261,8 +251,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     Injector child =
         parent.createChildInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @TestProvides
               @Named("foo")
@@ -276,8 +264,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
   public void testChildInjectorScannersDontImpactSiblings() {
     Module module =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @TestProvides
           @Named("foo")
@@ -324,8 +310,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     .skipSources(getClass())
                     .install(
                         new AbstractModule() {
-                          @Override
-                          protected void configure() {}
 
                           @Exposed
                           @TestProvides
@@ -376,8 +360,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     .newPrivateBinder()
                     .install(
                         new AbstractModule() {
-                          @Override
-                          protected void configure() {}
 
                           @Exposed
                           @TestProvides
@@ -403,8 +385,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     .skipSources(getClass())
                     .install(
                         new AbstractModule() {
-                          @Override
-                          protected void configure() {}
 
                           @Exposed
                           @TestProvides
@@ -430,8 +410,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     .newPrivateBinder()
                     .install(
                         new AbstractModule() {
-                          @Override
-                          protected void configure() {}
 
                           @Exposed
                           @TestProvides
@@ -507,8 +485,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     .newPrivateBinder()
                     .install(
                         new AbstractModule() {
-                          @Override
-                          protected void configure() {}
 
                           // ignored! (because the scanner doesn't run over this module)
                           @Exposed

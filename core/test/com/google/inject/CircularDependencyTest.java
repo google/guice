@@ -58,8 +58,6 @@ public class CircularDependencyTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               @Singleton
@@ -248,8 +246,6 @@ public class CircularDependencyTest extends TestCase {
     try {
       Guice.createInjector(
               new AbstractModule() {
-                @Override
-                protected void configure() {}
 
                 @Provides
                 C c(D d) {

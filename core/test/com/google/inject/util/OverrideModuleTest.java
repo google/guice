@@ -808,8 +808,6 @@ public class OverrideModuleTest extends TestCase {
             Modules.override(NamedMunger.module())
                 .with(
                     new AbstractModule() {
-                      @Override
-                      protected void configure() {}
 
                       @TestProvides
                       @Named("test")

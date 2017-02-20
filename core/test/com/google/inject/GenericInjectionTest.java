@@ -147,8 +147,6 @@ public class GenericInjectionTest extends TestCase {
   public void assertParameterizedDepsInjected(Key<?> key, Module bindingModule) {
     Module bindDataModule =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @Provides
           Map<String, Integer> provideMap() {

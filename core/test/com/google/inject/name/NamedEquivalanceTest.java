@@ -166,8 +166,6 @@ public class NamedEquivalanceTest extends TestCase {
 
   private static Module getJsr330BindingProviderMethodModule() {
     return new AbstractModule() {
-      @Override
-      protected void configure() {}
 
       @SuppressWarnings("unused")
       @Provides
@@ -180,8 +178,6 @@ public class NamedEquivalanceTest extends TestCase {
 
   private static Module getGuiceBindingProviderMethodModule() {
     return new AbstractModule() {
-      @Override
-      protected void configure() {}
 
       @SuppressWarnings("unused")
       @Provides

@@ -452,8 +452,6 @@ public class ScopesTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               final Iterator<String> values = Arrays.asList(null, "A").iterator();
 
