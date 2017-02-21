@@ -200,32 +200,25 @@ public final class InternalInjectorCreator {
       // jit bindings must be accessed while holding the lock.
       candidateBindings.addAll(injector.jitBindings.values());
     }
-    for (final BindingImpl<?> binding : candidateBindings) {
-      if (isEagerSingleton(injector, binding, stage)) {
-        try {
-          injector.callInContext(
-              new ContextualCallable<Void>() {
-                Dependency<?> dependency = Dependency.get(binding.getKey());
+    InternalContext context = injector.enterContext();
+    try {
+      for (BindingImpl<?> binding : candidateBindings) {
+        if (isEagerSingleton(injector, binding, stage)) {
+          Dependency<?> dependency = Dependency.get(binding.getKey());
+          Dependency previous = context.pushDependency(dependency, binding.getSource());
 
-                @Override
-                public Void call(InternalContext context) {
-                  Dependency previous = context.pushDependency(dependency, binding.getSource());
-
-                  Errors errorsForBinding = errors.withSource(dependency);
-                  try {
-                    binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
-                  } catch (ErrorsException e) {
-                    errorsForBinding.merge(e.getErrors());
-                  } finally {
-                      context.popStateAndSetDependency(previous);
-                    }
-                  return null;
-                }
-              });
-        } catch (ErrorsException e) {
-          throw new AssertionError();
+          Errors errorsForBinding = errors.withSource(dependency);
+          try {
+            binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
+          } catch (ErrorsException e) {
+            errorsForBinding.merge(e.getErrors());
+          } finally {
+              context.popStateAndSetDependency(previous);
+            }
         }
       }
+    } finally {
+      context.close();
     }
   }
 

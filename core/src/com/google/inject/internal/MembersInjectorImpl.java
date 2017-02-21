@@ -88,35 +88,27 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     if (instance == null) {
       return;
     }
-
-    injector.callInContext(
-        new ContextualCallable<Void>() {
-          @Override
-          public Void call(final InternalContext context) throws ErrorsException {
-            context.pushState(key, source);
-            try {
-
-            if (provisionCallback != null) {
-              provisionCallback.provision(
-                  errors,
-                  context,
-                  new ProvisionCallback<T>() {
-                    @Override
-                    public T call() {
-                      injectMembers(instance, errors, context, toolableOnly);
-                      return instance;
-                    }
-                  });
-            } else {
-              injectMembers(instance, errors, context, toolableOnly);
-            }
-            } finally {
-              context.popState();
-            }
-
-            return null;
-          }
-        });
+    final InternalContext context = injector.enterContext();
+    context.pushState(key, source);
+    try {
+      if (provisionCallback != null && provisionCallback.hasListeners()) {
+        provisionCallback.provision(
+            errors,
+            context,
+            new ProvisionCallback<T>() {
+              @Override
+              public T call() {
+                injectMembers(instance, errors, context, toolableOnly);
+                return instance;
+              }
+            });
+      } else {
+        injectMembers(instance, errors, context, toolableOnly);
+      }
+    } finally {
+      context.popState();
+      context.close();
+    }
 
     // TODO: We *could* notify listeners too here,
     // but it's not clear if we want to.  There's no way to know

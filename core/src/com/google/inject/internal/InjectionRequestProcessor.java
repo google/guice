@@ -114,24 +114,18 @@ final class InjectionRequestProcessor extends AbstractProcessor {
     }
 
     void injectMembers() {
+      InternalContext context = injector.enterContext();
       try {
-        injector.callInContext(
-            new ContextualCallable<Void>() {
-              @Override
-              public Void call(InternalContext context) {
-                for (SingleMemberInjector memberInjector : memberInjectors) {
-                  // Run injections if we're not in tool stage (ie, PRODUCTION or DEV),
-                  // or if we are in tool stage and the injection point is toolable.
-                  if (injector.options.stage != Stage.TOOL
-                      || memberInjector.getInjectionPoint().isToolable()) {
-                    memberInjector.inject(errors, context, null);
-                  }
-                }
-                return null;
-              }
-            });
-      } catch (ErrorsException e) {
-        throw new AssertionError();
+        boolean isStageTool = injector.options.stage == Stage.TOOL;
+        for (SingleMemberInjector memberInjector : memberInjectors) {
+          // Run injections if we're not in tool stage (ie, PRODUCTION or DEV),
+          // or if we are in tool stage and the injection point is toolable.
+          if (!isStageTool || memberInjector.getInjectionPoint().isToolable()) {
+            memberInjector.inject(errors, context, null);
+          }
+        }
+      } finally {
+        context.close();
       }
     }
   }
