@@ -84,7 +84,7 @@ import junit.framework.TestCase;
 /** @author dpb@google.com (David P. Baker) */
 public class MapBinderTest extends TestCase {
 
-  private static final Set<Key<?>> FRAMEWORK_KEYS =
+  private static final ImmutableSet<Key<?>> FRAMEWORK_KEYS =
       ImmutableSet.of(
           Key.get(java.util.logging.Logger.class), Key.get(Stage.class), Key.get(Injector.class));
 
