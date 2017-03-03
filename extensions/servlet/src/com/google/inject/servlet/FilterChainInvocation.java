@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -43,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 class FilterChainInvocation implements FilterChain {
 
-  private static final Set<String> SERVLET_INTERNAL_METHODS =
+  private static final ImmutableSet<String> SERVLET_INTERNAL_METHODS =
       ImmutableSet.of(FilterChainInvocation.class.getName() + ".doFilter");
 
   private final FilterDefinition[] filterDefinitions;
