@@ -29,7 +29,6 @@ import com.google.inject.Stage;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListenerBinding;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -41,7 +40,7 @@ final class ProvisionListenerCallbackStore {
 
   // TODO(sameb): Consider exposing this in the API somehow?  Maybe?
   // Lots of code often want to skip over the internal stuffs.
-  private static final Set<Key<?>> INTERNAL_BINDINGS =
+  private static final ImmutableSet<Key<?>> INTERNAL_BINDINGS =
       ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
 
   private final ImmutableList<ProvisionListenerBinding> listenerBindings;
