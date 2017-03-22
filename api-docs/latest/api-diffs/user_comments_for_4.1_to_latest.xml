@@ -40,6 +40,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.AbstractModule.configure_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.AbstractModule.currentStage_changed()"/>
   <text>
     InsertCommentsHere
