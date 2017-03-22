@@ -483,8 +483,6 @@ public class DuplicateBindingsTest extends TestCase {
   }
 
   private static class FailingProviderModule extends AbstractModule {
-    @Override
-    protected void configure() {}
 
     @Provides
     Foo foo() {
@@ -493,8 +491,6 @@ public class DuplicateBindingsTest extends TestCase {
   }
 
   private static class SimpleProviderModule extends AbstractModule {
-    @Override
-    protected void configure() {}
 
     @Provides
     @Named("providerMethod")

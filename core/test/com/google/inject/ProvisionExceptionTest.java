@@ -321,8 +321,6 @@ public class ProvisionExceptionTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               Integer i() {
@@ -353,8 +351,6 @@ public class ProvisionExceptionTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               Integer i() {
@@ -413,8 +409,6 @@ public class ProvisionExceptionTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               Integer i() {
@@ -438,8 +432,6 @@ public class ProvisionExceptionTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               Integer i() {

@@ -45,9 +45,9 @@ public final class MiniGuice {
 
   private MiniGuice() {}
 
-  private final Map<Key, Provider<?>> bindings = new HashMap<Key, Provider<?>>();
-  private final Queue<RequiredKey> requiredKeys = new ArrayDeque<RequiredKey>();
-  private final Set<Key> singletons = new HashSet<Key>();
+  private final Map<Key, Provider<?>> bindings = new HashMap<>();
+  private final Queue<RequiredKey> requiredKeys = new ArrayDeque<>();
+  private final Set<Key> singletons = new HashSet<>();
 
   /**
    * Creates an injector defined by {@code modules} and immediately uses it to create an instance of
@@ -88,7 +88,7 @@ public final class MiniGuice {
   }
 
   private void addProviderBindings() {
-    Map<Key, Provider<?>> providerBindings = new HashMap<Key, Provider<?>>();
+    Map<Key, Provider<?>> providerBindings = new HashMap<>();
     for (final Map.Entry<Key, Provider<?>> binding : bindings.entrySet()) {
       Key key = binding.getKey();
       final Provider<?> value = binding.getValue();
@@ -192,8 +192,8 @@ public final class MiniGuice {
     /*
      * Lookup the injectable fields and their corresponding keys.
      */
-    final List<Field> injectedFields = new ArrayList<Field>();
-    List<Object> fieldKeysList = new ArrayList<Object>();
+    final List<Field> injectedFields = new ArrayList<>();
+    List<Object> fieldKeysList = new ArrayList<>();
     for (Class<?> c = type; c != Object.class; c = c.getSuperclass()) {
       for (Field field : c.getDeclaredFields()) {
         if (!field.isAnnotationPresent(javax.inject.Inject.class)) {

@@ -84,7 +84,7 @@ import junit.framework.TestCase;
 /** @author dpb@google.com (David P. Baker) */
 public class MapBinderTest extends TestCase {
 
-  private static final Set<Key<?>> FRAMEWORK_KEYS =
+  private static final ImmutableSet<Key<?>> FRAMEWORK_KEYS =
       ImmutableSet.of(
           Key.get(java.util.logging.Logger.class), Key.get(Stage.class), Key.get(Injector.class));
 
@@ -1235,7 +1235,7 @@ public class MapBinderTest extends TestCase {
 
   @SuppressWarnings("unchecked")
   private <K, V> Map<K, V> mapOf(Object... elements) {
-    Map<K, V> result = new HashMap<K, V>();
+    Map<K, V> result = new HashMap<>();
     for (int i = 0; i < elements.length; i += 2) {
       result.put((K) elements[i], (V) elements[i + 1]);
     }
@@ -1286,7 +1286,7 @@ public class MapBinderTest extends TestCase {
     // This ensures that MultiBinder is internally using the correct set name --
     // making sure that instances of marker annotations have the same set name as
     // MarkerAnnotation.class.
-    Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> expected = new HashMap<>();
     expected.put(1, 1);
     expected.put(2, 2);
     assertEquals(expected, s1);
@@ -1357,7 +1357,7 @@ public class MapBinderTest extends TestCase {
                 binder.addBinding("bar").toInstance("foo");
               }
             });
-    WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
+    WeakReference<Injector> weakRef = new WeakReference<>(childInjector);
     WeakKeySetUtils.assertBlacklisted(parentInjector, mapKey);
 
     // Clear the ref, GC, and ensure that we are no longer blacklisting.

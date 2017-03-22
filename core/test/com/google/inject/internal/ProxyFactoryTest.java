@@ -43,7 +43,7 @@ public class ProxyFactoryTest extends TestCase {
     InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(Simple.class);
 
     aspects.add(new MethodAspect(any(), any(), interceptor));
-    ProxyFactory<Simple> factory = new ProxyFactory<Simple>(injectionPoint, aspects);
+    ProxyFactory<Simple> factory = new ProxyFactory<>(injectionPoint, aspects);
 
     ConstructionProxy<Simple> constructionProxy = factory.create();
 

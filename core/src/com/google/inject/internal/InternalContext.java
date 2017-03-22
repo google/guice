@@ -26,7 +26,7 @@ import java.util.Map;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-final class InternalContext {
+final class InternalContext implements AutoCloseable {
 
   private final InjectorOptions options;
 
@@ -48,8 +48,40 @@ final class InternalContext {
   private int dependencyStackSize = 0;
 
 
-  InternalContext(InjectorOptions options) {
+  /**
+   * The number of times {@link #enter()} has been called + 1 for initial construction. This value
+   * is decremented when {@link #exit()} is called.
+   */
+  private int enterCount;
+
+  /**
+   * A single element array to clear when the {@link #enterCount} hits {@code 0}.
+   *
+   * <p>This is the value stored in the {@code InjectorImpl.localContext} thread local.
+   */
+  private final Object[] toClear;
+
+  InternalContext(InjectorOptions options, Object[] toClear) {
     this.options = options;
+    this.toClear = toClear;
+    this.enterCount = 1;
+  }
+
+  /** Should only be called by InjectorImpl.enterContext(). */
+  void enter() {
+    enterCount++;
+  }
+
+  /** Should be called any any method that received an instance via InjectorImpl.enterContext(). */
+  @Override
+  public void close() {
+    int newCount = --enterCount;
+    if (newCount < 0) {
+      throw new IllegalStateException("Called close() too many times");
+    }
+    if (newCount == 0) {
+      toClear[0] = null;
+    }
   }
 
   InjectorOptions getInjectorOptions() {
@@ -61,7 +93,7 @@ final class InternalContext {
     ConstructionContext<T> constructionContext =
         (ConstructionContext<T>) constructionContexts.get(key);
     if (constructionContext == null) {
-      constructionContext = new ConstructionContext<T>();
+      constructionContext = new ConstructionContext<>();
       constructionContexts.put(key, constructionContext);
     }
     return constructionContext;

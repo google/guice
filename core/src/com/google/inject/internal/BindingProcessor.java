@@ -102,7 +102,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
             Initializable<T> ref =
                 initializer.requestInjection(
                     injector, instance, (Binding<T>) binding, source, injectionPoints);
-            ConstantFactory<? extends T> factory = new ConstantFactory<T>(ref);
+            ConstantFactory<? extends T> factory = new ConstantFactory<>(ref);
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
             putBinding(
@@ -175,7 +175,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
               errors.recursiveBinding();
             }
 
-            FactoryProxy<T> factory = new FactoryProxy<T>(injector, key, linkedKey, source);
+            FactoryProxy<T> factory = new FactoryProxy<>(injector, key, linkedKey, source);
             bindingData.addCreationListener(factory);
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
@@ -245,7 +245,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
   }
 
   private <T> void bindExposed(PrivateElements privateElements, Key<T> key) {
-    ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateElements);
+    ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<>(key, privateElements);
     bindingData.addCreationListener(exposedKeyFactory);
     putBinding(
         new ExposedBindingImpl<T>(

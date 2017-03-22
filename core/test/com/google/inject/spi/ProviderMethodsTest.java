@@ -148,8 +148,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               Foo newFoo(final Bar bar) {
@@ -206,8 +204,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
     try {
       Guice.createInjector(
           new AbstractModule() {
-            @Override
-            protected void configure() {}
 
             @Provides
             @Named("A")
@@ -255,9 +251,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
       this.second = second;
     }
 
-    @Override
-    protected void configure() {}
-
     @Named("First")
     @Provides
     T provideFirst() {
@@ -281,8 +274,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
         Guice.createInjector(
             (Module)
                 new AbstractModule() {
-                  @Override
-                  protected void configure() {}
 
                   private int next = 1;
 
@@ -432,8 +423,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
     try {
       Guice.createInjector(
           new AbstractModule() {
-            @Override
-            protected void configure() {}
 
             @Provides
             void provideFoo() {}
@@ -449,7 +438,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   }
 
   public void testInjectsJustOneLogger() {
-    AtomicReference<Logger> loggerRef = new AtomicReference<Logger>();
+    AtomicReference<Logger> loggerRef = new AtomicReference<>();
     Injector injector = Guice.createInjector(new FooModule(loggerRef));
 
     assertNull(loggerRef.get());
@@ -469,9 +458,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
       this.loggerRef = loggerRef;
     }
 
-    @Override
-    protected void configure() {}
-
     @SuppressWarnings("unused")
     @Provides
     Integer foo(Logger logger) {
@@ -483,8 +469,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testSpi() throws Exception {
     Module m1 =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @Provides
           @Named("foo")
@@ -494,8 +478,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
         };
     Module m2 =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @Provides
           Integer provideInt(@Named("foo") String dep) {
@@ -551,8 +533,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
   }
 
   private static class VisibilityModule extends AbstractModule {
-    @Override
-    protected void configure() {}
 
     @SuppressWarnings("unused")
     @Provides
@@ -600,8 +580,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
   }
 
   private static class BaseModule extends AbstractModule {
-    @Override
-    protected void configure() {}
 
     @Provides
     Integer foo() {
@@ -640,9 +618,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
     // start them off as unequal
     String barCallerClass = "not_set_bar";
     String fooCallerClass = "not_set_foo";
-
-    @Override
-    protected void configure() {}
 
     @Provides
     @Singleton
@@ -688,8 +663,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
   /*end[AOP]*/
 
   static class SuperClassModule extends AbstractModule {
-    @Override
-    protected void configure() {}
 
     @Provides
     Number providerMethod() {
@@ -958,8 +931,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
       return "foo";
     }
 
-    @Override
-    protected void configure() {}
   }
 
   public static class ExposedSub extends RestrictedSuper {}
@@ -975,8 +946,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
   }
 
   static class ModuleImpl extends AbstractModule implements ProviderInterface<String> {
-    @Override
-    protected void configure() {}
 
     @Override
     @Provides
@@ -1001,8 +970,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               @Singleton
@@ -1056,8 +1023,6 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testModuleBindings() throws Exception {
     Module module =
         new AbstractModule() {
-          @Override
-          protected void configure() {}
 
           @Provides
           Integer fail() {

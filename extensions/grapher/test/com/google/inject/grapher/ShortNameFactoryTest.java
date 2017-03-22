@@ -186,8 +186,6 @@ public class ShortNameFactoryTest extends TestCase {
   }
 
   private static class ProvidingModule extends AbstractModule {
-    @Override
-    protected void configure() {}
 
     @Provides
     public Integer provideInteger(String string) {

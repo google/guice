@@ -879,7 +879,7 @@ public class ElementsTest extends TestCase {
     final AtomicReference<MembersInjector<String>> membersInjectorFromBinder =
         new AtomicReference<MembersInjector<String>>();
 
-    final AtomicReference<String> lastInjected = new AtomicReference<String>();
+    final AtomicReference<String> lastInjected = new AtomicReference<>();
     final MembersInjector<String> stringInjector =
         new MembersInjector<String>() {
           @Override

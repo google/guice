@@ -29,7 +29,6 @@ import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
-import java.util.Set;
 
 /**
  * Guarantees that processing of Binding elements happens in a sane way.
@@ -41,7 +40,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
   // It's unfortunate that we have to maintain a blacklist of specific
   // classes, but we can't easily block the whole package because of
   // all our unit tests.
-  private static final Set<Class<?>> FORBIDDEN_TYPES =
+  private static final ImmutableSet<Class<?>> FORBIDDEN_TYPES =
       ImmutableSet.<Class<?>>of(
           AbstractModule.class,
           Binder.class,

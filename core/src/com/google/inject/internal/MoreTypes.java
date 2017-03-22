@@ -34,7 +34,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -48,7 +47,7 @@ public class MoreTypes {
 
   private MoreTypes() {}
 
-  private static final Map<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER =
+  private static final ImmutableMap<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER =
       new ImmutableMap.Builder<TypeLiteral<?>, TypeLiteral<?>>()
           .put(TypeLiteral.get(boolean.class), TypeLiteral.get(Boolean.class))
           .put(TypeLiteral.get(byte.class), TypeLiteral.get(Byte.class))

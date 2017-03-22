@@ -179,8 +179,8 @@ public final class MiniGuiceTest extends TestCase {
   }
 
   public void testSingletonBindingAnnotationAndProvider() {
-    final AtomicReference<A> a1 = new AtomicReference<A>();
-    final AtomicReference<A> a2 = new AtomicReference<A>();
+    final AtomicReference<A> a1 = new AtomicReference<>();
+    final AtomicReference<A> a2 = new AtomicReference<>();
 
     L l =
         MiniGuice.inject(

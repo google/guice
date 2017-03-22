@@ -452,8 +452,6 @@ public class ScopesTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               final Iterator<String> values = Arrays.asList(null, "A").iterator();
 
@@ -1181,18 +1179,18 @@ public class ScopesTest extends TestCase {
               }
             });
 
-    FutureTask<I0> firstThreadResult = new FutureTask<I0>(fetchClass(injector, I0.class));
+    FutureTask<I0> firstThreadResult = new FutureTask<>(fetchClass(injector, I0.class));
     Thread i0Thread = new Thread(firstThreadResult, "I0.class");
     // we need to call toString() now, because the toString() changes after the thread exits.
     String i0ThreadString = i0Thread.toString();
     i0Thread.start();
 
-    FutureTask<J0> secondThreadResult = new FutureTask<J0>(fetchClass(injector, J0.class));
+    FutureTask<J0> secondThreadResult = new FutureTask<>(fetchClass(injector, J0.class));
     Thread j0Thread = new Thread(secondThreadResult, "J0.class");
     String j0ThreadString = j0Thread.toString();
     j0Thread.start();
 
-    FutureTask<K0> thirdThreadResult = new FutureTask<K0>(fetchClass(injector, K0.class));
+    FutureTask<K0> thirdThreadResult = new FutureTask<>(fetchClass(injector, K0.class));
     Thread k0Thread = new Thread(thirdThreadResult, "K0.class");
     String k0ThreadString = k0Thread.toString();
     k0Thread.start();
@@ -1222,7 +1220,7 @@ public class ScopesTest extends TestCase {
     }
 
     // verification of error messages generated
-    List<Message> errors = new ArrayList<Message>();
+    List<Message> errors = new ArrayList<>();
     errors.addAll(((ProvisionException) firstException).getErrorMessages());
     errors.addAll(((ProvisionException) secondException).getErrorMessages());
     errors.addAll(((ProvisionException) thirdException).getErrorMessages());

@@ -32,8 +32,6 @@ public class SerializationTest extends TestCase {
   }
 
   static class MyAbstractModule extends AbstractModule implements Serializable {
-    @Override
-    protected void configure() {}
   }
 
   public void testCreationExceptionIsSerializable() throws IOException {

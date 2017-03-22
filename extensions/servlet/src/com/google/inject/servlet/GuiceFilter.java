@@ -61,7 +61,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class GuiceFilter implements Filter {
-  static final ThreadLocal<Context> localContext = new ThreadLocal<Context>();
+  static final ThreadLocal<Context> localContext = new ThreadLocal<>();
   static volatile FilterPipeline pipeline = new DefaultFilterPipeline();
 
   /** We allow both the static and dynamic versions of the pipeline to exist. */
@@ -223,7 +223,7 @@ public class GuiceFilter implements Filter {
     final ServletContext servletContext = filterConfig.getServletContext();
 
     // Store servlet context in a weakreference, for injection
-    GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
+    GuiceFilter.servletContext = new WeakReference<>(servletContext);
 
     // In the default pipeline, this is a noop. However, if replaced
     // by a managed pipeline, a lazy init will be triggered the first time

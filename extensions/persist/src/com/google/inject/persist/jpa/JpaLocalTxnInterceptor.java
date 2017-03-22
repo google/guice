@@ -37,7 +37,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   private static class Internal {}
 
   // Tracks if the unit of work was begun implicitly by this transaction.
-  private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<Boolean>();
+  private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<>();
 
   @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {

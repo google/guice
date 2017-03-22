@@ -332,7 +332,7 @@ public class KeyTest extends TestCase {
             binder().requestInjection(new TypeLiteral<Object>() {}, foo);
           }
         };
-    WeakReference<Module> moduleRef = new WeakReference<Module>(module);
+    WeakReference<Module> moduleRef = new WeakReference<>(module);
     final Injector injector = Guice.createInjector(module);
     module = null;
     awaitClear(moduleRef); // Make sure anonymous keys & typeliterals don't hold the module.
@@ -345,7 +345,7 @@ public class KeyTest extends TestCase {
             injector.getInstance(Key.get(new TypeLiteral<Typed<Integer>>() {}));
           }
         };
-    WeakReference<Runnable> runnerRef = new WeakReference<Runnable>(runner);
+    WeakReference<Runnable> runnerRef = new WeakReference<>(runner);
     runner.run();
     runner = null;
     awaitClear(runnerRef); // also make sure anonymous keys & typeliterals don't hold for JITs

@@ -121,7 +121,5 @@ public class ModuleSourceTest extends TestCase {
   }
 
   private static class C extends AbstractModule {
-    @Override
-    public void configure() {}
   }
 }

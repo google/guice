@@ -36,7 +36,7 @@ import javax.persistence.Persistence;
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 @Singleton
 class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistService {
-  private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
+  private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<>();
 
   private final String persistenceUnitName;
   private final Map<?, ?> persistenceProperties;

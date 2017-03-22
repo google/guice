@@ -404,7 +404,7 @@ public class OverrideModuleTest extends TestCase {
   }
 
   public void testOverrideIsLazy() {
-    final AtomicReference<String> value = new AtomicReference<String>("A");
+    final AtomicReference<String> value = new AtomicReference<>("A");
     Module overridden =
         Modules.override(
                 new AbstractModule() {
@@ -808,8 +808,6 @@ public class OverrideModuleTest extends TestCase {
             Modules.override(NamedMunger.module())
                 .with(
                     new AbstractModule() {
-                      @Override
-                      protected void configure() {}
 
                       @TestProvides
                       @Named("test")

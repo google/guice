@@ -415,9 +415,8 @@ public class TypeListenerTest extends TestCase {
   }
 
   public void testLookupsAtInjectorCreateTime() {
-    final AtomicReference<Provider<B>> bProviderReference = new AtomicReference<Provider<B>>();
-    final AtomicReference<MembersInjector<A>> aMembersInjectorReference =
-        new AtomicReference<MembersInjector<A>>();
+    final AtomicReference<Provider<B>> bProviderReference = new AtomicReference<>();
+    final AtomicReference<MembersInjector<A>> aMembersInjectorReference = new AtomicReference<>();
 
     final InjectionListener<Object> lookupsTester =
         new InjectionListener<Object>() {

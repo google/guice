@@ -169,7 +169,7 @@ public class XmlBeanModule implements Module {
 
   class BeanBuilder {
 
-    final List<Property> properties = new ArrayList<Property>();
+    final List<Property> properties = new ArrayList<>();
     final Class<?> type;
 
     BeanBuilder(Class<?> type) {

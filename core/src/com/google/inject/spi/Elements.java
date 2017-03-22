@@ -408,7 +408,7 @@ public final class Elements {
 
     @Override
     public <T> Provider<T> getProvider(final Dependency<T> dependency) {
-      final ProviderLookup<T> element = new ProviderLookup<T>(getElementSource(), dependency);
+      final ProviderLookup<T> element = new ProviderLookup<>(getElementSource(), dependency);
       elements.add(element);
       return element.getProvider();
     }

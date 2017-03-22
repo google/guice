@@ -16,6 +16,10 @@
 
 package com.google.inject;
 
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import junit.framework.TestCase;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
@@ -75,6 +79,97 @@ public class EagerSingletonTest extends TestCase {
     assertEquals(1, C.instanceCount);
   }
 
+  // there used to be a bug that caused a concurrent modification exception if jit bindings were
+  // loaded during eager singleton creation due to failur to apply the lock when iterating over
+  // all bindings.
+
+  public void testJustInTimeEagerSingletons_multipleThreads() throws Exception {
+    // in order to make the data race more likely we need a lot of jit bindings.  The easiest thing
+    // is just to 'copy' out class for B a bunch of times.
+    final List<Class<?>> jitBindings = new ArrayList<>();
+    for (int i = 0; i < 1000; i++) {
+      jitBindings.add(copyClass(B.class));
+    }
+    Guice.createInjector(
+        Stage.PRODUCTION,
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            // create a just-in-time binding for A
+            getProvider(A.class);
+
+            // create a just-in-time binding for C
+            requestInjection(
+                new Object() {
+                  @Inject
+                  void inject(final Injector injector) throws Exception {
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    new Thread() {
+                      @Override
+                      public void run() {
+                        latch.countDown();
+                        for (Class<?> jitBinding : jitBindings) {
+                          // this causes the binding to be created
+                          injector.getProvider(jitBinding);
+                        }
+                      }
+                    }.start();
+                    latch.await(); // make sure the thread is running before returning
+                  }
+                });
+          }
+        });
+
+    assertEquals(1, A.instanceCount);
+    // our thread runs in parallel with eager singleton loading so some there should be some number
+    // N such that 0<=N <jitBindings.size() and all classes in jitBindings with an index < N will
+    // have been initialized.  Assert that!
+    int prev = -1;
+    int index = 0;
+    for (Class<?> jitBinding : jitBindings) {
+      int instanceCount = (Integer) jitBinding.getDeclaredField("instanceCount").get(null);
+      if (instanceCount != 0 && instanceCount != 1) {
+        fail("Should only have created zero or one instances, got " + instanceCount);
+      }
+      if (prev == -1) {
+        prev = instanceCount;
+      } else if (prev != instanceCount) {
+        if (prev != 1 && instanceCount != 0) {
+          fail("initialized later JIT bindings before earlier ones at index " + index);
+        }
+        prev = instanceCount;
+      }
+      index++;
+    }
+  }
+
+  /** Creates a copy of a class in a child classloader. */
+  private static Class<?> copyClass(final Class<?> cls) {
+    URLClassLoader parent = (URLClassLoader) EagerSingletonTest.class.getClassLoader();
+    // To create a copy of a class we create a new child class loader with the same data as our
+    // parent and override loadClass to always load a new copy of cls.
+    try {
+      return new URLClassLoader(parent.getURLs(), parent) {
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+          // This means for every class besides cls we delegate to our parent (so things like
+          // @Singleton and Object are well defined), but for this one class we load a new one in
+          // this loader.
+          if (name.equals(cls.getName())) {
+            Class<?> c = findLoadedClass(name);
+            if (c == null) {
+              return super.findClass(name);
+            }
+            return c;
+          }
+          return super.loadClass(name);
+        }
+      }.loadClass(cls.getName());
+    } catch (ClassNotFoundException cnfe) {
+      throw new AssertionError(cnfe);
+    }
+  }
+
   @Singleton
   static class A {
     static int instanceCount = 0;
@@ -87,8 +182,8 @@ public class EagerSingletonTest extends TestCase {
   }
 
   @Singleton
-  static class B {
-    static int instanceCount = 0;
+  public static class B {
+    public static int instanceCount = 0;
     int instanceId = instanceCount++;
   }
 

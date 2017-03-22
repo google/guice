@@ -1036,7 +1036,7 @@ public class MultibinderTest extends TestCase {
     }
 
     static Set<String> values(Iterable<StringGrabber> grabbers) {
-      Set<String> result = new HashSet<String>();
+      Set<String> result = new HashSet<>();
       for (StringGrabber grabber : grabbers) {
         result.add(grabber.string);
       }
@@ -1302,7 +1302,7 @@ public class MultibinderTest extends TestCase {
     // This ensures that MultiBinder is internally using the correct set name --
     // making sure that instances of marker annotations have the same set name as
     // MarkerAnnotation.class.
-    Set<Integer> expected = new HashSet<Integer>();
+    Set<Integer> expected = new HashSet<>();
     expected.add(1);
     expected.add(2);
     assertEquals(expected, s1);

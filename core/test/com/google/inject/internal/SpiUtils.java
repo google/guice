@@ -151,7 +151,7 @@ public class SpiUtils {
       int expectedMapBindings,
       MapResult... results) {
     Injector injector = Guice.createInjector(modules);
-    Visitor<T> visitor = new Visitor<T>();
+    Visitor<T> visitor = new Visitor<>();
     Binding<T> mapBinding = injector.getBinding(mapKey);
     MapBinderBinding<T> mapbinder = (MapBinderBinding<T>) mapBinding.acceptTargetVisitor(visitor);
     assertNotNull(mapbinder);
@@ -320,7 +320,7 @@ public class SpiUtils {
       int expectedMapBindings,
       MapResult<?, ?>... results) {
     Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
-    Visitor<T> visitor = new Visitor<T>();
+    Visitor<T> visitor = new Visitor<>();
     MapBinderBinding<T> mapbinder = null;
     Map<Key<?>, Binding<?>> keyMap = Maps.newHashMap();
     for (Element element : elements) {
@@ -571,7 +571,7 @@ public class SpiUtils {
     Key<?> collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
     Key<?> collectionOfJavaxProvidersKey = setKey.ofType(collectionOfJavaxProvidersOf(elementType));
     Injector injector = Guice.createInjector(modules);
-    Visitor<Set<T>> visitor = new Visitor<Set<T>>();
+    Visitor<Set<T>> visitor = new Visitor<>();
     Binding<Set<T>> binding = injector.getBinding(setKey);
     MultibinderBinding<Set<T>> multibinder =
         (MultibinderBinding<Set<T>>) binding.acceptTargetVisitor(visitor);
@@ -666,7 +666,7 @@ public class SpiUtils {
     Key<?> collectionOfJavaxProvidersKey = setKey.ofType(collectionOfJavaxProvidersOf(elementType));
     List<BindResult> bindResults = Lists.newArrayList(results);
     List<Element> elements = Elements.getElements(modules);
-    Visitor<T> visitor = new Visitor<T>();
+    Visitor<T> visitor = new Visitor<>();
     MultibinderBinding<Set<T>> multibinder = null;
     for (Element element : elements) {
       if (element instanceof Binding && ((Binding) element).getKey().equals(setKey)) {
@@ -678,7 +678,7 @@ public class SpiUtils {
 
     assertEquals(elementType, multibinder.getElementTypeLiteral());
     List<Object> otherMultibinders = Lists.newArrayList();
-    Set<Element> otherContains = new HashSet<Element>();
+    Set<Element> otherContains = new HashSet<>();
     List<Element> otherElements = Lists.newArrayList();
     int duplicates = 0;
     Set<IndexedBinding> setOfIndexed = Sets.newHashSet();

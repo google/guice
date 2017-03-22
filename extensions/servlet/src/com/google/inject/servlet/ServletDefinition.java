@@ -57,7 +57,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
   private final HttpServlet servletInstance;
 
   //always set in init, our servlet is always presumed to be a singleton
-  private final AtomicReference<HttpServlet> httpServlet = new AtomicReference<HttpServlet>();
+  private final AtomicReference<HttpServlet> httpServlet = new AtomicReference<>();
 
   public ServletDefinition(
       Key<? extends HttpServlet> servletKey,

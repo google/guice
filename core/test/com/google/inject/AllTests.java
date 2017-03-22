@@ -44,14 +44,13 @@ import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
 import com.googlecode.guice.GuiceTck;
 import com.googlecode.guice.Jsr330Test;
-import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /** @author crazybob@google.com (Bob Lee) */
 public class AllTests {
 
-  private static final Set<String> SUPPRESSED_TEST_NAMES =
+  private static final ImmutableSet<String> SUPPRESSED_TEST_NAMES =
       ImmutableSet.of(
           "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
           "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")");

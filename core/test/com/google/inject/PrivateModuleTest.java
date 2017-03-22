@@ -103,8 +103,6 @@ public class PrivateModuleTest extends TestCase {
     try {
       Guice.createInjector(
           new AbstractModule() {
-            @Override
-            protected void configure() {}
 
             @Provides
             @Exposed
@@ -420,8 +418,6 @@ public class PrivateModuleTest extends TestCase {
               }
             },
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               @Named("ab")
@@ -499,8 +495,6 @@ public class PrivateModuleTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
-              @Override
-              protected void configure() {}
 
               @Provides
               @Named("ab")

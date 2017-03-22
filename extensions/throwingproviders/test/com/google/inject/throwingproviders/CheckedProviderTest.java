@@ -82,7 +82,7 @@ public class CheckedProviderTest extends TestCase {
 
   private final TypeLiteral<RemoteProvider<Foo>> remoteProviderOfFoo =
       new TypeLiteral<RemoteProvider<Foo>>() {};
-  private final MockRemoteProvider<Foo> mockRemoteProvider = new MockRemoteProvider<Foo>();
+  private final MockRemoteProvider<Foo> mockRemoteProvider = new MockRemoteProvider<>();
   private final TestScope testScope = new TestScope();
 
   private Injector bindInjector;
@@ -299,8 +299,8 @@ public class CheckedProviderTest extends TestCase {
   }
 
   public void testAnnotations_Bind() throws Exception {
-    final MockRemoteProvider<Foo> mockRemoteProviderA = new MockRemoteProvider<Foo>();
-    final MockRemoteProvider<Foo> mockRemoteProviderB = new MockRemoteProvider<Foo>();
+    final MockRemoteProvider<Foo> mockRemoteProviderA = new MockRemoteProvider<>();
+    final MockRemoteProvider<Foo> mockRemoteProviderB = new MockRemoteProvider<>();
     bindInjector =
         Guice.createInjector(
             new AbstractModule() {
@@ -320,8 +320,8 @@ public class CheckedProviderTest extends TestCase {
   }
 
   public void testAnnotations_Provides() throws Exception {
-    final MockRemoteProvider<Foo> mockRemoteProviderA = new MockRemoteProvider<Foo>();
-    final MockRemoteProvider<Foo> mockRemoteProviderB = new MockRemoteProvider<Foo>();
+    final MockRemoteProvider<Foo> mockRemoteProviderA = new MockRemoteProvider<>();
+    final MockRemoteProvider<Foo> mockRemoteProviderB = new MockRemoteProvider<>();
     providesInjector =
         Guice.createInjector(
             new AbstractModule() {

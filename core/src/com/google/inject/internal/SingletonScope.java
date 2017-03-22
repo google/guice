@@ -101,7 +101,7 @@ public class SingletonScope implements Scope {
        * Circular proxies are used when potential deadlocks are detected. Guarded by itself.
        * ConstructionContext is not thread-safe, so each call should be synchronized.
        */
-      final ConstructionContext<T> constructionContext = new ConstructionContext<T>();
+      final ConstructionContext<T> constructionContext = new ConstructionContext<>();
 
       /** For each binding there is a separate lock that we hold during object creation. */
       final CycleDetectingLock<Key<?>> creationLock = cycleDetectingLockFactory.create(key);

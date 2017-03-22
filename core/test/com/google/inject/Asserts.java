@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import static com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -28,6 +27,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.testing.GcFinalization;
+import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -172,8 +172,8 @@ public class Asserts {
   public static void awaitFullGc() {
     // GcFinalization *should* do it, but doesn't work well in practice...
     // so we put a second latch and wait for a ReferenceQueue to tell us.
-    ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-    WeakReference ref = new WeakReference<Object>(new Object(), queue);
+    ReferenceQueue<Object> queue = new ReferenceQueue<>();
+    WeakReference<Object> ref = new WeakReference<>(new Object(), queue);
     GcFinalization.awaitFullGc();
     try {
       assertSame("queue didn't return ref in time", ref, queue.remove(5000));
@@ -191,8 +191,8 @@ public class Asserts {
     ReferenceQueue<Object> queue = null;
     WeakReference extraRef = null;
     if (data != null) {
-      queue = new ReferenceQueue<Object>();
-      extraRef = new WeakReference<Object>(data, queue);
+      queue = new ReferenceQueue<>();
+      extraRef = new WeakReference<>(data, queue);
       data = null;
     }
     GcFinalization.awaitClear(ref);

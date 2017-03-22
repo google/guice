@@ -65,7 +65,7 @@ public abstract class AbstractModule implements Module {
   }
 
   /** Configures a {@link Binder} via the exposed methods. */
-  protected abstract void configure();
+  protected void configure() {}
 
   /** Gets direct access to the underlying {@code Binder}. */
   protected Binder binder() {

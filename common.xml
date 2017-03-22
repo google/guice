@@ -14,7 +14,7 @@
     <javac srcdir="${src.dir}"
          debug="on"
          destdir="${build.dir}/classes"
-         source="1.6" target="1.6" includeantruntime="false">
+         source="1.7" target="1.7" includeantruntime="false">
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath refid="compile.classpath"/>
     </javac>
@@ -39,7 +39,7 @@
     <property name="Bundle-DocURL" value="https://github.com/google/guice"/>
     <property name="Bundle-Copyright" value="Copyright (C) 2006 Google Inc."/>
     <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0.txt"/>
-    <property name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.6"/>
+    <property name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.7"/>
     <property name="Bundle-Vendor" value="Google, Inc."/>
 
     <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
@@ -76,7 +76,7 @@
     <javac srcdir="${test.dir}"
          debug="on"
          destdir="${build.dir}/test"
-         source="1.6" target="1.6" includeantruntime="false">
+         source="1.7" target="1.7" includeantruntime="false">
       <classpath path="${build.dir}/classes"/>
       <classpath path="${build.dir}/test"/>
       <classpath refid="compile.classpath"/>

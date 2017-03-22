@@ -93,7 +93,7 @@ final class MembersInjectorStore {
     ImmutableList<SingleMemberInjector> injectors = getInjectors(injectionPoints, errors);
     errors.throwIfNewErrors(numErrorsBefore);
 
-    EncounterImpl<T> encounter = new EncounterImpl<T>(errors, injector.lookups);
+    EncounterImpl<T> encounter = new EncounterImpl<>(errors, injector.lookups);
     Set<TypeListener> alreadySeenListeners = Sets.newHashSet();
     for (TypeListenerBinding binding : typeListenerBindings) {
       TypeListener typeListener = binding.getListener();
