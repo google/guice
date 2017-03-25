@@ -603,7 +603,7 @@ public final class Errors implements Serializable {
 
   public Errors cannotProxyClass(Class<?> expectedType) {
     return addMessage(
-        "Tried proxying %s to support a circular dependency, but it is not an interface. You have to break the circular dependency, or make the circular dependency refers to interfaces.",
+        "Tried proxying %s to support a circular dependency, but it is not an interface. You have to break the circular dependency, or make the circular dependency refers to interfaces. 32222",
         expectedType);
   }
 
