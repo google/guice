@@ -17,7 +17,10 @@
 package com.google.inject.internal;
 
 import com.google.inject.TypeLiteral;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
@@ -47,6 +50,14 @@ public class MoreTypesTest extends TestCase {
   public <T> void testEquals_typeVariable() throws Exception {
     Type type = getClass().getMethod("testEquals_typeVariable").getTypeParameters()[0];
     assertTrue(MoreTypes.equals(new TypeLiteral<T>() {}.getType(), type));
+  }
+
+  public <T> void testGetRawType_wildcard() throws Exception {
+    WildcardType wildcard =
+        (WildcardType)
+            ((ParameterizedType) new TypeLiteral<List<?>>() {}.getType())
+                .getActualTypeArguments()[0];
+    assertEquals(Object.class, MoreTypes.getRawType(wildcard));
   }
 
   public static class Inner<T> {}
