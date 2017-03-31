@@ -164,6 +164,10 @@ public class Struts2Factory extends ObjectFactory {
     ProvidedInterceptor providedInterceptor =
         new ProvidedInterceptor(interceptorConfig, interceptorRefParams, interceptorClass);
     interceptors.add(providedInterceptor);
+    if (strutsInjector != null) {
+      // injector is already built so we need to inject the interceptor
+      providedInterceptor.inject();
+    }
     return providedInterceptor;
   }
 
