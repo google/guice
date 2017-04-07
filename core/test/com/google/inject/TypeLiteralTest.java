@@ -100,16 +100,8 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testTypeLiteralsMustHaveRawTypes() {
-    try {
-      TypeLiteral.get(Types.subtypeOf(Runnable.class));
-      fail();
-    } catch (IllegalArgumentException expected) {
-      Asserts.assertContains(
-          expected.getMessage(),
-          "Expected a Class, ParameterizedType, or "
-              + "GenericArrayType, but <? extends java.lang.Runnable> is of type "
-              + "com.google.inject.internal.MoreTypes$WildcardTypeImpl");
-    }
+    // kind of weird, but wildcards and type variables always go to Object
+    assertEquals(Object.class, TypeLiteral.get(Types.subtypeOf(Runnable.class)).getRawType());
   }
 
   /**

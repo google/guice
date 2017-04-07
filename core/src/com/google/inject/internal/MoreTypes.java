@@ -195,7 +195,7 @@ public class MoreTypes {
       Type componentType = ((GenericArrayType) type).getGenericComponentType();
       return Array.newInstance(getRawType(componentType), 0).getClass();
 
-    } else if (type instanceof TypeVariable) {
+    } else if (type instanceof TypeVariable || type instanceof WildcardType) {
       // we could use the variable's bounds, but that'll won't work if there are multiple.
       // having a raw type that's more general than necessary is okay
       return Object.class;
