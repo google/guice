@@ -18,10 +18,11 @@ package com.google.inject.internal;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -112,7 +113,7 @@ final class InjectorImpl implements Injector, Lookups {
 
   final State state;
   final InjectorImpl parent;
-  final BindingsMultimap bindingsMultimap = new BindingsMultimap();
+  final ListMultimap<TypeLiteral<?>, Binding<?>> bindingsMultimap = ArrayListMultimap.create();
   final InjectorOptions options;
 
   /** Just-in-time binding cache. Guarded by state.lock() */
@@ -143,17 +144,15 @@ final class InjectorImpl implements Injector, Lookups {
   /** Indexes bindings by type. */
   void index() {
     for (Binding<?> binding : state.getExplicitBindingsThisLevel().values()) {
-      index(binding);
+      bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
     }
-  }
-
-  <T> void index(Binding<T> binding) {
-    bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
   }
 
   @Override
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
-    return bindingsMultimap.getAll(type);
+    @SuppressWarnings("unchecked") // safe because we only put matching entries into the map
+    List<Binding<T>> list = (List<Binding<T>>) (List) bindingsMultimap.get(type);
+    return Collections.unmodifiableList(list);
   }
 
   /** Returns the binding for {@code key} */
@@ -964,27 +963,6 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public Set<TypeConverterBinding> getTypeConverterBindings() {
     return ImmutableSet.copyOf(state.getConvertersThisLevel());
-  }
-
-  private static class BindingsMultimap {
-    final Map<TypeLiteral<?>, List<Binding<?>>> multimap = Maps.newHashMap();
-
-    <T> void put(TypeLiteral<T> type, Binding<T> binding) {
-      List<Binding<?>> bindingsForType = multimap.get(type);
-      if (bindingsForType == null) {
-        bindingsForType = Lists.newArrayList();
-        multimap.put(type, bindingsForType);
-      }
-      bindingsForType.add(binding);
-    }
-
-    @SuppressWarnings("unchecked") // safe because we only put matching entries into the map
-    <T> List<Binding<T>> getAll(TypeLiteral<T> type) {
-      List<Binding<?>> bindings = multimap.get(type);
-      return bindings != null
-          ? Collections.<Binding<T>>unmodifiableList((List) multimap.get(type))
-          : ImmutableList.<Binding<T>>of();
-    }
   }
 
   /** Returns parameter injectors, or {@code null} if there are no parameters. */
