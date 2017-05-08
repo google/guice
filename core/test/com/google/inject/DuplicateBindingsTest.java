@@ -423,6 +423,11 @@ public class DuplicateBindingsTest extends TestCase {
                 public boolean equals(Object obj) {
                   throw new RuntimeException("Boo!");
                 }
+
+                @Override
+                public int hashCode() {
+                  throw new RuntimeException("Boo!");
+                }
               });
     }
   }
