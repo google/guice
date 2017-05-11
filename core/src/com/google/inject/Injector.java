@@ -105,8 +105,9 @@ public interface Injector {
   /**
    * Returns a snapshot of this injector's bindings, <strong>both explicit and
    * just-in-time</strong>. The returned map is immutable; it contains only the bindings that were
-   * present when {@code getAllBindings()} was invoked. Subsequent calls may return a map with
-   * additional just-in-time bindings.
+   * present when {@code getAllBindings()} was invoked. Just-in-time bindings are only present if
+   * they have been requested at least once. Subsequent calls may return a map with additional
+   * just-in-time bindings.
    *
    * <p>The returned map does not include bindings inherited from a {@link #getParent() parent
    * injector}, should one exist.
