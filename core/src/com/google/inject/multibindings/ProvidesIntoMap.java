@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * <pre>
  * {@literal @}ProvidesIntoMap
  * {@literal @}StringMapKey("Foo")
- * {@literal @}Named("plugins")
+ * {@literal @}Named("urls")
  * Plugin provideFooUrl(FooManager fm) { return fm.getPlugin(); }
  *
  * {@literal @}ProvidesIntoMap
