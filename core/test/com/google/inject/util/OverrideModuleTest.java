@@ -632,7 +632,7 @@ public class OverrideModuleTest extends TestCase {
                         bind(RESULT_KEY).toInstance(OVERRIDDEN_RESULT);
                       }
                     }));
-    assertEquals(inj.getInstance(RESULT_KEY), OVERRIDDEN_RESULT);
+    assertEquals(OVERRIDDEN_RESULT, inj.getInstance(RESULT_KEY));
   }
 
   public void testPrivateBindingOverride() throws Exception {
@@ -646,7 +646,7 @@ public class OverrideModuleTest extends TestCase {
                         bind(INPUT_KEY).toInstance(OVERRIDDEN_INPUT);
                       }
                     }));
-    assertEquals(inj.getInstance(RESULT_KEY), OVERRIDDEN_RESULT);
+    assertEquals(OVERRIDDEN_RESULT, inj.getInstance(RESULT_KEY));
   }
 
   public static class ExampleModule extends PrivateModule {
