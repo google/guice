@@ -73,7 +73,7 @@ public class FilterDefinitionTest extends TestCase {
     assertTrue(filterDef.getFilter() instanceof MockFilter);
     final FilterConfig filterConfig = mockFilter.getConfig();
     assertTrue(null != filterConfig);
-    assertEquals(filterConfig.getServletContext().getServletContextName(), contextName);
+    assertEquals(contextName, filterConfig.getServletContext().getServletContextName());
     assertEquals(filterConfig.getFilterName(), Key.get(Filter.class).toString());
 
     final Enumeration names = filterConfig.getInitParameterNames();

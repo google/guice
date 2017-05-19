@@ -106,7 +106,7 @@ public class ElementsTest extends TestCase {
           @Override
           public Void visit(Message command) {
             assertEquals("A", command.getCause().getMessage());
-            assertEquals(command.getMessage(), "An exception was caught and reported. Message: A");
+            assertEquals("An exception was caught and reported. Message: A", command.getMessage());
             assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }

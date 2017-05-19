@@ -113,9 +113,9 @@ public class ElementSourceTest extends TestCase {
               assertEquals("com.google.inject.spi.ElementSourceTest", callStack[14].getClassName());
               // Check modules index
               List<Integer> indexes = elementSource.getModuleConfigurePositionsInStackTrace();
-              assertEquals((int) indexes.get(0), 4);
-              assertEquals((int) indexes.get(1), 6);
-              assertEquals((int) indexes.get(2), 10);
+              assertEquals(4, (int) indexes.get(0));
+              assertEquals(6, (int) indexes.get(1));
+              assertEquals(10, (int) indexes.get(2));
               return;
           }
         }
