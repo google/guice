@@ -208,6 +208,62 @@ public final class BytecodeGen {
   }
 
   /**
+   * An extension of FastClass.Generator that supports caching of generated classes by implementing
+   * hashCode and equals.
+   *
+   * @see <a href="https://github.com/google/guice/issues/1042">https://github.com/google/guice/
+   *      issues/1042</a>
+   * @see <a href="https://github.com/cglib/cglib/issues/91">https://github.com/cglib/cglib/issues/
+   *      91</a>
+   */
+  static class FastClassGenerator extends net.sf.cglib.reflect.FastClass.Generator {
+    // these fields are private in the parent class but are required for hashCode() and equals()
+    private ClassLoader classLoader;
+    private Class<?> type;
+
+    @Override
+    public void setClassLoader(ClassLoader classLoader) {
+      super.setClassLoader(classLoader);
+      this.classLoader = classLoader;
+    }
+
+    @Override
+    public void setType(@SuppressWarnings("rawtypes") Class type) {
+      super.setType(type);
+      this.type = type;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((classLoader == null) ? 0 : classLoader.hashCode());
+      result = prime * result + ((type == null) ? 0 : type.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (!(obj instanceof FastClassGenerator))
+        return false;
+      FastClassGenerator other = (FastClassGenerator) obj;
+      if (classLoader == null) {
+        if (other.classLoader != null)
+          return false;
+      } else if (!classLoader.equals(other.classLoader))
+        return false;
+      if (type == null) {
+        if (other.type != null)
+          return false;
+      } else if (!type.equals(other.type))
+        return false;
+      return true;
+    }
+  }
+
+  /**
    * Returns a FastClass proxy for invoking the given member or {@code null} if access rules
    * disallow it.
    *
@@ -244,8 +300,7 @@ public final class BytecodeGen {
       // (so we can't use the bridge classloader to work around).  Bail out.
       return null;
     }
-    net.sf.cglib.reflect.FastClass.Generator generator =
-        new net.sf.cglib.reflect.FastClass.Generator();
+    FastClassGenerator generator = new FastClassGenerator();
     if (publiclyCallable) {
       // Use the bridge classloader if we can
       generator.setClassLoader(getClassLoader(type));
