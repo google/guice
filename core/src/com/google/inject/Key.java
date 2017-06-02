@@ -300,6 +300,24 @@ public class Key<T> {
     return new Key<T>(typeLiteral, annotationStrategy.withoutAttributes());
   }
 
+  /**
+   * Returns a new key of the same type with the specified annotation.
+   *
+   * @since 4.1
+   */
+  public Key<T> withAnnotation(Class<? extends Annotation> annotationType) {
+    return new Key<T>(typeLiteral, strategyFor(annotationType));
+  }
+
+  /**
+   * Returns a new key of the same type with the specified annotation.
+   *
+   * @since 4.1
+   */
+  public Key<T> withAnnotation(Annotation annotation) {
+    return new Key<T>(typeLiteral, strategyFor(annotation));
+  }
+
   interface AnnotationStrategy {
     Annotation getAnnotation();
 

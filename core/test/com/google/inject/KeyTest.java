@@ -352,4 +352,11 @@ public class KeyTest extends TestCase {
   }
 
   static class Typed<T> {}
+
+  public void testWithAnnotation() {
+    Key<Object> k = Key.get(Object.class);
+    Key<Object> kf = k.withAnnotation(Foo.class);
+    assertNull(k.getAnnotationType());
+    assertEquals(Foo.class, kf.getAnnotationType());
+  }
 }
