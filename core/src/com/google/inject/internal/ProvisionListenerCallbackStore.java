@@ -86,7 +86,7 @@ final class ProvisionListenerCallbackStore {
    * <p>Returns true if the type was stored in the cache, false otherwise.
    */
   boolean remove(Binding<?> type) {
-    return cache.asMap().remove(type) != null;
+    return cache.asMap().remove(new KeyBinding(type.getKey(), type)) != null;
   }
 
   /**
