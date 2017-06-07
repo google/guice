@@ -56,7 +56,7 @@ public class ModulesTest extends TestCase {
     final Module combined2 = Modules.combine(skipSourcesModule);
     Injector injector = Guice.createInjector(combined2);
     ElementSource source = (ElementSource) injector.getBinding(Integer.class).getSource();
-    assertEquals(source.getModuleClassNames().size(), 4);
+    assertEquals(4, source.getModuleClassNames().size());
     assertEquals(
         ImmutableList.of(
             m1.getClass().getName(),
