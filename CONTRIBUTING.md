@@ -54,7 +54,7 @@ again.
   1. Finally, push the commits to your fork and submit a [pull request][].
 
 [forking]: https://help.github.com/articles/fork-a-repo
-[java style guide]: http://google-styleguide.googlecode.com/svn/trunk/javaguide.html
+[java style guide]: https://google.github.io/styleguide/javaguide.html
 [well-formed commit messages]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [pull request]: https://help.github.com/articles/creating-a-pull-request
 
