@@ -170,7 +170,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.truth</groupId>
         <artifactId>truth</artifactId>
-        <version>0.33</version>
+        <version>0.34</version>
         <scope>test</scope>
       </dependency>
       <dependency>
