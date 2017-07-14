@@ -57,7 +57,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
       failureStrategy.fail(String.format("checked provider <%s> threw an exception", provider), e);
       return ignoreCheck().that(new Object());
     }
-    return check().withFailureMessage("value provided by <%s>", provider).that(got);
+    return check().withMessage("value provided by <%s>", provider).that(got);
   }
 
   /**
@@ -75,7 +75,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     try {
       got = provider.get();
     } catch (Throwable e) {
-      return check().withFailureMessage("exception thrown by <%s>", provider).that(e);
+      return check().withMessage("exception thrown by <%s>", provider).that(e);
     }
     failWithBadResults("threw", "an exception", "provided", got);
     return ignoreCheck().that(new Throwable());
