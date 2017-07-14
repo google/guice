@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +20,10 @@ import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 
 import com.google.inject.AbstractModule;
-
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Install this module to add guice-persist library support for JPA persistence
- * providers.
+ * Install this module to add guice-persist library support for JPA persistence providers.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */

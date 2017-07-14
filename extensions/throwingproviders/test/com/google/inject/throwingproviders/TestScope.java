@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
-
 import java.lang.annotation.Retention;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,14 +33,16 @@ import java.util.Map;
  */
 class TestScope implements Scope {
 
-  @Retention(RUNTIME) @ScopeAnnotation
-  public @interface Scoped { }
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface Scoped {}
 
-  private Map<Key, Object> inScopeObjectsMap = new HashMap<Key, Object>();
+  private Map<Key, Object> inScopeObjectsMap = new HashMap<>();
 
-  public <T> Provider<T> scope(
-      final Key<T> key, final Provider<T> provider) {
+  @Override
+  public <T> Provider<T> scope(final Key<T> key, final Provider<T> provider) {
     return new Provider<T>() {
+      @Override
       @SuppressWarnings({"unchecked"})
       public T get() {
         T t = (T) inScopeObjectsMap.get(key);
@@ -55,6 +56,6 @@ class TestScope implements Scope {
   }
 
   public void beginNewScope() {
-    inScopeObjectsMap = new HashMap<Key, Object>();
+    inScopeObjectsMap = new HashMap<>();
   }
 }

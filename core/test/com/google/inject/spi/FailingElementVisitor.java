@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,8 @@ package com.google.inject.spi;
 import junit.framework.AssertionFailedError;
 
 class FailingElementVisitor extends DefaultElementVisitor<Void> {
-  @Override protected Void visitOther(Element element) {
+  @Override
+  protected Void visitOther(Element element) {
     throw new AssertionFailedError();
   }
 }

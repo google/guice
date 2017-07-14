@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,23 +21,19 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-
-import junit.framework.TestCase;
-
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import junit.framework.TestCase;
 
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
 public class ManualLocalTransactionsConfidenceTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT_3 =
       ManualLocalTransactionsConfidenceTest.class.getSimpleName()
-          + "CONSTRAINT_VIOLATING some other unique text" + new Date();
+          + "CONSTRAINT_VIOLATING some other unique text"
+          + new Date();
 
   @Override
   public void setUp() {
@@ -69,7 +65,8 @@ public class ManualLocalTransactionsConfidenceTest extends TestCase {
     }
 
     assertNotNull("No exception was thrown!", e);
-    assertTrue("Exception thrown was not what was expected (i.e. commit-time)",
+    assertTrue(
+        "Exception thrown was not what was expected (i.e. commit-time)",
         e instanceof PersistenceException);
   }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,17 +18,18 @@ package com.google.inject;
 
 import junit.framework.TestCase;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class SuperclassTest extends TestCase {
 
   public void testSuperclassInjection() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class);
+              }
+            });
 
     Provider<Sub> creator = injector.getProvider(Sub.class);
     Sub sub = creator.get();
@@ -40,17 +41,18 @@ public class SuperclassTest extends TestCase {
     assertNotNull(sub.fromMethod);
   }
 
-  static abstract class Super {
+  abstract static class Super {
     @Inject Foo field;
 
     Foo fromMethod;
-    @Inject void setC(Foo foo) {
+
+    @Inject
+    void setC(Foo foo) {
       fromMethod = foo;
     }
   }
 
-  static class Sub extends Super {
-  }
+  static class Sub extends Super {}
 
   static class Foo {}
 }

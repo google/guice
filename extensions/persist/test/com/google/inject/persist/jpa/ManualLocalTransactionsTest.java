@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,13 +22,10 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
-
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import junit.framework.TestCase;
 
 /**
  * For instance, a session-per-request strategy will control the opening and closing of the EM at
@@ -42,6 +39,7 @@ public class ManualLocalTransactionsTest extends TestCase {
   private static final String UNIQUE_TEXT = "some unique text" + new Date();
   private static final String UNIQUE_TEXT_2 = "some other unique text" + new Date();
 
+  @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -49,6 +47,7 @@ public class ManualLocalTransactionsTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
+  @Override
   public void tearDown() {
     injector.getInstance(EntityManagerFactory.class).close();
   }
@@ -63,7 +62,8 @@ public class ManualLocalTransactionsTest extends TestCase {
     injector.getInstance(TransactionalObject.class).runOperationInTxn2();
 
     //persisted entity should remain in the same em (which should still be open)
-    assertTrue("EntityManager  appears to have been closed across txns!",
+    assertTrue(
+        "EntityManager  appears to have been closed across txns!",
         injector.getInstance(EntityManager.class).contains(entity));
     assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
     assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
@@ -73,10 +73,14 @@ public class ManualLocalTransactionsTest extends TestCase {
 
     //try to query them back out
     em = injector.getInstance(EntityManager.class);
-    assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT).getSingleResult());
-    assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT_2).getSingleResult());
+    assertNotNull(
+        em.createQuery("from JpaTestEntity where text = :text")
+            .setParameter("text", UNIQUE_TEXT)
+            .getSingleResult());
+    assertNotNull(
+        em.createQuery("from JpaTestEntity where text = :text")
+            .setParameter("text", UNIQUE_TEXT_2)
+            .getSingleResult());
     em.close();
 
     assertFalse(em.isOpen());
@@ -100,6 +104,5 @@ public class ManualLocalTransactionsTest extends TestCase {
       entity.setText(UNIQUE_TEXT_2);
       em.persist(entity);
     }
-
   }
 }

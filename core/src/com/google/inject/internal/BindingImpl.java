@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -24,9 +24,7 @@ import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InstanceBinding;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public abstract class BindingImpl<T> implements Binding<T> {
 
   private final InjectorImpl injector;
@@ -35,8 +33,12 @@ public abstract class BindingImpl<T> implements Binding<T> {
   private final Scoping scoping;
   private final InternalFactory<? extends T> internalFactory;
 
-  public BindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Scoping scoping) {
+  public BindingImpl(
+      InjectorImpl injector,
+      Key<T> key,
+      Object source,
+      InternalFactory<? extends T> internalFactory,
+      Scoping scoping) {
     this.injector = injector;
     this.key = key;
     this.source = source;
@@ -52,16 +54,19 @@ public abstract class BindingImpl<T> implements Binding<T> {
     this.scoping = scoping;
   }
 
+  @Override
   public Key<T> getKey() {
     return key;
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
   private volatile Provider<T> provider;
 
+  @Override
   public Provider<T> getProvider() {
     if (provider == null) {
       if (injector == null) {
@@ -82,17 +87,19 @@ public abstract class BindingImpl<T> implements Binding<T> {
   }
 
   /**
-   * Is this a constant binding? This returns true for constant bindings as
-   * well as toInstance() bindings.
+   * Is this a constant binding? This returns true for constant bindings as well as toInstance()
+   * bindings.
    */
   public boolean isConstant() {
     return this instanceof InstanceBinding;
   }
 
+  @Override
   public <V> V acceptVisitor(ElementVisitor<V> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public <V> V acceptScopingVisitor(BindingScopingVisitor<V> visitor) {
     return scoping.acceptVisitor(visitor);
   }
@@ -104,9 +111,10 @@ public abstract class BindingImpl<T> implements Binding<T> {
   protected BindingImpl<T> withKey(Key<T> key) {
     throw new AssertionError();
   }
-  
-  @Override public String toString() {
-    return Objects.toStringHelper(Binding.class)
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(Binding.class)
         .add("key", key)
         .add("scope", scoping)
         .add("source", source)

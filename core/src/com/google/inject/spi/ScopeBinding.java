@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +20,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Binder;
 import com.google.inject.Scope;
-
 import java.lang.annotation.Annotation;
 
 /**
  * Registration of a scope annotation with the scope that implements it. Instances are created
  * explicitly in a module using {@link com.google.inject.Binder#bindScope(Class, Scope) bindScope()}
  * statements:
+ *
  * <pre>
  *     Scope recordScope = new RecordScope();
  *     bindScope(RecordScoped.class, new RecordScope());</pre>
@@ -45,6 +45,7 @@ public final class ScopeBinding implements Element {
     this.scope = checkNotNull(scope, "scope");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
@@ -57,10 +58,12 @@ public final class ScopeBinding implements Element {
     return scope;
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).bindScope(annotationType, scope);
   }

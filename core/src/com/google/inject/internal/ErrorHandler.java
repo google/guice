@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,13 +25,9 @@ import com.google.inject.spi.Message;
  */
 interface ErrorHandler {
 
-  /**
-   * Handles an error.
-   */
+  /** Handles an error. */
   void handle(Object source, Errors errors);
 
-  /**
-   * Handles a user-reported error.
-   */
+  /** Handles a user-reported error. */
   void handle(Message message);
 }

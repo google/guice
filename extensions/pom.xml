@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
@@ -18,12 +18,10 @@
 
   <modules>
     <module>assistedinject</module>
-    <!-- TODO(cgruber): Comment out dagger-adapter module if guice releases before dagger 2.x -->
     <module>dagger-adapter</module>
     <module>grapher</module>
     <module>jmx</module>
     <module>jndi</module>
-    <module>multibindings</module>
     <module>persist</module>
     <module>servlet</module>
     <module>spring</module>

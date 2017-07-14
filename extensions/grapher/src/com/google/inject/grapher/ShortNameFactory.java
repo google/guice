@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.ElementSource;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -31,23 +30,24 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * Reasonable implementation for {@link NameFactory}. Mostly takes various
- * {@link Object#toString()}s and strips package names out of them so that
- * they'll fit on the graph.
+ * Reasonable implementation for {@link NameFactory}. Mostly takes various {@link
+ * Object#toString()}s and strips package names out of them so that they'll fit on the graph.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class ShortNameFactory implements NameFactory {
+  @Override
   public String getMemberName(Member member) {
     if (member instanceof Constructor) {
       return "<init>";
     } else if (member instanceof Method) {
       return "#" + member.getName() + "(...)";
     } else {
-      return member.getName();      
+      return member.getName();
     }
   }
 
+  @Override
   public String getAnnotationName(Key<?> key) {
     Annotation annotation = key.getAnnotation();
     Class<? extends Annotation> annotationType = key.getAnnotationType();
@@ -57,7 +57,7 @@ public class ShortNameFactory implements NameFactory {
       String annotationString = annotation.toString();
       String canonicalName = annotationType.getName();
       String simpleName = annotationType.getSimpleName();
- 
+
       return annotationString.replace(canonicalName, simpleName).replace("()", "");
     } else if (annotationType != null) {
       return "@" + annotationType.getSimpleName();
@@ -66,11 +66,13 @@ public class ShortNameFactory implements NameFactory {
     }
   }
 
+  @Override
   public String getClassName(Key<?> key) {
     TypeLiteral<?> typeLiteral = key.getTypeLiteral();
     return stripPackages(typeLiteral.toString());
   }
 
+  @Override
   public String getInstanceName(Object instance) {
     if (instance instanceof ProviderMethod) {
       return getMethodString(((ProviderMethod<?>) instance).getMethod());
@@ -94,10 +96,11 @@ public class ShortNameFactory implements NameFactory {
   }
 
   /**
-   * Returns a name for a Guice "source" object. This will typically be either
-   * a {@link StackTraceElement} for when the binding is made to the instance,
-   * or a {@link Method} when a provider method is used.
+   * Returns a name for a Guice "source" object. This will typically be either a {@link
+   * StackTraceElement} for when the binding is made to the instance, or a {@link Method} when a
+   * provider method is used.
    */
+  @Override
   public String getSourceName(Object source) {
     if (source instanceof ElementSource) {
       source = ((ElementSource) source).getDeclaringSource();
@@ -128,8 +131,8 @@ public class ShortNameFactory implements NameFactory {
   }
 
   /**
-   * Eliminates runs of lowercase characters and numbers separated by periods.
-   * Seems to remove packages from fully-qualified type names pretty well.
+   * Eliminates runs of lowercase characters and numbers separated by periods. Seems to remove
+   * packages from fully-qualified type names pretty well.
    */
   private String stripPackages(String str) {
     return str.replaceAll("(^|[< .\\(])([a-z0-9]+\\.)*", "$1");

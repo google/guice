@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,7 @@ package com.google.inject.throwingproviders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -35,7 +34,6 @@ import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -44,26 +42,27 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 /**
- * <p>Builds a binding for a {@link CheckedProvider}.
- * 
+ * Builds a binding for a {@link CheckedProvider}.
+ *
  * <p>You can use a fluent API and custom providers:
+ *
  * <pre><code>ThrowingProviderBinder.create(binder())
  *    .bind(RemoteProvider.class, Customer.class)
  *    .to(RemoteCustomerProvider.class)
  *    .in(RequestScope.class);
  * </code></pre>
+ *
  * or, you can use throwing provider methods:
+ *
  * <pre><code>class MyModule extends AbstractModule {
  *   configure() {
- *     ThrowingProviderBinder.install(this, binder());
+ *     install(ThrowingProviderBinder.forModule(this));
  *   }
- *   
+ *
  *   {@literal @}CheckedProvides(RemoteProvider.class)
  *   {@literal @}RequestScope
  *   Customer provideCustomer(FlakyCustomerCreator creator) throws RemoteException {
@@ -71,25 +70,27 @@ import java.util.Set;
  *   }
  * }
  * </code></pre>
- * You also can declare that a CheckedProvider construct
- * a particular class whose constructor throws an exception:
+ *
+ * You also can declare that a CheckedProvider construct a particular class whose constructor throws
+ * an exception:
+ *
  * <pre><code>ThrowingProviderBinder.create(binder())
  *    .bind(RemoteProvider.class, Customer.class)
  *    .providing(CustomerImpl.class)
  *    .in(RequestScope.class);
  * </code></pre>
- * 
+ *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  * @author sameb@google.com (Sam Berlin)
  */
 public class ThrowingProviderBinder {
 
-  private static final TypeLiteral<CheckedProvider<?>> CHECKED_PROVIDER_TYPE
-      = new TypeLiteral<CheckedProvider<?>>() { };
+  private static final TypeLiteral<CheckedProvider<?>> CHECKED_PROVIDER_TYPE =
+      new TypeLiteral<CheckedProvider<?>>() {};
 
-  private static final TypeLiteral<CheckedProviderMethod<?>> CHECKED_PROVIDER_METHOD_TYPE
-      = new TypeLiteral<CheckedProviderMethod<?>>() { };
+  private static final TypeLiteral<CheckedProviderMethod<?>> CHECKED_PROVIDER_METHOD_TYPE =
+      new TypeLiteral<CheckedProviderMethod<?>>() {};
 
   private final Binder binder;
 
@@ -98,42 +99,36 @@ public class ThrowingProviderBinder {
   }
 
   public static ThrowingProviderBinder create(Binder binder) {
-    return new ThrowingProviderBinder(binder.skipSources(
-        ThrowingProviderBinder.class,
-        ThrowingProviderBinder.SecondaryBinder.class));
+    return new ThrowingProviderBinder(
+        binder.skipSources(
+            ThrowingProviderBinder.class, ThrowingProviderBinder.SecondaryBinder.class));
   }
-  
+
   /**
    * Returns a module that installs {@literal @}{@link CheckedProvides} methods.
-   * 
+   *
    * @since 3.0
    */
   public static Module forModule(Module module) {
     return CheckedProviderMethodsModule.forModule(module);
   }
-  
-  /**
-   * @deprecated Use {@link #bind(Class, Class)} or {@link #bind(Class, TypeLiteral)} instead. 
-   */
+
+  /** @deprecated Use {@link #bind(Class, Class)} or {@link #bind(Class, TypeLiteral)} instead. */
   @Deprecated
-  public <P extends CheckedProvider> SecondaryBinder<P, ?> 
-      bind(Class<P> interfaceType, Type clazz) {
+  public <P extends CheckedProvider> SecondaryBinder<P, ?> bind(
+      Class<P> interfaceType, Type clazz) {
     return new SecondaryBinder<P, Object>(interfaceType, clazz);
   }
 
-  /**
-   * @since 4.0
-   */
-  public <P extends CheckedProvider, T> SecondaryBinder<P, T> 
-      bind(Class<P> interfaceType, Class<T> clazz) {
+  /** @since 4.0 */
+  public <P extends CheckedProvider, T> SecondaryBinder<P, T> bind(
+      Class<P> interfaceType, Class<T> clazz) {
     return new SecondaryBinder<P, T>(interfaceType, clazz);
   }
-  
-  /**
-   * @since 4.0
-   */
-  public <P extends CheckedProvider, T> SecondaryBinder<P, T> 
-      bind(Class<P> interfaceType, TypeLiteral<T> typeLiteral) {
+
+  /** @since 4.0 */
+  public <P extends CheckedProvider, T> SecondaryBinder<P, T> bind(
+      Class<P> interfaceType, TypeLiteral<T> typeLiteral) {
     return new SecondaryBinder<P, T>(interfaceType, typeLiteral.getType());
   }
 
@@ -151,19 +146,19 @@ public class ThrowingProviderBinder {
     public SecondaryBinder(Class<P> interfaceType, Type valueType) {
       this.interfaceType = checkNotNull(interfaceType, "interfaceType");
       this.valueType = checkNotNull(valueType, "valueType");
-      if(checkInterface()) {
+      if (checkInterface()) {
         this.exceptionTypes = getExceptionType(interfaceType);
         valid = true;
       } else {
         valid = false;
         this.exceptionTypes = ImmutableList.of();
-      }      
+      }
     }
-    
+
     List<Class<? extends Throwable>> getExceptionTypes() {
       return exceptionTypes;
     }
-    
+
     Key<P> getKey() {
       return interfaceKey;
     }
@@ -194,13 +189,13 @@ public class ThrowingProviderBinder {
       this.scopeExceptions = scopeExceptions;
       return this;
     }
-    
+
     public ScopedBindingBuilder to(P target) {
       Key<P> targetKey = Key.get(interfaceType, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
       return to(targetKey);
     }
-    
+
     public ScopedBindingBuilder to(Class<? extends P> targetType) {
       return to(Key.get(targetType));
     }
@@ -212,7 +207,7 @@ public class ThrowingProviderBinder {
 
     /** @since 4.0 */
     @SuppressWarnings("unchecked") // safe because this is the cxtor of the literal
-    public ScopedBindingBuilder providing(TypeLiteral<? extends T> cxtorLiteral) {     
+    public ScopedBindingBuilder providing(TypeLiteral<? extends T> cxtorLiteral) {
       // Find a constructor that has @ThrowingInject.
       Constructor<? extends T> cxtor =
           CheckedProvideUtils.findThrowingConstructor(cxtorLiteral, binder);
@@ -224,7 +219,7 @@ public class ThrowingProviderBinder {
         // Validate the exceptions are consistent with the CheckedProvider interface.
         CheckedProvideUtils.validateExceptions(
             binder, cxtorLiteral.getExceptionTypes(cxtor), exceptionTypes, interfaceType);
-        
+
         typeKey = Key.get(cxtorLiteral, UniqueAnnotations.create());
         binder.bind(typeKey).toConstructor((Constructor) cxtor).in(Scopes.NO_SCOPE);
         typeProvider = binder.getProvider((Key<T>) typeKey);
@@ -233,43 +228,44 @@ public class ThrowingProviderBinder {
         typeProvider = null;
         typeKey = null;
       }
-        
+
       // Create a CheckedProvider that calls our cxtor
-      CheckedProvider<T> checkedProvider = new CheckedProviderWithDependencies<T>() {
-        @Override
-        public T get() throws Exception {
-          try {
-            return typeProvider.get();
-          } catch (ProvisionException pe) {
-            // Rethrow the provision cause as the actual exception
-            if (pe.getCause() instanceof Exception) {
-              throw (Exception) pe.getCause();
-            } else if (pe.getCause() instanceof Error) {
-              throw (Error) pe.getCause();
-            } else {
-              // If this failed because of multiple reasons (ie, more than
-              // one dependency failed due to scoping errors), then
-              // the ProvisionException won't have a cause, so we need
-              // to rethrow it as-is.
-              throw pe;
+      CheckedProvider<T> checkedProvider =
+          new CheckedProviderWithDependencies<T>() {
+            @Override
+            public T get() throws Exception {
+              try {
+                return typeProvider.get();
+              } catch (ProvisionException pe) {
+                // Rethrow the provision cause as the actual exception
+                if (pe.getCause() instanceof Exception) {
+                  throw (Exception) pe.getCause();
+                } else if (pe.getCause() instanceof Error) {
+                  throw (Error) pe.getCause();
+                } else {
+                  // If this failed because of multiple reasons (ie, more than
+                  // one dependency failed due to scoping errors), then
+                  // the ProvisionException won't have a cause, so we need
+                  // to rethrow it as-is.
+                  throw pe;
+                }
+              }
             }
-          }
-        }
-        
-        @Override
-        public Set<Dependency<?>> getDependencies() {
-          return ImmutableSet.<Dependency<?>>of(Dependency.get(typeKey));
-        }
-      };
-      
-      Key<CheckedProvider<?>> targetKey = Key.get(CHECKED_PROVIDER_TYPE,
-          UniqueAnnotations.create());
+
+            @Override
+            public Set<Dependency<?>> getDependencies() {
+              return ImmutableSet.<Dependency<?>>of(Dependency.get(typeKey));
+            }
+          };
+
+      Key<CheckedProvider<?>> targetKey =
+          Key.get(CHECKED_PROVIDER_TYPE, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(checkedProvider);
       return toInternal(targetKey);
     }
-    
+
     ScopedBindingBuilder toProviderMethod(CheckedProviderMethod<?> target) {
-      Key<CheckedProviderMethod<?>> targetKey = 
+      Key<CheckedProviderMethod<?>> targetKey =
           Key.get(CHECKED_PROVIDER_METHOD_TYPE, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
 
@@ -279,9 +275,9 @@ public class ThrowingProviderBinder {
     @SuppressWarnings("unchecked") // P only extends the raw type of CheckedProvider
     public ScopedBindingBuilder to(Key<? extends P> targetKey) {
       checkNotNull(targetKey, "targetKey");
-      return toInternal((Key<? extends CheckedProvider<?>>)targetKey);
+      return toInternal((Key<? extends CheckedProvider<?>>) targetKey);
     }
-    
+
     private ScopedBindingBuilder toInternal(final Key<? extends CheckedProvider<?>> targetKey) {
       final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
       // Note that this provider will behave like the final provider Guice creates.
@@ -291,53 +287,59 @@ public class ThrowingProviderBinder {
       interfaceKey = createKey();
 
       // don't bother binding the proxy type if this is in an invalid state.
-      if(valid) {
-        binder.bind(interfaceKey).toProvider(new ProviderWithDependencies<P>() {
-          private final P instance = interfaceType.cast(Proxy.newProxyInstance(
-              interfaceType.getClassLoader(), new Class<?>[] { interfaceType },
-              new InvocationHandler() {
-                public Object invoke(Object proxy, Method method, Object[] args)
-                    throws Throwable {
-                  // Allow methods like .equals(..), .hashcode(..), .toString(..) to work.
-                  if (method.getDeclaringClass() == Object.class) {
-                    return method.invoke(this, args);
+      if (valid) {
+        binder
+            .bind(interfaceKey)
+            .toProvider(
+                new ProviderWithDependencies<P>() {
+                  private final P instance =
+                      interfaceType.cast(
+                          Proxy.newProxyInstance(
+                              interfaceType.getClassLoader(),
+                              new Class<?>[] {interfaceType},
+                              new InvocationHandler() {
+                                @Override
+                                public Object invoke(Object proxy, Method method, Object[] args)
+                                    throws Throwable {
+                                  // Allow methods like .equals(..), .hashcode(..), .toString(..) to work.
+                                  if (method.getDeclaringClass() == Object.class) {
+                                    return method.invoke(this, args);
+                                  }
+
+                                  if (scopeExceptions) {
+                                    return resultProvider.get().getOrThrow();
+                                  } else {
+                                    Result result;
+                                    try {
+                                      result = resultProvider.get();
+                                    } catch (ProvisionException pe) {
+                                      Throwable cause = pe.getCause();
+                                      if (cause instanceof ResultException) {
+                                        throw ((ResultException) cause).getCause();
+                                      } else {
+                                        throw pe;
+                                      }
+                                    }
+                                    return result.getOrThrow();
+                                  }
+                                }
+                              }));
+
+                  @Override
+                  public P get() {
+                    return instance;
                   }
-                  
-                  if (scopeExceptions) {
-                    return resultProvider.get().getOrThrow();
-                  } else {
-                    Result result;
-                    try {
-                      result = resultProvider.get();
-                    } catch (ProvisionException pe) {
-                      Throwable cause = pe.getCause();
-                      if (cause instanceof ResultException) {
-                        throw ((ResultException)cause).getCause();
-                      } else {
-                        throw pe;
-                      }
-                    }
-                    return result.getOrThrow();
+
+                  @Override
+                  public Set<Dependency<?>> getDependencies() {
+                    return ImmutableSet.<Dependency<?>>of(Dependency.get(resultKey));
                   }
-                }
-              }));
-            
-            @Override
-            public P get() {
-              return instance;
-            }
-  
-            @Override
-            public Set<Dependency<?>> getDependencies() {
-              return ImmutableSet.<Dependency<?>>of(Dependency.get(resultKey));
-            }
-          });
+                });
       }
 
-      // The provider is unscoped, but the user may apply a scope to it through the 
+      // The provider is unscoped, but the user may apply a scope to it through the
       // ScopedBindingBuilder this returns.
-      return binder.bind(resultKey).toProvider(
-          createResultProvider(targetKey, targetProvider));
+      return binder.bind(resultKey).toProvider(createResultProvider(targetKey, targetProvider));
     }
 
     private ProviderWithDependencies<Result> createResultProvider(
@@ -374,10 +376,9 @@ public class ThrowingProviderBinder {
         }
       };
     }
-    
+
     /**
-     * Returns the exception type declared to be thrown by the get method of
-     * {@code interfaceType}.
+     * Returns the exception type declared to be thrown by the get method of {@code interfaceType}.
      */
     private List<Class<? extends Throwable>> getExceptionType(Class<P> interfaceType) {
       try {
@@ -397,100 +398,12 @@ public class ThrowingProviderBinder {
     }
 
     private boolean checkInterface() {
-      if(!checkArgument(interfaceType.isInterface(),
-         "%s must be an interface", interfaceType.getName())) {
-        return false;
-      }
-      if(!checkArgument(interfaceType.getGenericInterfaces().length == 1,
-          "%s must extend CheckedProvider (and only CheckedProvider)",
-          interfaceType)) {
-        return false;
-      }
-      
-      boolean tpMode = interfaceType.getInterfaces()[0] == ThrowingProvider.class;      
-      if(!tpMode) {
-        if(!checkArgument(interfaceType.getInterfaces()[0] == CheckedProvider.class,
-            "%s must extend CheckedProvider (and only CheckedProvider)",
-            interfaceType)) {
-          return false;
-        }
-      }
-
-      // Ensure that T is parameterized and unconstrained.
-      ParameterizedType genericThrowingProvider
-          = (ParameterizedType) interfaceType.getGenericInterfaces()[0];
-      if (interfaceType.getTypeParameters().length == 1) {
-        String returnTypeName = interfaceType.getTypeParameters()[0].getName();
-        Type returnType = genericThrowingProvider.getActualTypeArguments()[0];
-        if(!checkArgument(returnType instanceof TypeVariable,
-            "%s does not properly extend CheckedProvider, the first type parameter of CheckedProvider (%s) is not a generic type",
-            interfaceType, returnType)) {
-          return false;
-        }
-        if(!checkArgument(returnTypeName.equals(((TypeVariable) returnType).getName()),
-            "The generic type (%s) of %s does not match the generic type of CheckedProvider (%s)",
-            returnTypeName, interfaceType, ((TypeVariable)returnType).getName())) {
-          return false;
-        }
-      } else {
-        if(!checkArgument(interfaceType.getTypeParameters().length == 0,
-            "%s has more than one generic type parameter: %s",
-            interfaceType, Arrays.asList(interfaceType.getTypeParameters()))) {
-          return false;
-        }
-        if(!checkArgument(genericThrowingProvider.getActualTypeArguments()[0].equals(valueType),
-            "%s expects the value type to be %s, but it was %s",
-            interfaceType, genericThrowingProvider.getActualTypeArguments()[0], valueType)) {
-          return false;
-        }
-      }
-
-      if(tpMode) { // only validate exception in ThrowingProvider mode.
-        Type exceptionType = genericThrowingProvider.getActualTypeArguments()[1];
-        if(!checkArgument(exceptionType instanceof Class,
-            "%s has the wrong Exception generic type (%s) when extending CheckedProvider",
-            interfaceType, exceptionType)) {
-          return false;
-        }
-      }
-      
-      // Skip synthetic/bridge methods because java8 generates
-      // a default method on the interface w/ the superinterface type that
-      // just delegates directly to the overridden method.
-      List<Method> declaredMethods = FluentIterable
-          .from(Arrays.asList(interfaceType.getDeclaredMethods()))
-          .filter(NotSyntheticOrBridgePredicate.INSTANCE)
-          .toList();
-      if (declaredMethods.size() == 1) {
-        Method method = declaredMethods.get(0);
-        if(!checkArgument(method.getName().equals("get"),
-            "%s may not declare any new methods, but declared %s",
-            interfaceType, method)) {
-          return false;
-        }
-        if(!checkArgument(method.getParameterTypes().length == 0,
-            "%s may not declare any new methods, but declared %s",
-            interfaceType, method.toGenericString())) {
-          return false;
-        }
-      } else {
-        if(!checkArgument(declaredMethods.isEmpty(),
-            "%s may not declare any new methods, but declared %s",
-            interfaceType, Arrays.asList(interfaceType.getDeclaredMethods()))) {
-          return false;
-        }
-      }
-      
-      return true;
-    }
-
-    private boolean checkArgument(boolean condition,
-        String messageFormat, Object... args) {
-      if (!condition) {
-        binder.addError(messageFormat, args);
-        return false;
-      } else {
+      try {
+        ProviderChecker.checkInterface(interfaceType, Optional.of(valueType));
         return true;
+      } catch (IllegalArgumentException e) {
+        binder.addError(e.getMessage());
+        return false;
       }
     }
 
@@ -498,8 +411,9 @@ public class ThrowingProviderBinder {
     private Key<P> createKey() {
       TypeLiteral<P> typeLiteral;
       if (interfaceType.getTypeParameters().length == 1) {
-        ParameterizedType type = Types.newParameterizedTypeWithOwner(
-            interfaceType.getEnclosingClass(), interfaceType, valueType);
+        ParameterizedType type =
+            Types.newParameterizedTypeWithOwner(
+                interfaceType.getEnclosingClass(), interfaceType, valueType);
         typeLiteral = (TypeLiteral<P>) TypeLiteral.get(type);
       } else {
         typeLiteral = TypeLiteral.get(interfaceType);
@@ -507,10 +421,10 @@ public class ThrowingProviderBinder {
 
       if (annotation != null) {
         return Key.get(typeLiteral, annotation);
-        
+
       } else if (annotationType != null) {
         return Key.get(typeLiteral, annotationType);
-        
+
       } else {
         return Key.get(typeLiteral);
       }
@@ -539,7 +453,7 @@ public class ThrowingProviderBinder {
     public static Result forException(Exception e) {
       return new Result(null, e);
     }
-    
+
     public Object getOrThrow() throws Exception {
       if (exception != null) {
         throw exception;
@@ -550,20 +464,12 @@ public class ThrowingProviderBinder {
   }
 
   /**
-   * RuntimeException class to wrap exceptions from the checked provider.
-   * The regular guice provider can throw it and the checked provider proxy extracts
-   * the underlying exception and rethrows it.
+   * RuntimeException class to wrap exceptions from the checked provider. The regular guice provider
+   * can throw it and the checked provider proxy extracts the underlying exception and rethrows it.
    */
   private static class ResultException extends RuntimeException {
     ResultException(Exception cause) {
       super(cause);
-    }
-  }
-  
-  private static class NotSyntheticOrBridgePredicate implements Predicate<Method> {
-    static NotSyntheticOrBridgePredicate INSTANCE = new NotSyntheticOrBridgePredicate();
-    @Override public boolean apply(Method input) {
-      return !input.isBridge() && !input.isSynthetic();
     }
   }
 }

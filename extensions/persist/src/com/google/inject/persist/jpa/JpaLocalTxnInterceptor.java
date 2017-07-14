@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,13 +23,12 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.Method;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
   @Transactional
@@ -39,6 +38,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   @Inject
   private UnitOfWorkHandler unitOfWorkHandler;
   
+  @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 
     unitOfWorkHandler.requireUnitOfWork();
@@ -114,8 +114,8 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
    * @param e The exception to test for rollback
    * @param txn A JPA Transaction to issue rollbacks on
    */
-  private boolean rollbackIfNecessary(Transactional transactional, Exception e,
-      EntityTransaction txn) {
+  private boolean rollbackIfNecessary(
+      Transactional transactional, Exception e, EntityTransaction txn) {
     boolean commit = true;
 
     //check rollback clauses

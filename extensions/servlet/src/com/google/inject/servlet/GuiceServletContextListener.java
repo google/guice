@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,47 +17,44 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Injector;
-
 import java.lang.ref.WeakReference;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
- * As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener}
- * class as a logical place to create and configure your injector. This will ensure the injector
- * is created when the web application is deployed.
- * 
+ * As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener} class
+ * as a logical place to create and configure your injector. This will ensure the injector is
+ * created when the web application is deployed.
+ *
  * @author Kevin Bourrillion (kevinb@google.com)
  * @since 2.0
  */
-public abstract class GuiceServletContextListener
-    implements ServletContextListener {
+public abstract class GuiceServletContextListener implements ServletContextListener {
 
   static final String INJECTOR_NAME = Injector.class.getName();
 
+  @Override
   public void contextInitialized(ServletContextEvent servletContextEvent) {
     final ServletContext servletContext = servletContextEvent.getServletContext();
 
     // Set the Servletcontext early for those people who are using this class.
     // NOTE(dhanji): This use of the servletContext is deprecated.
-    GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
+    GuiceFilter.servletContext = new WeakReference<>(servletContext);
 
     Injector injector = getInjector();
-    injector.getInstance(InternalServletModule.BackwardsCompatibleServletContextProvider.class)
+    injector
+        .getInstance(InternalServletModule.BackwardsCompatibleServletContextProvider.class)
         .set(servletContext);
     servletContext.setAttribute(INJECTOR_NAME, injector);
   }
 
+  @Override
   public void contextDestroyed(ServletContextEvent servletContextEvent) {
     ServletContext servletContext = servletContextEvent.getServletContext();
     servletContext.removeAttribute(INJECTOR_NAME);
   }
 
-  /**
-   * Override this method to create (or otherwise obtain a reference to) your
-   * injector.
-   */
+  /** Override this method to create (or otherwise obtain a reference to) your injector. */
   protected abstract Injector getInjector();
 }

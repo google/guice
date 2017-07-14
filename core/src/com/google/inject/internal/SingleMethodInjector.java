@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +16,13 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.internal.InjectorImpl.MethodInvoker;
 import com.google.inject.spi.InjectionPoint;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-/**
- * Invokes an injectable method.
- */
+/** Invokes an injectable method. */
 final class SingleMethodInjector implements SingleMemberInjector {
   private final MethodInvoker methodInvoker;
   private final SingleParameterInjector<?>[] parameterInjectors;
@@ -42,31 +38,33 @@ final class SingleMethodInjector implements SingleMemberInjector {
 
   private MethodInvoker createMethodInvoker(final Method method) {
 
-    // We can't use FastMethod if the method is private.
-    int modifiers = method.getModifiers();
-    if (!Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers)) {
-      /*if[AOP]*/
-      try {
-      final net.sf.cglib.reflect.FastMethod fastMethod
-          = BytecodeGen.newFastClass(method.getDeclaringClass(), Visibility.forMember(method))
-              .getMethod(method);
+    /*if[AOP]*/
+    try {
+      final net.sf.cglib.reflect.FastClass fastClass = BytecodeGen.newFastClassForMember(method);
+      if (fastClass != null) {
+        final int index = fastClass.getMethod(method).getIndex();
 
-      return new MethodInvoker() {
-        public Object invoke(Object target, Object... parameters)
-            throws IllegalAccessException, InvocationTargetException {
-          return fastMethod.invoke(target, parameters);
-        }
-      };
-      } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
-      /*end[AOP]*/
+        return new MethodInvoker() {
+          @Override
+          public Object invoke(Object target, Object... parameters)
+              throws IllegalAccessException, InvocationTargetException {
+            return fastClass.invoke(index, target, parameters);
+          }
+        };
+      }
+    } catch (net.sf.cglib.core.CodeGenerationException e) {
+      /* fall-through */
     }
+    /*end[AOP]*/
 
-    if (!Modifier.isPublic(modifiers) ||
-        !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+    int modifiers = method.getModifiers();
+    if (!Modifier.isPublic(modifiers)
+        || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
       method.setAccessible(true);
     }
 
     return new MethodInvoker() {
+      @Override
       public Object invoke(Object target, Object... parameters)
           throws IllegalAccessException, InvocationTargetException {
         return method.invoke(target, parameters);
@@ -74,10 +72,12 @@ final class SingleMethodInjector implements SingleMemberInjector {
     };
   }
 
+  @Override
   public InjectionPoint getInjectionPoint() {
     return injectionPoint;
   }
 
+  @Override
   public void inject(Errors errors, InternalContext context, Object o) {
     Object[] parameters;
     try {
@@ -92,9 +92,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
     } catch (IllegalAccessException e) {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } catch (InvocationTargetException userException) {
-      Throwable cause = userException.getCause() != null
-          ? userException.getCause()
-          : userException;
+      Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
       errors.withSource(injectionPoint).errorInjectingMethod(cause);
     }
   }

@@ -31,14 +31,11 @@ import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.inject.Qualifier;
+import junit.framework.TestCase;
 
 /** Unit tests for {@link BoundFieldModule}. */
 public class BoundFieldModuleTest extends TestCase {
@@ -53,9 +50,10 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingOnePrivate() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue;
-    };
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -65,9 +63,10 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingOnePublic() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind public Integer anInt = testValue;
-    };
+    Object instance =
+        new Object() {
+          @Bind public Integer anInt = testValue;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -101,10 +100,11 @@ public class BoundFieldModuleTest extends TestCase {
   public void testBindingTwo() {
     final Integer testValue = 1024;
     final String testString = "Hello World!";
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue;
-      @Bind private String aString = testString;
-    };
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue;
+          @Bind private String aString = testString;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -115,9 +115,11 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingSuperType() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind(to = Number.class) private Integer anInt = testValue;
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = Number.class)
+          private Integer anInt = testValue;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -127,31 +129,36 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingSuperTypeAccessSubType() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind(to = Number.class) private Integer anInt = testValue;
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = Number.class)
+          private Integer anInt = testValue;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
     try {
       injector.getInstance(Integer.class);
+      fail();
     } catch (ConfigurationException e) {
-      assertContains(
-          e.getMessage(),
-          "Could not find a suitable constructor in java.lang.Integer");
+      assertContains(e.getMessage(), "Could not find a suitable constructor in java.lang.Integer");
     }
   }
 
   public void testBindingIncorrectTypeProviderFails() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind(to = String.class) private Provider<Integer> anIntProvider = new Provider<Integer>() {
-        @Override public Integer get() {
-          return testValue;
-        }
-      };
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = String.class)
+          private Provider<Integer> anIntProvider =
+              new Provider<Integer>() {
+                @Override
+                public Integer get() {
+                  return testValue;
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
@@ -162,7 +169,7 @@ public class BoundFieldModuleTest extends TestCase {
       assertContains(
           e.getMessage(),
           "Requested binding type \"java.lang.String\" is not "
-          + "assignable from field binding type \"java.lang.Integer\"");
+              + "assignable from field binding type \"java.lang.Integer\"");
     }
   }
 
@@ -172,21 +179,19 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingWithBindingAnnotation() {
     final Integer testValue1 = 1024, testValue2 = 2048;
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue1;
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue1;
 
-      @Bind
-      @SomeBindingAnnotation
-      private Integer anotherInt = testValue2;
-    };
+          @Bind @SomeBindingAnnotation private Integer anotherInt = testValue2;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
     assertEquals(testValue1, injector.getInstance(Integer.class));
     assertEquals(
-        testValue2,
-        injector.getInstance(Key.get(Integer.class, SomeBindingAnnotation.class)));
+        testValue2, injector.getInstance(Key.get(Integer.class, SomeBindingAnnotation.class)));
   }
 
   @Qualifier
@@ -195,74 +200,68 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingWithQualifier() {
     final Integer testValue1 = 1024, testValue2 = 2048;
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue1;
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue1;
 
-      @Bind
-      @SomeQualifier
-      private Integer anotherInt = testValue2;
-    };
+          @Bind @SomeQualifier private Integer anotherInt = testValue2;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
     assertEquals(testValue1, injector.getInstance(Integer.class));
-    assertEquals(
-        testValue2,
-        injector.getInstance(Key.get(Integer.class, SomeQualifier.class)));
+    assertEquals(testValue2, injector.getInstance(Key.get(Integer.class, SomeQualifier.class)));
   }
 
   public void testCanReuseBindingAnnotationsWithDifferentValues() {
     final Integer testValue1 = 1024, testValue2 = 2048;
     final String name1 = "foo", name2 = "bar";
-    Object instance = new Object() {
-      @Bind
-      @Named(name1)
-      private Integer anInt = testValue1;
+    Object instance =
+        new Object() {
+          @Bind
+          @Named(name1)
+          private Integer anInt = testValue1;
 
-      @Bind
-      @Named(name2)
-      private Integer anotherInt = testValue2;
-    };
+          @Bind
+          @Named(name2)
+          private Integer anotherInt = testValue2;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
-    assertEquals(
-        testValue1,
-        injector.getInstance(Key.get(Integer.class, Names.named(name1))));
-    assertEquals(
-        testValue2,
-        injector.getInstance(Key.get(Integer.class, Names.named(name2))));
+    assertEquals(testValue1, injector.getInstance(Key.get(Integer.class, Names.named(name1))));
+    assertEquals(testValue2, injector.getInstance(Key.get(Integer.class, Names.named(name2))));
   }
 
   public void testBindingWithValuedBindingAnnotation() {
     final Integer testValue1 = 1024, testValue2 = 2048;
     final String name = "foo";
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue1;
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue1;
 
-      @Bind
-      @Named(name)
-      private Integer anotherInt = testValue2;
-    };
+          @Bind
+          @Named(name)
+          private Integer anotherInt = testValue2;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
     assertEquals(testValue1, injector.getInstance(Integer.class));
-    assertEquals(
-        testValue2,
-        injector.getInstance(Key.get(Integer.class, Names.named(name))));
+    assertEquals(testValue2, injector.getInstance(Key.get(Integer.class, Names.named(name))));
   }
 
   public void testBindingWithGenerics() {
     final List<Integer> testIntList = Arrays.asList(new Integer[] {1, 2, 3});
     final List<Boolean> testBoolList = Arrays.asList(new Boolean[] {true, true, false});
-    Object instance = new Object() {
-      @Bind private List<Integer> anIntList = testIntList;
-      @Bind private List<Boolean> aBoolList = testBoolList;
-    };
+    Object instance =
+        new Object() {
+          @Bind private List<Integer> anIntList = testIntList;
+          @Bind private List<Boolean> aBoolList = testBoolList;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -285,9 +284,11 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testIncompatibleBindingType() {
     final Integer testInt = 1024;
-    Object instance = new Object() {
-      @Bind(to = String.class) private Integer anInt = testInt;
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = String.class)
+          private Integer anInt = testInt;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
@@ -295,25 +296,28 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "Requested binding type \"java.lang.String\" is not assignable from field binding type "
-          + "\"java.lang.Integer\"");
+              + "\"java.lang.Integer\"");
     }
   }
 
   public void testFailureOnMultipleBindingAnnotations() {
     final Integer testInt = 1024;
-    Object instance = new Object() {
-      @Bind
-      @Named("a")
-      @SomeBindingAnnotation
-      private Integer anInt = testInt;
-    };
+    Object instance =
+        new Object() {
+          @Bind
+          @Named("a")
+          @SomeBindingAnnotation
+          private Integer anInt = testInt;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(), "More than one annotation is specified for this binding.");
     }
@@ -321,11 +325,12 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingSuperTypeAndBindingAnnotation() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind(to = Number.class)
-      @Named("foo")
-      private Integer anInt = testValue;
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = Number.class)
+          @Named("foo")
+          private Integer anInt = testValue;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -335,13 +340,17 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingProvider() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind private Provider<Integer> anInt = new Provider<Integer>() {
-        @Override public Integer get() {
-          return testValue;
-        }
-      };
-    };
+    Object instance =
+        new Object() {
+          @Bind
+          private Provider<Integer> anInt =
+              new Provider<Integer>() {
+                @Override
+                public Integer get() {
+                  return testValue;
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -349,10 +358,31 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
-  public void testBindingNullField() {
-    Object instance = new Object() {
-      @Bind private Integer anInt = null;
-    };
+  public void testBindingJavaxProvider() {
+    final Integer testValue = 1024;
+    Object instance =
+        new Object() {
+          @Bind
+          private javax.inject.Provider<Integer> anInt =
+              new javax.inject.Provider<Integer>() {
+                @Override
+                public Integer get() {
+                  return testValue;
+                }
+              };
+        };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertEquals(testValue, injector.getInstance(Integer.class));
+  }
+
+  public void testBindingNonNullableNullField() {
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = null;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
@@ -360,16 +390,30 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+      assertContains(
+          e.getMessage(),
+          "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
   }
 
+  @Retention(RUNTIME)
+  private @interface Nullable {}
+
+  public void testBindingNullableNullField() {
+    Object instance =
+        new Object() {
+          @Bind @Nullable private Integer anInt = null;
+        };
+
+    Injector injector = Guice.createInjector(BoundFieldModule.of(instance));
+    assertNull(injector.getInstance(Integer.class));
+  }
+
   public void testBindingNullProvider() {
-    Object instance = new Object() {
-      @Bind private Provider<Integer> anIntProvider = null;
-    };
+    Object instance =
+        new Object() {
+          @Bind private Provider<Integer> anIntProvider = null;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
@@ -377,9 +421,29 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+      assertContains(
+          e.getMessage(),
+          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+              + "behavior.");
+    }
+  }
+
+  public void testBindingNullableNullProvider() {
+    Object instance =
+        new Object() {
+          @Bind @Nullable private Provider<Integer> anIntProvider = null;
+        };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertContains(
+          e.getMessage(),
+          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+              + "behavior.");
     }
   }
 
@@ -390,16 +454,18 @@ public class BoundFieldModuleTest extends TestCase {
       this.value = value;
     }
 
-    @Override public Integer get() {
+    @Override
+    public Integer get() {
       return value;
     }
   }
 
   public void testProviderSubclassesBindToTheProviderItself() {
     final IntegerProvider integerProvider = new IntegerProvider(1024);
-    Object instance = new Object() {
-      @Bind private IntegerProvider anIntProvider = integerProvider;
-    };
+    Object instance =
+        new Object() {
+          @Bind private IntegerProvider anIntProvider = integerProvider;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -409,9 +475,10 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testProviderSubclassesDoNotBindParameterizedType() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind private IntegerProvider anIntProvider = new IntegerProvider(testValue);
-    };
+    Object instance =
+        new Object() {
+          @Bind private IntegerProvider anIntProvider = new IntegerProvider(testValue);
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -424,6 +491,18 @@ public class BoundFieldModuleTest extends TestCase {
     }
   }
 
+  public void testNullableProviderSubclassesAllowNull() {
+    Object instance =
+        new Object() {
+          @Bind @Nullable private IntegerProvider anIntProvider = null;
+        };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertNull(injector.getInstance(IntegerProvider.class));
+  }
+
   private static class ParameterizedObject<T> {
     ParameterizedObject(T instance) {
       this.instance = instance;
@@ -433,7 +512,7 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   public void testBindParameterizedTypeFails() {
-    ParameterizedObject<Integer> instance = new ParameterizedObject<Integer>(0);
+    ParameterizedObject<Integer> instance = new ParameterizedObject<>(0);
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
@@ -456,10 +535,11 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   public void testBindArray() {
-    final Integer[] testArray = new Integer[] { 1024, 2048 };
-    Object instance = new Object() {
-      @Bind private Integer[] anIntArray = testArray;
-    };
+    final Integer[] testArray = new Integer[] {1024, 2048};
+    Object instance =
+        new Object() {
+          @Bind private Integer[] anIntArray = testArray;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -469,13 +549,17 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testRawProviderCannotBeBound() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind private Provider anIntProvider = new Provider() {
-        @Override public Object get() {
-          return testValue;
-        }
-      };
-    };
+    Object instance =
+        new Object() {
+          @Bind
+          private Provider anIntProvider =
+              new Provider() {
+                @Override
+                public Object get() {
+                  return testValue;
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
@@ -483,21 +567,26 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(),
+      assertContains(
+          e.getMessage(),
           "Non parameterized Provider fields must have an "
-          + "explicit binding class via @Bind(to = Foo.class)");
+              + "explicit binding class via @Bind(to = Foo.class)");
     }
   }
 
   public void testExplicitlyBoundRawProviderCanBeBound() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind(to = Integer.class) private Provider anIntProvider = new Provider() {
-        @Override public Object get() {
-          return testValue;
-        }
-      };
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = Integer.class)
+          private Provider anIntProvider =
+              new Provider() {
+                @Override
+                public Object get() {
+                  return testValue;
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -507,13 +596,17 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testRawProviderCanBindToIncorrectType() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind(to = String.class) private Provider anIntProvider = new Provider() {
-        @Override public Object get() {
-          return testValue;
-        }
-      };
-    };
+    Object instance =
+        new Object() {
+          @Bind(to = String.class)
+          private Provider anIntProvider =
+              new Provider() {
+                @Override
+                public Object get() {
+                  return testValue;
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -522,14 +615,18 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   public void testMultipleErrorsAreAggregated() {
-    Object instance = new Object() {
-      @Bind private Provider aProvider;
-      @Bind(to = String.class) private Integer anInt;
-    };
+    Object instance =
+        new Object() {
+          @Bind private Provider aProvider;
+
+          @Bind(to = String.class)
+          private Integer anInt;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertEquals(2, e.getErrorMessages().size());
     }
@@ -537,9 +634,10 @@ public class BoundFieldModuleTest extends TestCase {
 
   public void testBindingProviderWithProviderSubclassValue() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind private Provider<Integer> anIntProvider = new IntegerProvider(testValue);
-    };
+    Object instance =
+        new Object() {
+          @Bind private Provider<Integer> anIntProvider = new IntegerProvider(testValue);
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -548,34 +646,36 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   public void testBoundFieldsCannotBeInjected() {
-    Object instance = new Object() {
-      @Bind
-      @Inject
-      Integer anInt = 0;
-    };
+    Object instance =
+        new Object() {
+          @Bind @Inject Integer anInt = 0;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
-      assertContains(
-          e.getMessage(),
-          "Fields annotated with both @Bind and @Inject are illegal.");
+      assertContains(e.getMessage(), "Fields annotated with both @Bind and @Inject are illegal.");
     }
   }
 
   public void testIncrementingProvider() {
     final Integer testBaseValue = 1024;
-    Object instance = new Object() {
-      @Bind private Provider<Integer> anIntProvider = new Provider<Integer>() {
-        private int value = testBaseValue;
+    Object instance =
+        new Object() {
+          @Bind
+          private Provider<Integer> anIntProvider =
+              new Provider<Integer>() {
+                private int value = testBaseValue;
 
-        @Override public Integer get() {
-          return value++;
-        }
-      };
-    };
+                @Override
+                public Integer get() {
+                  return value++;
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -586,13 +686,17 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   public void testProviderDoesNotProvideDuringInjectorConstruction() {
-    Object instance = new Object() {
-      @Bind private Provider<Integer> myIntProvider = new Provider<Integer>() {
-        @Override public Integer get() {
-          throw new UnsupportedOperationException();
-        }
-      };
-    };
+    Object instance =
+        new Object() {
+          @Bind
+          private Provider<Integer> myIntProvider =
+              new Provider<Integer>() {
+                @Override
+                public Integer get() {
+                  throw new UnsupportedOperationException();
+                }
+              };
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Guice.createInjector(module);
@@ -601,7 +705,8 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   private static class InvalidBindableClass {
-    @Bind(to = String.class) Integer anInt;
+    @Bind(to = String.class)
+    Integer anInt;
   }
 
   public void testIncompatibleBindingTypeStackTraceHasUserFrame() {
@@ -620,17 +725,19 @@ public class BoundFieldModuleTest extends TestCase {
   private static class InjectedNumberProvider implements Provider<Number> {
     @Inject Integer anInt;
 
-    @Override public Number get() {
+    @Override
+    public Number get() {
       return anInt;
     }
   }
 
   public void testBoundProvidersAreInjected() {
     final Integer testValue = 1024;
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue;
-      @Bind private Provider<Number> aNumberProvider = new InjectedNumberProvider();
-    };
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue;
+          @Bind private Provider<Number> aNumberProvider = new InjectedNumberProvider();
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
@@ -641,10 +748,11 @@ public class BoundFieldModuleTest extends TestCase {
   public void testBoundInstancesAreInjected() {
     final Integer testValue = 1024;
     final InjectedNumberProvider testNumberProvider = new InjectedNumberProvider();
-    Object instance = new Object() {
-      @Bind private Integer anInt = testValue;
-      @Bind private InjectedNumberProvider aNumberProvider = testNumberProvider;
-    };
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue;
+          @Bind private InjectedNumberProvider aNumberProvider = testNumberProvider;
+        };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Guice.createInjector(module);
@@ -661,11 +769,12 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),
           "Requested binding type \"java.lang.String\" is not assignable from field binding type "
-          + "\"java.lang.Integer\"");
+              + "\"java.lang.Integer\"");
     }
   }
 
@@ -690,7 +799,8 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   static final class LazyClass {
-    @Bind(lazy = true) Integer foo = 1;
+    @Bind(lazy = true)
+    Integer foo = 1;
   }
 
   public void testFieldBound_lazy() {
@@ -701,7 +811,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(2, injector.getInstance(Integer.class).intValue());
   }
 
-  public void testFieldBound_lazy_rejectNull() {
+  public void testNonNullableFieldBound_lazy_rejectNull() {
     LazyClass asProvider = new LazyClass();
     Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
     assertEquals(1, injector.getInstance(Integer.class).intValue());
@@ -710,23 +820,72 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+      assertContains(
+          e.getMessage(),
+          "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
   }
 
-  static final class LazyProviderClass {
-    @Bind(lazy = true) Provider<Integer> foo = Providers.of(null);
+  static final class LazyClassNullable {
+    @Bind(lazy = true)
+    @Nullable
+    Integer foo = 1;
   }
 
-  public void testFieldBoundAsProvider_rejectProvider() {
+  public void testNullableFieldBound_lazy_allowNull() {
+    LazyClassNullable asProvider = new LazyClassNullable();
+    Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    asProvider.foo = null;
+    assertNull(injector.getInstance(Integer.class));
+  }
+
+  static final class LazyProviderClass {
+    @Bind(lazy = true)
+    Provider<Integer> foo = Providers.of(null);
+  }
+
+  public void testFieldBoundAsProvider_lazy() {
     LazyProviderClass asProvider = new LazyProviderClass();
+    Provider<Integer> provider =
+        Guice.createInjector(BoundFieldModule.of(asProvider)).getProvider(Integer.class);
+    assertNull(provider.get());
+    asProvider.foo = Providers.of(1);
+    assertEquals(1, provider.get().intValue());
+    asProvider.foo =
+        new Provider<Integer>() {
+          @Override
+          public Integer get() {
+            throw new RuntimeException("boom");
+          }
+        };
     try {
-      Guice.createInjector(BoundFieldModule.of(asProvider));
+      provider.get();
       fail();
-    } catch (CreationException e) {
-      assertContains(e.getMessage(), "'lazy' is incompatible with Provider valued fields");
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(), "boom");
+    }
+  }
+
+  private static final class LazyNonTransparentProvider {
+    @Bind(lazy = true)
+    @Nullable
+    private IntegerProvider anIntProvider = null;
+  }
+
+  public void testFieldBoundAsNonTransparentProvider_lazy() {
+    LazyNonTransparentProvider instance = new LazyNonTransparentProvider();
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertNull(injector.getInstance(IntegerProvider.class));
+    instance.anIntProvider = new IntegerProvider(3);
+    assertEquals(3, injector.getInstance(IntegerProvider.class).get().intValue());
+    try {
+      injector.getInstance(Integer.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      // expected because we don't interpret IntegerProvider as a Provider<Integer>
     }
   }
 }

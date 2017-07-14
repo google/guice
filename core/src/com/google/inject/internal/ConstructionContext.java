@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
-
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,28 +58,31 @@ final class ConstructionContext<T> {
     invocationHandlers = null;
   }
 
-  public Object createProxy(Errors errors, InjectorOptions injectorOptions,
-      Class<?> expectedType) throws ErrorsException {
+  public Object createProxy(Errors errors, InjectorOptions injectorOptions, Class<?> expectedType)
+      throws ErrorsException {
     if (injectorOptions.disableCircularProxies) {
-      throw errors.circularProxiesDisabled(expectedType).toException();
+      throw errors.circularDependenciesDisabled(expectedType).toException();
     }
     if (!expectedType.isInterface()) {
-      throw errors.cannotSatisfyCircularDependency(expectedType).toException();
+      throw errors.cannotProxyClass(expectedType).toException();
     }
 
     if (invocationHandlers == null) {
-      invocationHandlers = new ArrayList<DelegatingInvocationHandler<T>>();
+      invocationHandlers = new ArrayList<>();
     }
 
-    DelegatingInvocationHandler<T> invocationHandler = new DelegatingInvocationHandler<T>();
+    DelegatingInvocationHandler<T> invocationHandler = new DelegatingInvocationHandler<>();
     invocationHandlers.add(invocationHandler);
 
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).
     ClassLoader classLoader = BytecodeGen.getClassLoader(expectedType);
-    return expectedType.cast(Proxy.newProxyInstance(classLoader,
-        new Class[] { expectedType, CircularDependencyProxy.class }, invocationHandler));
+    return expectedType.cast(
+        Proxy.newProxyInstance(
+            classLoader,
+            new Class[] {expectedType, CircularDependencyProxy.class},
+            invocationHandler));
   }
 
   public void setProxyDelegates(T delegate) {

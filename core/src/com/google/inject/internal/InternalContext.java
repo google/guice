@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,98 +16,25 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.DependencyAndSource;
-
-import java.util.Arrays;
-import java.util.List;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
- * Internal context. Used to coordinate injections and support circular
- * dependencies.
+ * Internal context. Used to coordinate injections and support circular dependencies.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-final class InternalContext {
+final class InternalContext implements AutoCloseable {
 
   private final InjectorOptions options;
 
-  private Map<Object, ConstructionContext<?>> constructionContexts = Maps.newHashMap();
+  private final Map<Object, ConstructionContext<?>> constructionContexts =
+      new IdentityHashMap<Object, ConstructionContext<?>>();
 
   /** Keeps track of the type that is currently being requested for injection. */
   private Dependency<?> dependency;
-
-  /** Keeps track of the hierarchy of types needed during injection. */
-  private final DependencyStack state = new DependencyStack();
-
-  InternalContext(InjectorOptions options) {
-    this.options = options;
-  }
-
-  public InjectorOptions getInjectorOptions() {
-    return options;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T> ConstructionContext<T> getConstructionContext(Object key) {
-    ConstructionContext<T> constructionContext
-        = (ConstructionContext<T>) constructionContexts.get(key);
-    if (constructionContext == null) {
-      constructionContext = new ConstructionContext<T>();
-      constructionContexts.put(key, constructionContext);
-    }
-    return constructionContext;
-  }
-
-  public Dependency<?> getDependency() {
-    return dependency;
-  }
-
-  /** Sets the new current dependency & adds it to the state. */
-  public Dependency<?> pushDependency(Dependency<?> dependency, Object source) {
-    Dependency<?> previous = this.dependency;
-    this.dependency = dependency;
-    state.add(dependency, source);
-    return previous;
-  }
-
-  /** Pops the current state & sets the new dependency. */
-  public void popStateAndSetDependency(Dependency<?> newDependency) {
-    state.pop();
-    this.dependency = newDependency;
-  }
-
-  /** Adds to the state without setting the dependency. */
-  public void pushState(Key<?> key, Object source) {
-    state.add(key, source);
-  }
-  
-  /** Pops from the state without setting a dependency. */
-  public void popState() {
-    state.pop();
-  }
-
-  /** Returns the current dependency chain (all the state). */
-  public List<DependencyAndSource> getDependencyChain() {
-    ImmutableList.Builder<DependencyAndSource> builder = ImmutableList.builder();
-    for (int i = 0; i < state.size(); i += 2) {
-      Object evenEntry = state.get(i);
-      Dependency<?> dependency;
-      if (evenEntry instanceof Key) {
-        dependency = Dependency.get((Key<?>) evenEntry);
-      } else {
-        dependency = (Dependency<?>) evenEntry;
-      }
-      builder.add(new DependencyAndSource(dependency, state.get(i + 1)));
-    }
-    return builder.build();
-  }
 
   /**
    * Keeps track of the hierarchy of types needed during injection.
@@ -116,29 +43,126 @@ final class InternalContext {
    * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
    * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
    */
-  private static final class DependencyStack {
-    private Object[] elements = new Object[16];
-    private int size = 0;
+  private Object[] dependencyStack = new Object[16];
 
-    public void add(Object dependencyOrKey, Object source) {
-      if (elements.length < size + 2) {
-        elements = Arrays.copyOf(elements, (elements.length*3)/2 + 2);
-      }
-      elements[size++] = dependencyOrKey;
-      elements[size++] = source;
+  private int dependencyStackSize = 0;
+
+
+  /**
+   * The number of times {@link #enter()} has been called + 1 for initial construction. This value
+   * is decremented when {@link #exit()} is called.
+   */
+  private int enterCount;
+
+  /**
+   * A single element array to clear when the {@link #enterCount} hits {@code 0}.
+   *
+   * <p>This is the value stored in the {@code InjectorImpl.localContext} thread local.
+   */
+  private final Object[] toClear;
+
+  InternalContext(InjectorOptions options, Object[] toClear) {
+    this.options = options;
+    this.toClear = toClear;
+    this.enterCount = 1;
+  }
+
+  /** Should only be called by InjectorImpl.enterContext(). */
+  void enter() {
+    enterCount++;
+  }
+
+  /** Should be called any any method that received an instance via InjectorImpl.enterContext(). */
+  @Override
+  public void close() {
+    int newCount = --enterCount;
+    if (newCount < 0) {
+      throw new IllegalStateException("Called close() too many times");
     }
-
-    public void pop() {
-      elements[--size] = null;
-      elements[--size] = null;
-    }
-
-    public Object get(int i) {
-      return elements[i];
-    }
-
-    public int size() {
-      return size;
+    if (newCount == 0) {
+      toClear[0] = null;
     }
   }
+
+  InjectorOptions getInjectorOptions() {
+    return options;
+  }
+
+  @SuppressWarnings("unchecked")
+  <T> ConstructionContext<T> getConstructionContext(Object key) {
+    ConstructionContext<T> constructionContext =
+        (ConstructionContext<T>) constructionContexts.get(key);
+    if (constructionContext == null) {
+      constructionContext = new ConstructionContext<>();
+      constructionContexts.put(key, constructionContext);
+    }
+    return constructionContext;
+  }
+
+  Dependency<?> getDependency() {
+    return dependency;
+  }
+
+  /** Sets the new current dependency & adds it to the state. */
+  Dependency<?> pushDependency(Dependency<?> dependency, Object source) {
+    Dependency<?> previous = this.dependency;
+    this.dependency = dependency;
+    doPushState(dependency, source);
+    return previous;
+  }
+
+
+  /** Pops the current state & sets the new dependency. */
+  void popStateAndSetDependency(Dependency<?> newDependency) {
+    popState();
+    this.dependency = newDependency;
+  }
+
+
+  /** Adds to the state without setting the dependency. */
+  void pushState(com.google.inject.Key<?> key, Object source) {
+    doPushState(key, source);
+  }
+
+
+  private void doPushState(Object dependencyOrKey, Object source) {
+    int localSize = dependencyStackSize;
+    Object[] localStack = dependencyStack;
+    if (localStack.length < localSize + 2) {
+      localStack = dependencyStack =
+        java.util.Arrays.copyOf(localStack, (localStack.length * 3) / 2 + 2);
+    }
+    localStack[localSize++] = dependencyOrKey;
+    localStack[localSize++] = source;
+    dependencyStackSize = localSize;
+  }
+
+
+  /** Pops from the state without setting a dependency. */
+  void popState() {
+    // N.B. we don't null out the array entries.  It isn't necessary since all the objects in the
+    // array (Key, Dependency, or Binding source objects) are all tied to the lifetime of the
+    // injector, which is greater than the lifetime of this object.  So removing them from the array
+    // doesn't matter.
+    dependencyStackSize -= 2;
+  }
+
+
+  /** Returns the current dependency chain (all the state stored in the dependencyStack). */
+  java.util.List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
+    com.google.common.collect.ImmutableList.Builder<com.google.inject.spi.DependencyAndSource>
+        builder = com.google.common.collect.ImmutableList.builder();
+    for (int i = 0; i < dependencyStackSize; i += 2) {
+      Object evenEntry = dependencyStack[i];
+      Dependency<?> dependency;
+      if (evenEntry instanceof com.google.inject.Key) {
+        dependency = Dependency.get((com.google.inject.Key<?>) evenEntry);
+      } else {
+        dependency = (Dependency<?>) evenEntry;
+      }
+      builder.add(new com.google.inject.spi.DependencyAndSource(dependency, dependencyStack[i + 1]));
+    }
+    return builder.build();
+  }
+
 }

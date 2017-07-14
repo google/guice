@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,46 +20,46 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ErrorHandlingTest {
 
   public static void main(String[] args) throws CreationException {
     try {
       Guice.createInjector(new MyModule());
-    }
-    catch (CreationException e) {
+    } catch (CreationException e) {
       e.printStackTrace();
       System.err.println("--");
     }
 
-    Injector bad = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toProvider(new Provider<String>() {
-          public String get() {
-            return null;
-          }
-        });
-      }
-    });
+    Injector bad =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class)
+                    .toProvider(
+                        new Provider<String>() {
+                          @Override
+                          public String get() {
+                            return null;
+                          }
+                        });
+              }
+            });
     try {
       bad.getInstance(String.class);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       System.err.println("--");
     }
     try {
       bad.getInstance(NeedsString.class);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       System.err.println("--");
     }
@@ -69,29 +69,34 @@ public class ErrorHandlingTest {
     @Inject String mofo;
   }
 
-  @Inject @Named("missing")
+  @Inject
+  @Named("missing")
   static List<String> missing = null;
 
   static class Foo {
     @Inject
     public Foo(Runnable r) {}
 
-    @Inject void setNames(List<String> names) {}
+    @Inject
+    void setNames(List<String> names) {}
   }
 
   static class Bar {
     // Invalid constructor.
     Bar(String s) {}
 
-    @Inject void setNumbers(@Named("numbers") List<Integer> numbers) {}
+    @Inject
+    void setNumbers(@Named("numbers") List<Integer> numbers) {}
 
-    @Inject void bar(@Named("foo") String s) {}
+    @Inject
+    void bar(@Named("foo") String s) {}
   }
 
   static class Tee {
     @Inject String s;
 
-    @Inject void tee(String s, int i) {}
+    @Inject
+    void tee(String s, int i) {}
 
     @Inject Invalid invalid;
   }
@@ -100,11 +105,11 @@ public class ErrorHandlingTest {
     Invalid(String s) {}
   }
 
-  @SuppressWarnings("MoreThanOneScopeAnnotationOnClass") // suppress compiler error to test
-  @Singleton 
+  // suppress compiler error to test
+  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass", "multiple-scope"})
+  @Singleton
   @GoodScope
-  static class TooManyScopes {
-  }
+  static class TooManyScopes {}
 
   @Target(ElementType.TYPE)
   @Retention(RUNTIME)
@@ -117,6 +122,7 @@ public class ErrorHandlingTest {
   interface I {}
 
   static class MyModule extends AbstractModule {
+    @Override
     protected void configure() {
       bind(Runnable.class);
       bind(Foo.class);
@@ -127,15 +133,18 @@ public class ErrorHandlingTest {
       bind(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       bind(TooManyScopes.class);
       bindScope(BadScope.class, Scopes.SINGLETON);
-      bind(Object.class).toInstance(new Object() {
-        @Inject void foo() {
-          throw new RuntimeException();
-        }
-      });
+      bind(Object.class)
+          .toInstance(
+              new Object() {
+                @Inject
+                void foo() {
+                  throw new RuntimeException();
+                }
+              });
       requestStaticInjection(ErrorHandlingTest.class);
 
       addError("I don't like %s", "you");
-      
+
       Object o = "2";
       try {
         Integer i = (Integer) o;

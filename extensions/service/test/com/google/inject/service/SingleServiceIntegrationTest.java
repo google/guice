@@ -1,8 +1,5 @@
 package com.google.inject.service;
 
-
-import junit.framework.TestCase;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -11,10 +8,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import junit.framework.TestCase;
 
-/**
- * Tests using Async Service.
- */
+/** Tests using Async Service. */
 
 public class SingleServiceIntegrationTest extends TestCase {
 
@@ -23,21 +19,24 @@ public class SingleServiceIntegrationTest extends TestCase {
 
     final CountDownLatch startLatch = new CountDownLatch(1);
     final CountDownLatch stopLatch = new CountDownLatch(1);
-    AsyncService service = new AsyncService(executor) {
-      @Override protected void onStart() {
-        assertEquals(1, startLatch.getCount());
-        assertEquals(1, stopLatch.getCount());
+    AsyncService service =
+        new AsyncService(executor) {
+          @Override
+          protected void onStart() {
+            assertEquals(1, startLatch.getCount());
+            assertEquals(1, stopLatch.getCount());
 
-        startLatch.countDown();
-      }
+            startLatch.countDown();
+          }
 
-      @Override protected void onStop() {
-        assertEquals(0, startLatch.getCount());
-        assertEquals(1, stopLatch.getCount());
+          @Override
+          protected void onStop() {
+            assertEquals(0, startLatch.getCount());
+            assertEquals(1, stopLatch.getCount());
 
-        stopLatch.countDown();
-      }
-    };
+            stopLatch.countDown();
+          }
+        };
 
     Future<?> future = service.start();
     // This should not pass!  TODO(sameb): Why?  Looks like it should to me
@@ -61,15 +60,18 @@ public class SingleServiceIntegrationTest extends TestCase {
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     final AtomicInteger integer = new AtomicInteger(2);
-    AsyncService service = new AsyncService(executor) {
-      @Override protected void onStart() {
-        assertEquals(2, integer.getAndDecrement());
-      }
+    AsyncService service =
+        new AsyncService(executor) {
+          @Override
+          protected void onStart() {
+            assertEquals(2, integer.getAndDecrement());
+          }
 
-      @Override protected void onStop() {
-        assertEquals(1, integer.getAndDecrement());
-      }
-    };
+          @Override
+          protected void onStop() {
+            assertEquals(1, integer.getAndDecrement());
+          }
+        };
 
     service.start().get(2, TimeUnit.SECONDS);
     service.stop().get(2, TimeUnit.SECONDS);

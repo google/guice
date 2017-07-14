@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,16 +25,13 @@ import static org.easymock.EasyMock.verify;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import junit.framework.TestCase;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.http.HttpServlet;
+import junit.framework.TestCase;
 
 /**
- * This gorgeous test asserts that multiple servlet pipelines can
- * run in the SAME JVM. booya.
+ * This gorgeous test asserts that multiple servlet pipelines can run in the SAME JVM. booya.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -61,14 +58,16 @@ public class MultipleServletInjectorsTest extends TestCase {
       @Override
       protected Injector getInjector() {
         // Cache this injector in the test for later testing...
-        return injectorOne = Guice.createInjector(new ServletModule() {
+        return injectorOne =
+            Guice.createInjector(
+                new ServletModule() {
 
-          @Override
-          protected void configureServlets() {
-            // This creates a ManagedFilterPipeline internally...
-            serve("/*").with(DummyServlet.class);
-          }
-        });
+                  @Override
+                  protected void configureServlets() {
+                    // This creates a ManagedFilterPipeline internally...
+                    serve("/*").with(DummyServlet.class);
+                  }
+                });
       }
     }.contextInitialized(new ServletContextEvent(fakeContextOne));
 
@@ -81,16 +80,18 @@ public class MultipleServletInjectorsTest extends TestCase {
 
       @Override
       protected Injector getInjector() {
-        return injectorTwo = Guice.createInjector(new ServletModule() {
+        return injectorTwo =
+            Guice.createInjector(
+                new ServletModule() {
 
-          @Override
-          protected void configureServlets() {
-            // This creates a ManagedFilterPipeline internally...
-            filter("/8").through(DummyFilterImpl.class);
+                  @Override
+                  protected void configureServlets() {
+                    // This creates a ManagedFilterPipeline internally...
+                    filter("/8").through(DummyFilterImpl.class);
 
-            serve("/*").with(HttpServlet.class);
-          }
-        });
+                    serve("/*").with(HttpServlet.class);
+                  }
+                });
       }
     }.contextInitialized(new ServletContextEvent(fakeContextTwo));
 

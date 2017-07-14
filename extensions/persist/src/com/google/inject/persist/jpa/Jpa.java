@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.google.inject.persist.jpa;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -27,4 +26,5 @@ import java.lang.annotation.RetentionPolicy;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Retention(RetentionPolicy.RUNTIME)
-@BindingAnnotation @interface Jpa {}
+@BindingAnnotation
+@interface Jpa {}

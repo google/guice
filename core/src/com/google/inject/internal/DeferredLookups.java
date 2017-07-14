@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ProviderLookup;
-
 import java.util.List;
 
 /**
@@ -41,22 +40,22 @@ final class DeferredLookups implements Lookups {
     this.injector = injector;
   }
 
-  /**
-   * Initialize the specified lookups, either immediately or when the injector is created.
-   */
+  /** Initialize the specified lookups, either immediately or when the injector is created. */
   void initialize(Errors errors) {
     injector.lookups = injector;
     new LookupProcessor(errors).process(injector, lookups);
   }
 
+  @Override
   public <T> Provider<T> getProvider(Key<T> key) {
-    ProviderLookup<T> lookup = new ProviderLookup<T>(key, key);
+    ProviderLookup<T> lookup = new ProviderLookup<>(key, key);
     lookups.add(lookup);
     return lookup.getProvider();
   }
 
+  @Override
   public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
-    MembersInjectorLookup<T> lookup = new MembersInjectorLookup<T>(type, type);
+    MembersInjectorLookup<T> lookup = new MembersInjectorLookup<>(type, type);
     lookups.add(lookup);
     return lookup.getMembersInjector();
   }

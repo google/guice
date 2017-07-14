@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ package com.google.inject.grapher;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.io.IOException;
 import java.util.Set;
 
@@ -31,9 +30,7 @@ import java.util.Set;
  */
 public interface InjectorGrapher {
 
-  /**
-   * Graphs the guice dependency graph for the given injector using default starting keys.
-   */
+  /** Graphs the guice dependency graph for the given injector using default starting keys. */
   void graph(Injector injector) throws IOException;
 
   /**

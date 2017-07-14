@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +19,10 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.matcher.Matcher;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Ties a matcher to a method interceptor.
@@ -44,15 +42,19 @@ final class MethodAspect {
    *     annotatedWith(Transactional.class)}.
    * @param interceptors to apply
    */
-  MethodAspect(Matcher<? super Class<?>> classMatcher,
-      Matcher<? super Method> methodMatcher, List<MethodInterceptor> interceptors) {
+  MethodAspect(
+      Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher,
+      List<MethodInterceptor> interceptors) {
     this.classMatcher = checkNotNull(classMatcher, "class matcher");
     this.methodMatcher = checkNotNull(methodMatcher, "method matcher");
     this.interceptors = checkNotNull(interceptors, "interceptors");
   }
 
-  MethodAspect(Matcher<? super Class<?>> classMatcher,
-      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
+  MethodAspect(
+      Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher,
+      MethodInterceptor... interceptors) {
     this(classMatcher, methodMatcher, Arrays.asList(interceptors));
   }
 

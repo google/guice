@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.spi.TypeConverterBinding;
-
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +63,8 @@ public interface Injector {
    * you, you'll never need to use this method.
    *
    * @param instance to inject members on
-   *
    * @see Binder#getMembersInjector(Class) for a preferred alternative that supports checks before
-   *  run time
+   *     run time
    */
   void injectMembers(Object instance);
 
@@ -76,7 +74,7 @@ public interface Injector {
    *
    * @param typeLiteral type to get members injector for
    * @see Binder#getMembersInjector(TypeLiteral) for an alternative that offers up front error
-   *  detection
+   *     detection
    * @since 2.0
    */
   <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral);
@@ -87,8 +85,7 @@ public interface Injector {
    * instead to get increased up front error detection.
    *
    * @param type type to get members injector for
-   * @see Binder#getMembersInjector(Class) for an alternative that offers up front error
-   *  detection
+   * @see Binder#getMembersInjector(Class) for an alternative that offers up front error detection
    * @since 2.0
    */
   <T> MembersInjector<T> getMembersInjector(Class<T> type);
@@ -97,9 +94,9 @@ public interface Injector {
    * Returns this injector's <strong>explicit</strong> bindings.
    *
    * <p>The returned map does not include bindings inherited from a {@link #getParent() parent
-   * injector}, should one exist. The returned map is guaranteed to iterate (for example, with
-   * its {@link Map#entrySet()} iterator) in the order of insertion. In other words, the order in
-   * which bindings appear in user Modules.
+   * injector}, should one exist. The returned map is guaranteed to iterate (for example, with its
+   * {@link Map#entrySet()} iterator) in the order of insertion. In other words, the order in which
+   * bindings appear in user Modules.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    */
@@ -115,7 +112,7 @@ public interface Injector {
    * injector}, should one exist.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
-   * 
+   *
    * @since 3.0
    */
   Map<Key<?>, Binding<?>> getAllBindings();
@@ -142,17 +139,17 @@ public interface Injector {
    * @since 2.0
    */
   <T> Binding<T> getBinding(Class<T> type);
-  
+
   /**
-   * Returns the binding if it already exists, or null if does not exist. Unlike
-   * {@link #getBinding(Key)}, this does not attempt to create just-in-time bindings
-   * for keys that aren't bound.
-   * 
-   * <p> This method is part of the Guice SPI and is intended for use by tools and extensions.
-   * 
+   * Returns the binding if it already exists, or null if does not exist. Unlike {@link
+   * #getBinding(Key)}, this does not attempt to create just-in-time bindings for keys that aren't
+   * bound.
+   *
+   * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+   *
    * @since 3.0
    */
-  <T> Binding<T> getExistingBinding(Key<T> key);  
+  <T> Binding<T> getExistingBinding(Key<T> key);
 
   /**
    * Returns all explicit bindings for {@code type}.
@@ -171,8 +168,8 @@ public interface Injector {
   <T> Provider<T> getProvider(Key<T> key);
 
   /**
-   * Returns the provider used to obtain instances for the given type. When feasible, avoid
-   * using this method, in favor of having Guice inject your dependencies ahead of time.
+   * Returns the provider used to obtain instances for the given type. When feasible, avoid using
+   * this method, in favor of having Guice inject your dependencies ahead of time.
    *
    * @throws ConfigurationException if this injector cannot find or create the provider.
    * @see Binder#getProvider(Class) for an alternative that offers up front error detection
@@ -213,9 +210,9 @@ public interface Injector {
    *
    * <p>Just-in-time bindings created for child injectors will be created in an ancestor injector
    * whenever possible. This allows for scoped instances to be shared between injectors. Use
-   * explicit bindings to prevent bindings from being shared with the parent injector.  Optional
-   * injections in just-in-time bindings (created in the parent injector) may be silently
-   * ignored if the optional dependencies are from the child injector.
+   * explicit bindings to prevent bindings from being shared with the parent injector. Optional
+   * injections in just-in-time bindings (created in the parent injector) may be silently ignored if
+   * the optional dependencies are from the child injector.
    *
    * <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
    * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
@@ -243,12 +240,12 @@ public interface Injector {
   Injector createChildInjector(Module... modules);
 
   /**
-   * Returns a map containing all scopes in the injector. The maps keys are scoping annotations
-   * like {@code Singleton.class}, and the values are scope instances, such as {@code
-   * Scopes.SINGLETON}. The returned map is immutable.
+   * Returns a map containing all scopes in the injector. The maps keys are scoping annotations like
+   * {@code Singleton.class}, and the values are scope instances, such as {@code Scopes.SINGLETON}.
+   * The returned map is immutable.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
-   * 
+   *
    * @since 3.0
    */
   Map<Class<? extends Annotation>, Scope> getScopeBindings();
@@ -258,7 +255,7 @@ public interface Injector {
    * immutable.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
-   * 
+   *
    * @since 3.0
    */
   Set<TypeConverterBinding> getTypeConverterBindings();

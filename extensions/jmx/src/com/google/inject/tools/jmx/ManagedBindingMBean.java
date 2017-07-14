@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,18 +23,12 @@ package com.google.inject.tools.jmx;
  */
 public interface ManagedBindingMBean {
 
-  /**
-   * Gets the source of this binding.
-   */
+  /** Gets the source of this binding. */
   String getSource();
 
-  /**
-   * Gets the provider to which this binding is bound.
-   */
+  /** Gets the provider to which this binding is bound. */
   String getProvider();
 
-  /**
-   * Gets the binding key.
-   */
+  /** Gets the binding key. */
   String getKey();
 }

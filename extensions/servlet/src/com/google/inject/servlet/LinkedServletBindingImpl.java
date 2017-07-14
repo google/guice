@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,37 +16,38 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
-
 import java.util.Map;
-
 import javax.servlet.http.HttpServlet;
 
 /**
  * Default implementation of LinkedServletBinding.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extends HttpServlet>>
     implements LinkedServletBinding {
 
-  LinkedServletBindingImpl(Map<String, String> initParams, String pattern,
-      Key<? extends HttpServlet> target, UriPatternMatcher patternMatcher) {
-    super(initParams, pattern, target, patternMatcher);
+  LinkedServletBindingImpl(
+      Map<String, String> initParams,
+      Key<? extends HttpServlet> target,
+      UriPatternMatcher patternMatcher) {
+    super(initParams, target, patternMatcher);
   }
 
+  @Override
   public Key<? extends HttpServlet> getLinkedKey() {
     return getTarget();
   }
 
-  @Override public String toString() {
-    return Objects.toStringHelper(LinkedServletBinding.class)
-      .add("pattern", getPattern())
-      .add("initParams", getInitParams())
-      .add("uriPatternType", getUriPatternType())
-      .add("linkedServletKey", getLinkedKey())
-      .toString();
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(LinkedServletBinding.class)
+        .add("pattern", getPattern())
+        .add("initParams", getInitParams())
+        .add("uriPatternType", getUriPatternType())
+        .add("linkedServletKey", getLinkedKey())
+        .toString();
   }
-  
 }

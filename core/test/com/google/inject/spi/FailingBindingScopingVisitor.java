@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,25 +17,27 @@
 package com.google.inject.spi;
 
 import com.google.inject.Scope;
-
-import junit.framework.AssertionFailedError;
-
 import java.lang.annotation.Annotation;
+import junit.framework.AssertionFailedError;
 
 public class FailingBindingScopingVisitor implements BindingScopingVisitor<Void> {
 
+  @Override
   public Void visitEagerSingleton() {
     throw new AssertionFailedError();
   }
 
+  @Override
   public Void visitScope(Scope scope) {
     throw new AssertionFailedError();
   }
 
+  @Override
   public Void visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
     throw new AssertionFailedError();
   }
 
+  @Override
   public Void visitNoScoping() {
     throw new AssertionFailedError();
   }

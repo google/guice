@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,43 +20,47 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.util.Types.listOf;
 
 import com.google.inject.util.Types;
-
-import junit.framework.TestCase;
-
 import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * Demonstrates type reification.
- * 
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class TypeLiteralInjectionTest extends TestCase {
 
   public void testBindingToRawTypeLiteralIsNotAllowed() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(TypeLiteral.class).toInstance(TypeLiteral.get(String.class));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(TypeLiteral.class).toInstance(TypeLiteral.get(String.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "Binding to core guice framework type is not allowed: TypeLiteral");
     }
   }
 
   public void testBindingToParameterizedTypeLiteralIsNotAllowed() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(new TypeLiteral<TypeLiteral<String>>() {})
-              .toInstance(TypeLiteral.get(String.class));
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(new TypeLiteral<TypeLiteral<String>>() {})
+                  .toInstance(TypeLiteral.get(String.class));
+            }
+          });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "Binding to core guice framework type is not allowed: TypeLiteral");
     }
   }
@@ -70,8 +74,11 @@ public class TypeLiteralInjectionTest extends TestCase {
       Guice.createInjector().getInstance(B.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(), TypeLiteral.class.getName() + "<java.util.List<T>> "
-          + "cannot be used as a key; It is not fully specified.");
+      assertContains(
+          expected.getMessage(),
+          TypeLiteral.class.getName()
+              + "<java.util.List<T>> "
+              + "cannot be used as a key; It is not fully specified.");
     }
   }
 
@@ -88,8 +95,8 @@ public class TypeLiteralInjectionTest extends TestCase {
       Guice.createInjector().getInstance(TypeLiteral.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
-          "Cannot inject a TypeLiteral that has no type parameter");
+      assertContains(
+          expected.getMessage(), "Cannot inject a TypeLiteral that has no type parameter");
     }
   }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -32,14 +32,11 @@ import com.google.inject.PrivateBinder;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.PrivateElements;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public final class PrivateElementsImpl implements PrivateElements {
 
   /*
@@ -58,16 +55,19 @@ public final class PrivateElementsImpl implements PrivateElements {
 
   /** lazily instantiated */
   private ImmutableMap<Key<?>, Object> exposedKeysToSources;
+
   private Injector injector;
 
   public PrivateElementsImpl(Object source) {
     this.source = checkNotNull(source, "source");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
+  @Override
   public List<Element> getElements() {
     if (elements == null) {
       elements = ImmutableList.copyOf(elementsMutable);
@@ -77,6 +77,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     return elements;
   }
 
+  @Override
   public Injector getInjector() {
     return injector;
   }
@@ -86,6 +87,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     this.injector = checkNotNull(injector, "injector");
   }
 
+  @Override
   public Set<Key<?>> getExposedKeys() {
     if (exposedKeysToSources == null) {
       Map<Key<?>, Object> exposedKeysToSourcesMutable = Maps.newLinkedHashMap();
@@ -99,6 +101,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     return exposedKeysToSources.keySet();
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }
@@ -111,6 +114,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     exposureBuilders.add(exposureBuilder);
   }
 
+  @Override
   public void applyTo(Binder binder) {
     PrivateBinder privateBinder = binder.withSource(source).newPrivateBinder();
 
@@ -124,6 +128,7 @@ public final class PrivateElementsImpl implements PrivateElements {
     }
   }
 
+  @Override
   public Object getExposedSource(Key<?> key) {
     getExposedKeys(); // ensure exposedKeysToSources is populated
     Object source = exposedKeysToSources.get(key);
@@ -131,8 +136,9 @@ public final class PrivateElementsImpl implements PrivateElements {
     return source;
   }
 
-  @Override public String toString() {
-    return Objects.toStringHelper(PrivateElements.class)
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(PrivateElements.class)
         .add("exposedKeys", getExposedKeys())
         .add("source", getSource())
         .toString();

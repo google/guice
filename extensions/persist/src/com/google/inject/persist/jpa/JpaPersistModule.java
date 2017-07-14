@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,9 +36,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * JPA provider for guice persist.
@@ -49,16 +50,17 @@ public final class JpaPersistModule extends PersistModule {
   private final String jpaUnit;
 
   public JpaPersistModule(String jpaUnit) {
-    Preconditions.checkArgument(null != jpaUnit && jpaUnit.length() > 0,
-        "JPA unit name must be a non-empty string.");
+    Preconditions.checkArgument(
+        null != jpaUnit && jpaUnit.length() > 0, "JPA unit name must be a non-empty string.");
     this.jpaUnit = jpaUnit;
   }
 
-  private Map<?,?> properties;
+  private Map<?, ?> properties;
   private MethodInterceptor transactionInterceptor;
   private MethodInterceptor requiresUnitOfWorkInterceptor;
 
-  @Override protected void configurePersistence() {
+  @Override
+  protected void configurePersistence() {
     bindConstant().annotatedWith(Jpa.class).to(jpaUnit);
 
     bind(JpaPersistService.class).in(Singleton.class);
@@ -82,7 +84,8 @@ public final class JpaPersistModule extends PersistModule {
     }
   }
 
-  @Override protected MethodInterceptor getTransactionInterceptor() {
+  @Override
+  protected MethodInterceptor getTransactionInterceptor() {
     return transactionInterceptor;
   }
 
@@ -96,12 +99,12 @@ public final class JpaPersistModule extends PersistModule {
 
   /**
    * Configures the JPA persistence provider with a set of properties.
-   * 
-   * @param properties A set of name value pairs that configure a JPA persistence
-   *     provider as per the specification.
+   *
+   * @param properties A set of name value pairs that configure a JPA persistence provider as per
+   *     the specification.
    * @since 4.0 (since 3.0 with a parameter type of {@code java.util.Properties})
    */
-  public JpaPersistModule properties(Map<?,?> properties) {
+  public JpaPersistModule properties(Map<?, ?> properties) {
     this.properties = properties;
     return this;
   }
@@ -123,48 +126,60 @@ public final class JpaPersistModule extends PersistModule {
       return;
     }
 
-    InvocationHandler finderInvoker = new InvocationHandler() {
-      @Inject JpaFinderProxy finderProxy;
+    InvocationHandler finderInvoker =
+        new InvocationHandler() {
+          @Inject JpaFinderProxy finderProxy;
 
-      public Object invoke(final Object thisObject, final Method method, final Object[] args)
-          throws Throwable {
+          @Override
+          public Object invoke(final Object thisObject, final Method method, final Object[] args)
+              throws Throwable {
 
-        // Don't intercept non-finder methods like equals and hashcode.
-        if (!method.isAnnotationPresent(Finder.class)) {
-          // NOTE(dhanji): This is not ideal, we are using the invocation handler's equals
-          // and hashcode as a proxy (!) for the proxy's equals and hashcode. 
-          return method.invoke(this, args);
-        }
+            // Don't intercept non-finder methods like equals and hashcode.
+            if (!method.isAnnotationPresent(Finder.class)) {
+              // NOTE(dhanji): This is not ideal, we are using the invocation handler's equals
+              // and hashcode as a proxy (!) for the proxy's equals and hashcode.
+              return method.invoke(this, args);
+            }
 
-        return finderProxy.invoke(new MethodInvocation() {
-          public Method getMethod() {
-            return method;
+            return finderProxy.invoke(
+                new MethodInvocation() {
+                  @Override
+                  public Method getMethod() {
+                    return method;
+                  }
+
+                  @Override
+                  public Object[] getArguments() {
+                    return null == args ? new Object[0] : args;
+                  }
+
+                  @Override
+                  public Object proceed() throws Throwable {
+                    return method.invoke(thisObject, args);
+                  }
+
+                  @Override
+                  public Object getThis() {
+                    throw new UnsupportedOperationException(
+                        "Bottomless proxies don't expose a this.");
+                  }
+
+                  @Override
+                  public AccessibleObject getStaticPart() {
+                    throw new UnsupportedOperationException();
+                  }
+                });
           }
-
-          public Object[] getArguments() {
-            return null == args ? new Object[0] : args; 
-          }
-
-          public Object proceed() throws Throwable {
-            return method.invoke(thisObject, args);
-          }
-
-          public Object getThis() {
-            throw new UnsupportedOperationException("Bottomless proxies don't expose a this.");
-          }
-
-          public AccessibleObject getStaticPart() {
-            throw new UnsupportedOperationException();
-          }
-        });
-      }
-    };
+        };
     requestInjection(finderInvoker);
 
     @SuppressWarnings("unchecked") // Proxy must produce instance of type given.
-    T proxy = (T) Proxy
-        .newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[] { iface },
-            finderInvoker);
+    T proxy =
+        (T)
+            Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class<?>[] {iface},
+                finderInvoker);
 
     bind(iface).toInstance(proxy);
   }
@@ -179,8 +194,12 @@ public final class JpaPersistModule extends PersistModule {
     for (Method method : iface.getMethods()) {
       DynamicFinder finder = DynamicFinder.from(method);
       if (null == finder) {
-        addError("Dynamic Finder methods must be annotated with @Finder, but " + iface
-            + "." + method.getName() + " was not");
+        addError(
+            "Dynamic Finder methods must be annotated with @Finder, but "
+                + iface
+                + "."
+                + method.getName()
+                + " was not");
         valid = false;
       }
     }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.internal;
 
+import java.lang.annotation.Annotation;
 import junit.framework.TestCase;
 
-import java.lang.annotation.Annotation;
-
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class UniqueAnnotationsTest extends TestCase {
 
-  @UniqueAnnotations.Internal(31) public Void unused;
-  
+  @UniqueAnnotations.Internal(31)
+  public Void unused;
+
   public void testEqualsHashCodeToString() {
     Annotation actual = UniqueAnnotations.create(31);
 

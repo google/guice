@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,14 +23,12 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.internal.Annotations;
 import com.google.inject.servlet.ServletModule;
-
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.config.entities.InterceptorConfig;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.interceptor.Interceptor;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,20 +37,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-/**
- * @deprecated Use {@link com.google.inject.struts2.Struts2Factory} instead.
- */
+/** @deprecated Use {@link com.google.inject.struts2.Struts2Factory} instead. */
 @Deprecated
 public class GuiceObjectFactory extends ObjectFactory {
 
-  static final Logger logger =
-      Logger.getLogger(GuiceObjectFactory.class.getName());
+  static final Logger logger = Logger.getLogger(GuiceObjectFactory.class.getName());
 
   Module module;
   volatile Injector injector;
   boolean developmentMode = false;
-  List<ProvidedInterceptor> interceptors
-      = new ArrayList<ProvidedInterceptor>();
+  List<ProvidedInterceptor> interceptors = new ArrayList<>();
 
   @Override
   public boolean isNoArgConstructorRequired() {
@@ -66,7 +60,7 @@ public class GuiceObjectFactory extends ObjectFactory {
       @SuppressWarnings({"unchecked"})
       Class<? extends Module> moduleClass =
           (Class<? extends Module>) Class.forName(moduleClassName);
-      this.module = moduleClass.newInstance();
+      this.module = moduleClass.getConstructor().newInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -77,8 +71,9 @@ public class GuiceObjectFactory extends ObjectFactory {
     this.developmentMode = developmentMode.trim().equals("true");
   }
 
-  Set<Class<?>> boundClasses = new HashSet<Class<?>>();
+  Set<Class<?>> boundClasses = new HashSet<>();
 
+  @Override
   public Class getClassInstance(String name) throws ClassNotFoundException {
     Class<?> clazz = super.getClassInstance(name);
 
@@ -106,6 +101,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     return clazz;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public Object buildBean(Class clazz, Map extraContext) {
     if (injector == null) {
@@ -122,34 +118,37 @@ public class GuiceObjectFactory extends ObjectFactory {
   private void createInjector() {
     try {
       logger.info("Creating injector...");
-      this.injector = Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          // Install default servlet bindings.
-          install(new ServletModule());
+      this.injector =
+          Guice.createInjector(
+              new AbstractModule() {
+                @Override
+                protected void configure() {
+                  // Install default servlet bindings.
+                  install(new ServletModule());
 
-          // Install user's module.
-          if (module != null) {
-            logger.info("Installing " + module + "...");
-            install(module);
-          }
-          else {
-            logger.info("No module found. Set 'guice.module' to a Module "
-                + "class name if you'd like to use one.");
-          }
+                  // Install user's module.
+                  if (module != null) {
+                    logger.info("Installing " + module + "...");
+                    install(module);
+                  } else {
+                    logger.info(
+                        "No module found. Set 'guice.module' to a Module "
+                            + "class name if you'd like to use one.");
+                  }
 
-          // Tell the injector about all the action classes, etc., so it
-          // can validate them at startup.
-          for (Class<?> boundClass : boundClasses) {
-            // TODO: Set source from Struts XML.
-            bind(boundClass);
-          }
+                  // Tell the injector about all the action classes, etc., so it
+                  // can validate them at startup.
+                  for (Class<?> boundClass : boundClasses) {
+                    // TODO: Set source from Struts XML.
+                    bind(boundClass);
+                  }
 
-          // Validate the interceptor class.
-          for (ProvidedInterceptor interceptor : interceptors) {
-            interceptor.validate(binder());
-          }
-        }
-      });
+                  // Validate the interceptor class.
+                  for (ProvidedInterceptor interceptor : interceptors) {
+                    interceptor.validate(binder());
+                  }
+                }
+              });
 
       // Inject interceptors.
       for (ProvidedInterceptor interceptor : interceptors) {
@@ -163,9 +162,10 @@ public class GuiceObjectFactory extends ObjectFactory {
     logger.info("Injector created successfully.");
   }
 
+  @Override
   @SuppressWarnings("unchecked")
-  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,
-      Map interceptorRefParams) throws ConfigurationException {
+  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
+      throws ConfigurationException {
     // Ensure the interceptor class is present.
     Class<? extends Interceptor> interceptorClass;
     try {
@@ -174,14 +174,14 @@ public class GuiceObjectFactory extends ObjectFactory {
       throw new RuntimeException(e);
     }
 
-    ProvidedInterceptor providedInterceptor = new ProvidedInterceptor(
-        interceptorConfig, interceptorRefParams, interceptorClass);
+    ProvidedInterceptor providedInterceptor =
+        new ProvidedInterceptor(interceptorConfig, interceptorRefParams, interceptorClass);
     interceptors.add(providedInterceptor);
     return providedInterceptor;
   }
 
-  Interceptor superBuildInterceptor(InterceptorConfig interceptorConfig,
-      Map interceptorRefParams) throws ConfigurationException {
+  Interceptor superBuildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
+      throws ConfigurationException {
     return super.buildInterceptor(interceptorConfig, interceptorRefParams);
   }
 
@@ -192,8 +192,8 @@ public class GuiceObjectFactory extends ObjectFactory {
     final Class<? extends Interceptor> interceptorClass;
     Interceptor delegate;
 
-    ProvidedInterceptor(InterceptorConfig config, Map params,
-        Class<? extends Interceptor> interceptorClass) {
+    ProvidedInterceptor(
+        InterceptorConfig config, Map params, Class<? extends Interceptor> interceptorClass) {
       this.config = config;
       this.params = params;
       this.interceptorClass = interceptorClass;
@@ -202,15 +202,17 @@ public class GuiceObjectFactory extends ObjectFactory {
     void validate(Binder binder) {
       // TODO: Set source from Struts XML.
       if (hasScope(interceptorClass)) {
-        binder.addError("Scoping interceptors is not currently supported."
-            + " Please remove the scope annotation from "
-            + interceptorClass.getName() + ".");
+        binder.addError(
+            "Scoping interceptors is not currently supported."
+                + " Please remove the scope annotation from "
+                + interceptorClass.getName()
+                + ".");
       }
 
       // Make sure it implements Interceptor.
       if (!Interceptor.class.isAssignableFrom(interceptorClass)) {
-        binder.addError(interceptorClass.getName() + " must implement "
-          + Interceptor.class.getName() + ".");
+        binder.addError(
+            interceptorClass.getName() + " must implement " + Interceptor.class.getName() + ".");
       }
     }
 
@@ -218,24 +220,25 @@ public class GuiceObjectFactory extends ObjectFactory {
       delegate = superBuildInterceptor(config, params);
     }
 
+    @Override
     public void destroy() {
       if (null != delegate) {
         delegate.destroy();
       }
     }
 
+    @Override
     public void init() {
       throw new AssertionError();
     }
 
+    @Override
     public String intercept(ActionInvocation invocation) throws Exception {
       return delegate.intercept(invocation);
     }
   }
 
-  /**
-   * Returns true if the given class has a scope annotation.
-   */
+  /** Returns true if the given class has a scope annotation. */
   private static boolean hasScope(Class<? extends Interceptor> interceptorClass) {
     for (Annotation annotation : interceptorClass.getAnnotations()) {
       if (Annotations.isScopeAnnotation(annotation.annotationType())) {

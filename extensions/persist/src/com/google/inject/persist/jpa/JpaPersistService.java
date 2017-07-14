@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,44 +23,43 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 @Singleton
 class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistService {
-  private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
+  private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<>();
 
   private final String persistenceUnitName;
-  private final Map<?,?> persistenceProperties;
+  private final Map<?, ?> persistenceProperties;
 
   @Inject
-  public JpaPersistService(@Jpa String persistenceUnitName,
-      @Nullable @Jpa Map<?,?> persistenceProperties) {
+  public JpaPersistService(
+      @Jpa String persistenceUnitName, @Nullable @Jpa Map<?, ?> persistenceProperties) {
     this.persistenceUnitName = persistenceUnitName;
     this.persistenceProperties = persistenceProperties;
   }
 
+  @Override
   public EntityManager get() {
     if (!isWorking()) {
       begin();
     }
 
     EntityManager em = entityManager.get();
-    Preconditions.checkState(null != em, "Requested EntityManager outside work unit. "
-        + "Try calling UnitOfWork.begin() first, or use a PersistFilter if you "
-        + "are inside a servlet environment.");
+    Preconditions.checkState(
+        null != em,
+        "Requested EntityManager outside work unit. "
+            + "Try calling UnitOfWork.begin() first, or use a PersistFilter if you "
+            + "are inside a servlet environment.");
 
     return em;
   }
@@ -69,14 +68,17 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     return entityManager.get() != null;
   }
 
+  @Override
   public void begin() {
-    Preconditions.checkState(null == entityManager.get(),
+    Preconditions.checkState(
+        null == entityManager.get(),
         "Work already begun on this thread. Looks like you have called UnitOfWork.begin() twice"
-         + " without a balancing call to end() in between.");
+            + " without a balancing call to end() in between.");
 
     entityManager.set(emFactory.createEntityManager());
   }
 
+  @Override
   public void end() {
     EntityManager em = entityManager.get();
 
@@ -87,8 +89,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
 
     try {
       em.close();
-    }
-    finally {
+    } finally {
       entityManager.remove();
     }
   }
@@ -100,17 +101,19 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     this.emFactory = emFactory;
   }
 
+  @Override
   public synchronized void start() {
     Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
 
     if (null != persistenceProperties) {
-      this.emFactory = Persistence
-          .createEntityManagerFactory(persistenceUnitName, persistenceProperties);
+      this.emFactory =
+          Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
     } else {
       this.emFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
     }
   }
 
+  @Override
   public synchronized void stop() {
     Preconditions.checkState(emFactory.isOpen(), "Persistence service was already shut down.");
     emFactory.close();
@@ -125,15 +128,15 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
       this.emProvider = emProvider;
     }
 
+    @Override
     public EntityManagerFactory get() {
       assert null != emProvider.emFactory;
       return emProvider.emFactory;
     }
   }
-  
+
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.PARAMETER)
-  private @interface Nullable { }
-
+  private @interface Nullable {}
 }

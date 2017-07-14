@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,24 +19,24 @@ package com.google.inject;
 import static com.google.inject.matcher.Matchers.any;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class IntegrationTest extends TestCase {
 
   public void testIntegration() throws CreationException {
     final CountingInterceptor counter = new CountingInterceptor();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class);
-        bindInterceptor(any(), any(), counter);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class);
+                bindInterceptor(any(), any(), counter);
+              }
+            });
 
     Foo foo = injector.getInstance(Key.get(Foo.class));
     foo.foo();
@@ -51,6 +51,7 @@ public class IntegrationTest extends TestCase {
 
   static class Foo {
     boolean invoked;
+
     public void foo() {
       invoked = true;
     }
@@ -60,10 +61,10 @@ public class IntegrationTest extends TestCase {
 
     int count;
 
+    @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       count++;
       return methodInvocation.proceed();
     }
   }
-
 }

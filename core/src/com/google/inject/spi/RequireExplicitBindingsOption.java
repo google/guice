@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,14 +33,17 @@ public final class RequireExplicitBindingsOption implements Element {
     this.source = checkNotNull(source, "source");
   }
 
+  @Override
   public Object getSource() {
     return source;
   }
 
+  @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).requireExplicitBindings();
   }
 
+  @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }

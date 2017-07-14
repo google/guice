@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,10 +27,10 @@ import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
-
 import java.util.Map;
 import java.util.concurrent.Callable;
-
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,29 +45,33 @@ public class ServletScopes {
   private ServletScopes() {}
 
   /**
-   * A threadlocal scope map for non-http request scopes. The {@link #REQUEST}
-   * scope falls back to this scope map if no http request is available, and
-   * requires {@link #scopeRequest} to be called as an alternative.
+   * A threadlocal scope map for non-http request scopes. The {@link #REQUEST} scope falls back to
+   * this scope map if no http request is available, and requires {@link #scopeRequest} to be called
+   * as an alternative.
    */
-  private static final ThreadLocal<Context> requestScopeContext
-      = new ThreadLocal<Context>();
+  private static final ThreadLocal<Context> requestScopeContext = new ThreadLocal<>();
 
   /** A sentinel attribute value representing null. */
-  enum NullObject { INSTANCE }
+  enum NullObject {
+    INSTANCE
+  }
 
-  /**
-   * HTTP servlet request scope.
-   */
-  public static final Scope REQUEST = new Scope() {
+  /** HTTP servlet request scope. */
+  public static final Scope REQUEST = new RequestScope();
+
+  private static final class RequestScope implements Scope {
+    @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       return new Provider<T>() {
 
         /** Keys bound in request-scope which are handled directly by GuiceFilter. */
-        private final ImmutableSet<Key<?>> REQUEST_CONTEXT_KEYS = ImmutableSet.of(
+        private final ImmutableSet<Key<?>> REQUEST_CONTEXT_KEYS =
+            ImmutableSet.of(
                 Key.get(HttpServletRequest.class),
                 Key.get(HttpServletResponse.class),
                 new Key<Map<String, String[]>>(RequestParameters.class) {});
 
+        @Override
         public T get() {
           // Check if the alternate request scope should be used, if no HTTP
           // request is in progress.
@@ -96,7 +100,7 @@ public class ServletScopes {
 
               return t;
             } // else: fall into normal HTTP request scope and out of scope
-              // exception is thrown.
+            // exception is thrown.
           }
 
           // Always synchronize and get/set attributes on the underlying request
@@ -139,15 +143,17 @@ public class ServletScopes {
     public String toString() {
       return "ServletScopes.REQUEST";
     }
-  };
+  }
 
-  /**
-   * HTTP session scope.
-   */
-  public static final Scope SESSION = new Scope() {
+  /** HTTP session scope. */
+  public static final Scope SESSION = new SessionScope();
+
+  private static final class SessionScope implements Scope {
+    @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       final String name = key.toString();
       return new Provider<T>() {
+        @Override
         public T get() {
           HttpSession session = GuiceFilter.getRequest(key).getSession();
           synchronized (session) {
@@ -166,6 +172,7 @@ public class ServletScopes {
             return t;
           }
         }
+
         @Override
         public String toString() {
           return String.format("%s[%s]", creator, SESSION);
@@ -177,122 +184,135 @@ public class ServletScopes {
     public String toString() {
       return "ServletScopes.SESSION";
     }
-  };
+  }
 
   /**
-   * Wraps the given callable in a contextual callable that "continues" the
-   * HTTP request in another thread. This acts as a way of transporting
-   * request context data from the request processing thread to to worker
-   * threads.
-   * <p>
-   * There are some limitations:
+   * Wraps the given callable in a contextual callable that "continues" the HTTP request in another
+   * thread. This acts as a way of transporting request context data from the request processing
+   * thread to to worker threads.
+   *
+   * <p>There are some limitations:
+   *
    * <ul>
-   *   <li>Derived objects (i.e. anything marked @RequestScoped will not be
-   *      transported.</li>
-   *   <li>State changes to the HttpServletRequest after this method is called
-   *      will not be seen in the continued thread.</li>
-   *   <li>Only the HttpServletRequest, ServletContext and request parameter
-   *      map are available in the continued thread. The response and session
-   *      are not available.</li>
+   * <li>Derived objects (i.e. anything marked @RequestScoped will not be transported.
+   * <li>State changes to the HttpServletRequest after this method is called will not be seen in the
+   *     continued thread.
+   * <li>Only the HttpServletRequest, ServletContext and request parameter map are available in the
+   *     continued thread. The response and session are not available.
    * </ul>
    *
-   * <p>The returned callable will throw a {@link ScopingException} when called
-   * if the HTTP request scope is still active on the current thread.
+   * <p>The returned callable will throw a {@link ScopingException} when called if the HTTP request
+   * scope is still active on the current thread.
    *
-   * @param callable code to be executed in another thread, which depends on
-   *     the request scope.
-   * @param seedMap the initial set of scoped instances for Guice to seed the
-   *     request scope with.  To seed a key with null, use {@code null} as
-   *     the value.
-   * @return a callable that will invoke the given callable, making the request
-   *     context available to it.
-   * @throws OutOfScopeException if this method is called from a non-request
-   *     thread, or if the request has completed.
-   * 
+   * @param callable code to be executed in another thread, which depends on the request scope.
+   * @param seedMap the initial set of scoped instances for Guice to seed the request scope with. To
+   *     seed a key with null, use {@code null} as the value.
+   * @return a callable that will invoke the given callable, making the request context available to
+   *     it.
+   * @throws OutOfScopeException if this method is called from a non-request thread, or if the
+   *     request has completed.
    * @since 3.0
+   * @deprecated You probably want to use {@code transferRequest} instead
    */
-  public static <T> Callable<T> continueRequest(final Callable<T> callable,
-      final Map<Key<?>, Object> seedMap) {
-    Preconditions.checkArgument(null != seedMap,
-        "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
+  @Deprecated
+  public static <T> Callable<T> continueRequest(Callable<T> callable, Map<Key<?>, Object> seedMap) {
+    return wrap(callable, continueRequest(seedMap));
+  }
+
+  private static RequestScoper continueRequest(Map<Key<?>, Object> seedMap) {
+    Preconditions.checkArgument(
+        null != seedMap, "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
 
     // Snapshot the seed map and add all the instances to our continuing HTTP request.
     final ContinuingHttpServletRequest continuingRequest =
-        new ContinuingHttpServletRequest(
-            GuiceFilter.getRequest(Key.get(HttpServletRequest.class)));
+        new ContinuingHttpServletRequest(GuiceFilter.getRequest(Key.get(HttpServletRequest.class)));
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
       Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
       continuingRequest.setAttribute(entry.getKey().toString(), value);
     }
 
-    return new Callable<T>() {
-      public T call() throws Exception {
-        checkScopingState(null == GuiceFilter.localContext.get(),
+    return new RequestScoper() {
+      @Override
+      public CloseableScope open() {
+        checkScopingState(
+            null == GuiceFilter.localContext.get(),
             "Cannot continue request in the same thread as a HTTP request!");
-        return new GuiceFilter.Context(continuingRequest, continuingRequest, null)
-            .call(callable);
+        return new GuiceFilter.Context(continuingRequest, continuingRequest, null).open();
       }
     };
   }
 
   /**
-   * Wraps the given callable in a contextual callable that "transfers" the
-   * request to another thread. This acts as a way of transporting
-   * request context data from the current thread to a future thread.
+   * Wraps the given callable in a contextual callable that "transfers" the request to another
+   * thread. This acts as a way of transporting request context data from the current thread to a
+   * future thread.
    *
-   * <p>As opposed to {@link #continueRequest}, this method propagates all
-   * existing scoped objects. The primary use case is in server implementations
-   * where you can detach the request processing thread while waiting for data,
-   * and reattach to a different thread to finish processing at a later time.
+   * <p>As opposed to {@link #continueRequest}, this method propagates all existing scoped objects.
+   * The primary use case is in server implementations where you can detach the request processing
+   * thread while waiting for data, and reattach to a different thread to finish processing at a
+   * later time.
    *
-   * <p>Because request-scoped objects are not typically thread-safe, the
-   * callable returned by this method must not be run on a different thread
-   * until the current request scope has terminated. The returned callable will
-   * block until the current thread has released the request scope.
+   * <p>Because request-scoped objects are not typically thread-safe, the callable returned by this
+   * method must not be run on a different thread until the current request scope has terminated.
+   * The returned callable will block until the current thread has released the request scope.
    *
-   * @param callable code to be executed in another thread, which depends on
-   *     the request scope.
-   * @return a callable that will invoke the given callable, making the request
-   *     context available to it.
-   * @throws OutOfScopeException if this method is called from a non-request
-   *     thread, or if the request has completed.
+   * @param callable code to be executed in another thread, which depends on the request scope.
+   * @return a callable that will invoke the given callable, making the request context available to
+   *     it.
+   * @throws OutOfScopeException if this method is called from a non-request thread, or if the
+   *     request has completed.
    * @since 4.0
    */
   public static <T> Callable<T> transferRequest(Callable<T> callable) {
-    return (GuiceFilter.localContext.get() != null)
-        ? transferHttpRequest(callable)
-        : transferNonHttpRequest(callable);
+    return wrap(callable, transferRequest());
   }
 
-  private static <T> Callable<T> transferHttpRequest(final Callable<T> callable) {
+  /**
+   * Returns an object that "transfers" the request to another thread. This acts as a way of
+   * transporting request context data from the current thread to a future thread. The transferred
+   * scope is the one active for the thread that calls this method. A later call to {@code open()}
+   * activates the transferred the scope, including propagating any objects scoped at that time.
+   *
+   * <p>As opposed to {@link #continueRequest}, this method propagates all existing scoped objects.
+   * The primary use case is in server implementations where you can detach the request processing
+   * thread while waiting for data, and reattach to a different thread to finish processing at a
+   * later time.
+   *
+   * <p>Because request-scoped objects are not typically thread-safe, it is important to avoid
+   * applying the same request scope concurrently. The returned Scoper will block on open until the
+   * current thread has released the request scope.
+   *
+   * @return an object that when opened will initiate the request scope
+   * @throws OutOfScopeException if this method is called from a non-request thread, or if the
+   *     request has completed.
+   * @since 4.1
+   */
+  public static RequestScoper transferRequest() {
+    return (GuiceFilter.localContext.get() != null)
+        ? transferHttpRequest()
+        : transferNonHttpRequest();
+  }
+
+  private static RequestScoper transferHttpRequest() {
     final GuiceFilter.Context context = GuiceFilter.localContext.get();
     if (context == null) {
       throw new OutOfScopeException("Not in a request scope");
     }
-    return new Callable<T>() {
-      public T call() throws Exception {
-        return context.call(callable);
-      }
-    };
+    return context;
   }
 
-  private static <T> Callable<T> transferNonHttpRequest(final Callable<T> callable) {
+  private static RequestScoper transferNonHttpRequest() {
     final Context context = requestScopeContext.get();
     if (context == null) {
       throw new OutOfScopeException("Not in a request scope");
     }
-    return new Callable<T>() {
-      public T call() throws Exception {
-        return context.call(callable);
-      }
-    };
+    return context;
   }
 
   /**
-   * Returns true if {@code binding} is request-scoped. If the binding is a
-   * {@link com.google.inject.spi.LinkedKeyBinding linked key binding} and
-   * belongs to an injector (i. e. it was retrieved via
-   * {@link Injector#getBinding Injector.getBinding()}), then this method will
+   * Returns true if {@code binding} is request-scoped. If the binding is a {@link
+   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (i. e. it
+   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
    * also return true if the target binding is request-scoped.
    *
    * @since 4.0
@@ -302,53 +322,73 @@ public class ServletScopes {
   }
 
   /**
-   * Scopes the given callable inside a request scope. This is not the same
-   * as the HTTP request scope, but is used if no HTTP request scope is in
-   * progress. In this way, keys can be scoped as @RequestScoped and exist
-   * in non-HTTP requests (for example: RPC requests) as well as in HTTP
+   * Scopes the given callable inside a request scope. This is not the same as the HTTP request
+   * scope, but is used if no HTTP request scope is in progress. In this way, keys can be scoped
+   * as @RequestScoped and exist in non-HTTP requests (for example: RPC requests) as well as in HTTP
    * request threads.
    *
-   * <p>The returned callable will throw a {@link ScopingException} when called
-   * if there is a request scope already active on the current thread.
+   * <p>The returned callable will throw a {@link ScopingException} when called if there is a
+   * request scope already active on the current thread.
    *
-   * @param callable code to be executed which depends on the request scope.
-   *     Typically in another thread, but not necessarily so.
-   * @param seedMap the initial set of scoped instances for Guice to seed the
-   *     request scope with.  To seed a key with null, use {@code null} as
-   *     the value.
-   * @return a callable that when called will run inside the a request scope
-   *     that exposes the instances in the {@code seedMap} as scoped keys.
+   * @param callable code to be executed which depends on the request scope. Typically in another
+   *     thread, but not necessarily so.
+   * @param seedMap the initial set of scoped instances for Guice to seed the request scope with. To
+   *     seed a key with null, use {@code null} as the value.
+   * @return a callable that when called will run inside the a request scope that exposes the
+   *     instances in the {@code seedMap} as scoped keys.
    * @since 3.0
    */
-  public static <T> Callable<T> scopeRequest(final Callable<T> callable,
-      Map<Key<?>, Object> seedMap) {
-    Preconditions.checkArgument(null != seedMap,
-        "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
+  public static <T> Callable<T> scopeRequest(Callable<T> callable, Map<Key<?>, Object> seedMap) {
+    return wrap(callable, scopeRequest(seedMap));
+  }
+
+  /**
+   * Returns an object that will apply request scope to a block of code. This is not the same as the
+   * HTTP request scope, but is used if no HTTP request scope is in progress. In this way, keys can
+   * be scoped as @RequestScoped and exist in non-HTTP requests (for example: RPC requests) as well
+   * as in HTTP request threads.
+   *
+   * <p>The returned object will throw a {@link ScopingException} when opened if there is a request
+   * scope already active on the current thread.
+   *
+   * @param seedMap the initial set of scoped instances for Guice to seed the request scope with. To
+   *     seed a key with null, use {@code null} as the value.
+   * @return an object that when opened will initiate the request scope
+   * @since 4.1
+   */
+  public static RequestScoper scopeRequest(Map<Key<?>, Object> seedMap) {
+    Preconditions.checkArgument(
+        null != seedMap, "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
 
     // Copy the seed values into our local scope map.
     final Context context = new Context();
     Map<Key<?>, Object> validatedAndCanonicalizedMap =
-        Maps.transformEntries(seedMap, new EntryTransformer<Key<?>, Object, Object>() {
-          @Override public Object transformEntry(Key<?> key, Object value) {
-            return validateAndCanonicalizeValue(key, value);
-          }
-        });
+        Maps.transformEntries(
+            seedMap,
+            new EntryTransformer<Key<?>, Object, Object>() {
+              @Override
+              public Object transformEntry(Key<?> key, Object value) {
+                return validateAndCanonicalizeValue(key, value);
+              }
+            });
     context.map.putAll(validatedAndCanonicalizedMap);
-
-    return new Callable<T>() {
-      public T call() throws Exception {
-        checkScopingState(null == GuiceFilter.localContext.get(),
+    return new RequestScoper() {
+      @Override
+      public CloseableScope open() {
+        checkScopingState(
+            null == GuiceFilter.localContext.get(),
             "An HTTP request is already in progress, cannot scope a new request in this thread.");
-        checkScopingState(null == requestScopeContext.get(),
+        checkScopingState(
+            null == requestScopeContext.get(),
             "A request scope is already in progress, cannot scope a new request in this thread.");
-        return context.call(callable);
+        return context.open();
       }
     };
   }
 
   /**
-   * Validates the key and object, ensuring the value matches the key type, and
-   * canonicalizing null objects to the null sentinel.
+   * Validates the key and object, ensuring the value matches the key type, and canonicalizing null
+   * objects to the null sentinel.
    */
   private static Object validateAndCanonicalizeValue(Key<?> key, Object object) {
     if (object == null || object == NullObject.INSTANCE) {
@@ -356,26 +396,38 @@ public class ServletScopes {
     }
 
     if (!key.getTypeLiteral().getRawType().isInstance(object)) {
-      throw new IllegalArgumentException("Value[" + object + "] of type["
-          + object.getClass().getName() + "] is not compatible with key[" + key + "]");
+      throw new IllegalArgumentException(
+          "Value["
+              + object
+              + "] of type["
+              + object.getClass().getName()
+              + "] is not compatible with key["
+              + key
+              + "]");
     }
 
     return object;
   }
 
-  private static class Context {
+  private static class Context implements RequestScoper {
     final Map<Key, Object> map = Maps.newHashMap();
 
     // Synchronized to prevent two threads from using the same request
     // scope concurrently.
-    synchronized <T> T call(Callable<T> callable) throws Exception {
-      Context previous = requestScopeContext.get();
+    final Lock lock = new ReentrantLock();
+
+    @Override
+    public CloseableScope open() {
+      lock.lock();
+      final Context previous = requestScopeContext.get();
       requestScopeContext.set(this);
-      try {
-        return callable.call();
-      } finally {
-        requestScopeContext.set(previous);
-      }
+      return new CloseableScope() {
+        @Override
+        public void close() {
+          requestScopeContext.set(previous);
+          lock.unlock();
+        }
+      };
     }
   }
 
@@ -383,5 +435,20 @@ public class ServletScopes {
     if (!condition) {
       throw new ScopingException(msg);
     }
+  }
+
+  private static final <T> Callable<T> wrap(
+      final Callable<T> delegate, final RequestScoper requestScoper) {
+    return new Callable<T>() {
+      @Override
+      public T call() throws Exception {
+        RequestScoper.CloseableScope scope = requestScoper.open();
+        try {
+          return delegate.call();
+        } finally {
+          scope.close();
+        }
+      }
+    };
   }
 }

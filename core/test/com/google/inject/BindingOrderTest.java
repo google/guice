@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,41 +16,44 @@
 
 package com.google.inject;
 
-
-import junit.framework.TestCase;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 
 public class BindingOrderTest extends TestCase {
 
   public void testBindingOutOfOrder() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(BoundFirst.class);
-        bind(BoundSecond.class).to(BoundSecondImpl.class);
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(BoundFirst.class);
+            bind(BoundSecond.class).to(BoundSecondImpl.class);
+          }
+        });
   }
 
   public static class BoundFirst {
-    @Inject public BoundFirst(BoundSecond boundSecond) { }
+    @Inject
+    public BoundFirst(BoundSecond boundSecond) {}
   }
 
-  interface BoundSecond { }
-  static class BoundSecondImpl implements BoundSecond { }
+  interface BoundSecond {}
+
+  static class BoundSecondImpl implements BoundSecond {}
 
   public void testBindingOrderAndScopes() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(A.class);
-        bind(B.class).asEagerSingleton();
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(A.class);
+                bind(B.class).asEagerSingleton();
+              }
+            });
 
     assertSame(injector.getInstance(A.class).b, injector.getInstance(A.class).b);
   }
@@ -58,34 +61,39 @@ public class BindingOrderTest extends TestCase {
   public void testBindingWithExtraThreads() throws InterruptedException {
     final CountDownLatch ready = new CountDownLatch(1);
     final CountDownLatch done = new CountDownLatch(1);
-    final AtomicReference<B> ref = new AtomicReference<B>();
+    final AtomicReference<B> ref = new AtomicReference<>();
 
-    final Object createsAThread = new Object() {
-      @Inject void createAnotherThread(final Injector injector) {
-        new Thread() {
-          public void run() {
-            ready.countDown();
-            A a = injector.getInstance(A.class);
-            ref.set(a.b);
-            done.countDown();
+    final Object createsAThread =
+        new Object() {
+          @Inject
+          void createAnotherThread(final Injector injector) {
+            new Thread() {
+              @Override
+              public void run() {
+                ready.countDown();
+                A a = injector.getInstance(A.class);
+                ref.set(a.b);
+                done.countDown();
+              }
+            }.start();
+
+            // to encourage collisions, we make sure the other thread is running before returning
+            try {
+              ready.await();
+            } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+            }
           }
-        }.start();
+        };
 
-        // to encourage collisions, we make sure the other thread is running before returning
-        try {
-          ready.await();
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
-
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        requestInjection(createsAThread);
-        bind(A.class).toInstance(new A());
-      }
-    });
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            requestInjection(createsAThread);
+            bind(A.class).toInstance(new A());
+          }
+        });
 
     done.await();
     assertNotNull(ref.get());
@@ -95,5 +103,5 @@ public class BindingOrderTest extends TestCase {
     @Inject B b;
   }
 
-  static class B { }
+  static class B {}
 }

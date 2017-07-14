@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +17,16 @@ package com.google.inject.servlet;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * An enumeration of the available URI-pattern matching styles
- * 
+ *
  * @since 3.0
  */
 public enum UriPatternType {
-  SERVLET, REGEX;
+  SERVLET,
+  REGEX;
 
   static UriPatternMatcher get(UriPatternType type, String pattern) {
     switch (type) {
@@ -52,24 +54,45 @@ public enum UriPatternType {
    * @author dhanji@gmail.com (Dhanji R. Prasanna)
    */
   private static class ServletStyleUriPatternMatcher implements UriPatternMatcher {
-    private final String pattern;
+    private final String literal;
+    private final String originalPattern;
     private final Kind patternKind;
 
-    private static enum Kind { PREFIX, SUFFIX, LITERAL, }
+    private static enum Kind {
+      PREFIX,
+      SUFFIX,
+      LITERAL,
+    }
 
     public ServletStyleUriPatternMatcher(String pattern) {
+      this.originalPattern = pattern;
       if (pattern.startsWith("*")) {
-        this.pattern = pattern.substring(1);
+        this.literal = pattern.substring(1);
         this.patternKind = Kind.PREFIX;
       } else if (pattern.endsWith("*")) {
-        this.pattern = pattern.substring(0, pattern.length() - 1);
+        this.literal = pattern.substring(0, pattern.length() - 1);
         this.patternKind = Kind.SUFFIX;
       } else {
-        this.pattern = pattern;
+        this.literal = pattern;
         this.patternKind = Kind.LITERAL;
+      }
+      String normalized = ServletUtils.normalizePath(literal);
+      if (patternKind == Kind.PREFIX) {
+        normalized = "*" + normalized;
+      } else if (patternKind == Kind.SUFFIX) {
+        normalized = normalized + "*";
+      }
+      if (!pattern.equals(normalized)) {
+        throw new IllegalArgumentException(
+            "Servlet patterns cannot contain escape patterns. Registered pattern: '"
+                + pattern
+                + "' normalizes to: '"
+                + normalized
+                + "'");
       }
     }
 
+    @Override
     public boolean matches(String uri) {
       if (null == uri) {
         return false;
@@ -77,20 +100,21 @@ public enum UriPatternType {
 
       uri = getUri(uri);
       if (patternKind == Kind.PREFIX) {
-        return uri.endsWith(pattern);
+        return uri.endsWith(literal);
       } else if (patternKind == Kind.SUFFIX) {
-        return uri.startsWith(pattern);
+        return uri.startsWith(literal);
       }
 
-      //else treat as a literal
-      return pattern.equals(uri);
+      //else we need a complete match
+      return literal.equals(uri);
     }
 
+    @Override
     public String extractPath(String path) {
       if (patternKind == Kind.PREFIX) {
         return null;
       } else if (patternKind == Kind.SUFFIX) {
-        String extract = pattern;
+        String extract = literal;
 
         //trim the trailing '/'
         if (extract.endsWith("/")) {
@@ -103,9 +127,15 @@ public enum UriPatternType {
       //else treat as literal
       return path;
     }
-    
+
+    @Override
     public UriPatternType getPatternType() {
       return UriPatternType.SERVLET;
+    }
+
+    @Override
+    public String getOriginalPattern() {
+      return originalPattern;
     }
   }
 
@@ -116,15 +146,23 @@ public enum UriPatternType {
    */
   private static class RegexUriPatternMatcher implements UriPatternMatcher {
     private final Pattern pattern;
+    private final String originalPattern;
 
     public RegexUriPatternMatcher(String pattern) {
-      this.pattern = Pattern.compile(pattern);
+      this.originalPattern = pattern;
+      try {
+        this.pattern = Pattern.compile(pattern);
+      } catch (PatternSyntaxException pse) {
+        throw new IllegalArgumentException("Invalid regex pattern: " + pse.getMessage());
+      }
     }
 
+    @Override
     public boolean matches(String uri) {
       return null != uri && this.pattern.matcher(getUri(uri)).matches();
     }
 
+    @Override
     public String extractPath(String path) {
       Matcher matcher = pattern.matcher(path);
       if (matcher.matches() && matcher.groupCount() >= 1) {
@@ -140,9 +178,15 @@ public enum UriPatternType {
       }
       return null;
     }
-    
+
+    @Override
     public UriPatternType getPatternType() {
       return UriPatternType.REGEX;
+    }
+
+    @Override
+    public String getOriginalPattern() {
+      return originalPattern;
     }
   }
 }

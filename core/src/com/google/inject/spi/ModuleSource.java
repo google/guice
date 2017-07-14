@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2013 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.internal.util.StackTraceElements.InMemoryStackTraceElement;
-
 import java.util.List;
 
 /**
@@ -31,14 +30,10 @@ import java.util.List;
  */
 final class ModuleSource {
 
-  /**
-   * The class name of module that this {@link ModuleSource} associated to.
-   */
+  /** The class name of module that this {@link ModuleSource} associated to. */
   private final String moduleClassName;
 
-  /**
-   * The parent {@link ModuleSource module source}.
-   */
+  /** The parent {@link ModuleSource module source}. */
   private final ModuleSource parent;
 
   /**
@@ -51,22 +46,24 @@ final class ModuleSource {
 
   /**
    * Creates a new {@link ModuleSource} with a {@literal null} parent.
+   *
    * @param module the corresponding module
    * @param partialCallStack the chunk of call stack that starts from the parent module {@link
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
-   * Module#configure(Binder) configure(Binder)} method invocation
+   *     Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
+   *     Module#configure(Binder) configure(Binder)} method invocation
    */
   ModuleSource(Object module, StackTraceElement[] partialCallStack) {
     this(null, module, partialCallStack);
   }
 
- /**
+  /**
    * Creates a new {@link ModuleSource} Object.
+   *
    * @param parent the parent module {@link ModuleSource source}
    * @param module the corresponding module
    * @param partialCallStack the chunk of call stack that starts from the parent module {@link
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
-   * Module#configure(Binder) configure(Binder)} method invocation
+   *     Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
+   *     Module#configure(Binder) configure(Binder)} method invocation
    */
   private ModuleSource(
       /* @Nullable */ ModuleSource parent, Object module, StackTraceElement[] partialCallStack) {
@@ -96,27 +93,24 @@ final class ModuleSource {
     return StackTraceElements.convertToStackTraceElement(partialCallStack);
   }
 
-  /**
-   * Returns the size of partial call stack if stack trace collection is on otherwise zero.
-   */
+  /** Returns the size of partial call stack if stack trace collection is on otherwise zero. */
   int getPartialCallStackSize() {
     return partialCallStack.length;
   }
 
   /**
    * Creates and returns a child {@link ModuleSource} corresponding to the {@link Module module}.
+   *
    * @param module the corresponding module
    * @param partialCallStack the chunk of call stack that starts from the parent module {@link
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
-   * Module#configure(Binder) configure(Binder)} method invocation
+   *     Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
+   *     Module#configure(Binder) configure(Binder)} method invocation
    */
   ModuleSource createChild(Object module, StackTraceElement[] partialCallStack) {
     return new ModuleSource(this, module, partialCallStack);
   }
 
-  /**
-   * Returns the parent module {@link ModuleSource source}.
-   */
+  /** Returns the parent module {@link ModuleSource source}. */
   ModuleSource getParent() {
     return parent;
   }

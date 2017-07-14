@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +42,7 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
 
   /**
    * Parameters used to override default settings of the grapher.
+   *
    * @since 4.0
    */
   public static final class GrapherParameters {
@@ -98,11 +99,13 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     this.edgeCreator = options.getEdgeCreator();
   }
 
-  @Override public final void graph(Injector injector) throws IOException {
+  @Override
+  public final void graph(Injector injector) throws IOException {
     graph(injector, rootKeySetCreator.getRootKeys(injector));
   }
 
-  @Override public final void graph(Injector injector, Set<Key<?>> root) throws IOException {
+  @Override
+  public final void graph(Injector injector, Set<Key<?>> root) throws IOException {
     reset();
 
     Iterable<Binding<?>> bindings = getBindings(injector, root);
@@ -154,8 +157,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
 
   private void createEdges(Iterable<Edge> edges, Map<NodeId, NodeId> aliases) throws IOException {
     for (Edge edge : edges) {
-      edge = edge.copy(resolveAlias(aliases, edge.getFromId()),
-          resolveAlias(aliases, edge.getToId()));
+      edge =
+          edge.copy(resolveAlias(aliases, edge.getFromId()), resolveAlias(aliases, edge.getToId()));
       if (!edge.getFromId().equals(edge.getToId())) {
         if (edge instanceof BindingEdge) {
           newBindingEdge((BindingEdge) edge);
@@ -171,8 +174,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   }
 
   /**
-   * Transitively resolves aliases. Given aliases (X to Y) and (Y to Z), it will return mappings
-   * (X to Z) and (Y to Z).
+   * Transitively resolves aliases. Given aliases (X to Y) and (Y to Z), it will return mappings (X
+   * to Z) and (Y to Z).
    */
   private Map<NodeId, NodeId> resolveAliases(Iterable<Alias> aliases) {
     Map<NodeId, NodeId> resolved = Maps.newHashMap();

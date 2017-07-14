@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,13 +30,10 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 final class EncounterImpl<T> implements TypeEncounter<T> {
 
   private final Errors errors;
@@ -59,12 +56,12 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
 
   /*if[AOP]*/
   ImmutableList<MethodAspect> getAspects() {
-    return aspects == null
-        ? ImmutableList.<MethodAspect>of()
-        : ImmutableList.copyOf(aspects);
+    return aspects == null ? ImmutableList.<MethodAspect>of() : ImmutableList.copyOf(aspects);
   }
 
-  public void bindInterceptor(Matcher<? super Method> methodMatcher,
+  @Override
+  public void bindInterceptor(
+      Matcher<? super Method> methodMatcher,
       org.aopalliance.intercept.MethodInterceptor... interceptors) {
     checkState(valid, "Encounters may not be used after hear() returns.");
 
@@ -89,6 +86,7 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
         : ImmutableSet.copyOf(injectionListeners);
   }
 
+  @Override
   public void register(MembersInjector<? super T> membersInjector) {
     checkState(valid, "Encounters may not be used after hear() returns.");
 
@@ -99,6 +97,7 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
     membersInjectors.add(membersInjector);
   }
 
+  @Override
   public void register(InjectionListener<? super T> injectionListener) {
     checkState(valid, "Encounters may not be used after hear() returns.");
 
@@ -109,35 +108,42 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
     injectionListeners.add(injectionListener);
   }
 
+  @Override
   public void addError(String message, Object... arguments) {
     checkState(valid, "Encounters may not be used after hear() returns.");
     errors.addMessage(message, arguments);
   }
 
+  @Override
   public void addError(Throwable t) {
     checkState(valid, "Encounters may not be used after hear() returns.");
     errors.errorInUserCode(t, "An exception was caught and reported. Message: %s", t.getMessage());
   }
 
+  @Override
   public void addError(Message message) {
     checkState(valid, "Encounters may not be used after hear() returns.");
     errors.addMessage(message);
   }
 
+  @Override
   public <T> Provider<T> getProvider(Key<T> key) {
     checkState(valid, "Encounters may not be used after hear() returns.");
     return lookups.getProvider(key);
   }
 
+  @Override
   public <T> Provider<T> getProvider(Class<T> type) {
     return getProvider(Key.get(type));
   }
 
+  @Override
   public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
     checkState(valid, "Encounters may not be used after hear() returns.");
     return lookups.getMembersInjector(typeLiteral);
   }
 
+  @Override
   public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
     return getMembersInjector(TypeLiteral.get(type));
   }

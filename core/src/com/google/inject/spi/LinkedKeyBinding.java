@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,5 +32,4 @@ public interface LinkedKeyBinding<T> extends Binding<T> {
    * injector using {@link com.google.inject.Injector#getBinding(Key) Injector.getBinding(key)}.
    */
   Key<? extends T> getLinkedKey();
-
 }

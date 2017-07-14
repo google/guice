@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@ package com.google.inject.grapher.graphviz;
 
 /**
  * Styles for nodes. Similar to {@link EdgeStyle} but with a few more options.
- * <p>
- * See: http://www.graphviz.org/doc/info/attrs.html#k:style
+ *
+ * <p>See: http://www.graphviz.org/doc/info/attrs.html#k:style
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,37 +16,38 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
-
 import java.util.Map;
-
 import javax.servlet.Filter;
 
 /**
  * Default implementation of LinkedFilterBinding.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends Filter>>
     implements LinkedFilterBinding {
 
-  LinkedFilterBindingImpl(Map<String, String> initParams, String pattern,
-      Key<? extends Filter> target, UriPatternMatcher patternMatcher) {
-    super(initParams, pattern, target, patternMatcher);
+  LinkedFilterBindingImpl(
+      Map<String, String> initParams,
+      Key<? extends Filter> target,
+      UriPatternMatcher patternMatcher) {
+    super(initParams, target, patternMatcher);
   }
 
+  @Override
   public Key<? extends Filter> getLinkedKey() {
     return getTarget();
   }
-  
-  @Override public String toString() {
-    return Objects.toStringHelper(LinkedFilterBinding.class)
-      .add("pattern", getPattern())
-      .add("initParams", getInitParams())
-      .add("uriPatternType", getUriPatternType())
-      .add("linkedFilterKey", getLinkedKey())
-      .toString();
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(LinkedFilterBinding.class)
+        .add("pattern", getPattern())
+        .add("initParams", getInitParams())
+        .add("uriPatternType", getUriPatternType())
+        .add("linkedFilterKey", getLinkedKey())
+        .toString();
   }
-  
 }

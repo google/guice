@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 public class SerializationTest extends TestCase {
 
   public void testAbstractModuleIsSerializable() throws IOException {
     Asserts.reserialize(new MyAbstractModule());
   }
+
   static class MyAbstractModule extends AbstractModule implements Serializable {
-    protected void configure() {}
   }
 
   public void testCreationExceptionIsSerializable() throws IOException {
@@ -44,11 +40,13 @@ public class SerializationTest extends TestCase {
 
   private CreationException createCreationException() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(List.class);
-        }
-      });
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(List.class);
+            }
+          });
       throw new AssertionFailedError();
     } catch (CreationException e) {
       return e;

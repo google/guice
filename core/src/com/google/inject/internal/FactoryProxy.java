@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +16,14 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 
 /**
- * A placeholder which enables us to swap in the real factory once the injector is created.
- * Used for a linked binding, so that getting the linked binding returns the link's factory.
+ * A placeholder which enables us to swap in the real factory once the injector is created. Used for
+ * a linked binding, so that getting the linked binding returns the link's factory.
  */
 final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
 
@@ -41,26 +41,32 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
     this.source = source;
   }
 
+  @Override
   public void notify(final Errors errors) {
     try {
-      targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
+      targetFactory =
+          injector.getInternalFactory(
+              targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
   }
 
+  @Override
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    context.pushState(targetKey, source);
+    Key<? extends T> localTargetKey = targetKey;
+    context.pushState(localTargetKey, source);
     try {
-      return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
+    return targetFactory.get(errors.withSource(localTargetKey), context, dependency, true);
     } finally {
       context.popState();
     }
   }
 
-  @Override public String toString() {
-    return Objects.toStringHelper(FactoryProxy.class)
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(FactoryProxy.class)
         .add("key", key)
         .add("provider", targetFactory)
         .toString();

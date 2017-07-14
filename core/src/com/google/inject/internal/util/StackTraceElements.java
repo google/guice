@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +19,11 @@ package com.google.inject.internal.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.MapMaker;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Creates stack trace elements for members.
@@ -34,25 +33,31 @@ import java.util.Map;
 public class StackTraceElements {
 
   private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
-  private static final InMemoryStackTraceElement[] EMPTY_INMEMORY_STACK_TRACE = 
+  private static final InMemoryStackTraceElement[] EMPTY_INMEMORY_STACK_TRACE =
       new InMemoryStackTraceElement[0];
 
   /*if[AOP]*/
   static final LoadingCache<Class<?>, LineNumbers> lineNumbersCache =
-      CacheBuilder.newBuilder().weakKeys().softValues().build(
-          new CacheLoader<Class<?>, LineNumbers>() {
-            public LineNumbers load(Class<?> key) {
-              try {
-                return new LineNumbers(key);
-              }
-              catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            }
-          });
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .softValues()
+          .build(
+              new CacheLoader<Class<?>, LineNumbers>() {
+                @Override
+                public LineNumbers load(Class<?> key) {
+                  try {
+                    return new LineNumbers(key);
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                }
+              });
   /*end[AOP]*/
 
-  private static Map<Object, Object> cache = new MapMaker().makeMap();
+  private static final ConcurrentMap<InMemoryStackTraceElement, InMemoryStackTraceElement>
+      elementCache = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<String, String> stringCache = new ConcurrentHashMap<>();
+
   private static final String UNKNOWN_SOURCE = "Unknown Source";
 
   public static Object forMember(Member member) {
@@ -91,31 +96,28 @@ public class StackTraceElements {
 
     return new StackTraceElement(implementation.getName(), "class", fileName, lineNumber);
   }
-  
-  /**
-   * Clears the internal cache for {@link StackTraceElement StackTraceElements}.
-   */
+
+  /** Clears the internal cache for {@link StackTraceElement StackTraceElements}. */
   public static void clearCache() {
-    cache.clear();
+    elementCache.clear();
+    stringCache.clear();
   }
-  
-  /**
-   * Returns encoded in-memory version of {@link StackTraceElement StackTraceElements}.
-   */
+
+  /** Returns encoded in-memory version of {@link StackTraceElement StackTraceElements}. */
   public static InMemoryStackTraceElement[] convertToInMemoryStackTraceElement(
       StackTraceElement[] stackTraceElements) {
     if (stackTraceElements.length == 0) {
       return EMPTY_INMEMORY_STACK_TRACE;
     }
-    InMemoryStackTraceElement[] inMemoryStackTraceElements = 
+    InMemoryStackTraceElement[] inMemoryStackTraceElements =
         new InMemoryStackTraceElement[stackTraceElements.length];
     for (int i = 0; i < stackTraceElements.length; i++) {
-      inMemoryStackTraceElements[i] = 
+      inMemoryStackTraceElements[i] =
           weakIntern(new InMemoryStackTraceElement(stackTraceElements[i]));
     }
     return inMemoryStackTraceElements;
   }
-  
+
   /**
    * Decodes in-memory stack trace elements to regular {@link StackTraceElement StackTraceElements}.
    */
@@ -124,45 +126,43 @@ public class StackTraceElements {
     if (inMemoryStackTraceElements.length == 0) {
       return EMPTY_STACK_TRACE;
     }
-    StackTraceElement[] stackTraceElements = 
+    StackTraceElement[] stackTraceElements =
         new StackTraceElement[inMemoryStackTraceElements.length];
     for (int i = 0; i < inMemoryStackTraceElements.length; i++) {
       String declaringClass = inMemoryStackTraceElements[i].getClassName();
       String methodName = inMemoryStackTraceElements[i].getMethodName();
       int lineNumber = inMemoryStackTraceElements[i].getLineNumber();
-      stackTraceElements[i] = 
+      stackTraceElements[i] =
           new StackTraceElement(declaringClass, methodName, UNKNOWN_SOURCE, lineNumber);
     }
     return stackTraceElements;
   }
-  
+
   private static InMemoryStackTraceElement weakIntern(
       InMemoryStackTraceElement inMemoryStackTraceElement) {
-    InMemoryStackTraceElement cached = 
-        (InMemoryStackTraceElement) cache.get(inMemoryStackTraceElement);
+    InMemoryStackTraceElement cached = elementCache.get(inMemoryStackTraceElement);
     if (cached != null) {
       return cached;
     }
-    inMemoryStackTraceElement = new InMemoryStackTraceElement(
-        weakIntern(inMemoryStackTraceElement.getClassName()), 
-        weakIntern(inMemoryStackTraceElement.getMethodName()), 
-        inMemoryStackTraceElement.getLineNumber());
-    cache.put(inMemoryStackTraceElement, inMemoryStackTraceElement);
+    inMemoryStackTraceElement =
+        new InMemoryStackTraceElement(
+            weakIntern(inMemoryStackTraceElement.getClassName()),
+            weakIntern(inMemoryStackTraceElement.getMethodName()),
+            inMemoryStackTraceElement.getLineNumber());
+    elementCache.put(inMemoryStackTraceElement, inMemoryStackTraceElement);
     return inMemoryStackTraceElement;
   }
-  
+
   private static String weakIntern(String s) {
-    String cached = (String) cache.get(s);
+    String cached = stringCache.get(s);
     if (cached != null) {
       return cached;
     }
-    cache.put(s, s);
-    return s;  
+    stringCache.put(s, s);
+    return s;
   }
-  
-  /**
-   * In-Memory version of {@link StackTraceElement} that does not store the file name. 
-   */
+
+  /** In-Memory version of {@link StackTraceElement} that does not store the file name. */
   public static class InMemoryStackTraceElement {
     private String declaringClass;
     private String methodName;
@@ -181,11 +181,11 @@ public class StackTraceElements {
     String getClassName() {
       return declaringClass;
     }
-    
+
     String getMethodName() {
       return methodName;
     }
-    
+
     int getLineNumber() {
       return lineNumber;
     }
@@ -199,8 +199,9 @@ public class StackTraceElements {
         return false;
       }
       InMemoryStackTraceElement e = (InMemoryStackTraceElement) obj;
-      return e.declaringClass.equals(declaringClass) && e.lineNumber == lineNumber && 
-          methodName.equals(e.methodName);
+      return e.declaringClass.equals(declaringClass)
+          && e.lineNumber == lineNumber
+          && methodName.equals(e.methodName);
     }
 
     @Override
@@ -209,7 +210,7 @@ public class StackTraceElements {
       result = 31 * result + lineNumber;
       return result;
     }
-    
+
     @Override
     public String toString() {
       return declaringClass + "." + methodName + "(" + lineNumber + ")";

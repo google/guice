@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,27 +19,27 @@ package com.google.inject;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.spi.ElementSource;
-
+import java.lang.annotation.Retention;
 import junit.framework.TestCase;
 
-import java.lang.annotation.Retention;
-
-/**
- * @author crazybob@google.com (Bob Lee)
- */
+/** @author crazybob@google.com (Bob Lee) */
 public class ReflectionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @BindingAnnotation @interface I {}
+  @BindingAnnotation
+  @interface I {}
 
   public void testNormalBinding() throws CreationException {
     final Foo foo = new Foo();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toInstance(foo);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).toInstance(foo);
+              }
+            });
 
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getProvider().get());
@@ -49,11 +49,14 @@ public class ReflectionTest extends TestCase {
   }
 
   public void testConstantBinding() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bindConstant().annotatedWith(I.class).to(5);
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(I.class).to(5);
+              }
+            });
 
     Binding<?> i = injector.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getProvider().get());
@@ -65,12 +68,15 @@ public class ReflectionTest extends TestCase {
   public void testLinkedBinding() throws CreationException {
     final Bar bar = new Bar();
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Bar.class).toInstance(bar);
-        bind(Key.get(Foo.class)).to(Key.get(Bar.class));
-      }
-    });
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Bar.class).toInstance(bar);
+                bind(Key.get(Foo.class)).to(Key.get(Bar.class));
+              }
+            });
 
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getProvider().get());

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +20,12 @@ import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * Root key set creator that starts with all types that are not Guice internal types or the
- * {@link Logger} type.
+ * Root key set creator that starts with all types that are not Guice internal types or the {@link
+ * Logger} type.
  *
  * @author bojand@google.com (Bojan Djordjevic)
  * @since 4.0
@@ -34,11 +33,12 @@ import java.util.logging.Logger;
 public class DefaultRootKeySetCreator implements RootKeySetCreator {
   private static final Key<Logger> loggerKey = Key.get(Logger.class);
 
-  @Override public Set<Key<?>> getRootKeys(Injector injector) {
+  @Override
+  public Set<Key<?>> getRootKeys(Injector injector) {
     Set<Key<?>> root = Sets.newHashSet();
     for (Key<?> key : injector.getBindings().keySet()) {
       if (key.getTypeLiteral().getRawType().getPackage() != Guice.class.getPackage()
-        && !loggerKey.equals(key)) {
+          && !loggerKey.equals(key)) {
         root.add(key);
       }
     }

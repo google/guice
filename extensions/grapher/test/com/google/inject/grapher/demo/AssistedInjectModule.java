@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,16 +20,16 @@ import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 /**
- * Module to add {@link AssistedInject}-based elements to the demo
- * {@link Injector}.
+ * Module to add {@link AssistedInject}-based elements to the demo {@link Injector}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class AssistedInjectModule extends AbstractModule {
   @Override
   protected void configure() {
-    install(new FactoryModuleBuilder()
-        .implement(DanceParty.class, DancePartyImpl.class)
-        .build(DancePartyFactory.class));
+    install(
+        new FactoryModuleBuilder()
+            .implement(DanceParty.class, DancePartyImpl.class)
+            .build(DancePartyFactory.class));
   }
 }

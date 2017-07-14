@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,20 +32,18 @@ import java.util.Collection;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Finder {
   /**
-   * Returns the configured named query's name. Specify a named query's name
-   * here. This name is typically specified in your JPA configuration.
+   * Returns the configured named query's name. Specify a named query's name here. This name is
+   * typically specified in your JPA configuration.
    */
   String namedQuery() default "";
 
-  /**
-   * Returns the configured query string. Directly specify a JPAQL query here.
-   */
+  /** Returns the configured query string. Directly specify a JPAQL query here. */
   String query() default "";
 
   /**
-   * Returns the configured autoboxing collection class.
-   * Use this clause to specify a collection impl to autobox result lists into. The impl must
-   * have a default no-arg constructor and be a subclass of {@code java.util.Collection}.
+   * Returns the configured autoboxing collection class. Use this clause to specify a collection
+   * impl to autobox result lists into. The impl must have a default no-arg constructor and be a
+   * subclass of {@code java.util.Collection}.
    */
   Class<? extends Collection> returnAs() default Collection.class;
 }
