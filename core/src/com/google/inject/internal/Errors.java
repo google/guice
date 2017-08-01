@@ -93,6 +93,8 @@ public final class Errors implements Serializable {
   /** When a binding is not found, show at most this many bindings that have some similarities */
   private static final int MAX_RELATED_TYPES_REPORTED = 3;
 
+  private static int maxErrorsLogged = Integer.MAX_VALUE;
+
   /**
    * Throws a ConfigurationException with an NullPointerExceptions as the cause if the given
    * reference is {@code null}.
@@ -167,6 +169,13 @@ public final class Errors implements Serializable {
     return source == this.source || source == SourceProvider.UNKNOWN_SOURCE
         ? this
         : new Errors(this, source);
+  }
+
+  public static void setMaxErrorsLogged(int maxErrors) {
+      if (maxErrors <= 1) {
+          maxErrors = 1;
+      }
+      maxErrorsLogged = maxErrors;
   }
 
   /**
@@ -717,9 +726,12 @@ public final class Errors implements Serializable {
   }
 
   public static String format(String messageFormat, Object... arguments) {
-    for (int i = 0; i < arguments.length; i++) {
-      arguments[i] = Errors.convert(arguments[i]);
+    Object[] subCollection = new Object[Math.min(arguments.length, maxErrorsLogged)];
+    for (int i = 0; i < Math.min(arguments.length, maxErrorsLogged); i++) {
+      subCollection[i] = Errors.convert(arguments[i]);
+      arguments[i] = null;
     }
+    arguments = subCollection;
     return String.format(messageFormat, arguments);
   }
 
@@ -768,12 +780,16 @@ public final class Errors implements Serializable {
       }
 
       fmt.format("%n");
+
+      if (index >= maxErrorsLogged) {
+        break;
+      }
     }
 
     if (errorMessages.size() == 1) {
       fmt.format("1 error");
     } else {
-      fmt.format("%s errors", errorMessages.size());
+      fmt.format("%s errors listed, %s total", Math.min(errorMessages.size(), maxErrorsLogged), errorMessages.size());
     }
 
     return fmt.toString();
