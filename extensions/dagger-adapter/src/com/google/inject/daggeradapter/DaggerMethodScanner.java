@@ -65,10 +65,6 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     switch (annotation.type()) {
       case UNIQUE:
         return key;
-      case MAP:
-        /* TODO(cgruber) implement map bindings */
-        binder.addError("Map bindings are not yet supported.");
-        return key;
       case SET:
         return processSetBinding(binder, key);
       case SET_VALUES:
