@@ -3,8 +3,8 @@ package com.google.inject.testing.throwingproviders;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.testing.throwingproviders.CheckedProviderSubject.assertThat;
 
-import com.google.common.truth.AbstractVerb;
 import com.google.common.truth.ExpectFailure;
+import com.google.common.truth.SimpleSubjectBuilder;
 import com.google.inject.throwingproviders.CheckedProvider;
 import com.google.inject.throwingproviders.CheckedProviders;
 import org.junit.Rule;
@@ -102,7 +102,7 @@ public class CheckedProviderSubjectTest {
     assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
   }
 
-  private AbstractVerb.DelegatedVerb<
+  private SimpleSubjectBuilder<
           CheckedProviderSubject<String, CheckedProvider<String>>, CheckedProvider<String>>
       expectWhenTesting() {
     return expect
