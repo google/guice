@@ -1,5 +1,9 @@
 package com.google.inject;
 
+/**
+ * Implementation of a module that will only ever be installed once into
+ * the {@link Injector}
+ */
 public abstract class SingletonModule extends AbstractModule {
 
   @Override
