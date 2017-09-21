@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -40,20 +41,14 @@ import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.SourceProvider;
-import com.google.inject.spi.BindingTargetVisitor;
-import com.google.inject.spi.ConvertedConstantBinding;
-import com.google.inject.spi.Dependency;
-import com.google.inject.spi.HasDependencies;
-import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.InstanceBinding;
-import com.google.inject.spi.ProviderBinding;
-import com.google.inject.spi.TypeConverterBinding;
+import com.google.inject.spi.*;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -872,7 +867,7 @@ final class InjectorImpl implements Injector, Lookups {
    * @throws com.google.inject.internal.ErrorsException if the binding cannot be created.
    */
   private <T> BindingImpl<T> createJustInTimeBinding(
-      Key<T> key, Errors errors, boolean jitDisabled, JitLimitation jitType)
+          final Key<T> key, Errors errors, boolean jitDisabled, JitLimitation jitType)
       throws ErrorsException {
     int numErrorsBefore = errors.size();
 
@@ -884,6 +879,17 @@ final class InjectorImpl implements Injector, Lookups {
     if (state.isBlacklisted(key)) {
       throw errors.childBindingAlreadySet(key, sources).toException();
     }
+
+    for (final Map.Entry<Key<?>, Binding<?>> keyBindingEntry : state.getExplicitBindingsThisLevel().entrySet()) {
+      if (keyBindingEntry.getKey().getTypeLiteral().getRawType().isAssignableFrom(CustomJitProvider.class)) {
+        final CustomJitProvider customJitProvider = (CustomJitProvider) getInstance(keyBindingEntry.getValue().getKey());
+        if (customJitProvider.supports(key, this)) {
+          return new CustomBindingImpl<>(key, customJitProvider);
+        }
+      }
+
+    }
+
 
     // Handle cases where T is a Provider<?>.
     if (isProvider(key)) {
@@ -1144,5 +1150,30 @@ final class InjectorImpl implements Injector, Lookups {
     return MoreObjects.toStringHelper(Injector.class)
         .add("bindings", state.getExplicitBindingsThisLevel().values())
         .toString();
+  }
+
+
+  private class CustomBindingImpl<T> extends BindingImpl<T> {
+    CustomBindingImpl(final Key<T> key, final CustomJitProvider provider) {
+      super(InjectorImpl.this, key, provider, new InternalFactory<T>() {
+        @Override
+        public T get(final Errors errors, final InternalContext context, final Dependency<?> dependency,
+                     final boolean linked) throws ErrorsException {
+          return provider.provide(key, InjectorImpl.this, errors, dependency);
+        }
+      }, Scoping.SINGLETON_INSTANCE);
+    }
+
+
+    @Override
+    public <V> V acceptTargetVisitor(final BindingTargetVisitor<? super T, V> visitor) {
+      throw new UnsupportedOperationException("CustomBindingImpl does not support acceptTargetVisitor");
+    }
+
+
+    @Override
+    public void applyTo(final Binder binder) {
+      throw new UnsupportedOperationException("CustomBindingImpl does not support applyTo");
+    }
   }
 }
