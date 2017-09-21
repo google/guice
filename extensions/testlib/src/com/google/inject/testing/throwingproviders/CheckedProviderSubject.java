@@ -54,7 +54,8 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     try {
       got = provider.get();
     } catch (Exception e) {
-      failureStrategy.fail(String.format("checked provider <%s> threw an exception", provider), e);
+      failWithRawMessageAndCause(
+          String.format("checked provider <%s> threw an exception", provider), e);
       return ignoreCheck().that(new Object());
     }
     return check().withMessage("value provided by <%s>", provider).that(got);
