@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
 import javax.inject.Provider;
 

@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.ProvisionException;
+import com.google.inject.spi.ProvisionInterceptor;
 import com.google.inject.spi.ProvisionListener;
 import java.util.List;
 import java.util.Set;
@@ -87,10 +88,6 @@ final class ProvisionListenerStackCallback<T> {
     }
   }
 
-  // TODO(sameb): Can this be more InternalFactory-like?
-  public interface ProvisionCallback<T> {
-    public T call() throws ErrorsException;
-  }
 
   private class Provision extends ProvisionListener.ProvisionInvocation<T> {
 
@@ -115,7 +112,16 @@ final class ProvisionListenerStackCallback<T> {
       index++;
       if (index == listeners.length) {
         try {
-          result = callable.call();
+          boolean intercepted = false;
+          for (final ProvisionListener listener : listeners) {
+            if (listener instanceof ProvisionInterceptor) {
+              intercepted = true;
+              result = ((ProvisionInterceptor)listener).interceptProvision(this.getBinding(), result, callable);
+            }
+          }
+          if (!intercepted) {
+            result = callable.call();
+          }
           // Make sure we don't return the provisioned object if there were any errors
           // injecting its field/method dependencies.
           errors.throwIfNewErrors(numErrorsBefore);
