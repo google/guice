@@ -23,6 +23,7 @@ import static com.google.inject.Asserts.getDeclaringSourcePart;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.internal.Annotations;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
@@ -131,7 +132,9 @@ public class BinderTest extends TestCase {
       String segment4 =
           "No implementation for java.util.Date annotated with @"
               + Named.class.getName()
-              + "(value=date) was bound.";
+              + "(value="
+              + Annotations.memberValueString("date")
+              + ") was bound.";
       String atSegment = "at " + getClass().getName();
       String sourceFileName = getDeclaringSourcePart(getClass());
       assertContains(

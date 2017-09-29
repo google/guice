@@ -22,6 +22,7 @@ import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.Annotations;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
@@ -295,10 +296,10 @@ public class PrivateModuleTest extends TestCase {
           "at " + getClass().getName(),
           getDeclaringSourcePart(getClass()),
           "2) No implementation for " + String.class.getName(),
-          "Named(value=a) was bound.",
+          "Named(value=" + Annotations.memberValueString("a") + ") was bound.",
           "for field at " + AB.class.getName() + ".a(PrivateModuleTest.java:",
           "3) No implementation for " + String.class.getName(),
-          "Named(value=b) was bound.",
+          "Named(value=" + Annotations.memberValueString("b") + ") was bound.",
           "for field at " + AB.class.getName() + ".b(PrivateModuleTest.java:",
           "3 errors");
     }

@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint.Signature;
@@ -67,7 +68,9 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]@"
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+            + Annotations.memberValueString("a")
+            + ")]@"
             + getClass().getName()
             + ".foo",
         dependency.toString());
@@ -94,7 +97,9 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]@"
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+            + Annotations.memberValueString("b")
+            + ")]@"
             + getClass().getName()
             + ".bar()[0]",
         dependency.toString());
@@ -122,7 +127,9 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]@"
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+            + Annotations.memberValueString("c")
+            + ")]@"
             + Constructable.class.getName()
             + ".<init>()[0]",
         dependency.toString());
@@ -138,7 +145,9 @@ public class InjectionPointTest extends TestCase {
   public void testUnattachedDependency() throws IOException {
     Dependency<String> dependency = Dependency.get(Key.get(String.class, named("d")));
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=d)]",
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+            + Annotations.memberValueString("d")
+            + ")]",
         dependency.toString());
     assertNull(dependency.getInjectionPoint());
     assertEquals(-1, dependency.getParameterIndex());

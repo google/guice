@@ -18,6 +18,7 @@ package com.google.inject.name;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.inject.internal.Annotations;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 
@@ -52,7 +53,7 @@ class NamedImpl implements Named, Serializable {
 
   @Override
   public String toString() {
-    return "@" + Named.class.getName() + "(value=" + value + ")";
+    return "@" + Named.class.getName() + "(value=" + Annotations.memberValueString(value) + ")";
   }
 
   @Override
