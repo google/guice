@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 
+import com.google.inject.internal.Annotations;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import java.util.concurrent.Callable;
@@ -280,7 +281,9 @@ public class MembersInjectorTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "1) No implementation for com.google.inject.MembersInjector<java.lang.String> "
-              + "annotated with @com.google.inject.name.Named(value=foo) was bound.");
+              + "annotated with @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("foo")
+              + ") was bound.");
     }
   }
 

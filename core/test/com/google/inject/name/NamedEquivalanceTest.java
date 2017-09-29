@@ -27,6 +27,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.internal.Annotations;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Properties;
@@ -122,7 +123,10 @@ public class NamedEquivalanceTest extends TestCase {
     } catch (ConfigurationException e) {
       assertContains(
           e.getMessage(),
-          "No implementation for java.lang.String annotated with @com.google.inject.name.Named(value=foo) was bound.");
+          "No implementation for java.lang.String annotated with "
+              + "@com.google.inject.name.Named(value="
+              + Annotations.memberValueString("foo")
+              + ") was bound.");
     }
   }
 
@@ -136,7 +140,9 @@ public class NamedEquivalanceTest extends TestCase {
       if (fails) {
         assertContains(
             e.getMessage(),
-            "A binding to java.lang.String annotated with @com.google.inject.name.Named(value=foo) was already configured");
+            "A binding to java.lang.String annotated with @com.google.inject.name.Named(value="
+                + Annotations.memberValueString("foo")
+                + ") was already configured");
       } else {
         throw e;
       }
@@ -230,7 +236,11 @@ public class NamedEquivalanceTest extends TestCase {
 
     @Override
     public String toString() {
-      return "@" + javax.inject.Named.class.getName() + "(value=" + value + ")";
+      return "@"
+          + javax.inject.Named.class.getName()
+          + "(value="
+          + Annotations.memberValueString(value)
+          + ")";
     }
 
     @Override
@@ -271,7 +281,11 @@ public class NamedEquivalanceTest extends TestCase {
 
     @Override
     public String toString() {
-      return "@" + com.google.inject.name.Named.class.getName() + "(value=" + value + ")";
+      return "@"
+          + com.google.inject.name.Named.class.getName()
+          + "(value="
+          + Annotations.memberValueString(value)
+          + ")";
     }
 
     @Override
