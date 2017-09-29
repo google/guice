@@ -380,24 +380,22 @@ public class ThrowingProviderBinder {
     /**
      * Returns the exception type declared to be thrown by the get method of {@code interfaceType}.
      */
-    private List<Class<? extends Throwable>> getExceptionType(Class<P> interfaceType) {
+    private List<Class<? extends Throwable>> getExceptionType(Class<P> interfaceType)  {
       try {
         Method getMethod = interfaceType.getMethod("get");
         List<TypeLiteral<?>> exceptionLiterals =
             TypeLiteral.get(interfaceType).getExceptionTypes(getMethod);
         List<Class<? extends Throwable>> results = Lists.newArrayList();
-        for (TypeLiteral<?> exLiteral : exceptionLiterals) {
-          results.add(exLiteral.getRawType().asSubclass(Throwable.class));
-        }
+        exceptionLiterals.forEach(exLiteral -> {
+results.add(exLiteral.getRawType().asSubclass(Throwable.class));
+});
         return results;
       } catch (SecurityException e) {
         throw new IllegalStateException("Not allowed to inspect exception types", e);
       } catch (NoSuchMethodException e) {
         throw new IllegalStateException("No 'get'method available", e);
       }
-    }
-
-    private boolean checkInterface() {
+    }private boolean checkInterface() {
       try {
         ProviderChecker.checkInterface(interfaceType, Optional.of(valueType));
         return true;

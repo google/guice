@@ -44,31 +44,16 @@ class ProcessedBindingData {
   }
 
   /** Initialize bindings. This may be done eagerly */
-  void initializeBindings() {
-    for (Runnable initializer : uninitializedBindings) {
-      initializer.run();
-    }
-  }
-
-  /**
-   * Runs creation listeners.
-   *
-   * <p>TODO(lukes): figure out exactly why this case exists.
-   */
-  void runCreationListeners(Errors errors) {
-    for (CreationListener creationListener : creationListeners) {
-      creationListener.notify(errors);
-    }
-  }
-
-  /**
-   * Initialized bindings that need to be delayed until after all injection points and other
-   * bindings are processed. The main current usecase for this is resolving Optional dependencies
-   * for OptionalBinder bindings.
-   */
-  void initializeDelayedBindings() {
-    for (Runnable initializer : delayedUninitializedBindings) {
-      initializer.run();
-    }
-  }
-}
+   void initializeBindings()  {
+    uninitializedBindings.forEach(initializer -> {
+initializer.run();
+});
+  } void runCreationListeners(Errors errors)  {
+    creationListeners.forEach(creationListener -> {
+creationListener.notify(errors);
+});
+  } void initializeDelayedBindings()  {
+    delayedUninitializedBindings.forEach(initializer -> {
+initializer.run();
+});
+  }}

@@ -452,7 +452,7 @@ public class BinderTestSuite extends TestCase {
       return Guice.createInjector(modules);
     }
 
-    public void test() throws IllegalAccessException, InstantiationException {
+    public void test() throws IllegalAccessException, InstantiationException  {
       Injector injector = newInjector();
       nextId.set(201);
       for (Object value : expectedValues) {
@@ -491,11 +491,10 @@ public class BinderTestSuite extends TestCase {
       Injectable hasProvider = injector1.getInstance(injectsKey);
       hasProvider.provider.get();
       nextId.set(201);
-      for (Object value : expectedValues) {
-        assertEquals(value, hasProvider.provider.get());
-      }
-    }
-  }
+      expectedValues.forEach(value -> {
+assertEquals(value, hasProvider.provider.get());
+});
+    }}
 
   public static class CreationExceptionTest extends TestCase {
     final String name;

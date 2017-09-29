@@ -69,21 +69,19 @@ final class WeakKeySet {
    * There may be multiple child injectors blacklisting a certain key so only remove the source
    * that's relevant.
    */
-  private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources) {
+  private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources)  {
     synchronized (lock) {
-      for (KeyAndSource keyAndSource : keysAndSources) {
-        Multiset<Object> set = backingMap.get(keyAndSource.key);
-        if (set != null) {
-          set.remove(keyAndSource.source);
-          if (set.isEmpty()) {
+      keysAndSources.forEach(keyAndSource -> {
+Multiset<Object> set = backingMap.get(keyAndSource.key);
+if (set != null) {
+set.remove(keyAndSource.source);
+if (set.isEmpty()) {
             backingMap.remove(keyAndSource.key);
           }
-        }
-      }
+}
+});
     }
-  }
-
-  WeakKeySet(Object lock) {
+  }WeakKeySet(Object lock) {
     this.lock = lock;
   }
 

@@ -1527,11 +1527,10 @@ public class MultibinderTest extends TestCase {
   }
 
   private <T> Collection<T> collectValues(
-      Collection<? extends javax.inject.Provider<T>> providers) {
+      Collection<? extends javax.inject.Provider<T>> providers)  {
     Collection<T> values = Lists.newArrayList();
-    for (javax.inject.Provider<T> provider : providers) {
-      values.add(provider.get());
-    }
+    providers.forEach(provider -> {
+values.add(provider.get());
+});
     return values;
-  }
-}
+  }}

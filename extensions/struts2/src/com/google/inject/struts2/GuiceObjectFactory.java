@@ -115,14 +115,14 @@ public class GuiceObjectFactory extends ObjectFactory {
     return injector.getInstance(clazz);
   }
 
-  private void createInjector() {
+  private void createInjector()  {
     try {
       logger.info("Creating injector...");
       this.injector =
           Guice.createInjector(
               new AbstractModule() {
                 @Override
-                protected void configure() {
+                protected void configure()  {
                   // Install default servlet bindings.
                   install(new ServletModule());
 
@@ -138,31 +138,27 @@ public class GuiceObjectFactory extends ObjectFactory {
 
                   // Tell the injector about all the action classes, etc., so it
                   // can validate them at startup.
-                  for (Class<?> boundClass : boundClasses) {
-                    // TODO: Set source from Struts XML.
-                    bind(boundClass);
-                  }
+                  boundClasses.forEach(boundClass -> {
+bind(boundClass);
+});
 
                   // Validate the interceptor class.
-                  for (ProvidedInterceptor interceptor : interceptors) {
-                    interceptor.validate(binder());
-                  }
-                }
-              });
+                  interceptors.forEach(interceptor -> {
+interceptor.validate(binder());
+});
+                }});
 
       // Inject interceptors.
-      for (ProvidedInterceptor interceptor : interceptors) {
-        interceptor.inject();
-      }
+      interceptors.forEach(interceptor -> {
+interceptor.inject();
+});
 
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(1);
     }
     logger.info("Injector created successfully.");
-  }
-
-  @Override
+  }@Override
   @SuppressWarnings("unchecked")
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
       throws ConfigurationException {
