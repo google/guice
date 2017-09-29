@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.common.collect.Iterables;
+import com.google.inject.internal.Annotations;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
@@ -97,9 +98,17 @@ public class ImplicitBindingTest extends TestCase {
       Asserts.assertContains(
           expected.getMessage(),
           "1) No implementation for " + I.class.getName(),
-          "annotated with @" + Named.class.getName() + "(value=i) was bound.",
+          "annotated with @"
+              + Named.class.getName()
+              + "(value="
+              + Annotations.memberValueString("i")
+              + ") was bound.",
           "while locating " + I.class.getName(),
-          " annotated with @" + Named.class.getName() + "(value=i)");
+          " annotated with @"
+              + Named.class.getName()
+              + "(value="
+              + Annotations.memberValueString("i")
+              + ")");
     }
   }
 

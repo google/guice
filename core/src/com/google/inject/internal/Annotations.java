@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
@@ -210,6 +212,35 @@ public class Annotations {
     }
 
     return false;
+  }
+
+  private static final boolean QUOTE_MEMBER_VALUES = determineWhetherToQuote();
+
+  /**
+   * Returns {@code value}, quoted if annotation implementations quote their member values. In Java
+   * 9, annotations quote their string members.
+   */
+  public static String memberValueString(String value) {
+    return QUOTE_MEMBER_VALUES ? "\"" + value + "\"" : value;
+  }
+
+  @Retention(RUNTIME)
+  private @interface TestAnnotation {
+    String value();
+  }
+
+  @TestAnnotation("determineWhetherToQuote")
+  private static boolean determineWhetherToQuote() {
+    try {
+      String annotation =
+          Annotations.class
+              .getDeclaredMethod("determineWhetherToQuote")
+              .getAnnotation(TestAnnotation.class)
+              .toString();
+      return annotation.contains("\"determineWhetherToQuote\"");
+    } catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
+    }
   }
 
   /** Checks for the presence of annotations. Caches results because Android doesn't. */

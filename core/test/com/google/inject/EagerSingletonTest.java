@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.getClassPathUrls;
+
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,11 +147,10 @@ public class EagerSingletonTest extends TestCase {
 
   /** Creates a copy of a class in a child classloader. */
   private static Class<?> copyClass(final Class<?> cls) {
-    URLClassLoader parent = (URLClassLoader) EagerSingletonTest.class.getClassLoader();
     // To create a copy of a class we create a new child class loader with the same data as our
     // parent and override loadClass to always load a new copy of cls.
     try {
-      return new URLClassLoader(parent.getURLs(), parent) {
+      return new URLClassLoader(getClassPathUrls(), EagerSingletonTest.class.getClassLoader()) {
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
           // This means for every class besides cls we delegate to our parent (so things like
