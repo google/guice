@@ -23,9 +23,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Iterator;
 import java.util.Properties;
-import javax.imageio.spi.ServiceRegistry;
+import java.util.ServiceLoader;
 import junit.framework.TestCase;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.launch.Framework;
@@ -136,9 +135,8 @@ public class OSGiContainerTest extends TestCase {
     properties.setProperty("org.osgi.framework.storage.clean", "onFirstInit");
 
     // test each available OSGi framework in turn
-    Iterator<FrameworkFactory> f = ServiceRegistry.lookupProviders(FrameworkFactory.class);
-    while (f.hasNext()) {
-      Framework framework = f.next().newFramework(properties);
+    for (FrameworkFactory frameworkFactory : ServiceLoader.load(FrameworkFactory.class)) {
+      Framework framework = frameworkFactory.newFramework(properties);
 
       framework.start();
       BundleContext systemContext = framework.getBundleContext();
