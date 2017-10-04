@@ -94,6 +94,12 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     }
   }
 
+  @Override
+  public void restart() {
+    end();
+    start();
+  }
+
   private volatile EntityManagerFactory emFactory;
 
   @VisibleForTesting
