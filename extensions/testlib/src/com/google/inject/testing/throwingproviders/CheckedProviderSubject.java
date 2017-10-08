@@ -2,9 +2,8 @@ package com.google.inject.testing.throwingproviders;
 
 import static com.google.common.truth.Truth.assertAbout;
 
-import com.google.common.truth.FailureStrategy;
+import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
-import com.google.common.truth.SubjectFactory;
 import com.google.common.truth.ThrowableSubject;
 import com.google.inject.throwingproviders.CheckedProvider;
 import javax.annotation.Nullable;
@@ -18,16 +17,16 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     extends Subject<CheckedProviderSubject<T, P>, P> {
 
   private static final class CheckedProviderSubjectFactory<T, P extends CheckedProvider<T>>
-      extends SubjectFactory<CheckedProviderSubject<T, P>, P> {
+      implements Subject.Factory<CheckedProviderSubject<T, P>, P> {
     @Override
-    public CheckedProviderSubject<T, P> getSubject(
-        FailureStrategy failureStrategy, @Nullable P target) {
-      return new CheckedProviderSubject<T, P>(failureStrategy, target);
+    public CheckedProviderSubject<T, P> createSubject(
+        FailureMetadata failureMetadata, @Nullable P target) {
+      return new CheckedProviderSubject<T, P>(failureMetadata, target);
     }
   }
 
   public static <T, P extends CheckedProvider<T>>
-      SubjectFactory<CheckedProviderSubject<T, P>, P> checkedProviders() {
+      Subject.Factory<CheckedProviderSubject<T, P>, P> checkedProviders() {
     return new CheckedProviderSubjectFactory<>();
   }
 
@@ -36,8 +35,8 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     return assertAbout(CheckedProviderSubject.<T, P>checkedProviders()).that(provider);
   }
 
-  private CheckedProviderSubject(FailureStrategy failureStrategy, @Nullable P subject) {
-    super(failureStrategy, subject);
+  private CheckedProviderSubject(FailureMetadata failureMetadata, @Nullable P subject) {
+    super(failureMetadata, subject);
   }
 
   /**
