@@ -523,8 +523,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors errorInProvider(Throwable cause) {
-    Throwable unwrapped = unwrap(cause);
-    return errorInUserCode(unwrapped, "Error in custom provider, %s", unwrapped);
+    return errorInUserCode(cause, "Error in custom provider, %s", cause);
   }
 
   public Errors errorInUserInjector(
@@ -574,14 +573,6 @@ public final class Errors implements Serializable {
       return merge(messages);
     } else {
       return addMessage(cause, messageFormat, arguments);
-    }
-  }
-
-  private Throwable unwrap(Throwable runtimeException) {
-    if (runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
-      return runtimeException.getCause();
-    } else {
-      return runtimeException;
     }
   }
 
