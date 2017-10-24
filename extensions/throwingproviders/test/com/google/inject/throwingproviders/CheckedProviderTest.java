@@ -23,7 +23,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.BindingAnnotation;
@@ -1644,16 +1643,11 @@ public class CheckedProviderTest extends TestCase {
       injector.getInstance(Key.get(remoteProviderOfFoo)).get();
       fail();
     } catch (ProvisionException pe) {
-      assertEquals(2, pe.getErrorMessages().size());
-      List<Message> messages = Lists.newArrayList(pe.getErrorMessages());
+      Message message = Iterables.getOnlyElement(pe.getErrorMessages());
       assertEquals(
           "Error in custom provider, com.google.inject.OutOfScopeException: failure: "
               + Key.get(Unscoped1.class),
-          messages.get(0).getMessage());
-      assertEquals(
-          "Error in custom provider, com.google.inject.OutOfScopeException: failure: "
-              + Key.get(Unscoped2.class),
-          messages.get(1).getMessage());
+          message.getMessage());
     }
   }
 
