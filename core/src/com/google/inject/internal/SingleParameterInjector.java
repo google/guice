@@ -50,22 +50,13 @@ final class SingleParameterInjector<T> {
       return NO_ARGUMENTS;
     }
 
-    int numErrorsBefore = errors.size();
-
     int size = parameterInjectors.length;
     Object[] parameters = new Object[size];
 
     // optimization: use manual for/each to save allocating an iterator here
     for (int i = 0; i < size; i++) {
-      SingleParameterInjector<?> parameterInjector = parameterInjectors[i];
-      try {
-        parameters[i] = parameterInjector.inject(errors, context);
-      } catch (ErrorsException e) {
-        errors.merge(e.getErrors());
-      }
+      parameters[i] = parameterInjectors[i].inject(errors, context);
     }
-
-    errors.throwIfNewErrors(numErrorsBefore);
     return parameters;
   }
 }
