@@ -18,9 +18,11 @@ package com.google.inject.spi;
 
 import static com.google.inject.internal.MoreTypes.getRawType;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -38,6 +40,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -569,9 +572,13 @@ public final class InjectionPoint {
         for (InjectableMember member = injectableMembers.head;
             member != null;
             member = member.next) {
-          if (!(member instanceof InjectableMethod)) continue;
+          if (!(member instanceof InjectableMethod)) {
+            continue;
+          }
           InjectableMethod im = (InjectableMethod) member;
-          if (im.isFinal()) continue;
+          if (im.isFinal()) {
+            continue;
+          }
           List<InjectableMethod> methods = new ArrayList<>();
           methods.add(im);
           bySignature.put(new Signature(im.method), methods);
@@ -617,6 +624,7 @@ public final class InjectionPoint {
       }
       if (bySignature != null) {
         // Try to reuse the signature we created during removal
+        @SuppressWarnings("ReferenceEquality")
         Signature signature =
             injectableMethod.method == lastMethod
                 ? lastSignature
@@ -634,7 +642,8 @@ public final class InjectionPoint {
   /**
    * Returns an ordered, immutable set of injection points for the given type. Members in
    * superclasses come before members in subclasses. Within a class, fields come before methods.
-   * Overridden methods are filtered out.
+   * Overridden methods are filtered out. The order of fields/methods within a class is consistent
+   * but undefined.
    *
    * @param statics true is this method should return static members, false for instance members
    * @param errors used to record errors
@@ -658,7 +667,7 @@ public final class InjectionPoint {
 
       TypeLiteral<?> current = hierarchy.get(i);
 
-      for (Field field : current.getRawType().getDeclaredFields()) {
+      for (Field field : getDeclaredFields(current)) {
         if (Modifier.isStatic(field.getModifiers()) == statics) {
           Annotation atInject = getAtInject(field);
           if (atInject != null) {
@@ -671,7 +680,7 @@ public final class InjectionPoint {
         }
       }
 
-      for (Method method : current.getRawType().getDeclaredMethods()) {
+      for (Method method : getDeclaredMethods(current)) {
         if (isEligibleForInjection(method, statics)) {
           Annotation atInject = getAtInject(method);
           if (atInject != null) {
@@ -686,8 +695,8 @@ public final class InjectionPoint {
                       Level.WARNING,
                       "Method: {0} is not a valid injectable method ("
                           + "because it either has misplaced binding annotations "
-                          + "or specifies type parameters) but is overriding a method that is valid. "
-                          + "Because it is not valid, the method will not be injected. "
+                          + "or specifies type parameters) but is overriding a method that is "
+                          + "valid. Because it is not valid, the method will not be injected. "
                           + "To fix this, make the method a valid injectable method.",
                       method);
                 }
@@ -706,7 +715,7 @@ public final class InjectionPoint {
                  */
                 overrideIndex = new OverrideIndex(injectableMembers);
               } else {
-                // Forcibly remove the overriden method, otherwise we'll inject
+                // Forcibly remove the overridden method, otherwise we'll inject
                 // it twice.
                 overrideIndex.removeIfOverriddenBy(method, true, injectableMethod);
               }
@@ -719,9 +728,9 @@ public final class InjectionPoint {
                 logger.log(
                     Level.WARNING,
                     "Method: {0} is not annotated with @Inject but "
-                        + "is overriding a method that is annotated with @javax.inject.Inject.  Because "
-                        + "it is not annotated with @Inject, the method will not be injected. "
-                        + "To fix this, annotate the method with @Inject.",
+                        + "is overriding a method that is annotated with @javax.inject.Inject."
+                        + "Because it is not annotated with @Inject, the method will not be "
+                        + "injected. To fix this, annotate the method with @Inject.",
                     method);
               }
             }
@@ -746,6 +755,70 @@ public final class InjectionPoint {
     }
     return builder.build();
   }
+
+  private static Field[] getDeclaredFields(TypeLiteral<?> type) {
+    Field[] fields = type.getRawType().getDeclaredFields();
+    Arrays.sort(fields, FIELD_ORDERING);
+    return fields;
+  }
+
+  private static Method[] getDeclaredMethods(TypeLiteral<?> type) {
+    Method[] methods = type.getRawType().getDeclaredMethods();
+    Arrays.sort(methods, METHOD_ORDERING);
+    return methods;
+  }
+
+  /**
+   * An ordering suitable for comparing two classes if they are loaded by the same classloader
+   *
+   * <p>Within a single classloader there can only be one class with a given name, so we just
+   * compare the names.
+   */
+  private static final Ordering<Class<?>> CLASS_ORDERING =
+      new Ordering<Class<?>>() {
+        @Override
+        public int compare(Class<?> o1, Class<?> o2) {
+          return o1.getName().compareTo(o2.getName());
+        }
+      };
+
+  /**
+   * An ordering suitable for comparing two fields if they are owned by the same class.
+   *
+   * <p>Within a single class it is sufficent to compare the non-generic field signature which
+   * consists of the field name and type.
+   */
+  private static final Ordering<Field> FIELD_ORDERING =
+      new Ordering<Field>() {
+        @Override
+        public int compare(Field left, Field right) {
+          return ComparisonChain.start()
+              .compare(left.getName(), right.getName())
+              .compare(left.getType(), right.getType(), CLASS_ORDERING)
+              .result();
+        }
+      };
+
+  /**
+   * An ordering suitable for comparing two methods if they are owned by the same class.
+   *
+   * <p>Within a single class it is sufficient to compare the non-generic method signature which
+   * consists of the name, return type and parameter types.
+   */
+  private static final Ordering<Method> METHOD_ORDERING =
+      new Ordering<Method>() {
+        @Override
+        public int compare(Method left, Method right) {
+          return ComparisonChain.start()
+              .compare(left.getName(), right.getName())
+              .compare(left.getReturnType(), right.getReturnType(), CLASS_ORDERING)
+              .compare(
+                  Arrays.asList(left.getParameterTypes()),
+                  Arrays.asList(right.getParameterTypes()),
+                  CLASS_ORDERING.lexicographical())
+              .result();
+        }
+      };
 
   /**
    * Returns true if the method is eligible to be injected. This is different than {@link
