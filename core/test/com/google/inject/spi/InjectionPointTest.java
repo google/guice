@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
@@ -197,26 +198,34 @@ public class InjectionPointTest extends TestCase {
   public void testAddForInstanceMethodsAndFields() throws Exception {
     Method instanceMethod = HasInjections.class.getMethod("instanceMethod", String.class);
     Field instanceField = HasInjections.class.getField("instanceField");
+    Field instanceField2 = HasInjections.class.getField("instanceField2");
 
     TypeLiteral<HasInjections> type = TypeLiteral.get(HasInjections.class);
-    assertEquals(
-        ImmutableSet.of(
-            new InjectionPoint(type, instanceMethod, false),
-            new InjectionPoint(type, instanceField, false)),
-        InjectionPoint.forInstanceMethodsAndFields(HasInjections.class));
+    Set<InjectionPoint> injectionPoints =
+        InjectionPoint.forInstanceMethodsAndFields(HasInjections.class);
+    // there is a defined order. assert on it
+    assertThat(injectionPoints)
+        .containsExactly(
+            new InjectionPoint(type, instanceField, false),
+            new InjectionPoint(type, instanceField2, false),
+            new InjectionPoint(type, instanceMethod, false))
+        .inOrder();
   }
 
   public void testAddForStaticMethodsAndFields() throws Exception {
     Method staticMethod = HasInjections.class.getMethod("staticMethod", String.class);
     Field staticField = HasInjections.class.getField("staticField");
+    Field staticField2 = HasInjections.class.getField("staticField2");
 
     Set<InjectionPoint> injectionPoints =
         InjectionPoint.forStaticMethodsAndFields(HasInjections.class);
-    assertEquals(
-        ImmutableSet.of(
-            new InjectionPoint(TypeLiteral.get(HasInjections.class), staticMethod, false),
-            new InjectionPoint(TypeLiteral.get(HasInjections.class), staticField, false)),
-        injectionPoints);
+    TypeLiteral<HasInjections> type = TypeLiteral.get(HasInjections.class);
+    assertThat(injectionPoints)
+        .containsExactly(
+            new InjectionPoint(type, staticField, false),
+            new InjectionPoint(type, staticField2, false),
+            new InjectionPoint(type, staticMethod, false))
+        .inOrder();
   }
 
   static class HasInjections {
@@ -228,11 +237,19 @@ public class InjectionPointTest extends TestCase {
     public static String staticField;
 
     @Inject
+    @Named("c")
+    public static String staticField2;
+
+    @Inject
     public void instanceMethod(@Named("d") String d) {}
 
     @Inject
     @Named("f")
     public String instanceField;
+
+    @Inject
+    @Named("f")
+    public String instanceField2;
   }
 
   public void testAddForParameterizedInjections() {
