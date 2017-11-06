@@ -23,10 +23,14 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Providers;
 import dagger.multibindings.IntoSet;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
+import javax.inject.Qualifier;
 import junit.framework.TestCase;
 
 /**
@@ -54,7 +58,6 @@ public class DaggerAdapterTest extends TestCase {
     String aString(Integer i) {
       return i.toString();
     }
-
   }
 
   public void testInteractionWithGuiceModules() {
@@ -86,6 +89,28 @@ public class DaggerAdapterTest extends TestCase {
         Guice.createInjector(
             DaggerAdapter.from(new SetBindingDaggerModule1(), new SetBindingDaggerModule2()));
     assertEquals(ImmutableSet.of(3, 5), i.getInstance(new Key<Set<Integer>>() {}));
+  }
+
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface AnnotationOnSet {}
+
+  @dagger.Module
+  static class SetBindingWithAnnotationDaggerModule {
+    @dagger.Provides
+    @IntoSet
+    @AnnotationOnSet
+    Integer anInteger() {
+      return 4;
+    }
+  }
+
+  public void testSetBindingsWithAnnotation() {
+    Injector i =
+        Guice.createInjector(DaggerAdapter.from(new SetBindingWithAnnotationDaggerModule()));
+    assertEquals(
+        ImmutableSet.of(4),
+        i.getInstance(Key.get(new TypeLiteral<Set<Integer>>() {}, AnnotationOnSet.class)));
   }
 
   static class MultibindingGuiceModule implements Module {
