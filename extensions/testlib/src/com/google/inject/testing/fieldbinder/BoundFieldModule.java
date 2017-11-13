@@ -43,20 +43,23 @@ import java.lang.reflect.Type;
  * <p>The following rules are followed in determining how fields are bound using this module:
  *
  * <ul>
- * <li> For each {@link Bind} annotated field of an object and its superclasses, this module will
- *     bind that field's type to that field's value at injector creation time. This includes both
- *     instance and static fields.
- * <li> If {@link Bind#to} is specified, the field's value will be bound to the class specified by
- *     {@link Bind#to} instead of the field's actual type.
- * <li> If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
- *     that field will be bound using that annotation via {@link
- *     AnnotatedBindingBuilder#annotatedWith}. For example, {@code
- *     bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error to
- *     supply more than one {@link BindingAnnotation} or {@link javax.inject.Qualifier}.
- * <li> If the field is of type {@link Provider}, the field's value will be bound as a {@link
- *     Provider} using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized type.
- *     For example, {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a
- *     non-parameterized {@link Provider} without a {@link Bind#to} clause is an error.
+ *   <li>For each {@link Bind} annotated field of an object and its superclasses, this module will
+ *       bind that field's type to that field's value at injector creation time. This includes both
+ *       instance and static fields.
+ *   <li>If {@link Bind#to} is specified, the field's value will be bound to the class specified by
+ *       {@link Bind#to} instead of the field's actual type.
+ *   <li>If {@link Bind#lazy} is true, this module will delay reading the value from the field until
+ *       injection time, allowing the field's value to be reassigned during the course of a test's
+ *       execution.
+ *   <li>If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
+ *       that field will be bound using that annotation via {@link
+ *       AnnotatedBindingBuilder#annotatedWith}. For example, {@code
+ *       bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error to
+ *       supply more than one {@link BindingAnnotation} or {@link javax.inject.Qualifier}.
+ *   <li>If the field is of type {@link Provider}, the field's value will be bound as a {@link
+ *       Provider} using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized
+ *       type. For example, {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a
+ *       non-parameterized {@link Provider} without a {@link Bind#to} clause is an error.
  * </ul>
  *
  * <p>Example use:
@@ -66,6 +69,7 @@ import java.lang.reflect.Type;
  *   // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
  *   {@literal @}Bind private List{@code <Object>} listOfObjects = Lists.of();
  *
+ *   // private String userName = "string_that_changes_over_time";
  *   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
  *   {@literal @}Bind(lazy = true) private String userName;
  *
