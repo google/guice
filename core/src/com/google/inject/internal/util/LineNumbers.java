@@ -138,7 +138,7 @@ final class LineNumbers {
     private String name;
 
     LineNumberReader() {
-      super(Opcodes.ASM5);
+      super(Opcodes.ASM6);
     }
 
     @Override
@@ -197,7 +197,7 @@ final class LineNumbers {
 
     class LineNumberMethodVisitor extends MethodVisitor {
       LineNumberMethodVisitor() {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM6);
       }
 
       @Override
@@ -228,7 +228,7 @@ final class LineNumbers {
 
     class LineNumberAnnotationVisitor extends AnnotationVisitor {
       LineNumberAnnotationVisitor() {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM6);
       }
 
       @Override
