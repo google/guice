@@ -145,7 +145,7 @@
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="${common.basedir}/lib/build/cglib-3.2.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/asm-5.0.3.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/asm-6.0.jar"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
       <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
