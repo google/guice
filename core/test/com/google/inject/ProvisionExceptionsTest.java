@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Errors;
+import com.google.inject.internal.Messages;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class ProvisionExceptionsTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
       assertEquals(
-          IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+          IllegalStateException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
 
@@ -77,7 +77,7 @@ public class ProvisionExceptionsTest extends TestCase {
           pe.getMessage(), "1) Error injecting constructor", "java.io.IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
-      assertEquals(IOException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+      assertEquals(IOException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
 
@@ -108,7 +108,7 @@ public class ProvisionExceptionsTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
       assertEquals(
-          IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+          IllegalStateException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
 
@@ -136,7 +136,7 @@ public class ProvisionExceptionsTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
       assertEquals(
-          IllegalStateException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+          IllegalStateException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
 
@@ -164,7 +164,7 @@ public class ProvisionExceptionsTest extends TestCase {
           pe.getMessage(), "1) Error in custom provider", "java.io.IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
-      assertEquals(IOException.class, Errors.getOnlyCause(pe.getErrorMessages()).getClass());
+      assertEquals(IOException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
     }
   }
 
