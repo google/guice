@@ -58,7 +58,7 @@ public final class ProvisionException extends RuntimeException {
 
   @Override
   public String getMessage() {
-    return Messages.format("Unable to provision, see the following errors", messages);
+    return Messages.formatMessages("Unable to provision, see the following errors", messages);
   }
 
   private static final long serialVersionUID = 0;

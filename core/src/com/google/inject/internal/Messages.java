@@ -74,7 +74,7 @@ public final class Messages {
   }
 
   /** Returns the formatted message for an exception with the specified messages. */
-  public static String format(String heading, Collection<Message> errorMessages) {
+  public static String formatMessages(String heading, Collection<Message> errorMessages) {
     Formatter fmt = new Formatter().format(heading).format(":%n%n");
     int index = 1;
     boolean displayCauses = getOnlyCause(errorMessages) == null;
