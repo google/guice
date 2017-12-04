@@ -70,7 +70,7 @@ public final class ConfigurationException extends RuntimeException {
   }
 
   @Override public String getMessage() {
-    return Messages.format("Guice configuration errors", messages);
+    return Messages.formatMessages("Guice configuration errors", messages);
   }
 
   private static final long serialVersionUID = 0;

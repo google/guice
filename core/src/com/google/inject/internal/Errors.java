@@ -684,14 +684,10 @@ public final class Errors implements Serializable {
     return this;
   }
 
-  // TODO(lukes): the format(...) overloads violate best practices since they do very different
-  // things. Rename them as part of the inlining process.
-
   // TODO(lukes): inline into callers
   public static String format(String messageFormat, Object... arguments) {
     return Messages.format(messageFormat, arguments);
   }
-
 
   public List<Message> getMessages() {
     if (root.errors == null) {
@@ -704,12 +700,6 @@ public final class Errors implements Serializable {
         return a.getSource().compareTo(b.getSource());
       }
     }.sortedCopy(root.errors);
-  }
-
-  // TODO(lukes): remove external callers
-  /** Returns the formatted message for an exception with the specified messages. */
-  public static String format(String heading, Collection<Message> errorMessages) {
-    return Messages.format(heading, errorMessages);
   }
 
   // TODO(lukes): move @Provides logic into @Provides methods to help simplify this monster
