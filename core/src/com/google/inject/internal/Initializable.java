@@ -24,5 +24,5 @@ package com.google.inject.internal;
 interface Initializable<T> {
 
   /** Ensures the reference is initialized, then returns it. */
-  T get(Errors errors) throws ErrorsException;
+  T get() throws InternalProvisionException;
 }

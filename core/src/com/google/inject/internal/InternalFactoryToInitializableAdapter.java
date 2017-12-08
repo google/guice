@@ -42,22 +42,21 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   }
 
   @Override
-  public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
-      throws ErrorsException {
-    return circularGet(initializable.get(errors), errors, context, dependency, provisionCallback);
+  public T get(InternalContext context, Dependency<?> dependency, boolean linked)
+      throws InternalProvisionException {
+    return circularGet(initializable.get(), context, dependency, provisionCallback);
   }
 
   @Override
   protected T provision(
       javax.inject.Provider<? extends T> provider,
-      Errors errors,
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
-      throws ErrorsException {
+      throws InternalProvisionException {
     try {
-      return super.provision(provider, errors, dependency, constructionContext);
+      return super.provision(provider, dependency, constructionContext);
     } catch (RuntimeException userException) {
-      throw errors.withSource(source).errorInProvider(userException).toException();
+      throw InternalProvisionException.errorInProvider(userException).addSource(source);
     }
   }
 

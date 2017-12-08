@@ -23,7 +23,9 @@ final class SingleParameterInjector<T> {
   private static final Object[] NO_ARGUMENTS = {};
 
   private final Dependency<T> dependency;
+
   private final Object source;
+
   private final InternalFactory<? extends T> factory;
 
   SingleParameterInjector(Dependency<T> dependency, BindingImpl<? extends T> binding) {
@@ -32,20 +34,25 @@ final class SingleParameterInjector<T> {
     this.factory = binding.getInternalFactory();
   }
 
-  T inject(Errors errors, InternalContext context) throws ErrorsException {
+  T inject(InternalContext context) throws InternalProvisionException {
     Dependency<T> localDependency = dependency;
     Dependency previous = context.pushDependency(localDependency, source);
+
     try {
-    return factory.get(errors.withSource(localDependency), context, localDependency, false);
-    } finally {
-      context.popStateAndSetDependency(previous);
+      return factory.get(context, localDependency, false);
+    } catch (InternalProvisionException ipe) {
+      throw ipe.addSource(localDependency);
+      } finally {
+        context.popStateAndSetDependency(previous);
+
     }
   }
 
+  // TODO(lukes): inline into callers to decrease stack depth
+
   /** Returns an array of parameter values. */
-  static Object[] getAll(
-      Errors errors, InternalContext context, SingleParameterInjector<?>[] parameterInjectors)
-      throws ErrorsException {
+  static Object[] getAll(InternalContext context, SingleParameterInjector<?>[] parameterInjectors)
+      throws InternalProvisionException {
     if (parameterInjectors == null) {
       return NO_ARGUMENTS;
     }
@@ -55,7 +62,7 @@ final class SingleParameterInjector<T> {
 
     // optimization: use manual for/each to save allocating an iterator here
     for (int i = 0; i < size; i++) {
-      parameters[i] = parameterInjectors[i].inject(errors, context);
+      parameters[i] = parameterInjectors[i].inject(context);
     }
     return parameters;
   }

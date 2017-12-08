@@ -20,7 +20,7 @@ import com.google.inject.spi.InjectionPoint;
 
 /** Injects a field or method of a given object. */
 interface SingleMemberInjector {
-  void inject(Errors errors, InternalContext context, Object o);
+  void inject(InternalContext context, Object o) throws InternalProvisionException;
 
   InjectionPoint getInjectionPoint();
 }

@@ -107,22 +107,17 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     }
 
     @Override
-    public T get(
-        final Errors errors,
-        final InternalContext context,
-        final Dependency<?> dependency,
-        boolean linked)
-        throws ErrorsException {
+    public T get(final InternalContext context, final Dependency<?> dependency, boolean linked)
+        throws InternalProvisionException {
       if (provisionCallback == null) {
-        return doProvision(errors, context, dependency);
+        return doProvision(context, dependency);
       } else {
         return provisionCallback.provision(
-            errors,
             context,
             new ProvisionCallback<T>() {
               @Override
-              public T call() throws ErrorsException {
-                return doProvision(errors, context, dependency);
+              public T call() throws InternalProvisionException {
+                return doProvision(context, dependency);
               }
             });
       }
@@ -130,11 +125,11 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     /**
      * Creates an object to be injected.
      *
-     * @throws com.google.inject.internal.ErrorsException if a value cannot be provided
+     * @throws com.google.inject.internal.InternalProvisionException if a value cannot be provided
      * @return instance to be injected
      */
-    protected abstract T doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) throws ErrorsException;
+    protected abstract T doProvision(InternalContext context, Dependency<?> dependency)
+        throws InternalProvisionException;
   }
 
   /**
@@ -149,33 +144,29 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
 
     @Override
     public final T get(
-        final Errors errors,
-        final InternalContext context,
-        final Dependency<?> dependency,
-        boolean linked)
-        throws ErrorsException {
+        final InternalContext context, final Dependency<?> dependency, boolean linked)
+        throws InternalProvisionException {
       final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
       // We have a circular reference between bindings. Return a proxy.
       if (constructionContext.isConstructing()) {
         Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
         @SuppressWarnings("unchecked")
         T proxyType =
-            (T) constructionContext.createProxy(errors, context.getInjectorOptions(), expectedType);
+            (T) constructionContext.createProxy(context.getInjectorOptions(), expectedType);
         return proxyType;
       }
       // Optimization: Don't go through the callback stack if no one's listening.
       constructionContext.startConstruction();
       try {
         if (provisionCallback == null) {
-          return provision(errors, dependency, context, constructionContext);
+          return provision(dependency, context, constructionContext);
         } else {
           return provisionCallback.provision(
-              errors,
               context,
               new ProvisionCallback<T>() {
                 @Override
-                public T call() throws ErrorsException {
-                  return provision(errors, dependency, context, constructionContext);
+                public T call() throws InternalProvisionException {
+                  return provision(dependency, context, constructionContext);
                 }
               });
         }
@@ -186,19 +177,18 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     }
 
     private T provision(
-        Errors errors,
         Dependency<?> dependency,
         InternalContext context,
         ConstructionContext<T> constructionContext)
-        throws ErrorsException {
+        throws InternalProvisionException {
       try {
-        T t = doProvision(errors, context, dependency);
+        T t = doProvision(context, dependency);
         constructionContext.setProxyDelegates(t);
         return t;
-      } catch (ErrorsException ee) {
-        throw ee;
+      } catch (InternalProvisionException ipe) {
+        throw ipe.addSource(getSource());
       } catch (Throwable t) {
-        throw errors.withSource(getSource()).errorInProvider(t).toException();
+        throw InternalProvisionException.errorInProvider(t).addSource(getSource());
       }
     }
   }

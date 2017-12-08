@@ -137,9 +137,9 @@ final class Initializer {
     Preconditions.checkState(validationStarted, "Validation should be done before injection");
     for (InjectableReference<?> reference : pendingInjections) {
       try {
-        reference.get(errors);
-      } catch (ErrorsException e) {
-        errors.merge(e.getErrors());
+        reference.get();
+      } catch (InternalProvisionException ipe) {
+        errors.merge(ipe);
       }
     }
     pendingInjections.clear();
@@ -195,7 +195,7 @@ final class Initializer {
      * method will ensure that all its members have been injected before returning.
      */
     @Override
-    public T get(Errors errors) throws ErrorsException {
+    public T get() throws InternalProvisionException {
       // skipping acquiring lock if initialization is already finished
       if (state == InjectableReferenceState.READY) {
         return instance;
@@ -241,14 +241,12 @@ final class Initializer {
 
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
-        membersInjector.injectAndNotify(
-            instance,
-            errors.withSource(source),
-            key,
-            provisionCallback,
-            source,
-            injector.options.stage == Stage.TOOL);
-
+        try {
+          membersInjector.injectAndNotify(
+              instance, key, provisionCallback, source, injector.options.stage == Stage.TOOL);
+        } catch (InternalProvisionException ipe) {
+          throw ipe.addSource(source);
+        }
         // mark instance as ready to skip a lock on subsequent calls
         state = InjectableReferenceState.READY;
         return instance;

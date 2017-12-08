@@ -180,8 +180,8 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected Set<T> doProvision(Errors errors, InternalContext context, Dependency<?> dependency)
-        throws ErrorsException {
+    protected Set<T> doProvision(InternalContext context, Dependency<?> dependency)
+        throws InternalProvisionException {
       SingleParameterInjector<T>[] localInjectors = injectors;
       if (localInjectors == null) {
         // if localInjectors == null, then we have no bindings so return the empty set.
@@ -195,24 +195,23 @@ public final class RealMultibinder<T> implements Module {
       T[] values = (T[]) new Object[localInjectors.length];
       for (int i = 0; i < localInjectors.length; i++) {
         SingleParameterInjector<T> parameterInjector = localInjectors[i];
-        T newValue = parameterInjector.inject(errors, context);
+        T newValue = parameterInjector.inject(context);
         if (newValue == null) {
-          throw newNullEntryException(i, errors);
+          throw newNullEntryException(i);
         }
         values[i] = newValue;
       }
       ImmutableSet<T> set = ImmutableSet.copyOf(values);
       // There are fewer items in the set than the array.  Figure out which one got dropped.
       if (!permitDuplicates && set.size() < values.length) {
-        throw newDuplicateValuesException(set, values, errors);
+        throw newDuplicateValuesException(set, values);
       }
       return set;
     }
 
-    private ErrorsException newNullEntryException(int i, Errors errors) {
-      errors.addMessage(
+    private InternalProvisionException newNullEntryException(int i) {
+      return InternalProvisionException.create(
           "Set injection failed due to null element bound at: %s", bindings.get(i).getSource());
-      return errors.toException();
     }
 
     @SuppressWarnings("unchecked")
@@ -226,8 +225,8 @@ public final class RealMultibinder<T> implements Module {
       }
     }
 
-    private ErrorsException newDuplicateValuesException(
-        ImmutableSet<T> set, T[] values, Errors errors) {
+    private InternalProvisionException newDuplicateValuesException(
+        ImmutableSet<T> set, T[] values) {
       // TODO(lukes): consider reporting all duplicate values, the easiest way would be to rebuild
       // a new set and detect dupes as we go
       // Find the duplicate binding
@@ -254,19 +253,18 @@ public final class RealMultibinder<T> implements Module {
       String newString = newValue.toString();
       if (Objects.equal(oldString, newString)) {
         // When the value strings match, just show the source of the bindings
-        errors.addMessage(
+        return InternalProvisionException.create(
             "Set injection failed due to duplicated element \"%s\""
                 + "\n    Bound at %s\n    Bound at %s",
             newValue, duplicateBinding.getSource(), newBinding.getSource());
       } else {
         // When the value strings don't match, include them both as they may be useful for debugging
-        errors.addMessage(
+        return InternalProvisionException.create(
             "Set injection failed due to multiple elements comparing equal:"
                 + "\n    \"%s\"\n        bound at %s"
                 + "\n    \"%s\"\n        bound at %s",
             oldValue, duplicateBinding.getSource(), newValue, newBinding.getSource());
       }
-      return errors.toException();
     }
 
     @Override
@@ -551,7 +549,7 @@ public final class RealMultibinder<T> implements Module {
 
     @Override
     protected Collection<Provider<T>> doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) {
+        InternalContext context, Dependency<?> dependency) {
       return collectionOfProviders;
     }
 

@@ -316,8 +316,8 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected Object doProvision(Errors errors, InternalContext context, Dependency dependency)
-        throws ErrorsException {
+    protected Object doProvision(InternalContext context, Dependency dependency)
+        throws InternalProvisionException {
       InternalFactory<?> local = target;
       if (local == null) {
         return JAVA_OPTIONAL_EMPTY;
@@ -325,12 +325,16 @@ public final class RealOptionalBinder<T> implements Module {
       Dependency<?> localDependency = targetDependency;
       Object result;
       Dependency previous = context.pushDependency(localDependency, getSource());
+
       try {
-      // See comments in RealOptionalKeyProvider, about how localDependency may be more specific
-      // than what we actually need.
-      result = local.get(errors.withSource(localDependency), context, localDependency, false);
-      } finally {
-        context.popStateAndSetDependency(previous);
+        // See comments in RealOptionalKeyProvider, about how localDependency may be more specific
+        // than what we actually need.
+        result = local.get(context, localDependency, false);
+      } catch (InternalProvisionException ipe) {
+        throw ipe.addSource(localDependency);
+        } finally {
+          context.popStateAndSetDependency(previous);
+
       }
       return invokeJavaOptionalOfNullable(result);
     }
@@ -392,7 +396,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected Object doProvision(Errors errors, InternalContext context, Dependency dependency) {
+    protected Object doProvision(InternalContext context, Dependency dependency) {
       return value;
     }
 
@@ -406,7 +410,9 @@ public final class RealOptionalBinder<T> implements Module {
   private static final class RealDirectTypeProvider<T>
       extends RealOptionalBinderProviderWithDependencies<T, T> {
     private Key<? extends T> targetKey;
+
     private Object targetSource;
+
     private InternalFactory<? extends T> targetFactory;
 
     RealDirectTypeProvider(BindingSelection<T> bindingSelection) {
@@ -424,14 +430,18 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected T doProvision(Errors errors, InternalContext context, Dependency<?> dependency)
-        throws ErrorsException {
+    protected T doProvision(InternalContext context, Dependency<?> dependency)
+        throws InternalProvisionException {
       // This is what linked bindings do (see FactoryProxy), and we are pretty similar.
       context.pushState(targetKey, targetSource);
+
       try {
-      return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
-      } finally {
-        context.popState();
+        return targetFactory.get(context, dependency, true);
+      } catch (InternalProvisionException ipe) {
+        throw ipe.addSource(targetKey);
+        } finally {
+          context.popState();
+
       }
     }
 
@@ -460,8 +470,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected Optional<Provider<T>> doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) {
+    protected Optional<Provider<T>> doProvision(InternalContext context, Dependency<?> dependency) {
       return value;
     }
 
@@ -497,9 +506,8 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected Optional<T> doProvision(
-        Errors errors, InternalContext context, Dependency<?> currentDependency)
-        throws ErrorsException {
+    protected Optional<T> doProvision(InternalContext context, Dependency<?> currentDependency)
+        throws InternalProvisionException {
       InternalFactory<? extends T> local = delegate;
       if (local == null) {
         return Optional.absent();
@@ -507,14 +515,18 @@ public final class RealOptionalBinder<T> implements Module {
       Dependency<?> localDependency = targetDependency;
       T result;
       Dependency previous = context.pushDependency(localDependency, getSource());
+
       try {
-      // currentDependency is Optional<? super T>, so we really just need to set the target
-      // dependency to ? super T, but we are currently setting it to T.  We could hypothetically
-      // make it easier for our delegate to generate proxies by modifying the dependency, but that
-      // would also require us to rewrite the key on each call.  So for now we don't do it.
-      result = local.get(errors.withSource(localDependency), context, localDependency, false);
-      } finally {
-        context.popStateAndSetDependency(previous);
+        // currentDependency is Optional<? super T>, so we really just need to set the target
+        // dependency to ? super T, but we are currently setting it to T.  We could hypothetically
+        // make it easier for our delegate to generate proxies by modifying the dependency, but that
+        // would also require us to rewrite the key on each call.  So for now we don't do it.
+        result = local.get(context, localDependency, false);
+      } catch (InternalProvisionException ipe) {
+        throw ipe.addSource(localDependency);
+        } finally {
+          context.popStateAndSetDependency(previous);
+
       }
       return Optional.fromNullable(result);
     }

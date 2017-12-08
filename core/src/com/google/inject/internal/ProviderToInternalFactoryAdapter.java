@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.Provider;
-import com.google.inject.ProvisionException;
 
 /** @author crazybob@google.com (Bob Lee) */
 final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
@@ -33,17 +32,15 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   @Override
   public T get() {
-    final Errors errors = new Errors();
     InternalContext context = injector.enterContext();
     try {
       // Always pretend that we are a linked binding, to support
       // scoping implicit bindings.  If we are not actually a linked
       // binding, we'll fail properly elsewhere in the chain.
-      T t = internalFactory.get(errors, context, context.getDependency(), true);
-      errors.throwIfNewErrors(0);
+      T t = internalFactory.get(context, context.getDependency(), true);
       return t;
-    } catch (ErrorsException e) {
-      throw new ProvisionException(errors.merge(e.getErrors()).getMessages());
+    } catch (InternalProvisionException e) {
+      throw e.toProvisionException();
     } finally {
       context.close();
     }

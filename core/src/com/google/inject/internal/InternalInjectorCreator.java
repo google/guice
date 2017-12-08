@@ -207,11 +207,10 @@ public final class InternalInjectorCreator {
           Dependency<?> dependency = Dependency.get(binding.getKey());
           Dependency previous = context.pushDependency(dependency, binding.getSource());
 
-          Errors errorsForBinding = errors.withSource(dependency);
           try {
-            binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
-          } catch (ErrorsException e) {
-            errorsForBinding.merge(e.getErrors());
+            binding.getInternalFactory().get(context, dependency, false);
+          } catch (InternalProvisionException e) {
+            errors.withSource(dependency).merge(e);
           } finally {
               context.popStateAndSetDependency(previous);
             }

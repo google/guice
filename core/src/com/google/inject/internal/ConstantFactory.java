@@ -29,9 +29,9 @@ final class ConstantFactory<T> implements InternalFactory<T> {
   }
 
   @Override
-  public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
-      throws ErrorsException {
-    return initializable.get(errors);
+  public T get(InternalContext context, Dependency<?> dependency, boolean linked)
+      throws InternalProvisionException {
+    return initializable.get();
   }
 
   @Override

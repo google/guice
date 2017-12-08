@@ -53,7 +53,7 @@ final class InjectorShell {
   private final List<Element> elements;
   private final InjectorImpl injector;
 
-  private InjectorShell(Builder builder, List<Element> elements, InjectorImpl injector) {
+  private InjectorShell(List<Element> elements, InjectorImpl injector) {
     this.elements = elements;
     this.injector = injector;
   }
@@ -190,7 +190,7 @@ final class InjectorShell {
       stopwatch.resetAndLog("Module annotated method scanners creation");
 
       List<InjectorShell> injectorShells = Lists.newArrayList();
-      injectorShells.add(new InjectorShell(this, elements, injector));
+      injectorShells.add(new InjectorShell(elements, injector));
 
       // recursively build child shells
       PrivateElementProcessor processor = new PrivateElementProcessor(errors);
@@ -238,9 +238,7 @@ final class InjectorShell {
     }
 
     @Override
-    public Injector get(
-        Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
-        throws ErrorsException {
+    public Injector get(InternalContext context, Dependency<?> dependency, boolean linked) {
       return injector;
     }
 
@@ -276,8 +274,7 @@ final class InjectorShell {
 
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
     @Override
-    public Logger get(
-        Errors errors, InternalContext context, Dependency<?> dependency, boolean linked) {
+    public Logger get(InternalContext context, Dependency<?> dependency, boolean linked) {
       InjectionPoint injectionPoint = dependency.getInjectionPoint();
       return injectionPoint == null
           ? Logger.getAnonymousLogger()
