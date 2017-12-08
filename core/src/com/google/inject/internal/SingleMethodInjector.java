@@ -78,14 +78,8 @@ final class SingleMethodInjector implements SingleMemberInjector {
   }
 
   @Override
-  public void inject(Errors errors, InternalContext context, Object o) {
-    Object[] parameters;
-    try {
-      parameters = SingleParameterInjector.getAll(errors, context, parameterInjectors);
-    } catch (ErrorsException e) {
-      errors.merge(e.getErrors());
-      return;
-    }
+  public void inject(InternalContext context, Object o) throws InternalProvisionException {
+    Object[] parameters = SingleParameterInjector.getAll(context, parameterInjectors);
 
     try {
       methodInvoker.invoke(o, parameters);
@@ -93,7 +87,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
-      errors.withSource(injectionPoint).errorInjectingMethod(cause);
+      throw InternalProvisionException.errorInjectingMethod(cause).addSource(injectionPoint);
     }
   }
 }

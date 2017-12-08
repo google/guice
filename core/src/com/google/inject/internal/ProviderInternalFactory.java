@@ -37,11 +37,10 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
 
   protected T circularGet(
       final Provider<? extends T> provider,
-      final Errors errors,
       InternalContext context,
       final Dependency<?> dependency,
       /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
-      throws ErrorsException {
+      throws InternalProvisionException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
@@ -49,8 +48,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
       // TODO: if we can't proxy this object, can we proxy the other object?
       @SuppressWarnings("unchecked")
-      T proxyType =
-          (T) constructionContext.createProxy(errors, context.getInjectorOptions(), expectedType);
+      T proxyType = (T) constructionContext.createProxy(context.getInjectorOptions(), expectedType);
       return proxyType;
     }
 
@@ -58,15 +56,14 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
     constructionContext.startConstruction();
     try {
       if (provisionCallback == null) {
-        return provision(provider, errors, dependency, constructionContext);
+        return provision(provider, dependency, constructionContext);
       } else {
         return provisionCallback.provision(
-            errors,
             context,
             new ProvisionCallback<T>() {
               @Override
-              public T call() throws ErrorsException {
-                return provision(provider, errors, dependency, constructionContext);
+              public T call() throws InternalProvisionException {
+                return provision(provider, dependency, constructionContext);
               }
             });
       }
@@ -82,11 +79,10 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    */
   protected T provision(
       Provider<? extends T> provider,
-      Errors errors,
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
-      throws ErrorsException {
-    T t = errors.checkForNull(provider.get(), source, dependency);
+      throws InternalProvisionException {
+    T t = Errors.checkForNull(provider.get(), source, dependency);
     constructionContext.setProxyDelegates(t);
     return t;
   }

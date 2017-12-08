@@ -35,7 +35,6 @@ import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
-import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
@@ -378,8 +377,7 @@ final class InjectorImpl implements Injector, Lookups {
       final Provider<T> provider = providedBinding.getProvider();
       return new InternalFactory<Provider<T>>() {
         @Override
-        public Provider<T> get(
-            Errors errors, InternalContext context, Dependency dependency, boolean linked) {
+        public Provider<T> get(InternalContext context, Dependency<?> dependency, boolean linked) {
           return provider;
         }
       };
@@ -1046,15 +1044,13 @@ final class InjectorImpl implements Injector, Lookups {
     return new Provider<T>() {
       @Override
       public T get() {
-        Errors errors = new Errors(dependency);
         InternalContext currentContext = enterContext();
         Dependency previous = currentContext.pushDependency(dependency, source);
         try {
-          T t = internalFactory.get(errors, currentContext, dependency, false);
-          errors.throwIfNewErrors(0);
+          T t = internalFactory.get(currentContext, dependency, false);
           return t;
-        } catch (ErrorsException e) {
-          throw new ProvisionException(errors.merge(e.getErrors()).getMessages());
+        } catch (InternalProvisionException e) {
+          throw e.addSource(dependency).toProvisionException();
         } finally {
           currentContext.popStateAndSetDependency(previous);
           currentContext.close();

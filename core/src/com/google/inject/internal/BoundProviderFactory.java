@@ -52,31 +52,31 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   }
 
   @Override
-  public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
-      throws ErrorsException {
+  public T get(InternalContext context, Dependency<?> dependency, boolean linked)
+      throws InternalProvisionException {
     context.pushState(providerKey, source);
-    try {
 
-    errors = errors.withSource(providerKey);
-      javax.inject.Provider<? extends T> provider =
-          providerFactory.get(errors, context, dependency, true);
-      return circularGet(provider, errors, context, dependency, provisionCallback);
-    } finally {
-      context.popState();
+    try {
+      javax.inject.Provider<? extends T> provider = providerFactory.get(context, dependency, true);
+      return circularGet(provider, context, dependency, provisionCallback);
+    } catch (InternalProvisionException ipe) {
+      throw ipe.addSource(providerKey);
+      } finally {
+        context.popState();
+
     }
   }
 
   @Override
   protected T provision(
       Provider<? extends T> provider,
-      Errors errors,
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
-      throws ErrorsException {
+      throws InternalProvisionException {
     try {
-      return super.provision(provider, errors, dependency, constructionContext);
+      return super.provision(provider, dependency, constructionContext);
     } catch (RuntimeException userException) {
-      throw errors.errorInProvider(userException).toException();
+      throw InternalProvisionException.errorInProvider(userException);
     }
   }
 

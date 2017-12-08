@@ -27,7 +27,6 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.MembersInjector;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
@@ -36,7 +35,6 @@ import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ElementSource;
-import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
@@ -328,11 +326,6 @@ public final class Errors implements Serializable {
     return addMessage("Binding to Provider is not allowed.");
   }
 
-  public Errors subtypeNotProvided(
-      Class<? extends javax.inject.Provider<?>> providerType, Class<?> type) {
-    return addMessage("%s doesn't provide instances of %s.", providerType, type);
-  }
-
   public Errors notASubtype(Class<?> implementationType, Class<?> type) {
     return addMessage("%s doesn't extend %s.", implementationType, type);
   }
@@ -494,10 +487,6 @@ public final class Errors implements Serializable {
         key, convert(source), t);
   }
 
-  public Errors errorInjectingMethod(Throwable cause) {
-    return errorInUserCode(cause, "Error injecting method, %s", cause);
-  }
-
   public Errors errorNotifyingTypeListener(
       TypeListenerBinding listener, TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(
@@ -505,30 +494,6 @@ public final class Errors implements Serializable {
         "Error notifying TypeListener %s (bound at %s) of %s.%n Reason: %s",
         listener.getListener(),
         convert(listener.getSource()),
-        type,
-        cause);
-  }
-
-  public Errors errorInjectingConstructor(Throwable cause) {
-    return errorInUserCode(cause, "Error injecting constructor, %s", cause);
-  }
-
-  public Errors errorInProvider(Throwable cause) {
-    return errorInUserCode(cause, "Error in custom provider, %s", cause);
-  }
-
-  public Errors errorInUserInjector(
-      MembersInjector<?> listener, TypeLiteral<?> type, RuntimeException cause) {
-    return errorInUserCode(
-        cause, "Error injecting %s using %s.%n Reason: %s", type, listener, cause);
-  }
-
-  public Errors errorNotifyingInjectionListener(
-      InjectionListener<?> listener, TypeLiteral<?> type, RuntimeException cause) {
-    return errorInUserCode(
-        cause,
-        "Error notifying InjectionListener %s of %s.%n Reason: %s",
-        listener,
         type,
         cause);
   }
@@ -583,18 +548,6 @@ public final class Errors implements Serializable {
     return addMessage("Cannot inject a TypeLiteral that has no type parameter");
   }
 
-  public Errors cannotProxyClass(Class<?> expectedType) {
-    return addMessage(
-        "Tried proxying %s to support a circular dependency, but it is not an interface.",
-        expectedType);
-  }
-
-  public Errors circularDependenciesDisabled(Class<?> expectedType) {
-    return addMessage(
-        "Found a circular dependency involving %s, and circular dependencies are disabled.",
-        expectedType);
-  }
-
   public void throwCreationExceptionIfErrorsExist() {
     if (!hasErrors()) {
       return;
@@ -611,6 +564,7 @@ public final class Errors implements Serializable {
     throw new ConfigurationException(getMessages());
   }
 
+  // Guice no longer calls this, but external callers do
   public void throwProvisionExceptionIfErrorsExist() {
     if (!hasErrors()) {
       return;
@@ -641,7 +595,7 @@ public final class Errors implements Serializable {
     return this;
   }
 
-  public List<Object> getSources() {
+  private List<Object> getSources() {
     List<Object> sources = Lists.newArrayList();
     for (Errors e = this; e != null; e = e.parent) {
       if (e.source != SourceProvider.UNKNOWN_SOURCE) {
@@ -706,12 +660,10 @@ public final class Errors implements Serializable {
 
   /**
    * Returns {@code value} if it is non-null or allowed to be null. Otherwise a message is added and
-   * an {@code ErrorsException} is thrown.
+   * an {@code InternalProvisionException} is thrown.
    */
-  public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
-      throws ErrorsException {
-    // TODO(lukes): move this method to InternalProvisionException?  Maybe split into 2, one for
-    // ProviderMethods and one for everything else.
+  public static <T> T checkForNull(T value, Object source, Dependency<?> dependency)
+      throws InternalProvisionException {
     if (value != null || dependency.isNullable()) {
       return value;
     }
@@ -746,10 +698,10 @@ public final class Errors implements Serializable {
         (dependency.getParameterIndex() != -1)
             ? Messages.formatParameter(dependency)
             : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
-    addMessage(
-        "null returned by binding at %s%n but %s is not @Nullable", source, formattedDependency);
 
-    throw toException();
+    throw InternalProvisionException.create(
+            "null returned by binding at %s%n but %s is not @Nullable", source, formattedDependency)
+        .addSource(source);
   }
 
   public int size() {

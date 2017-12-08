@@ -290,20 +290,20 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
     @Override
     @SuppressWarnings("unchecked")
-    public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
-        throws ErrorsException {
+    public T get(InternalContext context, Dependency<?> dependency, boolean linked)
+        throws InternalProvisionException {
       ConstructorInjector<T> localInjector = constructorInjector;
       if (localInjector == null) {
         throw new IllegalStateException("Constructor not ready");
       }
 
       if (!linked && failIfNotLinked) {
-        throw errors.jitDisabled(key).toException();
+        throw InternalProvisionException.jitDisabled(key);
       }
 
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
-      return (T) localInjector.construct(errors, context, dependency, provisionCallback);
+      return (T) localInjector.construct(context, dependency, provisionCallback);
     }
   }
 }

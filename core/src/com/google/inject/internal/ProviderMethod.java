@@ -167,17 +167,17 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   }
 
   @Override
-  protected T doProvision(Errors errors, InternalContext context, Dependency<?> dependency)
-      throws ErrorsException {
+  protected T doProvision(InternalContext context, Dependency<?> dependency)
+      throws InternalProvisionException {
     try {
-      T t = doProvision(SingleParameterInjector.getAll(errors, context, parameterInjectors));
-      errors.checkForNull(t, getMethod(), dependency);
+      T t = doProvision(SingleParameterInjector.getAll(context, parameterInjectors));
+      Errors.checkForNull(t, getMethod(), dependency);
       return t;
     } catch (IllegalAccessException e) {
       throw new AssertionError(e);
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
-      throw errors.withSource(getSource()).errorInProvider(cause).toException();
+      throw InternalProvisionException.errorInProvider(cause).addSource(getSource());
     }
   }
 

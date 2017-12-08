@@ -56,41 +56,43 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
-      throws ErrorsException {
+  public T get(InternalContext context, Dependency<?> dependency, boolean linked)
+      throws InternalProvisionException {
     BindingImpl<? extends Provider<T>> localProviderBinding = providerBinding;
     if (localProviderBinding == null) {
       throw new IllegalStateException("not initialized");
     }
     Key<? extends Provider<T>> localProviderKey = providerKey;
     context.pushState(localProviderKey, localProviderBinding.getSource());
+
     try {
-    errors = errors.withSource(localProviderKey);
       Provider<? extends T> provider =
-          localProviderBinding.getInternalFactory().get(errors, context, dependency, true);
-      return circularGet(provider, errors, context, dependency, provisionCallback);
-    } finally {
-      context.popState();
+          localProviderBinding.getInternalFactory().get(context, dependency, true);
+      return circularGet(provider, context, dependency, provisionCallback);
+    } catch (InternalProvisionException ipe) {
+      throw ipe.addSource(localProviderKey);
+      } finally {
+        context.popState();
+
     }
   }
 
   @Override
   protected T provision(
       javax.inject.Provider<? extends T> provider,
-      Errors errors,
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
-      throws ErrorsException {
+      throws InternalProvisionException {
     try {
-      Object o = super.provision(provider, errors, dependency, constructionContext);
+      Object o = super.provision(provider, dependency, constructionContext);
       if (o != null && !rawType.isInstance(o)) {
-        throw errors.subtypeNotProvided(providerType, rawType).toException();
+        throw InternalProvisionException.subtypeNotProvided(providerType, rawType);
       }
       @SuppressWarnings("unchecked") // protected by isInstance() check above
       T t = (T) o;
       return t;
     } catch (RuntimeException e) {
-      throw errors.errorInProvider(e).toException();
+      throw InternalProvisionException.errorInProvider(e).addSource(source);
     }
   }
 }

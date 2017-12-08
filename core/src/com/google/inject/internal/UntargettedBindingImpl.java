@@ -33,8 +33,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
         source,
         new InternalFactory<T>() {
           @Override
-          public T get(
-              Errors errors, InternalContext context, Dependency<?> dependency, boolean linked) {
+          public T get(InternalContext context, Dependency<?> dependency, boolean linked) {
             throw new AssertionError();
           }
         },

@@ -725,8 +725,7 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    protected Map<K, Provider<V>> doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) {
+    protected Map<K, Provider<V>> doProvision(InternalContext context, Dependency<?> dependency) {
       return mapOfProviders;
     }
   }
@@ -780,8 +779,8 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    protected Map<K, V> doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) throws ErrorsException {
+    protected Map<K, V> doProvision(InternalContext context, Dependency<?> dependency)
+        throws InternalProvisionException {
       SingleParameterInjector<V>[] localInjectors = injectors;
       if (localInjectors == null) {
         // if injectors == null, then we have no bindings so return the empty map.
@@ -794,10 +793,10 @@ public final class RealMapBinder<K, V> implements Module {
         SingleParameterInjector<V> injector = localInjectors[i];
         K key = localKeys[i];
 
-        V value = injector.inject(errors, context);
+        V value = injector.inject(context);
 
         if (value == null) {
-          throw createNullValueException(errors, key, bindingSelection.getMapBindings().get(key));
+          throw createNullValueException(key, bindingSelection.getMapBindings().get(key));
         }
 
         resultBuilder.put(key, value);
@@ -1062,7 +1061,7 @@ public final class RealMapBinder<K, V> implements Module {
 
       @Override
       protected Map<K, Set<Provider<V>>> doProvision(
-          Errors errors, InternalContext context, Dependency<?> dependency) {
+          InternalContext context, Dependency<?> dependency) {
         return multimapOfProviders;
       }
     }
@@ -1142,8 +1141,8 @@ public final class RealMapBinder<K, V> implements Module {
       }
 
       @Override
-      protected Map<K, Set<V>> doProvision(
-          Errors errors, InternalContext context, Dependency<?> dependency) throws ErrorsException {
+      protected Map<K, Set<V>> doProvision(InternalContext context, Dependency<?> dependency)
+          throws InternalProvisionException {
         ImmutableMap.Builder<K, Set<V>> resultBuilder = ImmutableMap.builder();
 
         for (PerKeyData<K, V> perKeyData : perKeyDatas) {
@@ -1151,10 +1150,10 @@ public final class RealMapBinder<K, V> implements Module {
           SingleParameterInjector<V>[] injectors = perKeyData.injectors;
           for (int i = 0; i < injectors.length; i++) {
             SingleParameterInjector<V> injector = injectors[i];
-            V value = injector.inject(errors, context);
+            V value = injector.inject(context);
 
             if (value == null) {
-              throw createNullValueException(errors, perKeyData.key, perKeyData.bindings[i]);
+              throw createNullValueException(perKeyData.key, perKeyData.bindings[i]);
             }
 
             bindingsBuilder.add(value);
@@ -1196,7 +1195,7 @@ public final class RealMapBinder<K, V> implements Module {
 
     @Override
     protected Map.Entry<K, Provider<V>> doProvision(
-        Errors errors, InternalContext context, Dependency<?> dependency) {
+        InternalContext context, Dependency<?> dependency) {
       return entry;
     }
 
@@ -1336,12 +1335,10 @@ public final class RealMapBinder<K, V> implements Module {
     }
   }
 
-  private static <K, V> ErrorsException createNullValueException(
-      Errors errors, K key, Binding<V> binding) {
-    errors.addMessage(
+  private static <K, V> InternalProvisionException createNullValueException(
+      K key, Binding<V> binding) {
+    return InternalProvisionException.create(
         "Map injection failed due to null value for key \"%s\", bound at: %s",
         key, binding.getSource());
-
-    return errors.toException();
   }
 }

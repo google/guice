@@ -17,11 +17,13 @@
 package com.google.inject;
 
 import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
@@ -167,16 +169,28 @@ public class ProvisionListenerTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertEquals(1, expected.getErrorMessages().size());
-      expectedMsg = expected.getMessage();
+      expectedMsg = Iterables.getOnlyElement(expected.getErrorMessages()).getMessage();
       assertContains(
-          listener.capture.get().getMessage(),
+          expected.getMessage(),
           "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
           " at " + FooBomb.class.getName(),
           " while locating " + FooBomb.class.getName(),
           " while locating " + DependsOnFooBombInField.class.getName());
+      assertContains(
+          listener.capture.get().getMessage(),
+          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
+          " at " + FooBomb.class.getName(),
+          " while locating " + FooBomb.class.getName());
+      // The message that is captures by the provision listener does not show what is depending on
+      // the thing being listened to.
+      assertThat(listener.capture.get().getMessage())
+          .doesNotContain(" while locating " + DependsOnFooBombInField.class.getName());
     }
     assertEquals(1, listener.beforeProvision);
-    assertEquals(expectedMsg, listener.capture.get().getMessage());
+    assertEquals(
+        expectedMsg,
+        Iterables.getOnlyElement(((ProvisionException) listener.capture.get()).getErrorMessages())
+            .getMessage());
     assertEquals(0, listener.afterProvision);
   }
 
@@ -204,16 +218,28 @@ public class ProvisionListenerTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertEquals(1, expected.getErrorMessages().size());
-      expectedMsg = expected.getMessage();
+      expectedMsg = Iterables.getOnlyElement(expected.getErrorMessages()).getMessage();
       assertContains(
-          listener.capture.get().getMessage(),
+          expected.getMessage(),
           "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
           " at " + FooBomb.class.getName(),
           " while locating " + FooBomb.class.getName(),
           " while locating " + DependsOnFooBombInCxtor.class.getName());
+      assertContains(
+          listener.capture.get().getMessage(),
+          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
+          " at " + FooBomb.class.getName(),
+          " while locating " + FooBomb.class.getName());
+      // The message that is captures by the provision listener does not show what is depending on
+      // the thing being listened to.
+      assertThat(listener.capture.get().getMessage())
+          .doesNotContain(" while locating " + DependsOnFooBombInField.class.getName());
     }
     assertEquals(1, listener.beforeProvision);
-    assertEquals(expectedMsg, listener.capture.get().getMessage());
+    assertEquals(
+        expectedMsg,
+        Iterables.getOnlyElement(((ProvisionException) listener.capture.get()).getErrorMessages())
+            .getMessage());
     assertEquals(0, listener.afterProvision);
   }
 
@@ -614,6 +640,7 @@ public class ProvisionListenerTest extends TestCase {
 
   private static class ChainAsserter implements ProvisionListener {
     private final List<Class<?>> provisionList;
+
     private final List<Class<?>> expected;
 
     public ChainAsserter(List<Class<?>> provisionList, Iterable<Class<?>> expected) {
@@ -696,7 +723,7 @@ public class ProvisionListenerTest extends TestCase {
                 return new C() {};
               }
             });
-    Instance instance = injector.getInstance(Instance.class);
+    injector.getInstance(Instance.class);
     // make sure we're checking all of the chain asserters..
     assertEquals(
         of(Instance.class, A.class, BImpl.class, C.class, DP.class, D.class, E.class, F.class),
@@ -768,7 +795,9 @@ public class ProvisionListenerTest extends TestCase {
 
   private static class SpecialChecker implements ProvisionListener {
     private final Class<?> notifyType;
+
     private final String firstSource;
+
     private final AtomicBoolean notified;
 
     public SpecialChecker(Class<?> notifyType, String firstSource, AtomicBoolean notified) {
@@ -876,14 +905,14 @@ public class ProvisionListenerTest extends TestCase {
     X.createY = true;
     X x = injector.getInstance(X.class);
     assertNotSame(x, x.y.x);
-    assertFalse("x.ID: " + x.ID + ", x.y.x.iD: " + x.y.x.ID, x.ID == x.y.x.ID);
+    assertFalse("x.id: " + x.id + ", x.y.x.id: " + x.y.x.id, x.id == x.y.x.id);
   }
 
   private static class X {
     static final AtomicInteger COUNTER = new AtomicInteger();
     static boolean createY;
 
-    final int ID = COUNTER.getAndIncrement();
+    final int id = COUNTER.getAndIncrement();
     final Provider<Y> yProvider;
     Y y;
 

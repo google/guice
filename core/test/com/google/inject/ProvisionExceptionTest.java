@@ -189,17 +189,33 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  // The only way to trigger an exception with _multiple_ user controlled throwables is by
+  // triggering errors during injector creation.
   public void testMultipleCauses() {
     try {
-      Guice.createInjector().getInstance(G.class);
+      Guice.createInjector(
+          Stage.PRODUCTION,
+          new AbstractModule() {
+            @Provides
+            @Singleton
+            String injectFirst() {
+              throw new IllegalArgumentException(new UnsupportedOperationException("Unsupported"));
+            }
+
+            @Provides
+            @Singleton
+            Object injectSecond() {
+              throw new NullPointerException("can't inject second either");
+            }
+          });
       fail();
-    } catch (ProvisionException e) {
+    } catch (CreationException e) {
       assertContains(
           e.getMessage(),
-          "1) Error injecting method, java.lang.IllegalArgumentException",
+          "1) Error in custom provider, java.lang.IllegalArgumentException",
           "Caused by: java.lang.IllegalArgumentException: java.lang.UnsupportedOperationException",
           "Caused by: java.lang.UnsupportedOperationException: Unsupported",
-          "2) Error injecting method, java.lang.NullPointerException: can't inject second either",
+          "2) Error in custom provider, java.lang.NullPointerException: can't inject second either",
           "Caused by: java.lang.NullPointerException: can't inject second either",
           "2 errors");
     }
@@ -456,18 +472,6 @@ public class ProvisionExceptionTest extends TestCase {
     @Override
     public F get() {
       return new F();
-    }
-  }
-
-  static class G {
-    @Inject
-    void injectFirst() {
-      throw new IllegalArgumentException(new UnsupportedOperationException("Unsupported"));
-    }
-
-    @Inject
-    void injectSecond() {
-      throw new NullPointerException("can't inject second either");
     }
   }
 }

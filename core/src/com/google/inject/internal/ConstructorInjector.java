@@ -60,17 +60,16 @@ final class ConstructorInjector<T> {
    * proxy.
    */
   Object construct(
-      final Errors errors,
       final InternalContext context,
       Dependency<?> dependency,
       /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
-      throws ErrorsException {
+      throws InternalProvisionException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
       // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
       return constructionContext.createProxy(
-          errors, context.getInjectorOptions(), dependency.getKey().getTypeLiteral().getRawType());
+          context.getInjectorOptions(), dependency.getKey().getTypeLiteral().getRawType());
     }
 
     // If we're re-entering this factory while injecting fields or methods,
@@ -78,9 +77,8 @@ final class ConstructorInjector<T> {
     T t = constructionContext.getCurrentReference();
     if (t != null) {
       if (context.getInjectorOptions().disableCircularProxies) {
-        throw errors
-            .circularDependenciesDisabled(dependency.getKey().getTypeLiteral().getRawType())
-            .toException();
+        throw InternalProvisionException.circularDependenciesDisabled(
+            dependency.getKey().getTypeLiteral().getRawType());
       } else {
         return t;
       }
@@ -90,15 +88,14 @@ final class ConstructorInjector<T> {
     try {
       // Optimization: Don't go through the callback stack if we have no listeners.
       if (provisionCallback == null) {
-        return provision(errors, context, constructionContext);
+        return provision(context, constructionContext);
       } else {
         return provisionCallback.provision(
-            errors,
             context,
             new ProvisionCallback<T>() {
               @Override
-              public T call() throws ErrorsException {
-                return provision(errors, context, constructionContext);
+              public T call() throws InternalProvisionException {
+                return provision(context, constructionContext);
               }
             });
       }
@@ -108,13 +105,12 @@ final class ConstructorInjector<T> {
   }
 
   /** Provisions a new T. */
-  private T provision(
-      Errors errors, InternalContext context, ConstructionContext<T> constructionContext)
-      throws ErrorsException {
+  private T provision(InternalContext context, ConstructionContext<T> constructionContext)
+      throws InternalProvisionException {
     try {
       T t;
       try {
-        Object[] parameters = SingleParameterInjector.getAll(errors, context, parameterInjectors);
+        Object[] parameters = SingleParameterInjector.getAll(context, parameterInjectors);
         t = constructionProxy.newInstance(parameters);
         constructionContext.setProxyDelegates(t);
       } finally {
@@ -125,16 +121,14 @@ final class ConstructorInjector<T> {
       constructionContext.setCurrentReference(t);
 
       MembersInjectorImpl<T> localMembersInjector = membersInjector;
-      localMembersInjector.injectMembers(t, errors, context, false);
-      localMembersInjector.notifyListeners(t, errors);
+      localMembersInjector.injectMembers(t, context, false);
+      localMembersInjector.notifyListeners(t);
 
       return t;
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
-      throw errors
-          .withSource(constructionProxy.getInjectionPoint())
-          .errorInjectingConstructor(cause)
-          .toException();
+      throw InternalProvisionException.errorInjectingConstructor(cause)
+          .addSource(constructionProxy.getInjectionPoint());
     } finally {
       constructionContext.removeCurrentReference();
     }
