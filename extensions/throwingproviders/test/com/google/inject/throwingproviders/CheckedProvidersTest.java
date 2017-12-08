@@ -1,8 +1,7 @@
 package com.google.inject.throwingproviders;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assert_;
-import static org.junit.Assert.fail;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.inject.TypeLiteral;
 import java.util.Arrays;
@@ -108,8 +107,7 @@ public final class CheckedProvidersTest extends TestCase {
       fail("Expected an exception to be thrown");
     } catch (IllegalArgumentException e) {
       assertThat(e).hasMessage(message);
-      assert_()
-          .withFailureMessage(String.format("exception <%s> with cause", e))
+      assertWithMessage(String.format("exception <%s> with cause", e))
           .that(e.getCause())
           .isInstanceOf(NoSuchMethodException.class);
     }

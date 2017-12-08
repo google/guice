@@ -65,10 +65,6 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     switch (annotation.type()) {
       case UNIQUE:
         return key;
-      case MAP:
-        /* TODO(cgruber) implement map bindings */
-        binder.addError("Map bindings are not yet supported.");
-        return key;
       case SET:
         return processSetBinding(binder, key);
       case SET_VALUES:
@@ -82,7 +78,11 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
   }
 
   private static <T> Key<T> processSetBinding(Binder binder, Key<T> key) {
-    Multibinder<T> setBinder = Multibinder.newSetBinder(binder, key.getTypeLiteral());
+    Annotation annotation = key.getAnnotation();
+    Multibinder<T> setBinder =
+        (annotation != null)
+            ? Multibinder.newSetBinder(binder, key.getTypeLiteral(), annotation)
+            : Multibinder.newSetBinder(binder, key.getTypeLiteral());
     Key<T> newKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
     setBinder.addBinding().to(newKey);
     return newKey;

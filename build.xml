@@ -120,7 +120,7 @@
         <pathelement location="lib/build/guava-testlib-19.0.jar"/>
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
-        <pathelement location="lib/build/truth-0.29.jar"/>
+        <pathelement location="lib/build/truth-0.36.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
         <pathelement location="lib/build/javax.inject-tck.jar"/>
         <pathelement location="lib/build/bnd-0.0.384.jar"/>
@@ -279,7 +279,7 @@
       <arg value="-DNO_AOP" />
     </munge>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-5.0.3.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-6.0.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
       <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.jar"/>]]></replacetoken>

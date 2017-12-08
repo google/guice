@@ -22,6 +22,7 @@ import static com.google.inject.name.Names.named;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Runnables;
+import com.google.inject.internal.Annotations;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint;
@@ -545,19 +546,28 @@ public class BindingTest extends TestCase {
       fail();
     } catch (ConfigurationException e) {
       String msg = e.getMessage();
-      assertContains(msg,
+      assertContains(
+          msg,
           "Guice configuration errors:",
           "1) No implementation for"
               + " com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value=Turky) was bound.",
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("Turky")
+              + ") was bound.",
           "Did you mean?",
           "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value=Turkey)",
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("Turkey")
+              + ")",
           "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value=Tofu)",
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("Tofu")
+              + ")",
           "1 more binding with other annotations.",
           "while locating com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value=Turky)");
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("Turky")
+              + ")");
     }
   }
 
@@ -577,15 +587,22 @@ public class BindingTest extends TestCase {
     } catch (ConfigurationException e) {
       String msg = e.getMessage();
       assertContains(msg, "Guice configuration errors:");
-      assertContains(msg,
+      assertContains(
+          msg,
           "1) No implementation for com.google.inject.BindingTest$Bacon"
               + " annotated with"
-              + " @com.google.inject.name.Named(value=turkey) was bound.",
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("turkey")
+              + ") was bound.",
           "Did you mean?",
           "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value=Turkey)",
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("Turkey")
+              + ")",
           "while locating com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value=turkey)");
+              + " @com.google.inject.name.Named(value="
+              + Annotations.memberValueString("turkey")
+              + ")");
     }
   }
 

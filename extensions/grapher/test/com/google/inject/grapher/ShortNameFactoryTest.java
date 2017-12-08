@@ -26,6 +26,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.name.Names;
@@ -101,7 +102,9 @@ public class ShortNameFactoryTest extends TestCase {
 
   public void testGetAnnotationName_annotationInstanceWithParameters() throws Exception {
     Key<?> key = Key.get(String.class, Names.named("name"));
-    assertEquals("@Named(value=name)", nameFactory.getAnnotationName(key));
+    assertEquals(
+        "@Named(value=" + Annotations.memberValueString("name") + ")",
+        nameFactory.getAnnotationName(key));
   }
 
   public void testGetClassName_key() throws Exception {
@@ -129,7 +132,7 @@ public class ShortNameFactoryTest extends TestCase {
     Member method = Obj.class.getDeclaredMethod("method", String.class);
     assertEquals(
         "Method should be identified by its file name and line number",
-        "ShortNameFactoryTest.java:52",
+        "ShortNameFactoryTest.java:53",
         nameFactory.getSourceName(method));
   }
 
@@ -138,7 +141,7 @@ public class ShortNameFactoryTest extends TestCase {
         (StackTraceElement) StackTraceElements.forMember(Obj.class.getField("field"));
     assertEquals(
         "Stack trace element should be identified by its file name and line number",
-        "ShortNameFactoryTest.java:50",
+        "ShortNameFactoryTest.java:51",
         nameFactory.getSourceName(element));
   }
 

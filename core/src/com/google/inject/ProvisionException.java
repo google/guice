@@ -19,7 +19,7 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.Errors;
+import com.google.inject.internal.Messages;
 import com.google.inject.spi.Message;
 import java.util.Collection;
 
@@ -39,7 +39,7 @@ public final class ProvisionException extends RuntimeException {
   public ProvisionException(Iterable<Message> messages) {
     this.messages = ImmutableSet.copyOf(messages);
     checkArgument(!this.messages.isEmpty());
-    initCause(Errors.getOnlyCause(this.messages));
+    initCause(Messages.getOnlyCause(this.messages));
   }
 
   public ProvisionException(String message, Throwable cause) {
@@ -58,7 +58,7 @@ public final class ProvisionException extends RuntimeException {
 
   @Override
   public String getMessage() {
-    return Errors.format("Unable to provision, see the following errors", messages);
+    return Messages.formatMessages("Unable to provision, see the following errors", messages);
   }
 
   private static final long serialVersionUID = 0;

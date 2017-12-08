@@ -16,6 +16,7 @@
 
 package com.googlecode.guice;
 
+import static com.google.inject.Asserts.getClassPathUrls;
 import static com.google.inject.matcher.Matchers.any;
 
 import com.google.common.testing.GcFinalization;
@@ -24,7 +25,6 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.googlecode.guice.BytecodeGenTest.LogCreator;
 import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePrivate;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -103,11 +103,11 @@ public class BytecodeGenTest extends TestCase {
     final boolean hideInternals;
 
     TestVisibilityClassLoader(boolean hideInternals) {
-      this((URLClassLoader) TestVisibilityClassLoader.class.getClassLoader(), hideInternals);
+      this(TestVisibilityClassLoader.class.getClassLoader(), hideInternals);
     }
 
-    TestVisibilityClassLoader(URLClassLoader classloader, boolean hideInternals) {
-      super(classloader.getURLs(), classloader);
+    TestVisibilityClassLoader(ClassLoader classloader, boolean hideInternals) {
+      super(getClassPathUrls(), classloader);
       this.hideInternals = hideInternals;
     }
 
@@ -350,11 +350,11 @@ public class BytecodeGenTest extends TestCase {
   // its use.
   static class MultipleVersionsOfGuiceClassLoader extends URLClassLoader {
     MultipleVersionsOfGuiceClassLoader() {
-      this((URLClassLoader) MultipleVersionsOfGuiceClassLoader.class.getClassLoader());
+      this(MultipleVersionsOfGuiceClassLoader.class.getClassLoader());
     }
 
-    MultipleVersionsOfGuiceClassLoader(URLClassLoader classloader) {
-      super(classloader.getURLs(), classloader);
+    MultipleVersionsOfGuiceClassLoader(ClassLoader classloader) {
+      super(getClassPathUrls(), classloader);
     }
 
     public Class<? extends LogCreator> loadLogCreatorType(Class<? extends LogCreator> cls)

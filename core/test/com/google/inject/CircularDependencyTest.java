@@ -470,9 +470,6 @@ public class CircularDependencyTest extends TestCase {
           expected.getMessage(),
           "Found a circular dependency involving "
               + A.class.getName()
-              + ", and circular dependencies are disabled.",
-          "Found a circular dependency involving "
-              + B.class.getName()
               + ", and circular dependencies are disabled.");
     }
   }
