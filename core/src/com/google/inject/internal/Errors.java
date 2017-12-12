@@ -24,12 +24,16 @@ import com.google.common.primitives.Primitives;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.SourceProvider;
+import com.google.inject.internal.util.StackTraceElements;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ScopeBinding;
@@ -44,10 +48,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -65,6 +73,8 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class Errors implements Serializable {
+
+  private static final Logger logger = Logger.getLogger(Guice.class.getName());
 
   /** When a binding is not found, show at most this many bindings with the same type */
   private static final int MAX_MATCHING_TYPES_REPORTED = 3;
@@ -107,6 +117,9 @@ public final class Errors implements Serializable {
           .add(String.class)
           .addAll(Primitives.allWrapperTypes())
           .build();
+
+  private static final Set<Dependency<?>> warnedDependencies =
+      Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
   /** The root errors object. Used to access the list of error messages. */
   private final Errors root;
@@ -641,6 +654,54 @@ public final class Errors implements Serializable {
         return a.getSource().compareTo(b.getSource());
       }
     }.sortedCopy(root.errors);
+  }
+
+  // TODO(lukes): move @Provides logic into @Provides methods to help simplify this monster
+
+  /**
+   * Returns {@code value} if it is non-null or allowed to be null. Otherwise a message is added and
+   * an {@code InternalProvisionException} is thrown.
+   */
+  public static <T> T checkForNull(T value, Object source, Dependency<?> dependency)
+      throws InternalProvisionException {
+    if (value != null || dependency.isNullable()) {
+      return value;
+    }
+
+    // Hack to allow null parameters to @Provides methods, for backwards compatibility.
+    if (dependency.getInjectionPoint().getMember() instanceof Method) {
+      Method annotated = (Method) dependency.getInjectionPoint().getMember();
+      if (annotated.isAnnotationPresent(Provides.class)) {
+        switch (InternalFlags.getNullableProvidesOption()) {
+          case ERROR:
+            break; // break out & let the below exception happen
+          case IGNORE:
+            return value; // user doesn't care about injecting nulls to non-@Nullables.
+          case WARN:
+            // Warn only once, otherwise we spam logs too much.
+            if (warnedDependencies.add(dependency)) {
+              logger.log(
+                  Level.WARNING,
+                  "Guice injected null into {0} (a {1}), please mark it @Nullable."
+                      + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
+                      + " error.",
+                  new Object[] {
+                    Messages.formatParameter(dependency), Messages.convert(dependency.getKey())
+                  });
+            }
+            return value;
+        }
+      }
+    }
+
+    Object formattedDependency =
+        (dependency.getParameterIndex() != -1)
+            ? Messages.formatParameter(dependency)
+            : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
+
+    throw InternalProvisionException.create(
+            "null returned by binding at %s%n but %s is not @Nullable", source, formattedDependency)
+        .addSource(source);
   }
 
   public int size() {

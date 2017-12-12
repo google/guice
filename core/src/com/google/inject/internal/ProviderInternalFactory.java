@@ -82,10 +82,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
       throws InternalProvisionException {
-    T t = provider.get();
-    if (t == null && !dependency.isNullable()) {
-      InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
-    }
+    T t = Errors.checkForNull(provider.get(), source, dependency);
     constructionContext.setProxyDelegates(t);
     return t;
   }

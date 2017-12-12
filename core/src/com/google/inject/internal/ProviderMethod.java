@@ -171,9 +171,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       throws InternalProvisionException {
     try {
       T t = doProvision(SingleParameterInjector.getAll(context, parameterInjectors));
-      if (t == null && !dependency.isNullable()) {
-        InternalProvisionException.onNullInjectedIntoNonNullableDependency(getMethod(), dependency);
-      }
+      Errors.checkForNull(t, getMethod(), dependency);
       return t;
     } catch (IllegalAccessException e) {
       throw new AssertionError(e);
