@@ -19,26 +19,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
-import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.SourceProvider;
-import com.google.inject.internal.util.StackTraceElements;
-import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A checked exception for provisioning errors.
@@ -64,10 +54,6 @@ import java.util.logging.Logger;
  * ProvisionException).
  */
 public final class InternalProvisionException extends Exception {
-  private static final Logger logger = Logger.getLogger(Guice.class.getName());
-  private static final Set<Dependency<?>> warnedDependencies =
-      Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
-
   // TODO(lukes): rename ErrorsException to InternalConfigurationException after
   // InternalProvisionException is fully integrated.
 
@@ -130,48 +116,6 @@ public final class InternalProvisionException extends Exception {
       InjectionListener<?> listener, TypeLiteral<?> type, RuntimeException cause) {
     return errorInUserCode(
         cause, "Error notifying InjectionListener %s of %s.%n Reason: %s", listener, type, cause);
-  }
-
-  /**
-   * Returns {@code value} if it is non-null or allowed to be null. Otherwise a message is added and
-   * an {@code InternalProvisionException} is thrown.
-   */
-  static void onNullInjectedIntoNonNullableDependency(Object source, Dependency<?> dependency)
-      throws InternalProvisionException {
-    // Hack to allow null parameters to @Provides methods, for backwards compatibility.
-    if (dependency.getInjectionPoint().getMember() instanceof Method) {
-      Method annotated = (Method) dependency.getInjectionPoint().getMember();
-      if (annotated.isAnnotationPresent(Provides.class)) {
-        switch (InternalFlags.getNullableProvidesOption()) {
-          case ERROR:
-            break; // break out & let the below exception happen
-          case IGNORE:
-            return; // user doesn't care about injecting nulls to non-@Nullables.
-          case WARN:
-            // Warn only once, otherwise we spam logs too much.
-            if (warnedDependencies.add(dependency)) {
-              logger.log(
-                  Level.WARNING,
-                  "Guice injected null into {0} (a {1}), please mark it @Nullable."
-                      + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
-                      + " error.",
-                  new Object[] {
-                    Messages.formatParameter(dependency), Messages.convert(dependency.getKey())
-                  });
-            }
-            return;
-        }
-      }
-    }
-
-    Object formattedDependency =
-        (dependency.getParameterIndex() != -1)
-            ? Messages.formatParameter(dependency)
-            : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
-
-    throw InternalProvisionException.create(
-            "null returned by binding at %s%n but %s is not @Nullable", source, formattedDependency)
-        .addSource(source);
   }
 
   private final List<Object> sourcesToPrepend = new ArrayList<>();
