@@ -162,7 +162,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   }
 
   @Override
-  void initialize(InjectorImpl injector, Errors errors) throws InternalConfigurationException {
+  void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     parameterInjectors = injector.getParametersInjectors(dependencies.asList(), errors);
   }
 

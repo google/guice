@@ -47,7 +47,7 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
       targetFactory =
           injector.getInternalFactory(
               targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
-    } catch (InternalConfigurationException e) {
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
   }

@@ -31,7 +31,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.InternalConfigurationException;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint.Signature;
 import java.io.IOException;
@@ -56,8 +56,7 @@ public class InjectionPointTest extends TestCase {
     public Constructable(@Named("c") String param) {}
   }
 
-  public void testFieldInjectionPoint()
-      throws NoSuchFieldException, IOException, InternalConfigurationException {
+  public void testFieldInjectionPoint() throws NoSuchFieldException, IOException, ErrorsException {
     TypeLiteral<?> typeLiteral = TypeLiteral.get(getClass());
     Field fooField = getClass().getField("foo");
 
@@ -116,7 +115,7 @@ public class InjectionPointTest extends TestCase {
   }
 
   public void testConstructorInjectionPoint()
-      throws NoSuchMethodException, IOException, InternalConfigurationException {
+      throws NoSuchMethodException, IOException, ErrorsException {
     TypeLiteral<?> typeLiteral = TypeLiteral.get(Constructable.class);
 
     Constructor<?> constructor = Constructable.class.getConstructor(String.class);

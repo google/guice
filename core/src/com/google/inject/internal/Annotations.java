@@ -303,7 +303,7 @@ public class Annotations {
   /** Gets a key for the given type, member and annotations. */
   public static Key<?> getKey(
       TypeLiteral<?> type, Member member, Annotation[] annotations, Errors errors)
-      throws InternalConfigurationException {
+      throws ErrorsException {
     int numErrorsBefore = errors.size();
     Annotation found = findBindingAnnotation(errors, member, annotations);
     errors.throwIfNewErrors(numErrorsBefore);

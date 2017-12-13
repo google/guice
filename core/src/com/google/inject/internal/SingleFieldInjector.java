@@ -29,7 +29,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
   final BindingImpl<?> binding;
 
   public SingleFieldInjector(InjectorImpl injector, InjectionPoint injectionPoint, Errors errors)
-      throws InternalConfigurationException {
+      throws ErrorsException {
     this.injectionPoint = injectionPoint;
     this.field = (Field) injectionPoint.getMember();
     this.dependency = injectionPoint.getDependencies().get(0);

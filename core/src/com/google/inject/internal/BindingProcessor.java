@@ -85,7 +85,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
                       false);
               scheduleInitialization(onInjector);
               putBinding(onInjector);
-            } catch (InternalConfigurationException e) {
+            } catch (ErrorsException e) {
               errors.merge(e.getErrors());
               putBinding(invalidBinding(injector, key, source));
             }

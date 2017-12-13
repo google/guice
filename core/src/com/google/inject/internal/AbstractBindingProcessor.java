@@ -174,7 +174,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
         public void run() {
           try {
             binding.getInjector().initializeBinding(binding, errors.withSource(source));
-          } catch (InternalConfigurationException e) {
+          } catch (ErrorsException e) {
             errors.merge(e.getErrors());
           }
         }

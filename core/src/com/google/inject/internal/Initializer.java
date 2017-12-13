@@ -122,7 +122,7 @@ final class Initializer {
     for (InjectableReference<?> reference : pendingInjections) {
       try {
         reference.validate(errors);
-      } catch (InternalConfigurationException e) {
+      } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
@@ -178,7 +178,7 @@ final class Initializer {
       this.lock = checkNotNull(lock, "lock");
     }
 
-    public void validate(Errors errors) throws InternalConfigurationException {
+    public void validate(Errors errors) throws ErrorsException {
       @SuppressWarnings("unchecked") // the type of 'T' is a TypeLiteral<T>
       TypeLiteral<T> type = TypeLiteral.get((Class<T>) instance.getClass());
       membersInjector = injector.membersInjectorStore.get(type, errors.withSource(source));

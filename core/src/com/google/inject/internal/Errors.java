@@ -592,7 +592,7 @@ public final class Errors implements Serializable {
     return sources;
   }
 
-  public void throwIfNewErrors(int expectedSize) throws InternalConfigurationException {
+  public void throwIfNewErrors(int expectedSize) throws ErrorsException {
     if (size() == expectedSize) {
       return;
     }
@@ -600,8 +600,8 @@ public final class Errors implements Serializable {
     throw toException();
   }
 
-  public InternalConfigurationException toException() {
-    return new InternalConfigurationException(this);
+  public ErrorsException toException() {
+    return new ErrorsException(this);
   }
 
   public boolean hasErrors() {

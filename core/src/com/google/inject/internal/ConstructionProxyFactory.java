@@ -24,5 +24,5 @@ package com.google.inject.internal;
 interface ConstructionProxyFactory<T> {
 
   /** Gets a construction proxy for the given constructor. */
-  ConstructionProxy<T> create() throws InternalConfigurationException;
+  ConstructionProxy<T> create() throws ErrorsException;
 }

@@ -41,7 +41,7 @@ final class MembersInjectorStore {
       new FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>>() {
         @Override
         protected MembersInjectorImpl<?> create(TypeLiteral<?> type, Errors errors)
-            throws InternalConfigurationException {
+            throws ErrorsException {
           return createWithListeners(type, errors);
         }
       };
@@ -61,8 +61,7 @@ final class MembersInjectorStore {
 
   /** Returns a new complete members injector with injection listeners registered. */
   @SuppressWarnings("unchecked") // the MembersInjector type always agrees with the passed type
-  public <T> MembersInjectorImpl<T> get(TypeLiteral<T> key, Errors errors)
-      throws InternalConfigurationException {
+  public <T> MembersInjectorImpl<T> get(TypeLiteral<T> key, Errors errors) throws ErrorsException {
     return (MembersInjectorImpl<T>) cache.get(key, errors);
   }
 
@@ -81,7 +80,7 @@ final class MembersInjectorStore {
 
   /** Creates a new members injector and attaches both injection listeners and method aspects. */
   private <T> MembersInjectorImpl<T> createWithListeners(TypeLiteral<T> type, Errors errors)
-      throws InternalConfigurationException {
+      throws ErrorsException {
     int numErrorsBefore = errors.size();
 
     Set<InjectionPoint> injectionPoints;
@@ -128,7 +127,7 @@ final class MembersInjectorStore {
                 ? new SingleFieldInjector(this.injector, injectionPoint, errorsForMember)
                 : new SingleMethodInjector(this.injector, injectionPoint, errorsForMember);
         injectors.add(injector);
-      } catch (InternalConfigurationException ignoredForNow) {
+      } catch (ErrorsException ignoredForNow) {
         // ignored for now
       }
     }

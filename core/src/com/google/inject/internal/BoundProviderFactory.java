@@ -46,7 +46,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       providerFactory =
           injector.getInternalFactory(
               providerKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
-    } catch (InternalConfigurationException e) {
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
   }
