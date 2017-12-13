@@ -89,7 +89,8 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override
-  public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+  public void initialize(InjectorImpl injector, Errors errors)
+      throws InternalConfigurationException {
     if (delayedInitializer != null) {
       delayedInitializer.initialize(injector, errors);
     }

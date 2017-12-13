@@ -172,7 +172,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    void initialize(InjectorImpl injector, Errors errors) throws InternalConfigurationException {
       bindingSelection.initialize(injector, errors);
       this.bindings = bindingSelection.getBindings();
       this.injectors = bindingSelection.getParameterInjectors();
@@ -336,7 +336,7 @@ public final class RealMultibinder<T> implements Module {
       this.elementType = key.getTypeLiteral();
     }
 
-    void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    void initialize(InjectorImpl injector, Errors errors) throws InternalConfigurationException {
       // This will be called multiple times, once by each Factory. We only want
       // to do the work to initialize everything once, so guard this code with
       // isInitialized.
@@ -538,7 +538,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    void initialize(InjectorImpl injector, Errors errors) throws InternalConfigurationException {
       bindingSelection.initialize(injector, errors);
       ImmutableList.Builder<Provider<T>> providers = ImmutableList.builder();
       for (Binding<T> binding : bindingSelection.getBindings()) {

@@ -38,7 +38,7 @@ public class ProxyFactoryTest extends TestCase {
   List<MethodAspect> aspects = Lists.newArrayList();
 
   public void testSimpleCase()
-      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
+      throws NoSuchMethodException, InvocationTargetException, InternalConfigurationException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
     InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(Simple.class);
 
@@ -73,7 +73,7 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testInterceptOneMethod()
-      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
+      throws NoSuchMethodException, InvocationTargetException, InternalConfigurationException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     aspects.add(new MethodAspect(only(Bar.class), annotatedWith(Intercept.class), interceptor));
@@ -128,7 +128,7 @@ public class ProxyFactoryTest extends TestCase {
   @interface Intercept {}
 
   public void testWithConstructorArguments()
-      throws InvocationTargetException, NoSuchMethodException, ErrorsException {
+      throws InvocationTargetException, NoSuchMethodException, InternalConfigurationException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     aspects.add(new MethodAspect(any(), any(), interceptor));
@@ -143,7 +143,7 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testNotProxied()
-      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
+      throws NoSuchMethodException, InvocationTargetException, InternalConfigurationException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     aspects.add(new MethodAspect(not(any()), not(any()), interceptor));
@@ -168,7 +168,7 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testMultipleInterceptors()
-      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
+      throws NoSuchMethodException, InvocationTargetException, InternalConfigurationException {
     DoubleInterceptor doubleInterceptor = new DoubleInterceptor();
     CountingInterceptor countingInterceptor = new CountingInterceptor();
 

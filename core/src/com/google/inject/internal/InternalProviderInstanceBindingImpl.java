@@ -55,7 +55,8 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
   }
 
   @Override
-  public void initialize(final InjectorImpl injector, final Errors errors) throws ErrorsException {
+  public void initialize(final InjectorImpl injector, final Errors errors)
+      throws InternalConfigurationException {
     originalFactory.source = getSource();
     originalFactory.provisionCallback = injector.provisionListenerStore.get(this);
     // For these kinds of providers, the 'user supplied provider' is really 'guice supplied'
@@ -94,7 +95,8 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
      *
      * <p>Will be called exactly once, prior to any call to {@link #doProvision}.
      */
-    abstract void initialize(InjectorImpl injector, Errors errors) throws ErrorsException;
+    abstract void initialize(InjectorImpl injector, Errors errors)
+        throws InternalConfigurationException;
 
     @Override
     public final T get() {

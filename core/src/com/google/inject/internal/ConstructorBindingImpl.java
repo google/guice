@@ -88,7 +88,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       Errors errors,
       boolean failIfNotLinked,
       boolean failIfNotExplicit)
-      throws ErrorsException {
+      throws InternalConfigurationException {
     int numErrors = errors.size();
 
     @SuppressWarnings("unchecked") // constructorBinding guarantees type is consistent
@@ -150,7 +150,8 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
   @Override
   @SuppressWarnings("unchecked") // the result type always agrees with the ConstructorInjector type
-  public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+  public void initialize(InjectorImpl injector, Errors errors)
+      throws InternalConfigurationException {
     factory.constructorInjector =
         (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
     factory.provisionCallback = injector.provisionListenerStore.get(this);

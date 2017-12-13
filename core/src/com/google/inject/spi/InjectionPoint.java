@@ -29,7 +29,7 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalConfigurationException;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.util.Classes;
 import java.lang.annotation.Annotation;
@@ -95,7 +95,7 @@ public final class InjectionPoint {
       key = Annotations.getKey(declaringType.getFieldType(field), field, annotations, errors);
     } catch (ConfigurationException e) {
       errors.merge(e.getErrorMessages());
-    } catch (ErrorsException e) {
+    } catch (InternalConfigurationException e) {
       errors.merge(e.getErrors());
     }
     errors.throwConfigurationExceptionIfErrorsExist();
@@ -120,7 +120,7 @@ public final class InjectionPoint {
         index++;
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
-      } catch (ErrorsException e) {
+      } catch (InternalConfigurationException e) {
         errors.merge(e.getErrors());
       }
     }

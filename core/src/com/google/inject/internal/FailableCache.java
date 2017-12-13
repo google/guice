@@ -38,16 +38,16 @@ public abstract class FailableCache<K, V> {
                   V result = null;
                   try {
                     result = FailableCache.this.create(key, errors);
-                  } catch (ErrorsException e) {
+                  } catch (InternalConfigurationException e) {
                     errors.merge(e.getErrors());
                   }
                   return errors.hasErrors() ? errors : result;
                 }
               });
 
-  protected abstract V create(K key, Errors errors) throws ErrorsException;
+  protected abstract V create(K key, Errors errors) throws InternalConfigurationException;
 
-  public V get(K key, Errors errors) throws ErrorsException {
+  public V get(K key, Errors errors) throws InternalConfigurationException {
     Object resultOrError = delegate.getUnchecked(key);
     if (resultOrError instanceof Errors) {
       errors.merge((Errors) resultOrError);

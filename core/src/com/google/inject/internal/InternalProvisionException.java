@@ -44,8 +44,8 @@ import java.util.logging.Logger;
  * A checked exception for provisioning errors.
  *
  * <p>This is the internal dual of {@link ProvisionException}, similar to the relationship between
- * {@link com.google.inject.ConfigurationException} and {@link ErrorsException}. This is useful for
- * several reasons:
+ * {@link com.google.inject.ConfigurationException} and {@link InternalConfigurationException}. This
+ * is useful for several reasons:
  *
  * <ul>
  *   <li>Since it is a checked exception, we get some assistance from the java compiler in ensuring
@@ -54,9 +54,9 @@ import java.util.logging.Logger;
  *       would be undesirable in a public supported API.
  * </ul>
  *
- * <p>This exception will be thrown when errors are encountered during provisioning, ErrorsException
- * will continue to be used for errors that are encountered during provisioning and both make use of
- * the {@link Message} as the core model.
+ * <p>This exception will be thrown when errors are encountered during provisioning,
+ * InternalConfigurationException will continue to be used for errors that are encountered during
+ * provisioning and both make use of the {@link Message} as the core model.
  *
  * <p>NOTE: this object stores a list of messages but in the most common case the cardinality will
  * be 1. The only time that multiple errors might be reported via this mechanism is when {@link
@@ -68,8 +68,6 @@ public final class InternalProvisionException extends Exception {
   private static final Set<Dependency<?>> warnedDependencies =
       Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
-  // TODO(lukes): rename ErrorsException to InternalConfigurationException after
-  // InternalProvisionException is fully integrated.
 
   public static InternalProvisionException circularDependenciesDisabled(Class<?> expectedType) {
     return create(
