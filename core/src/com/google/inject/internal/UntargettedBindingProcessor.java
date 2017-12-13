@@ -54,7 +54,7 @@ class UntargettedBindingProcessor extends AbstractBindingProcessor {
                   injector.createUninitializedBinding(key, scoping, source, errors, false);
               scheduleInitialization(binding);
               putBinding(binding);
-            } catch (InternalConfigurationException e) {
+            } catch (ErrorsException e) {
               errors.merge(e.getErrors());
               putBinding(invalidBinding(injector, key, source));
             }

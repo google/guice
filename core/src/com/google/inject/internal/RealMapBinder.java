@@ -753,8 +753,7 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    protected void doInitialize(InjectorImpl injector, Errors errors)
-        throws InternalConfigurationException {
+    protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
       @SuppressWarnings("unchecked")
       K[] keysArray = (K[]) new Object[bindingSelection.getMapBindings().size()];
       keys = keysArray;
@@ -1103,8 +1102,7 @@ public final class RealMapBinder<K, V> implements Module {
       }
 
       @Override
-      protected void doInitialize(InjectorImpl injector, Errors errors)
-          throws InternalConfigurationException {
+      protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
         @SuppressWarnings({"unchecked", "rawtypes"})
         PerKeyData<K, V>[] typedPerKeyData =
             new PerKeyData[bindingSelection.getMapBindings().size()];
@@ -1246,8 +1244,7 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    final void initialize(InjectorImpl injector, Errors errors)
-        throws InternalConfigurationException {
+    final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
       if (bindingSelection.tryInitialize(injector, errors)) {
         doInitialize(injector, errors);
       }
@@ -1258,7 +1255,7 @@ public final class RealMapBinder<K, V> implements Module {
      * this will be called prior to any provisioning.
      */
     protected abstract void doInitialize(InjectorImpl injector, Errors errors)
-        throws InternalConfigurationException;
+        throws ErrorsException;
 
     @Override
     public boolean equals(Object obj) {
@@ -1304,8 +1301,7 @@ public final class RealMapBinder<K, V> implements Module {
      * state.
      */
     @Override
-    final void initialize(InjectorImpl injector, Errors errors)
-        throws InternalConfigurationException {
+    final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
       Binding<Map<K, V>> mapBinding = injector.getExistingBinding(mapKey);
       ProviderInstanceBinding<Map<K, V>> providerInstanceBinding =
           (ProviderInstanceBinding<Map<K, V>>) mapBinding;
@@ -1324,8 +1320,7 @@ public final class RealMapBinder<K, V> implements Module {
      * Initialize the factory. BindingSelection is guaranteed to be initialized at this point and
      * this will be called prior to any provisioning.
      */
-    abstract void doInitialize(InjectorImpl injector, Errors errors)
-        throws InternalConfigurationException;
+    abstract void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException;
 
     @Override
     public boolean equals(Object obj) {

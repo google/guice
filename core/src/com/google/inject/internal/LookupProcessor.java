@@ -39,7 +39,7 @@ final class LookupProcessor extends AbstractProcessor {
       MembersInjector<T> membersInjector =
           injector.membersInjectorStore.get(lookup.getType(), errors);
       lookup.initializeDelegate(membersInjector);
-    } catch (InternalConfigurationException e) {
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }
 
@@ -52,7 +52,7 @@ final class LookupProcessor extends AbstractProcessor {
     try {
       Provider<T> provider = injector.getProviderOrThrow(lookup.getDependency(), errors);
       lookup.initializeDelegate(provider);
-    } catch (InternalConfigurationException e) {
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }
 

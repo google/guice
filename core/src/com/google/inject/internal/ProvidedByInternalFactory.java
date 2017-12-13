@@ -50,8 +50,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  public void initialize(InjectorImpl injector, Errors errors)
-      throws InternalConfigurationException {
+  public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     providerBinding =
         injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
   }

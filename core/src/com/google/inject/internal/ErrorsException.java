@@ -23,11 +23,11 @@ package com.google.inject.internal;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class InternalConfigurationException extends Exception {
+public class ErrorsException extends Exception {
 
   private final Errors errors;
 
-  public InternalConfigurationException(Errors errors) {
+  public ErrorsException(Errors errors) {
     this.errors = errors;
   }
 

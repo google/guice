@@ -29,7 +29,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
   private final InjectionPoint injectionPoint;
 
   SingleMethodInjector(InjectorImpl injector, InjectionPoint injectionPoint, Errors errors)
-      throws InternalConfigurationException {
+      throws ErrorsException {
     this.injectionPoint = injectionPoint;
     final Method method = (Method) injectionPoint.getMember();
     methodInvoker = createMethodInvoker(method);

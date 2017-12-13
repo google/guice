@@ -75,7 +75,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
 
   /**
    * Provisions a new instance. Subclasses should override this to catch exceptions & rethrow as
-   * InternalConfigurationExceptions.
+   * ErrorsExceptions.
    */
   protected T provision(
       Provider<? extends T> provider,

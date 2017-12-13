@@ -758,8 +758,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    final void initialize(InjectorImpl injector, Errors errors)
-        throws InternalConfigurationException {
+    final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
       bindingSelection.initialize(injector);
       doInitialize();
     }
