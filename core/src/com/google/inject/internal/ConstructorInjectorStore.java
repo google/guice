@@ -33,7 +33,7 @@ final class ConstructorInjectorStore {
       new FailableCache<InjectionPoint, ConstructorInjector<?>>() {
         @Override
         protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
-            throws ErrorsException {
+            throws InternalConfigurationException {
           return createConstructor(constructorInjector, errors);
         }
       };
@@ -44,7 +44,7 @@ final class ConstructorInjectorStore {
 
   /** Returns a new complete constructor injector with injection listeners registered. */
   public ConstructorInjector<?> get(InjectionPoint constructorInjector, Errors errors)
-      throws ErrorsException {
+      throws InternalConfigurationException {
     return cache.get(constructorInjector, errors);
   }
 
@@ -62,7 +62,7 @@ final class ConstructorInjectorStore {
   }
 
   private <T> ConstructorInjector<T> createConstructor(InjectionPoint injectionPoint, Errors errors)
-      throws ErrorsException {
+      throws InternalConfigurationException {
     int numErrorsBefore = errors.size();
 
     SingleParameterInjector<?>[] constructorParameterInjectors =

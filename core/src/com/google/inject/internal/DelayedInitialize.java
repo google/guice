@@ -25,5 +25,5 @@ package com.google.inject.internal;
 interface DelayedInitialize {
 
   /** Initializes this binding, throwing any errors if necessary. */
-  void initialize(InjectorImpl injector, Errors errors) throws ErrorsException;
+  void initialize(InjectorImpl injector, Errors errors) throws InternalConfigurationException;
 }

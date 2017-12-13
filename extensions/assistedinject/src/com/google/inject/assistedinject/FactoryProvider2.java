@@ -44,7 +44,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalConfigurationException;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.internal.util.Classes;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -315,7 +315,7 @@ final class FactoryProvider2<F>
           ctorInjectionPoint =
               findMatchingConstructorInjectionPoint(
                   method, returnType, implementation, immutableParamList);
-        } catch (ErrorsException ee) {
+        } catch (InternalConfigurationException ee) {
           errors.merge(ee.getErrors());
           continue;
         }
@@ -399,7 +399,7 @@ final class FactoryProvider2<F>
 
       assistDataByMethod = assistDataBuilder.build();
       methodHandleByMethod = methodHandleBuilder.build();
-    } catch (ErrorsException e) {
+    } catch (InternalConfigurationException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
   }
@@ -501,7 +501,7 @@ final class FactoryProvider2<F>
    */
   private <T> InjectionPoint findMatchingConstructorInjectionPoint(
       Method method, Key<?> returnType, TypeLiteral<T> implementation, List<Key<?>> paramList)
-      throws ErrorsException {
+      throws InternalConfigurationException {
     Errors errors = new Errors(method);
     if (returnType.getTypeLiteral().equals(implementation)) {
       errors = errors.withSource(implementation);
@@ -580,7 +580,7 @@ final class FactoryProvider2<F>
    */
   private boolean constructorHasMatchingParams(
       TypeLiteral<?> type, Constructor<?> constructor, List<Key<?>> paramList, Errors errors)
-      throws ErrorsException {
+      throws InternalConfigurationException {
     List<TypeLiteral<?>> params = type.getParameterTypes(constructor);
     Annotation[][] paramAnnotations = constructor.getParameterAnnotations();
     int p = 0;
@@ -691,7 +691,8 @@ final class FactoryProvider2<F>
    * fails if another binding annotation is clobbered in the process. If the key already has the
    * {@literal @}Assisted annotation, it is returned as-is to preserve any String value.
    */
-  private <T> Key<T> assistKey(Method method, Key<T> key, Errors errors) throws ErrorsException {
+  private <T> Key<T> assistKey(Method method, Key<T> key, Errors errors)
+      throws InternalConfigurationException {
     if (key.getAnnotationType() == null) {
       return Key.get(key.getTypeLiteral(), DEFAULT_ANNOTATION);
     } else if (key.getAnnotationType() == Assisted.class) {
@@ -904,7 +905,7 @@ final class FactoryProvider2<F>
     static final Method bindTo;
     static final Method invokeWithArguments;
     static final Constructor<?> lookupCxtor;
-    static final boolean valid;
+    static final boolean VALID;
 
     static {
       Method unreflectSpecialTmp = null;
@@ -926,7 +927,7 @@ final class FactoryProvider2<F>
       }
 
       // Store refs to later.
-      valid = validTmp;
+      VALID = validTmp;
       unreflectSpecial = unreflectSpecialTmp;
       bindTo = bindToTmp;
       invokeWithArguments = invokeWithArgumentsTmp;
@@ -934,7 +935,7 @@ final class FactoryProvider2<F>
     }
 
     static MethodHandleWrapper create(Method method, Object proxy) {
-      if (!valid) {
+      if (!VALID) {
         return null;
       }
       try {

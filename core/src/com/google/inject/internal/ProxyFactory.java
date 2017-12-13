@@ -151,7 +151,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   }
 
   @Override
-  public ConstructionProxy<T> create() throws ErrorsException {
+  public ConstructionProxy<T> create() throws InternalConfigurationException {
     if (interceptors.isEmpty()) {
       return new DefaultConstructionProxyFactory<T>(injectionPoint).create();
     }

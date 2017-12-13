@@ -31,7 +31,7 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalConfigurationException;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
@@ -202,7 +202,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
             collector.addBinding(returnType, implementationType);
           }
         }
-      } catch (ErrorsException e) {
+      } catch (InternalConfigurationException e) {
         throw new ConfigurationException(e.getErrors().getMessages());
       }
 
