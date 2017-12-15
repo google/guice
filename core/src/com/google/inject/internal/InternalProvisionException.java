@@ -68,8 +68,6 @@ public final class InternalProvisionException extends Exception {
   private static final Set<Dependency<?>> warnedDependencies =
       Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
-  // TODO(lukes): rename ErrorsException to InternalConfigurationException after
-  // InternalProvisionException is fully integrated.
 
   public static InternalProvisionException circularDependenciesDisabled(Class<?> expectedType) {
     return create(

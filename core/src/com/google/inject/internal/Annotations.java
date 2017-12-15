@@ -300,6 +300,9 @@ public class Annotations {
     }
   }
 
+  // NOTE: getKey/findBindingAnnotation are used by Gin which is abandoned.  So changing this API
+  // will prevent Gin users from upgrading Guice version.
+
   /** Gets a key for the given type, member and annotations. */
   public static Key<?> getKey(
       TypeLiteral<?> type, Member member, Annotation[] annotations, Errors errors)
