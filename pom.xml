@@ -278,7 +278,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>1.10</version>
+          <version>1.16</version>
           <configuration>
             <signature>
               <groupId>org.codehaus.mojo.signature</groupId>
@@ -392,7 +392,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.7</version>
+          <version>3.0.0</version>
           <executions>
             <execution>
               <phase>package</phase>
@@ -463,7 +463,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <additionalOptions>
+                <additionalOption>-Xdoclint:none</additionalOption>
+              </additionalOptions>
             </configuration>
           </plugin>
         </plugins>
@@ -474,7 +476,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <additionalOptions>
+                <additionalOption>-Xdoclint:none</additionalOption>
+              </additionalOptions>
             </configuration>
           </plugin>
         </plugins>
