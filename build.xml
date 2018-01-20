@@ -116,8 +116,8 @@
         <pathelement location="${build.dir}/dist/guice-${version}.jar"/>
         <pathelement location="lib/javax.inject.jar"/>
         <pathelement location="lib/aopalliance.jar"/>
-        <pathelement location="lib/guava-19.0.jar"/>
-        <pathelement location="lib/build/guava-testlib-19.0.jar"/>
+        <pathelement location="lib/guava-20.0.jar"/>
+        <pathelement location="lib/build/guava-testlib-20.0.jar"/>
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/truth-0.36.jar"/>
