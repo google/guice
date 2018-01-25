@@ -91,9 +91,9 @@
 <li class="blockList">
 <hr>
 <br>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Documented.html?is-external=true" title="class or interface in java.lang.annotation">@Documented</a>
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#METHOD" title="class or interface in java.lang.annotation">METHOD</a>)
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
+<pre>@Documented
+ @Target(value=METHOD)
+ @Retention(value=RUNTIME)
 public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 <div class="block">Annotates methods of a <a href="../../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to create a <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a>
  method binding that can throw exceptions. The method's return type is bound to a <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a> that can be injected. Guice will pass dependencies to the method as parameters.
@@ -122,7 +122,7 @@ public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 <th class="colLast" scope="col">Required Element and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&gt;</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;? extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/CheckedProvides.html#value--">value</a></span></code>
 <div class="block">The interface that provides this value, a subinterface of <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a>.</div>
 </td>
@@ -169,7 +169,7 @@ public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>value</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&gt;&nbsp;value</pre>
+<pre>public abstract&nbsp;java.lang.Class&lt;? extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&gt;&nbsp;value</pre>
 <div class="block">The interface that provides this value, a subinterface of <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a>.</div>
 </li>
 </ul>

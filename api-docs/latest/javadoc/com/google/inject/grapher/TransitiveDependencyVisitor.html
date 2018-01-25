@@ -95,10 +95,10 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">com.google.inject.spi.DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</li>
+<li><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">com.google.inject.spi.DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</li>
 <li>
 <ul class="inheritance">
 <li>com.google.inject.grapher.TransitiveDependencyVisitor</li>
@@ -112,13 +112,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</dd>
+<dd><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">TransitiveDependencyVisitor</span>
-extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</pre>
-<div class="block"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi"><code>BindingTargetVisitor</code></a> that returns a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util"><code>Collection</code></a> of the
+extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</pre>
+<div class="block"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi"><code>BindingTargetVisitor</code></a> that returns a <code>Collection</code> of the
  <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject"><code>Key</code></a>s of each <a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject"><code>Binding</code></a>'s dependencies. Used by <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" title="interface in com.google.inject.grapher"><code>InjectorGrapher</code></a> to walk the
  dependency graph from a starting set of <a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject"><code>Binding</code></a>s.</div>
 </li>
@@ -157,50 +157,50 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.ConstructorBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/ConstructorBinding.html" title="interface in com.google.inject.spi">ConstructorBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a constructor binding.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.ConvertedConstantBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/ConvertedConstantBinding.html" title="interface in com.google.inject.spi">ConvertedConstantBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a binding created from converting a bound instance to a new type.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.InstanceBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/InstanceBinding.html" title="interface in com.google.inject.spi">InstanceBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a instance binding.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.LinkedKeyBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/LinkedKeyBinding.html" title="interface in com.google.inject.spi">LinkedKeyBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a linked key binding.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.ProviderBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/ProviderBinding.html" title="interface in com.google.inject.spi">ProviderBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a binding to a <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that delegates to the binding for the
  provided type.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.ProviderInstanceBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html" title="interface in com.google.inject.spi">ProviderInstanceBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a provider instance binding.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visit-com.google.inject.spi.ProviderKeyBinding-">visit</a></span>(<a href="../../../../com/google/inject/spi/ProviderKeyBinding.html" title="interface in com.google.inject.spi">ProviderKeyBinding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Visit a provider key binding.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/TransitiveDependencyVisitor.html#visitOther-com.google.inject.Binding-">visitOther</a></span>(<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;binding)</code>
 <div class="block">Default visit implementation.</div>
 </td>
@@ -217,8 +217,8 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -257,15 +257,15 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ConstructorBinding.html" title="interface in com.google.inject.spi">ConstructorBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ConstructorBinding.html" title="interface in com.google.inject.spi">ConstructorBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ConstructorBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a constructor binding. To resolve injections, an instance is instantiated by invoking
  <code>constructor</code>. This target is found only on injector bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ConstructorBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ConstructorBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ConstructorBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ConstructorBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -275,16 +275,16 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ConvertedConstantBinding.html" title="interface in com.google.inject.spi">ConvertedConstantBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ConvertedConstantBinding.html" title="interface in com.google.inject.spi">ConvertedConstantBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ConvertedConstantBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a binding created from converting a bound instance to a new type. The source binding has
  the same binding annotation but a different type. This target is found only on injector
  bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ConvertedConstantBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ConvertedConstantBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ConvertedConstantBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ConvertedConstantBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -294,15 +294,15 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/InstanceBinding.html" title="interface in com.google.inject.spi">InstanceBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/InstanceBinding.html" title="interface in com.google.inject.spi">InstanceBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.InstanceBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a instance binding. The same instance is returned for every injection. This target is
  found in both module and injector bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.InstanceBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.InstanceBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.InstanceBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.InstanceBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -312,15 +312,15 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/LinkedKeyBinding.html" title="interface in com.google.inject.spi">LinkedKeyBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/LinkedKeyBinding.html" title="interface in com.google.inject.spi">LinkedKeyBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.LinkedKeyBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a linked key binding. The other key's binding is used to resolve injections. This target
  is found in both module and injector bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.LinkedKeyBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.LinkedKeyBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.LinkedKeyBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.LinkedKeyBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -330,15 +330,15 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ProviderBinding.html" title="interface in com.google.inject.spi">ProviderBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ProviderBinding.html" title="interface in com.google.inject.spi">ProviderBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a binding to a <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that delegates to the binding for the
  provided type. This target is found only on injector bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ProviderBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ProviderBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -348,15 +348,15 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html" title="interface in com.google.inject.spi">ProviderInstanceBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html" title="interface in com.google.inject.spi">ProviderInstanceBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderInstanceBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a provider instance binding. The provider's <code>get</code> method is invoked to resolve
  injections. This target is found in both module and injector bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderInstanceBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderInstanceBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ProviderInstanceBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ProviderInstanceBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -366,16 +366,16 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockList">
 <li class="blockList">
 <h4>visit</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ProviderKeyBinding.html" title="interface in com.google.inject.spi">ProviderKeyBinding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visit(<a href="../../../../com/google/inject/spi/ProviderKeyBinding.html" title="interface in com.google.inject.spi">ProviderKeyBinding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderKeyBinding-">BindingTargetVisitor</a></code></span></div>
 <div class="block">Visit a provider key binding. To resolve injections, the provider key is first resolved, then
  that provider's <code>get</code> method is invoked. This target is found in both module and injector
  bindings.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderKeyBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit-com.google.inject.spi.ProviderKeyBinding-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html" title="interface in com.google.inject.spi">BindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ProviderKeyBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visit-com.google.inject.spi.ProviderKeyBinding-">visit</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -385,12 +385,12 @@ extends <a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.h
 <ul class="blockListLast">
 <li class="blockList">
 <h4>visitOther</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visitOther(<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;binding)</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;visitOther(<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;binding)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visitOther-com.google.inject.Binding-">DefaultBindingTargetVisitor</a></code></span></div>
 <div class="block">Default visit implementation. Returns <code>null</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visitOther-com.google.inject.Binding-">visitOther</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
+<dd><code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html#visitOther-com.google.inject.Binding-">visitOther</a></code>&nbsp;in class&nbsp;<code><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html" title="class in com.google.inject.spi">DefaultBindingTargetVisitor</a>&lt;java.lang.Object,java.util.Collection&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&gt;</code></dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
 </dl>

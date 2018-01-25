@@ -191,7 +191,7 @@ var activeTableTab = "activeTableTab";
 <h4>getDefaultBinding</h4>
 <pre><a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;getDefaultBinding()</pre>
 <div class="block">Returns the default binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>OptionalBinder.setDefault()</code></a>) if one exists or null if
- no default binding is set. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is
+ no default binding is set. This will throw <code>UnsupportedOperationException</code> if it is
  called on an element retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
 
  <p>The Binding's type will always match the type Optional's generic type. For example, if
@@ -207,7 +207,7 @@ var activeTableTab = "activeTableTab";
 <h4>getActualBinding</h4>
 <pre><a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&nbsp;getActualBinding()</pre>
 <div class="block">Returns the actual binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setBinding--"><code>OptionalBinder.setBinding()</code></a>) or null if not set. This
- will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element retrieved from
+ will throw <code>UnsupportedOperationException</code> if it is called on an element retrieved from
  <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
 
  <p>The Binding's type will always match the type Optional's generic type. For example, if

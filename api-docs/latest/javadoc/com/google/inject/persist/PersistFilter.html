@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.google.inject.persist.PersistFilter</li>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">PersistFilter</span>
-extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+extends java.lang.Object
 implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet">Filter</a></pre>
 <div class="block">Apply this filter to enable the HTTP Request unit of work and to have guice-persist manage the
  lifecycle of active units of work. The filter automatically starts and stops the relevant <a href="../../../../com/google/inject/persist/PersistService.html" title="interface in com.google.inject.persist"><code>PersistService</code></a> upon <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#init-javax.servlet.FilterConfig-" title="class or interface in javax.servlet"><code>Filter.init(javax.servlet.FilterConfig)</code></a> and <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#destroy--" title="class or interface in javax.servlet"><code>Filter.destroy()</code></a> respectively.
@@ -198,8 +198,8 @@ implements <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/se
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -272,13 +272,13 @@ public&nbsp;PersistFilter(<a href="../../../../com/google/inject/persist/UnitOfW
 <pre>public&nbsp;void&nbsp;doFilter(<a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletRequest.html?is-external=true" title="class or interface in javax.servlet">ServletRequest</a>&nbsp;servletRequest,
                      <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletResponse.html?is-external=true" title="class or interface in javax.servlet">ServletResponse</a>&nbsp;servletResponse,
                      <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/FilterChain.html?is-external=true" title="class or interface in javax.servlet">FilterChain</a>&nbsp;filterChain)
-              throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a>,
+              throws java.io.IOException,
                      <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletException.html?is-external=true" title="class or interface in javax.servlet">ServletException</a></pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-" title="class or interface in javax.servlet">doFilter</a></code>&nbsp;in interface&nbsp;<code><a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Filter.html?is-external=true" title="class or interface in javax.servlet">Filter</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 <dd><code><a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletException.html?is-external=true" title="class or interface in javax.servlet">ServletException</a></code></dd>
 </dl>
 </li>

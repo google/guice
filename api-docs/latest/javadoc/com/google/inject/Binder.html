@@ -198,7 +198,7 @@ var activeTableTab = "activeTableTab";
      bindConstant().annotatedWith(ServerHost.class).to(args[0]);</pre>
 
  Sets up a constant binding. Constant injections must always be annotated. When a constant
- binding's value is a string, it is eligile for conversion to all primitive types, to <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Enum.html?is-external=true#valueOf-java.lang.Class-java.lang.String-" title="class or interface in java.lang"><code>all enums</code></a>, and to <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true#forName-java.lang.String-" title="class or interface in java.lang"><code>class literals</code></a>. Conversions
+ binding's value is a string, it is eligile for conversion to all primitive types, to <code>all enums</code>, and to <code>class literals</code>. Conversions
  for other types can be configured using <a href="../../../com/google/inject/Binder.html#convertToTypes-com.google.inject.matcher.Matcher-com.google.inject.spi.TypeConverter-"><code>convertToTypes()</code></a>.
 
  <pre>
@@ -269,21 +269,21 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#addError-java.lang.String-java.lang.Object...-">addError</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message,
-        <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#addError-java.lang.String-java.lang.Object...-">addError</a></span>(java.lang.String&nbsp;message,
+        java.lang.Object...&nbsp;arguments)</code>
 <div class="block">Records an error message which will be presented to the user at a later time.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#addError-java.lang.Throwable-">addError</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;t)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#addError-java.lang.Throwable-">addError</a></span>(java.lang.Throwable&nbsp;t)</code>
 <div class="block">Records an exception, the full details of which will be logged, and the message of which will
  be presented to the user at a later time.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/AnnotatedBindingBuilder.html" title="interface in com.google.inject.binder">AnnotatedBindingBuilder</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#bind-java.lang.Class-">bind</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#bind-java.lang.Class-">bind</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">See the EDSL examples at <a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>.</div>
 </td>
 </tr>
@@ -307,8 +307,8 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">bindInterceptor</a></span>(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&gt;&nbsp;classMatcher,
-               <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">bindInterceptor</a></span>(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.Class&lt;?&gt;&gt;&nbsp;classMatcher,
+               <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.reflect.Method&gt;&nbsp;methodMatcher,
                <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</code>
 <div class="block">Binds method interceptor[s] to methods matched by class and method matchers.</div>
 </td>
@@ -329,7 +329,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#bindScope-java.lang.Class-com.google.inject.Scope-">bindScope</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&gt;&nbsp;annotationType,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#bindScope-java.lang.Class-com.google.inject.Scope-">bindScope</a></span>(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;&nbsp;annotationType,
          <a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject">Scope</a>&nbsp;scope)</code>
 <div class="block">Binds a scope to an annotation.</div>
 </td>
@@ -355,7 +355,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i14" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>.</div>
 </td>
@@ -369,7 +369,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getProvider-java.lang.Class-">getProvider</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getProvider-java.lang.Class-">getProvider</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the provider used to obtain instances for the given injection type.</div>
 </td>
 </tr>
@@ -399,7 +399,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i21" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestInjection-java.lang.Object-">requestInjection</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestInjection-java.lang.Object-">requestInjection</a></span>(java.lang.Object&nbsp;instance)</code>
 <div class="block">Upon successful creation, the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> will inject instance fields and methods of the
  given object.</div>
 </td>
@@ -414,7 +414,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i23" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;...&nbsp;types)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection</a></span>(java.lang.Class&lt;?&gt;...&nbsp;types)</code>
 <div class="block">Upon successful creation, the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> will inject static fields and methods in the
  given classes.</div>
 </td>
@@ -447,13 +447,13 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i28" class="altColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#skipSources-java.lang.Class...-">skipSources</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>...&nbsp;classesToSkip)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#skipSources-java.lang.Class...-">skipSources</a></span>(java.lang.Class...&nbsp;classesToSkip)</code>
 <div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the calling code.</div>
 </td>
 </tr>
 <tr id="i29" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#withSource-java.lang.Object-">withSource</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#withSource-java.lang.Object-">withSource</a></span>(java.lang.Object&nbsp;source)</code>
 <div class="block">Returns a binder that uses <code>source</code> as the reference location for configuration errors.</div>
 </td>
 </tr>
@@ -478,8 +478,8 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>bindInterceptor</h4>
-<pre>void&nbsp;bindInterceptor(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&gt;&nbsp;classMatcher,
-                     <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
+<pre>void&nbsp;bindInterceptor(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.Class&lt;?&gt;&gt;&nbsp;classMatcher,
+                     <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.reflect.Method&gt;&nbsp;methodMatcher,
                      <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</pre>
 <div class="block">Binds method interceptor[s] to methods matched by class and method matchers. A method is
  eligible for interception if:
@@ -503,7 +503,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>bindScope</h4>
-<pre>void&nbsp;bindScope(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&gt;&nbsp;annotationType,
+<pre>void&nbsp;bindScope(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;&nbsp;annotationType,
                <a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject">Scope</a>&nbsp;scope)</pre>
 <div class="block">Binds a scope to an annotation.</div>
 </li>
@@ -534,7 +534,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>bind</h4>
-<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/AnnotatedBindingBuilder.html" title="interface in com.google.inject.binder">AnnotatedBindingBuilder</a>&lt;T&gt;&nbsp;bind(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/AnnotatedBindingBuilder.html" title="interface in com.google.inject.binder">AnnotatedBindingBuilder</a>&lt;T&gt;&nbsp;bind(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <div class="block">See the EDSL examples at <a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>.</div>
 </li>
 </ul>
@@ -575,7 +575,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>requestInjection</h4>
-<pre>void&nbsp;requestInjection(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</pre>
+<pre>void&nbsp;requestInjection(java.lang.Object&nbsp;instance)</pre>
 <div class="block">Upon successful creation, the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> will inject instance fields and methods of the
  given object.</div>
 <dl>
@@ -592,7 +592,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>requestStaticInjection</h4>
-<pre>void&nbsp;requestStaticInjection(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;...&nbsp;types)</pre>
+<pre>void&nbsp;requestStaticInjection(java.lang.Class&lt;?&gt;...&nbsp;types)</pre>
 <div class="block">Upon successful creation, the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> will inject static fields and methods in the
  given classes.</div>
 <dl>
@@ -627,11 +627,11 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>addError</h4>
-<pre>void&nbsp;addError(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message,
-              <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</pre>
+<pre>void&nbsp;addError(java.lang.String&nbsp;message,
+              java.lang.Object...&nbsp;arguments)</pre>
 <div class="block">Records an error message which will be presented to the user at a later time. Unlike throwing
  an exception, this enable us to continue configuring the Injector and discover more errors.
- Uses <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true#format-java.lang.String-java.lang.Object...-" title="class or interface in java.lang"><code>String.format(String, Object[])</code></a> to insert the arguments into the message.</div>
+ Uses <code>String.format(String, Object[])</code> to insert the arguments into the message.</div>
 </li>
 </ul>
 <a name="addError-java.lang.Throwable-">
@@ -640,7 +640,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>addError</h4>
-<pre>void&nbsp;addError(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;t)</pre>
+<pre>void&nbsp;addError(java.lang.Throwable&nbsp;t)</pre>
 <div class="block">Records an exception, the full details of which will be logged, and the message of which will
  be presented to the user at a later time. If your Module calls something that you worry may
  fail, you should catch the exception and pass it into this.</div>
@@ -699,7 +699,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getProvider</h4>
-<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <div class="block">Returns the provider used to obtain instances for the given injection type. The returned
  provider will not be valid until the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> has been created. The provider will throw
  an <code>IllegalStateException</code> if you try to use it beforehand.</div>
@@ -733,7 +733,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getMembersInjector</h4>
-<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>. The returned members injector will not be valid until the main
  <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> has been created. The members injector will throw an <code>IllegalStateException</code> if you try to use it beforehand.</div>
@@ -811,13 +811,13 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>withSource</h4>
-<pre><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;withSource(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source)</pre>
+<pre><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;withSource(java.lang.Object&nbsp;source)</pre>
 <div class="block">Returns a binder that uses <code>source</code> as the reference location for configuration errors.
- This is typically a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a> for <code>.java</code> source but it could any binding
+ This is typically a <code>StackTraceElement</code> for <code>.java</code> source but it could any binding
  source, such as the path to a <code>.properties</code> file.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>source</code> - any object representing the source location and has a concise <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang"><code>toString()</code></a> value</dd>
+<dd><code>source</code> - any object representing the source location and has a concise <code>toString()</code> value</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a binder that shares its configuration with this binder</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -831,9 +831,9 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>skipSources</h4>
-<pre><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;skipSources(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>...&nbsp;classesToSkip)</pre>
+<pre><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;skipSources(java.lang.Class...&nbsp;classesToSkip)</pre>
 <div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the calling code. The caller's
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a> is used to locate the source of configuration errors.</div>
+ <code>StackTraceElement</code> is used to locate the source of configuration errors.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>classesToSkip</code> - library classes that create bindings on behalf of their clients.</dd>

@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":10,"i2":10};
+var methods = {"i0":9,"i1":9,"i2":10,"i3":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -72,7 +72,7 @@ var activeTableTab = "activeTableTab";
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested.classes.inherited.from.class.com.google.common.truth.Subject">Nested</a>&nbsp;|&nbsp;</li>
 <li><a href="#fields.inherited.from.class.com.google.common.truth.Subject">Field</a>&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.google.common.truth.Subject&lt;<a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html" title="class in com.google.inject.testing.throwingproviders">CheckedProviderSubject</a>&lt;T,P&gt;,P&gt;</li>
@@ -121,6 +121,21 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="nested.class.summary">
+<!--   -->
+</a>
+<h3>Nested Class Summary</h3>
+<ul class="blockList">
+<li class="blockList"><a name="nested.classes.inherited.from.class.com.google.common.truth.Subject">
+<!--   -->
+</a>
+<h3>Nested classes/interfaces inherited from class&nbsp;com.google.common.truth.Subject</h3>
+<code>com.google.common.truth.Subject.Factory&lt;SubjectT extends com.google.common.truth.Subject&lt;SubjectT,ActualT&gt;,ActualT&gt;</code></li>
+</ul>
+</li>
+</ul>
 <!-- =========== FIELD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="field.summary">
@@ -153,12 +168,16 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html#assertThat-P-">assertThat</a></span>(P&nbsp;provider)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>com.google.common.truth.Subject&lt;?,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;</code></td>
+<td class="colFirst"><code>static &lt;T,P extends <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;T&gt;&gt;<br>com.google.common.truth.Subject.Factory&lt;<a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html" title="class in com.google.inject.testing.throwingproviders">CheckedProviderSubject</a>&lt;T,P&gt;,P&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html#checkedProviders--">checkedProviders</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>com.google.common.truth.Subject&lt;?,java.lang.Object&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html#providedValue--">providedValue</a></span>()</code>
 <div class="block">Allows for assertions on the value provided by this provider.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>com.google.common.truth.ThrowableSubject</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html#thrownException--">thrownException</a></span>()</code>
 <div class="block">Allows for assertions on the exception thrown by this provider.</div>
@@ -170,14 +189,14 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;com.google.common.truth.Subject</h3>
-<code>check, equals, fail, fail, fail, failWithBadResults, failWithCustomSubject, failWithoutSubject, failWithRawMessage, getDisplaySubject, getSubject, hashCode, internalCustomName, isAnyOf, isEqualTo, isIn, isInstanceOf, isNoneOf, isNotEqualTo, isNotIn, isNotInstanceOf, isNotNull, isNotSameAs, isNull, isSameAs, named</code></li>
+<code>actual, actualAsString, actualCustomStringRepresentation, check, equals, fail, fail, fail, failComparing, failComparing, failWithBadResults, failWithCustomSubject, failWithoutActual, failWithoutSubject, failWithRawMessage, failWithRawMessageAndCause, getDisplaySubject, getSubject, hashCode, ignoreCheck, internalCustomName, isAnyOf, isEqualTo, isIn, isInstanceOf, isNoneOf, isNotEqualTo, isNotIn, isNotInstanceOf, isNotNull, isNotSameAs, isNull, isSameAs, named</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, finalize, getClass, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -193,6 +212,15 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="checkedProviders--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>checkedProviders</h4>
+<pre>public static&nbsp;&lt;T,P extends <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;T&gt;&gt;&nbsp;com.google.common.truth.Subject.Factory&lt;<a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html" title="class in com.google.inject.testing.throwingproviders">CheckedProviderSubject</a>&lt;T,P&gt;,P&gt;&nbsp;checkedProviders()</pre>
+</li>
+</ul>
 <a name="assertThat-com.google.inject.throwingproviders.CheckedProvider-">
 <!--   -->
 </a><a name="assertThat-P-">
@@ -201,7 +229,7 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <ul class="blockList">
 <li class="blockList">
 <h4>assertThat</h4>
-<pre>public static&nbsp;&lt;T,P extends <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;T&gt;&gt;&nbsp;<a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html" title="class in com.google.inject.testing.throwingproviders">CheckedProviderSubject</a>&lt;T,P&gt;&nbsp;assertThat(<a href="http://docs.oracle.com/javase/7/docs/api/javax/annotation/Nullable.html?is-external=true" title="class or interface in javax.annotation">@Nullable</a>
+<pre>public static&nbsp;&lt;T,P extends <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;T&gt;&gt;&nbsp;<a href="../../../../../com/google/inject/testing/throwingproviders/CheckedProviderSubject.html" title="class in com.google.inject.testing.throwingproviders">CheckedProviderSubject</a>&lt;T,P&gt;&nbsp;assertThat(@Nullable
                                                                                       P&nbsp;provider)</pre>
 </li>
 </ul>
@@ -211,7 +239,7 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <ul class="blockList">
 <li class="blockList">
 <h4>providedValue</h4>
-<pre>public&nbsp;com.google.common.truth.Subject&lt;?,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;providedValue()</pre>
+<pre>public&nbsp;com.google.common.truth.Subject&lt;?,java.lang.Object&gt;&nbsp;providedValue()</pre>
 <div class="block">Allows for assertions on the value provided by this provider.
 
  <p>The value provided by a checked provider is the object returned by a call to <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>CheckedProvider.get()</code></a></div>
@@ -230,11 +258,11 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <pre>public&nbsp;com.google.common.truth.ThrowableSubject&nbsp;thrownException()</pre>
 <div class="block">Allows for assertions on the exception thrown by this provider.
 
- <p>The exception thrown by a checked provider is the <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang"><code>Throwable</code></a> thrown by a call to
+ <p>The exception thrown by a checked provider is the <code>Throwable</code> thrown by a call to
  <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>CheckedProvider.get()</code></a></div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>ThrowableSubject</code> for asserting against the <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang"><code>Throwable</code></a> thrown by <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>CheckedProvider.get()</code></a></dd>
+<dd>a <code>ThrowableSubject</code> for asserting against the <code>Throwable</code> thrown by <a href="../../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--"><code>CheckedProvider.get()</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -290,7 +318,7 @@ extends com.google.common.truth.Subject&lt;<a href="../../../../../com/google/in
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested.classes.inherited.from.class.com.google.common.truth.Subject">Nested</a>&nbsp;|&nbsp;</li>
 <li><a href="#fields.inherited.from.class.com.google.common.truth.Subject">Field</a>&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>

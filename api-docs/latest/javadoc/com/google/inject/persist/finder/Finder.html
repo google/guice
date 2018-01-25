@@ -91,8 +91,8 @@
 <li class="blockList">
 <hr>
 <br>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#METHOD" title="class or interface in java.lang.annotation">METHOD</a>)
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
+<pre>@Target(value=METHOD)
+ @Retention(value=RUNTIME)
 public @interface <span class="memberNameLabel">Finder</span></pre>
 <div class="block">Marks a method stub as a dynamic finder. The method is intercepted and replaced with the
  specified JPAQL query. Provides result auto-boxing and automatic parameter binding.</div>
@@ -115,19 +115,19 @@ public @interface <span class="memberNameLabel">Finder</span></pre>
 <th class="colLast" scope="col">Optional Element and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/persist/finder/Finder.html#namedQuery--">namedQuery</a></span></code>
 <div class="block">Returns the configured named query's name.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/persist/finder/Finder.html#query--">query</a></span></code>
 <div class="block">Returns the configured query string.</div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&gt;</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;? extends java.util.Collection&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/persist/finder/Finder.html#returnAs--">returnAs</a></span></code>
 <div class="block">Returns the configured autoboxing collection class.</div>
 </td>
@@ -153,7 +153,7 @@ public @interface <span class="memberNameLabel">Finder</span></pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>namedQuery</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;namedQuery</pre>
+<pre>public abstract&nbsp;java.lang.String&nbsp;namedQuery</pre>
 <div class="block">Returns the configured named query's name. Specify a named query's name here. This name is
  typically specified in your JPA configuration.</div>
 <dl>
@@ -171,7 +171,7 @@ public @interface <span class="memberNameLabel">Finder</span></pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>query</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;query</pre>
+<pre>public abstract&nbsp;java.lang.String&nbsp;query</pre>
 <div class="block">Returns the configured query string. Directly specify a JPAQL query here.</div>
 <dl>
 <dt>Default:</dt>
@@ -188,7 +188,7 @@ public @interface <span class="memberNameLabel">Finder</span></pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>returnAs</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util">Collection</a>&gt;&nbsp;returnAs</pre>
+<pre>public abstract&nbsp;java.lang.Class&lt;? extends java.util.Collection&gt;&nbsp;returnAs</pre>
 <div class="block">Returns the configured autoboxing collection class. Use this clause to specify a collection
  impl to autobox result lists into. The impl must have a default no-arg constructor and be a
  subclass of <code>java.util.Collection</code>.</div>

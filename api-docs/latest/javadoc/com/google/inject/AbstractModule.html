@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.google.inject.AbstractModule</li>
@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public abstract class <span class="typeNameLabel">AbstractModule</span>
-extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+extends java.lang.Object
 implements <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a></pre>
 <div class="block">A support class for <a href="../../../com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a>s which reduces repetition and results in a more readable
  configuration. Simply extend this class, implement <a href="../../../com/google/inject/AbstractModule.html#configure--"><code>configure()</code></a>, and call the inherited
@@ -173,16 +173,16 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#addError-java.lang.String-java.lang.Object...-">addError</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message,
-        <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#addError-java.lang.String-java.lang.Object...-">addError</a></span>(java.lang.String&nbsp;message,
+        java.lang.Object...&nbsp;arguments)</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#addError-java.lang.Throwable-">addError</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;t)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#addError-java.lang.Throwable-">addError</a></span>(java.lang.Throwable&nbsp;t)</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>protected &lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/AnnotatedBindingBuilder.html" title="interface in com.google.inject.binder">AnnotatedBindingBuilder</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#bind-java.lang.Class-">bind</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;clazz)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#bind-java.lang.Class-">bind</a></span>(java.lang.Class&lt;T&gt;&nbsp;clazz)</code>&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>protected &lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;T&gt;</code></td>
@@ -204,8 +204,8 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">bindInterceptor</a></span>(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&gt;&nbsp;classMatcher,
-               <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#bindInterceptor-com.google.inject.matcher.Matcher-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">bindInterceptor</a></span>(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.Class&lt;?&gt;&gt;&nbsp;classMatcher,
+               <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.reflect.Method&gt;&nbsp;methodMatcher,
                <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</code>&nbsp;</td>
 </tr>
 <tr id="i9" class="rowColor">
@@ -220,7 +220,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 </tr>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#bindScope-java.lang.Class-com.google.inject.Scope-">bindScope</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&gt;&nbsp;scopeAnnotation,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#bindScope-java.lang.Class-com.google.inject.Scope-">bindScope</a></span>(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;&nbsp;scopeAnnotation,
          <a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject">Scope</a>&nbsp;scope)</code>&nbsp;</td>
 </tr>
 <tr id="i12" class="altColor">
@@ -246,7 +246,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>protected &lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>&nbsp;</td>
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>protected &lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;</code></td>
@@ -254,7 +254,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 </tr>
 <tr id="i18" class="altColor">
 <td class="colFirst"><code>protected &lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#getProvider-java.lang.Class-">getProvider</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#getProvider-java.lang.Class-">getProvider</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>&nbsp;</td>
 </tr>
 <tr id="i19" class="rowColor">
 <td class="colFirst"><code>protected &lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
@@ -266,15 +266,15 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 </tr>
 <tr id="i21" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#requestInjection-java.lang.Object-">requestInjection</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#requestInjection-java.lang.Object-">requestInjection</a></span>(java.lang.Object&nbsp;instance)</code>&nbsp;</td>
 </tr>
 <tr id="i22" class="altColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;...&nbsp;types)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection</a></span>(java.lang.Class&lt;?&gt;...&nbsp;types)</code>&nbsp;</td>
 </tr>
 <tr id="i23" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#requireBinding-java.lang.Class-">requireBinding</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;type)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/AbstractModule.html#requireBinding-java.lang.Class-">requireBinding</a></span>(java.lang.Class&lt;?&gt;&nbsp;type)</code>
 <div class="block">Adds a dependency from this module to <code>type</code>.</div>
 </td>
 </tr>
@@ -289,8 +289,8 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -368,7 +368,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>bindScope</h4>
-<pre>protected&nbsp;void&nbsp;bindScope(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&gt;&nbsp;scopeAnnotation,
+<pre>protected&nbsp;void&nbsp;bindScope(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;&nbsp;scopeAnnotation,
                          <a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject">Scope</a>&nbsp;scope)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
@@ -408,7 +408,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>bind</h4>
-<pre>protected&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/AnnotatedBindingBuilder.html" title="interface in com.google.inject.binder">AnnotatedBindingBuilder</a>&lt;T&gt;&nbsp;bind(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;clazz)</pre>
+<pre>protected&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/binder/AnnotatedBindingBuilder.html" title="interface in com.google.inject.binder">AnnotatedBindingBuilder</a>&lt;T&gt;&nbsp;bind(java.lang.Class&lt;T&gt;&nbsp;clazz)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../com/google/inject/Binder.html#bind-java.lang.Class-"><code>Binder.bind(Class)</code></a></dd>
@@ -447,8 +447,8 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>addError</h4>
-<pre>protected&nbsp;void&nbsp;addError(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message,
-                        <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</pre>
+<pre>protected&nbsp;void&nbsp;addError(java.lang.String&nbsp;message,
+                        java.lang.Object...&nbsp;arguments)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../com/google/inject/Binder.html#addError-java.lang.String-java.lang.Object...-"><code>Binder.addError(String, Object[])</code></a></dd>
@@ -461,7 +461,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>addError</h4>
-<pre>protected&nbsp;void&nbsp;addError(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;t)</pre>
+<pre>protected&nbsp;void&nbsp;addError(java.lang.Throwable&nbsp;t)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../com/google/inject/Binder.html#addError-java.lang.Throwable-"><code>Binder.addError(Throwable)</code></a></dd>
@@ -489,7 +489,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>requestInjection</h4>
-<pre>protected&nbsp;void&nbsp;requestInjection(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</pre>
+<pre>protected&nbsp;void&nbsp;requestInjection(java.lang.Object&nbsp;instance)</pre>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -504,7 +504,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>requestStaticInjection</h4>
-<pre>protected&nbsp;void&nbsp;requestStaticInjection(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;...&nbsp;types)</pre>
+<pre>protected&nbsp;void&nbsp;requestStaticInjection(java.lang.Class&lt;?&gt;...&nbsp;types)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-"><code>Binder.requestStaticInjection(Class[])</code></a></dd>
@@ -517,8 +517,8 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>bindInterceptor</h4>
-<pre>protected&nbsp;void&nbsp;bindInterceptor(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&gt;&nbsp;classMatcher,
-                               <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
+<pre>protected&nbsp;void&nbsp;bindInterceptor(<a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.Class&lt;?&gt;&gt;&nbsp;classMatcher,
+                               <a href="../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.reflect.Method&gt;&nbsp;methodMatcher,
                                <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
@@ -549,7 +549,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>requireBinding</h4>
-<pre>protected&nbsp;void&nbsp;requireBinding(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;type)</pre>
+<pre>protected&nbsp;void&nbsp;requireBinding(java.lang.Class&lt;?&gt;&nbsp;type)</pre>
 <div class="block">Adds a dependency from this module to <code>type</code>. When the injector is created, Guice will
  report an error if <code>type</code> cannot be injected. Note that this requirement may be satisfied
  by implicit binding, such as a public no-arguments constructor.</div>
@@ -580,7 +580,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>getProvider</h4>
-<pre>protected&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>protected&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -626,7 +626,7 @@ implements <a href="../../../com/google/inject/Module.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>getMembersInjector</h4>
-<pre>protected&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>protected&nbsp;&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>

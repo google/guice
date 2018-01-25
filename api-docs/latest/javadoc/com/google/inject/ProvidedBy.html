@@ -91,8 +91,8 @@
 <li class="blockList">
 <hr>
 <br>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#TYPE" title="class or interface in java.lang.annotation">TYPE</a>)
+<pre>@Retention(value=RUNTIME)
+ @Target(value=TYPE)
 public @interface <span class="memberNameLabel">ProvidedBy</span></pre>
 <div class="block">A pointer to the default provider type for a type.</div>
 </li>
@@ -114,7 +114,7 @@ public @interface <span class="memberNameLabel">ProvidedBy</span></pre>
 <th class="colLast" scope="col">Required Element and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends javax.inject.Provider&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;? extends javax.inject.Provider&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/ProvidedBy.html#value--">value</a></span></code>
 <div class="block">The implementation type.</div>
 </td>
@@ -140,7 +140,7 @@ public @interface <span class="memberNameLabel">ProvidedBy</span></pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>value</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends javax.inject.Provider&lt;?&gt;&gt;&nbsp;value</pre>
+<pre>public abstract&nbsp;java.lang.Class&lt;? extends javax.inject.Provider&lt;?&gt;&gt;&nbsp;value</pre>
 <div class="block">The implementation type.</div>
 </li>
 </ul>

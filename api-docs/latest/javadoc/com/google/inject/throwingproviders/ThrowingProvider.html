@@ -91,7 +91,7 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">com.google.inject.throwingproviders</div>
-<h2 title="Interface ThrowingProvider" class="title">Interface ThrowingProvider&lt;T,E extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;</h2>
+<h2 title="Interface ThrowingProvider" class="title">Interface ThrowingProvider&lt;T,E extends java.lang.Exception&gt;</h2>
 </div>
 <div class="contentContainer">
 <div class="description">
@@ -106,8 +106,8 @@ var activeTableTab = "activeTableTab";
 <div class="block"><span class="deprecationComment">use <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a> instead.</span></div>
 </div>
 <br>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
-public interface <span class="typeNameLabel">ThrowingProvider&lt;T,E extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;</span>
+<pre>@Deprecated
+public interface <span class="typeNameLabel">ThrowingProvider&lt;T,E extends java.lang.Exception&gt;</span>
 extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;T&gt;</pre>
 <div class="block">Alternative to the Guice <a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that throws a checked Exception.
  Users may not inject <code>T</code> directly.
@@ -168,13 +168,13 @@ extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider
 <li class="blockList">
 <h4>get</h4>
 <pre><a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html" title="type parameter in ThrowingProvider">T</a>&nbsp;get()
-throws <a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html" title="type parameter in ThrowingProvider">E</a> extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a></pre>
+throws <a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html" title="type parameter in ThrowingProvider">E</a> extends java.lang.Exception</pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html#get--">get</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&lt;<a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html" title="type parameter in ThrowingProvider">T</a>&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html" title="type parameter in ThrowingProvider">E</a> extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a></code></dd>
+<dd><code><a href="../../../../com/google/inject/throwingproviders/ThrowingProvider.html" title="type parameter in ThrowingProvider">E</a> extends java.lang.Exception</code></dd>
 </dl>
 </li>
 </ul>

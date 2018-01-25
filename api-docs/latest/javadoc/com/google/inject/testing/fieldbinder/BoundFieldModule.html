@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.google.inject.testing.fieldbinder.BoundFieldModule</li>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">BoundFieldModule</span>
-extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+extends java.lang.Object
 implements <a href="../../../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a></pre>
 <div class="block">Automatically creates Guice bindings for fields in an object annotated with <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a>.
 
@@ -122,17 +122,20 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
  <p>The following rules are followed in determining how fields are bound using this module:
 
  <ul>
- <li> For each <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated field of an object and its superclasses, this module will
-     bind that field's type to that field's value at injector creation time. This includes both
-     instance and static fields.
- <li> If <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> is specified, the field's value will be bound to the class specified by
-     <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> instead of the field's actual type.
- <li> If a <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code> is present on the field,
-     that field will be bound using that annotation via <a href="../../../../../com/google/inject/binder/AnnotatedBindingBuilder.html#annotatedWith-java.lang.Class-"><code>AnnotatedBindingBuilder.annotatedWith(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)</code></a>. For example, <code>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)</code>. It is an error to
-     supply more than one <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code>.
- <li> If the field is of type <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>, the field's value will be bound as a <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> using <a href="../../../../../com/google/inject/binder/LinkedBindingBuilder.html#toProvider-com.google.inject.Provider-"><code>LinkedBindingBuilder.toProvider(com.google.inject.Provider&lt;? extends T&gt;)</code></a> to the provider's parameterized type.
-     For example, <code>Provider&lt;Integer&gt;</code> binds to <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><code>Integer</code></a>. Attempting to bind a
-     non-parameterized <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> without a <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> clause is an error.
+   <li>For each <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated field of an object and its superclasses, this module will
+       bind that field's type to that field's value at injector creation time. This includes both
+       instance and static fields.
+   <li>If <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> is specified, the field's value will be bound to the class specified by
+       <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> instead of the field's actual type.
+   <li>If <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#lazy--"><code>Bind.lazy()</code></a> is true, this module will delay reading the value from the field until
+       injection time, allowing the field's value to be reassigned during the course of a test's
+       execution.
+   <li>If a <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code> is present on the field,
+       that field will be bound using that annotation via <a href="../../../../../com/google/inject/binder/AnnotatedBindingBuilder.html#annotatedWith-java.lang.Class-"><code>AnnotatedBindingBuilder.annotatedWith(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)</code></a>. For example, <code>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)</code>. It is an error to
+       supply more than one <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code>.
+   <li>If the field is of type <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>, the field's value will be bound as a <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> using <a href="../../../../../com/google/inject/binder/LinkedBindingBuilder.html#toProvider-com.google.inject.Provider-"><code>LinkedBindingBuilder.toProvider(com.google.inject.Provider&lt;? extends T&gt;)</code></a> to the provider's parameterized
+       type. For example, <code>Provider&lt;Integer&gt;</code> binds to <code>Integer</code>. Attempting to bind a
+       non-parameterized <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> without a <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> clause is an error.
  </ul>
 
  <p>Example use:
@@ -142,6 +145,7 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
    // bind(new TypeLiteral<code> &lt;List&lt;Object&gt;&gt;</code>() {}).toInstance(listOfObjects);
     @Bind private List<code> &lt;Object&gt;</code> listOfObjects = Lists.of();
 
+   // private String userName = "string_that_changes_over_time";
    // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
     @Bind(lazy = true) private String userName;
 
@@ -191,7 +195,7 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#of-java.lang.Object-">of</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#of-java.lang.Object-">of</a></span>(java.lang.Object&nbsp;instance)</code>
 <div class="block">Create a BoundFieldModule which binds the <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated fields of <code>instance</code>.</div>
 </td>
 </tr>
@@ -200,8 +204,8 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -223,7 +227,7 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 <ul class="blockList">
 <li class="blockList">
 <h4>of</h4>
-<pre>public static&nbsp;<a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule</a>&nbsp;of(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</pre>
+<pre>public static&nbsp;<a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule</a>&nbsp;of(java.lang.Object&nbsp;instance)</pre>
 <div class="block">Create a BoundFieldModule which binds the <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated fields of <code>instance</code>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>

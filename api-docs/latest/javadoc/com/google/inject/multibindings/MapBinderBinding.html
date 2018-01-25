@@ -142,14 +142,14 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.Entry.html?is-external=true" title="class or interface in java.util">Map.Entry</a>&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.List&lt;java.util.Map.Entry&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--">getEntries</a></span>()</code>
 <div class="block">Returns all entries in the Map.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.Entry.html?is-external=true" title="class or interface in java.util">Map.Entry</a>&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries-java.lang.Iterable-">getEntries</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;? extends <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;&nbsp;elements)</code>
+<td class="colFirst"><code>java.util.List&lt;java.util.Map.Entry&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries-java.lang.Iterable-">getEntries</a></span>(java.lang.Iterable&lt;? extends <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;&nbsp;elements)</code>
 <div class="block">Similar to <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a>, but can be used on a MapBinderBinding retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.</div>
 </td>
 </tr>
@@ -236,10 +236,10 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getEntries</h4>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.Entry.html?is-external=true" title="class or interface in java.util">Map.Entry</a>&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;&nbsp;getEntries()</pre>
+<pre>java.util.List&lt;java.util.Map.Entry&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;&nbsp;getEntries()</pre>
 <div class="block">Returns all entries in the Map. The returned list of Map.Entries contains the key and a binding
  to the value. Duplicate keys or values will exist as separate Map.Entries in the returned list.
- This is only supported on bindings returned from an injector. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
+ This is only supported on bindings returned from an injector. This will throw <code>UnsupportedOperationException</code> if it is called on an element retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
 
  <p>The elements will always match the type Map's generic type. For example, if getMapKey
  returns a key of <code>Map&lt;String, Snack></code>, then this will always return a list of
@@ -252,7 +252,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getEntries</h4>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.Entry.html?is-external=true" title="class or interface in java.util">Map.Entry</a>&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;&nbsp;getEntries(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;? extends <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;&nbsp;elements)</pre>
+<pre>java.util.List&lt;java.util.Map.Entry&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;&nbsp;getEntries(java.lang.Iterable&lt;? extends <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;&nbsp;elements)</pre>
 <div class="block">Similar to <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a>, but can be used on a MapBinderBinding retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
 
  <p>One way to use this is to pass in the results of <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a> as the <code>elements</code> parameter.
@@ -262,7 +262,7 @@ var activeTableTab = "activeTableTab";
  that <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a> does.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang">IllegalArgumentException</a></code> - if the provided elements contain partial map entries. If the
+<dd><code>java.lang.IllegalArgumentException</code> - if the provided elements contain partial map entries. If the
      elements come from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a> on a module with a MapBinder, there will be
      a 1:1 relationship and no exception will be thrown.</dd>
 </dl>
@@ -276,7 +276,7 @@ var activeTableTab = "activeTableTab";
 <h4>permitsDuplicates</h4>
 <pre>boolean&nbsp;permitsDuplicates()</pre>
 <div class="block">Returns true if the MapBinder permits duplicates. This is only supported on bindings returned
- from an injector. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on a
+ from an injector. This will throw <code>UnsupportedOperationException</code> if it is called on a
  MapBinderBinding retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.</div>
 </li>
 </ul>

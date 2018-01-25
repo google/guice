@@ -80,32 +80,34 @@ Similarly, documentation which was inherited from another class or interface is 
  <p>The following rules are followed in determining how fields are bound using this module:
 
  <ul>
- <li><strike>
-</strike> For each <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html"><TT>Bind</TT></A> annotated field of an object and its superclasses, this module <strike>will</strike><span style="background: #FFFF00">will
-  </span> <strike>bind
-</strike> <span style="background: #FFFF00"> bind </span>that field's type to that field's value at injector creation time. This includes <strike>both</strike><span style="background: #FFFF00">both
- </span> <strike>instance
-</strike> <span style="background: #FFFF00">  instance </span>and static fields.
  <strike>
- </strike><li><strike>
-</strike> If <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html#to"><TT>Bind.to</TT></A> is specified, the field's value will be bound to the class specified by
- <span style="background: #FFFF00">    </span><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html#to"><TT>Bind.to</TT></A> instead of the field's actual type.
+</strike><span style="background: #FFFF00"> </span> <li>For each <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html"><TT>Bind</TT></A> annotated field of an object and its superclasses, this module <strike>will</strike><span style="background: #FFFF00">will
+ </span> <strike>bind
+</strike><span style="background: #FFFF00">     bind</span> that field's type to that field's value at injector creation time. This includes <strike>both</strike><span style="background: #FFFF00">both
+</span> <strike>instance
+</strike> <span style="background: #FFFF00">     instance </span>and static fields.
  <strike>
- </strike><li><strike>
-</strike> If a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/BindingAnnotation.html"><TT>BindingAnnotation</TT></A> or <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/javax/inject/Qualifier.html"><TT>javax.inject.Qualifier</TT></A> is present on the field,
- <span style="background: #FFFF00">    </span>that field will be bound using that annotation via <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/AnnotatedBindingBuilder.html#annotatedWith"><TT>AnnotatedBindingBuilder.annotatedWith</TT></A>.<strike>
+</strike> <strike>
+</strike> <li>If <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html#to"><TT>Bind.to</TT></A> is specified, the field's value will be bound to the class specified by
+ <span style="background: #FFFF00">      </span><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html#to"><TT>Bind.to</TT></A> instead of the field's actual type.
+ <strike>
+</strike> <span style="background: #FFFF00"> </span><li><span style="background: #FFFF00">If <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html#lazy"><TT>Bind.lazy</TT></A> is true, this module will delay reading the value from the field until
+       injection time, allowing the field's value to be reassigned during the course of a test's
+       execution.</span>
+ <span style="background: #FFFF00">  <li></span>If a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/BindingAnnotation.html"><TT>BindingAnnotation</TT></A> or <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/javax/inject/Qualifier.html"><TT>javax.inject.Qualifier</TT></A> is present on the field,
+ <span style="background: #FFFF00">      </span>that field will be bound using that annotation via <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/AnnotatedBindingBuilder.html#annotatedWith"><TT>AnnotatedBindingBuilder.annotatedWith</TT></A>.<strike>
 </strike> For example, {@<strike>code</strike><span style="background: #FFFF00">code
-  </span> <span style="background: #FFFF00">  </span>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}.<strike>
+  </span> <span style="background: #FFFF00">    </span>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}.<strike>
 </strike> It is an error <strike>to</strike><span style="background: #FFFF00">to
-    </span> supply more than one <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/BindingAnnotation.html"><TT>BindingAnnotation</TT></A> <strike>or
+     </span> <span style="background: #FFFF00"> </span>supply more than one <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/BindingAnnotation.html"><TT>BindingAnnotation</TT></A> <strike>or
 </strike><span style="background: #FFFF00">or</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/javax/inject/Qualifier.html"><TT>javax.inject.Qualifier</TT></A>.
  <strike>
- </strike><li><strike>
-</strike> If the field is of type <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Provider.html"><TT>Provider</TT></A>, the field's value will be bound as a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Provider.html"><TT>Provider</TT></A><strike>
-</strike> using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/LinkedBindingBuilder.html#toProvider"><TT>LinkedBindingBuilder.toProvider</TT></A> to the provider's parameterized type.<span style="background: #FFFF00">
- </span> <span style="background: #FFFF00">   </span>For example,<strike>
+</strike> <strike>
+</strike> <li>If the field is of type <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Provider.html"><TT>Provider</TT></A>, the field's value will be bound as a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Provider.html"><TT>Provider</TT></A><strike>
+</strike> using <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/LinkedBindingBuilder.html#toProvider"><TT>LinkedBindingBuilder.toProvider</TT></A> to the provider's <strike>parameterized</strike><span style="background: #FFFF00">parameterized
+  </span> <span style="background: #FFFF00">    </span>type. For example,<strike>
 </strike> {@code Provider<Integer>} binds to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Integer.html"><TT>Integer</TT></A>. Attempting to bind <strike>a</strike><span style="background: #FFFF00">a
-  </span> <span style="background: #FFFF00">  </span>non-<strike>parameterized
+     </span> <span style="background: #FFFF00"> </span>non-<strike>parameterized
 </strike><span style="background: #FFFF00">parameterized</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Provider.html"><TT>Provider</TT></A> without a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/testing/fieldbinder/BoundFieldModule/Bind.html#to"><TT>Bind.to</TT></A> clause is an error.
  <strike>
  </strike></ul>
@@ -118,7 +120,8 @@ Similarly, documentation which was inherited from another class or interface is 
    // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
    {@literal @}Bind private List{@code <Object>} listOfObjects = Lists.of();
 
-   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
+   // <span style="background: #FFFF00">private String userName = "string_that_changes_over_time";
+   // </span>bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
    {@literal @}Bind(lazy = true) private String userName;
 
    // bind(SuperClass.class).toInstance(aSubClass);

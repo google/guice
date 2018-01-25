@@ -196,6 +196,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.ConfigurationException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.ConfigurationException.getPartialValue_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.Guice"/>
   <text>
     InsertCommentsHere

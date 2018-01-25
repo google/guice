@@ -138,29 +138,29 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#addError-java.lang.String-java.lang.Object...-">addError</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message,
-        <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#addError-java.lang.String-java.lang.Object...-">addError</a></span>(java.lang.String&nbsp;message,
+        java.lang.Object...&nbsp;arguments)</code>
 <div class="block">Records an error message for type <code>I</code> which will be presented to the user at a later
  time.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#addError-java.lang.Throwable-">addError</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;t)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#addError-java.lang.Throwable-">addError</a></span>(java.lang.Throwable&nbsp;t)</code>
 <div class="block">Records an exception for type <code>I</code>, the full details of which will be logged, and the
  message of which will be presented to the user at a later time.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#bindInterceptor-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">bindInterceptor</a></span>(<a href="../../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#bindInterceptor-com.google.inject.matcher.Matcher-org.aopalliance.intercept.MethodInterceptor...-">bindInterceptor</a></span>(<a href="../../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.reflect.Method&gt;&nbsp;methodMatcher,
                <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</code>
 <div class="block">Binds method interceptor[s] to methods matched in type <code>I</code> and its supertypes.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>.</div>
 </td>
@@ -174,7 +174,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#getProvider-java.lang.Class-">getProvider</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/TypeEncounter.html#getProvider-java.lang.Class-">getProvider</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the provider used to obtain instances for the given injection type.</div>
 </td>
 </tr>
@@ -217,11 +217,11 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>addError</h4>
-<pre>void&nbsp;addError(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message,
-              <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>...&nbsp;arguments)</pre>
+<pre>void&nbsp;addError(java.lang.String&nbsp;message,
+              java.lang.Object...&nbsp;arguments)</pre>
 <div class="block">Records an error message for type <code>I</code> which will be presented to the user at a later
  time. Unlike throwing an exception, this enable us to continue configuring the Injector and
- discover more errors. Uses <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true#format-java.lang.String-java.lang.Object...-" title="class or interface in java.lang"><code>String.format(String, Object[])</code></a> to insert the arguments into
+ discover more errors. Uses <code>String.format(String, Object[])</code> to insert the arguments into
  the message.</div>
 </li>
 </ul>
@@ -231,7 +231,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>addError</h4>
-<pre>void&nbsp;addError(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;t)</pre>
+<pre>void&nbsp;addError(java.lang.Throwable&nbsp;t)</pre>
 <div class="block">Records an exception for type <code>I</code>, the full details of which will be logged, and the
  message of which will be presented to the user at a later time. If your type listener calls
  something that you worry may fail, you should catch the exception and pass it to this method.</div>
@@ -265,7 +265,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getProvider</h4>
-<pre>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <div class="block">Returns the provider used to obtain instances for the given injection type. The returned
  provider will not be valid until the injector has been created. The provider will throw an
  <code>IllegalStateException</code> if you try to use it beforehand.</div>
@@ -294,7 +294,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getMembersInjector</h4>
-<pre>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;T&gt;&nbsp;type)</pre>
+<pre>&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;&nbsp;getMembersInjector(java.lang.Class&lt;T&gt;&nbsp;type)</pre>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>. The returned members injector will not be valid until the main
  injector has been created. The members injector will throw an <code>IllegalStateException</code> if
@@ -333,7 +333,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockListLast">
 <li class="blockList">
 <h4>bindInterceptor</h4>
-<pre>void&nbsp;bindInterceptor(<a href="../../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&gt;&nbsp;methodMatcher,
+<pre>void&nbsp;bindInterceptor(<a href="../../../../com/google/inject/matcher/Matcher.html" title="interface in com.google.inject.matcher">Matcher</a>&lt;? super java.lang.reflect.Method&gt;&nbsp;methodMatcher,
                      <a href="http://aopalliance.sourceforge.net/doc/org/aopalliance/intercept/MethodInterceptor.html?is-external=true" title="class or interface in org.aopalliance.intercept">MethodInterceptor</a>...&nbsp;interceptors)</pre>
 <div class="block">Binds method interceptor[s] to methods matched in type <code>I</code> and its supertypes. A method
  is eligible for interception if:

@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.google.inject.grapher.AbstractInjectorGrapher</li>
@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public abstract class <span class="typeNameLabel">AbstractInjectorGrapher</span>
-extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+extends java.lang.Object
 implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" title="interface in com.google.inject.grapher">InjectorGrapher</a></pre>
 <div class="block">Abstract injector grapher that builds the dependency graph but doesn't render it.</div>
 <dl>
@@ -191,7 +191,7 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/grapher/AbstractInjectorGrapher.html#graph-com.google.inject.Injector-java.util.Set-">graph</a></span>(<a href="../../../../com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a>&nbsp;injector,
-     <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util">Set</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;root)</code>
+     java.util.Set&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;root)</code>
 <div class="block">Graphs the guice dependency graph for the given injector using the given starting keys and
  their transitive dependencies.</div>
 </td>
@@ -243,8 +243,8 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -293,14 +293,14 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>graph</h4>
 <pre>public final&nbsp;void&nbsp;graph(<a href="../../../../com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a>&nbsp;injector)
-                 throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                 throws java.io.IOException</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/grapher/InjectorGrapher.html#graph-com.google.inject.Injector-">InjectorGrapher</a></code></span></div>
 <div class="block">Graphs the guice dependency graph for the given injector using default starting keys.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/inject/grapher/InjectorGrapher.html#graph-com.google.inject.Injector-">graph</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/grapher/InjectorGrapher.html" title="interface in com.google.inject.grapher">InjectorGrapher</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -311,8 +311,8 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>graph</h4>
 <pre>public final&nbsp;void&nbsp;graph(<a href="../../../../com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a>&nbsp;injector,
-                        <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util">Set</a>&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;root)
-                 throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                        java.util.Set&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;root)
+                 throws java.io.IOException</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/inject/grapher/InjectorGrapher.html#graph-com.google.inject.Injector-java.util.Set-">InjectorGrapher</a></code></span></div>
 <div class="block">Graphs the guice dependency graph for the given injector using the given starting keys and
  their transitive dependencies.</div>
@@ -320,7 +320,7 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/inject/grapher/InjectorGrapher.html#graph-com.google.inject.Injector-java.util.Set-">graph</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/grapher/InjectorGrapher.html" title="interface in com.google.inject.grapher">InjectorGrapher</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -331,11 +331,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>reset</h4>
 <pre>protected abstract&nbsp;void&nbsp;reset()
-                       throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                       throws java.io.IOException</pre>
 <div class="block">Resets the state of the grapher before rendering a new graph.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -346,11 +346,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>newInterfaceNode</h4>
 <pre>protected abstract&nbsp;void&nbsp;newInterfaceNode(<a href="../../../../com/google/inject/grapher/InterfaceNode.html" title="class in com.google.inject.grapher">InterfaceNode</a>&nbsp;node)
-                                  throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                  throws java.io.IOException</pre>
 <div class="block">Adds a new interface node to the graph.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -361,11 +361,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>newImplementationNode</h4>
 <pre>protected abstract&nbsp;void&nbsp;newImplementationNode(<a href="../../../../com/google/inject/grapher/ImplementationNode.html" title="class in com.google.inject.grapher">ImplementationNode</a>&nbsp;node)
-                                       throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                       throws java.io.IOException</pre>
 <div class="block">Adds a new implementation node to the graph.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -376,11 +376,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>newInstanceNode</h4>
 <pre>protected abstract&nbsp;void&nbsp;newInstanceNode(<a href="../../../../com/google/inject/grapher/InstanceNode.html" title="class in com.google.inject.grapher">InstanceNode</a>&nbsp;node)
-                                 throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                 throws java.io.IOException</pre>
 <div class="block">Adds a new instance node to the graph.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -391,11 +391,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>newDependencyEdge</h4>
 <pre>protected abstract&nbsp;void&nbsp;newDependencyEdge(<a href="../../../../com/google/inject/grapher/DependencyEdge.html" title="class in com.google.inject.grapher">DependencyEdge</a>&nbsp;edge)
-                                   throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                   throws java.io.IOException</pre>
 <div class="block">Adds a new dependency edge to the graph.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -406,11 +406,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>newBindingEdge</h4>
 <pre>protected abstract&nbsp;void&nbsp;newBindingEdge(<a href="../../../../com/google/inject/grapher/BindingEdge.html" title="class in com.google.inject.grapher">BindingEdge</a>&nbsp;edge)
-                                throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                                throws java.io.IOException</pre>
 <div class="block">Adds a new binding edge to the graph.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>
@@ -421,11 +421,11 @@ implements <a href="../../../../com/google/inject/grapher/InjectorGrapher.html" 
 <li class="blockList">
 <h4>postProcess</h4>
 <pre>protected abstract&nbsp;void&nbsp;postProcess()
-                             throws <a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                             throws java.io.IOException</pre>
 <div class="block">Performs any post processing required after all nodes and edges have been added.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code>java.io.IOException</code></dd>
 </dl>
 </li>
 </ul>

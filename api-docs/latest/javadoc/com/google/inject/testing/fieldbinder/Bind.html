@@ -91,8 +91,8 @@
 <li class="blockList">
 <hr>
 <br>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#FIELD" title="class or interface in java.lang.annotation">FIELD</a>)
+<pre>@Retention(value=RUNTIME)
+ @Target(value=FIELD)
 public @interface <span class="memberNameLabel">Bind</span></pre>
 <div class="block">Annotation used by <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> to indicate that a field should be bound to its value
  using Guice.
@@ -130,7 +130,7 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--">to</a></span></code>
 <div class="block">If specified, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will bind the annotated field's value to this type,
  rather than to the field's actual type.</div>
@@ -157,7 +157,7 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>to</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;to</pre>
+<pre>public abstract&nbsp;java.lang.Class&lt;?&gt;&nbsp;to</pre>
 <div class="block">If specified, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will bind the annotated field's value to this type,
  rather than to the field's actual type.</div>
 <dl>

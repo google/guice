@@ -613,6 +613,13 @@ Similarly, documentation which was inherited from another class or interface is 
 
  @author crazybob@google.com (Bob Lee)</blockquote>
 <hr align="left" width="100%">
+<A NAME="com.google.inject.ConfigurationException.dmethod.getPartialValue()"></A><a href="com.google.inject.ConfigurationException.html" class="hiddenlink">Class <b>ConfigurationException</b></a>, <a href="com.google.inject.ConfigurationException.html#com.google.inject.ConfigurationException.getPartialValue_changed()" class="hiddenlink">E <b>getPartialValue()</b></a><br><br><blockquote>Returns a value that was only partially computed due to this exception. The caller can <strike>use
+ this</strike><span style="background: #FFFF00">use this
+</span> while collecting additional configuration problems.
+
+ @return the partial value, or {@code null} if none was set. The type of the partial value is
+     <strike> </strike>specified by the throwing method.</blockquote>
+<hr align="left" width="100%">
 <A NAME="com.google.inject.Guice!class"></A><a href="com.google.inject.Guice.html" class="hiddenlink">Class <b>Guice</b></a><br><br><blockquote>The entry point to the Guice framework. Creates <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Guice/Injector.html"><TT>Injector</TT></A>s <strike>from
 </strike><span style="background: #FFFF00">from</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Guice/Module.html"><TT>Module</TT></A>s.
 
@@ -715,8 +722,10 @@ Similarly, documentation which was inherited from another class or interface is 
  @since 2.0</blockquote>
 <A NAME="com.google.inject.Injector.dmethod.getAllBindings()"></A><a href="com.google.inject.Injector.html" class="hiddenlink">Class <b>Injector</b></a>, <a href="com.google.inject.Injector.html#com.google.inject.Injector.getAllBindings_changed()" class="hiddenlink">Map&lt;Key&lt;?&gt;, Binding&lt;?&gt;&gt; <b>getAllBindings()</b></a><br><br><blockquote>Returns a snapshot of this injector's bindings, <strong>both explicit and
  just-in-time</strong>. The returned map is immutable; it contains only the bindings that were
- present when {@code getAllBindings()} was invoked. Subsequent calls may return a map with
- additional just-in-time bindings.
+ present when {@code getAllBindings()} was invoked. <span style="background: #FFFF00">Just-in-time bindings are only present if
+ they have been requested at least once. </span>Subsequent calls may return a map <strike>with
+ additional</strike><span style="background: #FFFF00">with additional
+</span> just-in-time bindings.
 
  <p>The returned map does not include bindings inherited from a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getParent()"><TT>parent
  injector</TT></A>, should one exist.

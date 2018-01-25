@@ -135,7 +135,7 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;</code></td>
+<td class="colFirst"><code>java.util.List&lt;<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#getElements--">getElements</a></span>()</code>
 <div class="block">Returns all bindings that make up the set.</div>
 </td>
@@ -203,9 +203,9 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getElements</h4>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&nbsp;getElements()</pre>
+<pre>java.util.List&lt;<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&nbsp;getElements()</pre>
 <div class="block">Returns all bindings that make up the set. This is only supported on bindings returned from an
- injector. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on an element
+ injector. This will throw <code>UnsupportedOperationException</code> if it is called on an element
  retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.
 
  <p>The elements will always match the type Set's generic type. For example, if getSetKey
@@ -221,7 +221,7 @@ var activeTableTab = "activeTableTab";
 <h4>permitsDuplicates</h4>
 <pre>boolean&nbsp;permitsDuplicates()</pre>
 <div class="block">Returns true if the multibinder permits duplicates. This is only supported on bindings returned
- from an injector. This will throw <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/UnsupportedOperationException.html?is-external=true" title="class or interface in java.lang"><code>UnsupportedOperationException</code></a> if it is called on a
+ from an injector. This will throw <code>UnsupportedOperationException</code> if it is called on a
  MultibinderBinding retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.</div>
 </li>
 </ul>

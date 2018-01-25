@@ -91,9 +91,9 @@
 <li class="blockList">
 <hr>
 <br>
-<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>={<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#METHOD" title="class or interface in java.lang.annotation">METHOD</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#TYPE" title="class or interface in java.lang.annotation">TYPE</a>})
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true" title="class or interface in java.lang.annotation">@Retention</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Retention.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html?is-external=true#RUNTIME" title="class or interface in java.lang.annotation">RUNTIME</a>)
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Inherited.html?is-external=true" title="class or interface in java.lang.annotation">@Inherited</a>
+<pre>@Target(value={METHOD,TYPE})
+ @Retention(value=RUNTIME)
+ @Inherited
 public @interface <span class="memberNameLabel">Transactional</span></pre>
 <div class="block">Any method or class marked with this annotation will be considered for transactionality. Consult
  the documentation on https://github.com/google/guice/wiki/GuicePersist for detailed semantics.
@@ -123,13 +123,13 @@ public @interface <span class="memberNameLabel">Transactional</span></pre>
 <th class="colLast" scope="col">Optional Element and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;[]</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;? extends java.lang.Exception&gt;[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/persist/Transactional.html#ignore--">ignore</a></span></code>
 <div class="block">A list of exceptions to <b>not<b> rollback on.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;[]</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;? extends java.lang.Exception&gt;[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/persist/Transactional.html#rollbackOn--">rollbackOn</a></span></code>
 <div class="block">A list of exceptions to rollback on, if thrown by the transactional method.</div>
 </td>
@@ -155,7 +155,7 @@ public @interface <span class="memberNameLabel">Transactional</span></pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>rollbackOn</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;[]&nbsp;rollbackOn</pre>
+<pre>public abstract&nbsp;java.lang.Class&lt;? extends java.lang.Exception&gt;[]&nbsp;rollbackOn</pre>
 <div class="block">A list of exceptions to rollback on, if thrown by the transactional method. These exceptions
  are propagated correctly after a rollback.</div>
 <dl>
@@ -173,7 +173,7 @@ public @interface <span class="memberNameLabel">Transactional</span></pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>ignore</h4>
-<pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;[]&nbsp;ignore</pre>
+<pre>public abstract&nbsp;java.lang.Class&lt;? extends java.lang.Exception&gt;[]&nbsp;ignore</pre>
 <div class="block">A list of exceptions to <b>not<b> rollback on. A caveat to the rollbackOn clause. The
  disjunction of rollbackOn and ignore represents the list of exceptions that will trigger a
  rollback. The complement of rollbackOn and the universal set plus any exceptions in the ignore

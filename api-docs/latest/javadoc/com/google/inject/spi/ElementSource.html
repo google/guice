@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.google.inject.spi.ElementSource</li>
@@ -108,7 +108,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">ElementSource</span>
-extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
+extends java.lang.Object</pre>
 <div class="block">Contains information about where and how an <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>element</code></a> was bound.
 
  <p>The <a href="../../../../com/google/inject/spi/ElementSource.html#getDeclaringSource--"><code>declaring source</code></a> refers to a location in source code that
@@ -116,7 +116,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  annotated by @Provides, the declaring source of element would be the method itself.
 
  <p>The <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> refers to the sequence of calls ends at one of <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a> <code>bindXXX()</code> methods and eventually defines the element. Note that
- <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> lists <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElements</code></a> in reverse
+ <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a> lists <code>StackTraceElements</code> in reverse
  chronological order. The first element (index zero) is the last method call and the last element
  is the first method invocation. By default, the stack trace is not collected. The default
  behavior can be changed by setting the <code>guice_include_stack_traces</code> flag value. The value
@@ -154,19 +154,19 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></td>
+<td class="colFirst"><code>java.lang.Object</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ElementSource.html#getDeclaringSource--">getDeclaringSource</a></span>()</code>
 <div class="block">Returns a single location in source code that defines the element.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
+<td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ElementSource.html#getModuleClassNames--">getModuleClassNames</a></span>()</code>
 <div class="block">Returns the class names of modules involved in creating this <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>Element</code></a>.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang">Integer</a>&gt;</code></td>
+<td class="colFirst"><code>java.util.List&lt;java.lang.Integer&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ElementSource.html#getModuleConfigurePositionsInStackTrace--">getModuleConfigurePositionsInStackTrace</a></span>()</code>
 <div class="block">Returns the position of <a href="../../../../com/google/inject/Module.html#configure-com.google.inject.Binder-"><code>configure(Binder)</code></a> method
  call in the <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>stack trace</code></a> for modules that their classes returned by
@@ -180,14 +180,14 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang">StackTraceElement</a>[]</code></td>
+<td class="colFirst"><code>java.lang.StackTraceElement[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--">getStackTrace</a></span>()</code>
 <div class="block">Returns the sequence of method calls that ends at one of <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>
  <code>bindXXX()</code> methods and eventually defines the element.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ElementSource.html#toString--">toString</a></span>()</code>
 <div class="block">Returns <code>getDeclaringSource().toString()</code> value.</div>
 </td>
@@ -197,8 +197,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -231,9 +231,9 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockList">
 <li class="blockList">
 <h4>getDeclaringSource</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;getDeclaringSource()</pre>
+<pre>public&nbsp;java.lang.Object&nbsp;getDeclaringSource()</pre>
 <div class="block">Returns a single location in source code that defines the element. It can be any object such as
- <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Constructor.html?is-external=true" title="class or interface in java.lang.reflect"><code>Constructor</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect"><code>Method</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Field.html?is-external=true" title="class or interface in java.lang.reflect"><code>Field</code></a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElement</code></a>, etc. For example, if the element is
+ <code>Constructor</code>, <code>Method</code>, <code>Field</code>, <code>StackTraceElement</code>, etc. For example, if the element is
  created from a method annotated by @Provides, the declaring source of element would
  be the method itself.</div>
 </li>
@@ -244,7 +244,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockList">
 <li class="blockList">
 <h4>getModuleClassNames</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;getModuleClassNames()</pre>
+<pre>public&nbsp;java.util.List&lt;java.lang.String&gt;&nbsp;getModuleClassNames()</pre>
 <div class="block">Returns the class names of modules involved in creating this <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi"><code>Element</code></a>. The first element
  (index 0) is the class name of module that defined the element, and the last element is the
  class name of root module.</div>
@@ -256,7 +256,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockList">
 <li class="blockList">
 <h4>getModuleConfigurePositionsInStackTrace</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang">Integer</a>&gt;&nbsp;getModuleConfigurePositionsInStackTrace()</pre>
+<pre>public&nbsp;java.util.List&lt;java.lang.Integer&gt;&nbsp;getModuleConfigurePositionsInStackTrace()</pre>
 <div class="block">Returns the position of <a href="../../../../com/google/inject/Module.html#configure-com.google.inject.Binder-"><code>configure(Binder)</code></a> method
  call in the <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>stack trace</code></a> for modules that their classes returned by
  <a href="../../../../com/google/inject/spi/ElementSource.html#getModuleClassNames--"><code>getModuleClassNames()</code></a>. For example, if the stack trace looks like the following:
@@ -281,10 +281,10 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockList">
 <li class="blockList">
 <h4>getStackTrace</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang">StackTraceElement</a>[]&nbsp;getStackTrace()</pre>
+<pre>public&nbsp;java.lang.StackTraceElement[]&nbsp;getStackTrace()</pre>
 <div class="block">Returns the sequence of method calls that ends at one of <a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>
  <code>bindXXX()</code> methods and eventually defines the element. Note that <a href="../../../../com/google/inject/spi/ElementSource.html#getStackTrace--"><code>getStackTrace()</code></a>
- lists <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StackTraceElement.html?is-external=true" title="class or interface in java.lang"><code>StackTraceElements</code></a> in reverse chronological order. The first
+ lists <code>StackTraceElements</code> in reverse chronological order. The first
  element (index zero) is the last method call and the last element is the first method
  invocation. In the cases where stack trace is not available (i.e.,the stack trace was not
  collected), it returns an empty array.</div>
@@ -296,11 +296,11 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockListLast">
 <li class="blockList">
 <h4>toString</h4>
-<pre>public&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;toString()</pre>
+<pre>public&nbsp;java.lang.String&nbsp;toString()</pre>
 <div class="block">Returns <code>getDeclaringSource().toString()</code> value.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a></code>&nbsp;in class&nbsp;<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></dd>
+<dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
 </dl>
 </li>
 </ul>
