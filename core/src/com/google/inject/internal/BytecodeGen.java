@@ -395,7 +395,7 @@ public final class BytecodeGen {
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
-      if (name.startsWith("sun.reflect")) {
+      if (name.startsWith("sun.reflect") || name.startsWith("jdk.internal.reflect")) {
         // these reflection classes must be loaded from bootstrap class loader
         return SystemBridgeHolder.SYSTEM_BRIDGE.classicLoadClass(name, resolve);
       }
