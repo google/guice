@@ -6,6 +6,7 @@ cache:
     - $HOME/.m2
 
 jdk:
+  - oraclejdk9
   - oraclejdk8
   - openjdk7
 
