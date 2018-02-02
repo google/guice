@@ -131,6 +131,11 @@
             <exclude>LICENSE</exclude>
             <exclude>NOTICE</exclude>
           </excludes>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>com.google.guice</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>
       <!--
