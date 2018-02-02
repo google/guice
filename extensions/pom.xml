@@ -22,6 +22,7 @@
     <module>grapher</module>
     <module>jmx</module>
     <module>jndi</module>
+    <module>multibindings</module>
     <module>persist</module>
     <module>servlet</module>
     <module>spring</module>
