@@ -67,7 +67,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </scm>
 
   <issueManagement>
-    <system>Google Code</system>
+    <system>Github</system>
     <url>https://github.com/google/guice/issues/</url>
   </issueManagement>
 
