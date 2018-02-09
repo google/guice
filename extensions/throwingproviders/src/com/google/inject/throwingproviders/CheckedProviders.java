@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
  * Static utility methods for creating and working with instances of {@link CheckedProvider}.
  *
  * @author eatnumber1@google.com (Russ Harmon)
+ * @since 4.2
  */
 public final class CheckedProviders {
   private abstract static class CheckedProviderInvocationHandler<T> implements InvocationHandler {

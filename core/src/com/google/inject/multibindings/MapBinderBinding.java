@@ -88,6 +88,7 @@ public interface MapBinderBinding<T> {
    * @throws IllegalArgumentException if the provided elements contain partial map entries. If the
    *     elements come from {@link Elements#getElements} on a module with a MapBinder, there will be
    *     a 1:1 relationship and no exception will be thrown.
+   * @since 4.2
    */
   List<Map.Entry<?, Binding<?>>> getEntries(Iterable<? extends Element> elements);
 
