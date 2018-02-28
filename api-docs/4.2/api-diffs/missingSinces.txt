@@ -1,0 +1,8 @@
+OK: com.google.inject.throwingproviders.CheckedProviders Class
+NO DOC BLOCK: com.google.inject.multibindings.MapBinder Method equals(java.lang.Object)
+NO DOC BLOCK: com.google.inject.multibindings.Multibinder Method equals(java.lang.Object)
+NO DOC BLOCK: com.google.inject.multibindings.OptionalBinder Method equals(java.lang.Object)
+OK: com.google.inject.multibindings.MapBinderBinding Method getEntries(java.lang.Iterable<? extends com.google.inject.spi.Element>)
+NO DOC BLOCK: com.google.inject.multibindings.MapBinder Method hashCode()
+NO DOC BLOCK: com.google.inject.multibindings.Multibinder Method hashCode()
+NO DOC BLOCK: com.google.inject.multibindings.OptionalBinder Method hashCode()
