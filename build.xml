@@ -136,7 +136,7 @@
     </java>
   </target>
 
-  <property name="old.api" value="4.1"/>
+  <property name="old.api" value="4.2"/>
   <property name="new.api" value="latest"/>
   <target name="jdiff" depends="compile">
     <property name="jdiff.home" value="lib/build/jdiff"/>
