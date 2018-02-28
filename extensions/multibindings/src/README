@@ -1,0 +1,4 @@
+This extension intentionally has no files in it. The multibindings functionality
+is now part of Guice core.  This extension still exists in order to ease the
+transition.  A future release will delete this extension.  You can remove your
+dependency on multibindings to avoid problems after the extension is deleted.
