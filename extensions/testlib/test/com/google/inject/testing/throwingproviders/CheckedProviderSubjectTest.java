@@ -2,6 +2,7 @@ package com.google.inject.testing.throwingproviders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.testing.throwingproviders.CheckedProviderSubject.assertThat;
+import static java.util.regex.Pattern.quote;
 
 import com.google.common.truth.ExpectFailure;
 import com.google.common.truth.SimpleSubjectBuilder;
@@ -38,11 +39,11 @@ public class CheckedProviderSubjectTest {
     CheckedProvider<String> provider = CheckedProviders.of(StringCheckedProvider.class, unexpected);
     String message =
         String.format(
-            "value provided by <%s>: Not true that <%s> is equal to <%s>",
-            getReturningProviderName(unexpected), unexpected, expected);
+            "value provided by <%s>(: |\n)Not true that <%s> is equal to <%s>",
+            quote(getReturningProviderName(unexpected)), quote(unexpected), quote(expected));
 
     expectWhenTesting().that(provider).providedValue().isEqualTo(expected);
-    assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
+    assertThat(expect.getFailure()).hasMessageThat().matches(message);
   }
 
   private static final class SummerException extends RuntimeException {}
@@ -78,15 +79,15 @@ public class CheckedProviderSubjectTest {
         CheckedProviders.throwing(StringCheckedProvider.class, unexpected);
     String message =
         String.format(
-            "exception thrown by <%s>: Not true that <%s> is an instance of <%s>. "
+            "exception thrown by <%s>(: |\n)Not true that <%s> is an instance of <%s>. "
                 + "It is an instance of <%s>",
-            getThrowingProviderName(UnsupportedOperationException.class.getName()),
-            UnsupportedOperationException.class.getName(),
-            SummerException.class.getName(),
-            UnsupportedOperationException.class.getName());
+            quote(getThrowingProviderName(UnsupportedOperationException.class.getName())),
+            quote(UnsupportedOperationException.class.getName()),
+            quote(SummerException.class.getName()),
+            quote(UnsupportedOperationException.class.getName()));
 
     expectWhenTesting().that(provider).thrownException().isInstanceOf(expected);
-    assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
+    assertThat(expect.getFailure()).hasMessageThat().matches(message);
   }
 
   @Test
