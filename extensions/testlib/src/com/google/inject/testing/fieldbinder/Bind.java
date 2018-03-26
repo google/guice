@@ -26,6 +26,9 @@ import java.lang.annotation.Target;
  * Annotation used by {@link BoundFieldModule} to indicate that a field should be bound to its value
  * using Guice.
  *
+ * <p>{@Bind} supports binding annotations. For example, to bind a {@code @Fast Car}, use
+ * {@code @Bind @Fast Car}.
+ *
  * <p>Binding to {@code null} is only allowed for fields that are annotated {@code @Nullable}. See
  * <a
  * href="https://github.com/google/guice/wiki/UseNullable">https://github.com/google/guice/wiki/UseNullable</a>
