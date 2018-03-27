@@ -97,6 +97,9 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <div class="block">Annotation used by <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> to indicate that a field should be bound to its value
  using Guice.
 
+ <p> supports binding annotations. For example, to bind a <code>@Fast Car</code>, use
+ <code>@Bind @Fast Car</code>.
+
  <p>Binding to <code>null</code> is only allowed for fields that are annotated <code>@Nullable</code>. See
  <a
  href="https://github.com/google/guice/wiki/UseNullable">https://github.com/google/guice/wiki/UseNullable</a></div>
