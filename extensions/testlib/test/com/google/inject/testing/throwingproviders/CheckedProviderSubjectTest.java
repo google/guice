@@ -2,7 +2,6 @@ package com.google.inject.testing.throwingproviders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.testing.throwingproviders.CheckedProviderSubject.assertThat;
-import static java.util.regex.Pattern.quote;
 
 import com.google.common.truth.ExpectFailure;
 import com.google.common.truth.SimpleSubjectBuilder;
@@ -37,13 +36,20 @@ public class CheckedProviderSubjectTest {
     String expected = "keep Summer safe";
     String unexpected = "Summer is unsafe";
     CheckedProvider<String> provider = CheckedProviders.of(StringCheckedProvider.class, unexpected);
-    String message =
+    String transitionMessage =
         String.format(
-            "value provided by <%s>(: |\n)Not true that <%s> is equal to <%s>",
-            quote(getReturningProviderName(unexpected)), quote(unexpected), quote(expected));
+            "value provided by <%s>\nNot true that <%s> is equal to <%s>",
+            getReturningProviderName(unexpected), unexpected, expected);
+    String oldMessage = transitionMessage.replaceFirst("\n", ": ");
+    String newMessage =
+        String.format(
+            "value provided by <%s>\nexpected: %s\nbut was : %s",
+            getReturningProviderName(unexpected), expected, unexpected);
 
     expectWhenTesting().that(provider).providedValue().isEqualTo(expected);
-    assertThat(expect.getFailure()).hasMessageThat().matches(message);
+    assertThat(expect.getFailure())
+        .hasMessageThat()
+        .isAnyOf(oldMessage, transitionMessage, newMessage);
   }
 
   private static final class SummerException extends RuntimeException {}
@@ -77,17 +83,30 @@ public class CheckedProviderSubjectTest {
     Class<? extends Throwable> unexpected = UnsupportedOperationException.class;
     CheckedProvider<String> provider =
         CheckedProviders.throwing(StringCheckedProvider.class, unexpected);
-    String message =
+    String transitionMessage =
         String.format(
-            "exception thrown by <%s>(: |\n)Not true that <%s> is an instance of <%s>. "
+            "exception thrown by <%s>\nNot true that <%s> is an instance of <%s>. "
                 + "It is an instance of <%s>",
-            quote(getThrowingProviderName(UnsupportedOperationException.class.getName())),
-            quote(UnsupportedOperationException.class.getName()),
-            quote(SummerException.class.getName()),
-            quote(UnsupportedOperationException.class.getName()));
+            getThrowingProviderName(UnsupportedOperationException.class.getName()),
+            UnsupportedOperationException.class.getName(),
+            SummerException.class.getName(),
+            UnsupportedOperationException.class.getName());
+    String oldMessage = transitionMessage.replaceFirst("\n", ": ");
+    String newMessage =
+        String.format(
+            "exception thrown by <%s>\n"
+                + "expected instance of: %s\n"
+                + "but was instance of : %s\n"
+                + "with value          : %s",
+            getThrowingProviderName(UnsupportedOperationException.class.getName()),
+            SummerException.class.getName(),
+            UnsupportedOperationException.class.getName(),
+            UnsupportedOperationException.class.getName());
 
     expectWhenTesting().that(provider).thrownException().isInstanceOf(expected);
-    assertThat(expect.getFailure()).hasMessageThat().matches(message);
+    assertThat(expect.getFailure())
+        .hasMessageThat()
+        .isAnyOf(oldMessage, transitionMessage, newMessage);
   }
 
   @Test
