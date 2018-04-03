@@ -32,7 +32,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <name>Google Guice</name>
 
   <description>
-    Guice is a lightweight dependency injection framework for Java 6 and above
+    Guice is a lightweight dependency injection framework for Java 8 and above
   </description>
 
   <url>https://github.com/google/guice</url>
@@ -348,7 +348,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
               <Bundle-Name>${project.artifactId}</Bundle-Name>
               <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
-              <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+              <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
               <Import-Package>!com.google.inject.*,*</Import-Package>
               <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
               <_versionpolicy>$(version;==;$(@))</_versionpolicy>
