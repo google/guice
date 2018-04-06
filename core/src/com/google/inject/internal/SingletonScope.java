@@ -25,28 +25,35 @@ import java.util.List;
  * reason on how does it work or not. Still I want to assure you that hundreds(?) of hours were
  * thrown into making this code simple, while still maintaining Singleton contract.
  *
- * <p>Anyway, why is it so complex? Singleton scope does not seem to be that unique. 1) Guice has
- * never truly expected to be used in multi threading environment with many Injectors working
- * alongside each other. There is almost no code with Guice that propagates state between threads.
- * And Singleton scope is The exception. 2) Guice supports circular dependencies and thus manages
- * proxy objects. There is no interface that allows user defined Scopes to create proxies, it is
- * expected to be done by Guice. Singleton scope needs to be able to detect circular dependencies
- * spanning several threads, therefore Singleton scope needs to be able to create these proxies. 3)
- * To make things worse, Guice has a very tricky definition for a binding resolution when Injectors
- * are in in a parent/child relationship. And Scope does not have access to this information by
- * design, the only real action that Scope can do is to call or not to call a creator. 4) There is
- * no readily available code in Guice that can detect a potential deadlock, and no code for handling
- * dependency cycles spanning several threads. This is significantly harder as all the dependencies
- * in a thread at runtime can be represented with a list, where in a multi threaded environment we
- * have more complex dependency trees. 5) Guice has a pretty strong contract regarding Garbage
- * Collection, which often prevents us from linking objects directly. So simple domain specific code
- * can not be written and intermediary id objects need to be managed. 6) Guice is relatively fast
- * and we should not make things worse. We're trying our best to optimize synchronization for speed
- * and memory. Happy path should be almost as fast as in a single threaded solution and should not
- * take much more memory. 7) Error message generation in Guice was not meant to be used like this
- * and to work around its APIs we need a lot of code. Additional complexity comes from inherent data
- * races as message is only generated when failure occurs on proxy object generation. Things get
- * ugly pretty fast.
+ * <p>Anyway, why is it so complex? Singleton scope does not seem to be that unique.
+ *
+ * <ol>
+ *   <li>Guice has never truly expected to be used in multi threading environment with many
+ *       Injectors working alongside each other. There is almost no code with Guice that propagates
+ *       state between threads. And Singleton scope is The exception.
+ *   <li>Guice supports circular dependencies and thus manages proxy objects. There is no interface
+ *       that allows user defined Scopes to create proxies, it is expected to be done by Guice.
+ *       Singleton scope needs to be able to detect circular dependencies spanning several threads,
+ *       therefore Singleton scope needs to be able to create these proxies.
+ *   <li>To make things worse, Guice has a very tricky definition for a binding resolution when
+ *       Injectors are in in a parent/child relationship. And Scope does not have access to this
+ *       information by design, the only real action that Scope can do is to call or not to call a
+ *       creator.
+ *   <li>There is no readily available code in Guice that can detect a potential deadlock, and no
+ *       code for handling dependency cycles spanning several threads. This is significantly harder
+ *       as all the dependencies in a thread at runtime can be represented with a list, where in a
+ *       multi threaded environment we have more complex dependency trees.
+ *   <li>Guice has a pretty strong contract regarding Garbage Collection, which often prevents us
+ *       from linking objects directly. So simple domain specific code can not be written and
+ *       intermediary id objects need to be managed.
+ *   <li>Guice is relatively fast and we should not make things worse. We're trying our best to
+ *       optimize synchronization for speed and memory. Happy path should be almost as fast as in a
+ *       single threaded solution and should not take much more memory.
+ *   <li>Error message generation in Guice was not meant to be used like this and to work around its
+ *       APIs we need a lot of code. Additional complexity comes from inherent data races as message
+ *       is only generated when failure occurs on proxy object generation. Things get ugly pretty
+ *       fast.
+ * </ol>
  *
  * @see #scope(Key, Provider)
  * @see CycleDetectingLock
@@ -70,40 +77,53 @@ public class SingletonScope implements Scope {
       new CycleDetectingLockFactory<Key<?>>();
 
   /**
-   * Provides singleton scope with the following properties: - creates no more than one instance per
-   * Key as a creator is used no more than once, - result is cached and returned quickly on
-   * subsequent calls, - exception in a creator is not treated as instance creation and is not
-   * cached, - creates singletons in parallel whenever possible, - waits for dependent singletons to
-   * be created even across threads and when dependencies are shared as long as no circular
-   * dependencies are detected, - returns circular proxy only when circular dependencies are
-   * detected, - aside from that, blocking synchronization is only used for proxy creation and
-   * initialization,
+   * Provides singleton scope with the following properties:
+   *
+   * <ul>
+   *   <li>creates no more than one instance per Key as a creator is used no more than once
+   *   <li>result is cached and returned quickly on subsequent calls
+   *   <li>exception in a creator is not treated as instance creation and is not cached
+   *   <li>creates singletons in parallel whenever possible
+   *   <li>waits for dependent singletons to be created even across threads and when dependencies
+   *       are shared as long as no circular dependencies are detected
+   *   <li>returns circular proxy only when circular dependencies are detected
+   *   <li>aside from that, blocking synchronization is only used for proxy creation and
+   *       initialization
+   * </ul>
    *
    * @see CycleDetectingLockFactory
    */
   @Override
   public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
-    /**
-     * Locking strategy: - volatile instance: double-checked locking for quick exit when scope is
-     * initialized, - constructionContext: manipulations with proxies list or instance
-     * initialization - creationLock: singleton instance creation, -- allows to guarantee only one
-     * instance per singleton, -- special type of a lock, that prevents potential deadlocks, --
-     * guards constructionContext for all operations except proxy creation
-     */
+    /** Locking strategy: */
     return new Provider<T>() {
       /**
        * The lazily initialized singleton instance. Once set, this will either have type T or will
        * be equal to NULL. Would never be reset to null.
+       *
+       * <p>Locking strategy: double-checked locking for quick exit when scope is initialized.
        */
       volatile Object instance;
 
       /**
        * Circular proxies are used when potential deadlocks are detected. Guarded by itself.
        * ConstructionContext is not thread-safe, so each call should be synchronized.
+       *
+       * <p>Locking strategy: manipulations with proxies list or instance initialization.
        */
       final ConstructionContext<T> constructionContext = new ConstructionContext<>();
 
-      /** For each binding there is a separate lock that we hold during object creation. */
+      /**
+       * For each binding there is a separate lock that we hold during object creation.
+       *
+       * <p>Locking strategy: singleton instance creation.
+       *
+       * <ul>
+       *   <li>allows to guarantee only one instance per singleton,
+       *   <li>special type of a lock, that prevents potential deadlocks,
+       *   <li>guards constructionContext for all operations except proxy creation
+       * </ul>
+       */
       final CycleDetectingLock<Key<?>> creationLock = cycleDetectingLockFactory.create(key);
 
       /**
