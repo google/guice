@@ -53,8 +53,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     try {
       got = provider.get();
     } catch (Exception e) {
-      failWithRawMessageAndCause(
-          String.format("checked provider <%s> threw an exception", provider), e);
+      failWithCauseAndMessage(e, "checked provider <%s> threw an exception", provider);
       return ignoreCheck().that(new Object());
     }
     return check().withMessage("value provided by <%s>", provider).that(got);
@@ -79,5 +78,35 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     }
     failWithBadResults("threw", "an exception", "provided", got);
     return ignoreCheck().that(new Throwable());
+  }
+
+  /*
+   * Hack to get Truth to include a given exception as the cause of the failure. It works by letting
+   * us delegate to a new Subject whose value under test is the exception. Because that makes the
+   * assertion "about" the exception, Truth includes it as a cause.
+   */
+
+  private void failWithCauseAndMessage(Throwable cause, String format, Object... args) {
+    check().about(unexpectedFailures()).that(cause).doFail(format, args);
+  }
+
+  private static Factory<UnexpectedFailureSubject, Throwable> unexpectedFailures() {
+    return new Factory<UnexpectedFailureSubject, Throwable>() {
+      @Override
+      public UnexpectedFailureSubject createSubject(FailureMetadata metadata, Throwable actual) {
+        return new UnexpectedFailureSubject(metadata, actual);
+      }
+    };
+  }
+
+  private static final class UnexpectedFailureSubject
+      extends Subject<UnexpectedFailureSubject, Throwable> {
+    UnexpectedFailureSubject(FailureMetadata metadata, @Nullable Throwable actual) {
+      super(metadata, actual);
+    }
+
+    void doFail(String format, Object... args) {
+      failWithRawMessage(format, args);
+    }
   }
 }
