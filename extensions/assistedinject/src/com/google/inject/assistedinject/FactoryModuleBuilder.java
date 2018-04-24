@@ -314,7 +314,7 @@ public final class FactoryModuleBuilder {
       @Override
       protected void configure() {
         Provider<F> provider = new FactoryProvider2<>(factoryInterface, bindings);
-        bind(factoryInterface).toProvider(provider);
+        binder().skipSources(this.getClass()).bind(factoryInterface).toProvider(provider);
       }
     };
   }
