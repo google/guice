@@ -30,8 +30,8 @@ import com.google.inject.internal.RealOptionalBinder;
  * roles:
  *
  * <ol>
- * <li>It allows a framework to define an injection point that may or may not be bound by users.
- * <li>It allows a framework to supply a default value that can be changed by users.
+ *   <li>It allows a framework to define an injection point that may or may not be bound by users.
+ *   <li>It allows a framework to supply a default value that can be changed by users.
  * </ol>
  *
  * <p>When an OptionalBinder is added, it will always supply the bindings: {@code Optional<T>} and
@@ -44,8 +44,8 @@ import com.google.inject.internal.RealOptionalBinder;
  * instantiated in {@code Stage.PRODUCTION}.</b>
  *
  * <p>If setDefault or setBinding are linked to Providers, the Provider may return {@code null}. If
- * it does, the Optional bindings will be absent. Binding setBinding to a Provider that returns null
- * will not cause OptionalBinder to fall back to the setDefault binding.
+ * it does, {@code Optional<T>} will be bound to an absent Optional. Binding setBinding to a
+ * Provider that returns null will not cause OptionalBinder to fall back to the setDefault binding.
  *
  * <p>If neither setDefault nor setBinding are called, it will try to link to a user-supplied
  * binding of the same type. If no binding exists, the optionals will be absent. Otherwise, if a
