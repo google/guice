@@ -43,6 +43,7 @@ public class ModuleTest extends TestCase {
     }
 
     @Override
+    @SuppressWarnings("EqualsBrokenForNull") // intentionally NPE on null for the test
     public boolean equals(Object obj) {
       return obj.getClass() == D.class; // we're all equal in the eyes of guice
     }
