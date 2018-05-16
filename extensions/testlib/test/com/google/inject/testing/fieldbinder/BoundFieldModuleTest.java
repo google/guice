@@ -19,6 +19,7 @@ package com.google.inject.testing.fieldbinder;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.collect.Iterables;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
@@ -30,6 +31,7 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.testing.fieldbinder.BoundFieldModule.BoundFieldInfo;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
 import java.util.Arrays;
@@ -173,6 +175,43 @@ public class BoundFieldModuleTest extends TestCase {
     }
   }
 
+  public void testBindingPrimitive() {
+    Object instance =
+        new Object() {
+          @Bind boolean boolValue = true;
+          @Bind char charValue = 'b';
+          @Bind byte byteValue = 3;
+          @Bind short shortValue = 4;
+          @Bind int intValue = 5;
+          @Bind long longValue = 6;
+          @Bind float floatValue = 7;
+          @Bind double doubleValue = 8;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertTrue(injector.getInstance(Boolean.class));
+    assertEquals('b', (char) injector.getInstance(Character.class));
+    assertEquals(3, (byte) injector.getInstance(Byte.class));
+    assertEquals(4, (short) injector.getInstance(Short.class));
+    assertEquals(5, (int) injector.getInstance(Integer.class));
+    assertEquals(6, (long) injector.getInstance(Long.class));
+    assertEquals(7, injector.getInstance(Float.class), 0);
+    assertEquals(8, injector.getInstance(Double.class), 0);
+  }
+
+  public void testBindingPrimitiveToBoxed() {
+    Object instance =
+        new Object() {
+          @Bind(to = Integer.class)
+          int value = 1;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertEquals(1, (int) injector.getInstance(Integer.class));
+  }
+
   @BindingAnnotation
   @Retention(RUNTIME)
   private static @interface SomeBindingAnnotation {}
@@ -299,6 +338,25 @@ public class BoundFieldModuleTest extends TestCase {
       assertContains(
           e.getMessage(),
           "Requested binding type \"java.lang.String\" is not assignable from field binding type "
+              + "\"java.lang.Integer\"");
+    }
+  }
+
+  public void testIncompatiblePrimitiveBindingType() {
+    Object instance =
+        new Object() {
+          @Bind(to = Long.class)
+          int value = 1;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertContains(
+          e.getMessage(),
+          "Requested binding type \"java.lang.Long\" is not assignable from field binding type "
               + "\"java.lang.Integer\"");
     }
   }
@@ -614,7 +672,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(String.class));
   }
 
-  public void testMultipleErrorsAreAggregated() {
+  public void testMultipleBindErrorsAreAggregated() {
     Object instance =
         new Object() {
           @Bind private Provider aProvider;
@@ -623,6 +681,21 @@ public class BoundFieldModuleTest extends TestCase {
           private Integer anInt;
         };
 
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertEquals(2, e.getErrorMessages().size());
+    }
+  }
+
+  public void testMultipleNullValueErrorsAreAggregated() {
+    Object instance =
+        new Object() {
+          @Bind private String first;
+          @Bind private String second;
+        };
     BoundFieldModule module = BoundFieldModule.of(instance);
     try {
       Guice.createInjector(module);
@@ -718,7 +791,7 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(), "at " + InvalidBindableClass.class.getName() + " field anInt");
+      assertContains(e.getMessage(), "at " + InvalidBindableClass.class.getName() + ".anInt");
     }
   }
 
@@ -887,5 +960,59 @@ public class BoundFieldModuleTest extends TestCase {
     } catch (ConfigurationException expected) {
       // expected because we don't interpret IntegerProvider as a Provider<Integer>
     }
+  }
+
+  public void testGetBoundFields_getValue() {
+    Object instance =
+        new Object() {
+          @Bind Integer value = 1;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Guice.createInjector(module);
+
+    BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
+    assertEquals(1, info.getValue());
+  }
+
+  public void testGetBoundFields_getField() throws Exception {
+    Object instance =
+        new Object() {
+          @Bind(lazy = true)
+          String value = "default";
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
+    String value = "value";
+    info.getField().set(instance, value);
+
+    assertEquals(value, injector.getInstance(info.getBoundKey()));
+  }
+
+  public void testGetBoundFields_getKey() throws Exception {
+    Object instance =
+        new Object() {
+          @Bind @SomeQualifier String value = "default";
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Guice.createInjector(module);
+    BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
+
+    assertEquals(Key.get(String.class, SomeQualifier.class), info.getBoundKey());
+  }
+
+  public void testGetBoundFields_getBindAnnotation() throws Exception {
+    Object instance =
+        new Object() {
+          @Bind(lazy = true)
+          @SomeQualifier
+          String value;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Guice.createInjector(module);
+    BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
+
+    assertTrue(info.getBindAnnotation().lazy());
   }
 }
