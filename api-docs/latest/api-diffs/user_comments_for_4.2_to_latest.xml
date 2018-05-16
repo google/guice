@@ -39,5 +39,29 @@
     InsertCommentsHere
   </text>
 </comment>
+<comment>
+  <identifier id="com.google.inject.testing.fieldbinder.BoundFieldModule"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.testing.fieldbinder.BoundFieldModule.BoundFieldInfo"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.testing.fieldbinder.BoundFieldModule.getBoundFields_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.testing.fieldbinder.BoundFieldModule.getInstance_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
 
 </comments>

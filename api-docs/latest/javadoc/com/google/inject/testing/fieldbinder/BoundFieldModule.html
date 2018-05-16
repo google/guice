@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":9};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li>Next&nbsp;Class</li>
+<li><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/inject/testing/fieldbinder/BoundFieldModule.html" target="_top">Frames</a></li>
@@ -72,7 +72,7 @@ var activeTableTab = "activeTableTab";
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
@@ -175,6 +175,27 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="nested.class.summary">
+<!--   -->
+</a>
+<h3>Nested Class Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Nested Class Summary table, listing nested classes, and an explanation">
+<caption><span>Nested Classes</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a></span></code>
+<div class="block">Information about a field bound by <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a>.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
 <!-- ========== METHOD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.summary">
@@ -194,6 +215,18 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>com.google.common.collect.ImmutableSet&lt;<a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#getBoundFields--">getBoundFields</a></span>()</code>
+<div class="block">Returns information about the fields bound by this module.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>java.lang.Object</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#getInstance--">getInstance</a></span>()</code>
+<div class="block">Returns the the object originally passed to <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#of-java.lang.Object-"><code>of(java.lang.Object)</code></a>).</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#of-java.lang.Object-">of</a></span>(java.lang.Object&nbsp;instance)</code>
 <div class="block">Create a BoundFieldModule which binds the <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated fields of <code>instance</code>.</div>
@@ -235,6 +268,32 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a module which will bind the <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotated fields of <code>instance</code>.</dd>
 </dl>
+</li>
+</ul>
+<a name="getInstance--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getInstance</h4>
+<pre>public&nbsp;java.lang.Object&nbsp;getInstance()</pre>
+<div class="block">Returns the the object originally passed to <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html#of-java.lang.Object-"><code>of(java.lang.Object)</code></a>).</div>
+</li>
+</ul>
+<a name="getBoundFields--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBoundFields</h4>
+<pre>public&nbsp;com.google.common.collect.ImmutableSet&lt;<a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a>&gt;&nbsp;getBoundFields()</pre>
+<div class="block">Returns information about the fields bound by this module.
+
+ <p>Note this is available immediately after construction, fields with errors won't be included
+ but their error messages will be deferred to configuration time.
+
+ <p>Fields with invalid null values <em>are</em> included but still cause errors at
+ configuration time.</div>
 </li>
 </ul>
 <a name="configure-com.google.inject.Binder-">
@@ -284,7 +343,7 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li>Next&nbsp;Class</li>
+<li><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?com/google/inject/testing/fieldbinder/BoundFieldModule.html" target="_top">Frames</a></li>
@@ -308,7 +367,7 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>

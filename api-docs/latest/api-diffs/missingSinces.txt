@@ -1,0 +1,3 @@
+MISSING @SINCE TAG: com.google.inject.testing.fieldbinder.BoundFieldModule.BoundFieldInfo Class
+MISSING @SINCE TAG: com.google.inject.testing.fieldbinder.BoundFieldModule Method getBoundFields()
+MISSING @SINCE TAG: com.google.inject.testing.fieldbinder.BoundFieldModule Method getInstance()

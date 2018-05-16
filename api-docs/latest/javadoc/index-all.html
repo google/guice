@@ -507,6 +507,10 @@
 <dd>
 <div class="block">Automatically creates Guice bindings for fields in an object annotated with <a href="com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a>.</div>
 </dd>
+<dt><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder"><span class="typeNameLink">BoundFieldModule.BoundFieldInfo</span></a> - Class in <a href="com/google/inject/testing/fieldbinder/package-summary.html">com.google.inject.testing.fieldbinder</a></dt>
+<dd>
+<div class="block">Information about a field bound by <a href="com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/assistedinject/FactoryModuleBuilder.html#build-java.lang.Class-">build(Class&lt;F&gt;)</a></span> - Method in class com.google.inject.assistedinject.<a href="com/google/inject/assistedinject/FactoryModuleBuilder.html" title="class in com.google.inject.assistedinject">FactoryModuleBuilder</a></dt>
 <dd>
 <div class="block">See the factory configuration examples at <a href="com/google/inject/assistedinject/FactoryModuleBuilder.html" title="class in com.google.inject.assistedinject"><code>FactoryModuleBuilder</code></a>.</div>
@@ -1212,6 +1216,10 @@
 <dd>
 <div class="block">Returns an <a href="com/google/inject/assistedinject/AssistedMethod.html" title="interface in com.google.inject.assistedinject"><code>AssistedMethod</code></a> for each method in the factory.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html#getBindAnnotation--">getBindAnnotation()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a></dt>
+<dd>
+<div class="block">The @<a href="com/google/inject/testing/fieldbinder/Bind.html" title="annotation in com.google.inject.testing.fieldbinder"><code>Bind</code></a> annotation which is present on the field.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/Injector.html#getBinding-com.google.inject.Key-">getBinding(Key&lt;T&gt;)</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a></dt>
 <dd>
 <div class="block">Returns the binding for the given injection key.</div>
@@ -1236,6 +1244,14 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns a string describing where this dependency was bound.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.html#getBoundFields--">getBoundFields()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule</a></dt>
+<dd>
+<div class="block">Returns information about the fields bound by this module.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html#getBoundKey--">getBoundKey()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a></dt>
+<dd>
+<div class="block">The key this field will bind to.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#getCause--">getCause()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
 <dd>
@@ -1425,8 +1441,16 @@
 <dd>
 <div class="block">Returns the factory method that is being assisted.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html#getField--">getField()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a></dt>
+<dd>
+<div class="block">The field itself.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/graphviz/GraphvizNode.html#getFields--">getFields()</a></span> - Method in class com.google.inject.grapher.graphviz.<a href="com/google/inject/grapher/graphviz/GraphvizNode.html" title="class in com.google.inject.grapher.graphviz">GraphvizNode</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html#getFieldType--">getFieldType()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a></dt>
+<dd>
+<div class="block">The actual type of the field.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/TypeLiteral.html#getFieldType-java.lang.reflect.Field-">getFieldType(Field)</a></span> - Method in class com.google.inject.<a href="com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a></dt>
 <dd>
 <div class="block">Returns the resolved generic type of <code>field</code>.</div>
@@ -1524,6 +1548,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/InstanceBinding.html#getInstance--">getInstance()</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/InstanceBinding.html" title="interface in com.google.inject.spi">InstanceBinding</a></dt>
 <dd>
 <div class="block">Returns the user-supplied instance.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.html#getInstance--">getInstance()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule</a></dt>
+<dd>
+<div class="block">Returns the the object originally passed to <a href="com/google/inject/testing/fieldbinder/BoundFieldModule.html#of-java.lang.Object-"><code>BoundFieldModule.of(java.lang.Object)</code></a>).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/NameFactory.html#getInstanceName-java.lang.Object-">getInstanceName(Object)</a></span> - Method in interface com.google.inject.grapher.<a href="com/google/inject/grapher/NameFactory.html" title="interface in com.google.inject.grapher">NameFactory</a></dt>
 <dd>&nbsp;</dd>
@@ -1954,6 +1982,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ConvertedConstantBinding.html#getValue--">getValue()</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ConvertedConstantBinding.html" title="interface in com.google.inject.spi">ConvertedConstantBinding</a></dt>
 <dd>
 <div class="block">Returns the converted value.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html#getValue--">getValue()</a></span> - Method in class com.google.inject.testing.fieldbinder.<a href="com/google/inject/testing/fieldbinder/BoundFieldModule.BoundFieldInfo.html" title="class in com.google.inject.testing.fieldbinder">BoundFieldModule.BoundFieldInfo</a></dt>
+<dd>
+<div class="block">Returns the current value of this field.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MapBinderBinding.html#getValueTypeLiteral--">getValueTypeLiteral()</a></span> - Method in interface com.google.inject.multibindings.<a href="com/google/inject/multibindings/MapBinderBinding.html" title="interface in com.google.inject.multibindings">MapBinderBinding</a></dt>
 <dd>
