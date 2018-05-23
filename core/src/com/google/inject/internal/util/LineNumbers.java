@@ -51,14 +51,17 @@ final class LineNumbers {
    * Reads line number information from the given class, if available.
    *
    * @param type the class to read line number information from
-   * @throws IllegalArgumentException if the bytecode for the class cannot be found
-   * @throws java.io.IOException if an error occurs while reading bytecode
    */
   public LineNumbers(Class type) throws IOException {
     this.type = type;
 
     if (!type.isArray()) {
-      InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
+      InputStream in = null;
+      try {
+        in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
+      } catch (IllegalStateException ignored) {
+        // Some classloaders throw IllegalStateException when they can't load a resource.
+      }
       if (in != null) {
         try {
           new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
