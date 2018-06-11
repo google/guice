@@ -27,6 +27,7 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.config.entities.InterceptorConfig;
+import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.interceptor.Interceptor;
 import java.lang.annotation.Annotation;
@@ -47,6 +48,11 @@ public class GuiceObjectFactory extends ObjectFactory {
   volatile Injector injector;
   boolean developmentMode = false;
   List<ProvidedInterceptor> interceptors = new ArrayList<>();
+
+  @Inject
+  public GuiceObjectFactory(Container container) {
+    super(container);
+  }
 
   @Override
   public boolean isNoArgConstructorRequired() {

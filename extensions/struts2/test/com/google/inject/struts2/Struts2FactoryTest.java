@@ -16,7 +16,7 @@
 
 package com.google.inject.struts2;
 
-import org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter;
+import org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -62,7 +62,7 @@ public class Struts2FactoryTest extends TestCase {
   }
 
   public void testStruts2Factory() {
-    Struts2Factory s2Factory = new Struts2Factory();
+    Struts2Factory s2Factory = new Struts2Factory(null);
     TestListener testListener =
         new TestListener(
             new AbstractModule() {

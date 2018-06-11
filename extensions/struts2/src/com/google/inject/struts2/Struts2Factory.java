@@ -24,6 +24,7 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.config.entities.InterceptorConfig;
+import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.interceptor.Interceptor;
 import java.lang.annotation.Annotation;
@@ -57,6 +58,11 @@ public class Struts2Factory extends ObjectFactory {
   @Override
   public boolean isNoArgConstructorRequired() {
     return false;
+  }
+
+  @Inject
+  public Struts2Factory(Container container) {
+    super(container);
   }
 
   @Inject(value = "guice.module", required = false)
