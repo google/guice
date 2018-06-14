@@ -36,20 +36,13 @@ public class CheckedProviderSubjectTest {
     String expected = "keep Summer safe";
     String unexpected = "Summer is unsafe";
     CheckedProvider<String> provider = CheckedProviders.of(StringCheckedProvider.class, unexpected);
-    String transitionMessage =
-        String.format(
-            "value provided by <%s>\nNot true that <%s> is equal to <%s>",
-            getReturningProviderName(unexpected), unexpected, expected);
-    String oldMessage = transitionMessage.replaceFirst("\n", ": ");
-    String newMessage =
+    String message =
         String.format(
             "value provided by <%s>\nexpected: %s\nbut was : %s",
             getReturningProviderName(unexpected), expected, unexpected);
 
     expectWhenTesting().that(provider).providedValue().isEqualTo(expected);
-    assertThat(expect.getFailure())
-        .hasMessageThat()
-        .isAnyOf(oldMessage, transitionMessage, newMessage);
+    assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
   }
 
   private static final class SummerException extends RuntimeException {}
@@ -83,16 +76,7 @@ public class CheckedProviderSubjectTest {
     Class<? extends Throwable> unexpected = UnsupportedOperationException.class;
     CheckedProvider<String> provider =
         CheckedProviders.throwing(StringCheckedProvider.class, unexpected);
-    String transitionMessage =
-        String.format(
-            "exception thrown by <%s>\nNot true that <%s> is an instance of <%s>. "
-                + "It is an instance of <%s>",
-            getThrowingProviderName(UnsupportedOperationException.class.getName()),
-            UnsupportedOperationException.class.getName(),
-            SummerException.class.getName(),
-            UnsupportedOperationException.class.getName());
-    String oldMessage = transitionMessage.replaceFirst("\n", ": ");
-    String newMessage =
+    String message =
         String.format(
             "exception thrown by <%s>\n"
                 + "expected instance of: %s\n"
@@ -104,9 +88,7 @@ public class CheckedProviderSubjectTest {
             UnsupportedOperationException.class.getName());
 
     expectWhenTesting().that(provider).thrownException().isInstanceOf(expected);
-    assertThat(expect.getFailure())
-        .hasMessageThat()
-        .isAnyOf(oldMessage, transitionMessage, newMessage);
+    assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
   }
 
   @Test
