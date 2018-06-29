@@ -86,9 +86,9 @@ function compareJars {
   rm -rf "tmp$$"
 }
 
-## Only bother doing this on the jdk8/mvn build (before we publish snapshots).
+## Only bother doing this on the jdk10/mvn build (before we publish snapshots).
 ## Otherwise it's a waste of time building mvn+ant each time.
-if [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" ] && \
+if [ "$TRAVIS_JDK_VERSION" == "oraclejdk10" ] && \
    [ "$LABEL" == "mvn" ]; then
   echo "Cleaning and building ant & maven..."
   cleanAndBuild

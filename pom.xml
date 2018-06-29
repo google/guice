@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 Copyright (c) 2006 Google, Inc. All rights reserved.
 
@@ -100,7 +98,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <module>bom</module>
     <module>core</module>
     <module>extensions</module>
-    <!-- jdk8-tests module activated only when running under JDK8, below -->
+    <!-- jdk10-tests module activated only when running under JDK10, below -->
   </modules>
 
   <prerequisites>
@@ -154,7 +152,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>6.0</version>
+        <version>6.2</version>
       </dependency>
       <dependency>
         <groupId>cglib</groupId>
@@ -269,26 +267,25 @@ See the Apache License Version 2.0 for the specific language governing permissio
         -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
           <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
+            <source>10</source>
+            <target>10</target>
           </configuration>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>1.16</version>
+          <version>1.17</version>
           <configuration>
             <signature>
               <groupId>org.codehaus.mojo.signature</groupId>
-              <artifactId>java17</artifactId>
+              <artifactId>java18</artifactId>
               <version>1.0</version>
             </signature>
           </configuration>
           <executions>
             <execution>
-              <id>check-java-1.7-compat</id>
+              <id>check-java-1.8-compat</id>
               <phase>process-classes</phase>
               <goals>
                 <goal>check</goal>
@@ -392,7 +389,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.0.1</version>
           <executions>
             <execution>
               <phase>package</phase>
@@ -448,15 +445,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <profiles>
     <profile>
-      <id>jdk8</id>
+      <id>jdk10</id>
       <activation>
-        <jdk>[1.8,)</jdk>
+        <jdk>[10,)</jdk>
       </activation>
-      <!-- Activate jdk8-tests module only under JDK 8 -->
+      <!-- Activate jdk10-tests module only under JDK 10 -->
       <modules>
-        <module>jdk8-tests</module>
+        <module>jdk10-tests</module>
       </modules>
-      <!-- Disable doclint under JDK 8 -->
+      <!-- Disable doclint under JDK 10 -->
       <reporting>
       <plugins>
           <plugin>
