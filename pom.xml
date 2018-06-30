@@ -144,12 +144,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>23.6-android</version>
+        <version>25.1-android</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>23.6-android</version>
+        <version>25.1-android</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
