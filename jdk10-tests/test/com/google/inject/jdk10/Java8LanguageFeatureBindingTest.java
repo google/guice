@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.jdk8;
+package com.google.inject.jdk10;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;

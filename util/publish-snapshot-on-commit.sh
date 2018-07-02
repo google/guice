@@ -1,7 +1,7 @@
 # see https://coderwall.com/p/9b_lfq
 
 if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
-   [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" ] && \
+   [ "$TRAVIS_JDK_VERSION" == "oraclejdk10" ] && \
    [ "$LABEL" == "mvn" ] && \
    [ "$TRAVIS_PULL_REQUEST" == "false" ] && \
    [ "$TRAVIS_BRANCH" == "master" ]; then

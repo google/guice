@@ -23,9 +23,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>jdk8-tests</artifactId>
+  <artifactId>jdk10-tests</artifactId>
 
-  <name>Google Guice - JDK8 Tests</name>
+  <name>Google Guice - JDK10 Tests</name>
 
   <dependencies>
     <dependency>
@@ -38,11 +38,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-assistedinject</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

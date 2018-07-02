@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.jdk8;
+package com.google.inject.jdk10;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
