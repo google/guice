@@ -32,18 +32,18 @@ import java.lang.annotation.Target;
  * <pre>
  * {@literal @}ProvidesIntoMap
  * {@literal @}StringMapKey("Foo")
- * {@literal @}Named("urls")
+ * {@literal @}Named("plugins")
  * Plugin provideFooUrl(FooManager fm) { return fm.getPlugin(); }
  *
  * {@literal @}ProvidesIntoMap
  * {@literal @}StringMapKey("Bar")
- * {@literal @}Named("urls")
+ * {@literal @}Named("plugins")
  * Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
  * </pre>
  *
- * will add two items to the {@code @Named("urls") Map<String, Plugin>} map. The key 'Foo' will map
- * to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. The values
- * are bound as providers and will be evaluated at injection time.
+ * will add two items to the {@code @Named("plugins") Map<String, Plugin>} map. The key 'Foo' will
+ * map to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. The
+ * values are bound as providers and will be evaluated at injection time.
  *
  * <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive types
  * and annotation instances are supported as keys.
