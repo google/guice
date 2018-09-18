@@ -102,18 +102,18 @@ public @interface <span class="memberNameLabel">ProvidesIntoMap</span></pre>
  <pre>
   @ProvidesIntoMap
   @StringMapKey("Foo")
-  @Named("urls")
+  @Named("plugins")
  Plugin provideFooUrl(FooManager fm) { return fm.getPlugin(); }
 
   @ProvidesIntoMap
   @StringMapKey("Bar")
-  @Named("urls")
+  @Named("plugins")
  Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
  </pre>
 
- will add two items to the <code>@Named("urls") Map&lt;String, Plugin&gt;</code> map. The key 'Foo' will map
- to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. The values
- are bound as providers and will be evaluated at injection time.
+ will add two items to the <code>@Named("plugins") Map&lt;String, Plugin&gt;</code> map. The key 'Foo' will
+ map to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. The
+ values are bound as providers and will be evaluated at injection time.
 
  <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive types
  and annotation instances are supported as keys.</div>

@@ -172,6 +172,34 @@ Similarly, documentation which was inherited from another class or interface is 
  @author sameb@google.com (Sam Berlin)
  @since 4.0</blockquote>
 <hr align="left" width="100%">
+<A NAME="com.google.inject.multibindings.ProvidesIntoMap!class"></A><a href="com.google.inject.multibindings.ProvidesIntoMap.html" class="hiddenlink">Class <b>ProvidesIntoMap</b></a><br><br><blockquote>Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/MapBinder.html"><TT>MapBinder</TT></A>. The method's return
+ type, binding annotation and additional key annotation determines what Map this will contribute
+ to. For example,
+
+ <pre>
+ {@literal @}ProvidesIntoMap
+ {@literal @}StringMapKey("Foo")
+ {@literal @}Named("<strike>urls</strike><span style="background: #FFFF00">plugins</span>")
+ Plugin provideFooUrl(FooManager fm) { return fm.getPlugin(); }
+
+ {@literal @}ProvidesIntoMap
+ {@literal @}StringMapKey("Bar")
+ {@literal @}Named("<strike>urls</strike><span style="background: #FFFF00">plugins</span>")
+ Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
+ </pre>
+
+ will add two items to the {@code @Named("<strike>urls</strike><span style="background: #FFFF00">plugins</span>") Map<String, Plugin>} map. The key 'Foo' <strike>will</strike><span style="background: #FFFF00">will
+</span> <strike>map
+</strike><span style="background: #FFFF00">map</span> to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method. <strike>The</strike><span style="background: #FFFF00">The
+</span> <strike>values
+</strike><span style="background: #FFFF00">values</span> are bound as providers and will be evaluated at injection time.
+
+ <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive types
+ and annotation instances are supported as keys.
+
+ @author sameb@google.com (Sam Berlin)
+ @since 4.0</blockquote>
+<hr align="left" width="100%">
 
 </BODY>
 </HTML>

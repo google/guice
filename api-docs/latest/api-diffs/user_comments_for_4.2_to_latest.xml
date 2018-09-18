@@ -28,6 +28,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings.ProvidesIntoMap"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.testing.fieldbinder"/>
   <text>
     InsertCommentsHere
