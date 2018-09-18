@@ -1,5 +1,7 @@
 package com.google.inject.testing.throwingproviders;
 
+import static com.google.common.base.Strings.lenientFormat;
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.FailureMetadata;
@@ -106,7 +108,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     }
 
     void doFail(String format, Object... args) {
-      failWithRawMessage(format, args);
+      failWithoutActual(simpleFact(lenientFormat(format, args)));
     }
   }
 }

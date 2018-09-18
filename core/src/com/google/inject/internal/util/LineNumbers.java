@@ -65,6 +65,10 @@ final class LineNumbers {
       if (in != null) {
         try {
           new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+        } catch (UnsupportedOperationException ignored) {
+          // We may be trying to inspect classes that were compiled with a more recent version
+          // of javac than our ASM supports.  If that happens, just ignore the class and don't
+          // capture line numbers.
         } finally {
           try {
             in.close();
