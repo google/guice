@@ -93,6 +93,7 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
     //startup persistence
     injector.getInstance(PersistService.class).start();
   }
+
   public void testWorksIfPassDataSource() {
     startPersistService(true);
   }
