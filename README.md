@@ -20,5 +20,3 @@ Guice aims to make development and debugging easier and faster, not harder and s
 For an introduction to Guice and a comparison to new and the factory pattern, see [Bob Lee's video presentation](https://www.youtube.com/watch?v=hBVJbzAagfs). After that, check out our [user's guide](https://github.com/google/guice/wiki/Motivation).
 
 We've been running Guice in mission critical applications since 2006, and now you can, too. We hope you enjoy it as much as we do.
-
-[![jolt award](http://crazybob.org/jolt.png)](http://joltawards.com)
