@@ -103,7 +103,9 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
 
   @Override
   public synchronized void start() {
-    Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
+    if (null != emFactory) {
+      return;
+    }
 
     if (null != persistenceProperties) {
       this.emFactory =
@@ -115,8 +117,9 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
 
   @Override
   public synchronized void stop() {
-    Preconditions.checkState(emFactory.isOpen(), "Persistence service was already shut down.");
-    emFactory.close();
+    if (emFactory.isOpen()) {
+      emFactory.close();
+    }
   }
 
   @Singleton

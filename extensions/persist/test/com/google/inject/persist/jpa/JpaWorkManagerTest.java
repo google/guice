@@ -89,15 +89,16 @@ public class JpaWorkManagerTest extends TestCase {
     }
   }
 
+  public void testStartMoreThanOnce() {
+    injector.getInstance(PersistService.class).start();
+    // No exception is thrown on subsequent start.
+    injector.getInstance(PersistService.class).start();
+  }
+
   public void testCloseMoreThanOnce() {
     injector.getInstance(PersistService.class).stop();
-
-    try {
-      injector.getInstance(PersistService.class).stop();
-      fail();
-    } catch (IllegalStateException e) {
-      // Ignored.
-    }
+    // No exception is thrown on subsequent stop.
+    injector.getInstance(PersistService.class).stop();
   }
 
   public static class TransactionalObject {
