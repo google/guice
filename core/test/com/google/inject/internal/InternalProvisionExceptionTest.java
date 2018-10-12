@@ -23,6 +23,8 @@ import junit.framework.TestCase;
 public final class InternalProvisionExceptionTest extends TestCase {
 
   public void testSourceFormatting() {
+    final String newline = System.lineSeparator();
+
     // Note that the duplicate source gets dropped as well as the unknown source
     assertThat(
             InternalProvisionException.create("An error")
@@ -34,12 +36,12 @@ public final class InternalProvisionExceptionTest extends TestCase {
                 .getMessage())
         .isEqualTo(
             ""
-                + "Unable to provision, see the following errors:\n"
-                + "\n"
-                + "1) An error\n"
-                + "  at Source1\n"
-                + "  at Source2\n"
-                + "\n"
+                + "Unable to provision, see the following errors:" + newline
+                + newline
+                + "1) An error" + newline
+                + "  at Source1" + newline
+                + "  at Source2" + newline
+                + newline
                 + "1 error");
   }
 }
