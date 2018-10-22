@@ -504,7 +504,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
 
     @Override
-    @SuppressWarnings("EqualsBrokenForNull") // intentionally NPE on null for the test
+    @SuppressWarnings({"EqualsHashCode", "EqualsBrokenForNull"}) // intentionally NPE on null for the test
     public boolean equals(Object obj) {
       return obj.getClass() == getClass();
     }
