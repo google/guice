@@ -42,6 +42,8 @@ import org.objectweb.asm.Opcodes;
  */
 final class LineNumbers {
 
+  private static final int ASM_API_LEVEL = Opcodes.ASM7;
+
   private final Class type;
   private final Map<String, Integer> lines = Maps.newHashMap();
   private String source;
@@ -145,7 +147,7 @@ final class LineNumbers {
     private String name;
 
     LineNumberReader() {
-      super(Opcodes.ASM6);
+      super(ASM_API_LEVEL);
     }
 
     @Override
@@ -204,7 +206,7 @@ final class LineNumbers {
 
     class LineNumberMethodVisitor extends MethodVisitor {
       LineNumberMethodVisitor() {
-        super(Opcodes.ASM6);
+        super(ASM_API_LEVEL);
       }
 
       @Override
@@ -235,7 +237,7 @@ final class LineNumbers {
 
     class LineNumberAnnotationVisitor extends AnnotationVisitor {
       LineNumberAnnotationVisitor() {
-        super(Opcodes.ASM6);
+        super(ASM_API_LEVEL);
       }
 
       @Override
