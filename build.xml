@@ -279,13 +279,13 @@
       <arg value="-DNO_AOP" />
     </munge>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-6.2.1.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-7.0.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.8.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.9.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.8.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.9.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value='Bundle-Name" value="$${ant.project.name} (no_aop)'>
       <replacetoken><![CDATA[Bundle-Name" value="${ant.project.name}]]></replacetoken>
