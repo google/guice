@@ -2,7 +2,7 @@
 <comments
   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
   xsi:noNamespaceSchemaLocation='comments.xsd'
-  name="4.2.1_to_latest"
+  name="4.2.2_to_latest"
   jdversion="1.1.1">
 
 <!-- This file contains comments for a JDiff report. -->
