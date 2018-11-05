@@ -6,10 +6,15 @@ cache:
     - $HOME/.m2
 
 jdk:
+  - oraclejdk-ea
   - oraclejdk11
   - oraclejdk9
   - oraclejdk8
   - openjdk7
+
+matrix:
+    allow_failures:
+        - jdk: oraclejdk-ea
 
 env:
   global:
