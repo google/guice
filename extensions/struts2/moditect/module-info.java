@@ -7,4 +7,5 @@ module com.google.guice.extensions.struts2 {
 	requires static xwork.core;
 	requires java.logging;
 
+	opens com.google.inject.struts2 to com.google.guice;
 }

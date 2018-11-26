@@ -5,4 +5,5 @@ module com.google.guice.extensions.daggeradapter {
 	requires com.google.guice;
 	requires dagger;
 
+	opens com.google.inject.daggeradapter to com.google.guice;
 }

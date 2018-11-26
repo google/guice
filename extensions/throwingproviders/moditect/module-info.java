@@ -9,4 +9,5 @@ module com.google.guice.extensions.throwingproviders {
 
 	requires static jsr305;
 
+	opens com.google.inject.throwingproviders to com.google.guice;
 }

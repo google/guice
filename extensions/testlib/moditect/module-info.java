@@ -8,5 +8,6 @@ module com.google.guice.extensions.testlib {
 	requires transitive com.google.guice;
 	requires javax.inject;
 
-
+	opens com.google.inject.testing.fieldbinder  to com.google.guice;
+	opens com.google.inject.testing.throwingproviders  to com.google.guice;
 }

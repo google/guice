@@ -3,8 +3,13 @@ module com.google.guice.extensions.servlet {
 
 	requires com.google.common;
 
+	//Servlet 3.1
 	requires static javax.servlet.api;
-	requires transitive com.google.guice;
+	//Servlet 2.5
+	requires static servlet.api;
+	requires com.google.guice;
 
 	requires java.logging;
+
+	opens com.google.inject.servlet to com.google.guice;
 }
