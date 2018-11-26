@@ -484,9 +484,65 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugins>
       </build>
     </profile>
+      <profile>
+          <id>jdk9</id>
+          <activation>
+              <jdk>1.9</jdk>
+          </activation>
+          <properties>
+              <jdk.version>1.9</jdk.version>
+              <maven.compiler.source>1.9</maven.compiler.source>
+              <maven.compiler.target>1.9</maven.compiler.target>
+              <maven.compiler.release>1.9</maven.compiler.release>
+          </properties>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-compiler-plugin</artifactId>
+                      <version>3.8.0</version>
+                      <dependencies>
+                          <dependency>
+                              <groupId>org.ow2.asm</groupId>
+                              <artifactId>asm</artifactId>
+                              <version>7.0</version>
+                          </dependency>
+                      </dependencies>
+                      <configuration>
+                          <release>1.9</release>
+                          <source>1.9</source>
+                          <target>1.9</target>
+                      </configuration>
+                  </plugin>
+                  <plugin>
+                      <groupId>org.codehaus.mojo</groupId>
+                      <artifactId>build-helper-maven-plugin</artifactId>
+                      <version>1.7</version>
+                      <executions>
+                          <execution>
+                              <id>add-source</id>
+                              <phase>generate-sources</phase>
+                              <goals>
+                                  <goal>add-source</goal>
+                              </goals>
+                              <configuration>
+                                  <sources>
+                                      <source>src</source>
+                                      <source>moditect</source>
+                                  </sources>
+                              </configuration>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
 
+      </profile>
       <profile>
           <id>jdk11</id>
+          <activation>
+              <jdk>1.11</jdk>
+          </activation>
           <properties>
               <jdk.version>1.11</jdk.version>
               <maven.compiler.source>1.11</maven.compiler.source>
@@ -526,7 +582,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
                             <configuration>
                                 <sources>
                                     <source>src</source>
-                                    <!--<source>src/jre10/java</source>-->
                                     <source>moditect</source>
                                 </sources>
                             </configuration>
