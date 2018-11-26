@@ -386,6 +386,28 @@
 
           <build>
               <plugins>
+                  <plugin>
+                      <groupId>org.moditect</groupId>
+                      <artifactId>moditect-maven-plugin</artifactId>
+                      <version>1.0.0.Beta1</version>
+                      <executions>
+                          <execution>
+                              <id>add-module-infos</id>
+                              <phase>package</phase>
+                              <goals>
+                                  <goal>add-module-info</goal>
+                              </goals>
+                              <configuration>
+                                  <overwriteExistingFiles>true</overwriteExistingFiles>
+                                  <module>
+                                      <moduleInfoFile>
+                                          moditect/module-info.java
+                                      </moduleInfoFile>
+                                  </module>
+                              </configuration>
+                          </execution>
+                      </executions>
+                  </plugin>
               </plugins>
           </build>
       </profile>
@@ -401,9 +423,30 @@
 
           <build>
               <plugins>
+                  <plugin>
+                      <groupId>org.moditect</groupId>
+                      <artifactId>moditect-maven-plugin</artifactId>
+                      <version>1.0.0.Beta1</version>
+                      <executions>
+                          <execution>
+                              <id>add-module-infos</id>
+                              <phase>package</phase>
+                              <goals>
+                                  <goal>add-module-info</goal>
+                              </goals>
+                              <configuration>
+                                  <overwriteExistingFiles>true</overwriteExistingFiles>
+                                  <module>
+                                      <moduleInfoFile>
+                                          moditect/module-info.java
+                                      </moduleInfoFile>
+                                  </module>
+                              </configuration>
+                          </execution>
+                      </executions>
+                  </plugin>
               </plugins>
           </build>
-
           <dependencies>
               <dependency>
                   <groupId>org.ow2.asm</groupId>
