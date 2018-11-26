@@ -19,17 +19,24 @@
       <artifactId>guice-servlet</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
+      <dependency>
+          <groupId>javax.servlet</groupId>
+          <artifactId>javax.servlet-api</artifactId>
+          <version>3.0.1</version>
+          <type>jar</type>
+          <scope>provided</scope>
+      </dependency>
     <dependency>
       <groupId>org.apache.struts</groupId>
       <artifactId>struts2-core</artifactId>
       <version>2.2.1</version>
       <scope>provided</scope>
+        <exclusions>
+            <exclusion>
+                <artifactId>commons-io</artifactId>
+                <groupId>commons-io</groupId>
+            </exclusion>
+        </exclusions>
     </dependency>
   </dependencies>
 

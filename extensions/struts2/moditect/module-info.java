@@ -4,8 +4,7 @@ module com.google.guice.extensions.struts2 {
 	requires transitive com.google.guice;
 	requires transitive com.google.guice.extensions.servlet;
 
-	requires xwork.core;
+	requires static xwork.core;
 	requires java.logging;
-
 
 }
