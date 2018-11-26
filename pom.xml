@@ -528,7 +528,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
                               <configuration>
                                   <sources>
                                       <source>src</source>
-                                      <source>moditect</source>
+                                      <!--<source>moditect</source>-->
                                   </sources>
                               </configuration>
                           </execution>
@@ -582,7 +582,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
                             <configuration>
                                 <sources>
                                     <source>src</source>
-                                    <source>moditect</source>
+                                    <!--<source>moditect</source>-->
                                 </sources>
                             </configuration>
                         </execution>
