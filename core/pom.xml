@@ -241,7 +241,6 @@
               <execution>
                 <id>jarjar</id>
                 <goals><goal>jarjar</goal></goals>
-                  <phase>generate-sources</phase>
               </execution>
             </executions>
             <configuration>
