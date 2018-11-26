@@ -20,12 +20,15 @@
       <version>1.0.0.Final</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
+      <dependency>
+          <groupId>javax.servlet</groupId>
+          <artifactId>javax.servlet-api</artifactId>
+          <version>3.1.0</version>
+          <type>jar</type>
+          <scope>provided</scope>
+      </dependency>
+
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
@@ -78,4 +81,16 @@
       </plugin>
     </plugins>
   </build>
+
+    <profiles>
+        <profile>
+            <id>jdk11</id>
+            <properties>
+                <jdk.version>1.11</jdk.version>
+                <maven.compiler.source>1.11</maven.compiler.source>
+                <maven.compiler.target>1.11</maven.compiler.target>
+                <maven.compiler.release>1.11</maven.compiler.release>
+            </properties>
+        </profile>
+    </profiles>
 </project>

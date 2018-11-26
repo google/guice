@@ -27,4 +27,16 @@
       </plugin>
     </plugins>
   </build>
+
+    <profiles>
+        <profile>
+            <id>jdk11</id>
+            <properties>
+                <jdk.version>1.11</jdk.version>
+                <maven.compiler.source>1.11</maven.compiler.source>
+                <maven.compiler.target>1.11</maven.compiler.target>
+                <maven.compiler.release>1.11</maven.compiler.release>
+            </properties>
+        </profile>
+    </profiles>
 </project>
