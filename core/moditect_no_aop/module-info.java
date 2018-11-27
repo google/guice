@@ -1,5 +1,6 @@
 module com.google.guice {
 	exports com.google.inject;
+	exports com.google.inject.util;
 	exports com.google.inject.matcher;
 	exports com.google.inject.name;
 	exports com.google.inject.binder;
