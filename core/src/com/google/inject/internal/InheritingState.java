@@ -27,11 +27,13 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
+import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ final class InheritingState implements State {
   private final Map<Key<?>, Binding<?>> explicitBindings =
       Collections.unmodifiableMap(explicitBindingsMutable);
   private final Map<Class<? extends Annotation>, ScopeBinding> scopes = Maps.newHashMap();
+  private final List<ProviderLookup<?>> lookups = Lists.newArrayList();
   private final List<TypeConverterBinding> converters = Lists.newArrayList();
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
@@ -86,6 +89,16 @@ final class InheritingState implements State {
   }
 
   @Override
+  public void putProviderLookup(ProviderLookup<?> lookup) {
+    lookups.add(lookup);
+  }
+
+  @Override
+  public List<ProviderLookup<?>> getProviderLookupsThisLevel() {
+    return lookups;
+  }
+
+  @Override
   public ScopeBinding getScopeBinding(Class<? extends Annotation> annotationType) {
     ScopeBinding scopeBinding = scopes.get(annotationType);
     return scopeBinding != null ? scopeBinding : parent.getScopeBinding(annotationType);
@@ -94,6 +107,11 @@ final class InheritingState implements State {
   @Override
   public void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope) {
     scopes.put(annotationType, scope);
+  }
+
+  @Override
+  public Collection<ScopeBinding> getScopeBindingsThisLevel() {
+    return scopes.values();
   }
 
   @Override
@@ -154,6 +172,11 @@ final class InheritingState implements State {
   }
 
   @Override
+  public List<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
+    return typeListenerBindings;
+  }
+
+  @Override
   public void addProvisionListener(ProvisionListenerBinding listenerBinding) {
     provisionListenerBindings.add(listenerBinding);
   }
@@ -169,6 +192,11 @@ final class InheritingState implements State {
   }
 
   @Override
+  public List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
+    return provisionListenerBindings;
+  }
+
+  @Override
   public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
     scannerBindings.add(scanner);
   }
@@ -181,6 +209,11 @@ final class InheritingState implements State {
     result.addAll(parentBindings);
     result.addAll(scannerBindings);
     return result;
+  }
+
+  @Override
+  public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
+    return scannerBindings;
   }
 
   @Override

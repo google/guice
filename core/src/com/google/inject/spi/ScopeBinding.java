@@ -18,8 +18,10 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.inject.Binder;
 import com.google.inject.Scope;
+import com.google.inject.internal.Errors;
 import java.lang.annotation.Annotation;
 
 /**
@@ -66,5 +68,14 @@ public final class ScopeBinding implements Element {
   @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).bindScope(annotationType, scope);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(ScopeBinding.class)
+        .add("annotationType", annotationType)
+        .add("scope", scope)
+        .add("source", Errors.convert(source))
+        .toString();
   }
 }

@@ -42,6 +42,7 @@ import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Element;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
@@ -860,11 +861,11 @@ final class InjectorImpl implements Injector, Lookups {
    * create just-in-time bindings are:
    *
    * <ol>
-   * <li>Internalizing Providers. If the requested binding is for {@code Provider<T>}, we delegate
-   *     to the binding for {@code T}.
-   * <li>Converting constants.
-   * <li>ImplementedBy and ProvidedBy annotations. Only for unannotated keys.
-   * <li>The constructor of the raw type. Only for unannotated keys.
+   *   <li>Internalizing Providers. If the requested binding is for {@code Provider<T>}, we delegate
+   *       to the binding for {@code T}.
+   *   <li>Converting constants.
+   *   <li>ImplementedBy and ProvidedBy annotations. Only for unannotated keys.
+   *   <li>The constructor of the raw type. Only for unannotated keys.
    * </ol>
    *
    * @throws com.google.inject.internal.ErrorsException if the binding cannot be created.
@@ -961,6 +962,20 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public Set<TypeConverterBinding> getTypeConverterBindings() {
     return ImmutableSet.copyOf(state.getConvertersThisLevel());
+  }
+
+  @Override
+  public List<Element> getElements() {
+    ImmutableList.Builder<Element> elements = ImmutableList.builder();
+    elements.addAll(getAllBindings().values());
+    elements.addAll(state.getProviderLookupsThisLevel());
+    elements.addAll(state.getConvertersThisLevel());
+    elements.addAll(state.getScopeBindingsThisLevel());
+    elements.addAll(state.getTypeListenerBindingsThisLevel());
+    elements.addAll(state.getProvisionListenerBindingsThisLevel());
+    elements.addAll(state.getScannerBindingsThisLevel());
+
+    return elements.build();
   }
 
   /** Returns parameter injectors, or {@code null} if there are no parameters. */

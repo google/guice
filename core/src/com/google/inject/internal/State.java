@@ -24,11 +24,13 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
+import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +62,16 @@ interface State {
 
         @Override
         public void putBinding(Key<?> key, BindingImpl<?> binding) {
+          throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void putProviderLookup(ProviderLookup<?> lookup) {
+          throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<ProviderLookup<?>> getProviderLookupsThisLevel() {
           throw new UnsupportedOperationException();
         }
 
@@ -150,13 +162,29 @@ interface State {
           throw new UnsupportedOperationException();
         }
 
-        public Object singletonCreationLock() {
+        @Override
+        public Map<Class<? extends Annotation>, Scope> getScopes() {
+          return ImmutableMap.of();
+        }
+
+        @Override
+        public List<ScopeBinding> getScopeBindingsThisLevel() {
           throw new UnsupportedOperationException();
         }
 
         @Override
-        public Map<Class<? extends Annotation>, Scope> getScopes() {
-          return ImmutableMap.of();
+        public List<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
+          throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
+          throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
+          throw new UnsupportedOperationException();
         }
       };
 
@@ -170,9 +198,15 @@ interface State {
 
   void putBinding(Key<?> key, BindingImpl<?> binding);
 
+  void putProviderLookup(ProviderLookup<?> lookup);
+
+  List<ProviderLookup<?>> getProviderLookupsThisLevel();
+
   ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation);
 
   void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope);
+
+  Collection<ScopeBinding> getScopeBindingsThisLevel();
 
   void addConverter(TypeConverterBinding typeConverterBinding);
 
@@ -193,13 +227,19 @@ interface State {
 
   List<TypeListenerBinding> getTypeListenerBindings();
 
+  List<TypeListenerBinding> getTypeListenerBindingsThisLevel();
+
   void addProvisionListener(ProvisionListenerBinding provisionListenerBinding);
 
   List<ProvisionListenerBinding> getProvisionListenerBindings();
 
+  List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel();
+
   void addScanner(ModuleAnnotatedMethodScannerBinding scanner);
 
   List<ModuleAnnotatedMethodScannerBinding> getScannerBindings();
+
+  List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel();
 
   /**
    * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors

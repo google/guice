@@ -35,6 +35,7 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
+import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
@@ -474,6 +475,16 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
+    public void putProviderLookup(ProviderLookup<?> lookup) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<ProviderLookup<?>> getProviderLookupsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
     public ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation) {
       return null;
     }
@@ -559,13 +570,29 @@ public class WeakKeySetTest extends TestCase {
       throw new UnsupportedOperationException();
     }
 
-    public Object singletonCreationLock() {
+    @Override
+    public Map<Class<? extends Annotation>, Scope> getScopes() {
+      return ImmutableMap.of();
+    }
+
+    @Override
+    public List<ScopeBinding> getScopeBindingsThisLevel() {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<Class<? extends Annotation>, Scope> getScopes() {
-      return ImmutableMap.of();
+    public List<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
+      throw new UnsupportedOperationException();
     }
   }
 }
