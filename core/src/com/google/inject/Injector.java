@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.Element;
 import com.google.inject.spi.TypeConverterBinding;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -31,10 +32,10 @@ import java.util.Set;
  * <p>Contains several default bindings:
  *
  * <ul>
- * <li>This {@link Injector} instance itself
- * <li>A {@code Provider<T>} for each binding of type {@code T}
- * <li>The {@link java.util.logging.Logger} for the class being injected
- * <li>The {@link Stage} in which the Injector was created
+ *   <li>This {@link Injector} instance itself
+ *   <li>A {@code Provider<T>} for each binding of type {@code T}
+ *   <li>The {@link java.util.logging.Logger} for the class being injected
+ *   <li>The {@link Stage} in which the Injector was created
  * </ul>
  *
  * Injectors are created using the facade class {@link Guice}.
@@ -260,4 +261,15 @@ public interface Injector {
    * @since 3.0
    */
   Set<TypeConverterBinding> getTypeConverterBindings();
+
+  /**
+   * Returns the elements that make up this injector. Note that not all kinds of elements are
+   * returned.
+   *
+   * <p>The returned list does not include elements inherited from a {@link #getParent() parent
+   * injector}, should one exist.
+   *
+   * @since 5.0
+   */
+  List<Element> getElements();
 }

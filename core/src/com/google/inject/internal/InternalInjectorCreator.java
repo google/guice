@@ -27,6 +27,7 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Element;
 import com.google.inject.spi.TypeConverterBinding;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -43,13 +44,13 @@ import java.util.Set;
  * <p>Injector construction happens in two phases.
  *
  * <ol>
- * <li>Static building. In this phase, we interpret commands, create bindings, and inspect
- *     dependencies. During this phase, we hold a lock to ensure consistency with parent injectors.
- *     No user code is executed in this phase.
- * <li>Dynamic injection. In this phase, we call user code. We inject members that requested
- *     injection. This may require user's objects be created and their providers be called. And we
- *     create eager singletons. In this phase, user code may have started other threads. This phase
- *     is not executed for injectors created using {@link Stage#TOOL the tool stage}
+ *   <li>Static building. In this phase, we interpret commands, create bindings, and inspect
+ *       dependencies. During this phase, we hold a lock to ensure consistency with parent
+ *       injectors. No user code is executed in this phase.
+ *   <li>Dynamic injection. In this phase, we call user code. We inject members that requested
+ *       injection. This may require user's objects be created and their providers be called. And we
+ *       create eager singletons. In this phase, user code may have started other threads. This
+ *       phase is not executed for injectors created using {@link Stage#TOOL the tool stage}
  * </ol>
  *
  * @author crazybob@google.com (Bob Lee)
@@ -304,6 +305,11 @@ public final class InternalInjectorCreator {
     @Override
     public Set<TypeConverterBinding> getTypeConverterBindings() {
       return delegateInjector.getTypeConverterBindings();
+    }
+
+    @Override
+    public List<Element> getElements() {
+      return delegateInjector.getElements();
     }
 
     @Override

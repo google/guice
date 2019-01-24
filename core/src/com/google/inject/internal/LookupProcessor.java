@@ -52,6 +52,11 @@ final class LookupProcessor extends AbstractProcessor {
     try {
       Provider<T> provider = injector.getProviderOrThrow(lookup.getDependency(), errors);
       lookup.initializeDelegate(provider);
+      // only remember ProviderLookups that are based on injection points,
+      // since those are the only worthwhile ones that can be examined later.
+      if (lookup.getDependency().getInjectionPoint() != null) {
+        injector.state.putProviderLookup(lookup);
+      }
     } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }
