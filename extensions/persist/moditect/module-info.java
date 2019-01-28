@@ -8,7 +8,15 @@ module com.google.guice.extensions.persist {
 	requires static aopalliance;
 	requires static hibernate.jpa;
 
+	requires javax.inject;
+
 	opens com.google.inject.persist to com.google.guice;
 	opens com.google.inject.persist.finder to com.google.guice;
 	opens com.google.inject.persist.jpa to com.google.guice;
+
+	//Test Dependencies
+	requires static java.sql;
+	requires static java.logging;
+	requires static java.naming;
+
 }

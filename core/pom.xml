@@ -275,7 +275,49 @@
               </rules>
             </configuration>
           </plugin>
-          <plugin>
+            <!-- Attach the generated module-info.class to the post jar-jar file.
+            JarJar does not yet know how to read newer class files-->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy file="target/guice-${project.version}.jar" tofile="target/guice_11-${project.version}.jar"/>
+
+                                <echo message="Extracting module-info class file after jarjar"/>
+                                <unzip src="target/original-guice-${project.version}.jar"
+                                       dest="target/classes" overwrite="true">
+                                    <patternset>
+                                        <include name="module-info.class"/>
+                                    </patternset>
+                                </unzip>
+                                <echo message="Repacking module-info class file after jarjar"/>
+                                <zip destfile="target/guice_11-${project.version}.jar"
+                                     basedir="target/classes"
+                                     includes="module-info.class"
+                                     update="true"/>
+                                <echo message="Done Repacking with module-info"/>
+                                <copy file="target/guice_11-${project.version}.jar" tofile="target/guice-${project.version}.jar"/>
+                                <echo message="Cleaning dormant jar files"/>
+                                <delete file="target/guice_11-${project.version}.jar"/>
+                                <delete file="target/original-guice-${project.version}.jar"/>
+                                <delete file="target/jarjar/hull-guice-${project.version}.jar"/>
+                                <delete file="target/jarjar/uber-guice-${project.version}.jar"/>
+                                <echo message="Finished with JAR"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
             <!--
              | Attach the original non-JarJar'd classes so extensions can compile against them
             -->
@@ -345,7 +387,7 @@
       <profile>
           <id>jdk8</id>
           <activation>
-              <jdk>1.8</jdk>
+              <jdk>[1.8,)</jdk>
           </activation>
           <build>
               <plugins>
@@ -373,90 +415,6 @@
                   </plugin>
               </plugins>
           </build>
-      </profile>
-
-      <profile>
-          <id>jdk9</id>
-          <properties>
-              <jdk.version>1.9</jdk.version>
-              <maven.compiler.source>1.9</maven.compiler.source>
-              <maven.compiler.target>1.9</maven.compiler.target>
-              <maven.compiler.release>1.9</maven.compiler.release>
-          </properties>
-
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.moditect</groupId>
-                      <artifactId>moditect-maven-plugin</artifactId>
-                      <version>1.0.0.Beta1</version>
-                      <executions>
-                          <execution>
-                              <id>add-module-infos</id>
-                              <phase>package</phase>
-                              <goals>
-                                  <goal>add-module-info</goal>
-                              </goals>
-                              <configuration>
-                                  <overwriteExistingFiles>true</overwriteExistingFiles>
-                                  <module>
-                                      <moduleInfoFile>
-                                          moditect/module-info.java
-                                      </moduleInfoFile>
-                                  </module>
-                              </configuration>
-                          </execution>
-                      </executions>
-                  </plugin>
-              </plugins>
-          </build>
-      </profile>
-
-      <profile>
-      <id>jdk11</id>
-      <properties>
-          <jdk.version>1.11</jdk.version>
-          <maven.compiler.source>1.11</maven.compiler.source>
-          <maven.compiler.target>1.11</maven.compiler.target>
-          <maven.compiler.release>1.11</maven.compiler.release>
-      </properties>
-
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.moditect</groupId>
-                      <artifactId>moditect-maven-plugin</artifactId>
-                      <version>1.0.0.Beta1</version>
-                      <executions>
-                          <execution>
-                              <id>add-module-infos</id>
-                              <phase>package</phase>
-                              <goals>
-                                  <goal>add-module-info</goal>
-                              </goals>
-                              <configuration>
-                                  <overwriteExistingFiles>true</overwriteExistingFiles>
-                                  <module>
-                                      <moduleInfoFile>
-                                          moditect/module-info.java
-                                      </moduleInfoFile>
-                                  </module>
-                              </configuration>
-                          </execution>
-                      </executions>
-                  </plugin>
-              </plugins>
-          </build>
-          <dependencies>
-              <dependency>
-                  <groupId>org.ow2.asm</groupId>
-                  <artifactId>asm</artifactId>
-              </dependency>
-              <dependency>
-                  <groupId>cglib</groupId>
-                  <artifactId>cglib</artifactId>
-              </dependency>
-          </dependencies>
       </profile>
   </profiles>
 </project>
