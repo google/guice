@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -208,13 +208,17 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <div class="block">Sets the actual provider.</div>
 </td>
 </tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#toString--">toString</a></span>()</code>&nbsp;</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -366,12 +370,25 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <a name="getProvider--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getProvider</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;getProvider()</pre>
 <div class="block">Returns the looked up provider. The result is not valid until this lookup has been initialized,
  which usually happens when the injector is created. The provider will throw an <code>IllegalStateException</code> if you try to use it beforehand.</div>
+</li>
+</ul>
+<a name="toString--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>toString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;toString()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
 </li>
 </ul>
 </li>

@@ -1,0 +1,3 @@
+OK: com.google.inject.Injector Method getElements()
+NO DOC BLOCK: com.google.inject.spi.ProviderLookup Method toString()
+NO DOC BLOCK: com.google.inject.spi.ScopeBinding Method toString()

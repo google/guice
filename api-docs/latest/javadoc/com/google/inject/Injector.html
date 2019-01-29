@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -108,10 +108,10 @@ var activeTableTab = "activeTableTab";
  <p>Contains several default bindings:
 
  <ul>
- <li>This <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> instance itself
- <li>A <code>Provider&lt;T&gt;</code> for each binding of type <code>T</code>
- <li>The <code>Logger</code> for the class being injected
- <li>The <a href="../../../com/google/inject/Stage.html" title="enum in com.google.inject"><code>Stage</code></a> in which the Injector was created
+   <li>This <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> instance itself
+   <li>A <code>Provider&lt;T&gt;</code> for each binding of type <code>T</code>
+   <li>The <code>Logger</code> for the class being injected
+   <li>The <a href="../../../com/google/inject/Stage.html" title="enum in com.google.inject"><code>Stage</code></a> in which the Injector was created
  </ul>
 
  Injectors are created using the facade class <a href="../../../com/google/inject/Guice.html" title="class in com.google.inject"><code>Guice</code></a>.
@@ -187,68 +187,74 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i7" class="rowColor">
+<td class="colFirst"><code>java.util.List&lt;<a href="../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getElements--">getElements</a></span>()</code>
+<div class="block">Returns the elements that make up this injector.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getExistingBinding-com.google.inject.Key-">getExistingBinding</a></span>(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</code>
 <div class="block">Returns the binding if it already exists, or null if does not exist.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;T</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getInstance-java.lang.Class-">getInstance</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the appropriate instance for the given injection type; equivalent to <code>getProvider(type).get()</code>.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;T</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getInstance-com.google.inject.Key-">getInstance</a></span>(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</code>
 <div class="block">Returns the appropriate instance for the given injection key; equivalent to <code>getProvider(key).get()</code>.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getMembersInjector-java.lang.Class-">getMembersInjector</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/MembersInjector.html" title="interface in com.google.inject">MembersInjector</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getMembersInjector-com.google.inject.TypeLiteral-">getMembersInjector</a></span>(<a href="../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;typeLiteral)</code>
 <div class="block">Returns the members injector used to inject dependencies into methods and fields on instances
  of the given type <code>T</code>.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getParent--">getParent</a></span>()</code>
 <div class="block">Returns this injector's parent, or <code>null</code> if this is a top-level injector.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getProvider-java.lang.Class-">getProvider</a></span>(java.lang.Class&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns the provider used to obtain instances for the given type.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getProvider-com.google.inject.Key-">getProvider</a></span>(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</code>
 <div class="block">Returns the provider used to obtain instances for the given injection key.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>java.util.Map&lt;java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;,<a href="../../../com/google/inject/Scope.html" title="interface in com.google.inject">Scope</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getScopeBindings--">getScopeBindings</a></span>()</code>
 <div class="block">Returns a map containing all scopes in the injector.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>java.util.Set&lt;<a href="../../../com/google/inject/spi/TypeConverterBinding.html" title="class in com.google.inject.spi">TypeConverterBinding</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#getTypeConverterBindings--">getTypeConverterBindings</a></span>()</code>
 <div class="block">Returns a set containing all type converter bindings in the injector.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Injector.html#injectMembers-java.lang.Object-">injectMembers</a></span>(java.lang.Object&nbsp;instance)</code>
 <div class="block">Injects dependencies into the fields and methods of <code>instance</code>.</div>
@@ -589,7 +595,7 @@ var activeTableTab = "activeTableTab";
 <a name="getTypeConverterBindings--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getTypeConverterBindings</h4>
 <pre>java.util.Set&lt;<a href="../../../com/google/inject/spi/TypeConverterBinding.html" title="class in com.google.inject.spi">TypeConverterBinding</a>&gt;&nbsp;getTypeConverterBindings()</pre>
@@ -600,6 +606,24 @@ var activeTableTab = "activeTableTab";
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>
+</dl>
+</li>
+</ul>
+<a name="getElements--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getElements</h4>
+<pre>java.util.List&lt;<a href="../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;&nbsp;getElements()</pre>
+<div class="block">Returns the elements that make up this injector. Note that not all kinds of elements are
+ returned.
+
+ <p>The returned list does not include elements inherited from a <a href="../../../com/google/inject/Injector.html#getParent--"><code>parent
+ injector</code></a>, should one exist.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
 </dl>
 </li>
 </ul>
