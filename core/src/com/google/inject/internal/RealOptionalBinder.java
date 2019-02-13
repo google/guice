@@ -235,7 +235,7 @@ public final class RealOptionalBinder<T> implements Module {
   public void configure(Binder binder) {
     bindingSelection.checkNotInitialized();
     Key<T> key = bindingSelection.getDirectKey();
-    // Every OptionalBinder get's the following types bound
+    // Every OptionalBinder gets the following types bound
     // * Optional<Provider<T>>
     // * Optional<javax.inject.Provider<T>>
     // * Optional<T>
@@ -373,6 +373,15 @@ public final class RealOptionalBinder<T> implements Module {
     @Override
     public Key getKey() {
       return optionalKey;
+    }
+
+    @Override
+    public Set<Key<?>> getAlternateKeys() {
+      Key<?> key = bindingSelection.getDirectKey();
+      TypeLiteral<?> typeLiteral = key.getTypeLiteral();
+      return ImmutableSet.of(
+          (Key<?>) key.ofType(javaOptionalOfProvider(typeLiteral)),
+          (Key<?>) key.ofType(javaOptionalOfJavaxProvider(typeLiteral)));
     }
   }
 
@@ -550,6 +559,15 @@ public final class RealOptionalBinder<T> implements Module {
     @Override
     public Key<Optional<T>> getKey() {
       return optionalKey;
+    }
+
+    @Override
+    public Set<Key<?>> getAlternateKeys() {
+      Key<?> key = bindingSelection.getDirectKey();
+      TypeLiteral<?> typeLiteral = key.getTypeLiteral();
+      return ImmutableSet.of(
+          (Key<?>) key.ofType(optionalOfProvider(typeLiteral)),
+          (Key<?>) key.ofType(optionalOfJavaxProvider(typeLiteral)));
     }
 
     @Override

@@ -23,18 +23,21 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A binding for a MapBinder.
  *
- * <p>Although MapBinders may be injected through a variety of generic types (Map&lt;K, V>, Map
- * &lt;K, Provider&lt;V>>, Map&lt;K, Set&lt;V>>, Map<K, Set&lt; Provider&lt;V>>, and even
- * Set&lt;Map.Entry&lt;K, Provider&lt;V>>), a MapBinderBinding exists only on the Binding associated
- * with the Map&lt;K, V> key. Other bindings can be validated to be derived from this
+ * <p>Although MapBinders may be injected through a variety of generic types ({@code Map<K, V>},
+ * {@code Map<K, Provider<V>>}, {@code Map<K, Set<V>>}, {@ocde Map<K, Set<Provider<V>>}, and even
+ * {@code Set<Map.Entry<K, Provider<V>>}), a MapBinderBinding exists only on the Binding associated
+ * with the Map&lt;K, V> key. Injectable map types can be discovered using {@link #getMapKey} (which
+ * will return the {@code Map<K, V>} key), or{@link #getAlternateMapKeys} (which will return the
+ * other keys that can inject this data). Other bindings can be validated to be derived from this
  * MapBinderBinding using {@link #containsElement(Element)}.
  *
- * @param <T> The fully qualified type of the map, including Map. For example: <code>
- *     MapBinderBinding&lt;Map&lt;String, Snack>></code>
+ * @param <T> The fully qualified type of the map, including Map. For example: {@code
+ *     MapBinderBinding<Map<String, Snack>>}
  * @since 3.0
  * @author sameb@google.com (Sam Berlin)
  */
@@ -42,6 +45,17 @@ public interface MapBinderBinding<T> {
 
   /** Returns the {@link Key} for the map. */
   Key<T> getMapKey();
+
+  /**
+   * Returns the keys of other bindings that represent this map. This will return an entry for
+   * {@code Map<K, com.google.inject.Provider<V>>}, {@code Map<K, javax.inject.Provider<V>>}, {@code
+   * Map<K, Set<com.google.inject.Provider<V>>>}, {@code Map<K, Set<javax.inject.Provider<V>>>},
+   * {@code Map<K, Collection<com.google.inject.Provider<V>>>}, {@code Map<K,
+   * Collection<javax.inject.Provider<V>>>}, and {@code Map<K, Set<V>}.
+   *
+   * @since 5.0
+   */
+  Set<Key<?>> getAlternateMapKeys();
 
   /**
    * Returns the TypeLiteral describing the keys of the map.

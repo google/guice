@@ -20,14 +20,17 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+import java.util.Set;
 
 /**
  * A binding for a OptionalBinder.
  *
- * <p>Although OptionalBinders may be injected through a variety of types {@code T}, {@code
- * Optional<T>}, {@code Optional<Provider<T>>}, etc..), an OptionalBinderBinding exists only on the
- * Binding associated with the {@code Optional<T>} key. Other bindings can be validated to be
- * derived from this OptionalBinderBinding using {@link #containsElement}.
+ * <p>Although OptionalBinders may be injected through a variety of types {@code V}, {@code
+ * Optional<V>}, {@code Optional<Provider<V>>}, etc..), an OptionalBinderBinding exists only on the
+ * Binding associated with the {@code Optional<V>} key. Injectable types can be discovered using
+ * {@link #getKey} (which will return the {@code Optional<V>} key), or{@link #getAlternateKeys}
+ * (which will return the other keys that can inject this data). Other bindings can be validated to
+ * be derived from this OptionalBinderBinding using {@link #containsElement}.
  *
  * @param <T> The fully qualified type of the optional binding, including Optional. For example:
  *     {@code Optional<String>}.
@@ -38,6 +41,15 @@ public interface OptionalBinderBinding<T> {
 
   /** Returns the {@link Key} for this binding. */
   Key<T> getKey();
+
+  /**
+   * Returns the keys of other bindings that represent this OptionalBinder. This will return an
+   * entry for {@code Optional<com.google.inject.Provider<V>>} and {@code
+   * Optional<javax.inject.Provider<V>>}.
+   *
+   * @since 5.0
+   */
+  Set<Key<?>> getAlternateKeys();
 
   /**
    * Returns the default binding (set by {@link OptionalBinder#setDefault}) if one exists or null if

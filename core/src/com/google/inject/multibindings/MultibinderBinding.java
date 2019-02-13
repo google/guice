@@ -22,12 +22,20 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A binding for a Multibinder.
  *
- * @param <T> The fully qualified type of the set, including Set. For example: <code>
- *     MultibinderBinding&lt;Set&lt;Boolean>></code>
+ * <p>Although Multibinders may be injected through a variety of generic types ({@code Set<V>} and
+ * {@code Collection<Provider<V>>}), a MultibinderBinding exists only on the Binding associated with
+ * the {@code Set<V>} key. Injectable types can be discovered using {@link #getSetKey} (which will
+ * return the {@code Set<V>} key), or{@link #getAlternateSetKeys} (which will return the other keys
+ * that can inject this data). Other bindings can be validated to be derived from this
+ * MultibinderBinding using {@link #containsElement(Element)}.
+ *
+ * @param <T> The fully qualified type of the set, including Set. For example: {@code
+ *     MultibinderBinding<Set<Boolean>>}
  * @since 3.0
  * @author sameb@google.com (Sam Berlin)
  */
@@ -35,6 +43,15 @@ public interface MultibinderBinding<T> {
 
   /** Returns the key for the set. */
   Key<T> getSetKey();
+
+  /**
+   * Returns the keys of other bindings that represent this set. This will return an entry for
+   * {@code Collection<com.google.inject.Provider<V>>} and {@code
+   * Collection<javax.inject.Provider<V>>}.
+   *
+   * @since 5.0
+   */
+  Set<Key<?>> getAlternateSetKeys();
 
   /**
    * Returns the TypeLiteral that describes the type of elements in the set.

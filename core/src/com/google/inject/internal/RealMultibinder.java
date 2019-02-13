@@ -284,6 +284,13 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
+    public Set<Key<?>> getAlternateSetKeys() {
+      return ImmutableSet.of(
+          (Key<?>) bindingSelection.getCollectionOfProvidersKey(),
+          (Key<?>) bindingSelection.getCollectionOfJavaxProvidersKey());
+    }
+
+    @Override
     public TypeLiteral<?> getElementTypeLiteral() {
       return bindingSelection.getElementTypeLiteral();
     }
