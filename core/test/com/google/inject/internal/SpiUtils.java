@@ -155,6 +155,7 @@ public class SpiUtils {
     Binding<T> mapBinding = injector.getBinding(mapKey);
     MapBinderBinding<T> mapbinder = (MapBinderBinding<T>) mapBinding.acceptTargetVisitor(visitor);
     assertNotNull(mapbinder);
+    assertEquals(mapKey, mapbinder.getMapKey());
     assertEquals(keyType, mapbinder.getKeyTypeLiteral());
     assertEquals(valueType, mapbinder.getValueTypeLiteral());
     assertEquals(allowDuplicates, mapbinder.permitsDuplicates());
@@ -204,6 +205,17 @@ public class SpiUtils {
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
+    assertEquals(
+        ImmutableSet.of(
+            mapOfJavaxProvider,
+            mapOfProvider,
+            mapOfSetOfProvider,
+            mapOfSetOfJavaxProvider,
+            mapOfCollectionOfProvider,
+            mapOfCollectionOfJavaxProvider,
+            mapOfSet),
+        mapbinder.getAlternateMapKeys());
+
     boolean entrySetMatch = false;
     boolean javaxEntrySetMatch = false;
     boolean mapJavaxProviderMatch = false;
@@ -363,6 +375,7 @@ public class SpiUtils {
         "Found all entries of: " + mapResults + ", but more were left over: " + entries,
         entries.isEmpty());
 
+    assertEquals(mapKey, mapbinder.getMapKey());
     assertEquals(keyType, mapbinder.getKeyTypeLiteral());
     assertEquals(valueType, mapbinder.getValueTypeLiteral());
 
@@ -381,6 +394,17 @@ public class SpiUtils {
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
+    assertEquals(
+        ImmutableSet.of(
+            mapOfProvider,
+            mapOfJavaxProvider,
+            mapOfSetOfProvider,
+            mapOfSetOfJavaxProvider,
+            mapOfCollectionOfProvider,
+            mapOfCollectionOfJavaxProvider,
+            mapOfSet),
+        mapbinder.getAlternateMapKeys());
+
     boolean entrySetMatch = false;
     boolean entrySetJavaxMatch = false;
     boolean mapProviderMatch = false;
@@ -576,8 +600,12 @@ public class SpiUtils {
     MultibinderBinding<Set<T>> multibinder =
         (MultibinderBinding<Set<T>>) binding.acceptTargetVisitor(visitor);
     assertNotNull(multibinder);
+    assertEquals(setKey, multibinder.getSetKey());
     assertEquals(elementType, multibinder.getElementTypeLiteral());
     assertEquals(allowDuplicates, multibinder.permitsDuplicates());
+    assertEquals(
+        ImmutableSet.of(collectionOfProvidersKey, collectionOfJavaxProvidersKey),
+        multibinder.getAlternateSetKeys());
     List<Binding<?>> elements = Lists.newArrayList(multibinder.getElements());
     List<BindResult> bindResults = Lists.newArrayList(results);
     assertEquals(
@@ -676,7 +704,11 @@ public class SpiUtils {
     }
     assertNotNull(multibinder);
 
+    assertEquals(setKey, multibinder.getSetKey());
     assertEquals(elementType, multibinder.getElementTypeLiteral());
+    assertEquals(
+        ImmutableSet.of(collectionOfProvidersKey, collectionOfJavaxProvidersKey),
+        multibinder.getAlternateSetKeys());
     List<Object> otherMultibinders = Lists.newArrayList();
     Set<Element> otherContains = new HashSet<>();
     List<Element> otherElements = Lists.newArrayList();
@@ -907,6 +939,14 @@ public class SpiUtils {
         HAS_JAVA_OPTIONAL
             ? keyType.ofType(RealOptionalBinder.javaOptionalOfProvider(keyType.getTypeLiteral()))
             : null;
+    assertEquals(
+        ImmutableSet.of(optionalJavaxProviderKey, optionalProviderKey),
+        optionalBinder.getAlternateKeys());
+    if (HAS_JAVA_OPTIONAL) {
+      assertEquals(
+          ImmutableSet.of(javaOptionalJavaxProviderKey, javaOptionalProviderKey),
+          javaOptionalBinder.getAlternateKeys());
+    }
 
     boolean keyMatch = false;
     boolean optionalKeyMatch = false;

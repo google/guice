@@ -1,4 +1,3 @@
-
 package com.google.inject.internal;
 
 import static com.google.inject.internal.Element.Type.MAPBINDER;
@@ -827,6 +826,18 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
+    public Set<Key<?>> getAlternateMapKeys() {
+      return ImmutableSet.of(
+          (Key<?>) bindingSelection.getJavaxProviderMapKey(),
+          (Key<?>) bindingSelection.getProviderMapKey(),
+          (Key<?>) bindingSelection.getProviderSetMultimapKey(),
+          (Key<?>) bindingSelection.getJavaxProviderSetMultimapKey(),
+          (Key<?>) bindingSelection.getProviderCollectionMultimapKey(),
+          (Key<?>) bindingSelection.getJavaxProviderCollectionMultimapKey(),
+          (Key<?>) bindingSelection.getMultimapKey());
+    }
+
+    @Override
     public TypeLiteral<K> getKeyTypeLiteral() {
       return bindingSelection.getKeyType();
     }
@@ -1168,7 +1179,7 @@ public final class RealMapBinder<K, V> implements Module {
   }
 
   /** A factory for a {@code Map.Entry<K, Provider<V>>}. */
-  //VisibleForTesting
+  // VisibleForTesting
   static final class ProviderMapEntry<K, V>
       extends InternalProviderInstanceBindingImpl.Factory<Map.Entry<K, Provider<V>>> {
     private final K key;
