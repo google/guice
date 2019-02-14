@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -107,9 +107,11 @@ var activeTableTab = "activeTableTab";
 <pre>public interface <span class="typeNameLabel">OptionalBinderBinding&lt;T&gt;</span></pre>
 <div class="block">A binding for a OptionalBinder.
 
- <p>Although OptionalBinders may be injected through a variety of types <code>T</code>, <code>Optional&lt;T&gt;</code>, <code>Optional&lt;Provider&lt;T&gt;&gt;</code>, etc..), an OptionalBinderBinding exists only on the
- Binding associated with the <code>Optional&lt;T&gt;</code> key. Other bindings can be validated to be
- derived from this OptionalBinderBinding using <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(com.google.inject.spi.Element)</code></a>.</div>
+ <p>Although OptionalBinders may be injected through a variety of types <code>V</code>, <code>Optional&lt;V&gt;</code>, <code>Optional&lt;Provider&lt;V&gt;&gt;</code>, etc..), an OptionalBinderBinding exists only on the
+ Binding associated with the <code>Optional&lt;V&gt;</code> key. Injectable types can be discovered using
+ <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getKey--"><code>getKey()</code></a> (which will return the <code>Optional&lt;V&gt;</code> key), or<a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getAlternateKeys--"><code>getAlternateKeys()</code></a>
+ (which will return the other keys that can inject this data). Other bindings can be validated to
+ be derived from this OptionalBinderBinding using <a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(com.google.inject.spi.Element)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -146,13 +148,19 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getAlternateKeys--">getAlternateKeys</a></span>()</code>
+<div class="block">Returns the keys of other bindings that represent this OptionalBinder.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getDefaultBinding--">getDefaultBinding</a></span>()</code>
 <div class="block">Returns the default binding (set by <a href="../../../../com/google/inject/multibindings/OptionalBinder.html#setDefault--"><code>OptionalBinder.setDefault()</code></a>) if one exists or null if
  no default binding is set.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html" title="type parameter in OptionalBinderBinding">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html#getKey--">getKey</a></span>()</code>
 <div class="block">Returns the <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject"><code>Key</code></a> for this binding.</div>
@@ -181,6 +189,21 @@ var activeTableTab = "activeTableTab";
 <h4>getKey</h4>
 <pre><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html" title="type parameter in OptionalBinderBinding">T</a>&gt;&nbsp;getKey()</pre>
 <div class="block">Returns the <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject"><code>Key</code></a> for this binding.</div>
+</li>
+</ul>
+<a name="getAlternateKeys--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAlternateKeys</h4>
+<pre>java.util.Set&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;getAlternateKeys()</pre>
+<div class="block">Returns the keys of other bindings that represent this OptionalBinder. This will return an
+ entry for <code>Optional&lt;com.google.inject.Provider&lt;V&gt;&gt;</code> and <code>Optional&lt;javax.inject.Provider&lt;V&gt;&gt;</code>.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
+</dl>
 </li>
 </ul>
 <a name="getDefaultBinding--">

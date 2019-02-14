@@ -34,6 +34,48 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.getAlternateMapKeys_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding.getAlternateSetKeys_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.OptionalBinderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.OptionalBinderBinding.getAlternateKeys_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.spi"/>
   <text>
     InsertCommentsHere

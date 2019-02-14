@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -99,18 +99,19 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>T</code> - The fully qualified type of the map, including Map. For example: <code>
-     MapBinderBinding&lt;Map&lt;String, Snack>></code></dd>
+<dd><code>T</code> - The fully qualified type of the map, including Map. For example: <code>MapBinderBinding&lt;Map&lt;String, Snack&gt;&gt;</code></dd>
 </dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">MapBinderBinding&lt;T&gt;</span></pre>
 <div class="block">A binding for a MapBinder.
 
- <p>Although MapBinders may be injected through a variety of generic types (Map&lt;K, V>, Map
- &lt;K, Provider&lt;V>>, Map&lt;K, Set&lt;V>>, Map<K, Set&lt; Provider&lt;V>>, and even
- Set&lt;Map.Entry&lt;K, Provider&lt;V>>), a MapBinderBinding exists only on the Binding associated
- with the Map&lt;K, V> key. Other bindings can be validated to be derived from this
+ <p>Although MapBinders may be injected through a variety of generic types (<code>Map&lt;K, V&gt;</code>,
+ <code>Map&lt;K, Provider&lt;V&gt;&gt;</code>, <code>Map&lt;K, Set&lt;V&gt;&gt;</code>, , and even
+ <code>Set&lt;Map.Entry&lt;K, Provider&lt;V&gt;&gt;</code>), a MapBinderBinding exists only on the Binding associated
+ with the Map&lt;K, V> key. Injectable map types can be discovered using <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getMapKey--"><code>getMapKey()</code></a> (which
+ will return the <code>Map&lt;K, V&gt;</code> key), or<a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getAlternateMapKeys--"><code>getAlternateMapKeys()</code></a> (which will return the
+ other keys that can inject this data). Other bindings can be validated to be derived from this
  MapBinderBinding using <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#containsElement-com.google.inject.spi.Element-"><code>containsElement(Element)</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -142,36 +143,42 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getAlternateMapKeys--">getAlternateMapKeys</a></span>()</code>
+<div class="block">Returns the keys of other bindings that represent this map.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>java.util.List&lt;java.util.Map.Entry&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--">getEntries</a></span>()</code>
 <div class="block">Returns all entries in the Map.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.util.List&lt;java.util.Map.Entry&lt;?,<a href="../../../../com/google/inject/Binding.html" title="interface in com.google.inject">Binding</a>&lt;?&gt;&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries-java.lang.Iterable-">getEntries</a></span>(java.lang.Iterable&lt;? extends <a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a>&gt;&nbsp;elements)</code>
 <div class="block">Similar to <a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getEntries--"><code>getEntries()</code></a>, but can be used on a MapBinderBinding retrieved from <a href="../../../../com/google/inject/spi/Elements.html#getElements-com.google.inject.Module...-"><code>Elements.getElements(com.google.inject.Module...)</code></a>.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getKeyTypeLiteral--">getKeyTypeLiteral</a></span>()</code>
 <div class="block">Returns the TypeLiteral describing the keys of the map.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinderBinding.html" title="type parameter in MapBinderBinding">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getMapKey--">getMapKey</a></span>()</code>
 <div class="block">Returns the <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject"><code>Key</code></a> for the map.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#getValueTypeLiteral--">getValueTypeLiteral</a></span>()</code>
 <div class="block">Returns the TypeLiteral describing the values of the map.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html#permitsDuplicates--">permitsDuplicates</a></span>()</code>
 <div class="block">Returns true if the MapBinder permits duplicates.</div>
@@ -200,6 +207,23 @@ var activeTableTab = "activeTableTab";
 <h4>getMapKey</h4>
 <pre><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinderBinding.html" title="type parameter in MapBinderBinding">T</a>&gt;&nbsp;getMapKey()</pre>
 <div class="block">Returns the <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject"><code>Key</code></a> for the map.</div>
+</li>
+</ul>
+<a name="getAlternateMapKeys--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAlternateMapKeys</h4>
+<pre>java.util.Set&lt;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;?&gt;&gt;&nbsp;getAlternateMapKeys()</pre>
+<div class="block">Returns the keys of other bindings that represent this map. This will return an entry for
+ <code>Map&lt;K, com.google.inject.Provider&lt;V&gt;&gt;</code>, <code>Map&lt;K, javax.inject.Provider&lt;V&gt;&gt;</code>, <code>Map&lt;K, Set&lt;com.google.inject.Provider&lt;V&gt;&gt;&gt;</code>, <code>Map&lt;K, Set&lt;javax.inject.Provider&lt;V&gt;&gt;&gt;</code>,
+ <code>Map&lt;K, Collection&lt;com.google.inject.Provider&lt;V&gt;&gt;&gt;</code>, <code>Map&lt;K,
+ Collection&lt;javax.inject.Provider&lt;V&gt;&gt;&gt;</code>, and <code>Map&lt;K, Set&lt;V&gt;</code>.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
+</dl>
 </li>
 </ul>
 <a name="getKeyTypeLiteral--">
