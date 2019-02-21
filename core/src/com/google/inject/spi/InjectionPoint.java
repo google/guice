@@ -18,16 +18,15 @@ package com.google.inject.spi;
 
 import static com.google.inject.internal.MoreTypes.getRawType;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.DeclaredMembers;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Nullability;
@@ -40,7 +39,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -757,68 +755,12 @@ public final class InjectionPoint {
   }
 
   private static Field[] getDeclaredFields(TypeLiteral<?> type) {
-    Field[] fields = type.getRawType().getDeclaredFields();
-    Arrays.sort(fields, FIELD_ORDERING);
-    return fields;
+    return DeclaredMembers.getDeclaredFields(type.getRawType());
   }
 
   private static Method[] getDeclaredMethods(TypeLiteral<?> type) {
-    Method[] methods = type.getRawType().getDeclaredMethods();
-    Arrays.sort(methods, METHOD_ORDERING);
-    return methods;
+    return DeclaredMembers.getDeclaredMethods(type.getRawType());
   }
-
-  /**
-   * An ordering suitable for comparing two classes if they are loaded by the same classloader
-   *
-   * <p>Within a single classloader there can only be one class with a given name, so we just
-   * compare the names.
-   */
-  private static final Ordering<Class<?>> CLASS_ORDERING =
-      new Ordering<Class<?>>() {
-        @Override
-        public int compare(Class<?> o1, Class<?> o2) {
-          return o1.getName().compareTo(o2.getName());
-        }
-      };
-
-  /**
-   * An ordering suitable for comparing two fields if they are owned by the same class.
-   *
-   * <p>Within a single class it is sufficent to compare the non-generic field signature which
-   * consists of the field name and type.
-   */
-  private static final Ordering<Field> FIELD_ORDERING =
-      new Ordering<Field>() {
-        @Override
-        public int compare(Field left, Field right) {
-          return ComparisonChain.start()
-              .compare(left.getName(), right.getName())
-              .compare(left.getType(), right.getType(), CLASS_ORDERING)
-              .result();
-        }
-      };
-
-  /**
-   * An ordering suitable for comparing two methods if they are owned by the same class.
-   *
-   * <p>Within a single class it is sufficient to compare the non-generic method signature which
-   * consists of the name, return type and parameter types.
-   */
-  private static final Ordering<Method> METHOD_ORDERING =
-      new Ordering<Method>() {
-        @Override
-        public int compare(Method left, Method right) {
-          return ComparisonChain.start()
-              .compare(left.getName(), right.getName())
-              .compare(left.getReturnType(), right.getReturnType(), CLASS_ORDERING)
-              .compare(
-                  Arrays.asList(left.getParameterTypes()),
-                  Arrays.asList(right.getParameterTypes()),
-                  CLASS_ORDERING.lexicographical())
-              .result();
-        }
-      };
 
   /**
    * Returns true if the method is eligible to be injected. This is different than {@link

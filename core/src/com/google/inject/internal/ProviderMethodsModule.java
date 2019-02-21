@@ -107,7 +107,7 @@ public final class ProviderMethodsModule implements Module {
     // The highest class in the type hierarchy that contained a provider method definition.
     Class<?> superMostClass = delegate.getClass();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
-      for (Method method : c.getDeclaredMethods()) {
+      for (Method method : DeclaredMembers.getDeclaredMethods(c)) {
         Annotation annotation = getAnnotation(binder, method);
         if (annotation != null) {
           if (result == null) {
