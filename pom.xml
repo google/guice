@@ -393,6 +393,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.0.0</version>
+          <!--TODO(b/123646401): try out maven-javadoc-plugin 3.1.0 and see if source 8 can be removed then-->
+          <configuration>
+            <source>8</source>
+          </configuration>
           <executions>
             <execution>
               <phase>package</phase>
