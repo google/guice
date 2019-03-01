@@ -19,9 +19,12 @@ package com.google.inject.spi;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Objects;
 import com.google.inject.Binder;
+import com.google.inject.ConfigurationException;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
+import java.util.Set;
 
 /**
  * A lookup of the members injector for a type. Lookups are created explicitly in a module using
@@ -85,6 +88,21 @@ public final class MembersInjectorLookup<T> implements Element {
   }
 
   /**
+   * Returns the instance methods and fields that will be injected to fulfill this request.
+   *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *     fields are returned and then all methods. Within the fields, supertype fields are returned
+   *     before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   * @throws ConfigurationException if there is a malformed injection point on the class of {@code
+   *     instance}, such as a field with multiple binding annotations. The exception's {@link
+   *     ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>} of
+   *     the valid injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints() throws ConfigurationException {
+    return InjectionPoint.forInstanceMethodsAndFields(type);
+  }
+
+  /**
    * Returns the looked up members injector. The result is not valid until this lookup has been
    * initialized, which usually happens when the injector is created. The members injector will
    * throw an {@code IllegalStateException} if you try to use it beforehand.
@@ -106,5 +124,17 @@ public final class MembersInjectorLookup<T> implements Element {
         return "MembersInjector<" + type + ">";
       }
     };
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof MembersInjectorLookup
+        && ((MembersInjectorLookup<?>) obj).type.equals(type)
+        && ((MembersInjectorLookup<?>) obj).source.equals(source);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(type, source);
   }
 }

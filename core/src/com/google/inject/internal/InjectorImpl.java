@@ -977,6 +977,9 @@ final class InjectorImpl implements Injector, Lookups {
     elements.addAll(state.getTypeListenerBindingsThisLevel());
     elements.addAll(state.getProvisionListenerBindingsThisLevel());
     elements.addAll(state.getScannerBindingsThisLevel());
+    elements.addAll(state.getStaticInjectionRequestsThisLevel());
+    elements.addAll(state.getMembersInjectorLookupsThisLevel());
+    elements.addAll(state.getInjectionRequestsThisLevel());
 
     return elements.build();
   }

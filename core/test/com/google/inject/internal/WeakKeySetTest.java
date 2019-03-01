@@ -34,10 +34,13 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.InjectionRequest;
+import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
+import com.google.inject.spi.StaticInjectionRequest;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
@@ -480,7 +483,37 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
-    public List<ProviderLookup<?>> getProviderLookupsThisLevel() {
+    public Set<ProviderLookup<?>> getProviderLookupsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<StaticInjectionRequest> getStaticInjectionRequestsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<InjectionRequest<?>> getInjectionRequestsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<MembersInjectorLookup<?>> getMembersInjectorLookupsThisLevel() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putInjectionRequest(InjectionRequest<?> injectionRequest) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putMembersInjectorLookup(MembersInjectorLookup<?> membersInjectorLookup) {
       throw new UnsupportedOperationException();
     }
 

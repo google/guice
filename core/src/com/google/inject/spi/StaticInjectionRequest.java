@@ -18,6 +18,7 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import java.util.Set;
@@ -75,5 +76,17 @@ public final class StaticInjectionRequest implements Element {
   @Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof StaticInjectionRequest
+        && ((StaticInjectionRequest) obj).source.equals(source)
+        && ((StaticInjectionRequest) obj).type.equals(type);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(source, type);
   }
 }

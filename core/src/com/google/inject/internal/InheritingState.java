@@ -22,14 +22,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.InjectionRequest;
+import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
+import com.google.inject.spi.StaticInjectionRequest;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
@@ -49,7 +53,10 @@ final class InheritingState implements State {
   private final Map<Key<?>, Binding<?>> explicitBindings =
       Collections.unmodifiableMap(explicitBindingsMutable);
   private final Map<Class<? extends Annotation>, ScopeBinding> scopes = Maps.newHashMap();
-  private final List<ProviderLookup<?>> lookups = Lists.newArrayList();
+  private final Set<ProviderLookup<?>> providerLookups = Sets.newLinkedHashSet();
+  private final Set<StaticInjectionRequest> staticInjectionRequests = Sets.newLinkedHashSet();
+  private final Set<MembersInjectorLookup<?>> membersInjectorLookups = Sets.newLinkedHashSet();
+  private final Set<InjectionRequest<?>> injectionRequests = Sets.newLinkedHashSet();
   private final List<TypeConverterBinding> converters = Lists.newArrayList();
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
@@ -90,12 +97,42 @@ final class InheritingState implements State {
 
   @Override
   public void putProviderLookup(ProviderLookup<?> lookup) {
-    lookups.add(lookup);
+    providerLookups.add(lookup);
   }
 
   @Override
-  public List<ProviderLookup<?>> getProviderLookupsThisLevel() {
-    return lookups;
+  public Set<ProviderLookup<?>> getProviderLookupsThisLevel() {
+    return providerLookups;
+  }
+
+  @Override
+  public void putStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest) {
+    staticInjectionRequests.add(staticInjectionRequest);
+  }
+
+  @Override
+  public Set<StaticInjectionRequest> getStaticInjectionRequestsThisLevel() {
+    return staticInjectionRequests;
+  }
+
+  @Override
+  public void putInjectionRequest(InjectionRequest<?> injectionRequest) {
+    injectionRequests.add(injectionRequest);
+  }
+
+  @Override
+  public Set<InjectionRequest<?>> getInjectionRequestsThisLevel() {
+    return injectionRequests;
+  }
+
+  @Override
+  public void putMembersInjectorLookup(MembersInjectorLookup<?> membersInjectorLookup) {
+    membersInjectorLookups.add(membersInjectorLookup);
+  }
+
+  @Override
+  public Set<MembersInjectorLookup<?>> getMembersInjectorLookupsThisLevel() {
+    return membersInjectorLookups;
   }
 
   @Override

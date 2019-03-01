@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
@@ -46,6 +47,7 @@ final class InjectionRequestProcessor extends AbstractProcessor {
   @Override
   public Boolean visit(StaticInjectionRequest request) {
     staticInjections.add(new StaticInjection(injector, request));
+    injector.state.putStaticInjectionRequest(request);
     return true;
   }
 
@@ -61,6 +63,16 @@ final class InjectionRequestProcessor extends AbstractProcessor {
 
     initializer.requestInjection(
         injector, request.getInstance(), null, request.getSource(), injectionPoints);
+    // When recreating the injection request, we revise the TypeLiteral to be the type
+    // of the instance.  This is because currently Guice ignores the user's TypeLiteral
+    // when determining the types for members injection.
+    // If/when this is fixed, we can report the exact type back to the user.
+    // (Otherwise the injection points exposed from the request may be wrong.)
+    injector.state.putInjectionRequest(
+        new InjectionRequest<>(
+            request.getSource(),
+            TypeLiteral.get(request.getInstance().getClass()),
+            /* instance= */ null));
     return true;
   }
 
