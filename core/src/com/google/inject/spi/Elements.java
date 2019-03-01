@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 
 import com.google.common.collect.ImmutableList;
@@ -236,11 +237,13 @@ public final class Elements {
     @Override
     @SuppressWarnings("unchecked") // it is safe to use the type literal for the raw type
     public void requestInjection(Object instance) {
+      checkNotNull(instance, "instance");
       requestInjection((TypeLiteral<Object>) TypeLiteral.get(instance.getClass()), instance);
     }
 
     @Override
     public <T> void requestInjection(TypeLiteral<T> type, T instance) {
+      checkNotNull(instance, "instance");
       elements.add(
           new InjectionRequest<T>(
               getElementSource(), MoreTypes.canonicalizeForKey(type), instance));

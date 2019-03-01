@@ -18,6 +18,7 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
@@ -43,7 +44,7 @@ public final class InjectionRequest<T> implements Element {
   public InjectionRequest(Object source, TypeLiteral<T> type, T instance) {
     this.source = checkNotNull(source, "source");
     this.type = checkNotNull(type, "type");
-    this.instance = checkNotNull(instance, "instance");
+    this.instance = instance;
   }
 
   @Override
@@ -51,6 +52,10 @@ public final class InjectionRequest<T> implements Element {
     return source;
   }
 
+  /**
+   * Returns the instance that injection is being requested on. This may be null for injection
+   * requests returned from an Injector, to allow the injector to reclaim memory.
+   */
   public T getInstance() {
     return instance;
   }
@@ -72,7 +77,8 @@ public final class InjectionRequest<T> implements Element {
    *     the valid injection points.
    */
   public Set<InjectionPoint> getInjectionPoints() throws ConfigurationException {
-    return InjectionPoint.forInstanceMethodsAndFields(instance.getClass());
+    return InjectionPoint.forInstanceMethodsAndFields(
+        instance != null ? TypeLiteral.get(instance.getClass()) : type);
   }
 
   @Override
@@ -83,5 +89,18 @@ public final class InjectionRequest<T> implements Element {
   @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).requestInjection(type, instance);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof InjectionRequest
+        && Objects.equal(((InjectionRequest<?>) obj).instance, instance)
+        && ((InjectionRequest<?>) obj).type.equals(type)
+        && ((InjectionRequest<?>) obj).source.equals(source);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(type, source);
   }
 }

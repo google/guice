@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -134,5 +135,17 @@ public final class ProviderLookup<T> implements Element {
         .add("dependency", dependency)
         .add("source", Errors.convert(source))
         .toString();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof ProviderLookup
+        && ((ProviderLookup<?>) obj).dependency.equals(dependency)
+        && ((ProviderLookup<?>) obj).source.equals(source);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(dependency, source);
   }
 }
