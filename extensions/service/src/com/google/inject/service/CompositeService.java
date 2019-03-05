@@ -79,26 +79,22 @@ public class CompositeService {
 
     return new Service() {
       @Override
-      public Future<State> start() {
+      public Future<State> start()  {
         final List<Future<State>> tasks = Lists.newArrayList();
-        for (Key<? extends Service> service : services) {
-          tasks.add(injector.getInstance(service).start());
-        }
+        services.forEach(service -> {
+tasks.add(injector.getInstance(service).start());
+});
 
         return futureGet(tasks, State.STARTED);
-      }
-
-      @Override
-      public Future<State> stop() {
+      }@Override
+      public Future<State> stop()  {
         final List<Future<State>> tasks = Lists.newArrayList();
-        for (Key<? extends Service> service : services) {
-          tasks.add(injector.getInstance(service).stop());
-        }
+        services.forEach(service -> {
+tasks.add(injector.getInstance(service).stop());
+});
 
         return futureGet(tasks, State.STOPPED);
-      }
-
-      @Override
+      }@Override
       public State state() {
         return compositeState;
       }

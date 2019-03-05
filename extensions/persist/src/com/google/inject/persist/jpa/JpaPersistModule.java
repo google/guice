@@ -55,7 +55,7 @@ public final class JpaPersistModule extends PersistModule {
   private MethodInterceptor transactionInterceptor;
 
   @Override
-  protected void configurePersistence() {
+  protected void configurePersistence()  {
     bindConstant().annotatedWith(Jpa.class).to(jpaUnit);
 
     bind(JpaPersistService.class).in(Singleton.class);
@@ -70,12 +70,10 @@ public final class JpaPersistModule extends PersistModule {
     requestInjection(transactionInterceptor);
 
     // Bind dynamic finders.
-    for (Class<?> finder : dynamicFinders) {
-      bindFinder(finder);
-    }
-  }
-
-  @Override
+    dynamicFinders.forEach(finder -> {
+bindFinder(finder);
+});
+  }@Override
   protected MethodInterceptor getTransactionInterceptor() {
     return transactionInterceptor;
   }

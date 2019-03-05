@@ -88,20 +88,18 @@ public final class PrivateElementsImpl implements PrivateElements {
   }
 
   @Override
-  public Set<Key<?>> getExposedKeys() {
+  public Set<Key<?>> getExposedKeys()  {
     if (exposedKeysToSources == null) {
       Map<Key<?>, Object> exposedKeysToSourcesMutable = Maps.newLinkedHashMap();
-      for (ExposureBuilder<?> exposureBuilder : exposureBuilders) {
-        exposedKeysToSourcesMutable.put(exposureBuilder.getKey(), exposureBuilder.getSource());
-      }
+      exposureBuilders.forEach(exposureBuilder -> {
+exposedKeysToSourcesMutable.put(exposureBuilder.getKey(), exposureBuilder.getSource());
+});
       exposedKeysToSources = ImmutableMap.copyOf(exposedKeysToSourcesMutable);
       exposureBuilders = null;
     }
 
     return exposedKeysToSources.keySet();
-  }
-
-  @Override
+  }@Override
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visit(this);
   }

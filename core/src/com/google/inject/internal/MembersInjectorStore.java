@@ -80,7 +80,7 @@ final class MembersInjectorStore {
 
   /** Creates a new members injector and attaches both injection listeners and method aspects. */
   private <T> MembersInjectorImpl<T> createWithListeners(TypeLiteral<T> type, Errors errors)
-      throws ErrorsException {
+      throws ErrorsException  {
     int numErrorsBefore = errors.size();
 
     Set<InjectionPoint> injectionPoints;
@@ -95,29 +95,23 @@ final class MembersInjectorStore {
 
     EncounterImpl<T> encounter = new EncounterImpl<>(errors, injector.lookups);
     Set<TypeListener> alreadySeenListeners = Sets.newHashSet();
-    for (TypeListenerBinding binding : typeListenerBindings) {
-      TypeListener typeListener = binding.getListener();
-      if (!alreadySeenListeners.contains(typeListener) && binding.getTypeMatcher().matches(type)) {
-        alreadySeenListeners.add(typeListener);
-        try {
-          typeListener.hear(type, encounter);
-        } catch (RuntimeException e) {
-          errors.errorNotifyingTypeListener(binding, type, e);
-        }
-      }
-    }
+    typeListenerBindings.forEach(binding -> {
+TypeListener typeListener = binding.getListener();
+if (!alreadySeenListeners.contains(typeListener) && binding.getTypeMatcher().matches(type)) {
+alreadySeenListeners.add(typeListener);
+typeListener.hear(type, encounter);
+errors.errorNotifyingTypeListener(binding, type, e);
+}
+});
     encounter.invalidate();
     errors.throwIfNewErrors(numErrorsBefore);
 
     return new MembersInjectorImpl<T>(injector, type, encounter, injectors);
-  }
-
-  /** Returns the injectors for the specified injection points. */
-  ImmutableList<SingleMemberInjector> getInjectors(
-      Set<InjectionPoint> injectionPoints, Errors errors) {
+  } ImmutableList<SingleMemberInjector> getInjectors(
+      Set<InjectionPoint> injectionPoints, Errors errors)  {
     List<SingleMemberInjector> injectors = Lists.newArrayList();
-    for (InjectionPoint injectionPoint : injectionPoints) {
-      try {
+    injectionPoints.forEach(injectionPoint -> {
+try {
         Errors errorsForMember =
             injectionPoint.isOptional()
                 ? new Errors(injectionPoint)
@@ -130,7 +124,6 @@ final class MembersInjectorStore {
       } catch (ErrorsException ignoredForNow) {
         // ignored for now
       }
-    }
+});
     return ImmutableList.copyOf(injectors);
-  }
-}
+  }}
