@@ -967,7 +967,15 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionPoint.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionRequest.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionRequest.html" title="class in com.google.inject.spi">InjectionRequest</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/MembersInjectorLookup.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/MembersInjectorLookup.html" title="class in com.google.inject.spi">MembersInjectorLookup</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/StaticInjectionRequest.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/StaticInjectionRequest.html" title="class in com.google.inject.spi">StaticInjectionRequest</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/TypeLiteral.html#equals-java.lang.Object-">equals(Object)</a></span> - Method in class com.google.inject.<a href="com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a></dt>
 <dd>&nbsp;</dd>
@@ -1530,6 +1538,10 @@
 <div class="block">Returns the field and method injection points of the instance, injected at injector-creation
  time only.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/MembersInjectorLookup.html#getInjectionPoints--">getInjectionPoints()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/MembersInjectorLookup.html" title="class in com.google.inject.spi">MembersInjectorLookup</a></dt>
+<dd>
+<div class="block">Returns the instance methods and fields that will be injected to fulfill this request.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderInstanceBinding.html#getInjectionPoints--">getInjectionPoints()</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ProviderInstanceBinding.html" title="interface in com.google.inject.spi">ProviderInstanceBinding</a></dt>
 <dd>
 <div class="block">Returns the field and method injection points of the provider, injected at injector-creation
@@ -1560,7 +1572,9 @@
 <div class="block">Returns the appropriate instance for the given injection type; equivalent to <code>getProvider(type).get()</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionRequest.html#getInstance--">getInstance()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionRequest.html" title="class in com.google.inject.spi">InjectionRequest</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns the instance that injection is being requested on.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/InstanceBinding.html#getInstance--">getInstance()</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/InstanceBinding.html" title="interface in com.google.inject.spi">InstanceBinding</a></dt>
 <dd>
 <div class="block">Returns the user-supplied instance.</div>
@@ -2121,7 +2135,15 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionPoint.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionRequest.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionRequest.html" title="class in com.google.inject.spi">InjectionRequest</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/MembersInjectorLookup.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/MembersInjectorLookup.html" title="class in com.google.inject.spi">MembersInjectorLookup</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/StaticInjectionRequest.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/StaticInjectionRequest.html" title="class in com.google.inject.spi">StaticInjectionRequest</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/TypeLiteral.html#hashCode--">hashCode()</a></span> - Method in class com.google.inject.<a href="com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a></dt>
 <dd>&nbsp;</dd>

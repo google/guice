@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -154,22 +154,30 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html#equals-java.lang.Object-">equals</a></span>(java.lang.Object&nbsp;obj)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.util.Set&lt;<a href="../../../../com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html#getInjectionPoints--">getInjectionPoints</a></span>()</code>
 <div class="block">Returns the static methods and fields of <code>type</code> that will be injected to fulfill this
  request.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>java.lang.Object</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html#getSource--">getSource</a></span>()</code>
 <div class="block">Returns an arbitrary object containing information about the "place" where this element was
  configured.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>java.lang.Class&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html#getType--">getType</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -177,7 +185,7 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+<code>clone, finalize, getClass, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -264,7 +272,7 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <a name="acceptVisitor-com.google.inject.spi.ElementVisitor-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>acceptVisitor</h4>
 <pre>public&nbsp;&lt;T&gt;&nbsp;T&nbsp;acceptVisitor(<a href="../../../../com/google/inject/spi/ElementVisitor.html" title="interface in com.google.inject.spi">ElementVisitor</a>&lt;T&gt;&nbsp;visitor)</pre>
@@ -275,6 +283,32 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <dd><code><a href="../../../../com/google/inject/spi/Element.html#acceptVisitor-com.google.inject.spi.ElementVisitor-">acceptVisitor</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/inject/spi/Element.html" title="interface in com.google.inject.spi">Element</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>visitor</code> - to call back on</dd>
+</dl>
+</li>
+</ul>
+<a name="equals-java.lang.Object-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>equals</h4>
+<pre>public&nbsp;boolean&nbsp;equals(java.lang.Object&nbsp;obj)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>equals</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
+</li>
+</ul>
+<a name="hashCode--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>hashCode</h4>
+<pre>public&nbsp;int&nbsp;hashCode()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>hashCode</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
 </dl>
 </li>
 </ul>
