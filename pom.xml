@@ -144,12 +144,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>25.1-android</version>
+        <version>27.1-jre</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>25.1-android</version>
+        <version>27.1-jre</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
@@ -265,14 +265,14 @@ See the Apache License Version 2.0 for the specific language governing permissio
           </executions>
         </plugin>
         <!--
-         | Make sure we only use Java7 methods
+         | Make sure we only use Java8 methods
         -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
           <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
         <plugin>
@@ -282,13 +282,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <configuration>
             <signature>
               <groupId>org.codehaus.mojo.signature</groupId>
-              <artifactId>java17</artifactId>
+              <artifactId>java18</artifactId>
               <version>1.0</version>
             </signature>
           </configuration>
           <executions>
             <execution>
-              <id>check-java-1.7-compat</id>
+              <id>check-java-1.8-compat</id>
               <phase>process-classes</phase>
               <goals>
                 <goal>check</goal>

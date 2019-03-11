@@ -14,7 +14,7 @@
     <javac srcdir="${src.dir}"
          debug="on"
          destdir="${build.dir}/classes"
-         source="1.7" target="1.7" includeantruntime="false">
+         source="1.8" target="1.8" includeantruntime="false">
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath refid="compile.classpath"/>
     </javac>
