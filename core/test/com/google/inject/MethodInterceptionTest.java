@@ -424,14 +424,11 @@ public class MethodInterceptionTest extends TestCase {
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
       queue.add(
-          new Runnable() {
-            @Override
-            public void run() {
-              try {
-                methodInvocation.proceed();
-              } catch (Throwable t) {
-                throw new RuntimeException(t);
-              }
+          () -> {
+            try {
+              methodInvocation.proceed();
+            } catch (Throwable t) {
+              throw new RuntimeException(t);
             }
           });
       return null;

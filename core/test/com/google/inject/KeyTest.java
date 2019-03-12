@@ -338,12 +338,9 @@ public class KeyTest extends TestCase {
     awaitClear(moduleRef); // Make sure anonymous keys & typeliterals don't hold the module.
 
     Runnable runner =
-        new Runnable() {
-          @Override
-          public void run() {
-            injector.getInstance(new Key<Typed<String>>() {});
-            injector.getInstance(Key.get(new TypeLiteral<Typed<Integer>>() {}));
-          }
+        () -> {
+          injector.getInstance(new Key<Typed<String>>() {});
+          injector.getInstance(Key.get(new TypeLiteral<Typed<Integer>>() {}));
         };
     WeakReference<Runnable> runnerRef = new WeakReference<>(runner);
     runner.run();

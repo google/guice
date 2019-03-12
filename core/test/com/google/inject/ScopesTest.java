@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -919,16 +918,7 @@ public class ScopesTest extends TestCase {
     volatile boolean barrierPassed = false;
 
     SBarrierProvider(int nThreads) {
-      barrier =
-          new CyclicBarrier(
-              nThreads,
-              new Runnable() {
-                @Override
-                public void run() {
-                  // would finish before returning from await() for any thread
-                  barrierPassed = true;
-                }
-              });
+      barrier = new CyclicBarrier(nThreads, () -> barrierPassed = true);
     }
 
     @Override
@@ -975,14 +965,7 @@ public class ScopesTest extends TestCase {
             });
 
     Future<S> secondThreadResult =
-        Executors.newSingleThreadExecutor()
-            .submit(
-                new Callable<S>() {
-                  @Override
-                  public S call() {
-                    return secondInjector.getInstance(S.class);
-                  }
-                });
+        Executors.newSingleThreadExecutor().submit(() -> secondInjector.getInstance(S.class));
 
     S firstS = injector.getInstance(S.class);
     S secondS = secondThreadResult.get();
@@ -1045,22 +1028,16 @@ public class ScopesTest extends TestCase {
     Future<G> firstThreadResult =
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<G>() {
-                  @Override
-                  public G call() {
-                    Thread.currentThread().setName("G.class");
-                    return injector.createChildInjector().getInstance(G.class);
-                  }
+                () -> {
+                  Thread.currentThread().setName("G.class");
+                  return injector.createChildInjector().getInstance(G.class);
                 });
     Future<H> secondThreadResult =
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<H>() {
-                  @Override
-                  public H call() {
-                    Thread.currentThread().setName("H.class");
-                    return injector.createChildInjector().getInstance(H.class);
-                  }
+                () -> {
+                  Thread.currentThread().setName("H.class");
+                  return injector.createChildInjector().getInstance(H.class);
                 });
 
     // using separate threads to avoid potential deadlock on the main thread
@@ -1179,18 +1156,18 @@ public class ScopesTest extends TestCase {
               }
             });
 
-    FutureTask<I0> firstThreadResult = new FutureTask<>(fetchClass(injector, I0.class));
+    FutureTask<I0> firstThreadResult = new FutureTask<>(() -> injector.getInstance(I0.class));
     Thread i0Thread = new Thread(firstThreadResult, "I0.class");
     // we need to call toString() now, because the toString() changes after the thread exits.
     String i0ThreadString = i0Thread.toString();
     i0Thread.start();
 
-    FutureTask<J0> secondThreadResult = new FutureTask<>(fetchClass(injector, J0.class));
+    FutureTask<J0> secondThreadResult = new FutureTask<>(() -> injector.getInstance(J0.class));
     Thread j0Thread = new Thread(secondThreadResult, "J0.class");
     String j0ThreadString = j0Thread.toString();
     j0Thread.start();
 
-    FutureTask<K0> thirdThreadResult = new FutureTask<>(fetchClass(injector, K0.class));
+    FutureTask<K0> thirdThreadResult = new FutureTask<>(() -> injector.getInstance(K0.class));
     Thread k0Thread = new Thread(thirdThreadResult, "K0.class");
     String k0ThreadString = k0Thread.toString();
     k0Thread.start();
@@ -1287,34 +1264,21 @@ public class ScopesTest extends TestCase {
         ImmutableList.of(I1.class.getName(), I2.class.getName(), J1.class.getName()));
   }
 
-  private static <T> Callable<T> fetchClass(final Injector injector, final Class<T> clazz) {
-    return new Callable<T>() {
-      @Override
-      public T call() {
-        return injector.getInstance(clazz);
-      }
-    };
-  }
-
   // Test for https://github.com/google/guice/issues/1032
 
   public void testScopeAppliedByUserInsteadOfScoping() throws Exception {
     Injector injector =
         java.util.concurrent.Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<Injector>() {
-                  @Override
-                  public Injector call() {
-                    return Guice.createInjector(
+                () ->
+                    Guice.createInjector(
                         new AbstractModule() {
                           @Override
                           protected void configure() {
                             bindListener(Matchers.any(), new ScopeMutatingProvisionListener());
                             bind(SingletonClass.class);
                           }
-                        });
-                  }
-                })
+                        }))
             .get();
     injector.getInstance(SingletonClass.class); // will fail here with NPE
   }

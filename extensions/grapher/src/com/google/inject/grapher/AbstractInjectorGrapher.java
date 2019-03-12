@@ -16,6 +16,8 @@
 
 package com.google.inject.grapher;
 
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -170,7 +172,7 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   }
 
   private NodeId resolveAlias(Map<NodeId, NodeId> aliases, NodeId nodeId) {
-    return aliases.containsKey(nodeId) ? aliases.get(nodeId) : nodeId;
+    return aliases.getOrDefault(nodeId, nodeId);
   }
 
   /**
@@ -179,7 +181,7 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
    */
   private Map<NodeId, NodeId> resolveAliases(Iterable<Alias> aliases) {
     Map<NodeId, NodeId> resolved = Maps.newHashMap();
-    Map<NodeId, Set<NodeId>> inverse = Maps.newHashMap();
+    SetMultimap<NodeId, NodeId> inverse = HashMultimap.create();
 
     for (Alias alias : aliases) {
       NodeId from = alias.getFromId();
@@ -188,18 +190,15 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
         to = resolved.get(to);
       }
       resolved.put(from, to);
-      if (inverse.get(to) == null) {
-        inverse.put(to, Sets.<NodeId>newHashSet());
-      }
-      inverse.get(to).add(from);
+      inverse.put(to, from);
 
       Set<NodeId> prev = inverse.get(from);
       if (prev != null) {
         for (NodeId id : prev) {
           resolved.remove(id);
-          inverse.get(from).remove(id);
+          inverse.remove(from, id);
           resolved.put(id, to);
-          inverse.get(to).add(id);
+          inverse.put(to, id);
         }
       }
     }

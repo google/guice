@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.collect.MoreCollectors.onlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.internal.SpiUtils.assertOptionalVisitor;
 import static com.google.inject.internal.SpiUtils.instance;
@@ -26,7 +27,6 @@ import static com.google.inject.name.Names.named;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -1366,7 +1366,10 @@ public class OptionalBinderTest extends TestCase {
         };
 
     InstanceBinding<?> binding =
-        Iterables.getOnlyElement(Iterables.filter(Elements.getElements(m), InstanceBinding.class));
+        Elements.getElements(m).stream()
+            .filter(InstanceBinding.class::isInstance)
+            .map(InstanceBinding.class::cast)
+            .collect(onlyElement());
     Key<?> keyBefore = binding.getKey();
     assertEquals(listOfStrings, keyBefore.getTypeLiteral());
 

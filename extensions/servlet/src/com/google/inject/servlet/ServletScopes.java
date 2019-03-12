@@ -19,7 +19,6 @@ package com.google.inject.servlet;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Maps.EntryTransformer;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -363,14 +362,7 @@ public class ServletScopes {
     // Copy the seed values into our local scope map.
     final Context context = new Context();
     Map<Key<?>, Object> validatedAndCanonicalizedMap =
-        Maps.transformEntries(
-            seedMap,
-            new EntryTransformer<Key<?>, Object, Object>() {
-              @Override
-              public Object transformEntry(Key<?> key, Object value) {
-                return validateAndCanonicalizeValue(key, value);
-              }
-            });
+        Maps.transformEntries(seedMap, ServletScopes::validateAndCanonicalizeValue);
     context.map.putAll(validatedAndCanonicalizedMap);
     return new RequestScoper() {
       @Override
@@ -439,15 +431,12 @@ public class ServletScopes {
 
   private static final <T> Callable<T> wrap(
       final Callable<T> delegate, final RequestScoper requestScoper) {
-    return new Callable<T>() {
-      @Override
-      public T call() throws Exception {
-        RequestScoper.CloseableScope scope = requestScoper.open();
-        try {
-          return delegate.call();
-        } finally {
-          scope.close();
-        }
+    return () -> {
+      RequestScoper.CloseableScope scope = requestScoper.open();
+      try {
+        return delegate.call();
+      } finally {
+        scope.close();
       }
     };
   }

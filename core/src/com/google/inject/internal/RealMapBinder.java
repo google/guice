@@ -473,9 +473,7 @@ public final class RealMapBinder<K, V> implements Module {
             // Don't do extra work unless we need to
             if (permitsDuplicates) {
               // Create a set builder for this key if it's the first time we've seen it
-              if (!bindingMultimapMutable.containsKey(key)) {
-                bindingMultimapMutable.put(key, ImmutableSet.<Binding<V>>builder());
-              }
+              bindingMultimapMutable.computeIfAbsent(key, k -> ImmutableSet.builder());
 
               // Add the Binding<V>
               bindingMultimapMutable.get(key).add(valueBinding);

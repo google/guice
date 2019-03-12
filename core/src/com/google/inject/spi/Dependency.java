@@ -103,8 +103,8 @@ public final class Dependency<T> {
     if (o instanceof Dependency) {
       Dependency dependency = (Dependency) o;
       return Objects.equal(injectionPoint, dependency.injectionPoint)
-          && Objects.equal(parameterIndex, dependency.parameterIndex)
-          && Objects.equal(key, dependency.key);
+          && parameterIndex == dependency.parameterIndex
+          && key.equals(dependency.key);
     } else {
       return false;
     }

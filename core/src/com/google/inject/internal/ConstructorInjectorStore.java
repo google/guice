@@ -16,10 +16,11 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.spi.InjectionPoint;
+import java.util.stream.Stream;
 
 /**
  * Constructor injectors by type.
@@ -78,7 +79,8 @@ final class ConstructorInjectorStore {
     ImmutableList<MethodAspect> methodAspects =
         membersInjector.getAddedAspects().isEmpty()
             ? injectorAspects
-            : ImmutableList.copyOf(concat(injectorAspects, membersInjector.getAddedAspects()));
+            : Stream.concat(injectorAspects.stream(), membersInjector.getAddedAspects().stream())
+                .collect(toImmutableList());
     ConstructionProxyFactory<T> factory = new ProxyFactory<>(injectionPoint, methodAspects);
     /*end[AOP]*/
     /*if[NO_AOP]

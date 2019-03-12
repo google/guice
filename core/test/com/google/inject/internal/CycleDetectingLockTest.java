@@ -7,7 +7,6 @@ import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory.ReentrantCycleDetectingLock;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -83,33 +82,27 @@ public class CycleDetectingLockTest extends TestCase {
     Future<Void> firstThreadResult =
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<Void>() {
-                  @Override
-                  public Void call() throws Exception {
-                    Thread.currentThread().setName("T1");
-                    signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                    assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
-                    assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
-                    lockB.unlock();
-                    lockA.unlock();
-                    return null;
-                  }
+                () -> {
+                  Thread.currentThread().setName("T1");
+                  signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                  assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
+                  assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
+                  lockB.unlock();
+                  lockA.unlock();
+                  return null;
                 });
     Future<Void> secondThreadResult =
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<Void>() {
-                  @Override
-                  public Void call() throws Exception {
-                    Thread.currentThread().setName("T2");
-                    assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
-                    signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                    signal2.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                    lockB.unlock();
-                    assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
-                    lockA.unlock();
-                    return null;
-                  }
+                () -> {
+                  Thread.currentThread().setName("T2");
+                  assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
+                  signal1.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                  signal2.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                  lockB.unlock();
+                  assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
+                  lockA.unlock();
+                  return null;
                 });
 
     firstThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
@@ -139,36 +132,30 @@ public class CycleDetectingLockTest extends TestCase {
     Future<Boolean> threadA =
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<Boolean>() {
-                  @Override
-                  public Boolean call() throws Exception {
-                    Thread.currentThread().setName("A");
-                    assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
-                    eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                    boolean isEmpty = lockB.lockOrDetectPotentialLocksCycle().isEmpty();
-                    if (isEmpty) {
-                      lockB.unlock();
-                    }
-                    lockA.unlock();
-                    return isEmpty;
+                () -> {
+                  Thread.currentThread().setName("A");
+                  assertTrue(lockA.lockOrDetectPotentialLocksCycle().isEmpty());
+                  eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                  boolean isEmpty = lockB.lockOrDetectPotentialLocksCycle().isEmpty();
+                  if (isEmpty) {
+                    lockB.unlock();
                   }
+                  lockA.unlock();
+                  return isEmpty;
                 });
     Future<Boolean> threadB =
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<Boolean>() {
-                  @Override
-                  public Boolean call() throws Exception {
-                    Thread.currentThread().setName("B");
-                    assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
-                    eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                    boolean isEmpty = lockA.lockOrDetectPotentialLocksCycle().isEmpty();
-                    if (isEmpty) {
-                      lockA.unlock();
-                    }
-                    lockB.unlock();
-                    return isEmpty;
+                () -> {
+                  Thread.currentThread().setName("B");
+                  assertTrue(lockB.lockOrDetectPotentialLocksCycle().isEmpty());
+                  eachThreadAcquiredFirstLock.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                  boolean isEmpty = lockA.lockOrDetectPotentialLocksCycle().isEmpty();
+                  if (isEmpty) {
+                    lockA.unlock();
                   }
+                  lockB.unlock();
+                  return isEmpty;
                 });
 
     boolean deadlockADetected = threadA.get(DEADLOCK_TIMEOUT_SECONDS * 2, TimeUnit.SECONDS);
@@ -229,18 +216,15 @@ public class CycleDetectingLockTest extends TestCase {
       final CyclicBarrier barrier) {
     FutureTask<ListMultimap<Thread, T>> future =
         new FutureTask<ListMultimap<Thread, T>>(
-            new Callable<ListMultimap<Thread, T>>() {
-              @Override
-              public ListMultimap<Thread, T> call() throws Exception {
-                assertTrue(lock1.lockOrDetectPotentialLocksCycle().isEmpty());
-                barrier.await();
-                ListMultimap<Thread, T> cycle = lock2.lockOrDetectPotentialLocksCycle();
-                if (cycle == null) {
-                  lock2.unlock();
-                }
-                lock1.unlock();
-                return cycle;
+            () -> {
+              assertTrue(lock1.lockOrDetectPotentialLocksCycle().isEmpty());
+              barrier.await();
+              ListMultimap<Thread, T> cycle = lock2.lockOrDetectPotentialLocksCycle();
+              if (cycle == null) {
+                lock2.unlock();
               }
+              lock1.unlock();
+              return cycle;
             });
     Thread thread = new Thread(future);
     thread.start();

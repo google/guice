@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalCause;
-import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Maps;
@@ -55,13 +54,10 @@ final class WeakKeySet {
       CacheBuilder.newBuilder()
           .weakKeys()
           .removalListener(
-              new RemovalListener<State, Set<KeyAndSource>>() {
-                @Override
-                public void onRemoval(RemovalNotification<State, Set<KeyAndSource>> notification) {
-                  Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
+              (RemovalNotification<State, Set<KeyAndSource>> notification) -> {
+                Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
 
-                  cleanUpForCollectedState(notification.getValue());
-                }
+                cleanUpForCollectedState(notification.getValue());
               })
           .build();
 
@@ -96,11 +92,7 @@ final class WeakKeySet {
     if (source instanceof Class || source == SourceProvider.UNKNOWN_SOURCE) {
       source = null;
     }
-    Multiset<Object> sources = backingMap.get(key);
-    if (sources == null) {
-      sources = LinkedHashMultiset.create();
-      backingMap.put(key, sources);
-    }
+    Multiset<Object> sources = backingMap.computeIfAbsent(key, k -> LinkedHashMultiset.create());
     Object convertedSource = Errors.convert(source);
     sources.add(convertedSource);
 
