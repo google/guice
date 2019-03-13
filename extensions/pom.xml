@@ -90,7 +90,7 @@
         <artifactId>maven-remote-resources-plugin</artifactId>
       </plugin>
       <!--
-       | Enable Java6 conformance checks
+       | Enable Java7 conformance checks
       -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
