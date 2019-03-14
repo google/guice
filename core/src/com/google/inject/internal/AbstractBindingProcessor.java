@@ -169,14 +169,11 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     }
 
     private Runnable asRunnable(final BindingImpl<?> binding) {
-      return new Runnable() {
-        @Override
-        public void run() {
-          try {
-            binding.getInjector().initializeBinding(binding, errors.withSource(source));
-          } catch (ErrorsException e) {
-            errors.merge(e.getErrors());
-          }
+      return () -> {
+        try {
+          binding.getInjector().initializeBinding(binding, errors.withSource(source));
+        } catch (ErrorsException e) {
+          errors.merge(e.getErrors());
         }
       };
     }
