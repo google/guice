@@ -88,7 +88,7 @@ public final class CheckedProvidersTest extends TestCase {
           new TypeLiteral<MoreMethodsCheckedProvider<String>>() {}, "SHOW ME WHAT YOU GOT");
       fail("Expected an exception to be thrown");
     } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessage(message);
+      assertThat(e).hasMessageThat().isEqualTo(message);
     }
   }
 
@@ -106,7 +106,7 @@ public final class CheckedProvidersTest extends TestCase {
       CheckedProviders.throwing(FooCheckedProvider.class, StringException.class);
       fail("Expected an exception to be thrown");
     } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessage(message);
+      assertThat(e).hasMessageThat().isEqualTo(message);
       assertWithMessage(String.format("exception <%s> with cause", e))
           .that(e.getCause())
           .isInstanceOf(NoSuchMethodException.class);
@@ -126,7 +126,7 @@ public final class CheckedProvidersTest extends TestCase {
       CheckedProviders.throwing(FooCheckedProvider.class, BarException.class);
       fail("Expected an exception to be thrown");
     } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessage(message);
+      assertThat(e).hasMessageThat().isEqualTo(message);
     }
   }
 
