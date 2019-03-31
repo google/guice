@@ -19,6 +19,9 @@ package com.google.inject.internal;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import java.util.Map;
 
 /**
  * Lazily creates (and caches) values for keys. If creating the value fails (with errors), an
@@ -61,5 +64,17 @@ public abstract class FailableCache<K, V> {
 
   boolean remove(K key) {
     return delegate.asMap().remove(key) != null;
+  }
+
+  Map<K, V> asMap() {
+    return Maps.transformValues(
+        Maps.filterValues(
+            ImmutableMap.copyOf(delegate.asMap()),
+            resultOrError -> !(resultOrError instanceof Errors)),
+        resultOrError -> {
+          @SuppressWarnings("unchecked") // create returned a non-error result, so this is safe
+          V result = (V) resultOrError;
+          return result;
+        });
   }
 }
