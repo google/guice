@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
 import com.google.common.base.Preconditions;
@@ -155,20 +154,18 @@ public class Annotations {
 
   private static final MapJoiner JOINER = Joiner.on(", ").withKeyValueSeparator("=");
 
-  private static final Function<Object, String> DEEP_TO_STRING_FN =
-      new Function<Object, String>() {
-        @Override
-        public String apply(Object arg) {
-          String s = Arrays.deepToString(new Object[] {arg});
-          return s.substring(1, s.length() - 1); // cut off brackets
-        }
-      };
-
   /** Implements {@link Annotation#toString}. */
   private static String annotationToString(
       Class<? extends Annotation> type, Map<String, Object> members) throws Exception {
     StringBuilder sb = new StringBuilder().append("@").append(type.getName()).append("(");
-    JOINER.appendTo(sb, Maps.transformValues(members, DEEP_TO_STRING_FN));
+    JOINER.appendTo(
+        sb,
+        Maps.transformValues(
+            members,
+            arg -> {
+              String s = Arrays.deepToString(new Object[] {arg});
+              return s.substring(1, s.length() - 1); // cut off brackets
+            }));
     return sb.append(")").toString();
   }
 

@@ -1,8 +1,9 @@
 package com.google.inject.throwingproviders;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.inject.internal.Errors;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -79,9 +80,9 @@ final class ProviderChecker {
     // a default method on the interface w/ the superinterface type that
     // just delegates directly to the overridden method.
     List<Method> declaredMethods =
-        FluentIterable.from(Arrays.asList(interfaceType.getDeclaredMethods()))
+        Arrays.stream(interfaceType.getDeclaredMethods())
             .filter(NotSyntheticOrBridgePredicate.INSTANCE)
-            .toList();
+            .collect(toImmutableList());
     if (declaredMethods.size() == 1) {
       Method method = declaredMethods.get(0);
       checkArgument(

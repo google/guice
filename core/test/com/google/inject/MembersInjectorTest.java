@@ -21,7 +21,6 @@ import static com.google.inject.Asserts.assertContains;
 import com.google.inject.internal.Annotations;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -311,13 +310,7 @@ public class MembersInjectorTest extends TestCase {
       // verify that other callback can be finished on a separate thread
       AbstractParallelMemberInjectionCallback otherCallback =
           Executors.newSingleThreadExecutor()
-              .submit(
-                  new Callable<AbstractParallelMemberInjectionCallback>() {
-                    @Override
-                    public AbstractParallelMemberInjectionCallback call() throws Exception {
-                      return injector.getInstance(otherCallbackClass);
-                    }
-                  })
+              .submit(() -> injector.getInstance(otherCallbackClass))
               .get(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
       assertTrue(otherCallback.called);
 
@@ -325,13 +318,7 @@ public class MembersInjectorTest extends TestCase {
         // other thread would wait for callback to finish on this thread first
         Executors.newSingleThreadExecutor()
             .submit(
-                new Callable<Object>() {
-                  @Override
-                  public Object call() throws Exception {
-                    return injector.getInstance(
-                        AbstractParallelMemberInjectionCallback.this.getClass());
-                  }
-                })
+                () -> injector.getInstance(AbstractParallelMemberInjectionCallback.this.getClass()))
             .get(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         fail();
       } catch (TimeoutException expected) {

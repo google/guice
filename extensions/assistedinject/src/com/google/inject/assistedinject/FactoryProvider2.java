@@ -57,9 +57,10 @@ import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -209,7 +210,7 @@ final class FactoryProvider2<F>
   private final ImmutableMap<Method, AssistData> assistDataByMethod;
 
   /** Mapping from method to method handle, for generated default methods. */
-  private final ImmutableMap<Method, MethodHandleWrapper> methodHandleByMethod;
+  private final ImmutableMap<Method, MethodHandle> methodHandleByMethod;
 
   /** the hosting injector, or null if we haven't been initialized yet */
   private Injector injector;
@@ -362,11 +363,10 @@ final class FactoryProvider2<F>
       // work.  If that doesn't work, fallback to trying to find compatible method
       // signatures.
       Map<Method, AssistData> dataSoFar = assistDataBuilder.build();
-      ImmutableMap.Builder<Method, MethodHandleWrapper> methodHandleBuilder =
-          ImmutableMap.builder();
+      ImmutableMap.Builder<Method, MethodHandle> methodHandleBuilder = ImmutableMap.builder();
       for (Map.Entry<String, Method> entry : defaultMethods.entries()) {
         Method defaultMethod = entry.getValue();
-        MethodHandleWrapper handle = MethodHandleWrapper.create(defaultMethod, factory);
+        MethodHandle handle = createMethodHandle(defaultMethod, factory);
         if (handle != null) {
           methodHandleBuilder.put(defaultMethod, handle);
         } else {
@@ -392,7 +392,8 @@ final class FactoryProvider2<F>
         }
       }
 
-      // If we generated any errors (from finding matching constructors, for instance), throw an exception.
+      // If we generated any errors (from finding matching constructors, for instance), throw an
+      // exception.
       if (errors.hasErrors()) {
         throw errors.toException();
       }
@@ -765,7 +766,8 @@ final class FactoryProvider2<F>
             int p = 0;
             if (!data.optimized) {
               for (Key<?> paramKey : data.paramTypes) {
-                // Wrap in a Provider to cover null, and to prevent Guice from injecting the parameter
+                // Wrap in a Provider to cover null, and to prevent Guice from injecting the
+                // parameter
                 binder.bind((Key) paramKey).toProvider(Providers.of(args[p++]));
               }
             } else {
@@ -895,82 +897,36 @@ final class FactoryProvider2<F>
     }
   }
 
-  /** Wrapper around MethodHandles/MethodHandle, so we can compile+run on java6. */
-  private static class MethodHandleWrapper {
-    static final int ALL_MODES =
+  // Note: this isn't a public API, but we need to use it in order to call default methods on (or
+  // with) non-public types.  If it doesn't exist, the code falls back to a less precise check.
+  private static final Constructor<MethodHandles.Lookup> methodHandlesLookupCxtor =
+      findMethodHandlesLookupCxtor();
+
+  private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor() {
+    try {
+      Constructor<MethodHandles.Lookup> cxtor =
+          MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+      cxtor.setAccessible(true);
+      return cxtor;
+    } catch (ReflectiveOperationException ignored) {
+      // Ignore, the code falls back to a less-precise check if we can't create method handles.
+      return null;
+    }
+  }
+
+  private static MethodHandle createMethodHandle(Method method, Object proxy) {
+    if (methodHandlesLookupCxtor == null) {
+      return null;
+    }
+    Class<?> declaringClass = method.getDeclaringClass();
+    int allModes =
         Modifier.PRIVATE | Modifier.STATIC /* package */ | Modifier.PUBLIC | Modifier.PROTECTED;
-
-    static final Method unreflectSpecial;
-    static final Method bindTo;
-    static final Method invokeWithArguments;
-    static final Constructor<?> lookupCxtor;
-    static final boolean valid;
-
-    static {
-      Method unreflectSpecialTmp = null;
-      Method bindToTmp = null;
-      Method invokeWithArgumentsTmp = null;
-      boolean validTmp = false;
-      Constructor<?> lookupCxtorTmp = null;
-      try {
-        Class<?> lookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
-        unreflectSpecialTmp = lookupClass.getMethod("unreflectSpecial", Method.class, Class.class);
-        Class<?> methodHandleClass = Class.forName("java.lang.invoke.MethodHandle");
-        bindToTmp = methodHandleClass.getMethod("bindTo", Object.class);
-        invokeWithArgumentsTmp = methodHandleClass.getMethod("invokeWithArguments", Object[].class);
-        lookupCxtorTmp = lookupClass.getDeclaredConstructor(Class.class, int.class);
-        lookupCxtorTmp.setAccessible(true);
-        validTmp = true;
-      } catch (Exception invalid) {
-        // Ignore the exception, store the values & exit early in create(..) if invalid.
-      }
-
-      // Store refs to later.
-      valid = validTmp;
-      unreflectSpecial = unreflectSpecialTmp;
-      bindTo = bindToTmp;
-      invokeWithArguments = invokeWithArgumentsTmp;
-      lookupCxtor = lookupCxtorTmp;
-    }
-
-    static MethodHandleWrapper create(Method method, Object proxy) {
-      if (!valid) {
-        return null;
-      }
-      try {
-        Class<?> declaringClass = method.getDeclaringClass();
-        // Note: this isn't a public API, but we need to use it in order to call default methods.
-        Object lookup = lookupCxtor.newInstance(declaringClass, ALL_MODES);
-        method.setAccessible(true);
-        // These are part of the public API, but we use reflection since we run on java6
-        // and they were introduced in java7.
-        lookup = unreflectSpecial.invoke(lookup, method, declaringClass);
-        Object handle = bindTo.invoke(lookup, proxy);
-        return new MethodHandleWrapper(handle);
-      } catch (InvocationTargetException ite) {
-        return null;
-      } catch (IllegalAccessException iae) {
-        return null;
-      } catch (InstantiationException ie) {
-        return null;
-      }
-    }
-
-    final Object handle;
-
-    MethodHandleWrapper(Object handle) {
-      this.handle = handle;
-    }
-
-    Object invokeWithArguments(Object[] args) throws Exception {
-      // We must cast the args to an object so the Object[] is the first param,
-      // as opposed to each individual varargs param.
-      return invokeWithArguments.invoke(handle, (Object) args);
-    }
-
-    @Override
-    public String toString() {
-      return handle.toString();
+    try {
+      MethodHandles.Lookup lookup = methodHandlesLookupCxtor.newInstance(declaringClass, allModes);
+      method.setAccessible(true);
+      return lookup.unreflectSpecial(method, declaringClass).bindTo(proxy);
+    } catch (ReflectiveOperationException roe) {
+      throw new RuntimeException("Unable to access method: " + method, roe);
     }
   }
 }

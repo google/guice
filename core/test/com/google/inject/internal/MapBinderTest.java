@@ -26,7 +26,6 @@ import static com.google.inject.internal.SpiUtils.providerInstance;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -1216,12 +1215,7 @@ public class MapBinderTest extends TestCase {
     Map<String, String> map =
         Maps.transformValues(
             injectedMultimap.get(),
-            new Function<Set<Provider<String>>, String>() {
-              @Override
-              public String apply(Set<Provider<String>> stringProvidersSet) {
-                return Iterables.getOnlyElement(stringProvidersSet).get();
-              }
-            });
+            stringProvidersSet -> Iterables.getOnlyElement(stringProvidersSet).get());
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), map);
   }
 

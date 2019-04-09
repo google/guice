@@ -16,10 +16,10 @@
 
 package com.google.inject.throwingproviders;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -70,14 +70,6 @@ public class CheckedProviderTest extends TestCase {
   @Retention(RUNTIME)
   @BindingAnnotation
   @interface NotExceptionScoping {};
-
-  private static final Function<Dependency<?>, Key<?>> DEPENDENCY_TO_KEY =
-      new Function<Dependency<?>, Key<?>>() {
-        @Override
-        public Key<?> apply(Dependency<?> from) {
-          return from.getKey();
-        }
-      };
 
   private final TypeLiteral<RemoteProvider<Foo>> remoteProviderOfFoo =
       new TypeLiteral<RemoteProvider<Foo>>() {};
@@ -596,8 +588,9 @@ public class CheckedProviderTest extends TestCase {
     // And make sure DependentRemoteProvider has the proper dependencies.
     hasDependencies = (HasDependencies) bindInjector.getBinding(DependentRemoteProvider.class);
     Set<Key<?>> dependencyKeys =
-        ImmutableSet.copyOf(
-            Iterables.transform(hasDependencies.getDependencies(), DEPENDENCY_TO_KEY));
+        hasDependencies.getDependencies().stream()
+            .map(Dependency::getKey)
+            .collect(toImmutableSet());
     assertEquals(
         ImmutableSet.<Key<?>>of(
             Key.get(String.class),
@@ -640,8 +633,9 @@ public class CheckedProviderTest extends TestCase {
             providesInjector.getBinding(
                 Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
     Set<Key<?>> dependencyKeys =
-        ImmutableSet.copyOf(
-            Iterables.transform(hasDependencies.getDependencies(), DEPENDENCY_TO_KEY));
+        hasDependencies.getDependencies().stream()
+            .map(Dependency::getKey)
+            .collect(toImmutableSet());
     assertEquals(
         ImmutableSet.<Key<?>>of(
             Key.get(String.class),
@@ -687,8 +681,9 @@ public class CheckedProviderTest extends TestCase {
     // And DependentMockFoo is dependent on the goods.
     hasDependencies = (HasDependencies) cxtorInjector.getBinding(key);
     Set<Key<?>> dependencyKeys =
-        ImmutableSet.copyOf(
-            Iterables.transform(hasDependencies.getDependencies(), DEPENDENCY_TO_KEY));
+        hasDependencies.getDependencies().stream()
+            .map(Dependency::getKey)
+            .collect(toImmutableSet());
     assertEquals(
         ImmutableSet.<Key<?>>of(
             Key.get(String.class),

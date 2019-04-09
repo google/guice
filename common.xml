@@ -14,7 +14,7 @@
     <javac srcdir="${src.dir}"
          debug="on"
          destdir="${build.dir}/classes"
-         source="1.7" target="1.7" includeantruntime="false">
+         source="1.8" target="1.8" includeantruntime="false">
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath refid="compile.classpath"/>
     </javac>
@@ -23,134 +23,8 @@
     </copy>
   </target>
 
-  <target name="manifest" description="Generate OSGi manifest." depends="compile">
-    <dirname property="common.basedir" file="${ant.file.common}"/>
-    <taskdef resource="aQute/bnd/ant/taskdef.properties"
-      classpath="${common.basedir}/lib/build/bnd-0.0.384.jar"/>
-
-    <fail unless="module" message="Missing 'module' property (use the primary package name in this jar)"/>
-    <property name="imports" value=""/>
-
-    <property name="Bundle-Name" value="${ant.project.name}"/>
-    <property name="Bundle-SymbolicName" value="${module}"/>
-    <property name="Bundle-Version" value="${replace;${version};^[^0-9];0.0.0.$0}"/>
-
-    <property name="Bundle-Description" value="Guice is a lightweight dependency injection framework for Java 6 and above"/>
-    <property name="Bundle-DocURL" value="https://github.com/google/guice"/>
-    <property name="Bundle-Copyright" value="Copyright (C) 2006 Google Inc."/>
-    <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0.txt"/>
-    <property name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.7"/>
-    <property name="Bundle-Vendor" value="Google, Inc."/>
-
-    <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
-
-    <condition property="Eclipse-ExtensibleAPI" value="true">
-      <equals arg1="${module}" arg2="com.google.inject"/>
-    </condition>
-
-    <condition property="Import-Package" value="!com.google.inject.*,*" else="!${module}.*,${imports},*">
-      <istrue value="${fragment}"/>
-    </condition>
-
-    <condition property="Fragment-Host" value="com.google.inject">
-      <istrue value="${fragment}"/>
-    </condition>
-
-    <property name="-nouses" value="true"/>
-
-    <property name="-removeheaders" value="Bnd-LastModified,Ignore-Package,Include-Resource,Private-Package,Tool"/>
-
-    <bndwrap jars="${build.dir}/classes" output="${build.dir}"/>
-
-    <unjar src="${build.dir}/classes.bar" dest="${build.dir}">
-      <patternset>
-        <include name="META-INF/MANIFEST.MF"/>
-      </patternset>
-    </unjar>
-  </target>
-
-  <target name="test.compile"
-      depends="compile"
-      description="Compile test source.">
-    <mkdir dir="${build.dir}/test"/>
-    <javac srcdir="${test.dir}"
-         debug="on"
-         destdir="${build.dir}/test"
-         source="1.7" target="1.7" includeantruntime="false">
-      <classpath path="${build.dir}/classes"/>
-      <classpath path="${build.dir}/test"/>
-      <classpath refid="compile.classpath"/>
-    </javac>
-    <copy toDir="${build.dir}/test">
-      <fileset dir="${test.dir}" excludes="**/*.java"/>
-    </copy>
-  </target>
-
-  <target name="test"
-      depends="test.compile"
-      description="Execute JUnit tests.">
-    <java fork="true"
-        classname="junit.textui.TestRunner"
-        failonerror="true"
-        taskname="junit">
-      <classpath>
-        <pathelement location="${build.dir}/test"/>
-        <pathelement location="${build.dir}/classes"/>
-        <path refid="compile.classpath"/>
-      </classpath>
-      <arg value="${test.class}"/>
-    </java>
-  </target>
-
   <target name="clean"
       description="Remove generated files.">
     <delete dir="${build.dir}"/>
-  </target>
-
-  <target name="source.jar"
-      description="Create a .jar file with sources">
-    <mkdir dir="${build.dir}"/>
-    <zip destfile="${build.dir}/${ant.project.name}-${version}-src.jar">
-      <fileset dir="${src.dir}"/>
-    </zip>
-  </target>
-
-  <target name="distjars"
-      depends="source.jar, jar"
-      description="Build jar files"/>
-
-  <target name="test.withdeps" depends="test.compile"
-      description="Build a jar of tests with internal.util refocused.">
-    <mkdir dir="${build.dir}/dist"/>
-    <dirname property="common.basedir" file="${ant.file.common}"/>
-    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
-    <jarjar jarfile="${build.dir}/${ant.project.name}-${version}-tests.jar">
-      <fileset dir="${build.dir}/test"/>
-      <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
-      <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
-      <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
-      <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <keep pattern="com.google.inject.**"/>
-      <keep pattern="com.googlecode.**"/>
-    </jarjar>
-  </target>
-
-  <target name="jar.withdeps" depends="compile"
-      description="Build jar with dependencies embedded.">
-    <mkdir dir="${build.dir}/dist"/>
-    <dirname property="common.basedir" file="${ant.file.common}"/>
-    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
-    <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
-      <fileset dir="${build.dir}/classes"/>
-      <zipfileset src="${common.basedir}/lib/build/cglib-3.2.9.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/asm-7.0.jar"/>
-      <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
-      <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
-      <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
-      <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <keep pattern="com.google.inject.**"/>
-    </jarjar>
   </target>
 </project>

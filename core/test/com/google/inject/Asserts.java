@@ -24,7 +24,6 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -57,14 +56,7 @@ public class Asserts {
     return Joiner.on(" -> ")
         .appendTo(
             new StringBuilder(" (via modules: "),
-            Iterables.transform(
-                ImmutableList.copyOf(classes),
-                new Function<Class, String>() {
-                  @Override
-                  public String apply(Class input) {
-                    return input.getName();
-                  }
-                }))
+            Iterables.transform(ImmutableList.copyOf(classes), Class::getName))
         .append(")")
         .toString();
   }

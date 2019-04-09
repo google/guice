@@ -17,13 +17,11 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Errors.checkConfiguration;
 import static com.google.inject.util.Types.newParameterizedType;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Binder;
@@ -46,8 +44,6 @@ import com.google.inject.util.Types;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Set;
 import javax.inject.Qualifier;
@@ -64,66 +60,16 @@ public final class RealOptionalBinder<T> implements Module {
     return optionalBinder;
   }
 
-  /* Reflectively capture java 8's Optional types so we can bind them if we're running in java8. */
-  private static final Class<?> JAVA_OPTIONAL_CLASS;
-  private static final Object JAVA_OPTIONAL_EMPTY;
-  private static final Method JAVA_OPTIONAL_OF_METHOD;
-
-  static {
-    Class<?> optional = null;
-    Object emptyObject = null;
-    Method of = null;
-    boolean useJavaOptional = false;
-    try {
-      optional = Class.forName("java.util.Optional");
-      emptyObject = optional.getDeclaredMethod("empty").invoke(null);
-      of = optional.getDeclaredMethod("of", Object.class);
-      // only use optional support if all our reflection succeeded
-      useJavaOptional = true;
-    } catch (ClassNotFoundException ignored) {
-    } catch (NoSuchMethodException ignored) {
-    } catch (SecurityException ignored) {
-    } catch (IllegalAccessException ignored) {
-    } catch (InvocationTargetException ignored) {
-    }
-    JAVA_OPTIONAL_CLASS = useJavaOptional ? optional : null;
-    JAVA_OPTIONAL_EMPTY = useJavaOptional ? emptyObject : null;
-    JAVA_OPTIONAL_OF_METHOD = useJavaOptional ? of : null;
-  }
-
-  /**
-   * Returns java.util.Optional.empty() if the parameter is null, calls {@link
-   * #invokeJavaOptionalOf} otherwise.
-   */
-  private static Object invokeJavaOptionalOfNullable(Object o) {
-    if (o == null) {
-      return JAVA_OPTIONAL_EMPTY;
-    }
-    return invokeJavaOptionalOf(o);
-  }
-
-  /** Invokes java.util.Optional.of. */
-  private static Object invokeJavaOptionalOf(Object o) {
-    try {
-      return JAVA_OPTIONAL_OF_METHOD.invoke(null, o);
-    } catch (IllegalAccessException e) {
-      throw new SecurityException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw Throwables.propagate(e.getCause());
-    }
-  }
-
   @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Optional<T>> optionalOf(TypeLiteral<T> type) {
     return (TypeLiteral<Optional<T>>)
         TypeLiteral.get(Types.newParameterizedType(Optional.class, type.getType()));
   }
 
-  static <T> TypeLiteral<?> javaOptionalOf(TypeLiteral<T> type) {
-    checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
-    return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS, type.getType()));
+  @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<java.util.Optional<T>> javaOptionalOf(TypeLiteral<T> type) {
+    return (TypeLiteral<java.util.Optional<T>>)
+        TypeLiteral.get(Types.newParameterizedType(java.util.Optional.class, type.getType()));
   }
 
   @SuppressWarnings("unchecked")
@@ -135,12 +81,14 @@ public final class RealOptionalBinder<T> implements Module {
                 Optional.class, newParameterizedType(javax.inject.Provider.class, type.getType())));
   }
 
-  static <T> TypeLiteral<?> javaOptionalOfJavaxProvider(TypeLiteral<T> type) {
-    checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
-    return TypeLiteral.get(
-        Types.newParameterizedType(
-            JAVA_OPTIONAL_CLASS,
-            newParameterizedType(javax.inject.Provider.class, type.getType())));
+  @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<java.util.Optional<javax.inject.Provider<T>>> javaOptionalOfJavaxProvider(
+      TypeLiteral<T> type) {
+    return (TypeLiteral<java.util.Optional<javax.inject.Provider<T>>>)
+        TypeLiteral.get(
+            Types.newParameterizedType(
+                java.util.Optional.class,
+                newParameterizedType(javax.inject.Provider.class, type.getType())));
   }
 
   @SuppressWarnings("unchecked")
@@ -151,11 +99,13 @@ public final class RealOptionalBinder<T> implements Module {
                 Optional.class, newParameterizedType(Provider.class, type.getType())));
   }
 
-  static <T> TypeLiteral<?> javaOptionalOfProvider(TypeLiteral<T> type) {
-    checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
-    return TypeLiteral.get(
-        Types.newParameterizedType(
-            JAVA_OPTIONAL_CLASS, newParameterizedType(Provider.class, type.getType())));
+  @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<java.util.Optional<Provider<T>>> javaOptionalOfProvider(
+      TypeLiteral<T> type) {
+    return (TypeLiteral<java.util.Optional<Provider<T>>>)
+        TypeLiteral.get(
+            Types.newParameterizedType(
+                java.util.Optional.class, newParameterizedType(Provider.class, type.getType())));
   }
 
   @SuppressWarnings("unchecked")
@@ -235,74 +185,70 @@ public final class RealOptionalBinder<T> implements Module {
   public void configure(Binder binder) {
     bindingSelection.checkNotInitialized();
     Key<T> key = bindingSelection.getDirectKey();
+    TypeLiteral<T> typeLiteral = key.getTypeLiteral();
     // Every OptionalBinder gets the following types bound
-    // * Optional<Provider<T>>
-    // * Optional<javax.inject.Provider<T>>
-    // * Optional<T>
+    // * {cgcb,ju}.Optional<Provider<T>>
+    // * {cgcb,ju}.Optional<javax.inject.Provider<T>>
+    // * {cgcb,ju}.Optional<T>
     // If setDefault() or setBinding() is called then also
     // * T is bound
-    // If java.util.Optional is on the classpath (because this is a jdk8+ vm), then you also get
-    // * java.util.Optional<Provider<T>>
-    // * java.util.Optional<javax.inject.Provider<T>>
-    // * java.util.Optional<T>
+
+    // cgcb.Optional<Provider<T>>
     InternalProviderInstanceBindingImpl.Factory<Optional<Provider<T>>> optionalProviderFactory =
-        new RealOptionalProviderProvider<T>(bindingSelection);
+        new RealOptionalProviderProvider<>(bindingSelection);
+    binder.bind(key.ofType(optionalOfProvider(typeLiteral))).toProvider(optionalProviderFactory);
+    // ju.Optional<Provider<T>>
+    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<Provider<T>>>
+        javaOptionalProviderFactory = new JavaOptionalProviderProvider<>(bindingSelection);
     binder
-        .bind(key.ofType(optionalOfProvider(key.getTypeLiteral())))
-        .toProvider(optionalProviderFactory);
+        .bind(key.ofType(javaOptionalOfProvider(typeLiteral)))
+        .toProvider(javaOptionalProviderFactory);
 
     // Provider is assignable to javax.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
+
+    // cgcb.Optional<ji.Provider<T>>
     @SuppressWarnings("unchecked")
     InternalProviderInstanceBindingImpl.Factory<Optional<javax.inject.Provider<T>>>
         optionalJavaxProviderFactory =
             (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
     binder
-        .bind(key.ofType(optionalOfJavaxProvider(key.getTypeLiteral())))
+        .bind(key.ofType(optionalOfJavaxProvider(typeLiteral)))
         .toProvider(optionalJavaxProviderFactory);
+    // ju.Optional<ji.Provider<T>>
+    @SuppressWarnings("unchecked")
+    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<javax.inject.Provider<T>>>
+        javaOptionalJavaxProviderFactory =
+            (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
+    binder
+        .bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
+        .toProvider(javaOptionalJavaxProviderFactory);
 
-    Key<Optional<T>> optionalKey = key.ofType(optionalOf(key.getTypeLiteral()));
+    // cgcb.Optional<T>
+    Key<Optional<T>> optionalKey = key.ofType(optionalOf(typeLiteral));
     binder
         .bind(optionalKey)
-        .toProvider(new RealOptionalKeyProvider<T>(bindingSelection, optionalKey));
-
-    // Bind the java-8 types if we know them.
-    bindJava8Optional(binder);
-  }
-
-  @SuppressWarnings("unchecked")
-  private void bindJava8Optional(Binder binder) {
-    if (JAVA_OPTIONAL_CLASS != null) {
-      Key<?> key = bindingSelection.getDirectKey();
-      TypeLiteral<?> typeLiteral = key.getTypeLiteral();
-      InternalProviderInstanceBindingImpl.Factory<Object> javaOptionalProviderFactory =
-          new JavaOptionalProviderProvider(bindingSelection);
-      binder
-          .bind(key.ofType(javaOptionalOfProvider(typeLiteral)))
-          .toProvider((Provider) javaOptionalProviderFactory);
-      // Provider is assignable to javax.inject.Provider and the provider that the factory contains
-      // cannot be modified so we can use some rawtypes hackery to share the same implementation.
-      binder
-          .bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
-          .toProvider((Provider) javaOptionalProviderFactory);
-      Key<?> javaOptionalKey = key.ofType(javaOptionalOf(typeLiteral));
-      binder
-          .bind(javaOptionalKey)
-          .toProvider(new JavaOptionalProvider(bindingSelection, javaOptionalKey));
-    }
+        .toProvider(new RealOptionalKeyProvider<>(bindingSelection, optionalKey));
+    // ju.Optional<T>
+    Key<java.util.Optional<T>> javaOptionalKey = key.ofType(javaOptionalOf(typeLiteral));
+    binder
+        .bind(javaOptionalKey)
+        .toProvider(new JavaOptionalProvider<>(bindingSelection, javaOptionalKey));
   }
 
   /** Provides the binding for java.util.Optional<T>. */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private static final class JavaOptionalProvider extends RealOptionalBinderProviderWithDependencies
-      implements ProviderWithExtensionVisitor, OptionalBinderBinding {
+  private static final class JavaOptionalProvider<T>
+      extends RealOptionalBinderProviderWithDependencies<T, java.util.Optional<T>>
+      implements ProviderWithExtensionVisitor<java.util.Optional<T>>,
+          OptionalBinderBinding<java.util.Optional<T>> {
 
-    private final Key<?> optionalKey;
+    private final Key<java.util.Optional<T>> optionalKey;
 
     private Dependency<?> targetDependency;
-    private InternalFactory<?> target;
+    private InternalFactory<? extends T> target;
 
-    JavaOptionalProvider(BindingSelection<?> bindingSelection, Key<?> optionalKey) {
+    JavaOptionalProvider(
+        BindingSelection<T> bindingSelection, Key<java.util.Optional<T>> optionalKey) {
       super(bindingSelection);
       this.optionalKey = optionalKey;
     }
@@ -316,14 +262,15 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected Object doProvision(InternalContext context, Dependency dependency)
+    protected java.util.Optional<T> doProvision(
+        InternalContext context, Dependency<?> currentDependency)
         throws InternalProvisionException {
-      InternalFactory<?> local = target;
+      InternalFactory<? extends T> local = target;
       if (local == null) {
-        return JAVA_OPTIONAL_EMPTY;
+        return java.util.Optional.empty();
       }
       Dependency<?> localDependency = targetDependency;
-      Object result;
+      T result;
       Dependency previous = context.pushDependency(localDependency, getSource());
 
       try {
@@ -336,7 +283,7 @@ public final class RealOptionalBinder<T> implements Module {
           context.popStateAndSetDependency(previous);
 
       }
-      return invokeJavaOptionalOfNullable(result);
+      return java.util.Optional.ofNullable(result);
     }
 
     @Override
@@ -346,10 +293,10 @@ public final class RealOptionalBinder<T> implements Module {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object acceptExtensionVisitor(
-        BindingTargetVisitor visitor, ProviderInstanceBinding binding) {
+    public <B, R> R acceptExtensionVisitor(
+        BindingTargetVisitor<B, R> visitor, ProviderInstanceBinding<? extends B> binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
-        return ((MultibindingsTargetVisitor) visitor).visit(this);
+        return ((MultibindingsTargetVisitor<java.util.Optional<T>, R>) visitor).visit(this);
       } else {
         return visitor.visit(binding);
       }
@@ -371,7 +318,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    public Key getKey() {
+    public Key<java.util.Optional<T>> getKey() {
       return optionalKey;
     }
 
@@ -386,26 +333,26 @@ public final class RealOptionalBinder<T> implements Module {
   }
 
   /** Provides the binding for java.util.Optional<Provider<T>>. */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private static final class JavaOptionalProviderProvider
-      extends RealOptionalBinderProviderWithDependencies {
-    private Object value;
+  private static final class JavaOptionalProviderProvider<T>
+      extends RealOptionalBinderProviderWithDependencies<T, java.util.Optional<Provider<T>>> {
+    private java.util.Optional<Provider<T>> value;
 
-    JavaOptionalProviderProvider(BindingSelection<?> bindingSelection) {
+    JavaOptionalProviderProvider(BindingSelection<T> bindingSelection) {
       super(bindingSelection);
     }
 
     @Override
     void doInitialize() {
       if (bindingSelection.getBinding() == null) {
-        value = JAVA_OPTIONAL_EMPTY;
+        value = java.util.Optional.empty();
       } else {
-        value = invokeJavaOptionalOf(bindingSelection.getBinding().getProvider());
+        value = java.util.Optional.of(bindingSelection.getBinding().getProvider());
       }
     }
 
     @Override
-    protected Object doProvision(InternalContext context, Dependency dependency) {
+    protected java.util.Optional<Provider<T>> doProvision(
+        InternalContext context, Dependency<?> dependency) {
       return value;
     }
 

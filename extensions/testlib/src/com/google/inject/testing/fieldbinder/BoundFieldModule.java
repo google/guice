@@ -387,6 +387,10 @@ public final class BoundFieldModule implements Module {
   /**
    * Determines if {@code clazz} is a "transparent provider".
    *
+   * <p>If you have traced through the code and found that what you want to do is failing because of
+   * this check, try using {@code @Bind(lazy=true) MyType myField} and lazily assign myField
+   * instead.
+   *
    * <p>A transparent provider is a {@link com.google.inject.Provider} or {@link
    * javax.inject.Provider} which binds to it's parameterized type when used as the argument to
    * {@link Binder#bind}.

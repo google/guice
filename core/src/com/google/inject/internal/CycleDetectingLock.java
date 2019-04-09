@@ -1,17 +1,13 @@
 package com.google.inject.internal;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.MultimapBuilder;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -69,8 +65,8 @@ interface CycleDetectingLock<ID> {
      * cycle detection.
      *
      * <ul>
-     * <li>Key: thread
-     * <li> Value: lock that is being waited on
+     *   <li>Key: thread
+     *   <li>Value: lock that is being waited on
      * </ul>
      *
      * <p>Element is added inside {@link #lockOrDetectPotentialLocksCycle()} before {@link
@@ -89,8 +85,8 @@ interface CycleDetectingLock<ID> {
      * detected.
      *
      * <ul>
-     * <li>Key: thread
-     * <li>Value: stack of locks that were owned.
+     *   <li>Key: thread
+     *   <li>Value: stack of locks that were owned.
      * </ul>
      *
      * <p>Element is added inside {@link #lockOrDetectPotentialLocksCycle()} after {@link Lock#lock}
@@ -157,7 +153,6 @@ interface CycleDetectingLock<ID> {
             // potential deadlock is found, we don't try to take this lock
             return locksInCycle;
           }
-
         }
 
         // this may be blocking, but we don't expect it to cause a deadlock
@@ -251,14 +246,7 @@ interface CycleDetectingLock<ID> {
         }
 
         ListMultimap<Thread, ID> potentialLocksCycle =
-            Multimaps.newListMultimap(
-                new LinkedHashMap<Thread, Collection<ID>>(),
-                new Supplier<List<ID>>() {
-                  @Override
-                  public List<ID> get() {
-                    return Lists.newArrayList();
-                  }
-                });
+            MultimapBuilder.linkedHashKeys().arrayListValues().build();
         // lock that is a part of a potential locks cycle, starts with current lock
         ReentrantCycleDetectingLock<?> lockOwnerWaitingOn = this;
         // try to find a dependency path between lock's owner thread and a current thread
@@ -303,8 +291,7 @@ interface CycleDetectingLock<ID> {
           }
         }
         Preconditions.checkState(
-            found,
-            "Internal error: We can not find locks that created a cycle that we detected");
+            found, "Internal error: We can not find locks that created a cycle that we detected");
         ReentrantCycleDetectingLock<?> unownedLock = lockThreadIsWaitingOn.get(thread);
         // If this thread is waiting for a lock add it to the cycle and return it
         if (unownedLock != null && unownedLock.lockFactory == this.lockFactory) {

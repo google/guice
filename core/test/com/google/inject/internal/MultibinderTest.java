@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.MoreCollectors.onlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
 import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
@@ -28,7 +30,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -1169,7 +1170,10 @@ public class MultibinderTest extends TestCase {
         };
 
     InstanceBinding<?> binding =
-        Iterables.getOnlyElement(Iterables.filter(Elements.getElements(ab), InstanceBinding.class));
+        Elements.getElements(ab).stream()
+            .filter(InstanceBinding.class::isInstance)
+            .map(InstanceBinding.class::cast)
+            .collect(onlyElement());
     Key<?> keyBefore = binding.getKey();
     assertEquals(listOfStrings, keyBefore.getTypeLiteral());
 
@@ -1371,9 +1375,9 @@ public class MultibinderTest extends TestCase {
     // We also know the InstanceBindings will be in the order: A, b, C because that's
     // how we bound them, and binding order is preserved.
     List<Binding<String>> bindings =
-        FluentIterable.from(injector.findBindingsByType(stringType))
+        injector.findBindingsByType(stringType).stream()
             .filter(Predicates.instanceOf(InstanceBinding.class))
-            .toList();
+            .collect(toImmutableList());
     assertEquals(bindings.toString(), 3, bindings.size());
     Binding<String> a = bindings.get(0);
     Binding<String> b = bindings.get(1);

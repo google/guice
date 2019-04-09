@@ -627,11 +627,8 @@ public final class InjectionPoint {
             injectableMethod.method == lastMethod
                 ? lastSignature
                 : new Signature(injectableMethod.method);
-        List<InjectableMethod> methods = bySignature.get(signature);
-        if (methods == null) {
-          methods = new ArrayList<>();
-          bySignature.put(signature, methods);
-        }
+        List<InjectableMethod> methods =
+            bySignature.computeIfAbsent(signature, k -> new ArrayList<>());
         methods.add(injectableMethod);
       }
     }

@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ListMultimap;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -28,6 +29,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeConverterBinding;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -310,6 +312,11 @@ public final class InternalInjectorCreator {
     @Override
     public List<Element> getElements() {
       return delegateInjector.getElements();
+    }
+
+    @Override
+    public ListMultimap<TypeLiteral<?>, InjectionPoint> getAllMembersInjectorInjectionPoints() {
+      return delegateInjector.getAllMembersInjectorInjectionPoints();
     }
 
     @Override

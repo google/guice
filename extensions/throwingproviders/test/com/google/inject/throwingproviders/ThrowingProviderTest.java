@@ -16,10 +16,10 @@
 
 package com.google.inject.throwingproviders;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -488,15 +488,9 @@ public class ThrowingProviderTest extends TestCase {
     // And make sure DependentRemoteProvider has the proper dependencies.
     hasDependencies = (HasDependencies) bindInjector.getBinding(DependentRemoteProvider.class);
     Set<Key<?>> dependencyKeys =
-        ImmutableSet.copyOf(
-            Iterables.transform(
-                hasDependencies.getDependencies(),
-                new Function<Dependency<?>, Key<?>>() {
-                  @Override
-                  public Key<?> apply(Dependency<?> from) {
-                    return from.getKey();
-                  }
-                }));
+        hasDependencies.getDependencies().stream()
+            .map(Dependency::getKey)
+            .collect(toImmutableSet());
     assertEquals(
         ImmutableSet.<Key<?>>of(
             Key.get(String.class),
@@ -539,15 +533,9 @@ public class ThrowingProviderTest extends TestCase {
             providesInjector.getBinding(
                 Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
     Set<Key<?>> dependencyKeys =
-        ImmutableSet.copyOf(
-            Iterables.transform(
-                hasDependencies.getDependencies(),
-                new Function<Dependency<?>, Key<?>>() {
-                  @Override
-                  public Key<?> apply(Dependency<?> from) {
-                    return from.getKey();
-                  }
-                }));
+        hasDependencies.getDependencies().stream()
+            .map(Dependency::getKey)
+            .collect(toImmutableSet());
     assertEquals(
         ImmutableSet.<Key<?>>of(
             Key.get(String.class),

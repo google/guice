@@ -22,7 +22,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -436,13 +435,7 @@ public class InjectorTest extends TestCase {
                   void initialize(final Injector injector)
                       throws ExecutionException, InterruptedException {
                     Future<JustInTime> future =
-                        executorService.submit(
-                            new Callable<JustInTime>() {
-                              @Override
-                              public JustInTime call() throws Exception {
-                                return injector.getInstance(JustInTime.class);
-                              }
-                            });
+                        executorService.submit(() -> injector.getInstance(JustInTime.class));
                     got.set(future.get());
                   }
                 });

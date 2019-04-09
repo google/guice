@@ -35,17 +35,10 @@ import junit.framework.TestCase;
 /** Tests transferring of entire request scope. */
 
 public class TransferRequestIntegrationTest extends TestCase {
-  private final Callable<Boolean> FALSE_CALLABLE =
-      new Callable<Boolean>() {
-        @Override
-        public Boolean call() {
-          return false;
-        }
-      };
 
   public void testTransferHttp_outOfScope() {
     try {
-      ServletScopes.transferRequest(FALSE_CALLABLE);
+      ServletScopes.transferRequest(() -> false);
       fail();
     } catch (OutOfScopeException expected) {
     }
@@ -53,7 +46,7 @@ public class TransferRequestIntegrationTest extends TestCase {
 
   public void testTransferNonHttp_outOfScope() {
     try {
-      ServletScopes.transferRequest(FALSE_CALLABLE);
+      ServletScopes.transferRequest(() -> false);
       fail();
     } catch (OutOfScopeException expected) {
     }
@@ -84,18 +77,10 @@ public class TransferRequestIntegrationTest extends TestCase {
             });
 
     Callable<Callable<Boolean>> callable =
-        new Callable<Callable<Boolean>>() {
-          @Override
-          public Callable<Boolean> call() {
-            final Object original = injector.getInstance(Object.class);
-            return ServletScopes.transferRequest(
-                new Callable<Boolean>() {
-                  @Override
-                  public Boolean call() {
-                    return original == injector.getInstance(Object.class);
-                  }
-                });
-          }
+        () -> {
+          final Object original = injector.getInstance(Object.class);
+          return ServletScopes.transferRequest(
+              () -> original == injector.getInstance(Object.class));
         };
 
     ImmutableMap<Key<?>, Object> seedMap = ImmutableMap.of();
@@ -128,14 +113,11 @@ public class TransferRequestIntegrationTest extends TestCase {
     }
 
     Callable<Data> callable =
-        new Callable<Data>() {
-          @Override
-          public Data call() {
-            Data data = new Data();
-            data.object = injector.getInstance(Object.class);
-            data.scoper = ServletScopes.transferRequest();
-            return data;
-          }
+        () -> {
+          Data data = new Data();
+          data.object = injector.getInstance(Object.class);
+          data.scoper = ServletScopes.transferRequest();
+          return data;
         };
 
     ImmutableMap<Key<?>, Object> seedMap = ImmutableMap.of();
@@ -153,21 +135,17 @@ public class TransferRequestIntegrationTest extends TestCase {
 
   public void testTransferNonHttpRequest_concurrentUseBlocks() throws Exception {
     Callable<Boolean> callable =
-        new Callable<Boolean>() {
-          @Override
-          public Boolean call() throws Exception {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+        () -> {
+          ExecutorService executor = Executors.newSingleThreadExecutor();
+          try {
+            Future<Boolean> future = executor.submit(ServletScopes.transferRequest(() -> false));
             try {
-              Future<Boolean> future =
-                  executor.submit(ServletScopes.transferRequest(FALSE_CALLABLE));
-              try {
-                return future.get(100, TimeUnit.MILLISECONDS);
-              } catch (TimeoutException e) {
-                return true;
-              }
-            } finally {
-              executor.shutdownNow();
+              return future.get(100, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+              return true;
             }
+          } finally {
+            executor.shutdownNow();
           }
         };
 
@@ -177,33 +155,27 @@ public class TransferRequestIntegrationTest extends TestCase {
 
   public void testTransferNonHttpRequest_concurrentUseBlocks_closeable() throws Exception {
     Callable<Boolean> callable =
-        new Callable<Boolean>() {
-          @Override
-          public Boolean call() throws Exception {
-            final RequestScoper scoper = ServletScopes.transferRequest();
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+        () -> {
+          final RequestScoper scoper = ServletScopes.transferRequest();
+          ExecutorService executor = Executors.newSingleThreadExecutor();
+          try {
+            Future<Boolean> future =
+                executor.submit(
+                    () -> {
+                      RequestScoper.CloseableScope scope = scoper.open();
+                      try {
+                        return false;
+                      } finally {
+                        scope.close();
+                      }
+                    });
             try {
-              Future<Boolean> future =
-                  executor.submit(
-                      new Callable<Boolean>() {
-                        @Override
-                        public Boolean call() {
-                          RequestScoper.CloseableScope scope = scoper.open();
-                          try {
-                            return false;
-                          } finally {
-                            scope.close();
-                          }
-                        }
-                      });
-              try {
-                return future.get(100, TimeUnit.MILLISECONDS);
-              } catch (TimeoutException e) {
-                return true;
-              }
-            } finally {
-              executor.shutdownNow();
+              return future.get(100, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+              return true;
             }
+          } finally {
+            executor.shutdownNow();
           }
         };
 
@@ -212,13 +184,7 @@ public class TransferRequestIntegrationTest extends TestCase {
   }
 
   public void testTransferNonHttpRequest_concurrentUseSameThreadOk() throws Exception {
-    Callable<Boolean> callable =
-        new Callable<Boolean>() {
-          @Override
-          public Boolean call() throws Exception {
-            return ServletScopes.transferRequest(FALSE_CALLABLE).call();
-          }
-        };
+    Callable<Boolean> callable = () -> ServletScopes.transferRequest(() -> false).call();
 
     ImmutableMap<Key<?>, Object> seedMap = ImmutableMap.of();
     assertFalse(ServletScopes.scopeRequest(callable, seedMap).call());
@@ -226,15 +192,12 @@ public class TransferRequestIntegrationTest extends TestCase {
 
   public void testTransferNonHttpRequest_concurrentUseSameThreadOk_closeable() throws Exception {
     Callable<Boolean> callable =
-        new Callable<Boolean>() {
-          @Override
-          public Boolean call() throws Exception {
-            RequestScoper.CloseableScope scope = ServletScopes.transferRequest().open();
-            try {
-              return false;
-            } finally {
-              scope.close();
-            }
+        () -> {
+          RequestScoper.CloseableScope scope = ServletScopes.transferRequest().open();
+          try {
+            return false;
+          } finally {
+            scope.close();
           }
         };
 

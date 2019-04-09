@@ -17,7 +17,6 @@
 package com.google.inject.service;
 
 import com.google.common.base.Preconditions;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -29,11 +28,7 @@ import java.util.concurrent.FutureTask;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public abstract class AsyncService implements Service {
-  private static final Runnable DO_NOTHING =
-      new Runnable() {
-        @Override
-        public void run() {}
-      };
+  private static final Runnable DO_NOTHING = () -> {};
 
   private final ExecutorService executor;
 
@@ -54,12 +49,9 @@ public abstract class AsyncService implements Service {
     }
 
     return executor.submit(
-        new Callable<State>() {
-          @Override
-          public State call() {
-            onStart();
-            return state = State.STARTED;
-          }
+        () -> {
+          onStart();
+          return state = State.STARTED;
         });
   }
 
@@ -80,12 +72,9 @@ public abstract class AsyncService implements Service {
     }
 
     return executor.submit(
-        new Callable<State>() {
-          @Override
-          public State call() {
-            onStop();
-            return state = State.STOPPED;
-          }
+        () -> {
+          onStop();
+          return state = State.STOPPED;
         });
   }
 

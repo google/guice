@@ -16,7 +16,10 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.collect.ImmutableListMultimap.flatteningToImmutableListMultimap;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.ConfigurationException;
@@ -26,6 +29,7 @@ import com.google.inject.spi.TypeListener;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -132,5 +136,12 @@ final class MembersInjectorStore {
       }
     }
     return ImmutableList.copyOf(injectors);
+  }
+
+  ImmutableListMultimap<TypeLiteral<?>, InjectionPoint> getAllInjectionPoints() {
+    return cache.asMap().entrySet().stream()
+        .collect(
+            flatteningToImmutableListMultimap(
+                Entry::getKey, entry -> entry.getValue().getInjectionPoints().stream()));
   }
 }

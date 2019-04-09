@@ -22,10 +22,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -127,6 +129,9 @@ final class InjectorImpl implements Injector, Lookups {
   final Set<Key<?>> failedJitBindings = Sets.newHashSet();
 
   Lookups lookups = new DeferredLookups(this);
+
+  /** The set of types passed to {@link #getMembersInjector} and {@link #injectMembers}. */
+  final Set<TypeLiteral<?>> userRequestedMembersInjectorTypes = Sets.newConcurrentHashSet();
 
   InjectorImpl(InjectorImpl parent, State state, InjectorOptions injectorOptions) {
     this.parent = parent;
@@ -984,6 +989,14 @@ final class InjectorImpl implements Injector, Lookups {
     return elements.build();
   }
 
+  @Override
+  public ListMultimap<TypeLiteral<?>, InjectionPoint> getAllMembersInjectorInjectionPoints() {
+    return ImmutableListMultimap.copyOf(
+        Multimaps.filterKeys(
+            membersInjectorStore.getAllInjectionPoints(),
+            userRequestedMembersInjectorTypes::contains));
+  }
+
   /** Returns parameter injectors, or {@code null} if there are no parameters. */
   SingleParameterInjector<?>[] getParametersInjectors(List<Dependency<?>> parameters, Errors errors)
       throws ErrorsException {
@@ -1038,6 +1051,8 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
     checkNotNull(typeLiteral, "typeLiteral");
+    userRequestedMembersInjectorTypes.add(typeLiteral);
+
     Errors errors = new Errors(typeLiteral);
     try {
       return membersInjectorStore.get(typeLiteral, errors);
