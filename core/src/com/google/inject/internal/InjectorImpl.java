@@ -990,11 +990,16 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   @Override
-  public ListMultimap<TypeLiteral<?>, InjectionPoint> getAllMembersInjectorInjectionPoints() {
-    return ImmutableListMultimap.copyOf(
-        Multimaps.filterKeys(
-            membersInjectorStore.getAllInjectionPoints(),
-            userRequestedMembersInjectorTypes::contains));
+  public Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints() {
+    // Note, this is a safe cast per the ListMultimap javadocs.
+    // We could use Multimaps.asMap to avoid the cast, but unfortunately it's a @Beta method.
+    return (Map<TypeLiteral<?>, List<InjectionPoint>>)
+        (Map<TypeLiteral<?>, ?>)
+            ImmutableListMultimap.copyOf(
+                    Multimaps.filterKeys(
+                        membersInjectorStore.getAllInjectionPoints(),
+                        userRequestedMembersInjectorTypes::contains))
+                .asMap();
   }
 
   /** Returns parameter injectors, or {@code null} if there are no parameters. */
