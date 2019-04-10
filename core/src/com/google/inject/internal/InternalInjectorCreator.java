@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ListMultimap;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -315,7 +314,7 @@ public final class InternalInjectorCreator {
     }
 
     @Override
-    public ListMultimap<TypeLiteral<?>, InjectionPoint> getAllMembersInjectorInjectionPoints() {
+    public Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints() {
       return delegateInjector.getAllMembersInjectorInjectionPoints();
     }
 

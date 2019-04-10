@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ListMultimap;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeConverterBinding;
@@ -298,5 +297,5 @@ public interface Injector {
    *
    * @since 5.0
    */
-  ListMultimap<TypeLiteral<?>, InjectionPoint> getAllMembersInjectorInjectionPoints();
+  Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints();
 }

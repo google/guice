@@ -3,7 +3,6 @@ package com.google.inject.spi;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.Binding;
@@ -331,7 +330,7 @@ public class InjectorSpiTest extends TestCase {
               }
             });
     injector.injectMembers(new ClassWithInjectableField("foo"));
-    Multimap<TypeLiteral<?>, InjectionPoint> injectionPoints =
+    Map<TypeLiteral<?>, List<InjectionPoint>> injectionPoints =
         injector.getAllMembersInjectorInjectionPoints();
     TypeLiteral<ClassWithInjectableField> expectedTypeLiteral =
         TypeLiteral.get(ClassWithInjectableField.class);
@@ -355,7 +354,7 @@ public class InjectorSpiTest extends TestCase {
               }
             });
     injector.getInstance(ClassWithInjectableField.class);
-    Multimap<TypeLiteral<?>, InjectionPoint> injectionPoints =
+    Map<TypeLiteral<?>, List<InjectionPoint>> injectionPoints =
         injector.getAllMembersInjectorInjectionPoints();
     assertThat(injectionPoints).isEmpty();
   }
@@ -372,7 +371,7 @@ public class InjectorSpiTest extends TestCase {
             });
     injector.injectMembers(new ClassWithInjectableField("foo"));
     injector.getInstance(ClassWithInjectableField.class);
-    Multimap<TypeLiteral<?>, InjectionPoint> injectionPoints =
+    Map<TypeLiteral<?>, List<InjectionPoint>> injectionPoints =
         injector.getAllMembersInjectorInjectionPoints();
     TypeLiteral<ClassWithInjectableField> expectedTypeLiteral =
         TypeLiteral.get(ClassWithInjectableField.class);
