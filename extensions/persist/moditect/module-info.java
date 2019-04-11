@@ -3,6 +3,7 @@ module com.google.guice.extensions.persist {
 
 	requires com.google.guice;
 	requires com.google.common;
+	requires java.activation;
 
 	requires static javax.servlet.api;
 	requires static aopalliance;

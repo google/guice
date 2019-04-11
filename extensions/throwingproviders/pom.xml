@@ -1,70 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.google.inject.extensions</groupId>
-    <artifactId>extensions-parent</artifactId>
-    <version>4.2.3-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>com.jwebmp.inject</groupId>
+        <artifactId>guice-parent</artifactId>
+        <version>0.0.0_0-SNAPSHOT</version>
+    </parent>
+    <groupId>com.jwebmp.inject.extensions</groupId>
+    <artifactId>guice-throwingproviders</artifactId>
 
-  <artifactId>guice-throwingproviders</artifactId>
+    <name>Google Guice - Extensions - ThrowingProviders</name>
 
-  <name>Google Guice - Extensions - ThrowingProviders</name>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/TestScope*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.google.guice.extensions.throwingproviders</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/TestScope*</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Automatic-Module-Name>com.google.guice.extensions.throwingproviders</Automatic-Module-Name>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+    <dependencies>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.google.truth</groupId>
-      <artifactId>truth</artifactId>
-        <exclusions>
-            <exclusion>
-                <groupId>org.checkerframework</groupId>
-                <artifactId>checker-compat-qual</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>com.jwebmp.thirdparty</groupId>
+            <artifactId>javax.inject</artifactId>
+
+        </dependency>
+        <dependency>
+            <groupId>com.jwebmp.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.google.truth</groupId>
+            <artifactId>truth</artifactId>
+            <version>0.41</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-compat-qual</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+    </dependencies>
 
     <profiles>
         <profile>
             <id>jdk8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.moditect</groupId>
                         <artifactId>moditect-maven-plugin</artifactId>
-                        <version>1.0.0.Beta1</version>
                         <executions>
                             <execution>
                                 <id>add-module-infos</id>
@@ -76,7 +90,7 @@
                                     <overwriteExistingFiles>true</overwriteExistingFiles>
                                     <module>
                                         <moduleInfoFile>
-                                            moditect/module-info.java
+                                            jre11/module-info.java
                                         </moduleInfoFile>
                                     </module>
                                 </configuration>
@@ -85,90 +99,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-
-        <profile>
-            <id>jdk9</id>
-            <properties>
-                <jdk.version>1.9</jdk.version>
-                <maven.compiler.source>1.9</maven.compiler.source>
-                <maven.compiler.target>1.9</maven.compiler.target>
-                <maven.compiler.release>1.9</maven.compiler.release>
-            </properties>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.moditect</groupId>
-                        <artifactId>moditect-maven-plugin</artifactId>
-                        <version>1.0.0.Beta1</version>
-                        <executions>
-                            <execution>
-                                <id>add-module-infos</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>add-module-info</goal>
-                                </goals>
-                                <configuration>
-                                    <overwriteExistingFiles>true</overwriteExistingFiles>
-                                    <module>
-                                        <moduleInfoFile>
-                                            moditect/module-info.java
-                                        </moduleInfoFile>
-                                    </module>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>jdk11</id>
-            <properties>
-                <jdk.version>1.11</jdk.version>
-                <maven.compiler.source>1.11</maven.compiler.source>
-                <maven.compiler.target>1.11</maven.compiler.target>
-                <maven.compiler.release>1.11</maven.compiler.release>
-            </properties>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.moditect</groupId>
-                        <artifactId>moditect-maven-plugin</artifactId>
-                        <version>1.0.0.Beta1</version>
-                        <executions>
-                            <execution>
-                                <id>add-module-infos</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>add-module-info</goal>
-                                </goals>
-                                <configuration>
-                                    <overwriteExistingFiles>true</overwriteExistingFiles>
-                                    <module>
-                                        <moduleInfoFile>
-                                            moditect/module-info.java
-                                        </moduleInfoFile>
-                                    </module>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>org.ow2.asm</groupId>
-                    <artifactId>asm</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>cglib</groupId>
-                    <artifactId>cglib</artifactId>
-                </dependency>
-            </dependencies>
         </profile>
     </profiles>
 </project>

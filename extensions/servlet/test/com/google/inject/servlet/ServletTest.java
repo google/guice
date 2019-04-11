@@ -16,8 +16,7 @@
 
 package com.google.inject.servlet;
 
-import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.reserialize;
+import static com.google.inject.servlet.Asserts.*;
 import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletRequest;
 import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletResponse;
 import static java.lang.annotation.ElementType.FIELD;

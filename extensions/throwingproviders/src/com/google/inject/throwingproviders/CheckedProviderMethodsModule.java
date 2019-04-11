@@ -151,7 +151,7 @@ final class CheckedProviderMethodsModule implements Module {
   }
 
   /** A provider that returns a logger based on the method name. */
-  private static final class LogProvider implements Provider<Logger> {
+  private static final class LogProvider implements com.google.inject.Provider<Logger> {
     private final String name;
 
     public LogProvider(Method method) {
