@@ -1,36 +1,48 @@
 [submodule "guice-bom"]
 	path = guice-bom
 	url = https://github.com/GedMarc/guice-bom.git
+	ignore = dirty
 [submodule "guice-core"]
 	path = guice-core
 	url = https://github.com/GedMarc/guice-core.git
+	ignore = dirty
 [submodule "extensions/assistedinject"]
 	path = extensions/assistedinject
 	url = https://github.com/GedMarc/guice-assistedinject.git
+	ignore = dirty
 [submodule "extensions/dagger-adapter"]
 	path = extensions/dagger-adapter
 	url = https://github.com/GedMarc/guice-dagger-adapter.git
+	ignore = dirty
 [submodule "extensions/grapher"]
 	path = extensions/grapher
 	url = https://github.com/GedMarc/guice-grapher.git
+	ignore = dirty
 [submodule "extensions/jmx"]
 	path = extensions/jmx
 	url = https://github.com/GedMarc/guice-jmx.git
+	ignore = dirty
 [submodule "extensions/jndi"]
 	path = extensions/jndi
 	url = https://github.com/GedMarc/guice-jndi.git
+	ignore = dirty
 [submodule "extensions/persist"]
 	path = extensions/persist
 	url = https://github.com/GedMarc/guice-persist.git
+	ignore = dirty
 [submodule "extensions/servlet"]
 	path = extensions/servlet
 	url = https://github.com/GedMarc/guice-servlet.git
+	ignore = dirty
 [submodule "extensions/spring"]
 	path = extensions/spring
 	url = https://github.com/GedMarc/guice-spring.git
+	ignore = dirty
 [submodule "extensions/testlib"]
 	path = extensions/testlib
 	url = https://github.com/GedMarc/guice-testlib.git
+	ignore = dirty
 [submodule "extensions/throwingproviders"]
 	path = extensions/throwingproviders
 	url = https://github.com/GedMarc/guice-throwingproviders.git
+	ignore = dirty

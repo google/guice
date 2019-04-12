@@ -15,7 +15,7 @@
   <name>Google Guice - Extensions</name>
     <profiles>
         <profile>
-            <id>guice-enabled</id>
+            <id>enable-guice</id>
             <modules>
                 <module>assistedinject</module>
                 <module>dagger-adapter</module>
