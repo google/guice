@@ -15,7 +15,6 @@
         <dependency>
             <groupId>com.jwebmp.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -29,13 +28,13 @@
         <dependency>
             <groupId>com.jwebmp.thirdparty</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.jwebmp.thirdparty</groupId>
             <artifactId>aopalliance-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
 

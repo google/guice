@@ -6,6 +6,7 @@ module com.google.guice.extensions.throwingproviders {
 
 	requires java.logging;
 	requires com.google.common;
+	requires javax.inject;
 
 	requires static jsr305;
 
