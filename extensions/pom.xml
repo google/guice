@@ -27,12 +27,6 @@
                 <module>spring</module>
                 <module>testlib</module>
                 <module>throwingproviders</module>
-                <!--
-                 |  not yet promoted...
-                - -
-                    <module>mini</module>
-                    <module>service</module>
-                -->
             </modules>
         </profile>
     </profiles>
