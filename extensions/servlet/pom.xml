@@ -41,8 +41,6 @@
         <dependency>
             <groupId>com.jwebmp.thirdparty</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
             <type>jar</type>
         </dependency>
 
@@ -50,8 +48,7 @@
         <dependency>
             <groupId>com.jwebmp.inject</groupId>
             <artifactId>guice</artifactId>
-
-            <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
 
 
@@ -63,6 +60,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <type>jar</type>
         </dependency>
 
     </dependencies>

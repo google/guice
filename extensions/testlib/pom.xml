@@ -8,7 +8,7 @@
         <artifactId>extensions-parent</artifactId>
         <version>0.0.0_0-SNAPSHOT</version>
     </parent>
-    <groupId>com.jwebmp.inject.extensions</groupId>
+
     <artifactId>guice-testlib</artifactId>
 
     <name>Google Guice - Extensions - TestLib</name>
@@ -39,37 +39,38 @@
         <dependency>
             <groupId>com.jwebmp.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.jwebmp.inject.extensions</groupId>
             <artifactId>guice-throwingproviders</artifactId>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.jwebmp.inject</groupId>
                     <artifactId>guice</artifactId>
                 </exclusion>
             </exclusions>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.jwebmp.thirdparty</groupId>
             <artifactId>javax.inject</artifactId>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.google.truth</groupId>
             <artifactId>truth</artifactId>
-            <version>0.41</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

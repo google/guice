@@ -23,16 +23,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Automatic-Module-Name>com.google.guice.extensions.throwingproviders</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -40,26 +30,28 @@
         <dependency>
             <groupId>com.jwebmp.thirdparty</groupId>
             <artifactId>javax.inject</artifactId>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.jwebmp.inject</groupId>
             <artifactId>guice</artifactId>
+            <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>com.jwebmp.thirdparty</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>com.google.truth</groupId>
             <artifactId>truth</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
