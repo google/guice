@@ -16,3 +16,4 @@ Thumbs.db
 **/*.project
 **/*.factorypath
 **/*.classpath
+*.versionsBackup
