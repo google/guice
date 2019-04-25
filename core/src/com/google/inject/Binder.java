@@ -128,7 +128,7 @@ import java.lang.reflect.Method;
  *     bindConstant().annotatedWith(ServerHost.class).to(args[0]);</pre>
  *
  * Sets up a constant binding. Constant injections must always be annotated. When a constant
- * binding's value is a string, it is eligile for conversion to all primitive types, to {@link
+ * binding's value is a string, it is eligible for conversion to all primitive types, to {@link
  * Enum#valueOf(Class, String) all enums}, and to {@link Class#forName class literals}. Conversions
  * for other types can be configured using {@link #convertToTypes(Matcher, TypeConverter)
  * convertToTypes()}.
