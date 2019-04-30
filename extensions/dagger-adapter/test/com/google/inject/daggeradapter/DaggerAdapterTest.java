@@ -18,6 +18,7 @@ package com.google.inject.daggeradapter;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -26,6 +27,7 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Providers;
+import dagger.multibindings.ElementsIntoSet;
 import dagger.multibindings.IntoSet;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -128,5 +130,33 @@ public class DaggerAdapterTest extends TestCase {
             new MultibindingGuiceModule(),
             DaggerAdapter.from(new SetBindingDaggerModule1(), new SetBindingDaggerModule2()));
     assertEquals(ImmutableSet.of(13, 3, 5, 8), i.getInstance(new Key<Set<Integer>>() {}));
+  }
+
+  @dagger.Module
+  static class UnsupportedAnnotationModule {
+    @dagger.Provides
+    @ElementsIntoSet
+    Set<Object> noGuiceEquivalentForElementsIntoSet() {
+      return ImmutableSet.of();
+    }
+  }
+
+  @dagger.Module
+  static class UnsupportedAnnotationSubclassModule extends UnsupportedAnnotationModule {}
+
+  public void testUnsupportedBindingAnnotation() {
+    try {
+      Guice.createInjector(DaggerAdapter.from(new UnsupportedAnnotationModule()));
+      fail();
+    } catch (CreationException expected) {
+    }
+  }
+
+  public void testUnsupportedBindingAnnotationFromModuleSuperclass() {
+    try {
+      Guice.createInjector(DaggerAdapter.from(new UnsupportedAnnotationSubclassModule()));
+      fail();
+    } catch (CreationException expected) {
+    }
   }
 }
