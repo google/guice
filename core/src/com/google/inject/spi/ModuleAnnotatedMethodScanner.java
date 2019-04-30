@@ -39,9 +39,9 @@ public abstract class ModuleAnnotatedMethodScanner {
   /**
    * Prepares a method for binding. This {@code key} parameter is the key discovered from looking at
    * the binding annotation and return value of the method. Implementations can modify the key to
-   * instead bind to another key. For example, Multibinder may want to change {@code @SetProvides
-   * String provideFoo()} to bind into a unique Key within the multibinder instead of binding {@code
-   * String}.
+   * instead bind to another key. For example, Multibinder may want to change
+   * {@code @ProvidesIntoSet String provideFoo()} to bind into a unique Key within the multibinder
+   * instead of binding {@code String}.
    *
    * <p>The injection point and annotation are provided in case the implementation wants to set the
    * key based on the property of the annotation or if any additional preparation is needed for any
