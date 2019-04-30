@@ -16,6 +16,7 @@
 package com.google.inject.daggeradapter;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.internal.ProviderMethodsModule;
@@ -59,7 +60,7 @@ public final class DaggerAdapter {
    */
   public static Module from(Object... daggerModuleObjects) {
     // TODO(cgruber): Gather injects=, dedupe, factor out instances, instantiate the rest, and go.
-    return new DaggerCompatibilityModule(daggerModuleObjects);
+    return new DaggerCompatibilityModule(ImmutableList.copyOf(daggerModuleObjects));
   }
 
   /**
@@ -68,9 +69,9 @@ public final class DaggerAdapter {
    * ModuleAnnotatedMethodScanner}.
    */
   private static final class DaggerCompatibilityModule implements Module {
-    private final Object[] daggerModuleObjects;
+    private final ImmutableList<Object> daggerModuleObjects;
 
-    private DaggerCompatibilityModule(Object... daggerModuleObjects) {
+    private DaggerCompatibilityModule(ImmutableList<Object> daggerModuleObjects) {
       this.daggerModuleObjects = daggerModuleObjects;
     }
 
