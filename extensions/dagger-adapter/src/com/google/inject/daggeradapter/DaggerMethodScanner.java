@@ -23,7 +23,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import dagger.Provides;
-import dagger.Provides.Type;
 import dagger.multibindings.IntoSet;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -53,19 +52,7 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
       return processSetBinding(binder, key);
     }
 
-    switch (annotation.type()) {
-      case UNIQUE:
-        return key;
-      case SET:
-        return processSetBinding(binder, key);
-      case SET_VALUES:
-        binder.addError(
-            Type.SET_VALUES.name() + " contributions are not supported by Guice.", providesMethod);
-        return key;
-      default:
-        binder.addError("Unknown @Provides type " + annotation.type() + ".", providesMethod);
-        return key;
-    }
+    return key;
   }
 
   private static <T> Key<T> processSetBinding(Binder binder, Key<T> key) {
