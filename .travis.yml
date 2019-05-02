@@ -7,8 +7,8 @@ cache:
 
 jdk:
   - oraclejdk11
-  - oraclejdk9
-  - oraclejdk8
+  - openjdk9
+  - openjdk8
 
 env:
   global:
