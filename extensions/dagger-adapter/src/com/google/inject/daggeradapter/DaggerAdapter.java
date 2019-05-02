@@ -25,7 +25,6 @@ import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 /**
  * A utility to adapt classes annotated with {@link @dagger.Module} such that their
@@ -119,9 +118,7 @@ public final class DaggerAdapter {
 
     @Override
     public String toString() {
-      return MoreObjects.toStringHelper(this)
-          .add("modules", Arrays.asList(daggerModuleObjects))
-          .toString();
+      return MoreObjects.toStringHelper(this).add("modules", daggerModuleObjects).toString();
     }
   }
 
