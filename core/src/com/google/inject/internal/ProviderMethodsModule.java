@@ -55,7 +55,7 @@ public final class ProviderMethodsModule implements Module {
   private ProviderMethodsModule(
       Object delegate, boolean skipFastClassGeneration, ModuleAnnotatedMethodScanner scanner) {
     this.delegate = checkNotNull(delegate, "delegate");
-    this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
+    this.typeLiteral = TypeLiteral.get(getDelegateModuleClass());
     this.skipFastClassGeneration = skipFastClassGeneration;
     this.scanner = scanner;
   }
@@ -91,8 +91,12 @@ public final class ProviderMethodsModule implements Module {
     return new ProviderMethodsModule(object, skipFastClassGeneration, scanner);
   }
 
-  public Object getDelegateModule() {
-    return delegate;
+  public Class<?> getDelegateModuleClass() {
+    return isStaticModule() ? (Class<?>) delegate : delegate.getClass();
+  }
+
+  private boolean isStaticModule() {
+    return delegate instanceof Class;
   }
 
   @Override
@@ -105,11 +109,20 @@ public final class ProviderMethodsModule implements Module {
   public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
     List<ProviderMethod<?>> result = null;
     // The highest class in the type hierarchy that contained a provider method definition.
-    Class<?> superMostClass = delegate.getClass();
-    for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
+    Class<?> superMostClass = getDelegateModuleClass();
+    for (Class<?> c = superMostClass; c != Object.class && c != null; c = c.getSuperclass()) {
       for (Method method : DeclaredMembers.getDeclaredMethods(c)) {
         Annotation annotation = getAnnotation(binder, method);
         if (annotation != null) {
+          if (isStaticModule() && !Modifier.isStatic(method.getModifiers())) {
+            binder
+                .skipSources(ProviderMethodsModule.class)
+                .addError(
+                    "%s is an instance method, but a class literal was passed. Make this method"
+                        + " static or pass an instance of the module instead.",
+                    method);
+            continue;
+          }
           if (result == null) {
             result = Lists.newArrayList();
           }
@@ -127,9 +140,9 @@ public final class ProviderMethodsModule implements Module {
     // provides methods, or when all provides methods are defined in a single class.
     Multimap<Signature, Method> methodsBySignature = null;
     // We can stop scanning when we see superMostClass, since no superclass method can override
-    // a method in a subclass.  Corrollary, if superMostClass == delegate.getClass(), there can be
-    // no overrides of a provides method.
-    for (Class<?> c = delegate.getClass(); c != superMostClass; c = c.getSuperclass()) {
+    // a method in a subclass.  Corrollary, if superMostClass == getDelegateModuleClass(), there can
+    // be no overrides of a provides method.
+    for (Class<?> c = getDelegateModuleClass(); c != superMostClass; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
         if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
             && !method.isBridge()
@@ -272,7 +285,7 @@ public final class ProviderMethodsModule implements Module {
     return ProviderMethod.create(
         key,
         method,
-        delegate,
+        isStaticModule() ? null : delegate,
         ImmutableSet.copyOf(point.getDependencies()),
         scopeAnnotation,
         skipFastClassGeneration,

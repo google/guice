@@ -35,23 +35,28 @@ import java.util.Arrays;
  * <p>Simple example:
  *
  * <pre>{@code
- * Guice.createInjector(...other modules..., DaggerAdapter.from(new SomeDaggerAdapter()));
+ * Guice.createInjector(
+ *   DaggerAdapter.from(SomeDaggerModule.class, new AnotherModuleWithConstructor());
  * }</pre>
+ *
+ * <p>For modules with no instance binding methods, prefer using a class literal. If there are
+ * instance binding methods, an instance of the module must be passed.
  *
  * <p>Some notes on usage and compatibility.
  *
  * <ul>
- * <li>Dagger provider methods have a "SET_VALUES" provision mode not supported by Guice.
- * <li>MapBindings are not yet implemented (pending).
- * <li>Be careful about stateful modules. In contrast to Dagger (where components are expected to be
- *     recreated on-demand with new Module instances), Guice typically has a single injector with a
- *     long lifetime, so your module instance will be used throughout the lifetime of the entire
- *     app.
- * <li>Dagger 1.x uses {@link @Singleton} for all scopes, including shorter-lived scopes like
- *     per-request or per-activity. Using modules written with Dagger 1.x usage in mind may result
- *     in mis-scoped objects.
- * <li>Dagger 2.x supports custom scope annotations, but for use in Guice, a custom scope
- *     implementation must be registered in order to support the custom lifetime of that annotation.
+ *   <li>Dagger provider methods have a "SET_VALUES" provision mode not supported by Guice.
+ *   <li>MapBindings are not yet implemented (pending).
+ *   <li>Be careful about stateful modules. In contrast to Dagger (where components are expected to
+ *       be recreated on-demand with new Module instances), Guice typically has a single injector
+ *       with a long lifetime, so your module instance will be used throughout the lifetime of the
+ *       entire app.
+ *   <li>Dagger 1.x uses {@link @Singleton} for all scopes, including shorter-lived scopes like
+ *       per-request or per-activity. Using modules written with Dagger 1.x usage in mind may result
+ *       in mis-scoped objects.
+ *   <li>Dagger 2.x supports custom scope annotations, but for use in Guice, a custom scope
+ *       implementation must be registered in order to support the custom lifetime of that
+ *       annotation.
  * </ul>
  *
  * @author cgruber@google.com (Christian Gruber)

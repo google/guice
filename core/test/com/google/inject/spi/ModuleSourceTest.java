@@ -81,7 +81,7 @@ public class ModuleSourceTest extends TestCase {
   private ModuleSource createWithSizeOne() {
     StackTraceElement[] partialCallStack = new StackTraceElement[1];
     partialCallStack[0] = BINDER_INSTALL;
-    return new ModuleSource(new A(), partialCallStack);
+    return new ModuleSource(A.class, partialCallStack);
   }
 
   private ModuleSource createWithSizeTwo() {
@@ -91,7 +91,7 @@ public class ModuleSourceTest extends TestCase {
     partialCallStack[1] =
         new StackTraceElement(
             "com.google.inject.spi.moduleSourceTest$A", "configure", "moduleSourceTest.java", 100);
-    return moduleSource.createChild(new B(), partialCallStack);
+    return moduleSource.createChild(B.class, partialCallStack);
   }
 
   private ModuleSource createWithSizeThree() {
@@ -103,7 +103,7 @@ public class ModuleSourceTest extends TestCase {
     partialCallStack[3] =
         new StackTraceElement(
             "com.google.inject.spi.moduleSourceTest$B", "configure", "moduleSourceTest.java", 200);
-    return moduleSource.createChild(new C(), partialCallStack);
+    return moduleSource.createChild(C.class, partialCallStack);
   }
 
   private static class A extends AbstractModule {
