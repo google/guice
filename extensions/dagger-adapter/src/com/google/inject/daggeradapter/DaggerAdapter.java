@@ -25,6 +25,7 @@ import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * A utility to adapt classes annotated with {@link @dagger.Module} such that their
@@ -88,7 +89,10 @@ public final class DaggerAdapter {
 
     @Override
     public void configure(Binder binder) {
+      binder = binder.skipSources(getClass());
       for (Object module : daggerModuleObjects) {
+        validateNoSubcomponents(binder, module);
+
         binder.install(ProviderMethodsModule.forModule(module, DaggerMethodScanner.INSTANCE));
         checkUnsupportedDaggerAnnotations(module, binder);
       }
@@ -114,6 +118,17 @@ public final class DaggerAdapter {
         methods.add(current.getDeclaredMethods());
       }
       return methods.build();
+    }
+
+    private void validateNoSubcomponents(Binder binder, Object module) {
+      Class<?> moduleClass = module instanceof Class ? (Class<?>) module : module.getClass();
+      dagger.Module moduleAnnotation = moduleClass.getAnnotation(dagger.Module.class);
+      if (moduleAnnotation.subcomponents().length > 0) {
+        binder.addError(
+            "Subcomponents cannot be configured for modules used with DaggerAdapter. %s specifies:"
+                + " %s",
+            moduleClass, Arrays.toString(moduleAnnotation.subcomponents()));
+      }
     }
 
     @Override
