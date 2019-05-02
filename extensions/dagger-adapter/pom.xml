@@ -15,6 +15,11 @@
       <artifactId>dagger</artifactId>
       <version>2.4</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

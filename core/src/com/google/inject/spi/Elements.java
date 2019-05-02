@@ -323,14 +323,14 @@ public final class Elements {
           // ModuleAnnotatedMethodScanner lets users scan their own modules for @Provides-like
           // bindings.  If they install the module at a top-level, then moduleSource can be null.
           // Also, if they pass something other than 'this' to it, we'd have the wrong source.
-          Object delegate = ((ProviderMethodsModule) module).getDelegateModule();
+          Class<?> delegateClass = ((ProviderMethodsModule) module).getDelegateModuleClass();
           if (moduleSource == null
-              || !moduleSource.getModuleClassName().equals(delegate.getClass().getName())) {
-            moduleSource = getModuleSource(delegate);
+              || !moduleSource.getModuleClassName().equals(delegateClass.getName())) {
+            moduleSource = getModuleSource(delegateClass);
             unwrapModuleSource = true;
           }
         } else {
-          moduleSource = getModuleSource(module);
+          moduleSource = getModuleSource(module.getClass());
           unwrapModuleSource = true;
         }
         boolean skipScanning = false;
@@ -514,7 +514,7 @@ public final class Elements {
       return builder;
     }
 
-    private ModuleSource getModuleSource(Object module) {
+    private ModuleSource getModuleSource(Class<?> module) {
       StackTraceElement[] partialCallStack;
       if (getIncludeStackTraceOption() == IncludeStackTraceOption.COMPLETE) {
         partialCallStack = getPartialCallStack(new Throwable().getStackTrace());

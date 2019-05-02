@@ -47,30 +47,32 @@ final class ModuleSource {
   /**
    * Creates a new {@link ModuleSource} with a {@literal null} parent.
    *
-   * @param module the corresponding module
+   * @param moduleClass the corresponding module
    * @param partialCallStack the chunk of call stack that starts from the parent module {@link
    *     Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
    *     Module#configure(Binder) configure(Binder)} method invocation
    */
-  ModuleSource(Object module, StackTraceElement[] partialCallStack) {
-    this(null, module, partialCallStack);
+  ModuleSource(Class<?> moduleClass, StackTraceElement[] partialCallStack) {
+    this(null, moduleClass, partialCallStack);
   }
 
   /**
    * Creates a new {@link ModuleSource} Object.
    *
    * @param parent the parent module {@link ModuleSource source}
-   * @param module the corresponding module
+   * @param moduleClass the corresponding module
    * @param partialCallStack the chunk of call stack that starts from the parent module {@link
    *     Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
    *     Module#configure(Binder) configure(Binder)} method invocation
    */
   private ModuleSource(
-      /* @Nullable */ ModuleSource parent, Object module, StackTraceElement[] partialCallStack) {
-    Preconditions.checkNotNull(module, "module cannot be null.");
+      /* @Nullable */ ModuleSource parent,
+      Class<?> moduleClass,
+      StackTraceElement[] partialCallStack) {
+    Preconditions.checkNotNull(moduleClass, "module cannot be null.");
     Preconditions.checkNotNull(partialCallStack, "partialCallStack cannot be null.");
     this.parent = parent;
-    this.moduleClassName = module.getClass().getName();
+    this.moduleClassName = moduleClass.getName();
     this.partialCallStack = StackTraceElements.convertToInMemoryStackTraceElement(partialCallStack);
   }
 
@@ -101,13 +103,13 @@ final class ModuleSource {
   /**
    * Creates and returns a child {@link ModuleSource} corresponding to the {@link Module module}.
    *
-   * @param module the corresponding module
+   * @param moduleClass the corresponding module
    * @param partialCallStack the chunk of call stack that starts from the parent module {@link
    *     Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
    *     Module#configure(Binder) configure(Binder)} method invocation
    */
-  ModuleSource createChild(Object module, StackTraceElement[] partialCallStack) {
-    return new ModuleSource(this, module, partialCallStack);
+  ModuleSource createChild(Class<?> moduleClass, StackTraceElement[] partialCallStack) {
+    return new ModuleSource(this, moduleClass, partialCallStack);
   }
 
   /** Returns the parent module {@link ModuleSource source}. */

@@ -15,6 +15,8 @@
  */
 package com.google.inject.daggeradapter;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -157,6 +159,64 @@ public class DaggerAdapterTest extends TestCase {
       Guice.createInjector(DaggerAdapter.from(new UnsupportedAnnotationSubclassModule()));
       fail();
     } catch (CreationException expected) {
+    }
+  }
+
+  // TODO(ronshapiro): break this class into smaller files.
+
+  @dagger.Module
+  static class StaticProvidesMethods {
+    @dagger.Provides
+    static String string() {
+      return "class";
+    }
+  }
+
+  @dagger.Module
+  interface StaticProvidesMethodsInterface {
+    @dagger.Provides
+    static String string() {
+      return "interface";
+    }
+  }
+
+  public void testStaticProvidesMethods() {
+    Injector injector = Guice.createInjector(DaggerAdapter.from(new StaticProvidesMethods()));
+    String staticProvision = injector.getInstance(String.class);
+    assertEquals("class", staticProvision);
+  }
+
+  public void testStaticProvidesMethods_classLiteral() {
+    Injector injector = Guice.createInjector(DaggerAdapter.from(StaticProvidesMethods.class));
+    String staticProvision = injector.getInstance(String.class);
+    assertEquals("class", staticProvision);
+  }
+
+  public void testStaticProvidesMethods_interface() {
+    Injector injector =
+        Guice.createInjector(DaggerAdapter.from(StaticProvidesMethodsInterface.class));
+    String staticProvision = injector.getInstance(String.class);
+    assertEquals("interface", staticProvision);
+  }
+
+  @dagger.Module
+  static class ModuleWithInstanceMethods {
+    @dagger.Provides
+    int i() {
+      return 0;
+    }
+  }
+
+  public void testClassLiteralWithInstanceProvidesMethod() {
+    try {
+      Guice.createInjector(DaggerAdapter.from(ModuleWithInstanceMethods.class));
+      fail();
+    } catch (CreationException expected) {
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "ModuleWithInstanceMethods.i() is an instance method, but a class literal was"
+                  + " passed. Make this method static or pass an instance of the module instead.");
     }
   }
 }
