@@ -91,10 +91,20 @@ public final class DaggerAdapter {
     public void configure(Binder binder) {
       binder = binder.skipSources(getClass());
       for (Object module : daggerModuleObjects) {
+        checkIsDaggerModule(module, binder);
         validateNoSubcomponents(binder, module);
+        checkUnsupportedDaggerAnnotations(module, binder);
 
         binder.install(ProviderMethodsModule.forModule(module, DaggerMethodScanner.INSTANCE));
-        checkUnsupportedDaggerAnnotations(module, binder);
+      }
+    }
+
+    private void checkIsDaggerModule(Object module, Binder binder) {
+      Class<?> moduleClass = module instanceof Class ? (Class<?>) module : module.getClass();
+      if (!moduleClass.isAnnotationPresent(dagger.Module.class)) {
+        binder
+            .skipSources(getClass())
+            .addError("%s must be annotated with @dagger.Module", moduleClass.getCanonicalName());
       }
     }
 

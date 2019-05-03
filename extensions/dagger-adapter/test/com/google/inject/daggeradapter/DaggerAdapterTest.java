@@ -219,4 +219,34 @@ public class DaggerAdapterTest extends TestCase {
                   + " passed. Make this method static or pass an instance of the module instead.");
     }
   }
+
+  public void testModuleObjectsMustBeDaggerModules() {
+    try {
+      Guice.createInjector(DaggerAdapter.from(new Object()));
+      fail();
+    } catch (CreationException expected) {
+      assertThat(expected)
+          .hasMessageThat()
+          .contains("Object must be annotated with @dagger.Module");
+    }
+  }
+
+  @dagger.producers.ProducerModule
+  static class ProducerModuleWithProvidesMethod {
+    @dagger.Provides
+    int i() {
+      return 1;
+    }
+  }
+
+  public void testProducerModulesNotSupported() {
+    try {
+      Guice.createInjector(DaggerAdapter.from(new ProducerModuleWithProvidesMethod()));
+      fail();
+    } catch (CreationException expected) {
+      assertThat(expected)
+          .hasMessageThat()
+          .contains("ProducerModuleWithProvidesMethod must be annotated with @dagger.Module");
+    }
+  }
 }
