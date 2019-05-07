@@ -37,8 +37,11 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     return assertAbout(CheckedProviderSubject.<T, P>checkedProviders()).that(provider);
   }
 
+  private final P actual;
+
   private CheckedProviderSubject(FailureMetadata failureMetadata, @Nullable P subject) {
     super(failureMetadata, subject);
+    this.actual = subject;
   }
 
   /**
@@ -50,7 +53,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
    * @return a {@link Subject} for asserting against the return value of {@link CheckedProvider#get}
    */
   public Subject<?, Object> providedValue() {
-    P provider = actual();
+    P provider = actual;
     T got;
     try {
       got = provider.get();
@@ -71,7 +74,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
    *     CheckedProvider#get}
    */
   public ThrowableSubject thrownException() {
-    P provider = actual();
+    P provider = actual;
     T got;
     try {
       got = provider.get();
@@ -103,8 +106,11 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
 
   private static final class UnexpectedFailureSubject
       extends Subject<UnexpectedFailureSubject, Throwable> {
+    private final Throwable actual;
+
     UnexpectedFailureSubject(FailureMetadata metadata, @Nullable Throwable actual) {
       super(metadata, actual);
+      this.actual = actual;
     }
 
     void doFail(String format, Object... args) {
