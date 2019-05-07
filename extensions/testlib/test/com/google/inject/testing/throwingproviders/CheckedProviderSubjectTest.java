@@ -38,8 +38,11 @@ public class CheckedProviderSubjectTest {
     CheckedProvider<String> provider = CheckedProviders.of(StringCheckedProvider.class, unexpected);
     String message =
         String.format(
-            "value provided by <%s>\nexpected: %s\nbut was : %s",
-            getReturningProviderName(unexpected), expected, unexpected);
+            "value of           : checkedProvider.get()\n"
+                + "expected           : %s\n"
+                + "but was            : %s\n"
+                + "checkedProvider was: %s",
+            expected, unexpected, getReturningProviderName(unexpected));
 
     expectWhenTesting().that(provider).providedValue().isEqualTo(expected);
     assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
@@ -53,7 +56,9 @@ public class CheckedProviderSubjectTest {
         CheckedProviders.throwing(StringCheckedProvider.class, SummerException.class);
     String message =
         String.format(
-            "checked provider <%s> threw an exception",
+            "value of           : checkedProvider.get()\n"
+                + "checked provider was not expected to throw an exception\n"
+                + "checkedProvider was: %s",
             getThrowingProviderName(SummerException.class.getName()));
 
     expectWhenTesting().that(provider).providedValue();
@@ -78,14 +83,15 @@ public class CheckedProviderSubjectTest {
         CheckedProviders.throwing(StringCheckedProvider.class, unexpected);
     String message =
         String.format(
-            "exception thrown by <%s>\n"
+            "value of            : checkedProvider.get()'s exception\n"
                 + "expected instance of: %s\n"
                 + "but was instance of : %s\n"
-                + "with value          : %s",
-            getThrowingProviderName(UnsupportedOperationException.class.getName()),
+                + "with value          : %s\n"
+                + "checkedProvider was : %s",
             SummerException.class.getName(),
             UnsupportedOperationException.class.getName(),
-            UnsupportedOperationException.class.getName());
+            UnsupportedOperationException.class.getName(),
+            getThrowingProviderName(UnsupportedOperationException.class.getName()));
 
     expectWhenTesting().that(provider).thrownException().isInstanceOf(expected);
     assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
@@ -95,10 +101,7 @@ public class CheckedProviderSubjectTest {
   public void thrownException_gets_expectFailure() {
     String getValue = "keep WINTER IS COMING safe";
     CheckedProvider<String> provider = CheckedProviders.of(StringCheckedProvider.class, getValue);
-    String message =
-        String.format(
-            "Not true that <%s> threw <an exception>. It provided <%s>",
-            getReturningProviderName(getValue), getValue);
+    String message = String.format("expected to throw\nbut provided: %s", getValue);
 
     expectWhenTesting().that(provider).thrownException();
     assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
