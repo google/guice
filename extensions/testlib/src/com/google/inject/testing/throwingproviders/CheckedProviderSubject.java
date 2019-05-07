@@ -1,6 +1,6 @@
 package com.google.inject.testing.throwingproviders;
 
-import static com.google.common.base.Strings.lenientFormat;
+import static com.google.common.truth.Fact.fact;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 
@@ -37,11 +37,11 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     return assertAbout(CheckedProviderSubject.<T, P>checkedProviders()).that(provider);
   }
 
-  private final P actual;
+  private final P provider;
 
   private CheckedProviderSubject(FailureMetadata failureMetadata, @Nullable P subject) {
     super(failureMetadata, subject);
-    this.actual = subject;
+    this.provider = subject;
   }
 
   /**
@@ -53,15 +53,14 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
    * @return a {@link Subject} for asserting against the return value of {@link CheckedProvider#get}
    */
   public Subject<?, Object> providedValue() {
-    P provider = actual;
     T got;
     try {
       got = provider.get();
     } catch (Exception e) {
-      failWithCauseAndMessage(e, "checked provider <%s> threw an exception", provider);
+      failWithCauseAndMessage(e, "checked provider was not expected to throw an exception");
       return ignoreCheck().that(new Object());
     }
-    return check().withMessage("value provided by <%s>", provider).that(got);
+    return check("get()").that(got);
   }
 
   /**
@@ -74,14 +73,13 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
    *     CheckedProvider#get}
    */
   public ThrowableSubject thrownException() {
-    P provider = actual;
     T got;
     try {
       got = provider.get();
     } catch (Throwable e) {
-      return check().withMessage("exception thrown by <%s>", provider).that(e);
+      return check("get()'s exception").that(e);
     }
-    failWithBadResults("threw", "an exception", "provided", got);
+    failWithoutActual(simpleFact("expected to throw"), fact("but provided", got));
     return ignoreCheck().that(new Throwable());
   }
 
@@ -91,8 +89,8 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
    * assertion "about" the exception, Truth includes it as a cause.
    */
 
-  private void failWithCauseAndMessage(Throwable cause, String format, Object... args) {
-    check().about(unexpectedFailures()).that(cause).doFail(format, args);
+  private void failWithCauseAndMessage(Throwable cause, String message) {
+    check("get()").about(unexpectedFailures()).that(cause).doFail(message);
   }
 
   private static Factory<UnexpectedFailureSubject, Throwable> unexpectedFailures() {
@@ -106,15 +104,12 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
 
   private static final class UnexpectedFailureSubject
       extends Subject<UnexpectedFailureSubject, Throwable> {
-    private final Throwable actual;
-
     UnexpectedFailureSubject(FailureMetadata metadata, @Nullable Throwable actual) {
       super(metadata, actual);
-      this.actual = actual;
     }
 
-    void doFail(String format, Object... args) {
-      failWithoutActual(simpleFact(lenientFormat(format, args)));
+    void doFail(String message) {
+      failWithoutActual(simpleFact(message));
     }
   }
 }
