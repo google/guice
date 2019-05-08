@@ -114,7 +114,7 @@ public final class DaggerAdapter {
           if (annotation.annotationType().getName().startsWith("dagger.")) {
             if (!SUPPORTED_METHOD_ANNOTATIONS.contains(annotation.annotationType())) {
               binder.addError(
-                  "%s is annotated with @%s which is not supported by DaggerAdapater",
+                  "%s is annotated with @%s which is not supported by DaggerAdapter",
                   method, annotation.annotationType().getCanonicalName());
             }
           }
