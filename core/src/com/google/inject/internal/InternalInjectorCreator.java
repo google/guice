@@ -230,10 +230,11 @@ public final class InternalInjectorCreator {
 
     // handle a corner case where a child injector links to a binding in a parent injector, and
     // that binding is singleton. We won't catch this otherwise because we only iterate the child's
-    // bindings.
+    // bindings. This only applies if the linked binding is not itself scoped.
     if (binding instanceof LinkedBindingImpl) {
       Key<?> linkedBinding = ((LinkedBindingImpl<?>) binding).getLinkedKey();
-      return isEagerSingleton(injector, injector.getBinding(linkedBinding), stage);
+      return binding.getScoping().isNoScope()
+          && isEagerSingleton(injector, injector.getBinding(linkedBinding), stage);
     }
 
     return false;

@@ -1340,4 +1340,40 @@ public class ScopesTest extends TestCase {
                   }
                 }));
   }
+
+  public void testScopedLinkedBindingDoesNotPropagateEagerSingleton() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+
+    final Scope notInScopeScope =
+        new Scope() {
+          @Override
+          public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+            return new Provider<T>() {
+              @Override
+              public T get() {
+                throw new IllegalStateException("Not in scope");
+              }
+            };
+          }
+        };
+
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(a).toInstance("a");
+            bind(b).to(a).in(CustomScoped.class);
+            bindScope(CustomScoped.class, notInScopeScope);
+          }
+        };
+
+    Injector injector = Guice.createInjector(module);
+    Provider<String> bProvider = injector.getProvider(b);
+    try {
+      bProvider.get();
+      fail("expected failure");
+    } catch (ProvisionException expected) {
+    }
+  }
 }
