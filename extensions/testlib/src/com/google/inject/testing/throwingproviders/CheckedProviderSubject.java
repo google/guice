@@ -15,8 +15,7 @@ import javax.annotation.Nullable;
  *
  * @author eatnumber1@google.com (Russ Harmon)
  */
-public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
-    extends Subject<CheckedProviderSubject<T, P>, P> {
+public final class CheckedProviderSubject<T, P extends CheckedProvider<T>> extends Subject {
 
   private static final class CheckedProviderSubjectFactory<T, P extends CheckedProvider<T>>
       implements Subject.Factory<CheckedProviderSubject<T, P>, P> {
@@ -52,7 +51,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
    *
    * @return a {@link Subject} for asserting against the return value of {@link CheckedProvider#get}
    */
-  public Subject<?, Object> providedValue() {
+  public Subject providedValue() {
     T got;
     try {
       got = provider.get();
@@ -102,8 +101,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
     };
   }
 
-  private static final class UnexpectedFailureSubject
-      extends Subject<UnexpectedFailureSubject, Throwable> {
+  private static final class UnexpectedFailureSubject extends Subject {
     UnexpectedFailureSubject(FailureMetadata metadata, @Nullable Throwable actual) {
       super(metadata, actual);
     }
