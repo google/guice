@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.ScopeAnnotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import javax.inject.Scope;
 
 /**
  * Apply this to implementation classes when you want one instance per request.
@@ -29,5 +29,5 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ScopeAnnotation
+@Scope
 public @interface RequestScoped {}
