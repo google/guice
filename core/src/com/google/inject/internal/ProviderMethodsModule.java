@@ -17,11 +17,11 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -108,13 +109,16 @@ public final class ProviderMethodsModule implements Module {
 
   public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
     List<ProviderMethod<?>> result = null;
+    List<MethodAndAnnotation> methodsAndAnnotations = null;
     // The highest class in the type hierarchy that contained a provider method definition.
     Class<?> superMostClass = getDelegateModuleClass();
     for (Class<?> c = superMostClass; c != Object.class && c != null; c = c.getSuperclass()) {
       for (Method method : DeclaredMembers.getDeclaredMethods(c)) {
         Annotation annotation = getAnnotation(binder, method);
         if (annotation != null) {
-          if (isStaticModule() && !Modifier.isStatic(method.getModifiers())) {
+          if (isStaticModule()
+              && !Modifier.isStatic(method.getModifiers())
+              && !Modifier.isAbstract(method.getModifiers())) {
             binder
                 .skipSources(ProviderMethodsModule.class)
                 .addError(
@@ -124,9 +128,15 @@ public final class ProviderMethodsModule implements Module {
             continue;
           }
           if (result == null) {
-            result = Lists.newArrayList();
+            result = new ArrayList<>();
+            methodsAndAnnotations = new ArrayList<>();
           }
-          result.add(createProviderMethod(binder, method, annotation));
+
+          ProviderMethod<Object> providerMethod = createProviderMethod(binder, method, annotation);
+          if (providerMethod != null) {
+            result.add(providerMethod);
+          }
+          methodsAndAnnotations.add(new MethodAndAnnotation(method, annotation));
           superMostClass = c;
         }
       }
@@ -158,8 +168,10 @@ public final class ProviderMethodsModule implements Module {
       // we have found all the signatures and now need to identify if any were overridden
       // In the worst case this will have O(n^2) in the number of @Provides methods, but that is
       // only assuming that every method is an override, in general it should be very quick.
-      for (ProviderMethod<?> provider : result) {
-        Method method = provider.getMethod();
+      for (MethodAndAnnotation methodAndAnnotation : methodsAndAnnotations) {
+        Method method = methodAndAnnotation.method;
+        Annotation annotation = methodAndAnnotation.annotation;
+
         for (Method matchingSignature :
             methodsBySignature.get(new Signature(typeLiteral, method))) {
           // matching signature is in the same class or a super class, therefore method cannot be
@@ -170,9 +182,9 @@ public final class ProviderMethodsModule implements Module {
           // now we know matching signature is in a subtype of method.getDeclaringClass()
           if (overrides(matchingSignature, method)) {
             String annotationString =
-                provider.getAnnotation().annotationType() == Provides.class
+                annotation.annotationType() == Provides.class
                     ? "@Provides"
-                    : "@" + provider.getAnnotation().annotationType().getCanonicalName();
+                    : "@" + annotation.annotationType().getCanonicalName();
             binder.addError(
                 "Overriding "
                     + annotationString
@@ -188,6 +200,16 @@ public final class ProviderMethodsModule implements Module {
       }
     }
     return result;
+  }
+
+  private static class MethodAndAnnotation {
+    final Method method;
+    final Annotation annotation;
+
+    MethodAndAnnotation(Method method, Annotation annotation) {
+      this.method = method;
+      this.annotation = annotation;
+    }
   }
 
   /** Returns the annotation that is claimed by the scanner, or null if there is none. */
@@ -277,11 +299,31 @@ public final class ProviderMethodsModule implements Module {
     } catch (Throwable t) {
       binder.addError(t);
     }
+
+    if (Modifier.isAbstract(method.getModifiers())) {
+      checkState(
+          key == null,
+          "%s returned a non-null key (%s) for %s. prepareMethod() must return null for abstract"
+              + " methods",
+          scanner,
+          key,
+          method);
+      return null;
+    } else {
+      checkState(
+          key != null,
+          "%s returned a null key for %s. prepareMethod() can only return null for abstract"
+              + " methods",
+          scanner,
+          method);
+    }
+
     Class<? extends Annotation> scopeAnnotation =
         Annotations.findScopeAnnotation(errors, method.getAnnotations());
     for (Message message : errors.getMessages()) {
       binder.addError(message);
     }
+
     return ProviderMethod.create(
         key,
         method,

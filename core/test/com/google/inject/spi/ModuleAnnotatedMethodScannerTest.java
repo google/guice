@@ -33,6 +33,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
+import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -522,5 +523,41 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
               }
             });
     assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  public void testAbstractMethodsAreScannedForOverrides() {
+    abstract class Superclass {
+      @TestProvides
+      abstract boolean abstractTest();
+    }
+
+    abstract class Subclass extends Superclass {
+      @TestProvides
+      @Override
+      abstract boolean abstractTest();
+    }
+
+    ModuleAnnotatedMethodScanner testScanner =
+        new ModuleAnnotatedMethodScanner() {
+          @Override
+          public Set<? extends Class<? extends Annotation>> annotationClasses() {
+            return ImmutableSet.of(TestProvides.class);
+          }
+
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            return null;
+          }
+        };
+    try {
+      Guice.createInjector(ProviderMethodsModule.forModule(Subclass.class, testScanner));
+      fail("expected exception not thrown");
+    } catch (CreationException e) {
+      assertContains(
+          e.getMessage(),
+          String.format(
+              "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
+    }
   }
 }
