@@ -47,6 +47,10 @@ public abstract class ModuleAnnotatedMethodScanner {
    * key based on the property of the annotation or if any additional preparation is needed for any
    * of the dependencies. The annotation is guaranteed to be an instance of one the classes returned
    * by {@link #annotationClasses}.
+   *
+   * <p>If {@code injectionPoint} represents an {@code abstract} method, {@code null} must be
+   * returned from this method. This scanner can use {@code binder} to bind alternative bindings in
+   * place of the abstract method. In all other cases, this method may not return null.
    */
   public abstract <T> Key<T> prepareMethod(
       Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint);
