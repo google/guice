@@ -1,4 +1,7 @@
 language: java
+os:
+  - linux
+  - linux-ppc64le
 sudo: false
 
 cache:
