@@ -50,7 +50,18 @@ import javax.inject.Scope;
  * @author cgruber@google.com (Christian Gruber)
  */
 final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
+  /**
+   * A single instance is not necessary for the correctness or performance of the scanner, but it
+   * does suffice an invariant of {@link com.google.inject.internal.ProviderMethodsModule}, which
+   * uses scanner equality in its own equality semantics. If multiple modules use
+   * DaggerAdapter.from(FooModule.class) separately, and thus are not deduplicated by DaggerAdapter
+   * on their own, Guice will do so as long as this scanner is always equal.
+   *
+   * <p>If we do away with this singleton instance, we need to be sure that we do so in a way that
+   * maintains equality in these cases.
+   */
   static final DaggerMethodScanner INSTANCE = new DaggerMethodScanner();
+
   private static final ImmutableSet<Class<? extends Annotation>> ANNOTATIONS =
       ImmutableSet.of(Provides.class, Binds.class, Multibinds.class, BindsOptionalOf.class);
 
