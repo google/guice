@@ -74,7 +74,6 @@ import java.util.Set;
 public final class DaggerAdapter {
   /** Creates a new {@link DaggerAdapter} from {@code daggerModuleObjects}. */
   public static Module from(Object... daggerModuleObjects) {
-    // TODO(cgruber): Gather injects=, dedupe, factor out instances, instantiate the rest, and go.
     return new DaggerCompatibilityModule(ImmutableList.copyOf(daggerModuleObjects));
   }
 
