@@ -15,22 +15,28 @@
  */
 package com.google.inject.daggeradapter;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Iterables.getFirst;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimaps;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * A utility to adapt classes annotated with {@link @dagger.Module} such that their
- * {@link @dagger.Provides} methods can be properly invoked by Guice to perform their provision
- * operations.
+ * Adapts classes annotated with {@link @dagger.Module} such that their {@link @dagger.Provides}
+ * methods can be properly invoked by Guice to perform their provision operations.
  *
  * <p>Simple example:
  *
@@ -41,6 +47,10 @@ import java.util.Arrays;
  *
  * <p>For modules with no instance binding methods, prefer using a class literal. If there are
  * instance binding methods, an instance of the module must be passed.
+ *
+ * <p>Any class literals specified by {@code dagger.Module(includes = ...)} transitively will be
+ * included. Modules are de-duplicated, though multiple module instances of the same type is an
+ * error. Specifying a module instance and a class literal is also an error.
  *
  * <p>Some notes on usage and compatibility.
  *
@@ -62,11 +72,7 @@ import java.util.Arrays;
  * @author cgruber@google.com (Christian Gruber)
  */
 public final class DaggerAdapter {
-  /**
-   * Returns a guice module from a dagger module.
-   *
-   * <p>Note: At present, it does not honor {@code @Module(includes=...)} directives.
-   */
+  /** Creates a new {@link DaggerAdapter} from {@code daggerModuleObjects}. */
   public static Module from(Object... daggerModuleObjects) {
     // TODO(cgruber): Gather injects=, dedupe, factor out instances, instantiate the rest, and go.
     return new DaggerCompatibilityModule(ImmutableList.copyOf(daggerModuleObjects));
@@ -81,16 +87,16 @@ public final class DaggerAdapter {
    * ModuleAnnotatedMethodScanner}.
    */
   private static final class DaggerCompatibilityModule implements Module {
-    private final ImmutableList<Object> daggerModuleObjects;
+    private final ImmutableList<Object> declaredModules;
 
-    private DaggerCompatibilityModule(ImmutableList<Object> daggerModuleObjects) {
-      this.daggerModuleObjects = daggerModuleObjects;
+    private DaggerCompatibilityModule(ImmutableList<Object> declaredModules) {
+      this.declaredModules = declaredModules;
     }
 
     @Override
     public void configure(Binder binder) {
       binder = binder.skipSources(getClass());
-      for (Object module : daggerModuleObjects) {
+      for (Object module : deduplicateModules(binder, transitiveModules())) {
         checkIsDaggerModule(module, binder);
         validateNoSubcomponents(binder, module);
         checkUnsupportedDaggerAnnotations(module, binder);
@@ -141,9 +147,82 @@ public final class DaggerAdapter {
       }
     }
 
+    private ImmutableList<Object> transitiveModules() {
+      ModuleTraversingQueue queue = new ModuleTraversingQueue();
+      declaredModules.forEach(queue::add);
+
+      while (!queue.isEmpty()) {
+        dagger.Module module = queue.pop().getAnnotation(dagger.Module.class);
+        if (module != null) {
+          // invalid inputs are checked separately in checkIsDaggerModule()
+          Arrays.asList(module.includes()).forEach(queue::add);
+        }
+      }
+
+      return queue.transitiveModules();
+    }
+
+    private static ImmutableList<Object> deduplicateModules(
+        Binder binder, ImmutableList<Object> transitiveModules) {
+      ImmutableList.Builder<Object> deduplicatedModules = ImmutableList.builder();
+      // Group modules by their module class to detect duplicates
+      Multimaps.index(transitiveModules, DaggerAdapter::moduleClass)
+          .asMap()
+          .forEach(
+              (moduleClass, duplicates) -> {
+                // Select all module instances (i.e. ignore Class objects) and materialize into a
+                // set so that they're deduplicated. If multiple conflicting module instances exist,
+                // an error is reported since we don't know which one to use and they may have
+                // instance state which is relevant to binding methods.
+                ImmutableSet<Object> instances =
+                    duplicates.stream()
+                        .filter(module -> !(module instanceof Class))
+                        .collect(toImmutableSet());
+                if (instances.size() > 1) {
+                  binder.addError(
+                      "Duplicate module instances provided for %s: %s", moduleClass, instances);
+                }
+
+                // Prefer module instances to module Class objects. If no instance exists, take any
+                // of `duplicates`, which should be identical since class instances are singletons
+                deduplicatedModules.add(getFirst(instances, duplicates.iterator().next()));
+              });
+
+      return deduplicatedModules.build();
+    }
+
     @Override
     public String toString() {
-      return MoreObjects.toStringHelper(this).add("modules", daggerModuleObjects).toString();
+      return MoreObjects.toStringHelper(this).add("modules", declaredModules).toString();
+    }
+  }
+
+  private static Class<?> moduleClass(Object module) {
+    return module instanceof Class ? (Class<?>) module : module.getClass();
+  }
+
+  private static class ModuleTraversingQueue {
+    private final Deque<Class<?>> queue = new ArrayDeque<>();
+    private final Set<Object> visited = new HashSet<>();
+    private final ImmutableList.Builder<Object> transitiveModules = ImmutableList.builder();
+
+    void add(Object module) {
+      if (visited.add(module)) {
+        transitiveModules.add(module);
+        queue.add(moduleClass(module));
+      }
+    }
+
+    boolean isEmpty() {
+      return queue.isEmpty();
+    }
+
+    Class<?> pop() {
+      return queue.pop();
+    }
+
+    ImmutableList<Object> transitiveModules() {
+      return transitiveModules.build();
     }
   }
 
