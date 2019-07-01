@@ -249,4 +249,26 @@ public class DaggerAdapterTest extends TestCase {
           .contains("ProducerModuleWithProvidesMethod must be annotated with @dagger.Module");
     }
   }
+
+  @dagger.Module
+  static class ElementsIntoSetModule {
+    @dagger.Provides
+    @ElementsIntoSet
+    static Set<Integer> elements() {
+      return ImmutableSet.of();
+    }
+  }
+
+  public void testElementsIntoSetNotSupported() {
+    try {
+      Guice.createInjector(DaggerAdapter.from(ElementsIntoSetModule.class));
+      fail();
+    } catch (CreationException expected) {
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "elements() is annotated with @dagger.multibindings.ElementsIntoSet which is not"
+                  + " supported by DaggerAdapter");
+    }
+  }
 }

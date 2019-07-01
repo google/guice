@@ -17,6 +17,7 @@ package com.google.inject.daggeradapter;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Iterables.getFirst;
+import static com.google.inject.daggeradapter.SupportedAnnotations.allSupportedAnnotations;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -77,9 +78,6 @@ public final class DaggerAdapter {
     return new DaggerCompatibilityModule(ImmutableList.copyOf(daggerModuleObjects));
   }
 
-  private static final ImmutableSet<Class<? extends Annotation>> SUPPORTED_METHOD_ANNOTATIONS =
-      ImmutableSet.of(dagger.Provides.class, dagger.multibindings.IntoSet.class);
-
   /**
    * A Module that adapts Dagger {@code @Module}-annotated types to contribute configuration to an
    * {@link com.google.inject.Injector} using a dagger-specific {@link
@@ -114,20 +112,20 @@ public final class DaggerAdapter {
     }
 
     private static void checkUnsupportedDaggerAnnotations(Object module, Binder binder) {
-      for (Method method : allDeclaredMethods(module.getClass())) {
+      for (Method method : allDeclaredMethods(moduleClass(module))) {
         for (Annotation annotation : method.getAnnotations()) {
-          if (annotation.annotationType().getName().startsWith("dagger.")) {
-            if (!SUPPORTED_METHOD_ANNOTATIONS.contains(annotation.annotationType())) {
-              binder.addError(
-                  "%s is annotated with @%s which is not supported by DaggerAdapter",
-                  method, annotation.annotationType().getCanonicalName());
-            }
+          Class<? extends Annotation> annotationClass = annotation.annotationType();
+          if (annotationClass.getName().startsWith("dagger.")
+              && !allSupportedAnnotations().contains(annotationClass)) {
+            binder.addError(
+                "%s is annotated with @%s which is not supported by DaggerAdapter",
+                method, annotationClass.getCanonicalName());
           }
         }
       }
     }
 
-    private static Iterable<Method> allDeclaredMethods(Class<?> clazz) {
+    private static ImmutableList<Method> allDeclaredMethods(Class<?> clazz) {
       ImmutableList.Builder<Method> methods = ImmutableList.builder();
       for (Class<?> current = clazz; current != null; current = current.getSuperclass()) {
         methods.add(current.getDeclaredMethods());
