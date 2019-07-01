@@ -18,6 +18,7 @@ package com.google.inject.daggeradapter;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.inject.daggeradapter.Annotations.getAnnotatedAnnotation;
 import static com.google.inject.daggeradapter.Keys.parameterKey;
+import static com.google.inject.daggeradapter.SupportedAnnotations.supportedBindingAnnotations;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -62,12 +63,9 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
    */
   static final DaggerMethodScanner INSTANCE = new DaggerMethodScanner();
 
-  private static final ImmutableSet<Class<? extends Annotation>> ANNOTATIONS =
-      ImmutableSet.of(Provides.class, Binds.class, Multibinds.class, BindsOptionalOf.class);
-
   @Override
-  public Set<? extends Class<? extends Annotation>> annotationClasses() {
-    return ANNOTATIONS;
+  public ImmutableSet<Class<? extends Annotation>> annotationClasses() {
+    return supportedBindingAnnotations();
   }
 
   @Override
