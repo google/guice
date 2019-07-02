@@ -144,6 +144,15 @@ public class DaggerAdapterTest extends TestCase {
   }
 
   @dagger.Module
+  static class UnsupportedAnnotationStaticModule {
+    @dagger.Provides
+    @ElementsIntoSet
+    static Set<Object> noGuiceEquivalentForElementsIntoSet() {
+      return ImmutableSet.of();
+    }
+  }
+
+  @dagger.Module
   static class UnsupportedAnnotationSubclassModule extends UnsupportedAnnotationModule {}
 
   public void testUnsupportedBindingAnnotation() {
@@ -151,6 +160,24 @@ public class DaggerAdapterTest extends TestCase {
       Guice.createInjector(DaggerAdapter.from(new UnsupportedAnnotationModule()));
       fail();
     } catch (CreationException expected) {
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "noGuiceEquivalentForElementsIntoSet() is annotated with"
+                  + " @dagger.multibindings.ElementsIntoSet which is not supported by"
+                  + " DaggerAdapter");
+    }
+
+    try {
+      Guice.createInjector(DaggerAdapter.from(UnsupportedAnnotationStaticModule.class));
+      fail();
+    } catch (CreationException expected) {
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "noGuiceEquivalentForElementsIntoSet() is annotated with"
+                  + " @dagger.multibindings.ElementsIntoSet which is not supported by"
+                  + " DaggerAdapter");
     }
   }
 
@@ -247,28 +274,6 @@ public class DaggerAdapterTest extends TestCase {
       assertThat(expected)
           .hasMessageThat()
           .contains("ProducerModuleWithProvidesMethod must be annotated with @dagger.Module");
-    }
-  }
-
-  @dagger.Module
-  static class ElementsIntoSetModule {
-    @dagger.Provides
-    @ElementsIntoSet
-    static Set<Integer> elements() {
-      return ImmutableSet.of();
-    }
-  }
-
-  public void testElementsIntoSetNotSupported() {
-    try {
-      Guice.createInjector(DaggerAdapter.from(ElementsIntoSetModule.class));
-      fail();
-    } catch (CreationException expected) {
-      assertThat(expected)
-          .hasMessageThat()
-          .contains(
-              "elements() is annotated with @dagger.multibindings.ElementsIntoSet which is not"
-                  + " supported by DaggerAdapter");
     }
   }
 }
