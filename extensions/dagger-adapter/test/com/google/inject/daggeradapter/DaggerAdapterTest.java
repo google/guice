@@ -54,7 +54,7 @@ public class DaggerAdapterTest extends TestCase {
 
   public void testSimpleModule() {
     Injector i = Guice.createInjector(DaggerAdapter.from(new SimpleDaggerModule()));
-    assertEquals((Integer) 1, i.getInstance(Integer.class));
+    assertThat(i.getInstance(Integer.class)).isEqualTo(1);
   }
 
   static class SimpleGuiceModule extends AbstractModule {
@@ -67,7 +67,7 @@ public class DaggerAdapterTest extends TestCase {
   public void testInteractionWithGuiceModules() {
     Injector i =
         Guice.createInjector(new SimpleGuiceModule(), DaggerAdapter.from(new SimpleDaggerModule()));
-    assertEquals("1", i.getInstance(String.class));
+    assertThat(i.getInstance(String.class)).isEqualTo("1");
   }
 
   @dagger.Module
@@ -92,7 +92,7 @@ public class DaggerAdapterTest extends TestCase {
     Injector i =
         Guice.createInjector(
             DaggerAdapter.from(new SetBindingDaggerModule1(), new SetBindingDaggerModule2()));
-    assertEquals(ImmutableSet.of(3, 5), i.getInstance(new Key<Set<Integer>>() {}));
+    assertThat(i.getInstance(new Key<Set<Integer>>() {})).isEqualTo(ImmutableSet.of(3, 5));
   }
 
   @Qualifier
@@ -112,9 +112,8 @@ public class DaggerAdapterTest extends TestCase {
   public void testSetBindingsWithAnnotation() {
     Injector i =
         Guice.createInjector(DaggerAdapter.from(new SetBindingWithAnnotationDaggerModule()));
-    assertEquals(
-        ImmutableSet.of(4),
-        i.getInstance(Key.get(new TypeLiteral<Set<Integer>>() {}, AnnotationOnSet.class)));
+    assertThat(i.getInstance(Key.get(new TypeLiteral<Set<Integer>>() {}, AnnotationOnSet.class)))
+        .isEqualTo(ImmutableSet.of(4));
   }
 
   static class MultibindingGuiceModule implements Module {
@@ -131,7 +130,7 @@ public class DaggerAdapterTest extends TestCase {
         Guice.createInjector(
             new MultibindingGuiceModule(),
             DaggerAdapter.from(new SetBindingDaggerModule1(), new SetBindingDaggerModule2()));
-    assertEquals(ImmutableSet.of(13, 3, 5, 8), i.getInstance(new Key<Set<Integer>>() {}));
+    assertThat(i.getInstance(new Key<Set<Integer>>() {})).isEqualTo(ImmutableSet.of(13, 3, 5, 8));
   }
 
   @dagger.Module
@@ -210,20 +209,20 @@ public class DaggerAdapterTest extends TestCase {
   public void testStaticProvidesMethods() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(new StaticProvidesMethods()));
     String staticProvision = injector.getInstance(String.class);
-    assertEquals("class", staticProvision);
+    assertThat(staticProvision).isEqualTo("class");
   }
 
   public void testStaticProvidesMethods_classLiteral() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(StaticProvidesMethods.class));
     String staticProvision = injector.getInstance(String.class);
-    assertEquals("class", staticProvision);
+    assertThat(staticProvision).isEqualTo("class");
   }
 
   public void testStaticProvidesMethods_interface() {
     Injector injector =
         Guice.createInjector(DaggerAdapter.from(StaticProvidesMethodsInterface.class));
     String staticProvision = injector.getInstance(String.class);
-    assertEquals("interface", staticProvision);
+    assertThat(staticProvision).isEqualTo("interface");
   }
 
   @dagger.Module

@@ -45,7 +45,7 @@ public class ModuleIncludesTest extends TestCase {
 
   public void testIncludedModules() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(Declared.class, Included.class));
-    assertEquals("included", injector.getInstance(String.class));
+    assertThat(injector.getInstance(String.class)).isEqualTo("included");
   }
 
   @Module
@@ -64,7 +64,7 @@ public class ModuleIncludesTest extends TestCase {
 
   public void testDeduplicated() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(Includes1.class, Includes2.class));
-    assertEquals("deduplicated", injector.getInstance(String.class));
+    assertThat(injector.getInstance(String.class)).isEqualTo("deduplicated");
   }
 
   public void testInstanceOfModuleAndClassLiteral() {
@@ -81,7 +81,7 @@ public class ModuleIncludesTest extends TestCase {
             DaggerAdapter.from(Includes1.class),
             DaggerAdapter.from(Includes2.class),
             DaggerAdapter.from(Includes2.class));
-    assertEquals("deduplicated", injector.getInstance(String.class));
+    assertThat(injector.getInstance(String.class)).isEqualTo("deduplicated");
   }
 
   @Module
