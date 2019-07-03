@@ -17,7 +17,7 @@ package com.google.inject.daggeradapter;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Iterables.getFirst;
-import static com.google.inject.daggeradapter.SupportedAnnotations.allSupportedAnnotations;
+import static com.google.inject.daggeradapter.SupportedAnnotations.isAnnotationSupported;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -116,7 +116,7 @@ public final class DaggerAdapter {
         for (Annotation annotation : method.getAnnotations()) {
           Class<? extends Annotation> annotationClass = annotation.annotationType();
           if (annotationClass.getName().startsWith("dagger.")
-              && !allSupportedAnnotations().contains(annotationClass)) {
+              && !isAnnotationSupported(annotationClass)) {
             binder.addError(
                 "%s is annotated with @%s which is not supported by DaggerAdapter",
                 method, annotationClass.getCanonicalName());
