@@ -16,6 +16,7 @@
 package com.google.inject.daggeradapter;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.daggeradapter.Annotations.getAnnotatedAnnotation;
 import static com.google.inject.daggeradapter.Keys.parameterKey;
 import static com.google.inject.daggeradapter.SupportedAnnotations.supportedBindingAnnotations;
@@ -35,6 +36,7 @@ import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Provides;
+import dagger.multibindings.IntoMap;
 import dagger.multibindings.IntoSet;
 import dagger.multibindings.Multibinds;
 import java.lang.annotation.Annotation;
@@ -110,14 +112,66 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
 
   private static <T> Key<T> processMultibindingAnnotations(
       Binder binder, Method method, Key<T> key) {
-    return method.isAnnotationPresent(IntoSet.class) ? processSetBinding(binder, key) : key;
+    if (method.isAnnotationPresent(IntoSet.class)) {
+      return processSetBinding(binder, key);
+    } else if (method.isAnnotationPresent(IntoMap.class)) {
+      return processMapBinding(binder, key, method);
+    }
+    return key;
   }
 
   private static <T> Key<T> processSetBinding(Binder binder, Key<T> key) {
     Multibinder<T> setBinder = newSetBinder(binder, key.getTypeLiteral(), key.getAnnotation());
-    Key<T> newKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
-    setBinder.addBinding().to(newKey);
-    return newKey;
+
+    Key<T> contributionKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
+    setBinder.addBinding().to(contributionKey);
+    return contributionKey;
+  }
+
+  private static <K, V> Key<V> processMapBinding(Binder binder, Key<V> key, Method method) {
+    MapKeyData<K> mapKeyData = mapKeyData(method);
+    MapBinder<K, V> mapBinder =
+        newMapBinder(binder, mapKeyData.typeLiteral, key.getTypeLiteral(), key.getAnnotation());
+
+    Key<V> contributionKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
+    mapBinder.addBinding(mapKeyData.key).to(contributionKey);
+    return contributionKey;
+  }
+
+  private static <K> MapKeyData<K> mapKeyData(Method method) {
+    Annotation mapKey = getAnnotatedAnnotation(method, dagger.MapKey.class).get();
+    dagger.MapKey mapKeyDefinition = mapKey.annotationType().getAnnotation(dagger.MapKey.class);
+    if (!mapKeyDefinition.unwrapValue()) {
+      return MapKeyData.create(TypeLiteral.get(mapKey.annotationType()), mapKey);
+    }
+
+    Method mapKeyValueMethod =
+        getOnlyElement(Arrays.asList(mapKey.annotationType().getDeclaredMethods()));
+    Object mapKeyValue;
+    try {
+      mapKeyValue = mapKeyValueMethod.invoke(mapKey);
+    } catch (ReflectiveOperationException e) {
+      throw new UnsupportedOperationException("Cannot extract map key value", e);
+    }
+    return MapKeyData.create(
+        TypeLiteral.get(mapKeyValueMethod.getGenericReturnType()), mapKeyValue);
+  }
+
+  private static class MapKeyData<K> {
+    final TypeLiteral<K> typeLiteral;
+    final K key;
+
+    MapKeyData(TypeLiteral<K> typeLiteral, K key) {
+      this.typeLiteral = typeLiteral;
+      this.key = key;
+    }
+
+    // We can't verify the compatibility of the type arguments here, but by definition they must be
+    // aligned
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static <K> MapKeyData<K> create(TypeLiteral<?> typeLiteral, Object key) {
+      return new MapKeyData(typeLiteral, key);
+    }
   }
 
   private static <T> Multibinder<T> newSetBinder(
