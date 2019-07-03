@@ -15,9 +15,9 @@
  */
 package com.google.inject.daggeradapter;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -68,9 +68,8 @@ public class IntoMapTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             DaggerAdapter.from(new MapBindingDaggerModule1(), new MapBindingDaggerModule2()));
-    assertEquals(
-        ImmutableMap.of("five", 5, "ten", 10, "twenty", 20),
-        injector.getInstance(new Key<Map<String, Integer>>() {}));
+    assertThat(injector.getInstance(new Key<Map<String, Integer>>() {}))
+        .containsExactly("five", 5, "ten", 10, "twenty", 20);
   }
 
   @Qualifier
@@ -91,10 +90,10 @@ public class IntoMapTest extends TestCase {
   public void testMapBindingsWithAnnotation() {
     Injector injector =
         Guice.createInjector(DaggerAdapter.from(new MapBindingWithAnnotationDaggerModule()));
-    assertEquals(
-        ImmutableMap.of("qualified", 4),
-        injector.getInstance(
-            Key.get(new TypeLiteral<Map<String, Integer>>() {}, AnnotationOnMap.class)));
+    assertThat(
+            injector.getInstance(
+                Key.get(new TypeLiteral<Map<String, Integer>>() {}, AnnotationOnMap.class)))
+        .containsExactly("qualified", 4);
   }
 
   static class MultibindingGuiceModule implements Module {
@@ -111,9 +110,9 @@ public class IntoMapTest extends TestCase {
         Guice.createInjector(
             new MultibindingGuiceModule(),
             DaggerAdapter.from(new MapBindingDaggerModule1(), new MapBindingDaggerModule2()));
-    assertEquals(
-        ImmutableMap.of("five", 5, "ten", 10, "twenty", 20, "guice-zero", 0, "guice-provider-2", 2),
-        injector.getInstance(new Key<Map<String, Integer>>() {}));
+    assertThat(injector.getInstance(new Key<Map<String, Integer>>() {}))
+        .containsExactly(
+            "five", 5, "ten", 10, "twenty", 20, "guice-zero", 0, "guice-provider-2", 2);
   }
 
   @dagger.MapKey(unwrapValue = false)
@@ -151,7 +150,7 @@ public class IntoMapTest extends TestCase {
   public void testWrappedMapKeys() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(new WrappedMapKeyModule()));
     Map<Wrapped, Integer> map = injector.getInstance(new Key<Map<Wrapped, Integer>>() {});
-    assertEquals(3, map.size());
+    assertThat(map).hasSize(3);
     map.forEach((key, value) -> {
       if (value == 0) {
         assertWrappedEquals(0, 0, "", key);
@@ -166,9 +165,9 @@ public class IntoMapTest extends TestCase {
   }
 
   private static void assertWrappedEquals(int i, long l, String defaultValue, Wrapped actual) {
-    assertEquals(i, actual.i());
-    assertEquals(l, actual.l());
-    assertEquals(defaultValue, actual.defaultValue());
+    assertThat(actual.i()).isEqualTo(i);
+    assertThat(actual.l()).isEqualTo(l);
+    assertThat(actual.defaultValue()).isEqualTo(defaultValue);
   }
 
   @dagger.Module
@@ -197,6 +196,6 @@ public class IntoMapTest extends TestCase {
   public void testBinds() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(BindsModule.class));
     Map<String, Object> map = injector.getInstance(new Key<Map<String, Object>>() {});
-    assertEquals(ImmutableMap.of("hello", "world"), map);
+    assertThat(map).containsExactly("hello", "world");
   }
 }
