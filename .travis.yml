@@ -16,6 +16,12 @@ cache:
   directories:
     - $HOME/.m2
 
+before_install:
+  - if [ "$LABEL" == "docs" ]; then wget --no-check-certificate https://www.apache.org/dist/ant/binaries/apache-ant-1.10.6-bin.tar.gz;  fi
+  - if [ "$LABEL" == "docs" ]; then tar -xzvf apache-ant-1.10.6-bin.tar.gz; fi
+  - if [ "$LABEL" == "docs" ]; then export PATH="$(pwd)/apache-ant-1.10.6/bin:$PATH"; fi
+
+
 env:
   global:
     - secure: "WuvBM11o29dIluXelJpV1TFPqprFOlLEs6ES4LjvNKrtB/FT9g569Q63jnbg43ufs4fhQZKuqc3ue1KwZiWWozmkRTry8+2KimiCC0QRFc2UfWPy5BBlPepWahnkC5/CSnjQWtTVKzs67DobyCmAsU3mraOidQatXSpoOozGnNA="
