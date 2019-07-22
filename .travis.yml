@@ -1,7 +1,5 @@
 language: java
 matrix:
-  - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true"
-  - LABEL=mvn        CMD="mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn -P!standard-with-extra-repos dependency:go-offline test clean --quiet --fail-never -DskipTests=true"
   include:
     - os: linux
       jdk: openjdk11
@@ -11,7 +9,8 @@ matrix:
       jdk: openjdk8
     - os: linux-ppc64le
       jdk: openjdk8
-
+    - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true"
+    - LABEL=mvn        CMD="mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn -P!standard-with-extra-repos dependency:go-offline test clean --quiet --fail-never -DskipTests=true"
 sudo: false
 
 cache:
