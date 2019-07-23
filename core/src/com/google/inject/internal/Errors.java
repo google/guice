@@ -229,7 +229,7 @@ public final class Errors implements Serializable {
     // annotations on simple types. This is usually a bad idea.
     if (sameTypes.isEmpty()
         && possibleMatches.isEmpty()
-        && key.getAnnotation() == null
+        && key.getAnnotationType() == null
         && COMMON_AMBIGUOUS_TYPES.contains(key.getTypeLiteral().getRawType())) {
       // We don't recommend using such simple types without annotations.
       sb.append(format("%nThe key seems very generic, did you forget an annotation?"));

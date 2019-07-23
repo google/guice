@@ -69,12 +69,8 @@ public class MoreTypes {
     // Otherwise, recreate the key to avoid the subclass
     if (key.getClass() == Key.class) {
       return key;
-    } else if (key.getAnnotation() != null) {
-      return Key.get(key.getTypeLiteral(), key.getAnnotation());
-    } else if (key.getAnnotationType() != null) {
-      return Key.get(key.getTypeLiteral(), key.getAnnotationType());
     } else {
-      return Key.get(key.getTypeLiteral());
+      return key.ofType(key.getTypeLiteral());
     }
   }
 

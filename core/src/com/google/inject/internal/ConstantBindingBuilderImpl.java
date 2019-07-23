@@ -119,14 +119,7 @@ public final class ConstantBindingBuilderImpl<T> extends AbstractBindingBuilder<
     }
 
     BindingImpl<T> base = getBinding();
-    Key<T> key;
-    if (base.getKey().getAnnotation() != null) {
-      key = Key.get(typeAsClassT, base.getKey().getAnnotation());
-    } else if (base.getKey().getAnnotationType() != null) {
-      key = Key.get(typeAsClassT, base.getKey().getAnnotationType());
-    } else {
-      key = Key.get(typeAsClassT);
-    }
+    Key<T> key = base.getKey().ofType(typeAsClassT);
 
     if (instanceAsT == null) {
       binder.addError(BINDING_TO_NULL);

@@ -141,12 +141,20 @@ public class Key<T> {
     return typeLiteral;
   }
 
-  /** Gets the annotation type. */
+  /** Gets the annotation type. Will be {@code null} if this key lacks an annotation. */
   public final Class<? extends Annotation> getAnnotationType() {
     return annotationStrategy.getAnnotationType();
   }
 
-  /** Gets the annotation. */
+  /**
+   * Gets the annotation instance if available. Will be {@code null} if this key lacks an annotation
+   * <i>or</i> the key was constructed with a {@code Class<Annotation>}.
+   *
+   * <p><b>Warning:</b> this can return null even if this key is annotated. To check whether a
+   * {@code Key} has an annotation use {@link #hasAnnotationType} instead.
+   */
+  // TODO(diamondm) consider deprecating this in favor of a method that ISEs if hasAnnotationType()
+  // is true but this would return null.
   public final Annotation getAnnotation() {
     return annotationStrategy.getAnnotation();
   }
