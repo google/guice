@@ -1,14 +1,12 @@
 language: java
-matrix:
-  include:
-    - os: linux
-      jdk: openjdk11
-    - os: linux
-      jdk: openjdk9
-    - os: linux
-      jdk: openjdk8
-    - os: linux-ppc64le
-      jdk: openjdk8
+os: linux
+jdk:
+  - openjdk11
+  - openjdk9
+  - openjdk8
+ 
+os: linux-ppc64le
+jdk: openjdk8
 
 sudo: false
 
