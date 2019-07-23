@@ -1,12 +1,15 @@
 language: java
-os: linux
-jdk:
-  - openjdk11
-  - openjdk9
-  - openjdk8
- 
-os: linux-ppc64le
-jdk: openjdk8
+matrix:
+  include:
+    - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true"
+    - LABEL=mvn        CMD="mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn -P!standard-with-extra-repos dependency:go-offline test clean --quiet --fail-never -DskipTests=true"
+    - os: linux
+      jdk: 
+        - openjdk11
+        - openjdk9
+        - openjdk8
+    - os: linux-ppc64le
+      jdk: openjdk8
 
 sudo: false
 
@@ -25,9 +28,9 @@ env:
     - secure: "WuvBM11o29dIluXelJpV1TFPqprFOlLEs6ES4LjvNKrtB/FT9g569Q63jnbg43ufs4fhQZKuqc3ue1KwZiWWozmkRTry8+2KimiCC0QRFc2UfWPy5BBlPepWahnkC5/CSnjQWtTVKzs67DobyCmAsU3mraOidQatXSpoOozGnNA="
     - secure: "pAeI941ODNSo6F7A94WFafxYqp2kdeFTJksMLVHljT0h2nX6/236OXn/iZXiB+FbXe/DkQIHN3n1IZRwE8UJAbSAwoaPUWenPy4mNAhnI4L/rwysREwq5FKSFTWJet9HitfFR57ezLGOV0VLFfH1xGsNWabHzzbwbV3WMl9pH0M="
     - secure: "Pqj194YmdK0va4bOkbjVG0wCZ7sbB5k3Qq66zSG2M26M21uHonwhXprdtSeYZ5Oy9fWcQte7jSA69euyYyLriDH6DU2NE34scK2Y1yO6SCfx5SGr3XuxHWqxtNOxoUaH4RP1WR/9CRkBg8kBxzWus3M2ZeqElu33/p2CtgJEdJg="
-  matrix:
-    - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true"
-    - LABEL=mvn        CMD="mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn -P!standard-with-extra-repos dependency:go-offline test clean --quiet --fail-never -DskipTests=true"
+  #matrix:
+  #  - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true"
+  #  - LABEL=mvn        CMD="mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn -P!standard-with-extra-repos dependency:go-offline test clean --quiet --fail-never -DskipTests=true"
 
 install:
   - ${INSTALL}
