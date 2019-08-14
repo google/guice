@@ -539,7 +539,7 @@ public class FactoryProvider2Test extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Could not find a suitable constructor in java.lang.Double.",
+          "No implementation for java.lang.Double (with no qualifier annotation) was bound",
           "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
     }
   }
@@ -559,7 +559,7 @@ public class FactoryProvider2Test extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Could not find a suitable constructor in java.lang.Double.",
+          "No implementation for java.lang.Double (with no qualifier annotation) was bound",
           "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
     }
   }
