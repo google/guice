@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.MoreTypes.getRawType;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -362,19 +364,28 @@ public final class Errors implements Serializable {
         member, bindingAnnotation);
   }
 
+  // TODO(diamondm) don't mention zero-arg constructors if requireAtInjectOnConstructors is true
   private static final String CONSTRUCTOR_RULES =
-      "Classes must have either one (and only one) constructor "
-          + "annotated with @Inject or a zero-argument constructor that is not private.";
+      "Injectable classes must have either one (and only one) constructor annotated with @Inject"
+          + " or a zero-argument constructor that is not private.";
 
-  public Errors missingConstructor(Class<?> implementation) {
+  public Errors missingConstructor(TypeLiteral<?> type) {
+    // Don't bother including the type in the message twice, unless the type is generic (i.e. the
+    // type has generics that the raw class loses)
+    String typeString = type.toString();
+    String rawTypeString = getRawType(type.getType()).getName();
     return addMessage(
-        "Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES, implementation);
+        "No implementation for %s (with no qualifier annotation) was bound, and could not find an"
+            + " injectable constructor%s. %s",
+        typeString,
+        typeString.equals(rawTypeString) ? "" : " in " + rawTypeString,
+        CONSTRUCTOR_RULES);
   }
 
   public Errors tooManyConstructors(Class<?> implementation) {
     return addMessage(
-        "%s has more than one constructor annotated with @Inject. " + CONSTRUCTOR_RULES,
-        implementation);
+        "%s has more than one constructor annotated with @Inject. %s",
+        implementation, CONSTRUCTOR_RULES);
   }
 
   public Errors constructorNotDefinedByType(Constructor<?> constructor, TypeLiteral<?> type) {

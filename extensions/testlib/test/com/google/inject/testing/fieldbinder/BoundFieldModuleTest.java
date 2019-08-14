@@ -144,7 +144,9 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(), "Could not find a suitable constructor in java.lang.Integer");
+      assertContains(
+          e.getMessage(),
+          "No implementation for java.lang.Integer (with no qualifier annotation) was bound");
     }
   }
 
@@ -545,7 +547,9 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(), "Could not find a suitable constructor in java.lang.Integer.");
+      assertContains(
+          e.getMessage(),
+          "No implementation for java.lang.Integer (with no qualifier annotation) was bound");
     }
   }
 

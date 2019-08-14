@@ -492,7 +492,10 @@ public class BinderTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Could not find a suitable constructor in " + NoInjectConstructor.class.getName(),
+          "1) No implementation for "
+              + NoInjectConstructor.class.getName()
+              + " (with no qualifier annotation) was bound, and could not find an injectable"
+              + " constructor",
           "for the 1st parameter of "
               + MissingParameter.class.getName()
               + ".<init>(BinderTest.java:");

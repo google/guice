@@ -350,7 +350,11 @@ public class ImplicitBindingTest extends TestCase {
     } catch (ConfigurationException expected) {
       Message msg = Iterables.getOnlyElement(expected.getErrorMessages());
       Asserts.assertContains(
-          msg.getMessage(), "Could not find a suitable constructor in " + D.class.getName());
+          msg.getMessage(),
+          "No implementation for "
+              + D.class.getName()
+              + " (with no qualifier annotation) was bound, and could not find an injectable"
+              + " constructor");
     }
     // Assert that we've removed all the bindings.
     assertNull(injector.getExistingBinding(Key.get(A.class)));

@@ -28,14 +28,6 @@ import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-
-import junit.framework.TestCase;
-
-/*if[AOP]*/
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-/*end[AOP]*/
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,6 +36,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import junit.framework.TestCase;
+/*if[AOP]*/
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+/*end[AOP]*/
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -219,8 +216,12 @@ public class BindingTest extends TestCase {
       Guice.createInjector().getInstance(clazz);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
-          "Could not find a suitable constructor in " + PrivateNoArg.class.getName(),
+      assertContains(
+          expected.getMessage(),
+          "No implementation for "
+              + PrivateNoArg.class.getName()
+              + " (with no qualifier annotation) was bound, and could not find an injectable"
+              + " constructor",
           "at " + PrivateNoArg.class.getName() + ".class(BindingTest.java:");
     }
   }
@@ -230,9 +231,11 @@ public class BindingTest extends TestCase {
       Guice.createInjector().getInstance(TooManyConstructors.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(),
-          TooManyConstructors.class.getName() + " has more than one constructor annotated with " 
-              + "@Inject. Classes must have either one (and only one) constructor",
+      assertContains(
+          expected.getMessage(),
+          TooManyConstructors.class.getName()
+              + " has more than one constructor annotated with "
+              + "@Inject. Injectable classes must have either one (and only one) constructor",
           "at " + TooManyConstructors.class.getName() + ".class(BindingTest.java:");
     }
   }
