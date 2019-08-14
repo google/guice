@@ -19,6 +19,7 @@ package com.google.inject.throwingproviders;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableList;
@@ -47,7 +48,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.throwingproviders.ThrowingProviderBinder.Result;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -1647,7 +1647,7 @@ public class CheckedProviderTest extends TestCase {
   }
 
   @ScopeAnnotation
-  @Target(ElementType.TYPE)
+  @Target({TYPE, METHOD})
   @Retention(RetentionPolicy.RUNTIME)
   private @interface BadScope {}
 
