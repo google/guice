@@ -64,10 +64,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       Annotation annotation) {
     int modifiers = method.getModifiers();
     /*if[AOP]*/
-    if (!skipFastClassGeneration
-        // Protect against a bug in cglib where static interface methods were invoked with
-        // invokeinterface and not invokestatic. See https://github.com/cglib/cglib/pull/153
-        && instance != null) {
+    if (!skipFastClassGeneration) {
       try {
         net.sf.cglib.reflect.FastClass fc = BytecodeGen.newFastClassForMember(method);
         if (fc != null) {
