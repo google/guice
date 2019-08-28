@@ -80,7 +80,13 @@ public final class Modules {
    * @param modules the modules whose bindings are open to be overridden
    */
   public static OverriddenModuleBuilder override(Module... modules) {
-    return new RealOverriddenModuleBuilder(Arrays.asList(modules));
+    return override(Arrays.asList(modules));
+  }
+
+  /** @deprecated there's no reason to use {@code Modules.override()} without any arguments. */
+  @Deprecated
+  public static OverriddenModuleBuilder override() {
+    return override(Arrays.asList());
   }
 
   /**
@@ -104,12 +110,36 @@ public final class Modules {
     return new RealOverriddenModuleBuilder(modules);
   }
 
-  /** Returns a new module that installs all of {@code modules}. */
+  /**
+   * Returns a new module that installs all of {@code modules}.
+   *
+   * <p>Although sometimes helpful, this method is rarely necessary. Most Guice APIs accept multiple
+   * arguments or (like {@code install()}) can be called repeatedly. Where possible, external APIs
+   * that require a single module should similarly be adapted to permit multiple modules.
+   */
   public static Module combine(Module... modules) {
     return combine(ImmutableSet.copyOf(modules));
   }
 
-  /** Returns a new module that installs all of {@code modules}. */
+  /** @deprecated there's no need to "combine" one module; just install it directly. */
+  @Deprecated
+  public static Module combine(Module module) {
+    return module;
+  }
+
+  /** @deprecated this method call is effectively a no-op, just remove it. */
+  @Deprecated
+  public static Module combine() {
+    return EMPTY_MODULE;
+  }
+
+  /**
+   * Returns a new module that installs all of {@code modules}.
+   *
+   * <p>Although sometimes helpful, this method is rarely necessary. Most Guice APIs accept multiple
+   * arguments or (like {@code install()}) can be called repeatedly. Where possible, external APIs
+   * that require a single module should similarly be adapted to permit multiple modules.
+   */
   public static Module combine(Iterable<? extends Module> modules) {
     return new CombinedModule(modules);
   }
@@ -136,6 +166,10 @@ public final class Modules {
     /** See the EDSL example at {@link Modules#override(Module[]) override()}. */
     Module with(Module... overrides);
 
+    /** @deprecated there's no reason to use {@code .with()} without any arguments. */
+    @Deprecated
+    public Module with();
+
     /** See the EDSL example at {@link Modules#override(Module[]) override()}. */
     Module with(Iterable<? extends Module> overrides);
   }
@@ -143,6 +177,7 @@ public final class Modules {
   private static final class RealOverriddenModuleBuilder implements OverriddenModuleBuilder {
     private final ImmutableSet<Module> baseModules;
 
+    // TODO(diamondm) checkArgument(!baseModules.isEmpty())?
     private RealOverriddenModuleBuilder(Iterable<? extends Module> baseModules) {
       this.baseModules = ImmutableSet.copyOf(baseModules);
     }
@@ -150,6 +185,11 @@ public final class Modules {
     @Override
     public Module with(Module... overrides) {
       return with(Arrays.asList(overrides));
+    }
+
+    @Override
+    public Module with() {
+      return with(Arrays.asList());
     }
 
     @Override
@@ -162,6 +202,7 @@ public final class Modules {
     private final ImmutableSet<Module> overrides;
     private final ImmutableSet<Module> baseModules;
 
+    // TODO(diamondm) checkArgument(!overrides.isEmpty())?
     OverrideModule(Iterable<? extends Module> overrides, ImmutableSet<Module> baseModules) {
       this.overrides = ImmutableSet.copyOf(overrides);
       this.baseModules = baseModules;
