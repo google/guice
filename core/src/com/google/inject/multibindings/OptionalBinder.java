@@ -18,7 +18,6 @@ package com.google.inject.multibindings;
 
 import static com.google.inject.internal.RealOptionalBinder.newRealOptionalBinder;
 
-import com.google.common.base.Optional;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
@@ -35,8 +34,9 @@ import com.google.inject.internal.RealOptionalBinder;
  * </ol>
  *
  * <p>When an OptionalBinder is added, it will always supply the bindings: {@code Optional<T>} and
- * {@code Optional<Provider<T>>}. If {@link #setBinding} or {@link #setDefault} are called, it will
- * also bind {@code T}.
+ * {@code Optional<Provider<T>>}. Both {@link java.util.Optional java.util.Optional} and {@link
+ * com.google.common.base.Optional com.google.common.base.Optional} are bound for compatibility. If
+ * {@link #setBinding} or {@link #setDefault} are called, it will also bind {@code T}.
  *
  * <p>{@code setDefault} is intended for use by frameworks that need a default value. User code can
  * call {@code setBinding} to override the default. <b>Warning: Even if setBinding is called, the
@@ -66,8 +66,8 @@ import com.google.inject.internal.RealOptionalBinder;
  *   }
  * }</code></pre>
  *
- * <p>With this module, an {@link Optional}{@code <Renamer>} can now be injected. With no other
- * bindings, the optional will be absent. Users can specify bindings in one of two ways:
+ * <p>With this module, an {@code Optional<Renamer>} can now be injected. With no other bindings,
+ * the optional will be absent. Users can specify bindings in one of two ways:
  *
  * <p>Option 1:
  *
