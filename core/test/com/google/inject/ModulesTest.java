@@ -53,16 +53,15 @@ public class ModulesTest extends TestCase {
             install(combined1);
           }
         };
-    final Module combined2 = Modules.combine(skipSourcesModule);
+    final Module combined2 = Modules.combine(skipSourcesModule); // returns skipSourcesModule
     Injector injector = Guice.createInjector(combined2);
     ElementSource source = (ElementSource) injector.getBinding(Integer.class).getSource();
-    assertEquals(4, source.getModuleClassNames().size());
+    assertEquals(3, source.getModuleClassNames().size());
     assertEquals(
         ImmutableList.of(
             m1.getClass().getName(),
             combined1.getClass().getName(),
-            skipSourcesModule.getClass().getName(),
-            combined2.getClass().getName()),
+            skipSourcesModule.getClass().getName()),
         source.getModuleClassNames());
     StackTraceElement stackTraceElement = (StackTraceElement) source.getDeclaringSource();
     assertEquals(skipSourcesModule.getClass().getName(), stackTraceElement.getClassName());
