@@ -387,16 +387,12 @@ public class ServletScopes {
       return NullObject.INSTANCE;
     }
 
-    if (!key.getTypeLiteral().getRawType().isInstance(object)) {
-      throw new IllegalArgumentException(
-          "Value["
-              + object
-              + "] of type["
-              + object.getClass().getName()
-              + "] is not compatible with key["
-              + key
-              + "]");
-    }
+    Preconditions.checkArgument(
+        key.getTypeLiteral().getRawType().isInstance(object),
+        "Value[%s] of type[%s] is not compatible with key[%s]",
+        object,
+        object.getClass().getName(),
+        key);
 
     return object;
   }
@@ -429,14 +425,10 @@ public class ServletScopes {
     }
   }
 
-  private static final <T> Callable<T> wrap(
-      final Callable<T> delegate, final RequestScoper requestScoper) {
+  private static <T> Callable<T> wrap(Callable<T> delegate, RequestScoper requestScoper) {
     return () -> {
-      RequestScoper.CloseableScope scope = requestScoper.open();
-      try {
+      try (RequestScoper.CloseableScope scope = requestScoper.open()) {
         return delegate.call();
-      } finally {
-        scope.close();
       }
     };
   }

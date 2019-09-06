@@ -157,7 +157,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
      * initialially processed.
      */
     protected void scheduleInitialization(BindingImpl<?> binding) {
-      bindingData.addUninitializedBinding(asRunnable(binding));
+      bindingData.addUninitializedBinding(() -> initializeBinding(binding));
     }
 
     /**
@@ -165,17 +165,15 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
      * bindings.
      */
     protected void scheduleDelayedInitialization(BindingImpl<?> binding) {
-      bindingData.addDelayedUninitializedBinding(asRunnable(binding));
+      bindingData.addDelayedUninitializedBinding(() -> initializeBinding(binding));
     }
 
-    private Runnable asRunnable(final BindingImpl<?> binding) {
-      return () -> {
-        try {
-          binding.getInjector().initializeBinding(binding, errors.withSource(source));
-        } catch (ErrorsException e) {
-          errors.merge(e.getErrors());
-        }
-      };
+    private void initializeBinding(BindingImpl<?> binding) {
+      try {
+        binding.getInjector().initializeBinding(binding, errors.withSource(source));
+      } catch (ErrorsException e) {
+        errors.merge(e.getErrors());
+      }
     }
   }
 }
