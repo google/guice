@@ -51,23 +51,15 @@ final class WeakKeySet {
    * garbage collected.
    */
   private final Cache<State, Set<KeyAndSource>> evictionCache =
-      CacheBuilder.newBuilder()
-          .weakKeys()
-          .removalListener(
-              (RemovalNotification<State, Set<KeyAndSource>> notification) -> {
-                Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
+      CacheBuilder.newBuilder().weakKeys().removalListener(this::cleanupOnRemoval).build();
 
-                cleanUpForCollectedState(notification.getValue());
-              })
-          .build();
+  private void cleanupOnRemoval(RemovalNotification<State, Set<KeyAndSource>> notification) {
+    Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
 
-  /**
-   * There may be multiple child injectors blacklisting a certain key so only remove the source
-   * that's relevant.
-   */
-  private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources) {
+    // There may be multiple child injectors blacklisting a certain key so only remove the source
+    // that's relevant.
     synchronized (lock) {
-      for (KeyAndSource keyAndSource : keysAndSources) {
+      for (KeyAndSource keyAndSource : notification.getValue()) {
         Multiset<Object> set = backingMap.get(keyAndSource.key);
         if (set != null) {
           set.remove(keyAndSource.source);
@@ -92,9 +84,8 @@ final class WeakKeySet {
     if (source instanceof Class || source == SourceProvider.UNKNOWN_SOURCE) {
       source = null;
     }
-    Multiset<Object> sources = backingMap.computeIfAbsent(key, k -> LinkedHashMultiset.create());
     Object convertedSource = Errors.convert(source);
-    sources.add(convertedSource);
+    backingMap.computeIfAbsent(key, k -> LinkedHashMultiset.create()).add(convertedSource);
 
     // Avoid all the extra work if we can.
     if (state.parent() != State.NONE) {

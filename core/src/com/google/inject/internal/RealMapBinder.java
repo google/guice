@@ -472,11 +472,10 @@ public final class RealMapBinder<K, V> implements Module {
 
             // Don't do extra work unless we need to
             if (permitsDuplicates) {
-              // Create a set builder for this key if it's the first time we've seen it
-              bindingMultimapMutable.computeIfAbsent(key, k -> ImmutableSet.builder());
-
-              // Add the Binding<V>
-              bindingMultimapMutable.get(key).add(valueBinding);
+              // Add the binding, creating a set builder if it's the first time we've seen it
+              bindingMultimapMutable
+                  .computeIfAbsent(key, k -> ImmutableSet.builder())
+                  .add(valueBinding);
             }
           }
         }
@@ -518,13 +517,13 @@ public final class RealMapBinder<K, V> implements Module {
 
         if (first) {
           first = false;
-          sb.append("\"" + dupKey + "\", from bindings:\n");
+          sb.append("\"").append(dupKey).append("\", from bindings:\n");
         } else {
-          sb.append("\n and key: \"" + dupKey + "\", from bindings:\n");
+          sb.append("\n and key: \"").append(dupKey).append("\", from bindings:\n");
         }
 
         for (Binding<V> dup : entry.getValue()) {
-          sb.append("\t at " + Errors.convert(dup.getSource()) + "\n");
+          sb.append("\t at ").append(Errors.convert(dup.getSource())).append("\n");
         }
       }
 

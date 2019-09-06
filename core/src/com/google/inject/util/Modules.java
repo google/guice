@@ -277,9 +277,9 @@ public final class Modules {
             // Record when a scope instance is used in a binding
             Scope scope = getScopeInstanceOrNull(binding);
             if (scope != null) {
-              List<Object> existing =
-                  scopeInstancesInUse.computeIfAbsent(scope, k -> Lists.newArrayList());
-              existing.add(binding.getSource());
+              scopeInstancesInUse
+                  .computeIfAbsent(scope, k -> Lists.newArrayList())
+                  .add(binding.getSource());
             }
           }
 
