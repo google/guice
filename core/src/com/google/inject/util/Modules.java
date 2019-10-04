@@ -407,4 +407,62 @@ public final class Modules {
       }
     };
   }
+
+  /** Returns a module that will configure the injector to require explicit bindings. */
+  public static Module requireExplicitBindingsModule() {
+    return new RequireExplicitBindingsModule();
+  }
+
+  private static final class RequireExplicitBindingsModule implements Module {
+    @Override
+    public void configure(Binder binder) {
+      binder.requireExplicitBindings();
+    }
+  }
+
+  /**
+   * Returns a module that will configure the injector to require {@literal @}{@link Inject} on
+   * constructors.
+   *
+   * @see Binder#requireAtInjectOnConstructors
+   */
+  public static Module requireAtInjectOnConstructorsModule() {
+    return new RequireAtInjectOnConstructorsModule();
+  }
+
+  private static final class RequireAtInjectOnConstructorsModule implements Module {
+    @Override
+    public void configure(Binder binder) {
+      binder.requireAtInjectOnConstructors();
+    }
+  }
+
+  /**
+   * Returns a module that will configure the injector to require an exactly matching binding
+   * annotation.
+   *
+   * @see Binder#requireExactBindingAnnotations
+   */
+  public static Module requireExactBindingAnnotationsModule() {
+    return new RequireExactBindingAnnotationsModule();
+  }
+
+  private static final class RequireExactBindingAnnotationsModule implements Module {
+    @Override
+    public void configure(Binder binder) {
+      binder.requireExactBindingAnnotations();
+    }
+  }
+
+  /** Returns a module that will configure the injector to disable circular proxies. */
+  public static Module disableCircularProxiesModule() {
+    return new DisableCircularProxiesModule();
+  }
+
+  private static final class DisableCircularProxiesModule implements Module {
+    @Override
+    public void configure(Binder binder) {
+      binder.disableCircularProxies();
+    }
+  }
 }
