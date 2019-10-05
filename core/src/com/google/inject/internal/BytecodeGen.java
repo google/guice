@@ -23,11 +23,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -148,6 +151,21 @@ public final class BytecodeGen {
                     });
               }
             });
+  }
+
+  private static final Map<Class<?>, Boolean> CIRCULAR_PROXY_TYPE_CACHE =
+      CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap();
+
+  /** Is the given object a circular proxy? */
+  public static boolean isCircularProxy(Object object) {
+    return CIRCULAR_PROXY_TYPE_CACHE.containsKey(object.getClass());
+  }
+
+  /** Creates a new circular proxy for the given type. */
+  public static <T> T newCircularProxy(Class<T> type, InvocationHandler handler) {
+    Object proxy = Proxy.newProxyInstance(type.getClassLoader(), new Class[] {type}, handler);
+    CIRCULAR_PROXY_TYPE_CACHE.put(proxy.getClass(), Boolean.TRUE);
+    return type.cast(proxy);
   }
 
   /**
