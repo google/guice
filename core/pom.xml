@@ -175,6 +175,7 @@
                 <configuration>
                   <symbols>NO_AOP</symbols>
                   <excludes>
+                    **/aop/*.java,
                     **/InterceptorBinding.java,
                     **/InterceptorBindingProcessor.java,
                     **/InterceptorStackCallback.java,
