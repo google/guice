@@ -65,20 +65,6 @@
       <artifactId>guava-testlib</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--
-     | Some extension tests depend on cglib which is not embedded
-     | in an execution that doesn't include package.
-    -->
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>

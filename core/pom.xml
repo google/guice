@@ -27,16 +27,11 @@
       <artifactId>guava</artifactId>
     </dependency>
     <!--
-     | CGLIB is embedded by default by the JarJar build profile
+     | ASM is embedded by default by the JarJar build profile
     -->
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
       <optional>true</optional>
     </dependency>
     <!--
@@ -116,7 +111,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.artifactId}$(if;$(classes;NAMED;*.MethodAspect);; (no_aop))</Bundle-Name>
-            <Import-Package>!net.sf.cglib.*,!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
+            <Import-Package>!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
             <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
           </instructions>
         </configuration>
@@ -222,7 +217,7 @@
     </profile>
     <profile>
       <!--
-       | JarJar build profile: Embed CGLIB (and ASM) classes under a Guice namespace
+       | JarJar build profile: Embed ASM classes under a Guice namespace
       -->
       <id>guice.with.jarjar</id>
       <activation>
@@ -247,17 +242,8 @@
               <overwrite>true</overwrite>
               <includes>
                 <include>*:asm*</include>
-                <include>*:cglib</include>
               </includes>
               <rules>
-                <rule>
-                  <pattern>net.sf.cglib.*</pattern>
-                  <result>com.google.inject.internal.cglib.$@1</result>
-                </rule>
-                <rule>
-                  <pattern>net.sf.cglib.**.*</pattern>
-                  <result>com.google.inject.internal.cglib.@1.$@2</result>
-                </rule>
                 <rule>
                   <pattern>org.objectweb.asm.*</pattern>
                   <result>com.google.inject.internal.asm.$@1</result>
