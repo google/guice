@@ -16,14 +16,16 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.sf.cglib.proxy.MethodProxy;
+import java.util.function.BiFunction;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -32,50 +34,49 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterceptor {
+final class InterceptorStackCallback implements InvocationHandler {
   private static final Set<String> AOP_INTERNAL_CLASSES =
-      new HashSet<String>(
-          Arrays.asList(
-              InterceptorStackCallback.class.getName(),
-              InterceptedMethodInvocation.class.getName(),
-              MethodProxy.class.getName()));
+      ImmutableSet.of(
+          InterceptorStackCallback.class.getName(),
+          InterceptedMethodInvocation.class.getName());
 
-  final MethodInterceptor[] interceptors;
   final Method method;
+  final MethodInterceptor[] interceptors;
+  final BiFunction<Object, Object[], Object> superInvoker;
 
-  public InterceptorStackCallback(Method method, List<MethodInterceptor> interceptors) {
+  public InterceptorStackCallback(
+      Method method,
+      List<MethodInterceptor> interceptors,
+      BiFunction<Object, Object[], Object> superInvoker) {
     this.method = method;
     this.interceptors = interceptors.toArray(new MethodInterceptor[interceptors.size()]);
+    this.superInvoker = superInvoker;
   }
 
   @Override
-  public Object intercept(Object proxy, Method method, Object[] arguments, MethodProxy methodProxy)
-      throws Throwable {
-    return new InterceptedMethodInvocation(proxy, methodProxy, arguments, 0).proceed();
+  public Object invoke(Object proxy, Method unused, Object[] arguments) throws Throwable {
+    return new InterceptedMethodInvocation(proxy, arguments, 0).proceed();
   }
 
   private class InterceptedMethodInvocation implements MethodInvocation {
 
     final Object proxy;
     final Object[] arguments;
-    final MethodProxy methodProxy;
-    final int index;
+    final int interceptorIndex;
 
-    public InterceptedMethodInvocation(
-        Object proxy, MethodProxy methodProxy, Object[] arguments, int index) {
+    public InterceptedMethodInvocation(Object proxy, Object[] arguments, int interceptorIndex) {
       this.proxy = proxy;
-      this.methodProxy = methodProxy;
       this.arguments = arguments;
-      this.index = index;
+      this.interceptorIndex = interceptorIndex;
     }
 
     @Override
     public Object proceed() throws Throwable {
       try {
-        return index == interceptors.length
-            ? methodProxy.invokeSuper(proxy, arguments)
-            : interceptors[index]
-                .invoke(new InterceptedMethodInvocation(proxy, methodProxy, arguments, index + 1));
+        return interceptorIndex == interceptors.length
+            ? superInvoker.apply(proxy, arguments)
+            : interceptors[interceptorIndex].invoke(
+                new InterceptedMethodInvocation(proxy, arguments, interceptorIndex + 1));
       } catch (Throwable t) {
         pruneStacktrace(t);
         throw t;
@@ -113,7 +114,7 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
       List<StackTraceElement> pruned = Lists.newArrayList();
       for (StackTraceElement element : stackTrace) {
         String className = element.getClassName();
-        if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("$EnhancerByGuice$")) {
+        if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("ByGuice$")) {
           pruned.add(element);
         }
       }

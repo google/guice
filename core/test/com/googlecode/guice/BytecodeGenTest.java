@@ -133,7 +133,7 @@ public class BytecodeGenTest extends TestCase {
         // standard bootdelegation of java.*
         return super.loadClass(name, resolve);
 
-      } else if (!name.contains(".internal.") && !name.contains(".cglib.")) {
+      } else if (!name.contains(".internal.")) {
 
         /*
          * load public and test classes directly from the classpath - we don't
@@ -188,8 +188,6 @@ public class BytecodeGenTest extends TestCase {
    * Note: this class must be marked as public or protected so that the Guice custom classloader
    * will intercept it. Private and implementation classes are not intercepted by the custom
    * classloader.
-   *
-   * @see com.google.inject.internal.BytecodeGen.Visibility
    */
   public static class ProxyTestImpl implements ProxyTest {
 
@@ -327,7 +325,7 @@ public class BytecodeGenTest extends TestCase {
     injector.getInstance(PackagePrivateInject.class).assertIsFastClassInvoked();
     injector.getInstance(PrivateInject.class).assertIsReflectionInvoked();
 
-    // This classloader will load the types in an loader with a different version of guice/cglib
+    // This classloader will load the types in an loader with a different version of guice
     // this prevents the use of fastclass for all but the public types (where the bridge
     // classloader can be used).
     MultipleVersionsOfGuiceClassLoader fakeLoader = new MultipleVersionsOfGuiceClassLoader();
@@ -346,8 +344,7 @@ public class BytecodeGenTest extends TestCase {
   }
 
   // This classloader simulates an OSGI environment where a bundle has a conflicting definition of
-  // cglib (or guice).  This is sort of the opposite of the BridgeClassloader and is meant to test
-  // its use.
+  // guice. This is sort of the opposite of the BridgeClassloader and is meant to test its use.
   static class MultipleVersionsOfGuiceClassLoader extends URLClassLoader {
     MultipleVersionsOfGuiceClassLoader() {
       this(MultipleVersionsOfGuiceClassLoader.class.getClassLoader());
@@ -383,7 +380,6 @@ public class BytecodeGenTest extends TestCase {
           || name.startsWith("javax.")
           || name.equals(LogCreator.class.getName())
           || (!name.startsWith("com.google.inject.")
-              && !name.contains(".cglib.")
               && !name.startsWith("com.googlecode.guice"))) {
 
         // standard parent delegation
@@ -411,7 +407,7 @@ public class BytecodeGenTest extends TestCase {
       // 2 because the first 2 elements are
       // LogCreator.<init>()
       // Subclass.<init>()
-      if (!caller.getStackTrace()[2].getClassName().contains("$$FastClassByGuice$$")) {
+      if (!caller.getStackTrace()[2].getClassName().contains("ByGuice$")) {
         throw new AssertionError("Caller was not FastClass").initCause(caller);
       }
     }

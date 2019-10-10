@@ -254,24 +254,24 @@ public class MethodInterceptionTest extends TestCase {
     Interceptable interceptable = injector.getInstance(Interceptable.class);
     assertNull(interceptable.lastElements);
     interceptable.foo();
-    boolean cglibFound = false;
+    boolean proxyFrameFound = false;
     for (int i = 0; i < interceptable.lastElements.length; i++) {
-      if (interceptable.lastElements[i].toString().contains("cglib")) {
-        cglibFound = true;
+      if (interceptable.lastElements[i].toString().contains("ByGuice$")) {
+        proxyFrameFound = true;
         break;
       }
     }
-    assertTrue(Arrays.toString(interceptable.lastElements), cglibFound);
-    cglibFound = false;
+    assertTrue(Arrays.toString(interceptable.lastElements), proxyFrameFound);
+    proxyFrameFound = false;
 
     interceptable.bar();
     for (int i = 0; i < interceptable.lastElements.length; i++) {
-      if (interceptable.lastElements[i].toString().contains("cglib")) {
-        cglibFound = true;
+      if (interceptable.lastElements[i].toString().contains("ByGuice$")) {
+        proxyFrameFound = true;
         break;
       }
     }
-    assertFalse(Arrays.toString(interceptable.lastElements), cglibFound);
+    assertFalse(Arrays.toString(interceptable.lastElements), proxyFrameFound);
   }
 
   static class Foo {}

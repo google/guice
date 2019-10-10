@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
@@ -24,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Produces construction proxies that invoke the class constructor.
@@ -46,16 +46,11 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     /*if[AOP]*/
     try {
-      net.sf.cglib.reflect.FastClass fc = BytecodeGen.newFastClassForMember(constructor);
-      if (fc != null) {
-        int index = fc.getIndex(constructor.getParameterTypes());
-        // We could just fall back to reflection in this case but I believe this should actually
-        // be impossible.
-        Preconditions.checkArgument(
-            index >= 0, "Could not find constructor %s in fast class", constructor);
-        return new FastClassProxy<T>(injectionPoint, constructor, fc, index);
+      Function<Object[], Object> fastInvoker = BytecodeGen.newFastInvoker(constructor);
+      if (fastInvoker != null) {
+        return new FastClassProxy<T>(injectionPoint, constructor, fastInvoker);
       }
-    } catch (net.sf.cglib.core.CodeGenerationException e) {
+    } catch (Exception | LinkageError e) {
       /* fall-through */
     }
     /*end[AOP]*/
@@ -64,29 +59,25 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
   }
 
   /*if[AOP]*/
-  /** A {@link ConstructionProxy} that uses FastClass to invoke the constructor. */
+  /** A {@link ConstructionProxy} that uses bytecode generation to invoke the constructor. */
   private static final class FastClassProxy<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
     final Constructor<T> constructor;
-    final net.sf.cglib.reflect.FastClass fc;
-    final int index;
+    final Function<Object[], Object> fastInvoker;
 
-    private FastClassProxy(
+    FastClassProxy(
         InjectionPoint injectionPoint,
         Constructor<T> constructor,
-        net.sf.cglib.reflect.FastClass fc,
-        int index) {
+        Function<Object[], Object> fastInvoker) {
       this.injectionPoint = injectionPoint;
       this.constructor = constructor;
-      this.fc = fc;
-      this.index = index;
+      this.fastInvoker = fastInvoker;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public T newInstance(Object... arguments) throws InvocationTargetException {
-      // Use this method instead of FastConstructor to save a stack frame
-      return (T) fc.newInstance(index, arguments);
+      return (T) fastInvoker.apply(arguments);
     }
 
     @Override
