@@ -16,12 +16,18 @@
 
 package com.google.inject.internal;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -57,7 +63,11 @@ public final class BytecodeGen {
 
   /** Prepares the given type and methods for enhancement using bytecode generation. */
   public static Object prepareEnhancer(Class<?> hostClass, Method[] methods) {
-    throw new UnsupportedOperationException();
+    try {
+      return ENHANCER_GLUE.get(hostClass, () -> newEnhancerGlue(hostClass, methods));
+    } catch (ExecutionException e) {
+      throw new UncheckedExecutionException(e.getCause());
+    }
   }
 
   /**
@@ -67,9 +77,10 @@ public final class BytecodeGen {
    *     methods returned by {@link #prepareEnhancer}) plus arguments for the original constructor
    *     and returns the enhanced instance
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<InvocationHandler[], Object[], Object> newEnhancer(
       Object enhancerGlue, Constructor<?> constructor) {
-    throw new UnsupportedOperationException();
+    return ((Function<String, BiFunction>) enhancerGlue).apply(signature(constructor));
   }
 
   /**
@@ -77,9 +88,10 @@ public final class BytecodeGen {
    *
    * @return invoker that takes an enhanced instance plus method arguments and returns the result
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<Object, Object[], Object> newSuperInvoker(
       Object enhancerGlue, Method method) {
-    throw new UnsupportedOperationException();
+    return ((Function<String, BiFunction>) enhancerGlue).apply(signature(method));
   }
 
   /**
@@ -87,8 +99,10 @@ public final class BytecodeGen {
    *
    * @return invoker that takes constructor arguments and returns the constructed instance
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static Function<Object[], Object> newFastInvoker(Constructor<?> constructor) {
-    throw new UnsupportedOperationException();
+    return (Function)
+        FAST_CLASS_GLUE.getUnchecked(constructor.getDeclaringClass()).apply(signature(constructor));
   }
 
   /**
@@ -96,8 +110,45 @@ public final class BytecodeGen {
    *
    * @return invoker that takes an instance to call plus method arguments and returns the result
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<Object, Object[], Object> newFastInvoker(Method method) {
+    return (BiFunction)
+        FAST_CLASS_GLUE.getUnchecked(method.getDeclaringClass()).apply(signature(method));
+  }
+
+  /**
+   * Weak cache of enhancer glue; both keys and values must be weak as values refer back to keys.
+   */
+  private static final Cache<Class<?>, Function<String, ?>> ENHANCER_GLUE =
+      CacheBuilder.newBuilder().weakKeys().weakValues().build();
+
+  /**
+   * Weak cache of fast-class glue; both keys and values must be weak as values refer back to keys.
+   */
+  private static final LoadingCache<Class<?>, Function<String, ?>> FAST_CLASS_GLUE =
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .weakValues()
+          .build(CacheLoader.from(BytecodeGen::newFastClassGlue));
+
+  /** Generate glue that maps signatures to various enhancer invokers. */
+  private static Function<String, ?> newEnhancerGlue(Class<?> hostClass, Method[] methods) {
     throw new UnsupportedOperationException();
+  }
+
+  /** Generate glue that maps signatures to various fast-class invokers. */
+  private static Function<String, ?> newFastClassGlue(Class<?> hostClass) {
+    throw new UnsupportedOperationException();
+  }
+
+  /** Minimum signature needed to disambiguate constructors from the same host class. */
+  private static String signature(Constructor<?> constructor) {
+    return Arrays.toString(constructor.getParameterTypes());
+  }
+
+  /** Minimum signature needed to disambiguate methods from the same host class. */
+  private static String signature(Method method) {
+    return method.getName() + Arrays.toString(method.getParameterTypes());
   }
 
   /*end[AOP]*/
