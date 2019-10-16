@@ -130,6 +130,10 @@ public final class InternalProvisionException extends Exception {
         cause, "Error notifying InjectionListener %s of %s.%n Reason: %s", listener, type, cause);
   }
 
+  public static InternalProvisionException cannotCreateLambda(Throwable cause) {
+    return create("Error creating lambda.%n Reason: %s", cause);
+  }
+
   /**
    * Returns {@code value} if it is non-null or allowed to be null. Otherwise a message is added and
    * an {@code InternalProvisionException} is thrown.

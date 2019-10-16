@@ -59,6 +59,11 @@ import java.util.Set;
  */
 public final class InternalInjectorCreator {
 
+  enum InjectionStrategy {
+    REFLECTION,
+    LAMBDA
+  }
+
   private final Stopwatch stopwatch = new Stopwatch();
   private final Errors errors = new Errors();
 
@@ -68,6 +73,7 @@ public final class InternalInjectorCreator {
 
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
   private List<InjectorShell> shells;
+  private InjectionStrategy injectionStrategy = InjectionStrategy.REFLECTION;
 
   public InternalInjectorCreator() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
@@ -86,6 +92,11 @@ public final class InternalInjectorCreator {
    */
   public InternalInjectorCreator parentInjector(InjectorImpl parent) {
     shellBuilder.parent(parent);
+    return this;
+  }
+
+  public InternalInjectorCreator useLambdaInjection() {
+    this.injectionStrategy = InjectionStrategy.LAMBDA;
     return this;
   }
 

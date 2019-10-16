@@ -86,4 +86,50 @@ public final class Guice {
   public static Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
     return new InternalInjectorCreator().stage(stage).addModules(modules).build();
   }
+
+  /**
+   * Creates an injector for the given set of modules. This is equivalent to calling {@link
+   * #createLambdaInjector(Stage, Module...)} with Stage.DEVELOPMENT. The created injector
+   * uses lambdas to inject members.
+   *
+   * @throws CreationException if one or more errors occur during injector construction
+   */
+  public static Injector createLambdaInjector(Module... modules) {
+    return createLambdaInjector(Arrays.asList(modules));
+  }
+
+  /**
+   * Creates an injector for the given set of modules, in a given development stage.
+   * The created injector uses lambdas to inject members.
+   *
+   * @throws CreationException if one or more errors occur during injector construction
+   */
+  public static Injector createLambdaInjector(Stage stage, Module... modules) {
+    return createLambdaInjector(stage, Arrays.asList(modules));
+  }
+
+  /**
+   * Creates an injector for the given set of modules. This is equivalent to calling {@link
+   * #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT. The created injector uses
+   * lambdas to inject members.
+   *
+   * @throws CreationException if one or more errors occur during injector construction
+   */
+  public static Injector createLambdaInjector(Iterable<Module> modules) {
+    return createLambdaInjector(Stage.DEVELOPMENT, modules);
+  }
+
+  /**
+   * Creates an injector for the given set of modules, in a given development stage.
+   * The created injector uses lambdas to inject members.
+   *
+   * @throws CreationException if one or more errors occur during injector construction
+   */
+  public static Injector createLambdaInjector(Stage stage, Iterable<? extends Module> modules) {
+    return new InternalInjectorCreator()
+        .stage(stage)
+        .addModules(modules)
+        .useLambdaInjection()
+        .build();
+  }
 }
