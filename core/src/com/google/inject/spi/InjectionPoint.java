@@ -480,9 +480,14 @@ public final class InjectionPoint {
     }
   }
 
-  static Annotation getAtInject(AnnotatedElement member) {
-    Annotation a = member.getAnnotation(javax.inject.Inject.class);
-    return a == null ? member.getAnnotation(Inject.class) : a;
+  private static Annotation getAtInject(AnnotatedElement member, Errors errors) {
+    try {
+      Annotation a = member.getAnnotation(javax.inject.Inject.class);
+      return a == null ? member.getAnnotation(Inject.class) : a;
+    } catch (Throwable x) {
+      errors.errorInUserCode(x, "Failed to retrieve @Inject from %s", member);
+      return null;
+    }
   }
 
   /** Linked list of injectable members. */
@@ -662,7 +667,7 @@ public final class InjectionPoint {
 
       for (Field field : getDeclaredFields(current)) {
         if (Modifier.isStatic(field.getModifiers()) == statics) {
-          Annotation atInject = getAtInject(field);
+          Annotation atInject = getAtInject(field, errors);
           if (atInject != null) {
             InjectableField injectableField = new InjectableField(current, field, atInject);
             if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
@@ -675,7 +680,7 @@ public final class InjectionPoint {
 
       for (Method method : getDeclaredMethods(current)) {
         if (isEligibleForInjection(method, statics)) {
-          Annotation atInject = getAtInject(method);
+          Annotation atInject = getAtInject(method, errors);
           if (atInject != null) {
             InjectableMethod injectableMethod = new InjectableMethod(current, method, atInject);
             if (checkForMisplacedBindingAnnotations(method, errors)
