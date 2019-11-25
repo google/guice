@@ -67,7 +67,7 @@ public final class BytecodeGen {
 
   /** Collects details describing the class about to be enhanced. */
   public static EnhancerTarget enhancerTarget(Class<?> host) {
-    throw new UnsupportedOperationException();
+    return new com.google.inject.internal.aop.MethodResolver(host).buildEnhancerTarget();
   }
 
   /** Prepares the given class and methods for enhancement using bytecode generation. */
@@ -83,7 +83,7 @@ public final class BytecodeGen {
    * Creates an enhancer for the original unenhanced constructor using bytecode generation.
    *
    * @return enhancer that takes method callbacks (in the same order as the list of enhanceable
-   *     methods returned by {@link #prepareEnhancer}) plus arguments for the original constructor
+   *     methods returned by {@link #enhancerTarget}) plus arguments for the original constructor
    *     and returns the enhanced instance
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
