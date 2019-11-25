@@ -48,12 +48,12 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   ProxyFactory(InjectionPoint injectionPoint, Iterable<MethodAspect> methodAspects) {
     this.injectionPoint = injectionPoint;
 
-    Class<?> hostClass = injectionPoint.getMember().getDeclaringClass();
+    Class<?> host = injectionPoint.getMember().getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
     List<MethodAspect> applicableAspects = Lists.newArrayList();
     for (MethodAspect methodAspect : methodAspects) {
-      if (methodAspect.matches(hostClass)) {
+      if (methodAspect.matches(host)) {
         applicableAspects.add(methodAspect);
       }
     }
@@ -65,8 +65,9 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    Method[] methods = BytecodeGen.getEnhanceableMethods(hostClass);
+    BytecodeGen.EnhancerTarget target = BytecodeGen.enhancerTarget(host);
 
+    Method[] methods = target.getEnhanceableMethods();
     MethodInterceptorsPair[] methodInterceptorsPairs = null; // lazy
 
     // Iterate over aspects and add interceptors for the methods they apply to
@@ -103,7 +104,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    enhancerGlue = BytecodeGen.prepareEnhancer(hostClass, methods);
+    enhancerGlue = BytecodeGen.prepareEnhancer(target);
     callbacks = new InvocationHandler[methods.length];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =

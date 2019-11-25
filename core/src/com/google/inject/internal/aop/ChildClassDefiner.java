@@ -49,10 +49,10 @@ final class ChildClassDefiner implements ClassDefiner {
             .build(
                 new CacheLoader<ClassLoader, ChildLoader>() {
                   @Override
-                  public ChildLoader load(final ClassLoader hostClassLoader) {
-                    logger.fine("Creating a child loader for " + hostClassLoader);
+                  public ChildLoader load(final ClassLoader hostLoader) {
+                    logger.fine("Creating a child loader for " + hostLoader);
                     return AccessController.doPrivileged(
-                        (PrivilegedAction<ChildLoader>) () -> new ChildLoader(hostClassLoader));
+                        (PrivilegedAction<ChildLoader>) () -> new ChildLoader(hostLoader));
                   }
                 });
   }

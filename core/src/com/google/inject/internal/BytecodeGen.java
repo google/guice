@@ -56,15 +56,24 @@ public final class BytecodeGen {
 
   /*if[AOP]*/
 
-  /** Lists the methods in the given type that can be enhanced. */
-  public static Method[] getEnhanceableMethods(Class<?> hostClass) {
+  /** Describes a class that can be enhanced with new behaviour. */
+  public interface EnhancerTarget {
+    /** The class to be enhanced. */
+    Class<?> getHost();
+
+    /** Lists the methods in the host class that can be enhanced. */
+    Method[] getEnhanceableMethods();
+  }
+
+  /** Collects details describing the class about to be enhanced. */
+  public static EnhancerTarget enhancerTarget(Class<?> host) {
     throw new UnsupportedOperationException();
   }
 
-  /** Prepares the given type and methods for enhancement using bytecode generation. */
-  public static Object prepareEnhancer(Class<?> hostClass, Method[] methods) {
+  /** Prepares the given class and methods for enhancement using bytecode generation. */
+  public static Object prepareEnhancer(EnhancerTarget target) {
     try {
-      return ENHANCER_GLUE.get(hostClass, () -> newEnhancerGlue(hostClass, methods));
+      return ENHANCER_GLUE.get(target.getHost(), () -> newEnhancerGlue(target));
     } catch (ExecutionException e) {
       throw new UncheckedExecutionException(e.getCause());
     }
@@ -132,12 +141,12 @@ public final class BytecodeGen {
           .build(CacheLoader.from(BytecodeGen::newFastClassGlue));
 
   /** Generate glue that maps signatures to various enhancer invokers. */
-  private static Function<String, ?> newEnhancerGlue(Class<?> hostClass, Method[] methods) {
+  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target) {
     throw new UnsupportedOperationException();
   }
 
   /** Generate glue that maps signatures to various fast-class invokers. */
-  private static Function<String, ?> newFastClassGlue(Class<?> hostClass) {
+  private static Function<String, ?> newFastClassGlue(Class<?> host) {
     throw new UnsupportedOperationException();
   }
 
