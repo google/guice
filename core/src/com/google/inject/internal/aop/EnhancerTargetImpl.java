@@ -44,7 +44,7 @@ class EnhancerTargetImpl implements EnhancerTarget {
   }
 
   @Override
-  public Class<?> getHost() {
+  public Class<?> getHostClass() {
     return host;
   }
 

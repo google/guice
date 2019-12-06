@@ -18,14 +18,12 @@ package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 

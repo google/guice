@@ -50,7 +50,7 @@ public class ImmutableStringTrieTest extends TestCase {
     ImmutableStringTrie trie = ImmutableStringTrie.build(table);
 
     for (int i = 0; i < table.size(); i++) {
-      assertThat(trie.indexOf(table.get(i)), is(i));
+      assertThat(trie.applyAsInt(table.get(i)), is(i));
     }
   }
 
@@ -75,7 +75,7 @@ public class ImmutableStringTrieTest extends TestCase {
     ImmutableStringTrie trie = ImmutableStringTrie.build(table);
 
     for (int i = 0; i < table.size(); i++) {
-      assertThat(trie.indexOf(table.get(i)), is(i));
+      assertThat(trie.applyAsInt(table.get(i)), is(i));
     }
   }
 

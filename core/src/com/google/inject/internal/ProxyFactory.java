@@ -48,12 +48,12 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   ProxyFactory(InjectionPoint injectionPoint, Iterable<MethodAspect> methodAspects) {
     this.injectionPoint = injectionPoint;
 
-    Class<?> host = injectionPoint.getMember().getDeclaringClass();
+    Class<?> hostClass = injectionPoint.getMember().getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
     List<MethodAspect> applicableAspects = Lists.newArrayList();
     for (MethodAspect methodAspect : methodAspects) {
-      if (methodAspect.matches(host)) {
+      if (methodAspect.matches(hostClass)) {
         applicableAspects.add(methodAspect);
       }
     }
@@ -65,14 +65,16 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    BytecodeGen.EnhancerTarget target = BytecodeGen.enhancerTarget(host);
+    BytecodeGen.EnhancerTarget enhancerTarget = BytecodeGen.enhancerTarget(hostClass);
 
-    Method[] methods = target.getEnhanceableMethods();
+    Method[] methods = enhancerTarget.getEnhanceableMethods();
+    int numMethods = methods.length;
+
     MethodInterceptorsPair[] methodInterceptorsPairs = null; // lazy
 
     // Iterate over aspects and add interceptors for the methods they apply to
     for (MethodAspect methodAspect : applicableAspects) {
-      for (int methodIndex = 0; methodIndex < methods.length; methodIndex++) {
+      for (int methodIndex = 0; methodIndex < numMethods; methodIndex++) {
         Method method = methods[methodIndex];
         if (methodAspect.matches(method)) {
           if (method.isSynthetic()) {
@@ -85,7 +87,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
           }
 
           if (methodInterceptorsPairs == null) {
-            methodInterceptorsPairs = new MethodInterceptorsPair[methods.length];
+            methodInterceptorsPairs = new MethodInterceptorsPair[numMethods];
           }
           MethodInterceptorsPair pair = methodInterceptorsPairs[methodIndex];
           if (pair == null) {
@@ -104,13 +106,13 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    enhancerGlue = BytecodeGen.prepareEnhancer(target);
-    callbacks = new InvocationHandler[methods.length];
+    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget);
+    callbacks = new InvocationHandler[numMethods];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =
         ImmutableMap.builder();
 
-    for (int methodIndex = 0; methodIndex < methods.length; methodIndex++) {
+    for (int methodIndex = 0; methodIndex < numMethods; methodIndex++) {
       MethodInterceptorsPair pair = methodInterceptorsPairs[methodIndex];
       if (pair == null) {
         continue;

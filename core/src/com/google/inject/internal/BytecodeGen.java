@@ -22,6 +22,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -44,7 +45,7 @@ public final class BytecodeGen {
 
   /** Is the given object a circular proxy? */
   public static boolean isCircularProxy(Object object) {
-    return CIRCULAR_PROXY_TYPE_CACHE.containsKey(object.getClass());
+    return object != null && CIRCULAR_PROXY_TYPE_CACHE.containsKey(object.getClass());
   }
 
   /** Creates a new circular proxy for the given type. */
@@ -59,21 +60,21 @@ public final class BytecodeGen {
   /** Describes a class that can be enhanced with new behaviour. */
   public interface EnhancerTarget {
     /** The class to be enhanced. */
-    Class<?> getHost();
+    Class<?> getHostClass();
 
     /** Lists the methods in the host class that can be enhanced. */
     Method[] getEnhanceableMethods();
   }
 
   /** Collects details describing the class about to be enhanced. */
-  public static EnhancerTarget enhancerTarget(Class<?> host) {
-    return new com.google.inject.internal.aop.MethodResolver(host).buildEnhancerTarget();
+  public static EnhancerTarget enhancerTarget(Class<?> hostClass) {
+    return new com.google.inject.internal.aop.MethodResolver(hostClass).buildEnhancerTarget();
   }
 
   /** Prepares the given class and methods for enhancement using bytecode generation. */
   public static Object prepareEnhancer(EnhancerTarget target) {
     try {
-      return ENHANCER_GLUE.get(target.getHost(), () -> newEnhancerGlue(target));
+      return ENHANCER_GLUE.get(target.getHostClass(), () -> newEnhancerGlue(target));
     } catch (ExecutionException e) {
       throw new UncheckedExecutionException(e.getCause());
     }
@@ -110,8 +111,7 @@ public final class BytecodeGen {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static Function<Object[], Object> newFastInvoker(Constructor<?> constructor) {
-    return (Function)
-        FAST_CLASS_GLUE.getUnchecked(constructor.getDeclaringClass()).apply(signature(constructor));
+    return (Function) prepareFastClass(constructor).apply(signature(constructor));
   }
 
   /**
@@ -121,8 +121,22 @@ public final class BytecodeGen {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<Object, Object[], Object> newFastInvoker(Method method) {
-    return (BiFunction)
-        FAST_CLASS_GLUE.getUnchecked(method.getDeclaringClass()).apply(signature(method));
+    return (BiFunction) prepareFastClass(method).apply(signature(method));
+  }
+
+  /** Prepares the given executable member for fast invocation using bytecode generation. */
+  private static Function<String, ?> prepareFastClass(Executable member) {
+    return FAST_CLASS_GLUE.getUnchecked(member.getDeclaringClass());
+  }
+
+  /** Minimum signature needed to disambiguate constructors from the same host class. */
+  private static String signature(Constructor<?> constructor) {
+    return Arrays.toString(constructor.getParameterTypes());
+  }
+
+  /** Minimum signature needed to disambiguate methods from the same host class. */
+  private static String signature(Method method) {
+    return method.getName() + Arrays.toString(method.getParameterTypes());
   }
 
   /**
@@ -146,18 +160,8 @@ public final class BytecodeGen {
   }
 
   /** Generate glue that maps signatures to various fast-class invokers. */
-  private static Function<String, ?> newFastClassGlue(Class<?> host) {
+  private static Function<String, ?> newFastClassGlue(Class<?> hostClass) {
     throw new UnsupportedOperationException();
-  }
-
-  /** Minimum signature needed to disambiguate constructors from the same host class. */
-  private static String signature(Constructor<?> constructor) {
-    return Arrays.toString(constructor.getParameterTypes());
-  }
-
-  /** Minimum signature needed to disambiguate methods from the same host class. */
-  private static String signature(Method method) {
-    return method.getName() + Arrays.toString(method.getParameterTypes());
   }
 
   /*end[AOP]*/

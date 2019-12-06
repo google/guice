@@ -189,6 +189,6 @@ public class Scopes {
    * @since 4.0
    */
   public static boolean isCircularProxy(Object object) {
-    return object != null && BytecodeGen.isCircularProxy(object);
+    return BytecodeGen.isCircularProxy(object);
   }
 }

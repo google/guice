@@ -19,6 +19,7 @@ package com.google.inject.internal.aop;
 import static java.util.Arrays.binarySearch;
 
 import java.util.List;
+import java.util.function.ToIntFunction;
 
 /**
  * Immutable space-efficient trie that provides a fast index for a sorted list of strings. It
@@ -80,7 +81,7 @@ import java.util.List;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-class ImmutableStringTrie {
+class ImmutableStringTrie implements ToIntFunction<String> {
 
   /** Marks a leaf in the trie, where the rest of the bits are the index to be returned. */
   private static final char LEAF_MARKER = 0x8000;
@@ -101,7 +102,8 @@ class ImmutableStringTrie {
    * non-negative index may be returned for strings that closely match those in the trie. This is
    * acceptable because we will only call this method with strings that we know exist in the trie.
    */
-  public int indexOf(String key) {
+  @Override
+  public int applyAsInt(String key) {
     int keyLength = key.length();
 
     int keyIndex = 0;
@@ -302,10 +304,10 @@ class ImmutableStringTrie {
     }
 
     @Override
-    public int indexOf(String key) {
+    public int applyAsInt(String key) {
       return key.compareTo(overflowKey) < 0
-          ? super.indexOf(key)
-          : MAX_ROWS_PER_TRIE + next.indexOf(key);
+          ? super.applyAsInt(key)
+          : MAX_ROWS_PER_TRIE + next.applyAsInt(key);
     }
   }
 }
