@@ -69,7 +69,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
         BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.newFastInvoker(method);
         if (fastInvoker != null) {
           return new FastClassProviderMethod<T>(
-              fastInvoker, key, method, instance, dependencies, scopeAnnotation, annotation);
+              key, method, instance, dependencies, scopeAnnotation, annotation, fastInvoker);
         }
       } catch (Exception | LinkageError e) {
         /* fall-through */
@@ -244,13 +244,13 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     final BiFunction<Object, Object[], Object> fastInvoker;
 
     FastClassProviderMethod(
-        BiFunction<Object, Object[], Object> fastInvoker,
         Key<T> key,
         Method method,
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
         Class<? extends Annotation> scopeAnnotation,
-        Annotation annotation) {
+        Annotation annotation,
+        BiFunction<Object, Object[], Object> fastInvoker) {
       super(key, method, instance, dependencies, scopeAnnotation, annotation);
       this.fastInvoker = fastInvoker;
     }
