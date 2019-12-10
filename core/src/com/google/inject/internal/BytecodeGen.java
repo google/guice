@@ -21,10 +21,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Map;
@@ -57,6 +59,63 @@ public final class BytecodeGen {
 
   /*if[AOP]*/
 
+  /**
+   * The required visibility of a user's class from a Guice-generated class. Visibility of
+   * package-private members depends on the loading classloader: only if two classes were loaded by
+   * the same classloader can they see each other's package-private members. We need to be careful
+   * when choosing which classloader to use for generated classes.
+   */
+  public enum Visibility {
+
+    /**
+     * Indicates Guice-generated classes only call or override public members of the target class.
+     * They may be loaded by a different classloader to the target class.
+     */
+    PUBLIC {
+      @Override
+      public Visibility and(Visibility that) {
+        return that;
+      }
+    },
+
+    /**
+     * Indicates Guice-generated classes call or override at least one package-private member. They
+     * must be loaded in the same classloader as the target class.
+     */
+    SAME_PACKAGE {
+      @Override
+      public Visibility and(Visibility that) {
+        return this;
+      }
+    };
+
+    public static Visibility forMember(Executable member) {
+      if ((member.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC)) == 0) {
+        return SAME_PACKAGE;
+      }
+
+      if (member instanceof Method && forType(((Method) member).getReturnType()) == SAME_PACKAGE) {
+        return SAME_PACKAGE;
+      }
+
+      for (Class<?> type : member.getParameterTypes()) {
+        if (forType(type) == SAME_PACKAGE) {
+          return SAME_PACKAGE;
+        }
+      }
+
+      return PUBLIC;
+    }
+
+    public static Visibility forType(Class<?> type) {
+      return (type.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC)) == 0
+          ? SAME_PACKAGE
+          : PUBLIC;
+    }
+
+    public abstract Visibility and(Visibility that);
+  }
+
   /** Describes a class that can be enhanced with new behaviour. */
   public interface EnhancerTarget {
     /** The class to be enhanced. */
@@ -72,9 +131,9 @@ public final class BytecodeGen {
   }
 
   /** Prepares the given class and methods for enhancement using bytecode generation. */
-  public static Object prepareEnhancer(EnhancerTarget target) {
+  public static Object prepareEnhancer(EnhancerTarget target, Visibility visibility) {
     try {
-      return ENHANCER_GLUE.get(target.getHostClass(), () -> newEnhancerGlue(target));
+      return ENHANCER_GLUE.get(target.getHostClass(), () -> newEnhancerGlue(target, visibility));
     } catch (ExecutionException e) {
       throw new UncheckedExecutionException(e.getCause());
     }
@@ -155,7 +214,7 @@ public final class BytecodeGen {
           .build(CacheLoader.from(BytecodeGen::newFastClassGlue));
 
   /** Generate glue that maps signatures to various enhancer invokers. */
-  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target) {
+  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target, Visibility visibility) {
     throw new UnsupportedOperationException();
   }
 

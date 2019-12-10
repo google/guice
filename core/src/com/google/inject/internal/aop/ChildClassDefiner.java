@@ -24,8 +24,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import static com.google.inject.internal.aop.Visibility.PUBLIC;
-
 /**
  * {@link ClassDefiner} that defines classes using child {@link ClassLoader}s.
  *
@@ -55,11 +53,6 @@ final class ChildClassDefiner implements ClassDefiner {
                         (PrivilegedAction<ChildLoader>) () -> new ChildLoader(hostLoader));
                   }
                 });
-  }
-
-  @Override
-  public boolean canAccess(Class<?> host, Visibility visibility) {
-    return visibility == PUBLIC;
   }
 
   @Override

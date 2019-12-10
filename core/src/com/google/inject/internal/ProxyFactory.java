@@ -70,6 +70,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     Method[] methods = enhancerTarget.getEnhanceableMethods();
     int numMethods = methods.length;
 
+    BytecodeGen.Visibility visibility = BytecodeGen.Visibility.PUBLIC;
     MethodInterceptorsPair[] methodInterceptorsPairs = null; // lazy
 
     // Iterate over aspects and add interceptors for the methods they apply to
@@ -94,6 +95,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
             pair = new MethodInterceptorsPair(method);
             methodInterceptorsPairs[methodIndex] = pair;
           }
+          visibility = visibility.and(BytecodeGen.Visibility.forMember(method));
           pair.addAll(methodAspect.interceptors());
         }
       }
@@ -106,7 +108,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget);
+    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget, visibility);
     callbacks = new InvocationHandler[numMethods];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =

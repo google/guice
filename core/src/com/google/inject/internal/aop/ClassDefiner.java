@@ -23,9 +23,6 @@ package com.google.inject.internal.aop;
  */
 public interface ClassDefiner {
 
-  /** Can this definer access the host class. */
-  boolean canAccess(Class<?> host, Visibility visibility);
-
   /** Defines a new class relative to the host. */
   Class<?> define(Class<?> host, byte[] bytecode) throws Exception;
 }

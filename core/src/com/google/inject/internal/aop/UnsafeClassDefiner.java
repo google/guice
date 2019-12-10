@@ -37,11 +37,6 @@ final class UnsafeClassDefiner implements ClassDefiner {
   private static final Method DEFINE_METHOD = tryPrivileged(UnsafeClassDefiner::bindDefineMethod);
 
   @Override
-  public boolean canAccess(Class<?> host, Visibility visibility) {
-    return THE_UNSAFE != null && DEFINE_METHOD != null;
-  }
-
-  @Override
   public Class<?> define(Class<?> host, byte[] bytecode) throws Exception {
     return (Class<?>) DEFINE_METHOD.invoke(THE_UNSAFE, host, bytecode, null);
   }
