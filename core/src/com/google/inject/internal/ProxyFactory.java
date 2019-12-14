@@ -30,6 +30,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
 
+import static com.google.inject.internal.BytecodeGen.Visibility.SAME_PACKAGE;
+import static com.google.inject.internal.InternalFlags.CustomClassLoadingOption.CHILD;
+
 /**
  * Builds a construction proxy that can participate in AOP. This class manages applying type and
  * method matchers to come up with the set of intercepted methods.
@@ -70,7 +73,6 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     Method[] methods = enhancerTarget.getEnhanceableMethods();
     int numMethods = methods.length;
 
-    BytecodeGen.Visibility visibility = BytecodeGen.Visibility.PUBLIC;
     MethodInterceptorsPair[] methodInterceptorsPairs = null; // lazy
 
     // Iterate over aspects and add interceptors for the methods they apply to
@@ -87,6 +89,15 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
                 new Object[] {method, methodAspect.interceptors()});
           }
 
+          if (InternalFlags.getCustomClassLoadingOption() == CHILD
+              && BytecodeGen.Visibility.forMember(method) == SAME_PACKAGE) {
+            logger.log(
+                Level.WARNING,
+                "Method [{0}] is configured to be intercepted by {1},"
+                    + " but is not visible using CHILD class loading.",
+                new Object[] {method, methodAspect.interceptors()});
+          }
+
           if (methodInterceptorsPairs == null) {
             methodInterceptorsPairs = new MethodInterceptorsPair[numMethods];
           }
@@ -95,7 +106,6 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
             pair = new MethodInterceptorsPair(method);
             methodInterceptorsPairs[methodIndex] = pair;
           }
-          visibility = visibility.and(BytecodeGen.Visibility.forMember(method));
           pair.addAll(methodAspect.interceptors());
         }
       }
@@ -108,7 +118,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget, visibility);
+    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget);
     callbacks = new InvocationHandler[numMethods];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =

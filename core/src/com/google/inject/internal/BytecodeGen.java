@@ -130,9 +130,9 @@ public final class BytecodeGen {
   }
 
   /** Prepares the given class and methods for enhancement using bytecode generation. */
-  public static Object prepareEnhancer(EnhancerTarget target, Visibility visibility) {
+  public static Object prepareEnhancer(EnhancerTarget target) {
     try {
-      return ENHANCER_GLUE.get(target.getHostClass(), () -> newEnhancerGlue(target, visibility));
+      return ENHANCER_GLUE.get(target.getHostClass(), () -> newEnhancerGlue(target));
     } catch (ExecutionException e) {
       throw new UncheckedExecutionException(e.getCause());
     }
@@ -213,7 +213,7 @@ public final class BytecodeGen {
           .build(CacheLoader.from(BytecodeGen::newFastClassGlue));
 
   /** Generate glue that maps signatures to various enhancer invokers. */
-  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target, Visibility visibility) {
+  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target) {
     throw new UnsupportedOperationException();
   }
 
