@@ -16,13 +16,12 @@
 
 package com.google.inject.internal.aop;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.logging.Logger;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.logging.Logger;
 
 /**
  * {@link ClassDefiner} that defines classes using child {@link ClassLoader}s.
@@ -35,7 +34,7 @@ final class ChildClassDefiner implements ClassDefiner {
 
   // initialization-on-demand...
   private static class SystemChildLoaderHolder {
-    static final ChildLoader SYSTEM_CHILD_LOADER = new ChildLoader();
+    static final ChildLoader SYSTEM_CHILD_LOADER = doPrivileged(ChildLoader::new);
   }
 
   // initialization-on-demand...
@@ -49,15 +48,14 @@ final class ChildClassDefiner implements ClassDefiner {
                   @Override
                   public ChildLoader load(final ClassLoader hostLoader) {
                     logger.fine("Creating a child loader for " + hostLoader);
-                    return AccessController.doPrivileged(
-                        (PrivilegedAction<ChildLoader>) () -> new ChildLoader(hostLoader));
+                    return doPrivileged(() -> new ChildLoader(hostLoader));
                   }
                 });
   }
 
   @Override
-  public Class<?> define(Class<?> host, byte[] bytecode) throws Exception {
-    ClassLoader hostLoader = host.getClassLoader();
+  public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
+    ClassLoader hostLoader = hostClass.getClassLoader();
 
     ChildLoader childLoader =
         hostLoader != null
@@ -67,6 +65,12 @@ final class ChildClassDefiner implements ClassDefiner {
     return childLoader.defineInChild(bytecode);
   }
 
+  /** Utility method to remove doPrivileged ambiguity */
+  static <T> T doPrivileged(PrivilegedAction<T> action) {
+    return AccessController.doPrivileged(action);
+  }
+
+  /** Custom class loader that grants access to defineClass */
   private static final class ChildLoader extends ClassLoader {
     ChildLoader(ClassLoader parent) {
       super(parent);

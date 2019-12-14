@@ -16,11 +16,11 @@
 
 package com.google.inject.internal;
 
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.logging.Logger;
+
 /**
  * Contains flags for Guice.
  */
@@ -57,7 +57,7 @@ public class InternalFlags {
     OFF,
     /** Prefer child class loaders, warn if the original unenhanced type isn't visible */
     CHILD,
-    /** Prefer unsafe, use child class loaders if unsafe is not available (Default) */
+    /** Prefer unsafe, but use child class loaders if unsafe is not available (Default) */
     BRIDGE
   }
 

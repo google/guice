@@ -32,16 +32,21 @@ final class UnsafeClassDefiner implements ClassDefiner {
 
   private static final Logger logger = Logger.getLogger(UnsafeClassDefiner.class.getName());
 
-  private static final Object THE_UNSAFE = tryPrivileged(UnsafeClassDefiner::bindUnsafe);
+  private static final Object THE_UNSAFE = tryPrivileged(UnsafeClassDefiner::bindTheUnsafe);
 
   private static final Method DEFINE_METHOD = tryPrivileged(UnsafeClassDefiner::bindDefineMethod);
 
-  @Override
-  public Class<?> define(Class<?> host, byte[] bytecode) throws Exception {
-    return (Class<?>) DEFINE_METHOD.invoke(THE_UNSAFE, host, bytecode, null);
+  /** Do we have access to {@code sun.misc.Unsafe}? */
+  public static boolean isAccessible() {
+    return DEFINE_METHOD != null;
   }
 
-  private static Object bindUnsafe() throws Exception {
+  @Override
+  public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
+    return (Class<?>) DEFINE_METHOD.invoke(THE_UNSAFE, hostClass, bytecode, null);
+  }
+
+  private static Object bindTheUnsafe() throws Exception {
     Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
     Field theUnsafeField = unsafeType.getDeclaredField("theUnsafe");
     theUnsafeField.setAccessible(true);
@@ -50,6 +55,7 @@ final class UnsafeClassDefiner implements ClassDefiner {
 
   private static Method bindDefineMethod() throws Exception {
     Class<?> unsafeType = THE_UNSAFE.getClass();
+    // defineAnonymousClass has all the functionality we need and is available in Java 7 onwards
     return unsafeType.getMethod("defineAnonymousClass", Class.class, byte[].class, Object[].class);
   }
 

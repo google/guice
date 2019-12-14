@@ -16,13 +16,9 @@
 
 package com.google.inject.internal.aop;
 
-/**
- * TODO.
- *
- * @author mcculls@gmail.com (Stuart McCulloch)
- */
+/** Defines enhanced classes. */
 public interface ClassDefiner {
 
   /** Defines a new class relative to the host. */
-  Class<?> define(Class<?> host, byte[] bytecode) throws Exception;
+  Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception;
 }
