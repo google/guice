@@ -96,6 +96,8 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
                 "Method [{0}] is configured to be intercepted by {1},"
                     + " but is not visible using CHILD class loading.",
                 new Object[] {method, methodAspect.interceptors()});
+
+            continue; // cannot enhance this method using CHILD class loading
           }
 
           if (methodInterceptorsPairs == null) {
