@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.BytecodeGen.Visibility.SAME_PACKAGE;
+import static com.google.inject.internal.InternalFlags.CustomClassLoadingOption.CHILD;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -29,9 +32,6 @@ import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
-
-import static com.google.inject.internal.BytecodeGen.Visibility.SAME_PACKAGE;
-import static com.google.inject.internal.InternalFlags.CustomClassLoadingOption.CHILD;
 
 /**
  * Builds a construction proxy that can participate in AOP. This class manages applying type and

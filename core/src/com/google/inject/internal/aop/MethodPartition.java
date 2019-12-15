@@ -32,18 +32,31 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.reflect.Modifier.FINAL;
 
 /**
- * TODO.
+ * Accumulates methods that have the same name and number of parameters for resolution. This helps
+ * narrow down potential bridge delegates that bridge between generic and resolved parameter types.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 class MethodPartition {
 
+  /** Reverse order of declaration; super-methods appear later in the list. */
   private final List<Method> candidates = new ArrayList<>();
 
+  /** Create new partition from the two methods seen so far. */
+  public MethodPartition(Method first, Method second) {
+    candidates.add(first);
+    candidates.add(second);
+  }
+
+  /** Add a new candidate method to this partition for resolution. */
   public void addCandidate(Method method) {
     candidates.add(method);
   }
 
+  /**
+   * Resolve and collect instance methods into the given list; one per method-signature. Methods
+   * declared in sub-classes are preferred over those in super-classes with the same signature.
+   */
   public void collectInstanceMethods(List<Method> instanceMethods) {
     Set<String> visited = new HashSet<>();
     for (Method candidate : candidates) {
@@ -53,6 +66,16 @@ class MethodPartition {
     }
   }
 
+  /**
+   * Resolve and collect enhanceable methods into the given list; one per method-signature. Methods
+   * declared in sub-classes are preferred over those in super-classes with the same signature.
+   * (Unless it's a bridge method, in that case we prefer to report the non-bridge method from the
+   * super-class as a convenience to AOP method matchers that always ignore synthetic methods.)
+   *
+   * <p>At the same time we use generic type resolution to match resolved bridge methods to the
+   * methods they delegate to (this avoids the need to crack open the original class resource for
+   * in-depth analysis by ASM, especially since that resource might not be accessible.)
+   */
   public void collectEnhanceableMethods(
       TypeLiteral<?> hostType,
       List<Method> enhanceableMethods,

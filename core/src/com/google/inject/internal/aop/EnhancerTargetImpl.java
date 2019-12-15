@@ -16,36 +16,35 @@
 
 package com.google.inject.internal.aop;
 
+import com.google.inject.internal.BytecodeGen.EnhancerTarget;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-import com.google.inject.internal.BytecodeGen.EnhancerTarget;
-
 /**
- * TODO.
+ * {@link EnhancerTarget} that also tracks bridge delegation in the host class.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-class EnhancerTargetImpl implements EnhancerTarget {
+final class EnhancerTargetImpl implements EnhancerTarget {
 
-  private final Class<?> host;
+  private final Class<?> hostClass;
 
   private final Method[] enhanceableMethods;
 
   private final Map<Method, Method> bridgeDelegates;
 
   EnhancerTargetImpl(
-      Class<?> host, List<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
+      Class<?> hostClass, List<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
 
-    this.host = host;
+    this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
     this.bridgeDelegates = bridgeDelegates;
   }
 
   @Override
   public Class<?> getHostClass() {
-    return host;
+    return hostClass;
   }
 
   @Override
@@ -53,6 +52,7 @@ class EnhancerTargetImpl implements EnhancerTarget {
     return enhanceableMethods;
   }
 
+  /** Returns the target delegate for a bridge method; {@code null} if no delegate exists. */
   public Method getBridgeDelegate(Method bridgeMethod) {
     return bridgeDelegates.get(bridgeMethod);
   }

@@ -16,6 +16,14 @@
 
 package com.google.inject.internal.aop;
 
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.PROTECTED;
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.lang.reflect.Modifier.STATIC;
+
+import com.google.inject.TypeLiteral;
+import com.google.inject.internal.BytecodeGen.EnhancerTarget;
+import com.google.inject.internal.InternalFlags;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,18 +31,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-
-import com.google.inject.TypeLiteral;
-import com.google.inject.internal.BytecodeGen.EnhancerTarget;
-
-import static java.lang.reflect.Modifier.PRIVATE;
-import static java.lang.reflect.Modifier.PROTECTED;
-import static java.lang.reflect.Modifier.PUBLIC;
-import static java.lang.reflect.Modifier.STATIC;
 
 /**
- * TODO.
+ * Resolves instance and enhanceable methods for fast-class and enhancer generation.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
@@ -42,55 +41,75 @@ public class MethodResolver {
 
   private static final Method[] OBJECT_METHODS = getObjectMethods();
 
-  private static final Function<Object, MethodPartition> NEW_PARTITION =
-      key -> new MethodPartition();
+  private final Class<?> hostClass;
 
-  private final Class<?> host;
+  // values may be single Methods (common case) or MethodPartitions
+  private final Map<String, Object> partitions = new HashMap<>();
 
-  private final Map<String, MethodPartition> partitions = new HashMap<>();
-
-  public MethodResolver(Class<?> host) {
-    this.host = host;
+  public MethodResolver(Class<?> hostClass) {
+    this.hostClass = hostClass;
     initializeMethodPartitions();
   }
 
+  /** Returns all non-private instance methods in the host class; one per method-signature. */
   public List<Method> getInstanceMethods() {
     List<Method> instanceMethods = new ArrayList<>();
-    for (MethodPartition partition : partitions.values()) {
-      partition.collectInstanceMethods(instanceMethods);
+    for (Object partition : partitions.values()) {
+      if (partition instanceof Method) {
+        instanceMethods.add((Method) partition); // common case, just one method with that name
+      } else {
+        ((MethodPartition) partition).collectInstanceMethods(instanceMethods);
+      }
     }
     return instanceMethods;
   }
 
+  /** Preliminary enhancer information for the host class; such as which methods can be enhanced. */
   public EnhancerTarget buildEnhancerTarget() {
     List<Method> enhanceableMethods = new ArrayList<>();
     Map<Method, Method> bridgeDelegates = new HashMap<>();
 
-    TypeLiteral<?> hostType = TypeLiteral.get(host);
-    for (MethodPartition partition : partitions.values()) {
-      partition.collectEnhanceableMethods(hostType, enhanceableMethods, bridgeDelegates);
+    TypeLiteral<?> hostType = TypeLiteral.get(hostClass);
+    for (Object partition : partitions.values()) {
+      if (partition instanceof Method) {
+        enhanceableMethods.add((Method) partition); // common case, just one method with that name
+      } else {
+        ((MethodPartition) partition)
+            .collectEnhanceableMethods(hostType, enhanceableMethods, bridgeDelegates);
+      }
     }
 
-    return new EnhancerTargetImpl(host, enhanceableMethods, bridgeDelegates);
+    return new EnhancerTargetImpl(hostClass, enhanceableMethods, bridgeDelegates);
   }
 
+  /**
+   * Partition all methods declared by the host class hierarchy. The general ordering is the same as
+   * the JVM when it comes to resolving methods: those declared by sub-classes before super-classes,
+   * finally any methods declared by interfaces.
+   */
   private void initializeMethodPartitions() {
     Set<Class<?>> interfaces = new LinkedHashSet<>();
-    for (Class<?> clazz = host;
+
+    for (Class<?> clazz = hostClass;
         clazz != Object.class && clazz != null;
         clazz = clazz.getSuperclass()) {
 
+      // track for partitioning at the end
       collectInterfaces(clazz, interfaces);
+
       partitionMethods(clazz);
     }
+
     for (Method method : OBJECT_METHODS) {
       partitionMethod(method);
     }
+
     for (Class<?> intf : interfaces) {
       partitionMethods(intf);
     }
   }
 
+  /** Collect all interfaces implemented by the given class. */
   private void collectInterfaces(Class<?> clazz, Set<Class<?>> interfaces) {
     for (Class<?> intf : clazz.getInterfaces()) {
       if (interfaces.add(intf)) {
@@ -99,6 +118,13 @@ public class MethodResolver {
     }
   }
 
+  /**
+   * Partition any non-private, non-static methods as they all have the potential to be enhanced.
+   *
+   * <p>The mechanism configured by {@link InternalFlags#getCustomClassLoadingOption()} to define
+   * the enhanced class will determine what is visible to the enhancer once we've resolved the
+   * methods down to a flat list.
+   */
   private void partitionMethods(Class<?> clazz) {
     for (Method method : clazz.getDeclaredMethods()) {
       if ((method.getModifiers() & (PRIVATE | STATIC)) == 0) {
@@ -107,11 +133,23 @@ public class MethodResolver {
     }
   }
 
+  /** Methods are partitioned by name plus parameter count. */
   private void partitionMethod(Method method) {
     String partitionKey = method.getName() + '#' + method.getParameterCount();
-    partitions.computeIfAbsent(partitionKey, NEW_PARTITION).addCandidate(method);
+    Object partition = partitions.get(partitionKey);
+    if (partition == null) {
+      // very common case: just one method with that name, store directly to reduce overhead
+      partitions.put(partitionKey, method);
+    } else if (partition instanceof Method) {
+      // found a second method, inflate to a proper partition containing the two methods
+      partitions.put(partitionKey, new MethodPartition((Method) partition, method));
+    } else {
+      // continue to add methods to the existing partition
+      ((MethodPartition) partition).addCandidate(method);
+    }
   }
 
+  /** Visible Object instance methods; ie. public or protected and not static. */
   private static Method[] getObjectMethods() {
     List<Method> objectMethods = new ArrayList<>();
     for (Method method : Object.class.getDeclaredMethods()) {
