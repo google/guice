@@ -16,7 +16,7 @@
 
 package com.google.inject.internal.aop;
 
-import com.google.inject.internal.BytecodeGen.EnhancerTarget;
+import com.google.inject.internal.BytecodeGen;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -26,19 +26,25 @@ import java.util.Map;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-final class EnhancerTargetImpl implements EnhancerTarget {
+final class EnhancerTargetImpl implements BytecodeGen.EnhancerTarget {
 
   private final Class<?> hostClass;
 
   private final Method[] enhanceableMethods;
 
+  private final Map<Method, Method> originalBridges;
+
   private final Map<Method, Method> bridgeDelegates;
 
   EnhancerTargetImpl(
-      Class<?> hostClass, List<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
+      Class<?> hostClass,
+      List<Method> enhanceableMethods,
+      Map<Method, Method> originalBridges,
+      Map<Method, Method> bridgeDelegates) {
 
     this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
+    this.originalBridges = originalBridges;
     this.bridgeDelegates = bridgeDelegates;
   }
 
@@ -52,8 +58,13 @@ final class EnhancerTargetImpl implements EnhancerTarget {
     return enhanceableMethods;
   }
 
-  /** Returns the delegate targeted by the bridge method; {@code null} if no delegate exists. */
-  public Method getBridgeDelegate(Method bridgeMethod) {
-    return bridgeDelegates.get(bridgeMethod);
+  /** Returns the original bridge for an enhanceable method; {@code null} if there's no bridge. */
+  public Method getOriginalBridge(Method enhanceableMethod) {
+    return originalBridges.get(enhanceableMethod);
+  }
+
+  /** Returns the bridge delegate for an enhanceable method; {@code null} if there's no delegate. */
+  public Method getBridgeDelegate(Method enhanceableMethod) {
+    return bridgeDelegates.get(enhanceableMethod);
   }
 }

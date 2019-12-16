@@ -23,7 +23,7 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.BytecodeGen.EnhancerTarget;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.InternalFlags;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -67,8 +67,9 @@ public class MethodResolver {
   }
 
   /** Preliminary enhancer information for the host class; such as which methods can be enhanced. */
-  public EnhancerTarget buildEnhancerTarget() {
+  public BytecodeGen.EnhancerTarget buildEnhancerTarget() {
     List<Method> enhanceableMethods = new ArrayList<>();
+    Map<Method, Method> originalBridges = new HashMap<>();
     Map<Method, Method> bridgeDelegates = new HashMap<>();
 
     TypeLiteral<?> hostType = TypeLiteral.get(hostClass);
@@ -81,11 +82,12 @@ public class MethodResolver {
         }
       } else {
         ((MethodPartition) partition)
-            .collectEnhanceableMethods(hostType, enhanceableMethods, bridgeDelegates);
+            .collectEnhanceableMethods(
+                hostType, enhanceableMethods, originalBridges, bridgeDelegates);
       }
     }
 
-    return new EnhancerTargetImpl(hostClass, enhanceableMethods, bridgeDelegates);
+    return new EnhancerTargetImpl(hostClass, enhanceableMethods, originalBridges, bridgeDelegates);
   }
 
   /**

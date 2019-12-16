@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.aop;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.reflect.Modifier.FINAL;
 
 import com.google.inject.TypeLiteral;
@@ -79,6 +78,7 @@ class MethodPartition {
   public void collectEnhanceableMethods(
       TypeLiteral<?> hostType,
       List<Method> enhanceableMethods,
+      Map<Method, Method> originalBridges,
       Map<Method, Method> bridgeDelegates) {
 
     Map<String, Method> leafMethods = new HashMap<>();
@@ -118,12 +118,19 @@ class MethodPartition {
     // interception if the delegate method was itself intercepted by a different interceptor!)
 
     for (Entry<String, Method> targetEntry : bridgeTargets.entrySet()) {
-      Method bridgeMethod = leafMethods.get(targetEntry.getKey());
+      Method originalBridge = leafMethods.get(targetEntry.getKey());
       Method superTarget = targetEntry.getValue();
 
-      // some AOP matchers skip all synthetic methods, so we give them something to match
-      // against by reporting the first non-bridge super-method with identical parameters
-      Method enhanceableMethod = firstNonNull(superTarget, bridgeMethod);
+      // some AOP matchers skip all synthetic methods, so if we have a non-bridge super-method with
+      // identical parameters then use that as the enhanceable method instead of the original bridge
+      // (we still need the original when generating the enhanced class so keep track of that too)
+      Method enhanceableMethod;
+      if (superTarget != null) {
+        enhanceableMethod = superTarget;
+        originalBridges.put(enhanceableMethod, originalBridge);
+      } else {
+        enhanceableMethod = originalBridge;
+      }
       enhanceableMethods.add(enhanceableMethod);
 
       // scan all methods looking for the bridge delegate by comparing generic parameters
@@ -131,10 +138,10 @@ class MethodPartition {
       for (Method candidate : candidates) {
         if (!candidate.isBridge()) {
           if (candidate == superTarget) {
-            break; // we've reached the super-method so default to super-class invocation
+            break; // we've reached the non-bridge super-method so default to super-class invocation
           }
           // compare bridge method against resolved candidate
-          if (resolvedParametersMatch(bridgeMethod, hostType, candidate)
+          if (resolvedParametersMatch(originalBridge, hostType, candidate)
               || (superTarget != null
                   // compare candidate against resolved super-method
                   && resolvedParametersMatch(candidate, hostType, superTarget))) {
