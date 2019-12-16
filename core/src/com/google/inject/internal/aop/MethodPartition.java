@@ -16,6 +16,10 @@
 
 package com.google.inject.internal.aop;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.lang.reflect.Modifier.FINAL;
+
+import com.google.inject.TypeLiteral;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,14 +30,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.inject.TypeLiteral;
-
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static java.lang.reflect.Modifier.FINAL;
-
 /**
- * Accumulates methods that have the same name and number of parameters for resolution. This helps
- * narrow down potential bridge delegates that bridge between generic and resolved parameter types.
+ * Accumulates methods with the same name and number of parameters. This helps focus the search for
+ * bridge delegates that involve type-erasure of generic parameter types, since the parameter count
+ * will be the same for the bridge method and its delegate.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
@@ -42,13 +42,13 @@ class MethodPartition {
   /** Reverse order of declaration; super-methods appear later in the list. */
   private final List<Method> candidates = new ArrayList<>();
 
-  /** Create new partition from the two methods seen so far. */
+  /** Each partition starts off with at least two methods. */
   public MethodPartition(Method first, Method second) {
     candidates.add(first);
     candidates.add(second);
   }
 
-  /** Add a new candidate method to this partition for resolution. */
+  /** Add a new method to this partition for resolution. */
   public void addCandidate(Method method) {
     candidates.add(method);
   }
@@ -69,12 +69,12 @@ class MethodPartition {
   /**
    * Resolve and collect enhanceable methods into the given list; one per method-signature. Methods
    * declared in sub-classes are preferred over those in super-classes with the same signature.
-   * (Unless it's a bridge method, in that case we prefer to report the non-bridge method from the
+   * (Unless it's a bridge method, in which case we prefer to report the non-bridge method from the
    * super-class as a convenience to AOP method matchers that always ignore synthetic methods.)
    *
    * <p>At the same time we use generic type resolution to match resolved bridge methods to the
    * methods they delegate to (this avoids the need to crack open the original class resource for
-   * in-depth analysis by ASM, especially since that resource might not be accessible.)
+   * in-depth analysis by ASM, especially since the class bytes might not be accessible.)
    */
   public void collectEnhanceableMethods(
       TypeLiteral<?> hostType,
@@ -84,17 +84,23 @@ class MethodPartition {
     Map<String, Method> leafMethods = new HashMap<>();
     Map<String, Method> bridgeTargets = new HashMap<>();
 
+    // Capture the first method found under each parameter key, these are called 'leaf' methods
+
     for (Method candidate : candidates) {
       String parametersKey = parametersKey(candidate);
       Method existingLeafMethod = leafMethods.putIfAbsent(parametersKey, candidate);
       if (existingLeafMethod == null) {
         if (candidate.isBridge()) {
+          // Record that we've started looking for the bridge's delegate
           bridgeTargets.put(parametersKey, null);
         }
       } else if (existingLeafMethod.isBridge() && !candidate.isBridge()) {
+        // Found potential bridge delegate with exactly the same paramaters (visibility bridge)
         bridgeTargets.putIfAbsent(parametersKey, candidate);
       }
     }
+
+    // Report any non-bridge leaf methods that are not final and can be enhanced
 
     for (Entry<String, Method> methodEntry : leafMethods.entrySet()) {
       Method method = methodEntry.getValue();
@@ -105,20 +111,28 @@ class MethodPartition {
       }
     }
 
+    // This leaves bridge methods
+
     for (Entry<String, Method> targetEntry : bridgeTargets.entrySet()) {
       Method bridgeMethod = leafMethods.get(targetEntry.getKey());
       Method superTarget = targetEntry.getValue();
 
+      // some AOP matchers skip all synthetic methods, so we give them something to match
+      // against by reporting the first non-bridge super-method with the same parameters
       Method enhanceableMethod = firstNonNull(superTarget, bridgeMethod);
       enhanceableMethods.add(enhanceableMethod);
 
+      // scan all methods looking for the bridge delegate by comparing generic parameters
+      // (these are the kind of bridge methods that were added to account for type-erasure)
       for (Method candidate : candidates) {
         if (!candidate.isBridge()) {
           if (candidate == superTarget) {
-            break;
+            break; // stop when we reach the super-method that has just been reported
           }
+          // see if the bridge method matches the candidate resolved againt the host class
           if (resolvedParametersMatch(bridgeMethod, hostType, candidate)
               || (superTarget != null
+                  // otherwise does the candidate match the resolved super-method
                   && resolvedParametersMatch(candidate, hostType, superTarget))) {
 
             bridgeDelegates.put(enhanceableMethod, candidate);
@@ -129,10 +143,12 @@ class MethodPartition {
     }
   }
 
+  /** Each method is uniquely identified in the partition by its actual parameter types. */
   private static String parametersKey(Method method) {
     return Arrays.toString(method.getParameterTypes());
   }
 
+  /** Compares a sub-method with a generic super-method by resolving it against the host class. */
   private static boolean resolvedParametersMatch(
       Method subMethod, TypeLiteral<?> host, Method superMethod) {
     Class<?>[] parameterTypes = subMethod.getParameterTypes();

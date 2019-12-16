@@ -16,7 +16,7 @@
 
 package com.google.inject.internal.aop;
 
-/** Defines enhanced classes. */
+/** Defines dynamically generated classes. */
 public interface ClassDefiner {
 
   /** Defines a new class relative to the host. */

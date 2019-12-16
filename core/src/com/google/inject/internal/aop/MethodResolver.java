@@ -16,6 +16,7 @@
 
 package com.google.inject.internal.aop;
 
+import static java.lang.reflect.Modifier.FINAL;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PROTECTED;
 import static java.lang.reflect.Modifier.PUBLIC;
@@ -43,7 +44,7 @@ public class MethodResolver {
 
   private final Class<?> hostClass;
 
-  // values may be single Methods (common case) or MethodPartitions
+  // values in this map may be single Methods or MethodPartitions
   private final Map<String, Object> partitions = new HashMap<>();
 
   public MethodResolver(Class<?> hostClass) {
@@ -56,7 +57,8 @@ public class MethodResolver {
     List<Method> instanceMethods = new ArrayList<>();
     for (Object partition : partitions.values()) {
       if (partition instanceof Method) {
-        instanceMethods.add((Method) partition); // common case, just one method with that name
+        // common case, partition is just one method
+        instanceMethods.add((Method) partition);
       } else {
         ((MethodPartition) partition).collectInstanceMethods(instanceMethods);
       }
@@ -72,7 +74,11 @@ public class MethodResolver {
     TypeLiteral<?> hostType = TypeLiteral.get(hostClass);
     for (Object partition : partitions.values()) {
       if (partition instanceof Method) {
-        enhanceableMethods.add((Method) partition); // common case, just one method with that name
+        // common case, partition is just one method; exclude if it turns out to be final
+        Method method = (Method) partition;
+        if ((method.getModifiers() & FINAL) == 0) {
+          enhanceableMethods.add(method);
+        }
       } else {
         ((MethodPartition) partition)
             .collectEnhanceableMethods(hostType, enhanceableMethods, bridgeDelegates);
@@ -85,7 +91,7 @@ public class MethodResolver {
   /**
    * Partition all methods declared by the host class hierarchy. The general ordering is the same as
    * the JVM when it comes to resolving methods: those declared by sub-classes before super-classes,
-   * finally any methods declared by interfaces.
+   * and finally any methods declared by interfaces.
    */
   private void initializeMethodPartitions() {
     Set<Class<?>> interfaces = new LinkedHashSet<>();
@@ -119,45 +125,51 @@ public class MethodResolver {
   }
 
   /**
-   * Partition any non-private, non-static methods as they all have the potential to be enhanced.
-   *
-   * <p>The mechanism configured by {@link InternalFlags#getCustomClassLoadingOption()} to define
-   * the enhanced class will determine what is visible to the enhancer once we've resolved the
-   * methods down to a flat list.
+   * Partition any methods that aren't private or static. We include package-private methods because
+   * they may be enhanceable depending on the {@link InternalFlags#getCustomClassLoadingOption()}.
+   * We also retain final methods in the partition; they can't be enhanced but we might want them
+   * for fast-class generation when we want to call setters, etc.
    */
   private void partitionMethods(Class<?> clazz) {
     for (Method method : clazz.getDeclaredMethods()) {
-      if ((method.getModifiers() & (PRIVATE | STATIC)) == 0) {
+      if ((method.getModifiers() & (PRIVATE | STATIC)) == 0 && !banned(method)) {
         partitionMethod(method);
       }
     }
   }
 
-  /** Methods are partitioned by name plus parameter count. */
+  /**
+   * Methods are partitioned by name and parameter count. This helps focus the search for bridge
+   * delegates that involve type-erasure of generic parameter types, since the parameter count will
+   * be the same for the bridge method and its delegate.
+   */
   private void partitionMethod(Method method) {
     String partitionKey = method.getName() + '#' + method.getParameterCount();
-    Object partition = partitions.get(partitionKey);
-    if (partition == null) {
-      // very common case: just one method with that name, store directly to reduce overhead
-      partitions.put(partitionKey, method);
-    } else if (partition instanceof Method) {
-      // found a second method, inflate to a proper partition containing the two methods
-      partitions.put(partitionKey, new MethodPartition((Method) partition, method));
-    } else {
-      // continue to add methods to the existing partition
-      ((MethodPartition) partition).addCandidate(method);
+    // common case: assume only one method with that key, store method directly to reduce overhead
+    Object existingPartition = partitions.putIfAbsent(partitionKey, method);
+    if (existingPartition instanceof Method) {
+      // this is the second matching method, inflate to MethodPartition containing the two methods
+      partitions.put(partitionKey, new MethodPartition((Method) existingPartition, method));
+    } else if (existingPartition instanceof MethodPartition) {
+      // continue to add methods to the existing MethodPartition
+      ((MethodPartition) existingPartition).addCandidate(method);
     }
   }
 
-  /** Visible Object instance methods; ie. public or protected and not static. */
+  /** Cache common enhanceable Object methods; ie. public or protected and not static or final. */
   private static Method[] getObjectMethods() {
     List<Method> objectMethods = new ArrayList<>();
     for (Method method : Object.class.getDeclaredMethods()) {
-      int flags = method.getModifiers() & (PUBLIC | PROTECTED | STATIC);
-      if ((flags == PUBLIC || flags == PROTECTED) && !"finalize".equals(method.getName())) {
+      int flags = method.getModifiers() & (PUBLIC | PROTECTED | STATIC | FINAL);
+      if ((flags == PUBLIC || flags == PROTECTED) && !banned(method)) {
         objectMethods.add(method);
       }
     }
     return objectMethods.toArray(new Method[objectMethods.size()]);
+  }
+
+  /** Deliberately ban certain methods from being enhanced, such as {@link Object#finalize}. */
+  private static boolean banned(Method method) {
+    return method.getParameterCount() == 0 && "finalize".equals(method.getName());
   }
 }

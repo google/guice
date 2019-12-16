@@ -52,7 +52,7 @@ final class EnhancerTargetImpl implements EnhancerTarget {
     return enhanceableMethods;
   }
 
-  /** Returns the target delegate for a bridge method; {@code null} if no delegate exists. */
+  /** Returns the delegate targeted by the bridge method; {@code null} if no delegate exists. */
   public Method getBridgeDelegate(Method bridgeMethod) {
     return bridgeDelegates.get(bridgeMethod);
   }
