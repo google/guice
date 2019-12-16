@@ -84,7 +84,8 @@ class MethodPartition {
     Map<String, Method> leafMethods = new HashMap<>();
     Map<String, Method> bridgeTargets = new HashMap<>();
 
-    // Capture the first method found under each parameter key, these are called 'leaf' methods
+    // First resolve the 'leaf' methods; these represent the latest declaration of each method in
+    // the class hierarchy (ie. ignoring super-class declarations with the same parameter types)
 
     for (Method candidate : candidates) {
       String parametersKey = parametersKey(candidate);
@@ -95,12 +96,12 @@ class MethodPartition {
           bridgeTargets.put(parametersKey, null);
         }
       } else if (existingLeafMethod.isBridge() && !candidate.isBridge()) {
-        // Found potential bridge delegate with exactly the same paramaters (visibility bridge)
+        // Found potential bridge delegate with identical parameters
         bridgeTargets.putIfAbsent(parametersKey, candidate);
       }
     }
 
-    // Report any non-bridge leaf methods that are not final and can be enhanced
+    // Discard any 'final' methods, as they cannot be enhanced, and report non-bridge leaf methods
 
     for (Entry<String, Method> methodEntry : leafMethods.entrySet()) {
       Method method = methodEntry.getValue();
@@ -111,14 +112,17 @@ class MethodPartition {
       }
     }
 
-    // This leaves bridge methods
+    // This leaves bridge methods which need further resolution; specifically around finding the
+    // real bridge delegate so we can call it using invokevirtual from our enhanced method rather
+    // than relying on super-class invocation to the original bridge method (as this would bypass
+    // interception if the delegate method was itself intercepted by a different interceptor!)
 
     for (Entry<String, Method> targetEntry : bridgeTargets.entrySet()) {
       Method bridgeMethod = leafMethods.get(targetEntry.getKey());
       Method superTarget = targetEntry.getValue();
 
       // some AOP matchers skip all synthetic methods, so we give them something to match
-      // against by reporting the first non-bridge super-method with the same parameters
+      // against by reporting the first non-bridge super-method with identical parameters
       Method enhanceableMethod = firstNonNull(superTarget, bridgeMethod);
       enhanceableMethods.add(enhanceableMethod);
 
@@ -127,14 +131,16 @@ class MethodPartition {
       for (Method candidate : candidates) {
         if (!candidate.isBridge()) {
           if (candidate == superTarget) {
-            break; // stop when we reach the super-method that has just been reported
+            break; // we've reached the super-method so default to super-class invocation
           }
-          // see if the bridge method matches the candidate resolved againt the host class
+          // compare bridge method against resolved candidate
           if (resolvedParametersMatch(bridgeMethod, hostType, candidate)
               || (superTarget != null
-                  // otherwise does the candidate match the resolved super-method
+                  // compare candidate against resolved super-method
                   && resolvedParametersMatch(candidate, hostType, superTarget))) {
 
+            // found a target that differs by raw parameter types but matches the bridge after
+            // generic resolution; record this delegation so we can call it with invokevirtual
             bridgeDelegates.put(enhanceableMethod, candidate);
             break;
           }
