@@ -21,7 +21,4 @@ public interface ClassDefiner {
 
   /** Defines a new class relative to the host. */
   Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception;
-
-  /** The preferred class definer. */
-  ClassDefiner INSTANCE = ClassDefiners.bindClassDefiner();
 }

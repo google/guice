@@ -16,20 +16,37 @@
 
 package com.google.inject.internal.aop;
 
-import java.util.logging.Logger;
-
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
+import java.util.logging.Logger;
 
 /**
  * Utility methods for dealing with {@link ClassDefiner}s.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-final class ClassDefiners {
+public final class ClassDefiners {
   private static final Logger logger = Logger.getLogger(ClassDefiners.class.getName());
 
-  /** Binds the preferred {@link ClassDefiner} in {@link ClassDefiner#INSTANCE}. */
+  // initialization-on-demand...
+  private static class ClassDefinerHolder {
+    static final ClassDefiner INSTANCE = bindClassDefiner();
+  }
+
+  /** The preferred class definer. */
+  public static ClassDefiner getClassDefiner() {
+    return ClassDefinerHolder.INSTANCE;
+  }
+
+  /** The minimum visibility supported by the preferred class definer. */
+  public static BytecodeGen.Visibility minimumVisibility() {
+    return getClassDefiner() instanceof UnsafeClassDefiner
+        ? BytecodeGen.Visibility.SAME_PACKAGE
+        : BytecodeGen.Visibility.PUBLIC;
+  }
+
+  /** Binds the preferred {@link ClassDefiner} instance. */
   static ClassDefiner bindClassDefiner() {
     CustomClassLoadingOption loadingOption = InternalFlags.getCustomClassLoadingOption();
     if (loadingOption == CustomClassLoadingOption.CHILD) {
