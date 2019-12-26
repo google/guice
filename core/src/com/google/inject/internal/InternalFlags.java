@@ -55,7 +55,7 @@ public class InternalFlags {
   public enum CustomClassLoadingOption {
     /** Never create child class loaders, always define enhanced types with unsafe */
     OFF,
-    /** Prefer child class loaders, warn if the original unenhanced type isn't visible */
+    /** Use child class loaders, warn if the type or method to be enhanced isn't visible */
     CHILD,
     /** Prefer unsafe, but use child class loaders if unsafe is not available (Default) */
     BRIDGE
