@@ -27,6 +27,7 @@ import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.InternalFlags;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,28 +35,19 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Resolves instance and enhanceable methods for fast-class and enhancer generation.
+ * Entry-point for resolving candidate methods for fast-class and enhancer generation.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-public class MethodResolver {
+public final class MethodResolving {
 
   private static final Method[] OBJECT_METHODS = getObjectMethods();
 
-  private final Class<?> hostClass;
-
-  // values in this map may be single Methods or MethodPartitions
-  private final Map<String, Object> partitions = new HashMap<>();
-
-  public MethodResolver(Class<?> hostClass) {
-    this.hostClass = hostClass;
-    initializeMethodPartitions();
-  }
-
   /** Returns all non-private instance methods in the host class; one per method-signature. */
-  public List<Method> getInstanceMethods() {
+  public static List<Method> getInstanceMethods(Class<?> hostClass) {
     List<Method> instanceMethods = new ArrayList<>();
-    for (Object partition : partitions.values()) {
+
+    for (Object partition : initializeMethodPartitions(hostClass)) {
       if (partition instanceof Method) {
         // common case, partition is just one method
         instanceMethods.add((Method) partition);
@@ -63,17 +55,19 @@ public class MethodResolver {
         ((MethodPartition) partition).collectInstanceMethods(instanceMethods);
       }
     }
+
     return instanceMethods;
   }
 
   /** Preliminary enhancer information for the host class; such as which methods can be enhanced. */
-  public BytecodeGen.EnhancerTarget buildEnhancerTarget() {
+  public static BytecodeGen.EnhancerTarget buildEnhancerTarget(Class<?> hostClass) {
     List<Method> enhanceableMethods = new ArrayList<>();
+
     Map<Method, Method> originalBridges = new HashMap<>();
     Map<Method, Method> bridgeDelegates = new HashMap<>();
 
     TypeLiteral<?> hostType = TypeLiteral.get(hostClass);
-    for (Object partition : partitions.values()) {
+    for (Object partition : initializeMethodPartitions(hostClass)) {
       if (partition instanceof Method) {
         // common case, partition is just one method; exclude if it turns out to be final
         Method method = (Method) partition;
@@ -94,8 +88,11 @@ public class MethodResolver {
    * Partition all methods declared by the host class hierarchy. The general ordering is the same as
    * the JVM when it comes to resolving methods: those declared by sub-classes before super-classes,
    * and finally any methods declared by interfaces.
+   *
+   * @return Collection of single Methods or MethodPartitions
    */
-  private void initializeMethodPartitions() {
+  private static Collection<?> initializeMethodPartitions(Class<?> hostClass) {
+    Map<String, Object> partitions = new HashMap<>();
     Set<Class<?>> interfaces = new LinkedHashSet<>();
 
     for (Class<?> clazz = hostClass;
@@ -105,20 +102,22 @@ public class MethodResolver {
       // track for partitioning at the end
       collectInterfaces(clazz, interfaces);
 
-      partitionMethods(clazz);
+      partitionMethods(clazz, partitions);
     }
 
     for (Method method : OBJECT_METHODS) {
-      partitionMethod(method);
+      partitionMethod(method, partitions);
     }
 
     for (Class<?> intf : interfaces) {
-      partitionMethods(intf);
+      partitionMethods(intf, partitions);
     }
+
+    return partitions.values();
   }
 
   /** Collect all interfaces implemented by the given class. */
-  private void collectInterfaces(Class<?> clazz, Set<Class<?>> interfaces) {
+  private static void collectInterfaces(Class<?> clazz, Set<Class<?>> interfaces) {
     for (Class<?> intf : clazz.getInterfaces()) {
       if (interfaces.add(intf)) {
         collectInterfaces(intf, interfaces);
@@ -132,10 +131,10 @@ public class MethodResolver {
    * We also retain final methods in the partition; they can't be enhanced but we might want them
    * for fast-class generation when we want to call setters, etc.
    */
-  private void partitionMethods(Class<?> clazz) {
+  private static void partitionMethods(Class<?> clazz, Map<String, Object> partitions) {
     for (Method method : clazz.getDeclaredMethods()) {
       if ((method.getModifiers() & (PRIVATE | STATIC)) == 0 && !banned(method)) {
-        partitionMethod(method);
+        partitionMethod(method, partitions);
       }
     }
   }
@@ -145,7 +144,7 @@ public class MethodResolver {
    * delegates that involve type-erasure of generic parameter types, since the parameter count will
    * be the same for the bridge method and its delegate.
    */
-  private void partitionMethod(Method method) {
+  private static void partitionMethod(Method method, Map<String, Object> partitions) {
     String partitionKey = method.getName() + '#' + method.getParameterCount();
     // common case: assume only one method with that key, store method directly to reduce overhead
     Object existingPartition = partitions.putIfAbsent(partitionKey, method);

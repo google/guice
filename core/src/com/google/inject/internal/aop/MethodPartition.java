@@ -36,7 +36,7 @@ import java.util.Set;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-class MethodPartition {
+final class MethodPartition {
 
   /** Reverse order of declaration; super-methods appear later in the list. */
   private final List<Method> candidates = new ArrayList<>();

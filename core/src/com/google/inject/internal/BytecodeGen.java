@@ -126,7 +126,7 @@ public final class BytecodeGen {
 
   /** Collects details describing the class about to be enhanced. */
   public static EnhancerTarget enhancerTarget(Class<?> hostClass) {
-    return new com.google.inject.internal.aop.MethodResolver(hostClass).buildEnhancerTarget();
+    return com.google.inject.internal.aop.MethodResolving.buildEnhancerTarget(hostClass);
   }
 
   /** Prepares the given class and methods for enhancement using bytecode generation. */
