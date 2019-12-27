@@ -17,7 +17,7 @@
 package com.google.inject.internal.aop;
 
 /** Defines dynamically generated classes. */
-public interface ClassDefiner {
+interface ClassDefiner {
 
   /** Defines a new class relative to the host. */
   Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception;

@@ -22,26 +22,29 @@ import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import java.util.logging.Logger;
 
 /**
- * Utility methods for dealing with {@link ClassDefiner}s.
+ * Entry-point for defining dynamically generated classes.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-public final class ClassDefiners {
-  private static final Logger logger = Logger.getLogger(ClassDefiners.class.getName());
+public final class ClassDefining {
+  private static final Logger logger = Logger.getLogger(ClassDefining.class.getName());
+
+  private static final String CLASS_DEFINING_UNSUPPORTED =
+      "Unsafe is not accessible and custom classloading is turned OFF.";
 
   // initialization-on-demand...
   private static class ClassDefinerHolder {
     static final ClassDefiner INSTANCE = bindClassDefiner();
   }
 
-  /** The preferred class definer. */
-  public static ClassDefiner getClassDefiner() {
-    return ClassDefinerHolder.INSTANCE;
+  /** Defines a new class relative to the host. */
+  public static Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
+    return ClassDefinerHolder.INSTANCE.define(hostClass, bytecode);
   }
 
-  /** The minimum visibility supported by the preferred class definer. */
+  /** The minimum visibility supported when defining classes. */
   public static BytecodeGen.Visibility minimumVisibility() {
-    return getClassDefiner() instanceof UnsafeClassDefiner
+    return ClassDefinerHolder.INSTANCE instanceof UnsafeClassDefiner
         ? BytecodeGen.Visibility.SAME_PACKAGE
         : BytecodeGen.Visibility.PUBLIC;
   }
@@ -56,10 +59,10 @@ public final class ClassDefiners {
     } else if (loadingOption != CustomClassLoadingOption.OFF) {
       return new ChildClassDefiner(); // second choice unless forbidden
     } else {
-      logger.warning("Unsafe is not accessible and custom classloading is turned OFF");
+      logger.warning(CLASS_DEFINING_UNSUPPORTED);
       return (hostClass, bytecode) -> {
         throw new UnsupportedOperationException(
-            "Cannot define class, custom classloading is turned OFF");
+            "Cannot define class, " + CLASS_DEFINING_UNSUPPORTED);
       };
     }
   }
