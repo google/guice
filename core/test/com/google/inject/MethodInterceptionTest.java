@@ -256,7 +256,7 @@ public class MethodInterceptionTest extends TestCase {
     interceptable.foo();
     boolean proxyFrameFound = false;
     for (int i = 0; i < interceptable.lastElements.length; i++) {
-      if (interceptable.lastElements[i].toString().contains("ByGuice$")) {
+      if (interceptable.lastElements[i].toString().contains("$EnhancerByGuice$")) {
         proxyFrameFound = true;
         break;
       }
@@ -266,7 +266,7 @@ public class MethodInterceptionTest extends TestCase {
 
     interceptable.bar();
     for (int i = 0; i < interceptable.lastElements.length; i++) {
-      if (interceptable.lastElements[i].toString().contains("ByGuice$")) {
+      if (interceptable.lastElements[i].toString().contains("$EnhancerByGuice$")) {
         proxyFrameFound = true;
         break;
       }

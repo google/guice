@@ -112,7 +112,7 @@ final class InterceptorStackCallback implements InvocationHandler {
       List<StackTraceElement> pruned = Lists.newArrayList();
       for (StackTraceElement element : stackTrace) {
         String className = element.getClassName();
-        if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("ByGuice$")) {
+        if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("$EnhancerByGuice$")) {
           pruned.add(element);
         }
       }

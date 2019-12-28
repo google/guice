@@ -406,7 +406,7 @@ public class BytecodeGenTest extends TestCase {
       // 2 because the first 2 elements are
       // LogCreator.<init>()
       // Subclass.<init>()
-      if (!caller.getStackTrace()[2].getClassName().contains("ByGuice$")) {
+      if (!caller.getStackTrace()[2].getClassName().contains("$$FastClassByGuice$$")) {
         throw new AssertionError("Caller was not FastClass").initCause(caller);
       }
     }
