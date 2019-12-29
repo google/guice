@@ -326,7 +326,7 @@ public class BytecodeGenTest extends TestCase {
     injector.getInstance(PackagePrivateInject.class).assertIsFastClassInvoked();
     injector.getInstance(PrivateInject.class).assertIsReflectionInvoked();
 
-    // This classloader loads the test types in a loader containg a different version of guice;
+    // This classloader loads the test types in a loader that has a different version of guice;
     // we can still use fastclass because the generated class is now fully decoupled from guice
     MultipleVersionsOfGuiceClassLoader fakeLoader = new MultipleVersionsOfGuiceClassLoader();
     injector

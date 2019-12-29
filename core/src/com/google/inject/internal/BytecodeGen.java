@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
@@ -124,15 +125,45 @@ public final class BytecodeGen {
     Method[] getEnhanceableMethods();
   }
 
+  /** Key for sharing enhancer glue. */
+  private static class EnhancerKey {
+
+    /** The class that was enhanced. */
+    private final Class<?> hostClass;
+
+    /** The indices of methods in the host class that were enhanced. */
+    private final BitSet methodIndices;
+
+    EnhancerKey(Class<?> hostClass, BitSet methodIndices) {
+      this.hostClass = hostClass;
+      this.methodIndices = methodIndices;
+    }
+
+    @Override
+    public int hashCode() {
+      return 31 * (31 + hostClass.hashCode()) + methodIndices.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof EnhancerKey) {
+        EnhancerKey key = (EnhancerKey) obj;
+        return hostClass.equals(key.hostClass) && methodIndices.equals(key.methodIndices);
+      }
+      return false;
+    }
+  }
+
   /** Collects details describing the class about to be enhanced. */
   public static EnhancerTarget enhancerTarget(Class<?> hostClass) {
     return com.google.inject.internal.aop.MethodResolving.buildEnhancerTarget(hostClass);
   }
 
-  /** Prepares the given class and methods for enhancement using bytecode generation. */
-  public static Object prepareEnhancer(EnhancerTarget target) {
+  /** Prepares selected methods in the target for enhancement using bytecode generation. */
+  public static Object prepareEnhancer(EnhancerTarget target, BitSet methodIndices) {
+    EnhancerKey key = new EnhancerKey(target.getHostClass(), methodIndices);
     try {
-      return ENHANCER_GLUE.get(target.getHostClass(), () -> newEnhancerGlue(target));
+      return ENHANCER_GLUE.get(key, () -> newEnhancerGlue(target, methodIndices));
     } catch (ExecutionException e) {
       throw new UncheckedExecutionException(e.getCause());
     }
@@ -200,7 +231,7 @@ public final class BytecodeGen {
   /**
    * Weak cache of enhancer glue; both keys and values must be weak as values refer back to keys.
    */
-  private static final Cache<Class<?>, Function<String, ?>> ENHANCER_GLUE =
+  private static final Cache<EnhancerKey, Function<String, ?>> ENHANCER_GLUE =
       CacheBuilder.newBuilder().weakKeys().weakValues().build();
 
   /**
@@ -213,7 +244,7 @@ public final class BytecodeGen {
           .build(CacheLoader.from(BytecodeGen::newFastClassGlue));
 
   /** Generate glue that maps signatures to various enhancer invokers. */
-  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target) {
+  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target, BitSet methodIndices) {
     throw new UnsupportedOperationException();
   }
 

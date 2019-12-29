@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -103,7 +102,7 @@ final class MethodPartition {
 
     // Discard any 'final' methods, as they cannot be enhanced, and report non-bridge leaf methods
 
-    for (Entry<String, Method> methodEntry : leafMethods.entrySet()) {
+    for (Map.Entry<String, Method> methodEntry : leafMethods.entrySet()) {
       Method method = methodEntry.getValue();
       if ((method.getModifiers() & FINAL) != 0) {
         bridgeTargets.remove(methodEntry.getKey());
@@ -117,7 +116,7 @@ final class MethodPartition {
     // than relying on super-class invocation to the original bridge method (as this would bypass
     // interception if the delegate method was itself intercepted by a different interceptor!)
 
-    for (Entry<String, Method> targetEntry : bridgeTargets.entrySet()) {
+    for (Map.Entry<String, Method> targetEntry : bridgeTargets.entrySet()) {
       Method originalBridge = leafMethods.get(targetEntry.getKey());
       Method superTarget = targetEntry.getValue();
 

@@ -19,14 +19,17 @@ package com.google.inject.internal;
 import static com.google.inject.internal.BytecodeGen.Visibility.SAME_PACKAGE;
 import static com.google.inject.internal.InternalFlags.CustomClassLoadingOption.CHILD;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.BitSet;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
@@ -73,7 +76,8 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     Method[] methods = enhancerTarget.getEnhanceableMethods();
     int numMethods = methods.length;
 
-    MethodInterceptorsPair[] methodInterceptorsPairs = null; // lazy
+    Multimap<Method, MethodInterceptor> matchedInterceptors = ArrayListMultimap.create();
+    BitSet matchedMethodIndices = new BitSet();
 
     // Iterate over aspects and add interceptors for the methods they apply to
     for (MethodAspect methodAspect : applicableAspects) {
@@ -100,46 +104,39 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
             continue; // cannot enhance this method using CHILD class loading
           }
 
-          if (methodInterceptorsPairs == null) {
-            methodInterceptorsPairs = new MethodInterceptorsPair[numMethods];
-          }
-          MethodInterceptorsPair pair = methodInterceptorsPairs[methodIndex];
-          if (pair == null) {
-            pair = new MethodInterceptorsPair(method);
-            methodInterceptorsPairs[methodIndex] = pair;
-          }
-          pair.addAll(methodAspect.interceptors());
+          matchedInterceptors.putAll(method, methodAspect.interceptors());
+          matchedMethodIndices.set(methodIndex);
         }
       }
     }
 
-    if (methodInterceptorsPairs == null) {
+    if (matchedMethodIndices.isEmpty()) {
       enhancerGlue = null;
       interceptors = ImmutableMap.of();
       callbacks = null;
       return;
     }
 
-    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget);
-    callbacks = new InvocationHandler[numMethods];
+    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget, matchedMethodIndices);
+    callbacks = new InvocationHandler[matchedMethodIndices.cardinality()];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =
         ImmutableMap.builder();
 
-    for (int methodIndex = 0; methodIndex < numMethods; methodIndex++) {
-      MethodInterceptorsPair pair = methodInterceptorsPairs[methodIndex];
-      if (pair == null) {
-        continue;
-      }
+    int callbackIndex = 0;
+    for (int methodIndex = matchedMethodIndices.nextSetBit(0);
+        methodIndex >= 0;
+        methodIndex = matchedMethodIndices.nextSetBit(methodIndex + 1)) {
 
-      List<MethodInterceptor> deDuplicated = pair.dedup();
-      interceptorsMapBuilder.put(pair.method, deDuplicated);
+      Method method = methods[methodIndex];
+      List<MethodInterceptor> deDuplicated =
+          ImmutableSet.copyOf(matchedInterceptors.get(method)).asList();
+      interceptorsMapBuilder.put(method, deDuplicated);
 
       BiFunction<Object, Object[], Object> superInvoker =
-          BytecodeGen.newSuperInvoker(enhancerGlue, pair.method);
+          BytecodeGen.newSuperInvoker(enhancerGlue, method);
 
-      callbacks[methodIndex] =
-          new InterceptorStackCallback(pair.method, deDuplicated, superInvoker);
+      callbacks[callbackIndex++] = new InterceptorStackCallback(method, deDuplicated, superInvoker);
     }
 
     interceptors = interceptorsMapBuilder.build();
@@ -164,24 +161,6 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       throw new Errors()
           .errorEnhancingClass(injectionPoint.getMember().getDeclaringClass(), e)
           .toException();
-    }
-  }
-
-  private static class MethodInterceptorsPair {
-    final Method method;
-    final ImmutableSet.Builder<MethodInterceptor> interceptorsSetBuilder;
-
-    MethodInterceptorsPair(Method method) {
-      this.method = method;
-      this.interceptorsSetBuilder = ImmutableSet.builder();
-    }
-
-    void addAll(List<MethodInterceptor> interceptors) {
-      this.interceptorsSetBuilder.addAll(interceptors);
-    }
-
-    List<MethodInterceptor> dedup() {
-      return interceptorsSetBuilder.build().asList();
     }
   }
 
