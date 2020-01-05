@@ -16,11 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
@@ -30,7 +28,6 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -116,106 +113,59 @@ public final class BytecodeGen {
     public abstract Visibility and(Visibility that);
   }
 
-  /** Describes a class that can be enhanced with new behaviour. */
-  public interface EnhancerTarget {
-    /** The class to be enhanced. */
-    Class<?> getHostClass();
+  /** Builder of enhanced classes. */
+  public interface EnhancerBuilder {
 
     /** Lists the methods in the host class that can be enhanced. */
     Method[] getEnhanceableMethods();
+
+    /** Generates an enhancer for the selected subset of methods. */
+    Function<String, ?> buildEnhancerForMethods(BitSet methodIndices);
   }
 
-  /** Key for sharing enhancer glue. */
-  private static class EnhancerKey {
-
-    /** The class that was enhanced. */
-    private final Class<?> hostClass;
-
-    /** The indices of methods in the host class that were enhanced. */
-    private final BitSet methodIndices;
-
-    EnhancerKey(Class<?> hostClass, BitSet methodIndices) {
-      this.hostClass = hostClass;
-      this.methodIndices = methodIndices;
-    }
-
-    @Override
-    public int hashCode() {
-      return 31 * (31 + hostClass.hashCode()) + methodIndices.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof EnhancerKey) {
-        EnhancerKey key = (EnhancerKey) obj;
-        return hostClass.equals(key.hostClass) && methodIndices.equals(key.methodIndices);
-      }
-      return false;
-    }
-  }
-
-  /** Collects details describing the class about to be enhanced. */
-  public static EnhancerTarget enhancerTarget(Class<?> hostClass) {
-    return com.google.inject.internal.aop.MethodResolving.buildEnhancerTarget(hostClass);
-  }
-
-  /** Prepares selected methods in the target for enhancement using bytecode generation. */
-  public static Object prepareEnhancer(EnhancerTarget target, BitSet methodIndices) {
-    EnhancerKey key = new EnhancerKey(target.getHostClass(), methodIndices);
-    try {
-      return ENHANCER_GLUE.get(key, () -> newEnhancerGlue(target, methodIndices));
-    } catch (ExecutionException e) {
-      throw new UncheckedExecutionException(e.getCause());
-    }
+  /** Create a builder of enhancers for the given class. */
+  public static EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
+    return ENHANCER_BUILDERS.getUnchecked(hostClass);
   }
 
   /**
-   * Creates an enhancer for the original unenhanced constructor using bytecode generation.
-   *
-   * @return enhancer that takes method callbacks (in the same order as the list of enhanceable
-   *     methods returned by {@link #enhancerTarget}) plus arguments for the original constructor
-   *     and returns the enhanced instance
+   * Returns an invoker for the original unenhanced constructor that creates an enhanced instance.
+   * The invoker function accepts an array of callbacks plus an array of arguments for the original
+   * constructor.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static BiFunction<InvocationHandler[], Object[], Object> newEnhancer(
-      Object enhancerGlue, Constructor<?> constructor) {
-    return ((Function<String, BiFunction>) enhancerGlue).apply(signature(constructor));
+  public static BiFunction<InvocationHandler[], Object[], Object> enhancedInvoker(
+      Function<String, ?> enhancer, Constructor<?> constructor) {
+    return (BiFunction) enhancer.apply(signature(constructor));
   }
 
   /**
-   * Creates an invoker that calls the original unenhanced method using bytecode generation.
-   *
-   * @return invoker that takes an enhanced instance plus method arguments and returns the result
+   * Returns an invoker that calls the original unenhanced method. The invoker function accepts an
+   * enhanced instance plus an array of arguments for the original method.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static BiFunction<Object, Object[], Object> newSuperInvoker(
-      Object enhancerGlue, Method method) {
-    return ((Function<String, BiFunction>) enhancerGlue).apply(signature(method));
+  public static BiFunction<Object, Object[], Object> superInvoker(
+      Function<String, ?> enhancer, Method method) {
+    return (BiFunction) enhancer.apply(signature(method));
   }
 
   /**
-   * Creates a fast invoker for the given constructor using bytecode generation.
-   *
-   * @return invoker that takes constructor arguments and returns the constructed instance
+   * Returns a fast invoker for the given constructor. The invoker function accepts an array of
+   * arguments for the constructor and invokes it using bytecode generation.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static Function<Object[], Object> newFastInvoker(Constructor<?> constructor) {
-    return (Function) prepareFastClass(constructor).apply(signature(constructor));
+  public static Function<Object[], Object> fastInvoker(Constructor<?> constructor) {
+    return (Function) fastClass(constructor).apply(signature(constructor));
   }
 
   /**
-   * Creates a fast invoker for the given method using bytecode generation.
-   *
-   * @return invoker that takes an instance to call plus method arguments and returns the result
+   * Returns a fast invoker for the given method. The invoker function accepts an instance, which
+   * will be {@code null} for static methods, and an array of arguments for the method and invokes
+   * it using bytecode generation.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static BiFunction<Object, Object[], Object> newFastInvoker(Method method) {
-    return (BiFunction) prepareFastClass(method).apply(signature(method));
-  }
-
-  /** Prepares the given executable member for fast invocation using bytecode generation. */
-  private static Function<String, ?> prepareFastClass(Executable member) {
-    return FAST_CLASS_GLUE.getUnchecked(member.getDeclaringClass());
+  public static BiFunction<Object, Object[], Object> fastInvoker(Method method) {
+    return (BiFunction) fastClass(method).apply(signature(method));
   }
 
   /** Minimum signature needed to disambiguate constructors from the same host class. */
@@ -229,29 +179,31 @@ public final class BytecodeGen {
   }
 
   /**
-   * Weak cache of enhancer glue; both keys and values must be weak as values refer back to keys.
+   * Prepares the class containing the given member for fast invocation using bytecode generation.
    */
-  private static final Cache<EnhancerKey, Function<String, ?>> ENHANCER_GLUE =
-      CacheBuilder.newBuilder().weakKeys().weakValues().build();
+  private static Function<String, ?> fastClass(Executable member) {
+    Class<?> hostClass = member.getDeclaringClass();
+    if (hostClass.getSimpleName().contains(ENHANCER_BY_GUICE_MARKER)) {
+      hostClass = hostClass.getSuperclass();
+    }
+    return FAST_CLASSES.getUnchecked(hostClass);
+  }
 
-  /**
-   * Weak cache of fast-class glue; both keys and values must be weak as values refer back to keys.
-   */
-  private static final LoadingCache<Class<?>, Function<String, ?>> FAST_CLASS_GLUE =
+  static final String ENHANCER_BY_GUICE_MARKER = "$EnhancerByGuice$";
+
+  /** Weak cache of enhancer builders; values must be weak/soft as they refer back to keys. */
+  private static final LoadingCache<Class<?>, EnhancerBuilder> ENHANCER_BUILDERS =
       CacheBuilder.newBuilder()
           .weakKeys()
-          .weakValues()
-          .build(CacheLoader.from(BytecodeGen::newFastClassGlue));
+          .softValues()
+          .build(CacheLoader.from(com.google.inject.internal.aop.ClassBuilding::enhancerBuilder));
 
-  /** Generate glue that maps signatures to various enhancer invokers. */
-  private static Function<String, ?> newEnhancerGlue(EnhancerTarget target, BitSet methodIndices) {
-    throw new UnsupportedOperationException();
-  }
-
-  /** Generate glue that maps signatures to various fast-class invokers. */
-  private static Function<String, ?> newFastClassGlue(Class<?> hostClass) {
-    throw new UnsupportedOperationException();
-  }
+  /** Weak cache of fast-classes; values must be weak/soft as they refer back to keys. */
+  private static final LoadingCache<Class<?>, Function<String, ?>> FAST_CLASSES =
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .softValues()
+          .build(CacheLoader.from(com.google.inject.internal.aop.ClassBuilding::buildFastClass));
 
   /*end[AOP]*/
 }

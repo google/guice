@@ -33,34 +33,19 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
- * Entry-point for resolving candidate methods for fast-class and enhancer generation.
+ * Entry-point for building enhanced classes and 'fast-class' invocation.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-public final class MethodResolving {
+public final class ClassBuilding {
 
   private static final Method[] OBJECT_METHODS = getObjectMethods();
 
-  /** Returns all non-private instance methods in the host class; one per method-signature. */
-  public static List<Method> getInstanceMethods(Class<?> hostClass) {
-    List<Method> instanceMethods = new ArrayList<>();
-
-    for (Object partition : initializeMethodPartitions(hostClass)) {
-      if (partition instanceof Method) {
-        // common case, partition is just one method
-        instanceMethods.add((Method) partition);
-      } else {
-        ((MethodPartition) partition).collectInstanceMethods(instanceMethods);
-      }
-    }
-
-    return instanceMethods;
-  }
-
-  /** Preliminary enhancer information for the host class; such as which methods can be enhanced. */
-  public static BytecodeGen.EnhancerTarget buildEnhancerTarget(Class<?> hostClass) {
+  /** Builder of enhancers that provide method interception via bytecode generation. */
+  public static BytecodeGen.EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
     List<Method> enhanceableMethods = new ArrayList<>();
 
     Map<Method, Method> originalBridges = new HashMap<>();
@@ -81,7 +66,23 @@ public final class MethodResolving {
       }
     }
 
-    return new EnhancerTargetImpl(hostClass, enhanceableMethods, originalBridges, bridgeDelegates);
+    return new EnhancerBuilderImpl(enhanceableMethods, originalBridges, bridgeDelegates);
+  }
+
+  /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
+  public static Function<String, ?> buildFastClass(Class<?> hostClass) {
+    List<Method> instanceMethods = new ArrayList<>();
+
+    for (Object partition : initializeMethodPartitions(hostClass)) {
+      if (partition instanceof Method) {
+        // common case, partition is just one method
+        instanceMethods.add((Method) partition);
+      } else {
+        ((MethodPartition) partition).collectInstanceMethods(instanceMethods);
+      }
+    }
+
+    throw new UnsupportedOperationException(); // TODO: GLUE
   }
 
   /**

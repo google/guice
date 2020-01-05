@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.util.BitSet;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -47,7 +48,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   private static final Logger logger = Logger.getLogger(ProxyFactory.class.getName());
 
   private final InjectionPoint injectionPoint;
-  private final Object enhancerGlue;
+  private final Function<String, ?> enhancer;
   private final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
   private final InvocationHandler[] callbacks;
 
@@ -65,15 +66,15 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     }
 
     if (applicableAspects.isEmpty()) {
-      enhancerGlue = null;
+      enhancer = null;
       interceptors = ImmutableMap.of();
       callbacks = null;
       return;
     }
 
-    BytecodeGen.EnhancerTarget enhancerTarget = BytecodeGen.enhancerTarget(hostClass);
+    BytecodeGen.EnhancerBuilder enhancerBuilder = BytecodeGen.enhancerBuilder(hostClass);
 
-    Method[] methods = enhancerTarget.getEnhanceableMethods();
+    Method[] methods = enhancerBuilder.getEnhanceableMethods();
     int numMethods = methods.length;
 
     Multimap<Method, MethodInterceptor> matchedInterceptors = ArrayListMultimap.create();
@@ -111,13 +112,13 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     }
 
     if (matchedMethodIndices.isEmpty()) {
-      enhancerGlue = null;
+      enhancer = null;
       interceptors = ImmutableMap.of();
       callbacks = null;
       return;
     }
 
-    enhancerGlue = BytecodeGen.prepareEnhancer(enhancerTarget, matchedMethodIndices);
+    enhancer = enhancerBuilder.buildEnhancerForMethods(matchedMethodIndices);
     callbacks = new InvocationHandler[matchedMethodIndices.cardinality()];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =
@@ -134,7 +135,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       interceptorsMapBuilder.put(method, deDuplicated);
 
       BiFunction<Object, Object[], Object> superInvoker =
-          BytecodeGen.newSuperInvoker(enhancerGlue, method);
+          BytecodeGen.superInvoker(enhancer, method);
 
       callbacks[callbackIndex++] = new InterceptorStackCallback(method, deDuplicated, superInvoker);
     }
@@ -156,7 +157,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     // Create the proxied class. We're careful to ensure that interceptor state is not-specific
     // to this injector. Otherwise, the proxies for each injector will waste PermGen memory
     try {
-      return new ProxyConstructor<>(injectionPoint, enhancerGlue, interceptors, callbacks);
+      return new ProxyConstructor<>(injectionPoint, enhancer, interceptors, callbacks);
     } catch (Throwable e) {
       throw new Errors()
           .errorEnhancingClass(injectionPoint.getMember().getDeclaringClass(), e)
@@ -168,19 +169,19 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   private static class ProxyConstructor<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
     final Constructor<T> constructor;
-    final BiFunction<InvocationHandler[], Object[], Object> enhancer;
+    final BiFunction<InvocationHandler[], Object[], Object> enhancedInvoker;
     final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
     final InvocationHandler[] callbacks;
 
     @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
     ProxyConstructor(
         InjectionPoint injectionPoint,
-        Object enhancerGlue,
+        Function<String, ?> enhancer,
         ImmutableMap<Method, List<MethodInterceptor>> interceptors,
         InvocationHandler[] callbacks) {
       this.injectionPoint = injectionPoint;
       this.constructor = (Constructor<T>) injectionPoint.getMember();
-      this.enhancer = BytecodeGen.newEnhancer(enhancerGlue, constructor);
+      this.enhancedInvoker = BytecodeGen.enhancedInvoker(enhancer, constructor);
       this.interceptors = interceptors;
       this.callbacks = callbacks;
     }
@@ -188,7 +189,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     @Override
     @SuppressWarnings("unchecked") // the enhancer promises to produce 'T's
     public T newInstance(Object... arguments) throws InvocationTargetException {
-      return (T) enhancer.apply(callbacks, arguments);
+      return (T) enhancedInvoker.apply(callbacks, arguments);
     }
 
     @Override

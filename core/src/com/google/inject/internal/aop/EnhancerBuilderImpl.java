@@ -18,17 +18,17 @@ package com.google.inject.internal.aop;
 
 import com.google.inject.internal.BytecodeGen;
 import java.lang.reflect.Method;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
- * {@link EnhancerTarget} that also tracks bridge delegation in the host class.
+ * Builder of enhancers that provide method interception via bytecode generation.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-final class EnhancerTargetImpl implements BytecodeGen.EnhancerTarget {
-
-  private final Class<?> hostClass;
+final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   private final Method[] enhanceableMethods;
 
@@ -36,26 +36,24 @@ final class EnhancerTargetImpl implements BytecodeGen.EnhancerTarget {
 
   private final Map<Method, Method> bridgeDelegates;
 
-  EnhancerTargetImpl(
-      Class<?> hostClass,
+  EnhancerBuilderImpl(
       List<Method> enhanceableMethods,
       Map<Method, Method> originalBridges,
       Map<Method, Method> bridgeDelegates) {
 
-    this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
     this.originalBridges = originalBridges;
     this.bridgeDelegates = bridgeDelegates;
   }
 
   @Override
-  public Class<?> getHostClass() {
-    return hostClass;
+  public Method[] getEnhanceableMethods() {
+    return enhanceableMethods;
   }
 
   @Override
-  public Method[] getEnhanceableMethods() {
-    return enhanceableMethods;
+  public Function<String, ?> buildEnhancerForMethods(BitSet methodIndices) {
+    throw new UnsupportedOperationException(); // TODO: GLUE
   }
 
   /** Returns the original bridge for an enhanceable method; {@code null} if there's no bridge. */

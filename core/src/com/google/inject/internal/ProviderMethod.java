@@ -66,7 +66,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     /*if[AOP]*/
     if (!skipFastClassGeneration) {
       try {
-        BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.newFastInvoker(method);
+        BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.fastInvoker(method);
         if (fastInvoker != null) {
           return new FastClassProviderMethod<T>(
               key, method, instance, dependencies, scopeAnnotation, annotation, fastInvoker);

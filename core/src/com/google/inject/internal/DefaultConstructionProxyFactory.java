@@ -46,7 +46,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     /*if[AOP]*/
     try {
-      Function<Object[], Object> fastInvoker = BytecodeGen.newFastInvoker(constructor);
+      Function<Object[], Object> fastInvoker = BytecodeGen.fastInvoker(constructor);
       if (fastInvoker != null) {
         return new FastClassProxy<T>(injectionPoint, constructor, fastInvoker);
       }

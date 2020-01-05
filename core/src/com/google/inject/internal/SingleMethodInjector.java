@@ -41,7 +41,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
 
     /*if[AOP]*/
     try {
-      BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.newFastInvoker(method);
+      BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.fastInvoker(method);
       if (fastInvoker != null) {
         return new MethodInvoker() {
           @Override
