@@ -21,7 +21,6 @@ import static java.lang.reflect.Modifier.FINAL;
 import com.google.inject.TypeLiteral;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +70,7 @@ final class MethodPartition {
     // the class hierarchy (ie. ignoring super-class declarations with the same parameter types)
 
     for (Method candidate : candidates) {
-      String parametersKey = parametersKey(candidate);
+      String parametersKey = parametersKey(candidate.getParameterTypes());
       Method existingLeafMethod = leafMethods.putIfAbsent(parametersKey, candidate);
       if (existingLeafMethod == null) {
         if (candidate.isBridge()) {
@@ -133,8 +132,15 @@ final class MethodPartition {
   }
 
   /** Each method is uniquely identified in the partition by its actual parameter types. */
-  private static String parametersKey(Method method) {
-    return Arrays.toString(method.getParameterTypes());
+  private static String parametersKey(Class<?>[] parameterTypes) {
+    StringBuilder key = new StringBuilder();
+    for (int i = 0, len = parameterTypes.length; i < len; i++) {
+      if (i > 0) {
+        key.append(',');
+      }
+      key.append(parameterTypes[i].getName());
+    }
+    return key.toString();
   }
 
   /** Compares a sub-method with a generic super-method by resolving it against the host class. */
@@ -142,7 +148,7 @@ final class MethodPartition {
       Method subMethod, TypeLiteral<?> host, Method superMethod) {
     Class<?>[] parameterTypes = subMethod.getParameterTypes();
     List<TypeLiteral<?>> resolvedTypes = host.getParameterTypes(superMethod);
-    for (int i = 0; i < parameterTypes.length; i++) {
+    for (int i = 0, len = parameterTypes.length; i < len; i++) {
       if (parameterTypes[i] != resolvedTypes.get(i).getRawType()) {
         return false;
       }

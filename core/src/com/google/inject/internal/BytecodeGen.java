@@ -17,6 +17,8 @@
 package com.google.inject.internal;
 
 /*if[AOP]*/
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.inject.internal.aop.ClassBuilding.canEnhance;
 import static com.google.inject.internal.aop.ClassBuilding.canFastInvoke;
 import static com.google.inject.internal.aop.ClassBuilding.signature;
 /*end[AOP]*/
@@ -67,7 +69,7 @@ public final class BytecodeGen {
     Method[] getEnhanceableMethods();
 
     /** Generates an enhancer for the selected subset of methods. */
-    Function<String, ?> buildEnhancer(Constructor<?> constructor, BitSet methodIndices);
+    Function<String, ?> buildEnhancer(BitSet methodIndices);
   }
 
   /** Create a builder of enhancers for the given class. */
@@ -83,6 +85,7 @@ public final class BytecodeGen {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<InvocationHandler[], Object[], Object> enhancedInvoker(
       Function<String, ?> enhancer, Constructor<?> constructor) {
+    checkState(canEnhance(constructor), "Constructor is not visible");
     return (BiFunction) enhancer.apply(signature(constructor));
   }
 
@@ -93,6 +96,7 @@ public final class BytecodeGen {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<Object, Object[], Object> superInvoker(
       Function<String, ?> enhancer, Method method) {
+    // no need to check 'canEnhance', ProxyFactory will only pick methods from enhanceable list
     return (BiFunction) enhancer.apply(signature(method));
   }
 

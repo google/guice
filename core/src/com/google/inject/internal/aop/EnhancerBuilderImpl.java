@@ -17,7 +17,12 @@
 package com.google.inject.internal.aop;
 
 import static com.google.inject.internal.aop.ClassBuilding.signature;
+import static com.google.inject.internal.aop.ClassBuilding.visitMembers;
+import static com.google.inject.internal.aop.ClassDefining.hasPackageAccess;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.internal.BytecodeGen;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -33,6 +38,9 @@ import java.util.function.Function;
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
+
+  private final LoadingCache<BitSet, Function<String, ?>> enhancers =
+      CacheBuilder.newBuilder().build(CacheLoader.from(this::doBuildEnhancer));
 
   private final Class<?> hostClass;
 
@@ -54,18 +62,27 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   }
 
   @Override
-  public Function<String, ?> buildEnhancer(Constructor<?> constructor, BitSet methodIndices) {
+  public Function<String, ?> buildEnhancer(BitSet methodIndices) {
+    return enhancers.getUnchecked(methodIndices);
+  }
 
-    Map<String, Method> enhancedMethodMap = new TreeMap<>();
+  private Function<String, ?> doBuildEnhancer(BitSet methodIndices) {
+    Map<String, Constructor<?>> constructorMap = new TreeMap<>();
+    Map<String, Method> methodMap = new TreeMap<>();
+
+    visitMembers(
+        hostClass.getDeclaredConstructors(),
+        hasPackageAccess(),
+        ctor -> constructorMap.put(signature(ctor), ctor));
 
     for (int methodIndex = methodIndices.nextSetBit(0);
         methodIndex >= 0;
         methodIndex = methodIndices.nextSetBit(methodIndex + 1)) {
       Method method = enhanceableMethods[methodIndex];
-      enhancedMethodMap.put(signature(method), method);
+      methodMap.put(signature(method), method);
     }
 
-    // return new Enhancer(hostClass, constructor, enhancedMethodMap, bridgeDelegates);
+    // return new Enhancer(hostClass, constructorMap, methodMap, bridgeDelegates);
     return signature -> null; // TODO: GLUE
   }
 }

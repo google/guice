@@ -29,7 +29,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -50,12 +49,26 @@ public final class ClassBuilding {
 
   /** Minimum signature needed to disambiguate constructors from the same host class. */
   public static String signature(Constructor<?> constructor) {
-    return Arrays.toString(constructor.getParameterTypes());
+    return signature("<>", constructor.getParameterTypes());
   }
 
   /** Minimum signature needed to disambiguate methods from the same host class. */
   public static String signature(Method method) {
-    return method.getName() + Arrays.toString(method.getParameterTypes());
+    return signature(method.getName(), method.getParameterTypes());
+  }
+
+  /** Appends a comma-separated list of parameter types to the given name. */
+  private static String signature(String name, Class<?>[] parameterTypes) {
+    StringBuilder signature = new StringBuilder(name);
+    for (Class<?> type : parameterTypes) {
+      signature.append(',').append(type.getName());
+    }
+    return signature.toString();
+  }
+
+  /** Can we enhance the given member using bytecode? */
+  public static boolean canEnhance(Executable member) {
+    return canAccess(member, hasPackageAccess());
   }
 
   /** Builder of enhancers that provide method interception via bytecode generation. */
@@ -66,7 +79,7 @@ public final class ClassBuilding {
         hostClass,
         method -> {
           // static methods can't be overridden
-          if ((method.getModifiers() & STATIC) != 0) {
+          if ((method.getModifiers() & STATIC) == 0) {
             partitionMethod(method, methodPartitions);
           }
         });
@@ -97,7 +110,7 @@ public final class ClassBuilding {
    * be the same for the bridge method and its delegate.
    */
   private static void partitionMethod(Method method, Map<String, Object> partitions) {
-    String partitionKey = method.getName() + '#' + method.getParameterCount();
+    String partitionKey = method.getName() + '/' + method.getParameterCount();
     // common case: assume only one method with that key, store method directly to reduce overhead
     Object existingPartition = partitions.putIfAbsent(partitionKey, method);
     if (existingPartition instanceof Method) {
@@ -112,7 +125,7 @@ public final class ClassBuilding {
   /** Visit the method hierarchy for the host class. */
   private static void visitMethodHierarchy(Class<?> hostClass, Consumer<Method> visitor) {
 
-    // only filter package-private methods if we expect to have package-access
+    // only try to match package-private methods if the class-definer has package-access
     String hostPackage = hasPackageAccess() ? packageName(hostClass.getName()) : null;
     Set<Class<?>> interfaces = new LinkedHashSet<>();
 
@@ -120,7 +133,7 @@ public final class ClassBuilding {
         clazz != Object.class && clazz != null;
         clazz = clazz.getSuperclass()) {
 
-      // optionally filter package-private methods belonging to the same package as the host
+      // optionally visit package-private methods matching the same package as the host
       boolean samePackage = hostPackage != null && hostPackage.equals(packageName(clazz.getName()));
       visitMembers(clazz.getDeclaredMethods(), samePackage, visitor);
 
@@ -218,7 +231,7 @@ public final class ClassBuilding {
   }
 
   /** Visit all subclass accessible members in the given array. */
-  private static <T extends Executable> void visitMembers(
+  static <T extends Executable> void visitMembers(
       T[] members, boolean samePackage, Consumer<T> visitor) {
     for (T member : members) {
       if (canAccess(member, samePackage)) {
