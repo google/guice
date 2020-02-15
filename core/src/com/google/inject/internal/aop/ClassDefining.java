@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.aop;
 
-import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import java.util.logging.Logger;
@@ -35,6 +34,7 @@ public final class ClassDefining {
   // initialization-on-demand...
   private static class ClassDefinerHolder {
     static final ClassDefiner INSTANCE = bindClassDefiner();
+    static final boolean HAS_PACKAGE_ACCESS = INSTANCE instanceof UnsafeClassDefiner;
   }
 
   /** Defines a new class relative to the host. */
@@ -42,11 +42,9 @@ public final class ClassDefining {
     return ClassDefinerHolder.INSTANCE.define(hostClass, bytecode);
   }
 
-  /** The minimum visibility supported when defining classes. */
-  public static BytecodeGen.Visibility minimumVisibility() {
-    return ClassDefinerHolder.INSTANCE instanceof UnsafeClassDefiner
-        ? BytecodeGen.Visibility.SAME_PACKAGE
-        : BytecodeGen.Visibility.PUBLIC;
+  /** Does the definer have access to package-private members? */
+  public static boolean hasPackageAccess() {
+    return ClassDefinerHolder.HAS_PACKAGE_ACCESS;
   }
 
   /** Binds the preferred {@link ClassDefiner} instance. */

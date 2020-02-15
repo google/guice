@@ -16,9 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.BytecodeGen.Visibility.SAME_PACKAGE;
-import static com.google.inject.internal.InternalFlags.CustomClassLoadingOption.CHILD;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -55,7 +52,8 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   ProxyFactory(InjectionPoint injectionPoint, Iterable<MethodAspect> methodAspects) {
     this.injectionPoint = injectionPoint;
 
-    Class<?> hostClass = injectionPoint.getMember().getDeclaringClass();
+    Constructor<?> constructor = (Constructor<?>) injectionPoint.getMember();
+    Class<?> hostClass = constructor.getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
     List<MethodAspect> applicableAspects = Lists.newArrayList();
@@ -94,17 +92,6 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
                 new Object[] {method, methodAspect.interceptors()});
           }
 
-          if (InternalFlags.getCustomClassLoadingOption() == CHILD
-              && BytecodeGen.Visibility.forMember(method) == SAME_PACKAGE) {
-            logger.log(
-                Level.WARNING,
-                "Method [{0}] is configured to be intercepted by {1},"
-                    + " but is not visible using CHILD class loading.",
-                new Object[] {method, methodAspect.interceptors()});
-
-            continue; // cannot enhance this method using CHILD class loading
-          }
-
           matchedInterceptors.putAll(method, methodAspect.interceptors());
           matchedMethodIndices.set(methodIndex);
         }
@@ -118,7 +105,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    enhancer = enhancerBuilder.buildEnhancerForMethods(matchedMethodIndices);
+    enhancer = enhancerBuilder.buildEnhancer(constructor, matchedMethodIndices);
     callbacks = new InvocationHandler[matchedMethodIndices.cardinality()];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =

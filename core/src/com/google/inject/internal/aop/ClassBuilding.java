@@ -16,6 +16,7 @@
 
 package com.google.inject.internal.aop;
 
+import static com.google.inject.internal.aop.ClassDefining.hasPackageAccess;
 import static java.lang.reflect.Modifier.FINAL;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PROTECTED;
@@ -24,15 +25,18 @@ import static java.lang.reflect.Modifier.STATIC;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.BytecodeGen;
-import com.google.inject.internal.InternalFlags;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -42,17 +46,36 @@ import java.util.function.Function;
  */
 public final class ClassBuilding {
 
-  private static final Method[] OBJECT_METHODS = getObjectMethods();
+  private static final Method[] OVERRIDABLE_OBJECT_METHODS = getOverridableObjectMethods();
+
+  /** Minimum signature needed to disambiguate constructors from the same host class. */
+  public static String signature(Constructor<?> constructor) {
+    return Arrays.toString(constructor.getParameterTypes());
+  }
+
+  /** Minimum signature needed to disambiguate methods from the same host class. */
+  public static String signature(Method method) {
+    return method.getName() + Arrays.toString(method.getParameterTypes());
+  }
 
   /** Builder of enhancers that provide method interception via bytecode generation. */
   public static BytecodeGen.EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
-    List<Method> enhanceableMethods = new ArrayList<>();
+    Map<String, Object> methodPartitions = new HashMap<>();
 
-    Map<Method, Method> originalBridges = new HashMap<>();
+    visitMethodHierarchy(
+        hostClass,
+        method -> {
+          // static methods can't be overridden
+          if ((method.getModifiers() & STATIC) != 0) {
+            partitionMethod(method, methodPartitions);
+          }
+        });
+
+    List<Method> enhanceableMethods = new ArrayList<>();
     Map<Method, Method> bridgeDelegates = new HashMap<>();
 
     TypeLiteral<?> hostType = TypeLiteral.get(hostClass);
-    for (Object partition : initializeMethodPartitions(hostClass)) {
+    for (Object partition : methodPartitions.values()) {
       if (partition instanceof Method) {
         // common case, partition is just one method; exclude if it turns out to be final
         Method method = (Method) partition;
@@ -61,83 +84,11 @@ public final class ClassBuilding {
         }
       } else {
         ((MethodPartition) partition)
-            .collectEnhanceableMethods(
-                hostType, enhanceableMethods, originalBridges, bridgeDelegates);
+            .collectEnhanceableMethods(hostType, enhanceableMethods, bridgeDelegates);
       }
     }
 
-    return new EnhancerBuilderImpl(enhanceableMethods, originalBridges, bridgeDelegates);
-  }
-
-  /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
-  public static Function<String, ?> buildFastClass(Class<?> hostClass) {
-    List<Method> instanceMethods = new ArrayList<>();
-
-    for (Object partition : initializeMethodPartitions(hostClass)) {
-      if (partition instanceof Method) {
-        // common case, partition is just one method
-        instanceMethods.add((Method) partition);
-      } else {
-        ((MethodPartition) partition).collectInstanceMethods(instanceMethods);
-      }
-    }
-
-    throw new UnsupportedOperationException(); // TODO: GLUE
-  }
-
-  /**
-   * Partition all methods declared by the host class hierarchy. The general ordering is the same as
-   * the JVM when it comes to resolving methods: those declared by sub-classes before super-classes,
-   * and finally any methods declared by interfaces.
-   *
-   * @return Collection of single Methods or MethodPartitions
-   */
-  private static Collection<?> initializeMethodPartitions(Class<?> hostClass) {
-    Map<String, Object> partitions = new HashMap<>();
-    Set<Class<?>> interfaces = new LinkedHashSet<>();
-
-    for (Class<?> clazz = hostClass;
-        clazz != Object.class && clazz != null;
-        clazz = clazz.getSuperclass()) {
-
-      // track for partitioning at the end
-      collectInterfaces(clazz, interfaces);
-
-      partitionMethods(clazz, partitions);
-    }
-
-    for (Method method : OBJECT_METHODS) {
-      partitionMethod(method, partitions);
-    }
-
-    for (Class<?> intf : interfaces) {
-      partitionMethods(intf, partitions);
-    }
-
-    return partitions.values();
-  }
-
-  /** Collect all interfaces implemented by the given class. */
-  private static void collectInterfaces(Class<?> clazz, Set<Class<?>> interfaces) {
-    for (Class<?> intf : clazz.getInterfaces()) {
-      if (interfaces.add(intf)) {
-        collectInterfaces(intf, interfaces);
-      }
-    }
-  }
-
-  /**
-   * Partition any methods that aren't private or static. We include package-private methods because
-   * they may be enhanceable depending on the {@link InternalFlags#getCustomClassLoadingOption()}.
-   * We also retain final methods in the partition; they can't be enhanced but we might want them
-   * for fast-class generation when we want to call setters, etc.
-   */
-  private static void partitionMethods(Class<?> clazz, Map<String, Object> partitions) {
-    for (Method method : clazz.getDeclaredMethods()) {
-      if ((method.getModifiers() & (PRIVATE | STATIC)) == 0 && !banned(method)) {
-        partitionMethod(method, partitions);
-      }
-    }
+    return new EnhancerBuilderImpl(hostClass, enhanceableMethods, bridgeDelegates);
   }
 
   /**
@@ -158,20 +109,129 @@ public final class ClassBuilding {
     }
   }
 
-  /** Cache common enhanceable Object methods; ie. public or protected and not static or final. */
-  private static Method[] getObjectMethods() {
-    List<Method> objectMethods = new ArrayList<>();
-    for (Method method : Object.class.getDeclaredMethods()) {
-      int flags = method.getModifiers() & (PUBLIC | PROTECTED | STATIC | FINAL);
-      if ((flags == PUBLIC || flags == PROTECTED) && !banned(method)) {
-        objectMethods.add(method);
+  /** Visit the method hierarchy for the host class. */
+  private static void visitMethodHierarchy(Class<?> hostClass, Consumer<Method> visitor) {
+
+    // only filter package-private methods if we expect to have package-access
+    String hostPackage = hasPackageAccess() ? packageName(hostClass.getName()) : null;
+    Set<Class<?>> interfaces = new LinkedHashSet<>();
+
+    for (Class<?> clazz = hostClass;
+        clazz != Object.class && clazz != null;
+        clazz = clazz.getSuperclass()) {
+
+      // optionally filter package-private methods belonging to the same package as the host
+      boolean samePackage = hostPackage != null && hostPackage.equals(packageName(clazz.getName()));
+      visitMembers(clazz.getDeclaredMethods(), samePackage, visitor);
+
+      // remember so we can visit them last
+      collectInterfaces(clazz, interfaces);
+    }
+
+    for (Method method : OVERRIDABLE_OBJECT_METHODS) {
+      visitor.accept(method);
+    }
+
+    for (Class<?> intf : interfaces) {
+      visitMembers(intf.getDeclaredMethods(), false, visitor);
+    }
+  }
+
+  /** Extract the package name from a class name. */
+  private static String packageName(String className) {
+    return className.substring(0, className.lastIndexOf('.') + 1);
+  }
+
+  /** Collect all interfaces implemented by the given class. */
+  private static void collectInterfaces(Class<?> clazz, Set<Class<?>> interfaces) {
+    for (Class<?> intf : clazz.getInterfaces()) {
+      if (interfaces.add(intf)) {
+        collectInterfaces(intf, interfaces);
       }
     }
+  }
+
+  /** Cache common overridable Object methods. */
+  private static Method[] getOverridableObjectMethods() {
+    List<Method> objectMethods = new ArrayList<>();
+
+    visitMembers(
+        Object.class.getDeclaredMethods(),
+        false, // no package-level access
+        method -> {
+          // exclude static/final methods that can't be overridden
+          if ((method.getModifiers() & (STATIC | FINAL)) == 0) {
+            objectMethods.add(method);
+          }
+        });
+
     return objectMethods.toArray(new Method[objectMethods.size()]);
   }
 
-  /** Deliberately ban certain methods from being enhanced, such as {@link Object#finalize}. */
-  private static boolean banned(Method method) {
-    return method.getParameterCount() == 0 && "finalize".equals(method.getName());
+  /** Can we fast-invoke the given member from a sibling class using bytecode? */
+  public static boolean canFastInvoke(Executable member) {
+    // must be public unless we have package-access in which case anything non-private is ok
+    int modifiers = member.getModifiers() & (PUBLIC | PRIVATE);
+    return modifiers == PUBLIC || (modifiers == 0 && hasPackageAccess());
+  }
+
+  /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
+  public static Function<String, ?> buildFastClass(Class<?> hostClass) {
+
+    Map<String, Constructor<?>> constructorMap = new TreeMap<>();
+    Map<String, Method> methodMap = new TreeMap<>();
+
+    visitFastConstructors(hostClass, ctor -> constructorMap.put(signature(ctor), ctor));
+    visitFastMethods(hostClass, method -> methodMap.put(signature(method), method));
+
+    // return new FastClass(hostClass, constructorMap, methodMap);
+    return signature -> null; // TODO: GLUE
+  }
+
+  /** Visit all constructors for the host class that can be fast-invoked. */
+  private static void visitFastConstructors(Class<?> hostClass, Consumer<Constructor<?>> visitor) {
+    if (hasPackageAccess()) {
+      // can fast-invoke all non-private constructors
+      visitMembers(hostClass.getDeclaredConstructors(), true, visitor);
+    } else {
+      // can only fast-invoke public constructors
+      for (Constructor<?> constructor : hostClass.getConstructors()) {
+        visitor.accept(constructor);
+      }
+    }
+  }
+
+  /** Visit all methods declared by the host class that can be fast-invoked. */
+  private static void visitFastMethods(Class<?> hostClass, Consumer<Method> visitor) {
+    if (hasPackageAccess()) {
+      // can fast-invoke all non-private methods declared by the class
+      visitMembers(hostClass.getDeclaredMethods(), true, visitor);
+    } else {
+      // can only fast-invoke public methods
+      for (Method method : hostClass.getMethods()) {
+        // limit to those declared by this class; inherited methods have their own fast-class
+        if (hostClass == method.getDeclaringClass()) {
+          visitor.accept(method);
+        }
+      }
+    }
+  }
+
+  /** Visit all subclass accessible members in the given array. */
+  private static <T extends Executable> void visitMembers(
+      T[] members, boolean samePackage, Consumer<T> visitor) {
+    for (T member : members) {
+      if (canAccess(member, samePackage)) {
+        visitor.accept(member);
+      }
+    }
+  }
+
+  /** Can we access this member from a subclass which may be in the same package? */
+  private static boolean canAccess(Executable member, boolean samePackage) {
+    int modifiers = member.getModifiers();
+
+    // public and protected members are always ok, non-private also ok if in the same package
+    return (modifiers & (PUBLIC | PROTECTED)) != 0 || (samePackage && (modifiers & PRIVATE) == 0);
   }
 }

@@ -16,11 +16,15 @@
 
 package com.google.inject.internal.aop;
 
+import static com.google.inject.internal.aop.ClassBuilding.signature;
+
 import com.google.inject.internal.BytecodeGen;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 /**
@@ -30,19 +34,17 @@ import java.util.function.Function;
  */
 final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
-  private final Method[] enhanceableMethods;
+  private final Class<?> hostClass;
 
-  private final Map<Method, Method> originalBridges;
+  private final Method[] enhanceableMethods;
 
   private final Map<Method, Method> bridgeDelegates;
 
   EnhancerBuilderImpl(
-      List<Method> enhanceableMethods,
-      Map<Method, Method> originalBridges,
-      Map<Method, Method> bridgeDelegates) {
+      Class<?> hostClass, List<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
 
+    this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
-    this.originalBridges = originalBridges;
     this.bridgeDelegates = bridgeDelegates;
   }
 
@@ -52,17 +54,18 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   }
 
   @Override
-  public Function<String, ?> buildEnhancerForMethods(BitSet methodIndices) {
-    throw new UnsupportedOperationException(); // TODO: GLUE
-  }
+  public Function<String, ?> buildEnhancer(Constructor<?> constructor, BitSet methodIndices) {
 
-  /** Returns the original bridge for an enhanceable method; {@code null} if there's no bridge. */
-  public Method getOriginalBridge(Method enhanceableMethod) {
-    return originalBridges.get(enhanceableMethod);
-  }
+    Map<String, Method> enhancedMethodMap = new TreeMap<>();
 
-  /** Returns the bridge delegate for an enhanceable method; {@code null} if there's no delegate. */
-  public Method getBridgeDelegate(Method enhanceableMethod) {
-    return bridgeDelegates.get(enhanceableMethod);
+    for (int methodIndex = methodIndices.nextSetBit(0);
+        methodIndex >= 0;
+        methodIndex = methodIndices.nextSetBit(methodIndex + 1)) {
+      Method method = enhanceableMethods[methodIndex];
+      enhancedMethodMap.put(signature(method), method);
+    }
+
+    // return new Enhancer(hostClass, constructor, enhancedMethodMap, bridgeDelegates);
+    return signature -> null; // TODO: GLUE
   }
 }

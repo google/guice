@@ -16,6 +16,11 @@
 
 package com.google.inject.internal;
 
+/*if[AOP]*/
+import static com.google.inject.internal.aop.ClassBuilding.canFastInvoke;
+import static com.google.inject.internal.aop.ClassBuilding.signature;
+/*end[AOP]*/
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -23,9 +28,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -56,71 +59,15 @@ public final class BytecodeGen {
 
   /*if[AOP]*/
 
-  /**
-   * The required visibility of a user's class from a Guice-generated class. Visibility of
-   * package-private members depends on the loading classloader: only if two classes were loaded by
-   * the same classloader can they see each other's package-private members. We need to be careful
-   * when choosing which classloader to use for generated classes.
-   */
-  public enum Visibility {
-
-    /**
-     * Indicates Guice-generated classes only call or override public members of the target class.
-     * They may be loaded by a different classloader to the target class.
-     */
-    PUBLIC {
-      @Override
-      public Visibility and(Visibility that) {
-        return that;
-      }
-    },
-
-    /**
-     * Indicates Guice-generated classes call or override at least one package-private member. They
-     * must be loaded in the same classloader as the target class.
-     */
-    SAME_PACKAGE {
-      @Override
-      public Visibility and(Visibility that) {
-        return this;
-      }
-    };
-
-    public static Visibility forMember(Executable member) {
-      if ((member.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC)) == 0) {
-        return SAME_PACKAGE;
-      }
-
-      if (member instanceof Method && forType(((Method) member).getReturnType()) == SAME_PACKAGE) {
-        return SAME_PACKAGE;
-      }
-
-      for (Class<?> type : member.getParameterTypes()) {
-        if (forType(type) == SAME_PACKAGE) {
-          return SAME_PACKAGE;
-        }
-      }
-
-      return PUBLIC;
-    }
-
-    public static Visibility forType(Class<?> type) {
-      return (type.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC)) == 0
-          ? SAME_PACKAGE
-          : PUBLIC;
-    }
-
-    public abstract Visibility and(Visibility that);
-  }
-
   /** Builder of enhanced classes. */
   public interface EnhancerBuilder {
+    String ENHANCER_BY_GUICE_MARKER = "$EnhancerByGuice$";
 
     /** Lists the methods in the host class that can be enhanced. */
     Method[] getEnhanceableMethods();
 
     /** Generates an enhancer for the selected subset of methods. */
-    Function<String, ?> buildEnhancerForMethods(BitSet methodIndices);
+    Function<String, ?> buildEnhancer(Constructor<?> constructor, BitSet methodIndices);
   }
 
   /** Create a builder of enhancers for the given class. */
@@ -155,7 +102,10 @@ public final class BytecodeGen {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static Function<Object[], Object> fastInvoker(Constructor<?> constructor) {
-    return (Function) fastClass(constructor).apply(signature(constructor));
+    if (canFastInvoke(constructor)) {
+      return (Function) fastClass(constructor).apply(signature(constructor));
+    }
+    return null;
   }
 
   /**
@@ -165,17 +115,10 @@ public final class BytecodeGen {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static BiFunction<Object, Object[], Object> fastInvoker(Method method) {
-    return (BiFunction) fastClass(method).apply(signature(method));
-  }
-
-  /** Minimum signature needed to disambiguate constructors from the same host class. */
-  private static String signature(Constructor<?> constructor) {
-    return Arrays.toString(constructor.getParameterTypes());
-  }
-
-  /** Minimum signature needed to disambiguate methods from the same host class. */
-  private static String signature(Method method) {
-    return method.getName() + Arrays.toString(method.getParameterTypes());
+    if (canFastInvoke(method)) {
+      return (BiFunction) fastClass(method).apply(signature(method));
+    }
+    return null;
   }
 
   /**
@@ -183,13 +126,11 @@ public final class BytecodeGen {
    */
   private static Function<String, ?> fastClass(Executable member) {
     Class<?> hostClass = member.getDeclaringClass();
-    if (hostClass.getSimpleName().contains(ENHANCER_BY_GUICE_MARKER)) {
+    if (hostClass.getSimpleName().contains(EnhancerBuilder.ENHANCER_BY_GUICE_MARKER)) {
       hostClass = hostClass.getSuperclass();
     }
     return FAST_CLASSES.getUnchecked(hostClass);
   }
-
-  static final String ENHANCER_BY_GUICE_MARKER = "$EnhancerByGuice$";
 
   /** Weak cache of enhancer builders; values must be weak/soft as they refer back to keys. */
   private static final LoadingCache<Class<?>, EnhancerBuilder> ENHANCER_BUILDERS =

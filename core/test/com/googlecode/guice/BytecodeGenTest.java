@@ -188,8 +188,6 @@ public class BytecodeGenTest extends TestCase {
    * Note: this class must be marked as public or protected so that the Guice custom classloader
    * will intercept it. Private and implementation classes are not intercepted by the custom
    * classloader.
-   *
-   * @see com.google.inject.internal.BytecodeGen.Visibility
    */
   public static class ProxyTestImpl implements ProxyTest {
 

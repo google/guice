@@ -23,10 +23,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Accumulates methods with the same name and number of parameters. This helps focus the search for
@@ -52,19 +50,6 @@ final class MethodPartition {
   }
 
   /**
-   * Resolve and collect instance methods into the given list; one per method-signature. Methods
-   * declared in sub-classes are preferred over those in super-classes with the same signature.
-   */
-  public void collectInstanceMethods(List<Method> instanceMethods) {
-    Set<String> visited = new HashSet<>();
-    for (Method candidate : candidates) {
-      if (visited.add(parametersKey(candidate))) {
-        instanceMethods.add(candidate);
-      }
-    }
-  }
-
-  /**
    * Resolve and collect enhanceable methods into the given list; one per method-signature. Methods
    * declared in sub-classes are preferred over those in super-classes with the same signature.
    * (Unless it's a bridge method, in which case we prefer to report the non-bridge method from the
@@ -77,7 +62,6 @@ final class MethodPartition {
   public void collectEnhanceableMethods(
       TypeLiteral<?> hostType,
       List<Method> enhanceableMethods,
-      Map<Method, Method> originalBridges,
       Map<Method, Method> bridgeDelegates) {
 
     Map<String, Method> leafMethods = new HashMap<>();
@@ -122,14 +106,7 @@ final class MethodPartition {
 
       // some AOP matchers skip all synthetic methods, so if we have a non-bridge super-method with
       // identical parameters then use that as the enhanceable method instead of the original bridge
-      // (we still need the original when generating the enhanced class so keep track of that too)
-      Method enhanceableMethod;
-      if (superTarget != null) {
-        enhanceableMethod = superTarget;
-        originalBridges.put(enhanceableMethod, originalBridge);
-      } else {
-        enhanceableMethod = originalBridge;
-      }
+      Method enhanceableMethod = superTarget != null ? superTarget : originalBridge;
       enhanceableMethods.add(enhanceableMethod);
 
       // scan all methods looking for the bridge delegate by comparing generic parameters
