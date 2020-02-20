@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.function.ToIntFunction;
 
 /**
- * Immutable space-efficient trie that provides an index for a sorted list of up to 65536 strings.
- * It assumes only those strings will be queried and therefore may produce false-positive results
- * for strings not in the list.
+ * Immutable space-efficient trie that provides a fast index for a sorted list of strings. It
+ * assumes only those strings will be queried and therefore may produce false-positive results for
+ * strings not in the list.
  *
  * <p>Each node of the tree is represented as a series of {@code char}s using this layout:
  *
@@ -81,36 +81,19 @@ import java.util.function.ToIntFunction;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-final class ImmutableStringTrie implements ToIntFunction<String> {
-
-  /** Maximum number of rows that can be indexed by a single trie. */
-  private static final int MAX_ROWS_PER_TRIE = 0x4000;
-
-  // Row limits marking the boundaries between tries
-
-  private static final int TRIE_1_LIMIT = 1 * MAX_ROWS_PER_TRIE;
-  private static final int TRIE_2_LIMIT = 2 * MAX_ROWS_PER_TRIE;
-  private static final int TRIE_3_LIMIT = 3 * MAX_ROWS_PER_TRIE;
-  private static final int TRIE_4_LIMIT = 4 * MAX_ROWS_PER_TRIE;
-
-  // Individual tries that together can index 65536 entries.
-
-  private final char[] trie1;
-  private final char[] trie2;
-  private final char[] trie3;
-  private final char[] trie4;
-
-  // Keys from the start of each overflow trie.
-
-  private final String key2;
-  private final String key3;
-  private final String key4;
+class ImmutableStringTrie implements ToIntFunction<String> {
 
   /** Marks a leaf in the trie, where the rest of the bits are the index to be returned. */
   private static final char LEAF_MARKER = 0x8000;
 
   /** Marks a 'bud' in the tree; the same as a leaf except the trie continues beneath it. */
   private static final char BUD_MARKER = 0x4000;
+
+  /** Maximum number of rows that can be indexed by a single trie. */
+  private static final int MAX_ROWS_PER_TRIE = 0x4000;
+
+  /** The compressed trie. */
+  private final char[] data;
 
   /**
    * Returns the index assigned in the trie to the given string.
@@ -122,23 +105,6 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
   @Override
   public int applyAsInt(String key) {
     int keyLength = key.length();
-    char[] data;
-    int offset;
-
-    // use overflow keys to pick the right trie
-    if (key2 == null || key.compareTo(key2) < 0) {
-      data = trie1;
-      offset = 0;
-    } else if (key3 == null || key.compareTo(key3) < 0) {
-      data = trie2;
-      offset = TRIE_1_LIMIT;
-    } else if (key4 == null || key.compareTo(key4) < 0) {
-      data = trie3;
-      offset = TRIE_2_LIMIT;
-    } else {
-      data = trie4;
-      offset = TRIE_3_LIMIT;
-    }
 
     int keyIndex = 0;
     int dataIndex = 0;
@@ -156,13 +122,13 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
       int resultIndex = branchIndex + branchCount;
       char result = data[resultIndex];
       if ((result & LEAF_MARKER) != 0) {
-        return offset + (result & ~LEAF_MARKER);
+        return result & ~LEAF_MARKER;
       }
 
       // 'buds' are just like leaves unless the key still has characters left
       if ((result & BUD_MARKER) != 0) {
         if (keyIndex == keyLength - 1) {
-          return offset + (result & ~BUD_MARKER);
+          return result & ~BUD_MARKER;
         }
         result = 1; // more characters to match, continue search with next character
       }
@@ -189,92 +155,29 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
    * <p>The table of strings must be sorted in lexical order.
    */
   public static ImmutableStringTrie build(List<String> table) {
-    StringBuilder buf = new StringBuilder();
-    int tableSize = table.size();
+    return build(new StringBuilder(), table, 0, table.size());
+  }
 
-    if (tableSize <= TRIE_1_LIMIT) {
-      buildTrie(buf, table, 0, 0, tableSize);
-      return new ImmutableStringTrie(buf.toString());
-    }
+  /** Builds a trie, overflowing to additional tries if there are too many rows */
+  private static ImmutableStringTrie build(
+      StringBuilder buf, List<String> table, int row, int rowLimit) {
 
-    buildTrie(buf, table, 0, 0, TRIE_1_LIMIT);
-    String trie1 = buf.toString();
+    int trieLimit = row + MAX_ROWS_PER_TRIE;
+    boolean overflow = rowLimit > trieLimit;
+
+    buildTrie(buf, table, 0, row, overflow ? trieLimit : rowLimit);
+
+    char[] data = new char[buf.length()];
+    buf.getChars(0, data.length, data, 0);
     buf.setLength(0);
 
-    String key2 = table.get(TRIE_1_LIMIT);
-    if (tableSize <= TRIE_2_LIMIT) {
-      buildTrie(buf, table, 0, TRIE_1_LIMIT, tableSize);
-      return new ImmutableStringTrie(trie1, key2, buf.toString());
-    }
-
-    buildTrie(buf, table, 0, TRIE_1_LIMIT, TRIE_2_LIMIT);
-    String trie2 = buf.toString();
-    buf.setLength(0);
-
-    String key3 = table.get(TRIE_2_LIMIT);
-    if (tableSize <= TRIE_3_LIMIT) {
-      buildTrie(buf, table, 0, TRIE_2_LIMIT, tableSize);
-      return new ImmutableStringTrie(trie1, key2, trie2, key3, buf.toString());
-    }
-
-    buildTrie(buf, table, 0, TRIE_2_LIMIT, TRIE_3_LIMIT);
-    String trie3 = buf.toString();
-    buf.setLength(0);
-
-    String key4 = table.get(TRIE_3_LIMIT);
-    if (tableSize <= TRIE_4_LIMIT) {
-      buildTrie(buf, table, 0, TRIE_3_LIMIT, tableSize);
-      return new ImmutableStringTrie(trie1, key2, trie2, key3, trie3, key4, buf.toString());
-    }
-
-    throw new IllegalArgumentException("Input list is too large: " + tableSize);
+    return overflow
+        ? new Overflow(data, table.get(trieLimit), build(buf, table, trieLimit, rowLimit))
+        : new ImmutableStringTrie(data);
   }
 
-  private ImmutableStringTrie(String trie1) {
-    this.trie1 = trie1.toCharArray();
-    this.key2 = null;
-    this.trie2 = null;
-    this.key3 = null;
-    this.trie3 = null;
-    this.key4 = null;
-    this.trie4 = null;
-  }
-
-  private ImmutableStringTrie(String trie1, String key2, String trie2) {
-    this.trie1 = trie1.toCharArray();
-    this.key2 = key2;
-    this.trie2 = trie2.toCharArray();
-    this.key3 = null;
-    this.trie3 = null;
-    this.key4 = null;
-    this.trie4 = null;
-  }
-
-  private ImmutableStringTrie(String trie1, String key2, String trie2, String key3, String trie3) {
-    this.trie1 = trie1.toCharArray();
-    this.key2 = key2;
-    this.trie2 = trie2.toCharArray();
-    this.key3 = key3;
-    this.trie3 = trie3.toCharArray();
-    this.key4 = null;
-    this.trie4 = null;
-  }
-
-  private ImmutableStringTrie(
-      String trie1,
-      String key2,
-      String trie2,
-      String key3,
-      String trie3,
-      String key4,
-      String trie4) {
-    this.trie1 = trie1.toCharArray();
-    this.key2 = key2;
-    this.trie2 = trie2.toCharArray();
-    this.key3 = key3;
-    this.trie3 = trie3.toCharArray();
-    this.key4 = key4;
-    this.trie4 = trie4.toCharArray();
+  ImmutableStringTrie(char[] data) {
+    this.data = data;
   }
 
   /** Recursively builds a trie for a slice of rows at a particular column. */
@@ -386,5 +289,25 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
     }
 
     return columnLimit;
+  }
+
+  /** Immutable trie that delegates searches that lie outside its range to an overflow trie. */
+  private static final class Overflow extends ImmutableStringTrie {
+    private final String overflowKey;
+
+    private final ImmutableStringTrie next;
+
+    Overflow(char[] data, String overflowKey, ImmutableStringTrie next) {
+      super(data);
+      this.overflowKey = overflowKey;
+      this.next = next;
+    }
+
+    @Override
+    public int applyAsInt(String key) {
+      return key.compareTo(overflowKey) < 0
+          ? super.applyAsInt(key)
+          : MAX_ROWS_PER_TRIE + next.applyAsInt(key);
+    }
   }
 }
