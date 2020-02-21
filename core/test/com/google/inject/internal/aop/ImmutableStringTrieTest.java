@@ -48,7 +48,7 @@ public class ImmutableStringTrieTest extends TestCase {
 
     sort(table);
 
-    ToIntFunction<String> trie = ImmutableStringTrie.build(table);
+    ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
 
     for (int i = 0; i < table.size(); i++) {
       assertThat(trie.applyAsInt(table.get(i)), is(i));
@@ -73,7 +73,7 @@ public class ImmutableStringTrieTest extends TestCase {
 
     List<String> table = ImmutableList.copyOf(strings);
 
-    ToIntFunction<String> trie = ImmutableStringTrie.build(table);
+    ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
 
     for (int i = 0; i < table.size(); i++) {
       assertThat(trie.applyAsInt(table.get(i)), is(i));

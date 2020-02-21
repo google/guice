@@ -154,26 +154,29 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
    *
    * <p>The table of strings must be sorted in lexical order.
    */
-  public static ToIntFunction<String> build(List<String> table) {
-    return build(new StringBuilder(), table, 0, table.size());
+  public static ToIntFunction<String> buildTrie(List<String> table) {
+    return buildTrie(new StringBuilder(), table, 0, table.size());
   }
 
   /** Builds a trie, overflowing to additional tries if there are too many rows */
-  private static ToIntFunction<String> build(
+  private static ToIntFunction<String> buildTrie(
       StringBuilder buf, List<String> table, int row, int rowLimit) {
 
     int trieLimit = row + MAX_ROWS_PER_TRIE;
-    boolean overflow = rowLimit > trieLimit;
+    if (rowLimit <= trieLimit) {
+      buildSubTrie(buf, table, 0, row, rowLimit);
+      char[] data = new char[buf.length()];
+      buf.getChars(0, data.length, data, 0);
+      return new ImmutableStringTrie(data);
+    }
 
-    buildTrie(buf, table, 0, row, overflow ? trieLimit : rowLimit);
-
+    // overflow, build as big a trie as we can and put the rest in additional tries
+    buildSubTrie(buf, table, 0, row, trieLimit);
     char[] data = new char[buf.length()];
     buf.getChars(0, data.length, data, 0);
-    buf.setLength(0);
+    buf.setLength(0); // reset buffer for re-use
 
-    return overflow
-        ? new Overflow(data, table.get(trieLimit), build(buf, table, trieLimit, rowLimit))
-        : new ImmutableStringTrie(data);
+    return new Overflow(data, table.get(trieLimit), buildTrie(buf, table, trieLimit, rowLimit));
   }
 
   ImmutableStringTrie(char[] data) {
@@ -181,7 +184,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
   }
 
   /** Recursively builds a trie for a slice of rows at a particular column. */
-  private static void buildTrie(
+  private static void buildSubTrie(
       StringBuilder buf, List<String> table, int column, int row, int rowLimit) {
 
     int trieStart = buf.length();
@@ -221,10 +224,10 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
 
       if (nextColumn < columnLimit) {
         buf.insert(resultIndex, (char) (nextColumn - column));
-        buildTrie(buf, table, nextColumn, lastRow, nextRow);
+        buildSubTrie(buf, table, nextColumn, lastRow, nextRow);
         allLeaves = false;
       } else {
-        buildTrie(buf, table, nextColumn, lastRow + 1, nextRow);
+        buildSubTrie(buf, table, nextColumn, lastRow + 1, nextRow);
         boolean isLeaf = subTrieStart > buf.length(); // only true if nothing was added
         char marker = isLeaf ? LEAF_MARKER : BUD_MARKER;
         buf.insert(resultIndex, (char) (lastRow & (MAX_ROWS_PER_TRIE - 1) | marker));
