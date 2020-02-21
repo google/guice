@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import junit.framework.TestCase;
 
@@ -47,7 +48,7 @@ public class ImmutableStringTrieTest extends TestCase {
 
     sort(table);
 
-    ImmutableStringTrie trie = ImmutableStringTrie.build(table);
+    ToIntFunction<String> trie = ImmutableStringTrie.build(table);
 
     for (int i = 0; i < table.size(); i++) {
       assertThat(trie.applyAsInt(table.get(i)), is(i));
@@ -72,7 +73,7 @@ public class ImmutableStringTrieTest extends TestCase {
 
     List<String> table = ImmutableList.copyOf(strings);
 
-    ImmutableStringTrie trie = ImmutableStringTrie.build(table);
+    ToIntFunction<String> trie = ImmutableStringTrie.build(table);
 
     for (int i = 0; i < table.size(); i++) {
       assertThat(trie.applyAsInt(table.get(i)), is(i));

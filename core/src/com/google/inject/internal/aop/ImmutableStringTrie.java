@@ -81,7 +81,7 @@ import java.util.function.ToIntFunction;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-class ImmutableStringTrie implements ToIntFunction<String> {
+final class ImmutableStringTrie implements ToIntFunction<String> {
 
   /** Marks a leaf in the trie, where the rest of the bits are the index to be returned. */
   private static final char LEAF_MARKER = 0x8000;
@@ -154,12 +154,12 @@ class ImmutableStringTrie implements ToIntFunction<String> {
    *
    * <p>The table of strings must be sorted in lexical order.
    */
-  public static ImmutableStringTrie build(List<String> table) {
+  public static ToIntFunction<String> build(List<String> table) {
     return build(new StringBuilder(), table, 0, table.size());
   }
 
   /** Builds a trie, overflowing to additional tries if there are too many rows */
-  private static ImmutableStringTrie build(
+  private static ToIntFunction<String> build(
       StringBuilder buf, List<String> table, int row, int rowLimit) {
 
     int trieLimit = row + MAX_ROWS_PER_TRIE;
@@ -292,13 +292,15 @@ class ImmutableStringTrie implements ToIntFunction<String> {
   }
 
   /** Immutable trie that delegates searches that lie outside its range to an overflow trie. */
-  private static final class Overflow extends ImmutableStringTrie {
+  private static final class Overflow implements ToIntFunction<String> {
+    private final ImmutableStringTrie trie;
+
     private final String overflowKey;
 
-    private final ImmutableStringTrie next;
+    private final ToIntFunction<String> next;
 
-    Overflow(char[] data, String overflowKey, ImmutableStringTrie next) {
-      super(data);
+    Overflow(char[] data, String overflowKey, ToIntFunction<String> next) {
+      this.trie = new ImmutableStringTrie(data);
       this.overflowKey = overflowKey;
       this.next = next;
     }
@@ -306,7 +308,7 @@ class ImmutableStringTrie implements ToIntFunction<String> {
     @Override
     public int applyAsInt(String key) {
       return key.compareTo(overflowKey) < 0
-          ? super.applyAsInt(key)
+          ? trie.applyAsInt(key)
           : MAX_ROWS_PER_TRIE + next.applyAsInt(key);
     }
   }
