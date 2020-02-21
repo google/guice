@@ -16,21 +16,18 @@
 
 package com.google.inject.internal.aop;
 
+import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
-import static java.util.Collections.sort;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 import junit.framework.TestCase;
 
 /**
@@ -41,17 +38,15 @@ import junit.framework.TestCase;
 public class ImmutableStringTrieTest extends TestCase {
 
   public void testMethodStrings() {
-    List<String> table =
-        stream(Binder.class.getDeclaredMethods())
-            .map(Method::toString)
-            .collect(Collectors.toList());
+    String[] table =
+        stream(Binder.class.getDeclaredMethods()).map(Method::toString).toArray(String[]::new);
 
     sort(table);
 
     ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
 
-    for (int i = 0; i < table.size(); i++) {
-      assertThat(trie.applyAsInt(table.get(i)), is(i));
+    for (int i = 0; i < table.length; i++) {
+      assertThat(trie.applyAsInt(table[i]), is(i));
     }
   }
 
@@ -71,12 +66,12 @@ public class ImmutableStringTrieTest extends TestCase {
       buf.setLength(0);
     }
 
-    List<String> table = ImmutableList.copyOf(strings);
+    String[] table = strings.toArray(new String[strings.size()]);
 
     ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
 
-    for (int i = 0; i < table.size(); i++) {
-      assertThat(trie.applyAsInt(table.get(i)), is(i));
+    for (int i = 0; i < table.length; i++) {
+      assertThat(trie.applyAsInt(table[i]), is(i));
     }
   }
 

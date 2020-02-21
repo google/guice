@@ -18,13 +18,12 @@ package com.google.inject.internal.aop;
 
 import static java.util.Arrays.binarySearch;
 
-import java.util.List;
 import java.util.function.ToIntFunction;
 
 /**
- * Immutable space-efficient trie that provides a fast index for a sorted list of strings. It
- * assumes only those strings will be queried and therefore may produce false-positive results for
- * strings not in the list.
+ * Immutable space-efficient trie that provides a quick lookup index for a sorted array of strings.
+ * It assumes only those strings will be queried and therefore may produce false-positive results
+ * for strings not in the array.
  *
  * <p>Each node of the tree is represented as a series of {@code char}s using this layout:
  *
@@ -48,7 +47,9 @@ import java.util.function.ToIntFunction;
  * <p>Leaves mark a definite end of the match, while buds mark a potential end which could continue
  * down the trie if there are more characters to match. The key-delta for buds is implicitly 1.
  *
- * <p>The jump section is omitted when all the branches from a node are leaves.
+ * <p>The jump for branch 0 is assumed to be 0 and is always ommitted, that is any continuation of
+ * the trie for branch 0 immediately follows the current node. The entire jump section is omitted
+ * when all the branches from a node are leaves.
  *
  * <p>Simple example: getValue, setValue
  *
@@ -78,6 +79,9 @@ import java.util.function.ToIntFunction;
  * | 1 | g | 3 | 2 | N | V | 0x8000 | 1 | 0 | 2 | a | e | 0x8001 | 0x8002 |
  * +---+---+---+---+---+---+--------+---+---+---+---+---+--------+--------+
  * </pre>
+ *
+ * After matching 'g' we skip past the 'get'. If the next character is 'N' we know this is 'getName'
+ * otherwise we skip over the 'V' and jump to the last check between '...alue' and '...ersion'.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
@@ -154,13 +158,13 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
    *
    * <p>The table of strings must be sorted in lexical order.
    */
-  public static ToIntFunction<String> buildTrie(List<String> table) {
-    return buildTrie(new StringBuilder(), table, 0, table.size());
+  public static ToIntFunction<String> buildTrie(String[] table) {
+    return buildTrie(new StringBuilder(), table, 0, table.length);
   }
 
   /** Builds a trie, overflowing to additional tries if there are too many rows */
   private static ToIntFunction<String> buildTrie(
-      StringBuilder buf, List<String> table, int row, int rowLimit) {
+      StringBuilder buf, String[] table, int row, int rowLimit) {
 
     int trieLimit = row + MAX_ROWS_PER_TRIE;
     if (rowLimit <= trieLimit) {
@@ -176,7 +180,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
     buf.getChars(0, data.length, data, 0);
     buf.setLength(0); // reset buffer for re-use
 
-    return new Overflow(data, table.get(trieLimit), buildTrie(buf, table, trieLimit, rowLimit));
+    return new Overflow(data, table[trieLimit], buildTrie(buf, table, trieLimit, rowLimit));
   }
 
   ImmutableStringTrie(char[] data) {
@@ -185,7 +189,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
 
   /** Recursively builds a trie for a slice of rows at a particular column. */
   private static void buildSubTrie(
-      StringBuilder buf, List<String> table, int column, int row, int rowLimit) {
+      StringBuilder buf, String[] table, int column, int row, int rowLimit) {
 
     int trieStart = buf.length();
 
@@ -196,7 +200,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
     boolean allLeaves = true;
 
     while (lastRow < rowLimit) {
-      String cells = table.get(lastRow);
+      String cells = table[lastRow];
       int columnLimit = cells.length();
 
       char pivot = cells.charAt(column);
@@ -261,11 +265,10 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
    *
    * <p>Returns the row just after the end of the range if all rows have the same character.
    */
-  private static int nextPivotRow(
-      List<String> table, char pivot, int column, int row, int rowLimit) {
+  private static int nextPivotRow(String[] table, char pivot, int column, int row, int rowLimit) {
 
     for (int r = row + 1; r < rowLimit; r++) {
-      String cells = table.get(r);
+      String cells = table[r];
       if (cells.length() <= column || cells.charAt(column) != pivot) {
         return r;
       }
@@ -280,9 +283,9 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
    *
    * <p>Returns the column just after the end of the current row if all rows are identical.
    */
-  private static int nextPivotColumn(List<String> table, int column, int row, int rowLimit) {
+  private static int nextPivotColumn(String[] table, int column, int row, int rowLimit) {
 
-    String cells = table.get(row);
+    String cells = table[row];
     int columnLimit = cells.length();
 
     for (int c = column + 1; c < columnLimit; c++) {
