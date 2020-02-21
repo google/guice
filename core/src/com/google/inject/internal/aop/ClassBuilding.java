@@ -49,7 +49,7 @@ public final class ClassBuilding {
 
   /** Minimum signature needed to disambiguate constructors from the same host class. */
   public static String signature(Constructor<?> constructor) {
-    return signature("<>", constructor.getParameterTypes());
+    return signature("<init>", constructor.getParameterTypes());
   }
 
   /** Minimum signature needed to disambiguate methods from the same host class. */
@@ -190,14 +190,12 @@ public final class ClassBuilding {
 
   /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
   public static Function<String, ?> buildFastClass(Class<?> hostClass) {
+    Map<String, Executable> glueMap = new TreeMap<>();
 
-    Map<String, Constructor<?>> constructorMap = new TreeMap<>();
-    Map<String, Method> methodMap = new TreeMap<>();
+    visitFastConstructors(hostClass, ctor -> glueMap.put(signature(ctor), ctor));
+    visitFastMethods(hostClass, method -> glueMap.put(signature(method), method));
 
-    visitFastConstructors(hostClass, ctor -> constructorMap.put(signature(ctor), ctor));
-    visitFastMethods(hostClass, method -> methodMap.put(signature(method), method));
-
-    // return new FastClass(hostClass, constructorMap, methodMap);
+    // return new FastClass(hostClass, glueMap).glue();
     return signature -> null; // TODO: GLUE
   }
 

@@ -24,7 +24,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.internal.BytecodeGen;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.BitSet;
 import java.util.List;
@@ -67,22 +67,21 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   }
 
   private Function<String, ?> doBuildEnhancer(BitSet methodIndices) {
-    Map<String, Constructor<?>> constructorMap = new TreeMap<>();
-    Map<String, Method> methodMap = new TreeMap<>();
+    Map<String, Executable> glueMap = new TreeMap<>();
 
     visitMembers(
         hostClass.getDeclaredConstructors(),
         hasPackageAccess(),
-        ctor -> constructorMap.put(signature(ctor), ctor));
+        ctor -> glueMap.put(signature(ctor), ctor));
 
     for (int methodIndex = methodIndices.nextSetBit(0);
         methodIndex >= 0;
         methodIndex = methodIndices.nextSetBit(methodIndex + 1)) {
       Method method = enhanceableMethods[methodIndex];
-      methodMap.put(signature(method), method);
+      glueMap.put(signature(method), method);
     }
 
-    // return new Enhancer(hostClass, constructorMap, methodMap, bridgeDelegates);
+    // return new Enhancer(hostClass, glueMap, bridgeDelegates).glue();
     return signature -> null; // TODO: GLUE
   }
 }
