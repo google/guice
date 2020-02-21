@@ -18,14 +18,14 @@ package com.google.inject.internal;
 
 /*if[AOP]*/
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.inject.internal.aop.ClassBuilding.buildEnhancerBuilder;
+import static com.google.inject.internal.aop.ClassBuilding.buildFastClass;
 import static com.google.inject.internal.aop.ClassBuilding.canEnhance;
 import static com.google.inject.internal.aop.ClassBuilding.canFastInvoke;
 import static com.google.inject.internal.aop.ClassBuilding.signature;
 /*end[AOP]*/
 
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
@@ -74,7 +74,7 @@ public final class BytecodeGen {
 
   /** Create a builder of enhancers for the given class. */
   public static EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
-    return ENHANCER_BUILDERS.getUnchecked(hostClass);
+    return ENHANCER_BUILDERS.get(hostClass);
   }
 
   /**
@@ -133,22 +133,26 @@ public final class BytecodeGen {
     if (hostClass.getSimpleName().contains(EnhancerBuilder.ENHANCER_BY_GUICE_MARKER)) {
       hostClass = hostClass.getSuperclass();
     }
-    return FAST_CLASSES.getUnchecked(hostClass);
+    return FAST_CLASSES.get(hostClass);
   }
 
-  /** Weak cache of enhancer builders; values must be weak/soft as they refer back to keys. */
-  private static final LoadingCache<Class<?>, EnhancerBuilder> ENHANCER_BUILDERS =
-      CacheBuilder.newBuilder()
-          .weakKeys()
-          .softValues()
-          .build(CacheLoader.from(com.google.inject.internal.aop.ClassBuilding::enhancerBuilder));
+  /** Lazy association between classes and their {@link EnhancerBuilder}s. */
+  private static final ClassValue<EnhancerBuilder> ENHANCER_BUILDERS =
+      new ClassValue<EnhancerBuilder>() {
+        @Override
+        protected EnhancerBuilder computeValue(Class<?> hostClass) {
+          return buildEnhancerBuilder(hostClass);
+        }
+      };
 
-  /** Weak cache of fast-classes; values must be weak/soft as they refer back to keys. */
-  private static final LoadingCache<Class<?>, Function<String, ?>> FAST_CLASSES =
-      CacheBuilder.newBuilder()
-          .weakKeys()
-          .softValues()
-          .build(CacheLoader.from(com.google.inject.internal.aop.ClassBuilding::buildFastClass));
+  /** Lazy association between classes and their fast-classes. */
+  private static final ClassValue<Function<String, ?>> FAST_CLASSES =
+      new ClassValue<Function<String, ?>>() {
+        @Override
+        protected Function<String, ?> computeValue(Class<?> hostClass) {
+          return buildFastClass(hostClass);
+        }
+      };
 
   /*end[AOP]*/
 }

@@ -72,7 +72,7 @@ public final class ClassBuilding {
   }
 
   /** Builder of enhancers that provide method interception via bytecode generation. */
-  public static BytecodeGen.EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
+  public static BytecodeGen.EnhancerBuilder buildEnhancerBuilder(Class<?> hostClass) {
     Map<String, Object> methodPartitions = new HashMap<>();
 
     visitMethodHierarchy(
