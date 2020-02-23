@@ -26,11 +26,13 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 import junit.framework.TestCase;
 
 /**
@@ -49,7 +51,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
             new AbstractModule() {
               @Override
               protected void configure() {
-                bind(new TypeLiteral<Predicate<Object>>() {}).toInstance(o -> o != null);
+                bind(new TypeLiteral<Predicate<Object>>() {}).toInstance(Objects::nonNull);
               }
             });
 
@@ -73,7 +75,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     assertEquals("foo", callable.call());
   }
 
-  public void testProviderMethod_containingLambda_throwingException() throws Exception {
+  public void testProviderMethod_containingLambda_throwingException() {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
@@ -134,7 +136,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
 
     @Override
     public String get() {
-      return Collections.singleton(uuid).stream().map(UUID::toString).findFirst().get();
+      return Stream.of(uuid).map(UUID::toString).findFirst().get();
     }
   }
 
@@ -154,20 +156,17 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
   }
 
   public void testBinding_toProvider_methodReference() {
+    String expected = "Hello";
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
               @Override
               protected void configure() {
-                bind(String.class).toProvider(Java8LanguageFeatureBindingTest.this::provideString);
+                bind(String.class).toProvider(() -> expected);
               }
             });
 
     Provider<String> provider = injector.getProvider(String.class);
-    assertEquals("Hello", provider.get());
-  }
-
-  private String provideString() {
-    return "Hello";
+    assertEquals(expected, provider.get());
   }
 }
