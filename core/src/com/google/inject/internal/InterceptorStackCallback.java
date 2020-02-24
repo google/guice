@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.BytecodeGen.EnhancerBuilder.ENHANCER_BY_GUICE_MARKER;
+import static com.google.inject.internal.BytecodeGen.ENHANCER_BY_GUICE_MARKER;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;

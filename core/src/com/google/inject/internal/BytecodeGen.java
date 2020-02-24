@@ -61,10 +61,12 @@ public final class BytecodeGen {
 
   /*if[AOP]*/
 
+  public static final String ENHANCER_BY_GUICE_MARKER = "$$EnhancerByGuice$$";
+
+  public static final String FASTCLASS_BY_GUICE_MARKER = "$$FastClassByGuice$$";
+
   /** Builder of enhanced classes. */
   public interface EnhancerBuilder {
-    String ENHANCER_BY_GUICE_MARKER = "$EnhancerByGuice$";
-
     /** Lists the methods in the host class that can be enhanced. */
     Method[] getEnhanceableMethods();
 
@@ -130,7 +132,7 @@ public final class BytecodeGen {
    */
   private static Function<String, ?> fastClass(Executable member) {
     Class<?> hostClass = member.getDeclaringClass();
-    if (hostClass.getSimpleName().contains(EnhancerBuilder.ENHANCER_BY_GUICE_MARKER)) {
+    if (hostClass.getSimpleName().contains(ENHANCER_BY_GUICE_MARKER)) {
       hostClass = hostClass.getSuperclass();
     }
     return FAST_CLASSES.get(hostClass);
