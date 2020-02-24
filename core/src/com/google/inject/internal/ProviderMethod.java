@@ -66,10 +66,10 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     /*if[AOP]*/
     if (!skipFastClassGeneration) {
       try {
-        BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.fastInvoker(method);
-        if (fastInvoker != null) {
+        BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
+        if (fastMethod != null) {
           return new FastClassProviderMethod<T>(
-              key, method, instance, dependencies, scopeAnnotation, annotation, fastInvoker);
+              key, method, instance, dependencies, scopeAnnotation, annotation, fastMethod);
         }
       } catch (Exception | LinkageError e) {
         /* fall-through */
@@ -241,7 +241,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
    * method.
    */
   private static final class FastClassProviderMethod<T> extends ProviderMethod<T> {
-    final BiFunction<Object, Object[], Object> fastInvoker;
+    final BiFunction<Object, Object[], Object> fastMethod;
 
     FastClassProviderMethod(
         Key<T> key,
@@ -250,16 +250,16 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
         ImmutableSet<Dependency<?>> dependencies,
         Class<? extends Annotation> scopeAnnotation,
         Annotation annotation,
-        BiFunction<Object, Object[], Object> fastInvoker) {
+        BiFunction<Object, Object[], Object> fastMethod) {
       super(key, method, instance, dependencies, scopeAnnotation, annotation);
-      this.fastInvoker = fastInvoker;
+      this.fastMethod = fastMethod;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public T doProvision(Object[] parameters)
         throws IllegalAccessException, InvocationTargetException {
-      return (T) fastInvoker.apply(instance, parameters);
+      return (T) fastMethod.apply(instance, parameters);
     }
   }
   /*end[AOP]*/

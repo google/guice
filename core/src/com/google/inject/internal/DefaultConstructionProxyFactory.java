@@ -46,9 +46,9 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     /*if[AOP]*/
     try {
-      Function<Object[], Object> fastInvoker = BytecodeGen.fastInvoker(constructor);
-      if (fastInvoker != null) {
-        return new FastClassProxy<T>(injectionPoint, constructor, fastInvoker);
+      Function<Object[], Object> fastConstructor = BytecodeGen.fastConstructor(constructor);
+      if (fastConstructor != null) {
+        return new FastClassProxy<T>(injectionPoint, constructor, fastConstructor);
       }
     } catch (Exception | LinkageError e) {
       /* fall-through */
@@ -63,21 +63,21 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
   private static final class FastClassProxy<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
     final Constructor<T> constructor;
-    final Function<Object[], Object> fastInvoker;
+    final Function<Object[], Object> fastConstructor;
 
     FastClassProxy(
         InjectionPoint injectionPoint,
         Constructor<T> constructor,
-        Function<Object[], Object> fastInvoker) {
+        Function<Object[], Object> fastConstructor) {
       this.injectionPoint = injectionPoint;
       this.constructor = constructor;
-      this.fastInvoker = fastInvoker;
+      this.fastConstructor = fastConstructor;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public T newInstance(Object... arguments) throws InvocationTargetException {
-      return (T) fastInvoker.apply(arguments);
+      return (T) fastConstructor.apply(arguments);
     }
 
     @Override

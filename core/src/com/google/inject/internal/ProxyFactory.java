@@ -155,7 +155,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   private static class ProxyConstructor<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
     final Constructor<T> constructor;
-    final BiFunction<InvocationHandler[], Object[], Object> enhancedInvoker;
+    final BiFunction<InvocationHandler[], Object[], Object> enhancedConstructor;
     final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
     final InvocationHandler[] callbacks;
 
@@ -167,7 +167,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
         InvocationHandler[] callbacks) {
       this.injectionPoint = injectionPoint;
       this.constructor = (Constructor<T>) injectionPoint.getMember();
-      this.enhancedInvoker = BytecodeGen.enhancedInvoker(enhancer, constructor);
+      this.enhancedConstructor = BytecodeGen.enhancedConstructor(enhancer, constructor);
       this.interceptors = interceptors;
       this.callbacks = callbacks;
     }
@@ -175,7 +175,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     @Override
     @SuppressWarnings("unchecked") // the enhancer promises to produce 'T's
     public T newInstance(Object... arguments) throws InvocationTargetException {
-      return (T) enhancedInvoker.apply(callbacks, arguments);
+      return (T) enhancedConstructor.apply(callbacks, arguments);
     }
 
     @Override

@@ -80,12 +80,11 @@ public final class BytecodeGen {
   }
 
   /**
-   * Returns an invoker for the original unenhanced constructor that creates an enhanced instance.
-   * The invoker function accepts an array of callbacks plus an array of arguments for the original
-   * constructor.
+   * Returns an invoker that constructs an enhanced instance. The invoker function accepts an array
+   * of invocation handlers plus an array of arguments for the original constructor.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static BiFunction<InvocationHandler[], Object[], Object> enhancedInvoker(
+  public static BiFunction<InvocationHandler[], Object[], Object> enhancedConstructor(
       Function<String, ?> enhancer, Constructor<?> constructor) {
     checkState(canEnhance(constructor), "Constructor is not visible");
     return (BiFunction) enhancer.apply(signature(constructor));
@@ -104,10 +103,10 @@ public final class BytecodeGen {
 
   /**
    * Returns a fast invoker for the given constructor. The invoker function accepts an array of
-   * arguments for the constructor and invokes it using bytecode generation.
+   * arguments for the constructor.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static Function<Object[], Object> fastInvoker(Constructor<?> constructor) {
+  public static Function<Object[], Object> fastConstructor(Constructor<?> constructor) {
     if (canFastInvoke(constructor)) {
       return (Function) fastClass(constructor).apply(signature(constructor));
     }
@@ -116,11 +115,10 @@ public final class BytecodeGen {
 
   /**
    * Returns a fast invoker for the given method. The invoker function accepts an instance, which
-   * will be {@code null} for static methods, and an array of arguments for the method and invokes
-   * it using bytecode generation.
+   * will be {@code null} for static methods, and an array of arguments for the method.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static BiFunction<Object, Object[], Object> fastInvoker(Method method) {
+  public static BiFunction<Object, Object[], Object> fastMethod(Method method) {
     if (canFastInvoke(method)) {
       return (BiFunction) fastClass(method).apply(signature(method));
     }

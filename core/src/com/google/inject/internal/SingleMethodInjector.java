@@ -41,13 +41,13 @@ final class SingleMethodInjector implements SingleMemberInjector {
 
     /*if[AOP]*/
     try {
-      BiFunction<Object, Object[], Object> fastInvoker = BytecodeGen.fastInvoker(method);
-      if (fastInvoker != null) {
+      BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
+      if (fastMethod != null) {
         return new MethodInvoker() {
           @Override
           public Object invoke(Object target, Object... parameters)
               throws IllegalAccessException, InvocationTargetException {
-            return fastInvoker.apply(target, parameters);
+            return fastMethod.apply(target, parameters);
           }
         };
       }
