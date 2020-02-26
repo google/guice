@@ -36,6 +36,7 @@ import static org.objectweb.asm.Opcodes.SIPUSH;
 import java.lang.reflect.Executable;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import org.objectweb.asm.ClassWriter;
@@ -79,24 +80,40 @@ abstract class AbstractGlueGenerator {
 
   private static final String RETURN_BIFUNCTION = "()Ljava/util/function/BiFunction;";
 
-  private static final String GLUE_METHOD_PREFIX = "GUICE$GLUE$";
+  private static final String GLUE_PREFIX = "GUICE$GLUE$";
 
-  private static final String GLUE_INDEX_METHOD = GLUE_METHOD_PREFIX + "INDEX";
+  private static final String GLUE_INDEX_METHOD = GLUE_PREFIX + "INDEX";
+
+  private static final AtomicInteger COUNTER = new AtomicInteger();
+
+  protected final ClassWriter classWriter = new ClassWriter(0);
 
   protected final Class<?> hostClass;
 
-  protected ClassWriter classWriter;
+  protected final String hostName;
 
-  protected String glueName;
+  protected final String proxyName;
 
-  protected AbstractGlueGenerator(Class<?> hostClass) {
+  protected AbstractGlueGenerator(Class<?> hostClass, String marker) {
     this.hostClass = hostClass;
+    this.hostName = Type.getInternalName(hostClass);
+    this.proxyName = proxyName(hostName, marker, hashCode());
+  }
+
+  /** Generates a unique name based on the original class name and marker. */
+  private static String proxyName(String hostName, String marker, int hash) {
+    int id = ((hash & 0x000FFFFF) | (COUNTER.getAndIncrement() << 20));
+    String proxyName = hostName + marker + id;
+    if (proxyName.startsWith("java.")) {
+      proxyName = '$' + proxyName; // can't define java.* glue in same package
+    }
+    return proxyName;
   }
 
   /** Generates glue methods along with an index of their method references. */
   public final Function<String, ?> glue(Map<String, Executable> glueMap) {
-    classWriter = new ClassWriter(0);
-    glueName = initGlueClass();
+
+    prepareGlueClass();
 
     int glueCount = glueMap.size();
     String[] signatures = new String[glueCount];
@@ -105,7 +122,7 @@ abstract class AbstractGlueGenerator {
     int index = 0;
     for (Entry<String, Executable> entry : glueMap.entrySet()) {
       signatures[index] = entry.getKey();
-      glueTypes[index] = addGlue(entry.getValue());
+      glueTypes[index] = addGlue(GLUE_PREFIX + index, entry.getValue());
       index++;
     }
 
@@ -126,11 +143,11 @@ abstract class AbstractGlueGenerator {
     return signature -> glueIndex[trie.applyAsInt(signature)];
   }
 
-  /** Initializes the skeleton of the generated class and returns its name. */
-  protected abstract String initGlueClass();
+  /** Prepares the skeleton of the glue class. */
+  protected abstract void prepareGlueClass();
 
   /** Adds the appropriate invocation glue for the given constructor/method. */
-  protected abstract Type addGlue(Executable member);
+  protected abstract Type addGlue(String glueId, Executable member);
 
   /** Pushes an integer onto the stack, choosing the most efficient opcode. */
   protected static void pushInteger(MethodVisitor methodVisitor, int value) {
@@ -166,11 +183,11 @@ abstract class AbstractGlueGenerator {
     methodVisitor.visitInsn(ICONST_0);
     methodVisitor.visitVarInsn(ISTORE, 1);
 
-    for (int i = 0; i < glueCount; i++) {
+    for (int index = 0; index < glueCount; index++) {
       methodVisitor.visitVarInsn(ALOAD, 0);
       methodVisitor.visitVarInsn(ILOAD, 1);
 
-      String glueDescriptor = glueTypes[i].getDescriptor();
+      String glueDescriptor = glueTypes[index].getDescriptor();
       // choose the most appropriate functional interface based on the number of glue arguments
       boolean singleArgument = glueDescriptor.charAt(glueDescriptor.indexOf(';') + 1) == ')';
       methodVisitor.visitInvokeDynamicInsn(
@@ -179,8 +196,8 @@ abstract class AbstractGlueGenerator {
           METAFACTORY_HANDLE,
           new Object[] {
             singleArgument ? RAW_FUNCTION_SIGNATURE : RAW_BIFUNCTION_SIGNATURE,
-            new Handle(H_INVOKESTATIC, glueName, GLUE_METHOD_PREFIX + i, glueDescriptor, false),
-            glueTypes[i]
+            new Handle(H_INVOKESTATIC, proxyName, GLUE_PREFIX + index, glueDescriptor, false),
+            glueTypes[index]
           });
 
       methodVisitor.visitInsn(AASTORE);
