@@ -27,9 +27,12 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ANEWARRAY;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BIPUSH;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
@@ -84,6 +87,14 @@ abstract class AbstractGlueGenerator {
 
   private static final String GLUE_INDEX_METHOD = GLUE_PREFIX + "INDEX";
 
+  private static final ClassValue<Type> TYPE_CACHE =
+      new ClassValue<Type>() {
+        @Override
+        protected Type computeValue(Class<?> clazz) {
+          return Type.getType(clazz);
+        }
+      };
+
   private static final AtomicInteger COUNTER = new AtomicInteger();
 
   protected final ClassWriter classWriter = new ClassWriter(0);
@@ -122,7 +133,7 @@ abstract class AbstractGlueGenerator {
     int index = 0;
     for (Entry<String, Executable> entry : glueMap.entrySet()) {
       signatures[index] = entry.getKey();
-      glueTypes[index] = addGlue(GLUE_PREFIX + index, entry.getValue());
+      glueTypes[index] = addGlue(index, GLUE_PREFIX + index, entry.getValue());
       index++;
     }
 
@@ -147,7 +158,7 @@ abstract class AbstractGlueGenerator {
   protected abstract void prepareGlueClass();
 
   /** Adds the appropriate invocation glue for the given constructor/method. */
-  protected abstract Type addGlue(String glueId, Executable member);
+  protected abstract Type addGlue(int index, String glueId, Executable member);
 
   /** Pushes an integer onto the stack, choosing the most efficient opcode. */
   protected static void pushInteger(MethodVisitor methodVisitor, int value) {
@@ -161,6 +172,48 @@ abstract class AbstractGlueGenerator {
       methodVisitor.visitIntInsn(SIPUSH, value);
     } else {
       methodVisitor.visitLdcInsn(value);
+    }
+  }
+
+  /** Retrieves the ASM types for parameters of the given constructor/method. */
+  protected static Type[] getParameterTypes(Executable member) {
+    Class<?>[] parameterTypes = member.getParameterTypes();
+    Type[] internalTypes = new Type[parameterTypes.length];
+    for (int i = 0, len = internalTypes.length; i < len; i++) {
+      internalTypes[i] = TYPE_CACHE.get(parameterTypes[i]);
+    }
+    return internalTypes;
+  }
+
+  /** Generates bytecode to box the primitive value on the Java stack. */
+  protected static void boxParameter(MethodVisitor methodVisitor, Type parameterType) {
+
+    String boxedClass = boxedClass(parameterType.getSort());
+    String boxMethod = "valueOf";
+    String boxDescriptor = '(' + parameterType.getInternalName() + ")L" + boxedClass + ';';
+
+    methodVisitor.visitMethodInsn(INVOKESTATIC, boxedClass, boxMethod, boxDescriptor, false);
+  }
+
+  /** Generates bytecode to unbox the boxed value on the Java stack. */
+  protected static void unboxParameter(MethodVisitor methodVisitor, Type parameterType) {
+
+    String boxedClass = boxedClass(parameterType.getSort());
+    String unboxMethod = parameterType.getClassName() + "Value";
+    String unboxDescriptor = "()" + parameterType.getInternalName();
+
+    methodVisitor.visitTypeInsn(CHECKCAST, boxedClass);
+    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, boxedClass, unboxMethod, unboxDescriptor, false);
+  }
+
+  /** Returns the boxed class for the given primitive parameter. */
+  private static String boxedClass(int parameterSort) {
+    if (parameterSort == Type.BOOLEAN) {
+      return "java/lang/Boolean";
+    } else if (parameterSort == Type.CHAR) {
+      return "java/lang/Character";
+    } else {
+      return "java/lang/Number";
     }
   }
 
