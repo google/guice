@@ -16,16 +16,18 @@
 
 package com.google.inject.internal;
 
-/*if[AOP]*/
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.inject.internal.aop.ClassBuilding.buildEnhancerBuilder;
+/*if[AOP]*/
 import static com.google.inject.internal.aop.ClassBuilding.buildFastClass;
 import static com.google.inject.internal.aop.ClassBuilding.canEnhance;
 import static com.google.inject.internal.aop.ClassBuilding.canFastInvoke;
 import static com.google.inject.internal.aop.ClassBuilding.signature;
-/*end[AOP]*/
 
+import com.google.inject.internal.aop.ClassBuilding;
+/*end[AOP]*/
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
@@ -76,7 +78,7 @@ public final class BytecodeGen {
 
   /** Create a builder of enhancers for the given class. */
   public static EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
-    return ENHANCER_BUILDERS.get(hostClass);
+    return ENHANCER_BUILDERS.getUnchecked(hostClass);
   }
 
   /**
@@ -136,16 +138,18 @@ public final class BytecodeGen {
     return FAST_CLASSES.get(hostClass);
   }
 
-  /** Lazy association between classes and their {@link EnhancerBuilder}s. */
-  private static final ClassValue<EnhancerBuilder> ENHANCER_BUILDERS =
-      new ClassValue<EnhancerBuilder>() {
-        @Override
-        protected EnhancerBuilder computeValue(Class<?> hostClass) {
-          return buildEnhancerBuilder(hostClass);
-        }
-      };
+  /**
+   * Cache of recent {@link EnhancerBuilder}s.
+   *
+   * <p>Uses weak values so builders can be collected after they're done enhancing.
+   */
+  private static final LoadingCache<Class<?>, EnhancerBuilder> ENHANCER_BUILDERS =
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .weakValues()
+          .build(CacheLoader.from(ClassBuilding::buildEnhancerBuilder));
 
-  /** Lazy association between classes and their fast-classes. */
+  /** Lazy association between classes and their generated fast-classes. */
   private static final ClassValue<Function<String, ?>> FAST_CLASSES =
       new ClassValue<Function<String, ?>>() {
         @Override

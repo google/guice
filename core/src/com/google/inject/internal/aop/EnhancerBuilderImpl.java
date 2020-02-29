@@ -38,7 +38,14 @@ import java.util.function.Function;
  */
 final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
-  private final Map<BitSet, Function<String, ?>> enhancers = new HashMap<>();
+  /** Lazy association between classes and their generated enhancers. */
+  private static final ClassValue<Map<BitSet, Function<String, ?>>> ENHANCERS =
+      new ClassValue<Map<BitSet, Function<String, ?>>>() {
+        @Override
+        protected Map<BitSet, Function<String, ?>> computeValue(Class<?> hostClass) {
+          return new HashMap<>();
+        }
+      };
 
   private final Class<?> hostClass;
 
@@ -62,6 +69,7 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   @Override
   public Function<String, ?> buildEnhancer(BitSet methodIndices) {
+    Map<BitSet, Function<String, ?>> enhancers = ENHANCERS.get(hostClass);
     synchronized (enhancers) {
       return enhancers.computeIfAbsent(methodIndices, this::doBuildEnhancer);
     }
