@@ -25,6 +25,7 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ANEWARRAY;
+import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -87,7 +88,7 @@ abstract class AbstractGlueGenerator {
 
   private static final String GLUE_INDEX_METHOD = GLUE_PREFIX + "INDEX";
 
-  private static final ClassValue<Type> TYPE_CACHE =
+  private static final ClassValue<Type> PARAMETER_TYPE_CACHE =
       new ClassValue<Type>() {
         @Override
         protected Type computeValue(Class<?> clazz) {
@@ -175,14 +176,9 @@ abstract class AbstractGlueGenerator {
     }
   }
 
-  /** Retrieves the ASM types for parameters of the given constructor/method. */
-  protected static Type[] getParameterTypes(Executable member) {
-    Class<?>[] parameterTypes = member.getParameterTypes();
-    Type[] internalTypes = new Type[parameterTypes.length];
-    for (int i = 0, len = internalTypes.length; i < len; i++) {
-      internalTypes[i] = TYPE_CACHE.get(parameterTypes[i]);
-    }
-    return internalTypes;
+  /** Retrieves the ASM representation of the given parameter type. */
+  protected static Type getParameterType(Class<?> clazz) {
+    return PARAMETER_TYPE_CACHE.get(clazz);
   }
 
   /** Generates bytecode to box the primitive value on the Java stack. */
@@ -257,6 +253,8 @@ abstract class AbstractGlueGenerator {
       methodVisitor.visitIincInsn(1, 1);
     }
 
+    methodVisitor.visitVarInsn(ALOAD, 0);
+    methodVisitor.visitInsn(ARETURN);
     methodVisitor.visitMaxs(3, 2);
     methodVisitor.visitEnd();
   }

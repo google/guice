@@ -20,13 +20,12 @@ import static com.google.inject.internal.aop.ClassBuilding.signature;
 import static com.google.inject.internal.aop.ClassBuilding.visitMembers;
 import static com.google.inject.internal.aop.ClassDefining.hasPackageAccess;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.inject.internal.BytecodeGen;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,8 +38,7 @@ import java.util.function.Function;
  */
 final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
-  private final LoadingCache<BitSet, Function<String, ?>> enhancers =
-      CacheBuilder.newBuilder().build(CacheLoader.from(this::doBuildEnhancer));
+  private final Map<BitSet, Function<String, ?>> enhancers = new HashMap<>();
 
   private final Class<?> hostClass;
 
@@ -48,12 +46,13 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   private final Map<Method, Method> bridgeDelegates;
 
-  EnhancerBuilderImpl(
+  public EnhancerBuilderImpl(
       Class<?> hostClass, List<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
 
     this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
-    this.bridgeDelegates = bridgeDelegates;
+    // most of the time we won't have any bridge delegates, so use empty map constant to save space
+    this.bridgeDelegates = bridgeDelegates.isEmpty() ? Collections.emptyMap() : bridgeDelegates;
   }
 
   @Override
@@ -63,7 +62,9 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   @Override
   public Function<String, ?> buildEnhancer(BitSet methodIndices) {
-    return enhancers.getUnchecked(methodIndices);
+    synchronized (enhancers) {
+      return enhancers.computeIfAbsent(methodIndices, this::doBuildEnhancer);
+    }
   }
 
   private Function<String, ?> doBuildEnhancer(BitSet methodIndices) {
@@ -81,7 +82,7 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
       glueMap.put(signature(method), method);
     }
 
-    // return new Enhancer(hostClass, glueMap, bridgeDelegates).glue();
+    // return new Enhancer(hostClass, bridgeDelegates).glue(glueMap);
     return signature -> null; // TODO: GLUE
   }
 }

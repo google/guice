@@ -195,7 +195,7 @@ public final class ClassBuilding {
     visitFastConstructors(hostClass, ctor -> glueMap.put(signature(ctor), ctor));
     visitFastMethods(hostClass, method -> glueMap.put(signature(method), method));
 
-    // return new FastClass(hostClass, glueMap).glue();
+    // return new FastClass(hostClass).glue(glueMap);
     return signature -> null; // TODO: GLUE
   }
 

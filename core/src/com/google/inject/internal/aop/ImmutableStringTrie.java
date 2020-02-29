@@ -97,7 +97,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
   private static final int MAX_ROWS_PER_TRIE = 0x4000;
 
   /** The compressed trie. */
-  private final char[] data;
+  private final char[] trie;
 
   /**
    * Returns the index assigned in the trie to the given string.
@@ -112,6 +112,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
 
     int keyIndex = 0;
     int dataIndex = 0;
+    char[] data = trie;
 
     while (keyIndex < keyLength) {
       // trie is ordered, so we can use binary search to pick the right branch
@@ -184,7 +185,7 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
   }
 
   ImmutableStringTrie(char[] data) {
-    this.data = data;
+    this.trie = data;
   }
 
   /** Recursively builds a trie for a slice of rows at a particular column. */
