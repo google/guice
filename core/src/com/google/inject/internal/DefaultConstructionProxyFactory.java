@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Produces construction proxies that invoke the class constructor.
@@ -46,7 +46,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     /*if[AOP]*/
     try {
-      Function<Object[], Object> fastConstructor = BytecodeGen.fastConstructor(constructor);
+      BiFunction<Object, Object[], Object> fastConstructor = BytecodeGen.fastConstructor(constructor);
       if (fastConstructor != null) {
         return new FastClassProxy<T>(injectionPoint, constructor, fastConstructor);
       }
@@ -63,12 +63,12 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
   private static final class FastClassProxy<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
     final Constructor<T> constructor;
-    final Function<Object[], Object> fastConstructor;
+    final BiFunction<Object, Object[], Object> fastConstructor;
 
     FastClassProxy(
         InjectionPoint injectionPoint,
         Constructor<T> constructor,
-        Function<Object[], Object> fastConstructor) {
+        BiFunction<Object, Object[], Object> fastConstructor) {
       this.injectionPoint = injectionPoint;
       this.constructor = constructor;
       this.fastConstructor = fastConstructor;
@@ -77,7 +77,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @Override
     @SuppressWarnings("unchecked")
     public T newInstance(Object... arguments) throws InvocationTargetException {
-      return (T) fastConstructor.apply(arguments);
+      return (T) fastConstructor.apply(null, arguments);
     }
 
     @Override

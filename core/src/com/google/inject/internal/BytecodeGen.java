@@ -73,7 +73,7 @@ public final class BytecodeGen {
     Method[] getEnhanceableMethods();
 
     /** Generates an enhancer for the selected subset of methods. */
-    Function<String, ?> buildEnhancer(BitSet methodIndices);
+    Function<String, BiFunction> buildEnhancer(BitSet methodIndices);
   }
 
   /** Create a builder of enhancers for the given class. */
@@ -85,32 +85,32 @@ public final class BytecodeGen {
    * Returns an invoker that constructs an enhanced instance. The invoker function accepts an array
    * of invocation handlers plus an array of arguments for the original constructor.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings("unchecked")
   public static BiFunction<InvocationHandler[], Object[], Object> enhancedConstructor(
-      Function<String, ?> enhancer, Constructor<?> constructor) {
+      Function<String, BiFunction> enhancer, Constructor<?> constructor) {
     checkState(canEnhance(constructor), "Constructor is not visible");
-    return (BiFunction) enhancer.apply(signature(constructor));
+    return enhancer.apply(signature(constructor));
   }
 
   /**
    * Returns an invoker that calls the original unenhanced method. The invoker function accepts an
    * enhanced instance plus an array of arguments for the original method.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static BiFunction<Object, Object[], Object> superInvoker(
-      Function<String, ?> enhancer, Method method) {
+  @SuppressWarnings("unchecked")
+  public static BiFunction<Object, Object[], Object> superMethod(
+      Function<String, BiFunction> enhancer, Method method) {
     // no need to check 'canEnhance', ProxyFactory will only pick methods from enhanceable list
-    return (BiFunction) enhancer.apply(signature(method));
+    return enhancer.apply(signature(method));
   }
 
   /**
-   * Returns a fast invoker for the given constructor. The invoker function accepts an array of
-   * arguments for the constructor.
+   * Returns a fast invoker for the given constructor. The invoker function ignores the first
+   * parameter and accepts an array of arguments for the constructor in the second parameter.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static Function<Object[], Object> fastConstructor(Constructor<?> constructor) {
+  @SuppressWarnings("unchecked")
+  public static BiFunction<Object, Object[], Object> fastConstructor(Constructor<?> constructor) {
     if (canFastInvoke(constructor)) {
-      return (Function) fastClass(constructor).apply(signature(constructor));
+      return fastClass(constructor).apply(signature(constructor));
     }
     return null;
   }
@@ -119,10 +119,10 @@ public final class BytecodeGen {
    * Returns a fast invoker for the given method. The invoker function accepts an instance, which
    * will be {@code null} for static methods, and an array of arguments for the method.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings("unchecked")
   public static BiFunction<Object, Object[], Object> fastMethod(Method method) {
     if (canFastInvoke(method)) {
-      return (BiFunction) fastClass(method).apply(signature(method));
+      return fastClass(method).apply(signature(method));
     }
     return null;
   }
@@ -130,7 +130,7 @@ public final class BytecodeGen {
   /**
    * Prepares the class containing the given member for fast invocation using bytecode generation.
    */
-  private static Function<String, ?> fastClass(Executable member) {
+  private static Function<String, BiFunction> fastClass(Executable member) {
     Class<?> hostClass = member.getDeclaringClass();
     if (hostClass.getSimpleName().contains(ENHANCER_BY_GUICE_MARKER)) {
       hostClass = hostClass.getSuperclass();
@@ -150,10 +150,10 @@ public final class BytecodeGen {
           .build(CacheLoader.from(ClassBuilding::buildEnhancerBuilder));
 
   /** Lazy association between classes and their generated fast-classes. */
-  private static final ClassValue<Function<String, ?>> FAST_CLASSES =
-      new ClassValue<Function<String, ?>>() {
+  private static final ClassValue<Function<String, BiFunction>> FAST_CLASSES =
+      new ClassValue<Function<String, BiFunction>>() {
         @Override
-        protected Function<String, ?> computeValue(Class<?> hostClass) {
+        protected Function<String, BiFunction> computeValue(Class<?> hostClass) {
           return buildFastClass(hostClass);
         }
       };

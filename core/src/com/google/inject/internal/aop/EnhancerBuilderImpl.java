@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -39,10 +40,10 @@ import java.util.function.Function;
 final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   /** Lazy association between classes and their generated enhancers. */
-  private static final ClassValue<Map<BitSet, Function<String, ?>>> ENHANCERS =
-      new ClassValue<Map<BitSet, Function<String, ?>>>() {
+  private static final ClassValue<Map<BitSet, Function<String, BiFunction>>> ENHANCERS =
+      new ClassValue<Map<BitSet, Function<String, BiFunction>>>() {
         @Override
-        protected Map<BitSet, Function<String, ?>> computeValue(Class<?> hostClass) {
+        protected Map<BitSet, Function<String, BiFunction>> computeValue(Class<?> hostClass) {
           return new HashMap<>();
         }
       };
@@ -68,14 +69,14 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   }
 
   @Override
-  public Function<String, ?> buildEnhancer(BitSet methodIndices) {
-    Map<BitSet, Function<String, ?>> enhancers = ENHANCERS.get(hostClass);
+  public Function<String, BiFunction> buildEnhancer(BitSet methodIndices) {
+    Map<BitSet, Function<String, BiFunction>> enhancers = ENHANCERS.get(hostClass);
     synchronized (enhancers) {
       return enhancers.computeIfAbsent(methodIndices, this::doBuildEnhancer);
     }
   }
 
-  private Function<String, ?> doBuildEnhancer(BitSet methodIndices) {
+  private Function<String, BiFunction> doBuildEnhancer(BitSet methodIndices) {
     Map<String, Executable> glueMap = new TreeMap<>();
 
     visitMembers(

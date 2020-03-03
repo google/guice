@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -189,7 +190,7 @@ public final class ClassBuilding {
   }
 
   /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
-  public static Function<String, ?> buildFastClass(Class<?> hostClass) {
+  public static Function<String, BiFunction> buildFastClass(Class<?> hostClass) {
     Map<String, Executable> glueMap = new TreeMap<>();
 
     visitFastConstructors(hostClass, ctor -> glueMap.put(signature(ctor), ctor));

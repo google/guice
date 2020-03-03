@@ -45,7 +45,8 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   private static final Logger logger = Logger.getLogger(ProxyFactory.class.getName());
 
   private final InjectionPoint injectionPoint;
-  private final Function<String, ?> enhancer;
+
+  private final Function<String, BiFunction> enhancer;
   private final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
   private final InvocationHandler[] callbacks;
 
@@ -121,7 +122,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       interceptorsMapBuilder.put(method, deDuplicated);
 
       BiFunction<Object, Object[], Object> superInvoker =
-          BytecodeGen.superInvoker(enhancer, method);
+          BytecodeGen.superMethod(enhancer, method);
 
       callbacks[callbackIndex++] = new InterceptorStackCallback(method, deDuplicated, superInvoker);
     }
@@ -162,7 +163,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
     ProxyConstructor(
         InjectionPoint injectionPoint,
-        Function<String, ?> enhancer,
+        Function<String, BiFunction> enhancer,
         ImmutableMap<Method, List<MethodInterceptor>> interceptors,
         InvocationHandler[] callbacks) {
       this.injectionPoint = injectionPoint;
