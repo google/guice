@@ -280,6 +280,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <artifactId>java18</artifactId>
               <version>1.0</version>
             </signature>
+            <ignores>
+              <!-- workaround https://github.com/mojohaus/animal-sniffer/issues/18 -->
+              <ignore>java.lang.invoke.MethodHandle</ignore>
+            </ignores>
           </configuration>
           <executions>
             <execution>
