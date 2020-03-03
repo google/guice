@@ -58,11 +58,11 @@ public final class ClassBuilding {
     return signature(method.getName(), method.getParameterTypes());
   }
 
-  /** Appends a comma-separated list of parameter types to the given name. */
+  /** Appends a semicolon-separated list of parameter types to the given name. */
   private static String signature(String name, Class<?>[] parameterTypes) {
     StringBuilder signature = new StringBuilder(name);
     for (Class<?> type : parameterTypes) {
-      signature.append(',').append(type.getName());
+      signature.append(';').append(type.getName());
     }
     return signature.toString();
   }
