@@ -19,86 +19,50 @@ package com.google.inject.internal.aop;
 import static com.google.common.base.Throwables.throwIfUnchecked;
 import static com.google.inject.internal.aop.ClassDefining.define;
 import static com.google.inject.internal.aop.ImmutableStringTrie.buildTrie;
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.ASTORE;
+import static java.lang.invoke.MethodType.methodType;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Executable;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
 /**
  * Support code for generating enhancer/fast-class glue.
  *
- * <p>This class is not thread-safe; fresh instances should be used when generating {@link #glue}.
- *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 abstract class AbstractGlueGenerator {
 
-  private static final String METAFACTORY_SIGNATURE =
-      "(Ljava/lang/invoke/MethodHandles$Lookup;"
-          + "Ljava/lang/String;"
-          + "Ljava/lang/invoke/MethodType;"
-          + "Ljava/lang/invoke/MethodType;"
-          + "Ljava/lang/invoke/MethodHandle;"
-          + "Ljava/lang/invoke/MethodType;)"
-          + "Ljava/lang/invoke/CallSite;";
+  private static final String GLUE_HANDLE = "GUICE$GLUE";
 
-  private static final Handle METAFACTORY_HANDLE =
-      new Handle(
-          H_INVOKESTATIC,
-          "java/lang/invoke/LambdaMetafactory",
-          "metafactory",
-          METAFACTORY_SIGNATURE,
-          false);
+  private static final MethodType RAW_INVOKER =
+      methodType(Object.class, Object.class, Object.class);
 
-  private static final Type RAW_FUNCTION_SIGNATURE =
-      Type.getType("(Ljava/lang/Object;)Ljava/lang/Object;");
+  private static final MethodType GLUE_INVOKER =
+      methodType(Object.class, Object.class, Object[].class);
 
-  private static final Type RAW_BIFUNCTION_SIGNATURE =
-      Type.getType("(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+  private static final MethodType GLUE_TABLE = methodType(BiFunction.class, int.class);
 
-  private static final String RETURN_FUNCTION = "()Ljava/util/function/Function;";
-
-  private static final String RETURN_BIFUNCTION = "()Ljava/util/function/BiFunction;";
-
-  private static final String GLUE_PREFIX = "GUICE$GLUE$";
-
-  private static final String GLUE_INDEX_METHOD = GLUE_PREFIX + "INDEX";
-
-  private static final ClassValue<Type> PARAMETER_TYPE_CACHE =
-      new ClassValue<Type>() {
-        @Override
-        protected Type computeValue(Class<?> clazz) {
-          return Type.getType(clazz);
-        }
-      };
+  private static final Lookup LOOKUP = MethodHandles.lookup();
 
   private static final AtomicInteger COUNTER = new AtomicInteger();
-
-  protected final ClassWriter classWriter = new ClassWriter(0);
 
   protected final Class<?> hostClass;
 
@@ -116,50 +80,58 @@ abstract class AbstractGlueGenerator {
   private static String proxyName(String hostName, String marker, int hash) {
     int id = ((hash & 0x000FFFFF) | (COUNTER.getAndIncrement() << 20));
     String proxyName = hostName + marker + id;
-    if (proxyName.startsWith("java.")) {
+    if (proxyName.startsWith("java/")) {
       proxyName = '$' + proxyName; // can't define java.* glue in same package
     }
     return proxyName;
   }
 
-  /** Generates glue methods along with an index of their method references. */
-  public final Function<String, ?> glue(Map<String, Executable> glueMap) {
+  /** Returns a mapping from signature to generated invoker function. */
+  public final Function<String, BiFunction> glue(Map<String, Executable> glueMap) {
+    return bindGlue(glueMap.keySet(), generateGlue(glueMap.values()));
+  }
 
-    prepareGlueClass();
+  /** Generates the appropriate glue for the given constructors/methods. */
+  protected abstract byte[] generateGlue(Collection<Executable> members);
 
-    int glueCount = glueMap.size();
-    String[] signatures = new String[glueCount];
-    Type[] glueTypes = new Type[glueCount];
+  /** Binds the generated glue into lambda form, mapping signatures to invoker functions. */
+  private Function<String, BiFunction> bindGlue(Collection<String> signatures, byte[] bytecode) {
 
-    int index = 0;
-    for (Entry<String, Executable> entry : glueMap.entrySet()) {
-      signatures[index] = entry.getKey();
-      glueTypes[index] = addGlue(index, GLUE_PREFIX + index, entry.getValue());
-      index++;
-    }
-
-    addGlueIndex(glueTypes);
-    classWriter.visitEnd();
-
-    Object[] glueIndex;
+    final MethodHandle glueTable;
     try {
-      // retrieve the indexed method references for the generated glue
-      Class<?> glueClass = define(hostClass, classWriter.toByteArray());
-      glueIndex = (Object[]) glueClass.getMethod(GLUE_INDEX_METHOD).invoke(null);
-    } catch (Exception e) {
+      final Class<?> glueClass = define(hostClass, bytecode);
+
+      // generated glue invoker has signature: (int, Object, Object[]) -> Object
+      final MethodHandle glueGetter =
+          LOOKUP.findStaticGetter(glueClass, GLUE_HANDLE, MethodHandle.class);
+
+      // create lambda that transforms this to: (int) -> ((Object, Object[]) -> Object)
+      final CallSite callSite =
+          LambdaMetafactory.metafactory(
+              LOOKUP,
+              "apply",
+              GLUE_TABLE,
+              RAW_INVOKER,
+              (MethodHandle) glueGetter.invokeExact(),
+              GLUE_INVOKER);
+
+      glueTable = callSite.getTarget();
+    } catch (Throwable e) {
       throwIfUnchecked(e);
       throw new GlueException(e);
     }
 
-    ToIntFunction<String> trie = buildTrie(signatures);
-    return signature -> glueIndex[trie.applyAsInt(signature)];
+    // combine trie with lambda to get: (String) -> ((Object, Object[]) -> Object)
+    final ToIntFunction<String> trie = buildTrie(signatures.toArray(new String[signatures.size()]));
+    return signature -> {
+      try {
+        return (BiFunction) glueTable.invokeExact(trie.applyAsInt(signature));
+      } catch (Throwable e) {
+        throwIfUnchecked(e);
+        throw new GlueException(e);
+      }
+    };
   }
-
-  /** Prepares the skeleton of the glue class. */
-  protected abstract void prepareGlueClass();
-
-  /** Adds the appropriate invocation glue for the given constructor/method. */
-  protected abstract Type addGlue(int index, String glueId, Executable member);
 
   /** Pushes an integer onto the stack, choosing the most efficient opcode. */
   protected static void pushInteger(MethodVisitor methodVisitor, int value) {
@@ -176,30 +148,51 @@ abstract class AbstractGlueGenerator {
     }
   }
 
-  /** Retrieves the ASM representation of the given parameter type. */
-  protected static Type getParameterType(Class<?> clazz) {
-    return PARAMETER_TYPE_CACHE.get(clazz);
+  /** Returns internal names of exceptions declared by the given constructor/method. */
+  protected static String[] exceptionNames(Executable member) {
+    Class<?>[] exceptionClasses = member.getExceptionTypes();
+    int numExceptionNames = exceptionClasses.length;
+
+    String[] exceptionNames = new String[numExceptionNames];
+    for (int i = 0; i < numExceptionNames; i++) {
+      exceptionNames[i] = Type.getInternalName(exceptionClasses[i]);
+    }
+    return exceptionNames;
+  }
+
+  /** Retrieves the ASM types for parameters of the given constructor/method. */
+  protected static Type[] parameterTypes(Executable member) {
+    Class<?>[] parameterClasses = member.getParameterTypes();
+    int numParameterTypes = parameterClasses.length;
+
+    Type[] parameterTypes = new Type[numParameterTypes];
+    for (int i = 0; i < numParameterTypes; i++) {
+      parameterTypes[i] = Type.getType(parameterClasses[i]);
+    }
+    return parameterTypes;
   }
 
   /** Generates bytecode to box the primitive value on the Java stack. */
-  protected static void boxParameter(MethodVisitor methodVisitor, Type parameterType) {
-
-    String boxedClass = boxedClass(parameterType.getSort());
-    String boxMethod = "valueOf";
-    String boxDescriptor = '(' + parameterType.getInternalName() + ")L" + boxedClass + ';';
-
-    methodVisitor.visitMethodInsn(INVOKESTATIC, boxedClass, boxMethod, boxDescriptor, false);
+  protected static void maybeBoxParameter(MethodVisitor methodVisitor, Type parameterType) {
+    int parameterSort = parameterType.getSort();
+    if (parameterSort != Type.OBJECT && parameterSort != Type.ARRAY) {
+      String boxedClass = boxedClass(parameterSort);
+      String boxMethod = "valueOf";
+      String boxDescriptor = '(' + parameterType.getDescriptor() + ")L" + boxedClass + ';';
+      methodVisitor.visitMethodInsn(INVOKESTATIC, boxedClass, boxMethod, boxDescriptor, false);
+    }
   }
 
   /** Generates bytecode to unbox the boxed value on the Java stack. */
-  protected static void unboxParameter(MethodVisitor methodVisitor, Type parameterType) {
-
-    String boxedClass = boxedClass(parameterType.getSort());
-    String unboxMethod = parameterType.getClassName() + "Value";
-    String unboxDescriptor = "()" + parameterType.getInternalName();
-
-    methodVisitor.visitTypeInsn(CHECKCAST, boxedClass);
-    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, boxedClass, unboxMethod, unboxDescriptor, false);
+  protected static void maybeUnboxParameter(MethodVisitor methodVisitor, Type parameterType) {
+    int parameterSort = parameterType.getSort();
+    if (parameterSort != Type.OBJECT && parameterSort != Type.ARRAY) {
+      String boxedClass = boxedClass(parameterSort);
+      String unboxMethod = parameterType.getClassName() + "Value";
+      String unboxDescriptor = "()" + parameterType.getDescriptor();
+      methodVisitor.visitTypeInsn(CHECKCAST, boxedClass);
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, boxedClass, unboxMethod, unboxDescriptor, false);
+    }
   }
 
   /** Returns the boxed class for the given primitive parameter. */
@@ -211,51 +204,5 @@ abstract class AbstractGlueGenerator {
     } else {
       return "java/lang/Number";
     }
-  }
-
-  /** Adds a static helper that returns indexed method references for the generated glue. */
-  private final void addGlueIndex(Type[] glueTypes) {
-    MethodVisitor methodVisitor =
-        classWriter.visitMethod(
-            ACC_PUBLIC | ACC_STATIC | ACC_SYNTHETIC,
-            GLUE_INDEX_METHOD,
-            "()[Ljava/lang/Object;",
-            null,
-            null);
-
-    methodVisitor.visitCode();
-
-    int glueCount = glueTypes.length;
-    pushInteger(methodVisitor, glueCount);
-    methodVisitor.visitTypeInsn(ANEWARRAY, "java/lang/Object");
-    methodVisitor.visitVarInsn(ASTORE, 0);
-    methodVisitor.visitInsn(ICONST_0);
-    methodVisitor.visitVarInsn(ISTORE, 1);
-
-    for (int index = 0; index < glueCount; index++) {
-      methodVisitor.visitVarInsn(ALOAD, 0);
-      methodVisitor.visitVarInsn(ILOAD, 1);
-
-      String glueDescriptor = glueTypes[index].getDescriptor();
-      // choose the most appropriate functional interface based on the number of glue arguments
-      boolean singleArgument = glueDescriptor.charAt(glueDescriptor.indexOf(';') + 1) == ')';
-      methodVisitor.visitInvokeDynamicInsn(
-          "apply",
-          singleArgument ? RETURN_FUNCTION : RETURN_BIFUNCTION,
-          METAFACTORY_HANDLE,
-          new Object[] {
-            singleArgument ? RAW_FUNCTION_SIGNATURE : RAW_BIFUNCTION_SIGNATURE,
-            new Handle(H_INVOKESTATIC, proxyName, GLUE_PREFIX + index, glueDescriptor, false),
-            glueTypes[index]
-          });
-
-      methodVisitor.visitInsn(AASTORE);
-      methodVisitor.visitIincInsn(1, 1);
-    }
-
-    methodVisitor.visitVarInsn(ALOAD, 0);
-    methodVisitor.visitInsn(ARETURN);
-    methodVisitor.visitMaxs(3, 2);
-    methodVisitor.visitEnd();
   }
 }
