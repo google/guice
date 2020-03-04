@@ -17,9 +17,7 @@
 package com.google.inject.internal.aop;
 
 import static com.google.common.base.Throwables.throwIfUnchecked;
-import static com.google.inject.internal.aop.ClassDefining.define;
 import static com.google.inject.internal.aop.ImmutableStringTrie.buildTrie;
-import static java.lang.invoke.MethodType.methodType;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.ICONST_0;
@@ -50,19 +48,24 @@ import org.objectweb.asm.Type;
  */
 abstract class AbstractGlueGenerator {
 
-  private static final String GLUE_HANDLE = "GUICE$GLUE";
+  private static final MethodType GLUE_INVOKER_TABLE =
+      MethodType.methodType(BiFunction.class, int.class);
 
   private static final MethodType RAW_INVOKER =
-      methodType(Object.class, Object.class, Object.class);
+      MethodType.methodType(Object.class, Object.class, Object.class);
 
   private static final MethodType GLUE_INVOKER =
-      methodType(Object.class, Object.class, Object[].class);
-
-  private static final MethodType GLUE_TABLE = methodType(BiFunction.class, int.class);
+      MethodType.methodType(Object.class, Object.class, Object[].class);
 
   private static final Lookup LOOKUP = MethodHandles.lookup();
 
   private static final AtomicInteger COUNTER = new AtomicInteger();
+
+  protected static final String GLUE_NAME = "GUICE$GLUE";
+
+  protected static final String GLUE_TYPE = "Ljava/lang/invoke/MethodHandle;";
+
+  protected static final String GLUE_SIGNATURE = "(ILjava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;";
 
   protected final Class<?> hostClass;
 
@@ -99,18 +102,18 @@ abstract class AbstractGlueGenerator {
 
     final MethodHandle glueTable;
     try {
-      final Class<?> glueClass = define(hostClass, bytecode);
+      final Class<?> glueClass = ClassDefining.define(hostClass, bytecode);
 
       // generated glue invoker has signature: (int, Object, Object[]) -> Object
       final MethodHandle glueGetter =
-          LOOKUP.findStaticGetter(glueClass, GLUE_HANDLE, MethodHandle.class);
+          LOOKUP.findStaticGetter(glueClass, GLUE_NAME, MethodHandle.class);
 
       // create lambda that transforms this to: (int) -> ((Object, Object[]) -> Object)
       final CallSite callSite =
           LambdaMetafactory.metafactory(
               LOOKUP,
               "apply",
-              GLUE_TABLE,
+              GLUE_INVOKER_TABLE,
               RAW_INVOKER,
               (MethodHandle) glueGetter.invokeExact(),
               GLUE_INVOKER);

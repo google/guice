@@ -91,7 +91,6 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
       glueMap.put(signature(method), method);
     }
 
-    // return new Enhancer(hostClass, bridgeDelegates).glue(glueMap);
-    return signature -> null; // TODO: GLUE
+    return new Enhancer(hostClass, bridgeDelegates).glue(glueMap);
   }
 }
