@@ -18,6 +18,7 @@ package com.google.inject.internal.aop;
 
 import static java.util.Arrays.binarySearch;
 
+import java.util.Collection;
 import java.util.function.ToIntFunction;
 
 /**
@@ -152,6 +153,15 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
     }
 
     return -1;
+  }
+
+  /**
+   * Builds an immutable trie that indexes the given table of strings.
+   *
+   * <p>The table of strings must be sorted in lexical order.
+   */
+  public static ToIntFunction<String> buildTrie(Collection<String> table) {
+    return buildTrie(table.toArray(new String[table.size()]));
   }
 
   /**
