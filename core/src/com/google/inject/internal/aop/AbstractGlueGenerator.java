@@ -16,8 +16,7 @@
 
 package com.google.inject.internal.aop;
 
-import static com.google.common.base.Throwables.throwIfUnchecked;
-import static com.google.inject.internal.aop.ImmutableStringTrie.buildTrie;
+import static java.lang.invoke.MethodHandles.insertArguments;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.ICONST_0;
@@ -25,12 +24,7 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Executable;
 import java.util.Collection;
 import java.util.Map;
@@ -48,30 +42,22 @@ import org.objectweb.asm.Type;
  */
 abstract class AbstractGlueGenerator {
 
-  private static final MethodType GLUE_INVOKER_TABLE =
-      MethodType.methodType(BiFunction.class, int.class);
+  protected static final String TRAMPOLINE_NAME = "GUICE$TRAMPOLINE";
 
-  private static final MethodType RAW_INVOKER =
-      MethodType.methodType(Object.class, Object.class, Object.class);
-
-  private static final MethodType GLUE_INVOKER =
-      MethodType.methodType(Object.class, Object.class, Object[].class);
-
-  private static final Lookup LOOKUP = MethodHandles.lookup();
-
-  private static final AtomicInteger COUNTER = new AtomicInteger();
-
-  protected static final String GLUE_NAME = "GUICE$GLUE";
-
-  protected static final String GLUE_TYPE = "Ljava/lang/invoke/MethodHandle;";
-
-  protected static final String GLUE_SIGNATURE = "(ILjava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;";
+  /**
+   * The trampoline method takes an index, along with a context object and an array of argument
+   * objects, and invokes the appropriate constructor/method returning the result as an object.
+   */
+  protected static final String TRAMPOLINE_DESCRIPTOR =
+      "(ILjava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;";
 
   protected final Class<?> hostClass;
 
   protected final String hostName;
 
   protected final String proxyName;
+
+  private static final AtomicInteger COUNTER = new AtomicInteger();
 
   protected AbstractGlueGenerator(Class<?> hostClass, String marker) {
     this.hostClass = hostClass;
@@ -89,51 +75,62 @@ abstract class AbstractGlueGenerator {
     return proxyName;
   }
 
-  /** Returns a mapping from signature to generated invoker function. */
+  /** Generates the enhancer/fast-class and returns a mapping from signature to invoker. */
   public final Function<String, BiFunction> glue(Map<String, Executable> glueMap) {
-    return bindGlue(glueMap.keySet(), generateGlue(glueMap.values()));
-  }
-
-  /** Generates the appropriate glue for the given constructors/methods. */
-  protected abstract byte[] generateGlue(Collection<Executable> members);
-
-  /** Binds the generated glue into lambda form, mapping signatures to invoker functions. */
-  private Function<String, BiFunction> bindGlue(Collection<String> signatures, byte[] bytecode) {
-
-    final MethodHandle glueTable;
+    MethodHandle invokerTable;
     try {
-      final Class<?> glueClass = ClassDefining.define(hostClass, bytecode);
-
-      // generated glue invoker has signature: (int, Object, Object[]) -> Object
-      final MethodHandle glueGetter =
-          LOOKUP.findStaticGetter(glueClass, GLUE_NAME, MethodHandle.class);
-
-      // create lambda that transforms this to: (int) -> ((Object, Object[]) -> Object)
-      final CallSite callSite =
-          LambdaMetafactory.metafactory(
-              LOOKUP,
-              "apply",
-              GLUE_INVOKER_TABLE,
-              RAW_INVOKER,
-              (MethodHandle) glueGetter.invokeExact(),
-              GLUE_INVOKER);
-
-      glueTable = callSite.getTarget();
+      byte[] bytecode = generateGlue(glueMap.values());
+      Class<?> glueClass = ClassDefining.define(hostClass, bytecode);
+      invokerTable = lookupInvokerTable(glueClass);
     } catch (Throwable e) {
-      throwIfUnchecked(e);
-      throw new GlueException(e);
+      throw new GlueException("Problem generating " + proxyName, e);
     }
 
-    // combine trie with lambda to get: (String) -> ((Object, Object[]) -> Object)
-    final ToIntFunction<String> trie = buildTrie(signatures.toArray(new String[signatures.size()]));
+    // build optimized index for these signatures and bind it to the generated invokers
+    ToIntFunction<String> signatureTable = ImmutableStringTrie.buildTrie(glueMap.keySet());
+    return bindSignaturesToInvokers(signatureTable, invokerTable);
+  }
+
+  /** Generates enhancer/fast-class bytecode for the given constructors/methods. */
+  protected abstract byte[] generateGlue(Collection<Executable> members);
+
+  /** Lookup the invoker table; this may be represented by a function or a trampoline. */
+  protected abstract MethodHandle lookupInvokerTable(Class<?> glueClass) throws Throwable;
+
+  /** Combines the signature and invoker tables into a mapping from signature to invoker. */
+  private static Function<String, BiFunction> bindSignaturesToInvokers(
+      ToIntFunction<String> signatureTable, MethodHandle invokerTable) {
+
+    // single-argument method; assume table is a function from integer index to invoker
+    if (invokerTable.type().parameterCount() == 1) {
+      return signature -> {
+        try {
+          // pass this signature's index into the table function to retrieve the invoker
+          return (BiFunction) invokerTable.invokeExact(signatureTable.applyAsInt(signature));
+        } catch (Throwable e) {
+          throw asIfUnchecked(e);
+        }
+      };
+    }
+
+    // otherwise must be trampoline that accepts the index with other arguments at invocation time
     return signature -> {
-      try {
-        return (BiFunction) glueTable.invokeExact(trie.applyAsInt(signature));
-      } catch (Throwable e) {
-        throwIfUnchecked(e);
-        throw new GlueException(e);
-      }
+      // convert trampoline handle into specific invoker handle by binding the index upfront
+      MethodHandle invoker = insertArguments(invokerTable, 0, signatureTable.applyAsInt(signature));
+      return (instance, arguments) -> {
+        try {
+          return invoker.invokeExact(instance, (Object[]) arguments);
+        } catch (Throwable e) {
+          throw asIfUnchecked(e);
+        }
+      };
     };
+  }
+
+  @SuppressWarnings("unchecked")
+  /** Generics trick to get compiler to treat all exceptions as if unchecked, like JVM does. */
+  private static <E extends Throwable> RuntimeException asIfUnchecked(Throwable e) throws E {
+    throw (E) e;
   }
 
   /** Pushes an integer onto the stack, choosing the most efficient opcode. */
@@ -175,7 +172,7 @@ abstract class AbstractGlueGenerator {
     return parameterTypes;
   }
 
-  /** Generates bytecode to box the primitive value on the Java stack. */
+  /** Generates bytecode to box a primitive value on the Java stack. */
   protected static void maybeBoxParameter(MethodVisitor methodVisitor, Type parameterType) {
     int parameterSort = parameterType.getSort();
     if (parameterSort != Type.OBJECT && parameterSort != Type.ARRAY) {
@@ -186,7 +183,7 @@ abstract class AbstractGlueGenerator {
     }
   }
 
-  /** Generates bytecode to unbox the boxed value on the Java stack. */
+  /** Generates bytecode to unbox a boxed value on the Java stack. */
   protected static void maybeUnboxParameter(MethodVisitor methodVisitor, Type parameterType) {
     int parameterSort = parameterType.getSort();
     if (parameterSort != Type.OBJECT && parameterSort != Type.ARRAY) {
