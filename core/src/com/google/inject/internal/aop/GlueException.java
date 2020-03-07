@@ -18,8 +18,8 @@ package com.google.inject.internal.aop;
 
 /** Thrown when errors occur defining enhancer/fast-class glue. */
 final class GlueException extends RuntimeException {
-  public GlueException(Throwable cause) {
-    super(cause);
+  public GlueException(String message, Throwable cause) {
+    super(message, cause);
   }
 
   private static final long serialVersionUID = 0;
