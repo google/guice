@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.aop;
 
-import static java.lang.invoke.MethodHandles.insertArguments;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.ICONST_0;
@@ -77,7 +76,7 @@ abstract class AbstractGlueGenerator {
 
   /** Generates the enhancer/fast-class and returns a mapping from signature to invoker. */
   public final Function<String, BiFunction> glue(Map<String, Executable> glueMap) {
-    MethodHandle invokerTable;
+    final MethodHandle invokerTable;
     try {
       byte[] bytecode = generateGlue(glueMap.values());
       Class<?> glueClass = ClassDefining.define(hostClass, bytecode);
@@ -115,11 +114,12 @@ abstract class AbstractGlueGenerator {
 
     // otherwise must be trampoline that accepts the index with other arguments at invocation time
     return signature -> {
-      // convert trampoline handle into specific invoker handle by binding the index upfront
-      MethodHandle invoker = insertArguments(invokerTable, 0, signatureTable.applyAsInt(signature));
+      // bind the index when we have the signature...
+      int index = signatureTable.applyAsInt(signature);
       return (instance, arguments) -> {
         try {
-          return invoker.invokeExact(instance, (Object[]) arguments);
+          // ...but delay applying it until invocation time
+          return invokerTable.invokeExact(index, instance, (Object[]) arguments);
         } catch (Throwable e) {
           throw asIfUnchecked(e);
         }
