@@ -23,14 +23,21 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.F_SAME;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_8;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -40,6 +47,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 
 /**
  * Generates enhanced classes.
@@ -50,7 +58,29 @@ final class Enhancer extends AbstractGlueGenerator {
 
   private static final String HANDLERS_NAME = "GUICE$HANDLERS";
 
-  private static final String HANDLERS_TYPE = "[Ljava/lang/reflect/InvocationHandler;";
+  private static final String HANDLERS_DESCRIPTOR = "[Ljava/lang/reflect/InvocationHandler;";
+
+  protected static final String INVOKERS_NAME = "GUICE$INVOKERS";
+
+  private static final String INVOKERS_DESCRIPTOR = "Ljava/lang/invoke/MethodHandle;";
+
+  private static final String METAFACTORY_DESCRIPTOR =
+      "(Ljava/lang/invoke/MethodHandles$Lookup;"
+          + "Ljava/lang/String;"
+          + "Ljava/lang/invoke/MethodType;"
+          + "Ljava/lang/invoke/MethodType;"
+          + "Ljava/lang/invoke/MethodHandle;"
+          + "Ljava/lang/invoke/MethodType;)"
+          + "Ljava/lang/invoke/CallSite;";
+
+  private static final Type INDEX_TO_INVOKER_METHOD_TYPE =
+      Type.getMethodType("(I)Ljava/util/function/BiFunction;");
+
+  private static final Type RAW_INVOKER_METHOD_TYPE =
+      Type.getMethodType("(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+
+  private static final Type INVOKER_METHOD_TYPE =
+      Type.getMethodType("(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;");
 
   private final Map<Method, Method> bridgeDelegates;
 
@@ -59,27 +89,69 @@ final class Enhancer extends AbstractGlueGenerator {
     this.bridgeDelegates = bridgeDelegates;
   }
 
+  static {
+    if (Enhancer.class.getName().indexOf('/') > 0) {
+      System.err.println("anon");
+    }
+  }
+
   @Override
   protected byte[] generateGlue(Collection<Executable> members) {
     ClassWriter cw = new ClassWriter(0);
     MethodVisitor mv;
 
     cw.visit(V1_8, PUBLIC | FINAL | ACC_SUPER, proxyName, null, hostName, null);
-    cw.visitField(PUBLIC | STATIC | FINAL, GLUE_NAME, GLUE_TYPE, null, null).visitEnd();
+
+    cw.visitField(PUBLIC | STATIC | FINAL, INVOKERS_NAME, INVOKERS_DESCRIPTOR, null, null)
+        .visitEnd();
+
+    Handle trampolineHandle =
+        new Handle(H_INVOKESTATIC, proxyName, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, false);
 
     mv = cw.visitMethod(PRIVATE | STATIC, "<clinit>", "()V", null, null);
     mv.visitCode();
-    mv.visitLdcInsn(new Handle(H_INVOKESTATIC, proxyName, GLUE_NAME, GLUE_SIGNATURE, false));
-    mv.visitFieldInsn(PUTSTATIC, proxyName, GLUE_NAME, GLUE_TYPE);
+
+    if (ClassDefining.hasPackageAccess()) {
+      mv.visitLdcInsn(trampolineHandle);
+    } else {
+      mv.visitMethodInsn(
+          INVOKESTATIC,
+          "java/lang/invoke/MethodHandles",
+          "lookup",
+          "()Ljava/lang/invoke/MethodHandles$Lookup;",
+          false);
+
+      mv.visitLdcInsn("apply");
+      mv.visitLdcInsn(INDEX_TO_INVOKER_METHOD_TYPE);
+      mv.visitLdcInsn(RAW_INVOKER_METHOD_TYPE);
+      mv.visitLdcInsn(trampolineHandle);
+      mv.visitLdcInsn(INVOKER_METHOD_TYPE);
+
+      mv.visitMethodInsn(
+          INVOKESTATIC,
+          "java/lang/invoke/LambdaMetafactory",
+          "metafactory",
+          METAFACTORY_DESCRIPTOR,
+          false);
+
+      mv.visitMethodInsn(
+          INVOKEVIRTUAL,
+          "java/lang/invoke/CallSite",
+          "getTarget",
+          "()Ljava/lang/invoke/MethodHandle;",
+          false);
+    }
+
+    mv.visitFieldInsn(PUTSTATIC, proxyName, INVOKERS_NAME, INVOKERS_DESCRIPTOR);
+
     mv.visitInsn(RETURN);
-    mv.visitMaxs(1, 0);
+    mv.visitMaxs(16, 8);
     mv.visitEnd();
 
-    int numMembers = members.size();
-
-    mv = cw.visitMethod(PUBLIC | STATIC, GLUE_NAME, GLUE_SIGNATURE, null, null);
+    mv = cw.visitMethod(PUBLIC | STATIC, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, null, null);
     mv.visitCode();
 
+    int numMembers = members.size();
     Label[] labels = new Label[numMembers];
     for (int i = 0; i < numMembers; i++) {
       labels[i] = new Label();
@@ -100,10 +172,10 @@ final class Enhancer extends AbstractGlueGenerator {
     mv.visitInsn(ACONST_NULL);
     mv.visitInsn(ARETURN);
 
-    mv.visitMaxs(1, 3);
+    mv.visitMaxs(8, 8);
     mv.visitEnd();
 
-    cw.visitField(PRIVATE | FINAL, HANDLERS_NAME, HANDLERS_TYPE, null, null).visitEnd();
+    cw.visitField(PRIVATE | FINAL, HANDLERS_NAME, HANDLERS_DESCRIPTOR, null, null).visitEnd();
     for (Executable member : members) {
       if (member instanceof Constructor<?>) {
         enhanceConstructor(cw, (Constructor<?>) member);
@@ -118,10 +190,39 @@ final class Enhancer extends AbstractGlueGenerator {
   }
 
   private void enhanceConstructor(ClassWriter cw, Constructor<?> constructor) {
-    // TODO
+    String descriptor = Type.getConstructorDescriptor(constructor);
+    String enhancedDescriptor = '(' + HANDLERS_DESCRIPTOR + descriptor.substring(1);
+
+    MethodVisitor mv =
+        cw.visitMethod(PUBLIC, "<init>", enhancedDescriptor, null, exceptionNames(constructor));
+
+    mv.visitCode();
+
+    mv.visitVarInsn(ALOAD, 0);
+    mv.visitInsn(DUP);
+    mv.visitVarInsn(ALOAD, 1);
+    mv.visitFieldInsn(PUTFIELD, proxyName, HANDLERS_NAME, HANDLERS_DESCRIPTOR);
+
+    int slot = 2;
+    for (Type parameterType : parameterTypes(constructor)) {
+      mv.visitVarInsn(parameterType.getOpcode(ILOAD), slot);
+      maybeBoxParameter(mv, parameterType);
+      slot = slot + parameterType.getSize();
+    }
+
+    mv.visitMethodInsn(INVOKESPECIAL, hostName, "<init>", descriptor, false);
+
+    mv.visitInsn(RETURN);
+    mv.visitMaxs(3, 2);
+    mv.visitEnd();
   }
 
   private void enhanceMethod(ClassWriter cw, Method method) {
     // TODO
+  }
+
+  @Override
+  protected MethodHandle lookupInvokerTable(Class<?> glueClass) throws Throwable {
+    return (MethodHandle) glueClass.getField(INVOKERS_NAME).get(null);
   }
 }

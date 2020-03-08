@@ -128,7 +128,7 @@ abstract class AbstractGlueGenerator {
   }
 
   @SuppressWarnings("unchecked")
-  /** Generics trick to get compiler to treat all exceptions as if unchecked, like JVM does. */
+  /** Generics trick to get compiler to treat given exception as if unchecked (as JVM does). */
   private static <E extends Throwable> RuntimeException asIfUnchecked(Throwable e) throws E {
     throw (E) e;
   }
