@@ -25,6 +25,7 @@ import static org.objectweb.asm.Opcodes.SIPUSH;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Executable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -151,24 +152,16 @@ abstract class AbstractGlueGenerator {
   /** Returns internal names of exceptions declared by the given constructor/method. */
   protected static String[] exceptionNames(Executable member) {
     Class<?>[] exceptionClasses = member.getExceptionTypes();
-    int numExceptionNames = exceptionClasses.length;
-
-    String[] exceptionNames = new String[numExceptionNames];
-    for (int i = 0; i < numExceptionNames; i++) {
-      exceptionNames[i] = Type.getInternalName(exceptionClasses[i]);
-    }
+    String[] exceptionNames = new String[exceptionClasses.length];
+    Arrays.setAll(exceptionNames, i -> Type.getInternalName(exceptionClasses[i]));
     return exceptionNames;
   }
 
   /** Retrieves the ASM types for parameters of the given constructor/method. */
   protected static Type[] parameterTypes(Executable member) {
     Class<?>[] parameterClasses = member.getParameterTypes();
-    int numParameterTypes = parameterClasses.length;
-
-    Type[] parameterTypes = new Type[numParameterTypes];
-    for (int i = 0; i < numParameterTypes; i++) {
-      parameterTypes[i] = Type.getType(parameterClasses[i]);
-    }
+    Type[] parameterTypes = new Type[parameterClasses.length];
+    Arrays.setAll(parameterTypes, i -> Type.getType(parameterClasses[i]));
     return parameterTypes;
   }
 
