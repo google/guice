@@ -21,14 +21,11 @@ import static java.lang.reflect.Modifier.FINAL;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.F_SAME;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
@@ -41,11 +38,11 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
@@ -97,7 +94,7 @@ final class Enhancer extends AbstractGlueGenerator {
 
   @Override
   protected byte[] generateGlue(Collection<Executable> members) {
-    ClassWriter cw = new ClassWriter(0);
+    ClassWriter cw = new ClassWriter(COMPUTE_MAXS);
     MethodVisitor mv;
 
     cw.visit(V1_8, PUBLIC | FINAL | ACC_SUPER, proxyName, null, hostName, null);
@@ -145,35 +142,10 @@ final class Enhancer extends AbstractGlueGenerator {
     mv.visitFieldInsn(PUTSTATIC, proxyName, INVOKERS_NAME, INVOKERS_DESCRIPTOR);
 
     mv.visitInsn(RETURN);
-    mv.visitMaxs(16, 8);
+    mv.visitMaxs(0, 0);
     mv.visitEnd();
 
-    mv = cw.visitMethod(PUBLIC | STATIC, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, null, null);
-    mv.visitCode();
-
-    int numMembers = members.size();
-    Label[] labels = new Label[numMembers];
-    for (int i = 0; i < numMembers; i++) {
-      labels[i] = new Label();
-    }
-    Label defaultLabel = new Label();
-
-    mv.visitVarInsn(ILOAD, 0);
-    mv.visitTableSwitchInsn(0, numMembers - 1, defaultLabel, labels);
-    for (int i = 0; i < numMembers; i++) {
-      mv.visitLabel(labels[i]);
-      mv.visitFrame(F_SAME, 0, null, 0, null);
-      mv.visitInsn(ACONST_NULL);
-      mv.visitInsn(ARETURN);
-    }
-
-    mv.visitLabel(defaultLabel);
-    mv.visitFrame(F_SAME, 0, null, 0, null);
-    mv.visitInsn(ACONST_NULL);
-    mv.visitInsn(ARETURN);
-
-    mv.visitMaxs(8, 8);
-    mv.visitEnd();
+    generateTrampoline(cw, members);
 
     cw.visitField(PRIVATE | FINAL, HANDLERS_NAME, HANDLERS_DESCRIPTOR, null, null).visitEnd();
     for (Executable member : members) {
@@ -185,7 +157,6 @@ final class Enhancer extends AbstractGlueGenerator {
     }
 
     cw.visitEnd();
-
     return cw.toByteArray();
   }
 
@@ -204,16 +175,14 @@ final class Enhancer extends AbstractGlueGenerator {
     mv.visitFieldInsn(PUTFIELD, proxyName, HANDLERS_NAME, HANDLERS_DESCRIPTOR);
 
     int slot = 2;
-    for (Type parameterType : parameterTypes(constructor)) {
-      mv.visitVarInsn(parameterType.getOpcode(ILOAD), slot);
-      maybeBoxParameter(mv, parameterType);
-      slot = slot + parameterType.getSize();
+    for (Class<?> parameterType : constructor.getParameterTypes()) {
+      slot = loadParameter(mv, parameterType, slot);
     }
 
     mv.visitMethodInsn(INVOKESPECIAL, hostName, "<init>", descriptor, false);
 
     mv.visitInsn(RETURN);
-    mv.visitMaxs(3, 2);
+    mv.visitMaxs(0, 0);
     mv.visitEnd();
   }
 
@@ -222,7 +191,29 @@ final class Enhancer extends AbstractGlueGenerator {
   }
 
   @Override
+  protected void generateConstructorInvoker(MethodVisitor mv, Constructor<?> constructor) {
+    mv.visitVarInsn(ALOAD, 1);
+    unpackParameters(mv, constructor.getParameterTypes());
+    // INVOKE!
+  }
+
+  @Override
+  protected void generateMethodInvoker(MethodVisitor mv, Method method) {
+    mv.visitVarInsn(ALOAD, 1);
+    unpackParameters(mv, method.getParameterTypes());
+    // INVOKE!
+  }
+
+  @Override
   protected MethodHandle lookupInvokerTable(Class<?> glueClass) throws Throwable {
     return (MethodHandle) glueClass.getField(INVOKERS_NAME).get(null);
+  }
+
+  /** Returns internal names of exceptions declared by the given constructor/method. */
+  private static String[] exceptionNames(Executable member) {
+    Class<?>[] exceptionClasses = member.getExceptionTypes();
+    String[] exceptionNames = new String[exceptionClasses.length];
+    Arrays.setAll(exceptionNames, i -> Type.getInternalName(exceptionClasses[i]));
+    return exceptionNames;
   }
 }

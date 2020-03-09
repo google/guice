@@ -16,15 +16,28 @@
 
 package com.google.inject.internal.aop;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.lang.reflect.Modifier.STATIC;
+import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.AASTORE;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ANEWARRAY;
+import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.F_SAME;
 import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -32,6 +45,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
@@ -134,6 +149,70 @@ abstract class AbstractGlueGenerator {
     throw (E) e;
   }
 
+  protected final void generateTrampoline(ClassWriter cw, Collection<Executable> members) {
+    MethodVisitor mv =
+        cw.visitMethod(PUBLIC | STATIC, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, null, null);
+    mv.visitCode();
+
+    Label[] labels = new Label[members.size()];
+    Arrays.setAll(labels, i -> new Label());
+    Label defaultLabel = new Label();
+
+    mv.visitVarInsn(ILOAD, 0);
+    mv.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);
+
+    int labelIndex = 0;
+    for (Executable member : members) {
+      mv.visitLabel(labels[labelIndex++]);
+      mv.visitFrame(F_SAME, 0, null, 0, null);
+      if (member instanceof Constructor<?>) {
+        generateConstructorInvoker(mv, (Constructor<?>) member);
+      } else {
+        generateMethodInvoker(mv, (Method) member);
+      }
+      mv.visitInsn(ARETURN);
+    }
+
+    mv.visitLabel(defaultLabel);
+    mv.visitFrame(F_SAME, 0, null, 0, null);
+    mv.visitInsn(ACONST_NULL);
+    mv.visitInsn(ARETURN);
+
+    mv.visitMaxs(0, 0);
+    mv.visitEnd();
+  }
+
+  protected abstract void generateConstructorInvoker(MethodVisitor mv, Constructor<?> constructor);
+
+  protected abstract void generateMethodInvoker(MethodVisitor mv, Method method);
+
+  protected static void packParameters(MethodVisitor mv, Class<?>[] parameterTypes) {
+    pushInteger(mv, parameterTypes.length);
+    mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+    int parameterIndex = 0;
+    int slot = 1;
+    for (Class<?> parameterType : parameterTypes) {
+      mv.visitInsn(DUP);
+      pushInteger(mv, parameterIndex++);
+      slot = loadParameter(mv, parameterType, slot);
+      mv.visitInsn(AASTORE);
+    }
+  }
+
+  protected static void unpackParameters(MethodVisitor mv, Class<?>[] parameterTypes) {
+    int parameterIndex = 0;
+    for (Class<?> parameterType : parameterTypes) {
+      mv.visitVarInsn(ALOAD, 2);
+      pushInteger(mv, parameterIndex++);
+      mv.visitInsn(AALOAD);
+      if (parameterType.isPrimitive()) {
+        unbox(mv, Type.getType(parameterType));
+      } else {
+        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(parameterType));
+      }
+    }
+  }
+
   /** Pushes an integer onto the stack, choosing the most efficient opcode. */
   protected static void pushInteger(MethodVisitor methodVisitor, int value) {
     if (value < -1) {
@@ -149,50 +228,39 @@ abstract class AbstractGlueGenerator {
     }
   }
 
-  /** Returns internal names of exceptions declared by the given constructor/method. */
-  protected static String[] exceptionNames(Executable member) {
-    Class<?>[] exceptionClasses = member.getExceptionTypes();
-    String[] exceptionNames = new String[exceptionClasses.length];
-    Arrays.setAll(exceptionNames, i -> Type.getInternalName(exceptionClasses[i]));
-    return exceptionNames;
-  }
-
-  /** Retrieves the ASM types for parameters of the given constructor/method. */
-  protected static Type[] parameterTypes(Executable member) {
-    Class<?>[] parameterClasses = member.getParameterTypes();
-    Type[] parameterTypes = new Type[parameterClasses.length];
-    Arrays.setAll(parameterTypes, i -> Type.getType(parameterClasses[i]));
-    return parameterTypes;
+  protected static int loadParameter(MethodVisitor mv, Class<?> parameterType, int slot) {
+    if (parameterType.isPrimitive()) {
+      Type primitiveType = Type.getType(parameterType);
+      mv.visitVarInsn(primitiveType.getOpcode(ILOAD), slot);
+      box(mv, primitiveType);
+      return slot + primitiveType.getSize();
+    }
+    mv.visitVarInsn(ALOAD, slot);
+    return slot + 1;
   }
 
   /** Generates bytecode to box a primitive value on the Java stack. */
-  protected static void maybeBoxParameter(MethodVisitor methodVisitor, Type parameterType) {
-    int parameterSort = parameterType.getSort();
-    if (parameterSort != Type.OBJECT && parameterSort != Type.ARRAY) {
-      String boxedClass = boxedClass(parameterSort);
-      String boxMethod = "valueOf";
-      String boxDescriptor = '(' + parameterType.getDescriptor() + ")L" + boxedClass + ';';
-      methodVisitor.visitMethodInsn(INVOKESTATIC, boxedClass, boxMethod, boxDescriptor, false);
-    }
+  protected static void box(MethodVisitor mv, Type primitiveType) {
+    String boxedClass = boxedClass(primitiveType.getSort());
+    String boxMethod = "valueOf";
+    String boxDescriptor = '(' + primitiveType.getDescriptor() + ")L" + boxedClass + ';';
+    mv.visitMethodInsn(INVOKESTATIC, boxedClass, boxMethod, boxDescriptor, false);
   }
 
   /** Generates bytecode to unbox a boxed value on the Java stack. */
-  protected static void maybeUnboxParameter(MethodVisitor methodVisitor, Type parameterType) {
-    int parameterSort = parameterType.getSort();
-    if (parameterSort != Type.OBJECT && parameterSort != Type.ARRAY) {
-      String boxedClass = boxedClass(parameterSort);
-      String unboxMethod = parameterType.getClassName() + "Value";
-      String unboxDescriptor = "()" + parameterType.getDescriptor();
-      methodVisitor.visitTypeInsn(CHECKCAST, boxedClass);
-      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, boxedClass, unboxMethod, unboxDescriptor, false);
-    }
+  protected static void unbox(MethodVisitor mv, Type primitiveType) {
+    String boxedClass = boxedClass(primitiveType.getSort());
+    String unboxMethod = primitiveType.getClassName() + "Value";
+    String unboxDescriptor = "()" + primitiveType.getDescriptor();
+    mv.visitTypeInsn(CHECKCAST, boxedClass);
+    mv.visitMethodInsn(INVOKEVIRTUAL, boxedClass, unboxMethod, unboxDescriptor, false);
   }
 
-  /** Returns the boxed class for the given primitive parameter. */
-  private static String boxedClass(int parameterSort) {
-    if (parameterSort == Type.BOOLEAN) {
+  /** Returns the boxed class for the given primitive type. */
+  private static String boxedClass(int primitiveSort) {
+    if (primitiveSort == Type.BOOLEAN) {
       return "java/lang/Boolean";
-    } else if (parameterSort == Type.CHAR) {
+    } else if (primitiveSort == Type.CHAR) {
       return "java/lang/Character";
     } else {
       return "java/lang/Number";
