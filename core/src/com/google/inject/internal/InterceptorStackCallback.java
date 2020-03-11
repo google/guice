@@ -18,13 +18,11 @@ package com.google.inject.internal;
 
 import static com.google.inject.internal.BytecodeGen.ENHANCER_BY_GUICE_MARKER;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiFunction;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -35,9 +33,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author crazybob@google.com (Bob Lee)
  */
 final class InterceptorStackCallback implements InvocationHandler {
-  private static final Set<String> AOP_INTERNAL_CLASSES =
-      ImmutableSet.of(
-          InterceptorStackCallback.class.getName(), InterceptedMethodInvocation.class.getName());
+  private static final String GUICE_INTERNAL_AOP_PACKAGE = "com.google.inject.internal.aop";
 
   final Method method;
   final MethodInterceptor[] interceptors;
@@ -113,7 +109,8 @@ final class InterceptorStackCallback implements InvocationHandler {
       List<StackTraceElement> pruned = Lists.newArrayList();
       for (StackTraceElement element : stackTrace) {
         String className = element.getClassName();
-        if (!AOP_INTERNAL_CLASSES.contains(className)
+        if (!className.startsWith(InterceptorStackCallback.class.getName())
+            && !className.startsWith(GUICE_INTERNAL_AOP_PACKAGE)
             && !className.contains(ENHANCER_BY_GUICE_MARKER)) {
           pruned.add(element);
         }
