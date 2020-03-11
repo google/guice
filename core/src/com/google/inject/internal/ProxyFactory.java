@@ -121,9 +121,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
           ImmutableSet.copyOf(matchedInterceptors.get(method)).asList();
       interceptorsMapBuilder.put(method, deDuplicated);
 
-      BiFunction<Object, Object[], Object> superInvoker =
-          BytecodeGen.superMethod(enhancer, method);
-
+      BiFunction<Object, Object[], Object> superInvoker = BytecodeGen.superMethod(enhancer, method);
       callbacks[callbackIndex++] = new InterceptorStackCallback(method, deDuplicated, superInvoker);
     }
 
