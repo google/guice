@@ -17,6 +17,8 @@
 package com.google.inject.internal.aop;
 
 import static com.google.inject.internal.BytecodeGen.ENHANCER_BY_GUICE_MARKER;
+import static com.google.inject.internal.aop.BytecodeTasks.loadArgument;
+import static com.google.inject.internal.aop.BytecodeTasks.unpackArguments;
 import static java.lang.reflect.Modifier.FINAL;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
@@ -176,7 +178,7 @@ final class Enhancer extends AbstractGlueGenerator {
 
     int slot = 2;
     for (Class<?> parameterType : constructor.getParameterTypes()) {
-      slot = loadParameter(mv, parameterType, slot);
+      slot += loadArgument(mv, parameterType, slot);
     }
 
     mv.visitMethodInsn(INVOKESPECIAL, hostName, "<init>", descriptor, false);
@@ -193,14 +195,14 @@ final class Enhancer extends AbstractGlueGenerator {
   @Override
   protected void generateConstructorInvoker(MethodVisitor mv, Constructor<?> constructor) {
     mv.visitVarInsn(ALOAD, 1);
-    unpackParameters(mv, constructor.getParameterTypes());
+    unpackArguments(mv, constructor.getParameterTypes());
     // INVOKE!
   }
 
   @Override
   protected void generateMethodInvoker(MethodVisitor mv, Method method) {
     mv.visitVarInsn(ALOAD, 1);
-    unpackParameters(mv, method.getParameterTypes());
+    unpackArguments(mv, method.getParameterTypes());
     // INVOKE!
   }
 

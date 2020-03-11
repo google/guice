@@ -17,6 +17,8 @@
 package com.google.inject.internal.aop;
 
 import static com.google.inject.internal.BytecodeGen.FASTCLASS_BY_GUICE_MARKER;
+import static com.google.inject.internal.aop.BytecodeTasks.box;
+import static com.google.inject.internal.aop.BytecodeTasks.unpackArguments;
 import static java.lang.reflect.Modifier.FINAL;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
@@ -121,7 +123,7 @@ final class FastClass extends AbstractGlueGenerator {
     mv.visitTypeInsn(NEW, hostName);
     mv.visitInsn(DUP);
 
-    unpackParameters(mv, constructor.getParameterTypes());
+    unpackArguments(mv, constructor.getParameterTypes());
 
     mv.visitMethodInsn(
         INVOKESPECIAL, hostName, "<init>", Type.getConstructorDescriptor(constructor), false);
@@ -141,7 +143,7 @@ final class FastClass extends AbstractGlueGenerator {
       invokeOpcode = INVOKESTATIC;
     }
 
-    unpackParameters(mv, method.getParameterTypes());
+    unpackArguments(mv, method.getParameterTypes());
 
     mv.visitMethodInsn(
         invokeOpcode,

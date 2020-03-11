@@ -18,21 +18,10 @@ package com.google.inject.internal.aop;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
-import static org.objectweb.asm.Opcodes.AALOAD;
-import static org.objectweb.asm.Opcodes.AASTORE;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
 import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.BIPUSH;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.F_SAME;
-import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.SIPUSH;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
@@ -185,85 +174,4 @@ abstract class AbstractGlueGenerator {
   protected abstract void generateConstructorInvoker(MethodVisitor mv, Constructor<?> constructor);
 
   protected abstract void generateMethodInvoker(MethodVisitor mv, Method method);
-
-  protected static void packParameters(MethodVisitor mv, Class<?>[] parameterTypes) {
-    pushInteger(mv, parameterTypes.length);
-    mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
-    int parameterIndex = 0;
-    int slot = 1;
-    for (Class<?> parameterType : parameterTypes) {
-      mv.visitInsn(DUP);
-      pushInteger(mv, parameterIndex++);
-      slot = loadParameter(mv, parameterType, slot);
-      mv.visitInsn(AASTORE);
-    }
-  }
-
-  protected static void unpackParameters(MethodVisitor mv, Class<?>[] parameterTypes) {
-    int parameterIndex = 0;
-    for (Class<?> parameterType : parameterTypes) {
-      mv.visitVarInsn(ALOAD, 2);
-      pushInteger(mv, parameterIndex++);
-      mv.visitInsn(AALOAD);
-      if (parameterType.isPrimitive()) {
-        unbox(mv, Type.getType(parameterType));
-      } else {
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(parameterType));
-      }
-    }
-  }
-
-  /** Pushes an integer onto the stack, choosing the most efficient opcode. */
-  protected static void pushInteger(MethodVisitor mv, int value) {
-    if (value < -1) {
-      mv.visitLdcInsn(value);
-    } else if (value <= 5) {
-      mv.visitInsn(ICONST_0 + value);
-    } else if (value <= Byte.MAX_VALUE) {
-      mv.visitIntInsn(BIPUSH, value);
-    } else if (value <= Short.MAX_VALUE) {
-      mv.visitIntInsn(SIPUSH, value);
-    } else {
-      mv.visitLdcInsn(value);
-    }
-  }
-
-  protected static int loadParameter(MethodVisitor mv, Class<?> parameterType, int slot) {
-    if (parameterType.isPrimitive()) {
-      Type primitiveType = Type.getType(parameterType);
-      mv.visitVarInsn(primitiveType.getOpcode(ILOAD), slot);
-      box(mv, primitiveType);
-      return slot + primitiveType.getSize();
-    }
-    mv.visitVarInsn(ALOAD, slot);
-    return slot + 1;
-  }
-
-  /** Generates bytecode to box a primitive value on the Java stack. */
-  protected static void box(MethodVisitor mv, Type primitiveType) {
-    String boxedClass = boxedClass(primitiveType.getSort());
-    String boxMethod = "valueOf";
-    String boxDescriptor = '(' + primitiveType.getDescriptor() + ")L" + boxedClass + ';';
-    mv.visitMethodInsn(INVOKESTATIC, boxedClass, boxMethod, boxDescriptor, false);
-  }
-
-  /** Generates bytecode to unbox a boxed value on the Java stack. */
-  protected static void unbox(MethodVisitor mv, Type primitiveType) {
-    String boxedClass = boxedClass(primitiveType.getSort());
-    String unboxMethod = primitiveType.getClassName() + "Value";
-    String unboxDescriptor = "()" + primitiveType.getDescriptor();
-    mv.visitTypeInsn(CHECKCAST, boxedClass);
-    mv.visitMethodInsn(INVOKEVIRTUAL, boxedClass, unboxMethod, unboxDescriptor, false);
-  }
-
-  /** Returns the boxed class for the given primitive type. */
-  private static String boxedClass(int primitiveSort) {
-    if (primitiveSort == Type.BOOLEAN) {
-      return "java/lang/Boolean";
-    } else if (primitiveSort == Type.CHAR) {
-      return "java/lang/Character";
-    } else {
-      return "java/lang/Number";
-    }
-  }
 }
