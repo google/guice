@@ -214,17 +214,17 @@ abstract class AbstractGlueGenerator {
   }
 
   /** Pushes an integer onto the stack, choosing the most efficient opcode. */
-  protected static void pushInteger(MethodVisitor methodVisitor, int value) {
+  protected static void pushInteger(MethodVisitor mv, int value) {
     if (value < -1) {
-      methodVisitor.visitLdcInsn(value);
+      mv.visitLdcInsn(value);
     } else if (value <= 5) {
-      methodVisitor.visitInsn(ICONST_0 + value);
+      mv.visitInsn(ICONST_0 + value);
     } else if (value <= Byte.MAX_VALUE) {
-      methodVisitor.visitIntInsn(BIPUSH, value);
+      mv.visitIntInsn(BIPUSH, value);
     } else if (value <= Short.MAX_VALUE) {
-      methodVisitor.visitIntInsn(SIPUSH, value);
+      mv.visitIntInsn(SIPUSH, value);
     } else {
-      methodVisitor.visitLdcInsn(value);
+      mv.visitLdcInsn(value);
     }
   }
 
