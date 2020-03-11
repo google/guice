@@ -17,28 +17,42 @@
 package com.google.inject.internal.aop;
 
 import static com.google.inject.internal.BytecodeGen.ENHANCER_BY_GUICE_MARKER;
+import static com.google.inject.internal.aop.BytecodeTasks.box;
 import static com.google.inject.internal.aop.BytecodeTasks.loadArgument;
+import static com.google.inject.internal.aop.BytecodeTasks.packArguments;
+import static com.google.inject.internal.aop.BytecodeTasks.pushInteger;
+import static com.google.inject.internal.aop.BytecodeTasks.unbox;
 import static com.google.inject.internal.aop.BytecodeTasks.unpackArguments;
 import static java.lang.reflect.Modifier.FINAL;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+import static org.objectweb.asm.Opcodes.AALOAD;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.SWAP;
 import static org.objectweb.asm.Opcodes.V1_8;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,9 +73,19 @@ final class Enhancer extends AbstractGlueGenerator {
 
   private static final String HANDLERS_DESCRIPTOR = "[Ljava/lang/reflect/InvocationHandler;";
 
-  protected static final String INVOKERS_NAME = "GUICE$INVOKERS";
+  private static final String HANDLER_TYPE = Type.getInternalName(InvocationHandler.class);
+
+  private static final String HANDLER_ARRAY_TYPE = Type.getInternalName(InvocationHandler[].class);
+
+  private static final String INVOKERS_NAME = "GUICE$INVOKERS";
 
   private static final String INVOKERS_DESCRIPTOR = "Ljava/lang/invoke/MethodHandle;";
+
+  private static final String CALLBACK_DESCRIPTOR =
+      "(Ljava/lang/Object;"
+          + "Ljava/lang/reflect/Method;"
+          + "[Ljava/lang/Object;)"
+          + "Ljava/lang/Object;";
 
   private static final String METAFACTORY_DESCRIPTOR =
       "(Ljava/lang/invoke/MethodHandles$Lookup;"
@@ -86,12 +110,6 @@ final class Enhancer extends AbstractGlueGenerator {
   public Enhancer(Class<?> hostClass, Map<Method, Method> bridgeDelegates) {
     super(hostClass, ENHANCER_BY_GUICE_MARKER);
     this.bridgeDelegates = bridgeDelegates;
-  }
-
-  static {
-    if (Enhancer.class.getName().indexOf('/') > 0) {
-      System.err.println("anon");
-    }
   }
 
   @Override
@@ -149,12 +167,13 @@ final class Enhancer extends AbstractGlueGenerator {
 
     generateTrampoline(cw, members);
 
+    int methodIndex = 0;
     cw.visitField(PRIVATE | FINAL, HANDLERS_NAME, HANDLERS_DESCRIPTOR, null, null).visitEnd();
     for (Executable member : members) {
       if (member instanceof Constructor<?>) {
         enhanceConstructor(cw, (Constructor<?>) member);
       } else {
-        enhanceMethod(cw, (Method) member);
+        enhanceMethod(cw, (Method) member, methodIndex++);
       }
     }
 
@@ -188,22 +207,73 @@ final class Enhancer extends AbstractGlueGenerator {
     mv.visitEnd();
   }
 
-  private void enhanceMethod(ClassWriter cw, Method method) {
-    // TODO
+  private void enhanceMethod(ClassWriter cw, Method method, int methodIndex) {
+    MethodVisitor mv =
+        cw.visitMethod(
+            PUBLIC,
+            method.getName(),
+            Type.getMethodDescriptor(method),
+            null,
+            exceptionNames(method));
+
+    mv.visitVarInsn(ALOAD, 0);
+    mv.visitInsn(DUP);
+    mv.visitFieldInsn(GETFIELD, proxyName, HANDLERS_NAME, HANDLERS_DESCRIPTOR);
+    pushInteger(mv, methodIndex);
+    mv.visitInsn(AALOAD);
+    mv.visitInsn(SWAP);
+    mv.visitInsn(ACONST_NULL);
+    packArguments(mv, method.getParameterTypes());
+
+    mv.visitMethodInsn(INVOKEINTERFACE, HANDLER_TYPE, "invoke", CALLBACK_DESCRIPTOR, true);
+
+    Class<?> returnType = method.getReturnType();
+    if (returnType == void.class) {
+      mv.visitInsn(RETURN);
+    } else if (returnType.isPrimitive()) {
+      Type primitiveType = Type.getType(returnType);
+      unbox(mv, primitiveType);
+      mv.visitInsn(primitiveType.getOpcode(IRETURN));
+    } else {
+      mv.visitTypeInsn(CHECKCAST, Type.getInternalName(returnType));
+      mv.visitInsn(ARETURN);
+    }
+
+    mv.visitMaxs(0, 0);
+    mv.visitEnd();
   }
 
   @Override
   protected void generateConstructorInvoker(MethodVisitor mv, Constructor<?> constructor) {
+    String descriptor = Type.getConstructorDescriptor(constructor);
+    String enhancedDescriptor = '(' + HANDLERS_DESCRIPTOR + descriptor.substring(1);
+
+    mv.visitTypeInsn(NEW, proxyName);
+    mv.visitInsn(DUP);
+
     mv.visitVarInsn(ALOAD, 1);
+    mv.visitTypeInsn(CHECKCAST, HANDLER_ARRAY_TYPE);
     unpackArguments(mv, constructor.getParameterTypes());
-    // INVOKE!
+
+    mv.visitMethodInsn(INVOKESPECIAL, proxyName, "<init>", enhancedDescriptor, false);
   }
 
   @Override
   protected void generateMethodInvoker(MethodVisitor mv, Method method) {
+    mv.visitInsn(ACONST_NULL);
     mv.visitVarInsn(ALOAD, 1);
+    mv.visitTypeInsn(CHECKCAST, hostName);
     unpackArguments(mv, method.getParameterTypes());
-    // INVOKE!
+
+    mv.visitMethodInsn(
+        INVOKESPECIAL, hostName, method.getName(), Type.getMethodDescriptor(method), false);
+
+    Class<?> returnType = method.getReturnType();
+    if (returnType == void.class) {
+      mv.visitInsn(ACONST_NULL);
+    } else if (returnType.isPrimitive()) {
+      box(mv, Type.getType(returnType));
+    }
   }
 
   @Override
