@@ -79,7 +79,7 @@ public final class ClassBuilding {
     visitMethodHierarchy(
         hostClass,
         method -> {
-          // static methods can't be overridden
+          // exclude static methods, but keep final methods for bridge analysis
           if ((method.getModifiers() & STATIC) == 0) {
             partitionMethod(method, methodPartitions);
           }
@@ -173,8 +173,9 @@ public final class ClassBuilding {
         Object.class.getDeclaredMethods(),
         false, // no package-level access
         method -> {
-          // exclude static/final methods that can't be overridden
-          if ((method.getModifiers() & (STATIC | FINAL)) == 0) {
+          // skip methods that can't/shouldn't be overridden
+          if ((method.getModifiers() & (STATIC | FINAL)) == 0
+              && !"finalize".equals(method.getName())) {
             objectMethods.add(method);
           }
         });
