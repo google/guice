@@ -105,8 +105,13 @@ final class MethodPartition {
       Method superTarget = targetEntry.getValue();
 
       // some AOP matchers skip all synthetic methods, so if we have a non-bridge super-method with
-      // identical parameters then use that as the enhanceable method instead of the original bridge
-      Method enhanceableMethod = superTarget != null ? superTarget : originalBridge;
+      // identical parameters and it's not from an interface then use that as the enhanceable method
+      // instead of the original bridge
+      Method enhanceableMethod =
+          superTarget != null && !superTarget.getDeclaringClass().isInterface()
+              ? superTarget
+              : originalBridge;
+
       methodVisitor.accept(enhanceableMethod);
 
       // scan all methods looking for the bridge delegate by comparing generic parameters
