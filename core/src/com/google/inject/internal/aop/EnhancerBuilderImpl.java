@@ -20,12 +20,12 @@ import static com.google.inject.internal.aop.ClassBuilding.signature;
 import static com.google.inject.internal.aop.ClassBuilding.visitMembers;
 import static com.google.inject.internal.aop.ClassDefining.hasPackageAccess;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.internal.BytecodeGen;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.BitSet;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -55,12 +55,13 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   private final Map<Method, Method> bridgeDelegates;
 
   public EnhancerBuilderImpl(
-      Class<?> hostClass, Collection<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
+      Class<?> hostClass,
+      Collection<Method> enhanceableMethods,
+      Map<Method, Method> bridgeDelegates) {
 
     this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
-    // most of the time we won't have any bridge delegates, so use empty map constant to save space
-    this.bridgeDelegates = bridgeDelegates.isEmpty() ? Collections.emptyMap() : bridgeDelegates;
+    this.bridgeDelegates = ImmutableMap.copyOf(bridgeDelegates);
   }
 
   @Override
