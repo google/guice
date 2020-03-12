@@ -19,6 +19,7 @@ package com.google.inject.internal.aop;
 import static com.google.inject.internal.aop.ClassBuilding.signature;
 import static com.google.inject.internal.aop.ClassBuilding.visitMembers;
 import static com.google.inject.internal.aop.ClassDefining.hasPackageAccess;
+import static java.lang.reflect.Modifier.FINAL;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.internal.BytecodeGen;
@@ -71,6 +72,10 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   @Override
   public Function<String, BiFunction> buildEnhancer(BitSet methodIndices) {
+    if ((hostClass.getModifiers() & FINAL) != 0) {
+      throw new IllegalArgumentException("Cannot subclass final " + hostClass);
+    }
+
     Map<BitSet, Function<String, BiFunction>> enhancers = ENHANCERS.get(hostClass);
     synchronized (enhancers) {
       return enhancers.computeIfAbsent(methodIndices, this::doBuildEnhancer);

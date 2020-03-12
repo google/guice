@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import static java.lang.reflect.Modifier.FINAL;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -70,10 +68,6 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       interceptors = ImmutableMap.of();
       callbacks = null;
       return;
-    }
-
-    if ((hostClass.getModifiers() & FINAL) != 0) {
-      throw new IllegalArgumentException("Cannot subclass final " + hostClass);
     }
 
     BytecodeGen.EnhancerBuilder enhancerBuilder = BytecodeGen.enhancerBuilder(hostClass);
