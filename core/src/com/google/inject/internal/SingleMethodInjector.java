@@ -47,7 +47,11 @@ final class SingleMethodInjector implements SingleMemberInjector {
           @Override
           public Object invoke(Object target, Object... parameters)
               throws IllegalAccessException, InvocationTargetException {
-            return fastMethod.apply(target, parameters);
+            try {
+              return fastMethod.apply(target, parameters);
+            } catch (Exception e) {
+              throw new InvocationTargetException(e);
+            }
           }
         };
       }

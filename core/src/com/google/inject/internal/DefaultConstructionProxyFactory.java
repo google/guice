@@ -78,7 +78,11 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @Override
     @SuppressWarnings("unchecked")
     public T newInstance(Object... arguments) throws InvocationTargetException {
-      return (T) fastConstructor.apply(null, arguments);
+      try {
+        return (T) fastConstructor.apply(null, arguments);
+      } catch (Exception e) {
+        throw new InvocationTargetException(e);
+      }
     }
 
     @Override

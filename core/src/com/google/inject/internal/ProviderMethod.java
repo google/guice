@@ -259,7 +259,11 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     @Override
     public T doProvision(Object[] parameters)
         throws IllegalAccessException, InvocationTargetException {
-      return (T) fastMethod.apply(instance, parameters);
+      try {
+        return (T) fastMethod.apply(instance, parameters);
+      } catch (Exception e) {
+        throw new InvocationTargetException(e);
+      }
     }
   }
   /*end[AOP]*/
