@@ -76,8 +76,11 @@ final class FastClass extends AbstractGlueGenerator {
 
   private static final Lookup LOOKUP = MethodHandles.lookup();
 
+  private final boolean hostIsInterface;
+
   public FastClass(Class<?> hostClass) {
     super(hostClass, FASTCLASS_BY_GUICE_MARKER);
+    hostIsInterface = hostClass.isInterface();
   }
 
   @Override
@@ -131,14 +134,12 @@ final class FastClass extends AbstractGlueGenerator {
 
   @Override
   protected void generateMethodInvoker(MethodVisitor mv, Method method) {
-    Class<?> declaringClass = method.getDeclaringClass();
-    boolean isInterface = declaringClass.isInterface();
 
     int invokeOpcode;
     if ((method.getModifiers() & STATIC) == 0) {
       mv.visitVarInsn(ALOAD, 1);
       mv.visitTypeInsn(CHECKCAST, hostName);
-      invokeOpcode = isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL;
+      invokeOpcode = hostIsInterface ? INVOKEINTERFACE : INVOKEVIRTUAL;
     } else {
       invokeOpcode = INVOKESTATIC;
     }
@@ -147,10 +148,10 @@ final class FastClass extends AbstractGlueGenerator {
 
     mv.visitMethodInsn(
         invokeOpcode,
-        hostClass == declaringClass ? hostName : Type.getInternalName(declaringClass),
+        hostName,
         method.getName(),
         Type.getMethodDescriptor(method),
-        isInterface);
+        hostIsInterface);
 
     Class<?> returnType = method.getReturnType();
     if (returnType == void.class) {
