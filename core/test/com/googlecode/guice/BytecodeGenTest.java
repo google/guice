@@ -243,6 +243,10 @@ public class BytecodeGenTest extends TestCase {
     // null the proxy
     testObject = null;
 
+    // null the host class
+    proxyTestClass = null;
+    realClass = null;
+
     /*
      * this should be enough to queue the weak reference
      * unless something is holding onto it accidentally.
