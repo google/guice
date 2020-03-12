@@ -56,7 +56,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
@@ -167,6 +169,8 @@ final class Enhancer extends AbstractGlueGenerator {
 
     generateTrampoline(cw, members);
 
+    Set<Method> remainingBridgeMethods = new HashSet<>(bridgeDelegates.keySet());
+
     int methodIndex = 0;
     cw.visitField(PRIVATE | FINAL, HANDLERS_NAME, HANDLERS_DESCRIPTOR, null, null).visitEnd();
     for (Executable member : members) {
@@ -174,6 +178,15 @@ final class Enhancer extends AbstractGlueGenerator {
         enhanceConstructor(cw, (Constructor<?>) member);
       } else {
         enhanceMethod(cw, (Method) member, methodIndex++);
+        remainingBridgeMethods.remove(member);
+      }
+    }
+
+    // replace any remaining bridge methods with virtual dispatch to their non-bridge targets
+    for (Method method : remainingBridgeMethods) {
+      Method target = bridgeDelegates.get(method);
+      if (target != null) {
+        generateVirtualBridge(cw, method, target);
       }
     }
 
@@ -260,20 +273,57 @@ final class Enhancer extends AbstractGlueGenerator {
 
   @Override
   protected void generateMethodInvoker(MethodVisitor mv, Method method) {
+    Method target = bridgeDelegates.getOrDefault(method, method);
+
+    // if this was a bridge method and we know the target then replace superclass delegation
+    // with virtual dispatch to avoid skipping other interceptors overriding the target method
+    int invokeOpcode = target != method ? INVOKEVIRTUAL : INVOKESPECIAL;
+
     mv.visitInsn(ACONST_NULL);
     mv.visitVarInsn(ALOAD, 1);
-    mv.visitTypeInsn(CHECKCAST, hostName);
-    unpackArguments(mv, method.getParameterTypes());
+    // JVM seems to prefer different casting when using defineAnonymous vs child-loader
+    mv.visitTypeInsn(CHECKCAST, ClassDefining.hasPackageAccess() ? hostName : proxyName);
+    unpackArguments(mv, target.getParameterTypes());
 
     mv.visitMethodInsn(
-        INVOKESPECIAL, hostName, method.getName(), Type.getMethodDescriptor(method), false);
+        invokeOpcode, hostName, method.getName(), Type.getMethodDescriptor(target), false);
 
-    Class<?> returnType = method.getReturnType();
+    Class<?> returnType = target.getReturnType();
     if (returnType == void.class) {
       mv.visitInsn(ACONST_NULL);
     } else if (returnType.isPrimitive()) {
       box(mv, Type.getType(returnType));
     }
+  }
+
+  /** Override the original bridge method and replace it with virtual dispatch to the target. */
+  private void generateVirtualBridge(ClassWriter cw, Method method, Method target) {
+    MethodVisitor mv =
+        cw.visitMethod(
+            PUBLIC,
+            method.getName(),
+            Type.getMethodDescriptor(method),
+            null,
+            exceptionNames(method));
+
+    mv.visitVarInsn(ALOAD, 0);
+    mv.visitTypeInsn(CHECKCAST, hostName);
+    int slot = 1;
+    for (Class<?> parameterType : target.getParameterTypes()) {
+      slot += loadArgument(mv, parameterType, slot);
+    }
+
+    mv.visitMethodInsn(
+        INVOKEVIRTUAL, hostName, target.getName(), Type.getMethodDescriptor(target), false);
+
+    Type returnType = Type.getType(method.getReturnType());
+    if (target.getReturnType() != method.getReturnType()) {
+      mv.visitTypeInsn(CHECKCAST, returnType.getInternalName());
+    }
+    mv.visitInsn(returnType.getOpcode(IRETURN));
+
+    mv.visitMaxs(0, 0);
+    mv.visitEnd();
   }
 
   @Override
