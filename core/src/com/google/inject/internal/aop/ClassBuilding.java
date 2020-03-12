@@ -85,7 +85,7 @@ public final class ClassBuilding {
           }
         });
 
-    List<Method> enhanceableMethods = new ArrayList<>();
+    Map<String, Method> enhanceableMethods = new TreeMap<>();
     Map<Method, Method> bridgeDelegates = new HashMap<>();
 
     TypeLiteral<?> hostType = TypeLiteral.get(hostClass);
@@ -94,15 +94,18 @@ public final class ClassBuilding {
         // common case, partition is just one method; exclude if it turns out to be final
         Method method = (Method) partition;
         if ((method.getModifiers() & FINAL) == 0) {
-          enhanceableMethods.add(method);
+          enhanceableMethods.put(signature(method), method);
         }
       } else {
         ((MethodPartition) partition)
-            .collectEnhanceableMethods(hostType, enhanceableMethods, bridgeDelegates);
+            .collectEnhanceableMethods(
+                hostType,
+                method -> enhanceableMethods.put(signature(method), method),
+                bridgeDelegates);
       }
     }
 
-    return new EnhancerBuilderImpl(hostClass, enhanceableMethods, bridgeDelegates);
+    return new EnhancerBuilderImpl(hostClass, enhanceableMethods.values(), bridgeDelegates);
   }
 
   /**

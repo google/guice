@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Accumulates methods with the same name and number of parameters. This helps focus the search for
@@ -60,7 +61,7 @@ final class MethodPartition {
    */
   public void collectEnhanceableMethods(
       TypeLiteral<?> hostType,
-      List<Method> enhanceableMethods,
+      Consumer<Method> methodVisitor,
       Map<Method, Method> bridgeDelegates) {
 
     Map<String, Method> leafMethods = new HashMap<>();
@@ -90,7 +91,7 @@ final class MethodPartition {
       if ((method.getModifiers() & FINAL) != 0) {
         bridgeTargets.remove(methodEntry.getKey());
       } else if (!method.isBridge()) {
-        enhanceableMethods.add(method);
+        methodVisitor.accept(method);
       }
     }
 
@@ -106,7 +107,7 @@ final class MethodPartition {
       // some AOP matchers skip all synthetic methods, so if we have a non-bridge super-method with
       // identical parameters then use that as the enhanceable method instead of the original bridge
       Method enhanceableMethod = superTarget != null ? superTarget : originalBridge;
-      enhanceableMethods.add(enhanceableMethod);
+      methodVisitor.accept(enhanceableMethod);
 
       // scan all methods looking for the bridge delegate by comparing generic parameters
       // (these are the kind of bridge methods that were added to account for type-erasure)

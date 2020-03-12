@@ -24,9 +24,9 @@ import com.google.inject.internal.BytecodeGen;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
@@ -55,7 +55,7 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   private final Map<Method, Method> bridgeDelegates;
 
   public EnhancerBuilderImpl(
-      Class<?> hostClass, List<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
+      Class<?> hostClass, Collection<Method> enhanceableMethods, Map<Method, Method> bridgeDelegates) {
 
     this.hostClass = hostClass;
     this.enhanceableMethods = enhanceableMethods.toArray(new Method[enhanceableMethods.size()]);
