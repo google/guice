@@ -297,27 +297,37 @@ final class Enhancer extends AbstractGlueGenerator {
   }
 
   /** Override the original bridge method and replace it with virtual dispatch to the target. */
-  private void generateVirtualBridge(ClassWriter cw, Method method, Method target) {
+  private void generateVirtualBridge(ClassWriter cw, Method bridge, Method target) {
     MethodVisitor mv =
         cw.visitMethod(
             PUBLIC,
-            method.getName(),
-            Type.getMethodDescriptor(method),
+            bridge.getName(),
+            Type.getMethodDescriptor(bridge),
             null,
-            exceptionNames(method));
+            exceptionNames(bridge));
 
     mv.visitVarInsn(ALOAD, 0);
     mv.visitTypeInsn(CHECKCAST, hostName);
     int slot = 1;
-    for (Class<?> parameterType : target.getParameterTypes()) {
+
+    Class<?>[] bridgeParameterTypes = bridge.getParameterTypes();
+    Class<?>[] targetParameterTypes = target.getParameterTypes();
+
+    for (int i = 0, len = targetParameterTypes.length; i < len; i++) {
+      Class<?> parameterType = targetParameterTypes[i];
       slot += loadArgument(mv, parameterType, slot);
+      if (parameterType != bridgeParameterTypes[i]) {
+        // cast incoming argument to the specific type expected by target
+        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(parameterType));
+      }
     }
 
     mv.visitMethodInsn(
         INVOKEVIRTUAL, hostName, target.getName(), Type.getMethodDescriptor(target), false);
 
-    Type returnType = Type.getType(method.getReturnType());
-    if (target.getReturnType() != method.getReturnType()) {
+    Type returnType = Type.getType(bridge.getReturnType());
+    if (target.getReturnType() != bridge.getReturnType()) {
+      // cast return value to the specific type expected by bridge
       mv.visitTypeInsn(CHECKCAST, returnType.getInternalName());
     }
     mv.visitInsn(returnType.getOpcode(IRETURN));
