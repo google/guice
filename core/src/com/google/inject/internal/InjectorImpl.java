@@ -358,21 +358,23 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   /**
-   * Creates a synthetic binding to {@code Provider<T>}, i.e. a binding to the provider from {@code
-   * Binding<T>}.
+   * Creates a synthetic binding to {@code Provider<T>}, i.e. a framework-created JIT binding to the
+   * provider from {@code Binding<T>}.
    */
-  private <T> BindingImpl<Provider<T>> createProviderBinding(Key<Provider<T>> key, Errors errors)
-      throws ErrorsException {
+  private <T> BindingImpl<Provider<T>> createSyntheticProviderBinding(
+      Key<Provider<T>> key, Errors errors) throws ErrorsException {
     Key<T> providedKey = getProvidedKey(key, errors);
     BindingImpl<T> delegate = getBindingOrThrow(providedKey, errors, JitLimitation.NO_JIT);
-    return new ProviderBindingImpl<T>(this, key, delegate);
+    return new SyntheticProviderBindingImpl<T>(this, key, delegate);
   }
 
-  private static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
+  /** A framework-created JIT Provider<T> binding. */
+  private static class SyntheticProviderBindingImpl<T> extends BindingImpl<Provider<T>>
       implements ProviderBinding<Provider<T>>, HasDependencies {
     final BindingImpl<T> providedBinding;
 
-    ProviderBindingImpl(InjectorImpl injector, Key<Provider<T>> key, Binding<T> providedBinding) {
+    SyntheticProviderBindingImpl(
+        InjectorImpl injector, Key<Provider<T>> key, Binding<T> providedBinding) {
       super(
           injector,
           key,
@@ -422,8 +424,8 @@ final class InjectorImpl implements Injector, Lookups {
 
     @Override
     public boolean equals(Object obj) {
-      if (obj instanceof ProviderBindingImpl) {
-        ProviderBindingImpl<?> o = (ProviderBindingImpl<?>) obj;
+      if (obj instanceof SyntheticProviderBindingImpl) {
+        SyntheticProviderBindingImpl<?> o = (SyntheticProviderBindingImpl<?>) obj;
         return getKey().equals(o.getKey())
             && getScoping().equals(o.getScoping())
             && Objects.equal(providedBinding, o.providedBinding);
@@ -895,9 +897,9 @@ final class InjectorImpl implements Injector, Lookups {
     // Handle cases where T is a Provider<?>.
     if (isProvider(key)) {
       // These casts are safe. We know T extends Provider<X> and that given Key<Provider<X>>,
-      // createProviderBinding() will return BindingImpl<Provider<X>>.
+      // createSyntheticProviderBinding() will return BindingImpl<Provider<X>>.
       @SuppressWarnings({"unchecked", "cast"})
-      BindingImpl<T> binding = (BindingImpl<T>) createProviderBinding((Key) key, errors);
+      BindingImpl<T> binding = (BindingImpl<T>) createSyntheticProviderBinding((Key) key, errors);
       return binding;
     }
 
