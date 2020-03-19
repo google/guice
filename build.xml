@@ -17,7 +17,7 @@
     <pathelement location="${build.dir}/classes"/>
   </path>
 
-  <property name="old.api" value="4.2.2"/>
+  <property name="old.api" value="4.2.3"/>
   <property name="new.api" value="latest"/>
   <target name="jdiff" depends="compile">
     <property name="jdiff.home" value="lib/build/jdiff"/>
