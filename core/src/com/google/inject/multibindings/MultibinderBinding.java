@@ -49,7 +49,7 @@ public interface MultibinderBinding<T> {
    * {@code Collection<com.google.inject.Provider<V>>} and {@code
    * Collection<javax.inject.Provider<V>>}.
    *
-   * @since 5.0
+   * @since 4.2.3
    */
   Set<Key<?>> getAlternateSetKeys();
 
