@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>4.2.3-SNAPSHOT</version>
+    <version>4.2.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>guice</artifactId>

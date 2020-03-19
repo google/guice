@@ -19,7 +19,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <parent>
     <artifactId>guice-parent</artifactId>
     <groupId>com.google.inject</groupId>
-    <version>4.2.3-SNAPSHOT</version>
+    <version>4.2.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
