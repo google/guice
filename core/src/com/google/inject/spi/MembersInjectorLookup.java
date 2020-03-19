@@ -90,6 +90,7 @@ public final class MembersInjectorLookup<T> implements Element {
   /**
    * Returns the instance methods and fields that will be injected to fulfill this request.
    *
+   * @since 4.2.3
    * @return a possibly empty set of injection points. The set has a specified iteration order. All
    *     fields are returned and then all methods. Within the fields, supertype fields are returned
    *     before subtype fields. Similarly, supertype methods are returned before subtype methods.

@@ -53,7 +53,7 @@ public interface MapBinderBinding<T> {
    * {@code Map<K, Collection<com.google.inject.Provider<V>>>}, {@code Map<K,
    * Collection<javax.inject.Provider<V>>>}, and {@code Map<K, Set<V>}.
    *
-   * @since 5.0
+   * @since 4.2.3
    */
   Set<Key<?>> getAlternateMapKeys();
 
