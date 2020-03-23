@@ -24,7 +24,7 @@ public final class InternalProvisionExceptionTest extends TestCase {
 
   public void testSourceFormatting() {
     // Note that the duplicate source gets dropped as well as the unknown source
-    String ls = System.lineSeparator();
+    final String LINE_SEPARATOR = System.lineSeparator();
     assertThat(
             InternalProvisionException.create("An error")
                 .addSource("Source1")
@@ -35,12 +35,12 @@ public final class InternalProvisionExceptionTest extends TestCase {
                 .getMessage())
         .isEqualTo(
             ""
-                + "Unable to provision, see the following errors:" + ls 
-                + ls 
-                + "1) An error" + ls 
-                + "  at Source1" + ls 
-                + "  at Source2" + ls 
-                + "" + ls 
+                + "Unable to provision, see the following errors:" + LINE_SEPARATOR 
+                + LINE_SEPARATOR 
+                + "1) An error" + LINE_SEPARATOR 
+                + "  at Source1" + LINE_SEPARATOR 
+                + "  at Source2" + LINE_SEPARATOR 
+                + "" + LINE_SEPARATOR 
                 + "1 error");
   }
 }
