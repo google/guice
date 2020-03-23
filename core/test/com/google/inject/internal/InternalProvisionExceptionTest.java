@@ -34,12 +34,12 @@ public final class InternalProvisionExceptionTest extends TestCase {
                 .getMessage())
         .isEqualTo(
             ""
-                + "Unable to provision, see the following errors:\n"
-                + "\n"
-                + "1) An error\n"
-                + "  at Source1\n"
-                + "  at Source2\n"
-                + "\n"
+                + "Unable to provision, see the following errors:" + System.lineSeparator()
+                + System.lineSeparator()
+                + "1) An error" + System.lineSeparator()
+                + "  at Source1" + System.lineSeparator()
+                + "  at Source2" + System.lineSeparator()
+                + "" + System.lineSeparator()
                 + "1 error");
   }
 }
