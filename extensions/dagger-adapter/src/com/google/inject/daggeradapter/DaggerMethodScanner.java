@@ -21,6 +21,8 @@ import static com.google.inject.daggeradapter.Annotations.getAnnotatedAnnotation
 import static com.google.inject.daggeradapter.Keys.parameterKey;
 import static com.google.inject.daggeradapter.SupportedAnnotations.supportedBindingAnnotations;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -53,17 +55,12 @@ import javax.inject.Scope;
  * @author cgruber@google.com (Christian Gruber)
  */
 final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
-  /**
-   * A single instance is not necessary for the correctness or performance of the scanner, but it
-   * does suffice an invariant of {@link com.google.inject.internal.ProviderMethodsModule}, which
-   * uses scanner equality in its own equality semantics. If multiple modules use
-   * DaggerAdapter.from(FooModule.class) separately, and thus are not deduplicated by DaggerAdapter
-   * on their own, Guice will do so as long as this scanner is always equal.
-   *
-   * <p>If we do away with this singleton instance, we need to be sure that we do so in a way that
-   * maintains equality in these cases.
-   */
-  static final DaggerMethodScanner INSTANCE = new DaggerMethodScanner();
+
+  static DaggerMethodScanner create(Predicate<Method> predicate) {
+    return new DaggerMethodScanner(predicate);
+  }
+
+  private final Predicate<Method> predicate;
 
   @Override
   public ImmutableSet<Class<? extends Annotation>> annotationClasses() {
@@ -74,6 +71,9 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
   public <T> Key<T> prepareMethod(
       Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
     Method method = (Method) injectionPoint.getMember();
+    if (!predicate.apply(method)) {
+      return null;
+    }
     Class<? extends Annotation> annotationType = annotation.annotationType();
     if (annotationType.equals(Provides.class)) {
       return prepareProvidesKey(binder, method, key);
@@ -209,5 +209,26 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     }
   }
 
-  private DaggerMethodScanner() {}
+  @Override
+  public boolean equals(Object object) {
+    if (object instanceof DaggerMethodScanner) {
+      DaggerMethodScanner that = (DaggerMethodScanner) object;
+      return this.predicate.equals(that.predicate);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return predicate.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("predicate", predicate).toString();
+  }
+
+  private DaggerMethodScanner(Predicate<Method> predicate) {
+    this.predicate = predicate;
+  }
 }
