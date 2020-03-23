@@ -26,6 +26,7 @@ import com.google.common.collect.Iterables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Exposed;
 import com.google.inject.Guice;
@@ -41,6 +42,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.Set;
 import junit.framework.TestCase;
 
@@ -244,7 +246,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     String aString() {
       return "Foo";
     }
-
   }
 
   public void testChildInjectorInheritsScanner() {
@@ -559,5 +560,132 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
           String.format(
               "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
     }
+  }
+
+  static class Superclass {
+    @TestProvides
+    boolean booleanTest() {
+      return true;
+    }
+  }
+
+  static class Subclass extends Superclass {
+    @TestProvides
+    @Override
+    boolean booleanTest() {
+      return true;
+    }
+  }
+
+  static class IgnoringScanner extends ModuleAnnotatedMethodScanner {
+    private final Class<?> classToIgnore;
+    private int ignoredCounter = 0;
+
+    IgnoringScanner(Class<?> classToIgnore) {
+      this.classToIgnore = classToIgnore;
+    }
+
+    @Override
+    public Set<? extends Class<? extends Annotation>> annotationClasses() {
+      return ImmutableSet.of(TestProvides.class);
+    }
+
+    @Override
+    public <T> Key<T> prepareMethod(
+        Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+      Method method = (Method) injectionPoint.getMember();
+      if (method.getDeclaringClass().equals(classToIgnore)) {
+        ignoredCounter++;
+        return null;
+      }
+      return key;
+    }
+
+    int ignoredCounter() {
+      return ignoredCounter;
+    }
+  }
+
+  public void testIgnoreMethodsScannedForOverridesSubclass() {
+    IgnoringScanner scanner = new IgnoringScanner(Subclass.class);
+    try {
+      Guice.createInjector(ProviderMethodsModule.forModule(new Subclass(), scanner));
+      fail("expected exception not thrown");
+    } catch (CreationException e) {
+      assertContains(
+          e.getMessage(),
+          String.format(
+              "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
+    }
+    assertEquals(1, scanner.ignoredCounter()); // checking that there was a method ignored.
+  }
+
+  public void testIgnoreMethodsScannedForOverridesSuperclass() {
+    IgnoringScanner scanner = new IgnoringScanner(Superclass.class);
+
+    try {
+      Guice.createInjector(ProviderMethodsModule.forModule(new Subclass(), scanner));
+      fail("expected exception not thrown");
+    } catch (CreationException e) {
+      assertContains(
+          e.getMessage(),
+          String.format(
+              "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
+    }
+    assertEquals(1, scanner.ignoredCounter()); // checking that there was a method ignored.
+  }
+
+  public void testIgnoreMethods() {
+    class ModuleWithMethodsToIgnore {
+      @TestProvides
+      boolean booleanTest() {
+        return true;
+      }
+
+      @TestProvides
+      int ignore() {
+        return 0;
+      }
+    }
+
+    class TestScanner extends ModuleAnnotatedMethodScanner {
+      @Override
+      public Set<? extends Class<? extends Annotation>> annotationClasses() {
+        return ImmutableSet.of(TestProvides.class);
+      }
+
+      @Override
+      public <T> Key<T> prepareMethod(
+          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+        return key;
+      }
+    }
+    ModuleAnnotatedMethodScanner filteringScanner =
+        new TestScanner() {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            Method method = (Method) injectionPoint.getMember();
+            if (method.getName().equals("ignore")) {
+              return null;
+            }
+            return key;
+          }
+        };
+    Injector filteredInjector =
+        Guice.createInjector(
+            ProviderMethodsModule.forModule(new ModuleWithMethodsToIgnore(), filteringScanner));
+    assertTrue(filteredInjector.getInstance(Key.get(Boolean.class)));
+    try {
+      filteredInjector.getInstance(Integer.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      //
+    }
+    Injector unfilteredInjector =
+        Guice.createInjector(
+            ProviderMethodsModule.forModule(new ModuleWithMethodsToIgnore(), new TestScanner()));
+    assertTrue(unfilteredInjector.getInstance(Key.get(Boolean.class)));
+    assertEquals(Integer.valueOf(0), unfilteredInjector.getInstance(Integer.class));
   }
 }

@@ -15,11 +15,14 @@
  */
 package com.google.inject.daggeradapter;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.inject.daggeradapter.SupportedAnnotations.isAnnotationSupported;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimaps;
@@ -70,12 +73,48 @@ import java.util.Set;
  *       annotation.
  * </ul>
  *
- * @author cgruber@google.com (Christian Gruber)
+ * <p>If methods need to be ignored based on a condtion, a {@code Predicate<Method>} can be used
+ * passed to {@link DaggerAdapter.Builder#filter}, as in {@code
+ * DaggerAdapter.builder().addModules(...).filter(predicate).build()}. Only the methods which
+ * satisfy the predicate will be processed.
  */
 public final class DaggerAdapter {
   /** Creates a new {@link DaggerAdapter} from {@code daggerModuleObjects}. */
   public static Module from(Object... daggerModuleObjects) {
-    return new DaggerCompatibilityModule(ImmutableList.copyOf(daggerModuleObjects));
+    return builder().addModules(ImmutableList.copyOf(daggerModuleObjects)).build();
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** Builder for setting configuration options on DaggerAdapter. */
+  public static class Builder {
+    private final ImmutableList.Builder<Object> modules = ImmutableList.builder();
+    private Predicate<Method> predicate = Predicates.alwaysTrue();
+
+    /** Returns a module that will configure bindings based on the modules & scanners. */
+    public Module build() {
+      return new DaggerCompatibilityModule(this);
+    }
+
+    /**
+     * Adds modules (which can be classes annotated with {@link dagger.Module}, or instances of
+     * those classes) which will be scanned for bindings.
+     */
+    public Builder addModules(Iterable<Object> daggerModuleObjects) {
+      this.modules.addAll(daggerModuleObjects);
+      return this;
+    }
+
+    /**
+     * Limit the adapter to a subset of {@code methods} from {@link @dagger.Module} annotated
+     * classes which satisfy the {@code predicate}. Defaults to allowing all.
+     */
+    public Builder filter(Predicate<Method> predicate) {
+      this.predicate = checkNotNull(predicate, "predicate");
+      return this;
+    }
   }
 
   /**
@@ -85,20 +124,23 @@ public final class DaggerAdapter {
    */
   private static final class DaggerCompatibilityModule implements Module {
     private final ImmutableList<Object> declaredModules;
+    private final Predicate<Method> predicate;
 
-    private DaggerCompatibilityModule(ImmutableList<Object> declaredModules) {
-      this.declaredModules = declaredModules;
+    private DaggerCompatibilityModule(Builder builder) {
+      this.declaredModules = builder.modules.build();
+      this.predicate = builder.predicate;
     }
 
     @Override
     public void configure(Binder binder) {
       binder = binder.skipSources(getClass());
+      ModuleAnnotatedMethodScanner scanner = DaggerMethodScanner.create(predicate);
       for (Object module : deduplicateModules(binder, transitiveModules())) {
         checkIsDaggerModule(module, binder);
         validateNoSubcomponents(binder, module);
         checkUnsupportedDaggerAnnotations(module, binder);
 
-        binder.install(ProviderMethodsModule.forModule(module, DaggerMethodScanner.INSTANCE));
+        binder.install(ProviderMethodsModule.forModule(module, scanner));
       }
     }
 
