@@ -35,6 +35,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -65,6 +66,20 @@ public final class InjectionPoint {
   private final TypeLiteral<?> declaringType;
   private final ImmutableList<Dependency<?>> dependencies;
 
+  private static Class<?> annotatedTypeClass = null;
+  private static Method getAnnotatedParameterTypesMethod = null;
+  private static Method getAnnotationsMethod = null;
+
+  static {
+    try {
+      annotatedTypeClass = Class.forName("java.lang.reflect.AnnotatedType");
+      getAnnotatedParameterTypesMethod = Constructor.class.getMethod("getAnnotatedParameterTypes");
+      getAnnotationsMethod = annotatedTypeClass.getMethod("getAnnotations");
+    } catch (ClassNotFoundException | NoSuchMethodException e) {
+      // this only exists in java8
+    }
+  }
+
   InjectionPoint(TypeLiteral<?> declaringType, Method method, boolean optional) {
     this.member = method;
     this.declaringType = declaringType;
@@ -77,7 +92,7 @@ public final class InjectionPoint {
     this.declaringType = declaringType;
     this.optional = false;
     this.dependencies =
-        forMember(constructor, declaringType, constructor.getParameterAnnotations());
+        forMember(constructor, declaringType, getAllAnnotations(constructor));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
@@ -101,6 +116,49 @@ public final class InjectionPoint {
     this.dependencies =
         ImmutableList.<Dependency<?>>of(
             newDependency(key, Nullability.allowsNull(annotations), -1));
+  }
+
+  private static Annotation[][] getAllAnnotations(Constructor<?> constructor) {
+    Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
+    Annotation[][] output = new Annotation[parameterAnnotations.length][];
+    for (int i = 0; i < parameterAnnotations.length; i++) {
+        Annotation[] paramAnnotations = parameterAnnotations[i];
+        Annotation[] typeAnnotations = getConstructorParameterTypeAnnotation(constructor, i);
+        if (paramAnnotations.length == 0) {
+            output[i] = typeAnnotations;
+          } else if (typeAnnotations.length == 0) {
+            output[i] = paramAnnotations;
+          } else {
+            Annotation[] sum = new Annotation[paramAnnotations.length + typeAnnotations.length];
+            System.arraycopy(typeAnnotations, 0, sum, 0, typeAnnotations.length);
+            System.arraycopy(
+                paramAnnotations, 0, sum, typeAnnotations.length,
+                paramAnnotations.length
+            );
+            output[i] = sum;
+         }
+      }
+    return output;
+  }
+
+  /**
+    * This is the equivalent of the java 8
+    * constructor.getAnnotatedParameterTypes()[parameterIndex].getAnnotations()
+    * but implemented using reflection have it compile and run in java versions
+    * prior to java 8.
+    */
+  private static Annotation[] getConstructorParameterTypeAnnotation(
+    Constructor<?> constructor, int parameterIndex
+  ) {
+    if (annotatedTypeClass == null) {
+      return new Annotation[0];
+    }
+    try {
+      Object[] annotatedTypeInstances = (Object[])getAnnotatedParameterTypesMethod.invoke(constructor);
+      return (Annotation[])getAnnotationsMethod.invoke(annotatedTypeInstances[parameterIndex]);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private ImmutableList<Dependency<?>> forMember(
