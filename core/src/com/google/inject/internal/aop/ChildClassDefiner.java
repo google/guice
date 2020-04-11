@@ -43,14 +43,7 @@ final class ChildClassDefiner implements ClassDefiner {
         CacheBuilder.newBuilder()
             .weakKeys()
             .weakValues()
-            .build(
-                new CacheLoader<ClassLoader, ChildLoader>() {
-                  @Override
-                  public ChildLoader load(final ClassLoader hostLoader) {
-                    logger.fine("Creating a child loader for " + hostLoader);
-                    return doPrivileged(() -> new ChildLoader(hostLoader));
-                  }
-                });
+            .build(CacheLoader.from(ChildClassDefiner::childLoader));
   }
 
   @Override
@@ -68,6 +61,12 @@ final class ChildClassDefiner implements ClassDefiner {
   /** Utility method to remove doPrivileged ambiguity */
   static <T> T doPrivileged(PrivilegedAction<T> action) {
     return AccessController.doPrivileged(action);
+  }
+
+  /** Creates a child loader for the given host loader */
+  static ChildLoader childLoader(ClassLoader hostLoader) {
+    logger.fine("Creating a child loader for " + hostLoader);
+    return doPrivileged(() -> new ChildLoader(hostLoader));
   }
 
   /** Custom class loader that grants access to defineClass */
