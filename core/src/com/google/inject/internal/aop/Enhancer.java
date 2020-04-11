@@ -119,7 +119,7 @@ final class Enhancer extends AbstractGlueGenerator {
     ClassWriter cw = new ClassWriter(COMPUTE_MAXS);
     MethodVisitor mv;
 
-    cw.visit(V1_8, PUBLIC | FINAL | ACC_SUPER, proxyName, null, hostName, null);
+    cw.visit(V1_8, PUBLIC | ACC_SUPER, proxyName, null, hostName, null);
 
     cw.visitField(PUBLIC | STATIC | FINAL, INVOKERS_NAME, INVOKERS_DESCRIPTOR, null, null)
         .visitEnd();
