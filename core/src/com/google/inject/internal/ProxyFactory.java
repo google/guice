@@ -50,7 +50,8 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   private final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
   private final InvocationHandler[] callbacks;
 
-  ProxyFactory(InjectionPoint injectionPoint, Iterable<MethodAspect> methodAspects) {
+  ProxyFactory(InjectionPoint injectionPoint, Iterable<MethodAspect> methodAspects)
+      throws ErrorsException {
     this.injectionPoint = injectionPoint;
 
     Class<?> hostClass = injectionPoint.getMember().getDeclaringClass();
@@ -105,7 +106,14 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return;
     }
 
-    enhancer = enhancerBuilder.buildEnhancer(matchedMethodIndices);
+    try {
+      enhancer = enhancerBuilder.buildEnhancer(matchedMethodIndices);
+    } catch (Throwable e) {
+      throw new Errors()
+          .errorEnhancingClass(injectionPoint.getMember().getDeclaringClass(), e)
+          .toException();
+    }
+
     callbacks = new InvocationHandler[matchedMethodIndices.cardinality()];
 
     ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder =

@@ -81,16 +81,7 @@ final class ConstructorInjectorStore {
             ? injectorAspects
             : Stream.concat(injectorAspects.stream(), membersInjector.getAddedAspects().stream())
                 .collect(toImmutableList());
-
-    ConstructionProxyFactory<T> factory;
-    try {
-      factory = new ProxyFactory<>(injectionPoint, methodAspects);
-    } catch (Throwable e) {
-      throw errors
-          .errorEnhancingClass(injectionPoint.getMember().getDeclaringClass(), e)
-          .toException();
-    }
-
+    ConstructionProxyFactory<T> factory = new ProxyFactory<>(injectionPoint, methodAspects);
     /*end[AOP]*/
     /*if[NO_AOP]
     ConstructionProxyFactory<T> factory = new DefaultConstructionProxyFactory<>(injectionPoint);
