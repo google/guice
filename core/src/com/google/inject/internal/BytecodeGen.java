@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkArgument;
 /*if[AOP]*/
 import static com.google.inject.internal.aop.ClassBuilding.buildFastClass;
 import static com.google.inject.internal.aop.ClassBuilding.canEnhance;
@@ -88,7 +88,7 @@ public final class BytecodeGen {
   @SuppressWarnings("unchecked")
   public static BiFunction<InvocationHandler[], Object[], Object> enhancedConstructor(
       Function<String, BiFunction> enhancer, Constructor<?> constructor) {
-    checkState(canEnhance(constructor), "Constructor is not visible");
+    checkArgument(canEnhance(constructor), "Constructor is not visible");
     return enhancer.apply(signature(constructor));
   }
 
