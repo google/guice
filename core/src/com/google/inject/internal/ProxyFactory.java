@@ -109,9 +109,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     try {
       enhancer = enhancerBuilder.buildEnhancer(matchedMethodIndices);
     } catch (Throwable e) {
-      throw new Errors()
-          .errorEnhancingClass(injectionPoint.getMember().getDeclaringClass(), e)
-          .toException();
+      throw new Errors().errorEnhancingClass(hostClass, e).toException();
     }
 
     callbacks = new InvocationHandler[matchedMethodIndices.cardinality()];
