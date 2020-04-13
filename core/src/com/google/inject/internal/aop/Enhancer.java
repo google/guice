@@ -281,8 +281,8 @@ final class Enhancer extends AbstractGlueGenerator {
 
     mv.visitInsn(ACONST_NULL);
     mv.visitVarInsn(ALOAD, 1);
-    // JVM seems to prefer different casting when using defineAnonymous vs child-loader
-    mv.visitTypeInsn(CHECKCAST, ClassDefining.hasPackageAccess() ? hostName : proxyName);
+    // proxy is not visible by name when hosted anonymously; casting to host works as a fallback
+    mv.visitTypeInsn(CHECKCAST, ClassDefining.isAnonymousHost(hostClass) ? hostName : proxyName);
     unpackArguments(mv, target.getParameterTypes());
 
     mv.visitMethodInsn(

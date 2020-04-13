@@ -34,7 +34,7 @@ public final class ClassDefining {
   // initialization-on-demand...
   private static class ClassDefinerHolder {
     static final ClassDefiner INSTANCE = bindClassDefiner();
-    static final boolean HAS_PACKAGE_ACCESS = INSTANCE instanceof UnsafeClassDefiner;
+    static final boolean IS_UNSAFE = INSTANCE instanceof UnsafeClassDefiner;
   }
 
   /** Defines a new class relative to the host. */
@@ -44,7 +44,12 @@ public final class ClassDefining {
 
   /** Does the definer have access to package-private members? */
   public static boolean hasPackageAccess() {
-    return ClassDefinerHolder.HAS_PACKAGE_ACCESS;
+    return ClassDefinerHolder.IS_UNSAFE;
+  }
+
+  /** Does the given class host new types anonymously, meaning they are not visible by name? */
+  public static boolean isAnonymousHost(Class<?> hostClass) {
+    return ClassDefinerHolder.IS_UNSAFE && UnsafeClassDefiner.isAnonymousHost(hostClass);
   }
 
   /** Binds the preferred {@link ClassDefiner} instance. */
