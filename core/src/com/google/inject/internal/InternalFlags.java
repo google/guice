@@ -53,11 +53,13 @@ public class InternalFlags {
    * The options for Guice custom class loading.
    */
   public enum CustomClassLoadingOption {
-    /** Never use child class loaders, always define enhanced types with unsafe */
+    /** Never use child class loaders, use Unsafe to define types in existing class loaders */
     OFF,
-    /** Always use child class loaders, even when unsafe support is available */
+    /** Always use child class loaders, even when Unsafe support is available */
     CHILD,
-    /** Prefer unsafe, but use child class loaders if unsafe is not available (Default) */
+    /** Prefer Unsafe.defineAnonymousClass, even when defineClass is available */
+    ANONYMOUS,
+    /** Prefer Unsafe, but use child class loaders if Unsafe is not available (Default) */
     BRIDGE
   }
 
