@@ -104,21 +104,21 @@ final class MethodPartition {
       Method originalBridge = leafMethods.get(targetEntry.getKey());
       Method superTarget = targetEntry.getValue();
 
-      // some AOP matchers skip all synthetic methods, so if we have a non-bridge super-method with
-      // identical parameters and it's not from an interface then use that as the enhanceable method
-      // instead of the original bridge
-      Method enhanceableMethod =
-          superTarget != null && !superTarget.getDeclaringClass().isInterface()
-              ? superTarget
-              : originalBridge;
-
-      methodVisitor.accept(enhanceableMethod);
+      Method enhanceableMethod = originalBridge;
 
       // scan all methods looking for the bridge delegate by comparing generic parameters
       // (these are the kind of bridge methods that were added to account for type-erasure)
       for (Method candidate : candidates) {
         if (!candidate.isBridge()) {
           if (candidate == superTarget) {
+
+            // some AOP matchers skip all synthetic methods, so if bridge delegation is not involved
+            // and we have a non-bridge super-method with identical parameters and it is not from an
+            // interface then use that as the enhanceable method instead of the original bridge
+            if (!superTarget.getDeclaringClass().isInterface()) {
+              enhanceableMethod = superTarget;
+            }
+
             break; // we've reached the non-bridge super-method so default to super-class invocation
           }
           // compare bridge method against resolved candidate
@@ -129,11 +129,13 @@ final class MethodPartition {
 
             // found a target that differs by raw parameter types but matches the bridge after
             // generic resolution; record this delegation so we can call it with invokevirtual
-            bridgeDelegates.put(enhanceableMethod, candidate);
+            bridgeDelegates.put(originalBridge, candidate);
             break;
           }
         }
       }
+
+      methodVisitor.accept(enhanceableMethod);
     }
   }
 
