@@ -23,10 +23,13 @@ import static com.google.inject.internal.aop.BytecodeTasks.packArguments;
 import static com.google.inject.internal.aop.BytecodeTasks.pushInteger;
 import static com.google.inject.internal.aop.BytecodeTasks.unbox;
 import static com.google.inject.internal.aop.BytecodeTasks.unpackArguments;
+import static java.lang.reflect.Modifier.ABSTRACT;
 import static java.lang.reflect.Modifier.FINAL;
+import static java.lang.reflect.Modifier.NATIVE;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
+import static java.lang.reflect.Modifier.SYNCHRONIZED;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.AALOAD;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
@@ -223,7 +226,7 @@ final class Enhancer extends AbstractGlueGenerator {
   private void enhanceMethod(ClassWriter cw, Method method, int methodIndex) {
     MethodVisitor mv =
         cw.visitMethod(
-            PUBLIC,
+            FINAL | (method.getModifiers() & ~(ABSTRACT | NATIVE | SYNCHRONIZED)),
             method.getName(),
             Type.getMethodDescriptor(method),
             null,
@@ -300,7 +303,7 @@ final class Enhancer extends AbstractGlueGenerator {
   private void generateVirtualBridge(ClassWriter cw, Method bridge, Method target) {
     MethodVisitor mv =
         cw.visitMethod(
-            PUBLIC,
+            FINAL | (bridge.getModifiers() & ~(ABSTRACT | NATIVE | SYNCHRONIZED)),
             bridge.getName(),
             Type.getMethodDescriptor(bridge),
             null,
