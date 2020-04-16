@@ -112,9 +112,14 @@ final class Enhancer extends AbstractGlueGenerator {
 
   private final Map<Method, Method> bridgeDelegates;
 
+  private final String checkcastToProxy;
+
   public Enhancer(Class<?> hostClass, Map<Method, Method> bridgeDelegates) {
     super(hostClass, ENHANCER_BY_GUICE_MARKER);
     this.bridgeDelegates = bridgeDelegates;
+
+    // CHECKCAST(proxyName) fails when hosted anonymously; hostName works in that scenario
+    this.checkcastToProxy = ClassDefining.isAnonymousHost(hostClass) ? hostName : proxyName;
   }
 
   @Override
@@ -284,8 +289,7 @@ final class Enhancer extends AbstractGlueGenerator {
 
     mv.visitInsn(ACONST_NULL);
     mv.visitVarInsn(ALOAD, 1);
-    // proxy is not visible by name when hosted anonymously; casting to host works as a fallback
-    mv.visitTypeInsn(CHECKCAST, ClassDefining.isAnonymousHost(hostClass) ? hostName : proxyName);
+    mv.visitTypeInsn(CHECKCAST, checkcastToProxy);
     unpackArguments(mv, target.getParameterTypes());
 
     mv.visitMethodInsn(
@@ -310,12 +314,12 @@ final class Enhancer extends AbstractGlueGenerator {
             exceptionNames(bridge));
 
     mv.visitVarInsn(ALOAD, 0);
-    mv.visitTypeInsn(CHECKCAST, hostName);
-    int slot = 1;
+    mv.visitTypeInsn(CHECKCAST, checkcastToProxy);
 
     Class<?>[] bridgeParameterTypes = bridge.getParameterTypes();
     Class<?>[] targetParameterTypes = target.getParameterTypes();
 
+    int slot = 1;
     for (int i = 0, len = targetParameterTypes.length; i < len; i++) {
       Class<?> parameterType = targetParameterTypes[i];
       slot += loadArgument(mv, parameterType, slot);
