@@ -132,7 +132,8 @@ public class BinderTest extends TestCase {
       String segment4 =
           "No implementation for java.util.Date annotated with @"
               + Named.class.getName()
-              + "(value="
+              + "("
+              + Annotations.memberKeyString()
               + Annotations.memberValueString("date")
               + ") was bound.";
       String atSegment = "at " + getClass().getName();

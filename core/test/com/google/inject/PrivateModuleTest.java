@@ -296,10 +296,10 @@ public class PrivateModuleTest extends TestCase {
           "at " + getClass().getName(),
           getDeclaringSourcePart(getClass()),
           "2) No implementation for " + String.class.getName(),
-          "Named(value=" + Annotations.memberValueString("a") + ") was bound.",
+          "Named(" + Annotations.memberKeyString() + Annotations.memberValueString("a") + ") was bound.",
           "for field at " + AB.class.getName() + ".a(PrivateModuleTest.java:",
           "3) No implementation for " + String.class.getName(),
-          "Named(value=" + Annotations.memberValueString("b") + ") was bound.",
+          "Named(" + Annotations.memberKeyString() + Annotations.memberValueString("b") + ") was bound.",
           "for field at " + AB.class.getName() + ".b(PrivateModuleTest.java:",
           "3 errors");
     }

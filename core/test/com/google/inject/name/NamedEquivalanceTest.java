@@ -124,7 +124,7 @@ public class NamedEquivalanceTest extends TestCase {
       assertContains(
           e.getMessage(),
           "No implementation for java.lang.String annotated with "
-              + "@com.google.inject.name.Named(value="
+              + "@com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("foo")
               + ") was bound.");
     }
@@ -140,7 +140,8 @@ public class NamedEquivalanceTest extends TestCase {
       if (fails) {
         assertContains(
             e.getMessage(),
-            "A binding to java.lang.String annotated with @com.google.inject.name.Named(value="
+            "A binding to java.lang.String annotated with @com.google.inject.name.Named("
+                + Annotations.memberKeyString()
                 + Annotations.memberValueString("foo")
                 + ") was already configured");
       } else {
@@ -238,7 +239,7 @@ public class NamedEquivalanceTest extends TestCase {
     public String toString() {
       return "@"
           + javax.inject.Named.class.getName()
-          + "(value="
+          + "(" + Annotations.memberKeyString()
           + Annotations.memberValueString(value)
           + ")";
     }
@@ -283,7 +284,7 @@ public class NamedEquivalanceTest extends TestCase {
     public String toString() {
       return "@"
           + com.google.inject.name.Named.class.getName()
-          + "(value="
+          + "(" + Annotations.memberKeyString()
           + Annotations.memberValueString(value)
           + ")";
     }

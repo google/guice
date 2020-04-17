@@ -69,7 +69,8 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named("
+            + Annotations.memberKeyString()
             + Annotations.memberValueString("a")
             + ")]@"
             + getClass().getName()
@@ -98,7 +99,8 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named("
+            + Annotations.memberKeyString()
             + Annotations.memberValueString("b")
             + ")]@"
             + getClass().getName()
@@ -128,7 +130,8 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named("
+            + Annotations.memberKeyString()
             + Annotations.memberValueString("c")
             + ")]@"
             + Constructable.class.getName()
@@ -146,7 +149,8 @@ public class InjectionPointTest extends TestCase {
   public void testUnattachedDependency() throws IOException {
     Dependency<String> dependency = Dependency.get(Key.get(String.class, named("d")));
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
+        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named("
+            + Annotations.memberKeyString()
             + Annotations.memberValueString("d")
             + ")]",
         dependency.toString());

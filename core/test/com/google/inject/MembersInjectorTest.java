@@ -280,7 +280,7 @@ public class MembersInjectorTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "1) No implementation for com.google.inject.MembersInjector<java.lang.String> "
-              + "annotated with @com.google.inject.name.Named(value="
+              + "annotated with @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("foo")
               + ") was bound.");
     }

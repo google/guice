@@ -673,7 +673,8 @@ public class FactoryProvider2Test extends TestCase {
               + " [com.google.inject.Provider<"
               + Color.class.getName()
               + ">"
-              + " annotated with @com.google.inject.assistedinject.Assisted(value="
+              + " annotated with @com.google.inject.assistedinject.Assisted("
+              + Annotations.memberKeyString()
               + Annotations.memberValueString("color")
               + ")]"
               + " on method ["
@@ -731,7 +732,8 @@ public class FactoryProvider2Test extends TestCase {
               + " [com.google.inject.Provider<"
               + Color.class.getName()
               + ">"
-              + " annotated with @com.google.inject.assistedinject.Assisted(value="
+              + " annotated with @com.google.inject.assistedinject.Assisted("
+              + Annotations.memberKeyString()
               + Annotations.memberValueString("color")
               + ")]"
               + " on method ["
@@ -866,7 +868,8 @@ public class FactoryProvider2Test extends TestCase {
               + Color.class.getName()
               + " annotated with @"
               + Assisted.class.getName()
-              + "(value="
+              + "("
+              + Annotations.memberKeyString()
               + Annotations.memberValueString("paint")
               + ") was already configured at");
     }

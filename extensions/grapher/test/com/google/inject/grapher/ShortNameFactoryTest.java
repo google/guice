@@ -103,7 +103,7 @@ public class ShortNameFactoryTest extends TestCase {
   public void testGetAnnotationName_annotationInstanceWithParameters() throws Exception {
     Key<?> key = Key.get(String.class, Names.named("name"));
     assertEquals(
-        "@Named(value=" + Annotations.memberValueString("name") + ")",
+        "@Named(" + Annotations.memberKeyString() + Annotations.memberValueString("name") + ")",
         nameFactory.getAnnotationName(key));
   }
 

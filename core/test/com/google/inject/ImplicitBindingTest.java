@@ -100,13 +100,13 @@ public class ImplicitBindingTest extends TestCase {
           "1) No implementation for " + I.class.getName(),
           "annotated with @"
               + Named.class.getName()
-              + "(value="
+              + "(" + Annotations.memberKeyString()
               + Annotations.memberValueString("i")
               + ") was bound.",
           "while locating " + I.class.getName(),
           " annotated with @"
               + Named.class.getName()
-              + "(value="
+              + "(" + Annotations.memberKeyString()
               + Annotations.memberValueString("i")
               + ")");
     }

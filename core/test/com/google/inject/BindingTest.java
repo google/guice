@@ -518,7 +518,7 @@ public class BindingTest extends TestCase {
       this.stage = stage;
     }
   }
-  
+
   public void testTurkeyBaconProblemUsingToConstuctor() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @SuppressWarnings("unchecked")
@@ -534,11 +534,11 @@ public class BindingTest extends TestCase {
     Bacon bacon = injector.getInstance(Bacon.class);
     assertEquals(Food.PORK, bacon.getMaterial());
     assertFalse(bacon.isCooked());
-    
+
     Bacon turkeyBacon = injector.getInstance(Key.get(Bacon.class, named("Turkey")));
     assertEquals(Food.TURKEY, turkeyBacon.getMaterial());
     assertTrue(turkeyBacon.isCooked());
-    
+
     Bacon cookedBacon = injector.getInstance(Key.get(Bacon.class, named("Cooked")));
     assertEquals(Food.PORK, cookedBacon.getMaterial());
     assertTrue(cookedBacon.isCooked());
@@ -554,21 +554,21 @@ public class BindingTest extends TestCase {
           "Guice configuration errors:",
           "1) No implementation for"
               + " com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("Turky")
               + ") was bound.",
           "Did you mean?",
           "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("Turkey")
               + ")",
           "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("Tofu")
               + ")",
           "1 more binding with other annotations.",
           "while locating com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("Turky")
               + ")");
     }
@@ -594,16 +594,16 @@ public class BindingTest extends TestCase {
           msg,
           "1) No implementation for com.google.inject.BindingTest$Bacon"
               + " annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("turkey")
               + ") was bound.",
           "Did you mean?",
           "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("Turkey")
               + ")",
           "while locating com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
+              + " @com.google.inject.name.Named(" + Annotations.memberKeyString()
               + Annotations.memberValueString("turkey")
               + ")");
     }
