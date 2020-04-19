@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.only;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -25,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.ConstructorBinding;
+import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -433,5 +435,46 @@ public class MethodInterceptionTest extends TestCase {
           });
       return null;
     }
+  }
+
+  @Retention(RUNTIME)
+  @interface Trackable {}
+
+  interface Animal {
+    default String identifyMyself() {
+      return "I am an animal.";
+    }
+  }
+
+  interface Hoofed extends Animal {
+    @Override
+    @Trackable
+    default String identifyMyself() {
+      return "I have hooves.";
+    }
+  }
+
+  interface MythicalAnimal extends Animal {}
+
+  static class Horse implements Hoofed {}
+
+  static class Unicorn extends Horse implements MythicalAnimal {}
+
+  public void testDefaultMethodInterception() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindInterceptor(
+                    Matchers.any(),
+                    Matchers.annotatedWith(Trackable.class),
+                    new CountingInterceptor());
+              }
+            });
+
+    assertEquals(0, count.get());
+    assertEquals("I have hooves.", injector.getInstance(Unicorn.class).identifyMyself());
+    assertEquals(1, count.get());
   }
 }
