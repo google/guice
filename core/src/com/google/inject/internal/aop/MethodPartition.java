@@ -135,7 +135,10 @@ final class MethodPartition {
         }
       }
 
-      methodVisitor.accept(enhanceableMethod);
+      // sanity check: only report method if we can enhance it
+      if ((enhanceableMethod.getModifiers() & FINAL) == 0) {
+        methodVisitor.accept(enhanceableMethod);
+      }
     }
   }
 
