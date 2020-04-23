@@ -57,6 +57,13 @@ import org.objectweb.asm.Type;
 /**
  * Generates fast-classes.
  *
+ * <p>Each fast-class has a single constructor that takes an index. It also has an instance method
+ * that takes a context object and an array of argument objects which it combines with the index to
+ * call the shared static trampoline. Each fast-class instance therefore acts like a bound invoker
+ * to the appropriate constructor or method of the host class.
+ *
+ * <p>A handle to the fast-class constructor is used as the invoker table, mapping index to invoker.
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 final class FastClass extends AbstractGlueGenerator {
@@ -93,6 +100,7 @@ final class FastClass extends AbstractGlueGenerator {
 
     cw.visitField(PRIVATE | FINAL, "index", "I", null, null).visitEnd();
 
+    // fast-class constructor that takes an index and binds it
     mv = cw.visitMethod(PUBLIC, "<init>", "(I)V", null, null);
     mv.visitCode();
     mv.visitVarInsn(ALOAD, 0);
@@ -104,13 +112,16 @@ final class FastClass extends AbstractGlueGenerator {
     mv.visitMaxs(0, 0);
     mv.visitEnd();
 
+    // fast-class invoker function that takes a context object and argument array
     mv = cw.visitMethod(PUBLIC, "apply", RAW_INVOKER_DESCRIPTOR, null, null);
     mv.visitCode();
+    // combine bound index with context object and argument array
     mv.visitVarInsn(ALOAD, 0);
     mv.visitFieldInsn(GETFIELD, proxyName, "index", "I");
     mv.visitVarInsn(ALOAD, 1);
     mv.visitVarInsn(ALOAD, 2);
     mv.visitTypeInsn(CHECKCAST, OBJECT_ARRAY_TYPE);
+    // call into the shared trampoline
     mv.visitMethodInsn(INVOKESTATIC, proxyName, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, false);
     mv.visitInsn(ARETURN);
     mv.visitMaxs(0, 0);
@@ -127,6 +138,8 @@ final class FastClass extends AbstractGlueGenerator {
     mv.visitTypeInsn(NEW, hostName);
     mv.visitInsn(DUP);
 
+    // fast-class constructor invokers don't use the context object
+
     unpackArguments(mv, constructor.getParameterTypes());
 
     mv.visitMethodInsn(
@@ -138,10 +151,12 @@ final class FastClass extends AbstractGlueGenerator {
 
     int invokeOpcode;
     if ((method.getModifiers() & STATIC) == 0) {
+      // context object is the instance whose method we want to call
       mv.visitVarInsn(ALOAD, 1);
       mv.visitTypeInsn(CHECKCAST, hostName);
       invokeOpcode = hostIsInterface ? INVOKEINTERFACE : INVOKEVIRTUAL;
     } else {
+      // fast-class static method invokers don't use the context object
       invokeOpcode = INVOKESTATIC;
     }
 
@@ -164,6 +179,7 @@ final class FastClass extends AbstractGlueGenerator {
 
   @Override
   protected MethodHandle lookupInvokerTable(Class<?> glueClass) throws Throwable {
+    // adapt constructor to method handle that takes an index and returns an invoker
     return LOOKUP
         .findConstructor(glueClass, INT_CONSTRUCTOR_TYPE)
         .asType(INDEX_TO_INVOKER_METHOD_TYPE);

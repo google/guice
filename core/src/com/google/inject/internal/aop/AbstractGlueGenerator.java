@@ -107,7 +107,7 @@ abstract class AbstractGlueGenerator {
   private static Function<String, BiFunction> bindSignaturesToInvokers(
       ToIntFunction<String> signatureTable, MethodHandle invokerTable) {
 
-    // single-argument method; assume table is a function from integer index to invoker
+    // single-argument method; the table must be a function from integer index to invoker function
     if (invokerTable.type().parameterCount() == 1) {
       return signature -> {
         try {
@@ -119,13 +119,13 @@ abstract class AbstractGlueGenerator {
       };
     }
 
-    // otherwise must be trampoline that accepts the index with other arguments at invocation time
+    // otherwise must be a trampoline method that takes the index and invoker arguments all at once
     return signature -> {
-      // bind the index when we have the signature...
+      // bind the index as soon as we have the signature...
       int index = signatureTable.applyAsInt(signature);
       return (instance, arguments) -> {
         try {
-          // ...but delay applying it until invocation time
+          // ...but delay calling trampoline until invocation time when we have the other arguments
           return invokerTable.invokeExact(index, instance, (Object[]) arguments);
         } catch (Throwable e) {
           throw asIfUnchecked(e);
@@ -140,6 +140,10 @@ abstract class AbstractGlueGenerator {
     throw (E) e;
   }
 
+  /**
+   * Generate trampoline that takes an index, along with a context object and array of argument
+   * objects, and invokes the appropriate constructor/method returning the result as an object.
+   */
   protected final void generateTrampoline(ClassWriter cw, Collection<Executable> members) {
     MethodVisitor mv =
         cw.visitMethod(PUBLIC | STATIC, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, null, null);
@@ -173,7 +177,9 @@ abstract class AbstractGlueGenerator {
     mv.visitEnd();
   }
 
+  /** Generate invoker that takes a context and an argument array and calls the constructor. */
   protected abstract void generateConstructorInvoker(MethodVisitor mv, Constructor<?> constructor);
 
+  /** Generate invoker that takes an instance and an argument array and calls the method. */
   protected abstract void generateMethodInvoker(MethodVisitor mv, Method method);
 }
