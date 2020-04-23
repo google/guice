@@ -128,6 +128,7 @@ final class Enhancer extends AbstractGlueGenerator {
     MethodVisitor mv;
 
     cw.visit(V1_8, PUBLIC | ACC_SUPER, proxyName, null, hostName, null);
+    cw.visitSource(GENERATED_SOURCE, null);
 
     cw.visitField(PUBLIC | STATIC | FINAL, INVOKERS_NAME, INVOKERS_DESCRIPTOR, null, null)
         .visitEnd();

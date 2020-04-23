@@ -89,6 +89,7 @@ final class FastClass extends AbstractGlueGenerator {
     MethodVisitor mv;
 
     cw.visit(V1_8, PUBLIC | FINAL | ACC_SUPER, proxyName, null, "java/lang/Object", FAST_CLASS_API);
+    cw.visitSource(GENERATED_SOURCE, null);
 
     cw.visitField(PRIVATE | FINAL, "index", "I", null, null).visitEnd();
 

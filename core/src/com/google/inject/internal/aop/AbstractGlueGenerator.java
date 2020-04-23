@@ -46,6 +46,8 @@ import org.objectweb.asm.Type;
  */
 abstract class AbstractGlueGenerator {
 
+  protected static final String GENERATED_SOURCE = "<generated>";
+
   protected static final String TRAMPOLINE_NAME = "GUICE$TRAMPOLINE";
 
   /**
