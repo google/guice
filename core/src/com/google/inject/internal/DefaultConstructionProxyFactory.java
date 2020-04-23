@@ -80,7 +80,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     public T newInstance(Object... arguments) throws InvocationTargetException {
       try {
         return (T) fastConstructor.apply(null, arguments);
-      } catch (Exception e) {
+      } catch (Throwable e) {
         throw new InvocationTargetException(e);
       }
     }

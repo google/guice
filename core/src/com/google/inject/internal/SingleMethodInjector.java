@@ -49,7 +49,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
               throws IllegalAccessException, InvocationTargetException {
             try {
               return fastMethod.apply(target, parameters);
-            } catch (Exception e) {
+            } catch (Throwable e) {
               throw new InvocationTargetException(e);
             }
           }

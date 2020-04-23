@@ -261,7 +261,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
         throws IllegalAccessException, InvocationTargetException {
       try {
         return (T) fastMethod.apply(instance, parameters);
-      } catch (Exception e) {
+      } catch (Throwable e) {
         throw new InvocationTargetException(e);
       }
     }
