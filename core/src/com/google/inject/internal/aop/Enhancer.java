@@ -140,7 +140,7 @@ final class Enhancer extends AbstractGlueGenerator {
     cw.visit(V1_8, PUBLIC | ACC_SUPER, proxyName, null, hostName, null);
     cw.visitSource(GENERATED_SOURCE, null);
 
-    // this field will either contain the trampoline or glue to make it into an invoker table
+    // this shared field either contains the trampoline or glue to make it into an invoker table
     cw.visitField(PUBLIC | STATIC | FINAL, INVOKERS_NAME, INVOKERS_DESCRIPTOR, null, null)
         .visitEnd();
 
@@ -148,7 +148,7 @@ final class Enhancer extends AbstractGlueGenerator {
 
     generateTrampoline(cw, members);
 
-    // store the handlers configured for this particular enhanced instance
+    // this field will hold the handlers configured for this particular enhanced instance
     cw.visitField(PRIVATE | FINAL, HANDLERS_NAME, HANDLERS_DESCRIPTOR, null, null).visitEnd();
 
     Set<Method> remainingBridgeMethods = new HashSet<>(bridgeDelegates.keySet());
