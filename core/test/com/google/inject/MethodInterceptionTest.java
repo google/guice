@@ -438,7 +438,7 @@ public class MethodInterceptionTest extends TestCase {
   }
 
   @Retention(RUNTIME)
-  @interface Trackable {}
+  @interface Grounded {}
 
   interface Animal {
     default String identifyMyself() {
@@ -446,19 +446,31 @@ public class MethodInterceptionTest extends TestCase {
     }
   }
 
-  interface Hoofed extends Animal {
+  interface Horse extends Animal {
     @Override
-    @Trackable
+    @Grounded
     default String identifyMyself() {
-      return "I have hooves.";
+      return "I am a horse.";
     }
   }
 
   interface MythicalAnimal extends Animal {}
 
-  static class Horse implements Hoofed {}
+  interface FlyingHorse extends Horse, MythicalAnimal {
+    @Override
+    // not Grounded
+    default String identifyMyself() {
+      return "I am a flying horse.";
+    }
+  }
 
-  static class Unicorn extends Horse implements MythicalAnimal {}
+  static class HorseImpl implements Horse {}
+
+  // MythicalAnimal shouldn't disturb earlier hierarchy
+  static class Unicorn extends HorseImpl implements MythicalAnimal {}
+
+  // FlyingHorse should be merged into earlier hierarchy
+  static class Pegasus extends HorseImpl implements MythicalAnimal, FlyingHorse {}
 
   public void testDefaultMethodInterception() {
     Injector injector =
@@ -468,13 +480,15 @@ public class MethodInterceptionTest extends TestCase {
               protected void configure() {
                 bindInterceptor(
                     Matchers.any(),
-                    Matchers.annotatedWith(Trackable.class),
+                    Matchers.annotatedWith(Grounded.class),
                     new CountingInterceptor());
               }
             });
 
     assertEquals(0, count.get());
-    assertEquals("I have hooves.", injector.getInstance(Unicorn.class).identifyMyself());
-    assertEquals(1, count.get());
+    assertEquals("I am a horse.", injector.getInstance(Unicorn.class).identifyMyself());
+    assertEquals(1, count.get()); // unicorn is grounded
+    assertEquals("I am a flying horse.", injector.getInstance(Pegasus.class).identifyMyself());
+    assertEquals(1, count.get()); // pegasus is not grounded
   }
 }
