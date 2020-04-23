@@ -88,6 +88,8 @@ import java.util.function.ToIntFunction;
  */
 final class ImmutableStringTrie implements ToIntFunction<String> {
 
+  private static final ToIntFunction<String> SINGLETON_TRIE = key -> 0;
+
   /** Marks a leaf in the trie, where the rest of the bits are the index to be returned. */
   private static final char LEAF_MARKER = 0x8000;
 
@@ -161,16 +163,11 @@ final class ImmutableStringTrie implements ToIntFunction<String> {
    * <p>The table of strings must be sorted in lexical order.
    */
   public static ToIntFunction<String> buildTrie(Collection<String> table) {
-    return buildTrie(table.toArray(new String[table.size()]));
-  }
-
-  /**
-   * Builds an immutable trie that indexes the given table of strings.
-   *
-   * <p>The table of strings must be sorted in lexical order.
-   */
-  public static ToIntFunction<String> buildTrie(String[] table) {
-    return buildTrie(new StringBuilder(), table, 0, table.length);
+    int numRows = table.size();
+    if (numRows > 1) {
+      return buildTrie(new StringBuilder(), table.toArray(new String[numRows]), 0, numRows);
+    }
+    return SINGLETON_TRIE;
   }
 
   /** Builds a trie, overflowing to additional tries if there are too many rows */
