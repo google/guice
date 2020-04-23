@@ -32,10 +32,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -156,16 +154,19 @@ public final class ClassBuilding {
       visitor.accept(method);
     }
 
-    // work our way back down the class hierarchy, visiting interfaces declared at each level
-    Set<Class<?>> visited = new HashSet<>();
+    // work our way back down the class hierarchy, merging and flattening interfaces into a list
+    List<Class<?>> interfaces = new ArrayList<>();
     while (!interfaceStack.isEmpty()) {
       for (Class<?> intf : interfaceStack.pop()) {
-        // skip duplicate declarations of an interface
-        if (visited.add(intf)) {
-          visitMembers(intf.getDeclaredMethods(), false, visitor);
+        if (mergeInterface(interfaces, intf)) {
           pushInterfaces(interfaceStack, intf.getInterfaces());
         }
       }
+    }
+
+    // finally visit the methods declared in the flattened interface hierarchy
+    for (Class<?> intf : interfaces) {
+      visitMembers(intf.getDeclaredMethods(), false, visitor);
     }
   }
 
@@ -174,6 +175,24 @@ public final class ClassBuilding {
     if (interfaces.length > 0) {
       interfaceStack.push(interfaces);
     }
+  }
+
+  /** Attempts to merge the interface with the current flattened hierarchy. */
+  private static boolean mergeInterface(List<Class<?>> interfaces, Class<?> candidate) {
+    // work along the flattened hierarchy to find the appropriate merge point
+    for (int i = 0, len = interfaces.size(); i < len; i++) {
+      Class<?> existingInterface = interfaces.get(i);
+      if (existingInterface == candidate) {
+        // already seen this interface, skip further processing
+        return false;
+      } else if (existingInterface.isAssignableFrom(candidate)) {
+        // extends existing interface, insert just before it in the flattened hierarchy
+        interfaces.add(i, candidate);
+        return true;
+      }
+    }
+    // unrelated or a superinterface, in both cases append to the flattened hierarchy
+    return interfaces.add(candidate);
   }
 
   /** Extract the package name from a class name. */
