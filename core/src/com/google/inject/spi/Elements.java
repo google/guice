@@ -314,50 +314,52 @@ public final class Elements {
 
     @Override
     public void install(Module module) {
-      if (!modules.containsKey(module)) {
-        RecordingBinder binder = this;
-        boolean unwrapModuleSource = false;
-        // Update the module source for the new module
-        if (module instanceof ProviderMethodsModule) {
-          // There are two reason's we'd want to get the module source in a ProviderMethodsModule.
-          // ModuleAnnotatedMethodScanner lets users scan their own modules for @Provides-like
-          // bindings.  If they install the module at a top-level, then moduleSource can be null.
-          // Also, if they pass something other than 'this' to it, we'd have the wrong source.
-          Class<?> delegateClass = ((ProviderMethodsModule) module).getDelegateModuleClass();
-          if (moduleSource == null
-              || !moduleSource.getModuleClassName().equals(delegateClass.getName())) {
-            moduleSource = getModuleSource(delegateClass);
-            unwrapModuleSource = true;
-          }
-        } else {
-          moduleSource = getModuleSource(module.getClass());
+      // Ignore duplicate installations of the same module instance.
+      if (modules.containsKey(module)) {
+        return;
+      }
+      RecordingBinder binder = this;
+      boolean unwrapModuleSource = false;
+      // Update the module source for the new module
+      if (module instanceof ProviderMethodsModule) {
+        // There are two reason's we'd want to get the module source in a ProviderMethodsModule.
+        // ModuleAnnotatedMethodScanner lets users scan their own modules for @Provides-like
+        // bindings.  If they install the module at a top-level, then moduleSource can be null.
+        // Also, if they pass something other than 'this' to it, we'd have the wrong source.
+        Class<?> delegateClass = ((ProviderMethodsModule) module).getDelegateModuleClass();
+        if (moduleSource == null
+            || !moduleSource.getModuleClassName().equals(delegateClass.getName())) {
+          moduleSource = getModuleSource(delegateClass);
           unwrapModuleSource = true;
         }
-        boolean skipScanning = false;
-        if (module instanceof PrivateModule) {
-          binder = (RecordingBinder) binder.newPrivateBinder();
-          // Store the module in the private binder too so we scan for it.
-          binder.modules.put(module, new ModuleInfo(binder, moduleSource, false));
-          skipScanning = true; // don't scan this module in the parent's module set.
+      } else {
+        moduleSource = getModuleSource(module.getClass());
+        unwrapModuleSource = true;
+      }
+      boolean skipScanning = false;
+      if (module instanceof PrivateModule) {
+        binder = (RecordingBinder) binder.newPrivateBinder();
+        // Store the module in the private binder too so we scan for it.
+        binder.modules.put(module, new ModuleInfo(binder, moduleSource, false));
+        skipScanning = true; // don't scan this module in the parent's module set.
+      }
+      // Always store this in the parent binder (even if it was a private module)
+      // so that we know not to process it again, and so that scanners inherit down.
+      modules.put(module, new ModuleInfo(binder, moduleSource, skipScanning));
+      try {
+        module.configure(binder);
+      } catch (RuntimeException e) {
+        Collection<Message> messages = Errors.getMessagesFromThrowable(e);
+        if (!messages.isEmpty()) {
+          elements.addAll(messages);
+        } else {
+          addError(e);
         }
-        // Always store this in the parent binder (even if it was a private module)
-        // so that we know not to process it again, and so that scanners inherit down.
-        modules.put(module, new ModuleInfo(binder, moduleSource, skipScanning));
-        try {
-          module.configure(binder);
-        } catch (RuntimeException e) {
-          Collection<Message> messages = Errors.getMessagesFromThrowable(e);
-          if (!messages.isEmpty()) {
-            elements.addAll(messages);
-          } else {
-            addError(e);
-          }
-        }
-        binder.install(ProviderMethodsModule.forModule(module));
-        // We are done with this module, so undo module source change
-        if (unwrapModuleSource) {
-          moduleSource = moduleSource.getParent();
-        }
+      }
+      binder.install(ProviderMethodsModule.forModule(module));
+      // We are done with this module, so undo module source change
+      if (unwrapModuleSource) {
+        moduleSource = moduleSource.getParent();
       }
     }
 
