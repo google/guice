@@ -325,7 +325,7 @@ public final class ProviderMethodsModule implements Module {
     return ProviderMethod.create(
         key,
         method,
-        isStaticModule() ? null : delegate,
+        isStaticModule() || Modifier.isStatic(method.getModifiers()) ? null : delegate,
         ImmutableSet.copyOf(point.getDependencies()),
         scopeAnnotation,
         skipFastClassGeneration,

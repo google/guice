@@ -1047,6 +1047,44 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  static final class DeduplicateModule extends AbstractModule {
+    @Provides
+    String provideString() {
+      return "";
+    }
+  }
+
+  public void testDeduplicateProviderMethodsBindings_sameInstance() {
+    Module module = new DeduplicateModule();
+    Guice.createInjector(Stage.PRODUCTION, module, module);
+  }
+
+  public void testDeduplicateProviderMethodsBindings_differentInstances() {
+    try {
+      Guice.createInjector(Stage.PRODUCTION, new DeduplicateModule(), new DeduplicateModule());
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "A binding to java.lang.String was already configured");
+    }
+  }
+
+  static final class DeduplicateStaticModule extends AbstractModule {
+    @Provides
+    static String provideString() {
+      return "";
+    }
+  }
+
+  public void testDeduplicateProviderMethodsBindings_sameInstance_staticMethod() {
+    Module module = new DeduplicateStaticModule();
+    Guice.createInjector(Stage.PRODUCTION, module, module);
+  }
+
+  public void testDeduplicateProviderMethodsBindings_differentInstances_staticMethod() {
+    Guice.createInjector(
+        Stage.PRODUCTION, new DeduplicateStaticModule(), new DeduplicateStaticModule());
+  }
+
   private void runNullableTest(Injector injector, Dependency<?> dependency, Module module) {
     switch (InternalFlags.getNullableProvidesOption()) {
       case ERROR:
