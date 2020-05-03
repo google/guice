@@ -22,16 +22,6 @@ import org.junit.Test;
 
 /** @author bn0010100@gmail.com (Neil) */
 public class ProvidedByAndScopeTest {
-  /* static because only support inject to static inner class */
-  static class MixClassProvider implements Provider<MixClass> {
-    public MixClass get() {
-      return new MixClass();
-    }
-  }
-
-  @Singleton
-  @ProvidedBy(MixClassProvider.class)
-  static class MixClass {}
 
   @Test
   public void testMixClass() {
@@ -55,5 +45,16 @@ public class ProvidedByAndScopeTest {
     final MixClass i1 = injector.getInstance(MixClass.class);
     final MixClass i2 = injector.getInstance(MixClass.class);
     assertSame(i1, i2);
+  }
+
+  @Singleton
+  @ProvidedBy(MixClassProvider.class)
+  static class MixClass {}
+
+  /* static because only support inject to static inner class */
+  static class MixClassProvider implements Provider<MixClass> {
+    public MixClass get() {
+      return new MixClass();
+    }
   }
 }
