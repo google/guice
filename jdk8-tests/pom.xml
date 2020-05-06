@@ -45,6 +45,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <artifactId>guava-testlib</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--
+     | jdk8 tests depend indirectly on asm (via LineNumbers) which is only embedded
+     | with 'mvn package'; make it an explict dependency to support using 'mvn test'.
+    -->
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
