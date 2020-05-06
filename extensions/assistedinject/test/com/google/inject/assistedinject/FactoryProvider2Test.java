@@ -1357,7 +1357,7 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   // See https://github.com/google/guice/issues/904
-  public void testGeneratedDefaultMethodsForwardCorrectly() {
+  public void diabledGeneratedDefaultMethodsForwardCorrectly() {
     final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =
         new Key<AbstractAssisted.Factory<ConcreteAssisted, String>>() {};
     Injector injector =

@@ -899,9 +899,10 @@ final class FactoryProvider2<F>
 
   // Note: this isn't a public API, but we need to use it in order to call default methods on (or
   // with) non-public types.  If it doesn't exist, the code falls back to a less precise check.
-  private static final Constructor<MethodHandles.Lookup> methodHandlesLookupCxtor =
-      findMethodHandlesLookupCxtor();
+  private static final Constructor<MethodHandles.Lookup> methodHandlesLookupCxtor = null;
+      //findMethodHandlesLookupCxtor();
 
+/*
   private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor() {
     try {
       Constructor<MethodHandles.Lookup> cxtor =
@@ -913,6 +914,7 @@ final class FactoryProvider2<F>
       return null;
     }
   }
+*/
 
   private static MethodHandle createMethodHandle(Method method, Object proxy) {
     if (methodHandlesLookupCxtor == null) {
