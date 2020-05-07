@@ -433,10 +433,6 @@ public final class Errors implements Serializable {
     return addMessage("Injected method %s cannot be abstract.", method);
   }
 
-  public Errors cannotInjectNonVoidMethod(Method method) {
-    return addMessage("Injected method %s must return void.", method);
-  }
-
   public Errors cannotInjectMethodWithTypeParameters(Method method) {
     return addMessage("Injected method %s cannot declare type parameters of its own.", method);
   }
