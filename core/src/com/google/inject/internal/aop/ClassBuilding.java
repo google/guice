@@ -67,7 +67,7 @@ public final class ClassBuilding {
     return signature.toString();
   }
 
-  /** Can we enhance the given member using bytecode? */
+  /** Returns true if the given member can be enhanced using bytecode. */
   public static boolean canEnhance(Executable member) {
     return canAccess(member, hasPackageAccess());
   }
@@ -218,7 +218,7 @@ public final class ClassBuilding {
     return objectMethods.toArray(new Method[objectMethods.size()]);
   }
 
-  /** Can we fast-invoke the given member from a sibling class using bytecode? */
+  /** Returns true if the given member can be fast-invoked. */
   public static boolean canFastInvoke(Executable member) {
     // must be public unless we have package-access in which case anything non-private is ok
     int modifiers = member.getModifiers() & (PUBLIC | PRIVATE);

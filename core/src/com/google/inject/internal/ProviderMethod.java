@@ -100,7 +100,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
    */
   private SingleParameterInjector<?>[] parameterInjectors;
 
-  /** @param method the method to invoke. It's return type must be the same type as {@code key}. */
+  /** @param method the method to invoke. Its return type must be the same type as {@code key}. */
   ProviderMethod(
       Key<T> key,
       Method method,

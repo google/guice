@@ -42,7 +42,7 @@ public final class ClassDefining {
     return ClassDefinerHolder.INSTANCE.define(hostClass, bytecode);
   }
 
-  /** Does the definer have access to package-private members? */
+  /** Returns true if the ClassDefiner has access to package-private members. */
   public static boolean hasPackageAccess() {
     return ClassDefinerHolder.IS_UNSAFE;
   }

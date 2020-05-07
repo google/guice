@@ -22,9 +22,9 @@ import java.util.Collection;
 import java.util.function.ToIntFunction;
 
 /**
- * Immutable space-efficient trie that provides a quick lookup index for a sorted array of strings.
- * It assumes only those strings will be queried and therefore may produce false-positive results
- * for strings not in the array.
+ * Immutable space-efficient trie that provides a quick lookup index for a sorted set of non empty
+ * strings. It assumes only those strings will be queried and therefore may produce false-positive
+ * results for strings not in the array.
  *
  * <p>Each node of the tree is represented as a series of {@code char}s using this layout:
  *
@@ -52,7 +52,7 @@ import java.util.function.ToIntFunction;
  * the trie for branch 0 immediately follows the current node. The entire jump section is omitted
  * when all the branches from a node are leaves.
  *
- * <p>Simple example: getValue, setValue
+ * <p>Simple example trie with 2 strings "getValue" and "setValue":
  *
  * <pre>
  * +---+---+---+--------+--------+
@@ -62,7 +62,7 @@ import java.util.function.ToIntFunction;
  *
  * In this case the first character is enough to determine the index result.
  *
- * <p>Example of a trie with a 'bud': getName, getNameAndValue
+ * <p>Example of a trie with a 'bud' that contains 2 strings "getName" and "getNameAndValue":
  *
  * <pre>
  * +---+---+---+---+---+--------+---+---+--------+
@@ -73,7 +73,7 @@ import java.util.function.ToIntFunction;
  * After matching 'g' we skip to the end of 'getName' before checking if there are any more
  * characters to match.
  *
- * <p>More complex example: getName, getValue, getVersion
+ * <p>More complex example with 3 strings "getName", "getValue", "getVersion"
  *
  * <pre>
  * +---+---+---+---+---+---+--------+---+---+---+---+---+--------+--------+

@@ -49,7 +49,7 @@ public final class BytecodeGen {
   private static final Map<Class<?>, Boolean> CIRCULAR_PROXY_TYPE_CACHE =
       CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap();
 
-  /** Is the given object a circular proxy? */
+  /** Returns true if the given object is a circular proxy. */
   public static boolean isCircularProxy(Object object) {
     return object != null && CIRCULAR_PROXY_TYPE_CACHE.containsKey(object.getClass());
   }

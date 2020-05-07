@@ -87,7 +87,7 @@ final class BytecodeTasks {
     }
   }
 
-  /** Loads a local argument onto the Java stack. */
+  /** Loads a local argument onto the Java stack and returns the size of the argument. */
   public static int loadArgument(MethodVisitor mv, Class<?> parameterType, int slot) {
     if (!parameterType.isPrimitive()) {
       mv.visitVarInsn(ALOAD, slot);
