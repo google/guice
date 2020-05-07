@@ -29,7 +29,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -82,7 +82,7 @@ abstract class AbstractGlueGenerator {
   }
 
   /** Generates the enhancer/fast-class and returns a mapping from signature to invoker. */
-  public final Function<String, BiFunction> glue(Map<String, Executable> glueMap) {
+  public final Function<String, BiFunction> glue(SortedMap<String, Executable> glueMap) {
     final MethodHandle invokerTable;
     try {
       byte[] bytecode = generateGlue(glueMap.values());

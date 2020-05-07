@@ -55,7 +55,7 @@ public final class BytecodeGen {
   }
 
   /** Creates a new circular proxy for the given type. */
-  public static <T> T newCircularProxy(Class<T> type, InvocationHandler handler) {
+  static <T> T newCircularProxy(Class<T> type, InvocationHandler handler) {
     Object proxy = Proxy.newProxyInstance(type.getClassLoader(), new Class[] {type}, handler);
     CIRCULAR_PROXY_TYPE_CACHE.put(proxy.getClass(), Boolean.TRUE);
     return type.cast(proxy);
@@ -77,7 +77,7 @@ public final class BytecodeGen {
   }
 
   /** Create a builder of enhancers for the given class. */
-  public static EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
+  static EnhancerBuilder enhancerBuilder(Class<?> hostClass) {
     return ENHANCER_BUILDERS.getUnchecked(hostClass);
   }
 
@@ -86,7 +86,7 @@ public final class BytecodeGen {
    * of invocation handlers plus an array of arguments for the original constructor.
    */
   @SuppressWarnings("unchecked")
-  public static BiFunction<InvocationHandler[], Object[], Object> enhancedConstructor(
+  static BiFunction<InvocationHandler[], Object[], Object> enhancedConstructor(
       Function<String, BiFunction> enhancer, Constructor<?> constructor) {
     checkArgument(canEnhance(constructor), "Constructor is not visible");
     return enhancer.apply(signature(constructor));
@@ -97,7 +97,7 @@ public final class BytecodeGen {
    * enhanced instance plus an array of arguments for the original method.
    */
   @SuppressWarnings("unchecked")
-  public static BiFunction<Object, Object[], Object> superMethod(
+  static BiFunction<Object, Object[], Object> superMethod(
       Function<String, BiFunction> enhancer, Method method) {
     // no need to check 'canEnhance', ProxyFactory will only pick methods from enhanceable list
     return enhancer.apply(signature(method));
@@ -106,9 +106,11 @@ public final class BytecodeGen {
   /**
    * Returns a fast invoker for the given constructor. The invoker function ignores the first
    * parameter and accepts an array of arguments for the constructor in the second parameter.
+   *
+   * Returns {@code null} if the constructor cannot be "fast-invoked" due to visibility issues.
    */
   @SuppressWarnings("unchecked")
-  public static BiFunction<Object, Object[], Object> fastConstructor(Constructor<?> constructor) {
+  static BiFunction<Object, Object[], Object> fastConstructor(Constructor<?> constructor) {
     if (canFastInvoke(constructor)) {
       return fastClass(constructor).apply(signature(constructor));
     }
@@ -118,9 +120,11 @@ public final class BytecodeGen {
   /**
    * Returns a fast invoker for the given method. The invoker function accepts an instance, which
    * will be {@code null} for static methods, and an array of arguments for the method.
+   *
+   * Returns {@code null} if the method cannot be "fast-invoked" due to visibility issues.
    */
   @SuppressWarnings("unchecked")
-  public static BiFunction<Object, Object[], Object> fastMethod(Method method) {
+  static BiFunction<Object, Object[], Object> fastMethod(Method method) {
     if (canFastInvoke(method)) {
       return fastClass(method).apply(signature(method));
     }

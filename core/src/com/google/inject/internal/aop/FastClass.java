@@ -85,7 +85,7 @@ final class FastClass extends AbstractGlueGenerator {
 
   private final boolean hostIsInterface;
 
-  public FastClass(Class<?> hostClass) {
+  FastClass(Class<?> hostClass) {
     super(hostClass, FASTCLASS_BY_GUICE_MARKER);
     hostIsInterface = hostClass.isInterface();
   }

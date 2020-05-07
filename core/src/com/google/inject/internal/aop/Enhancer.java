@@ -125,7 +125,7 @@ final class Enhancer extends AbstractGlueGenerator {
 
   private final String checkcastToProxy;
 
-  public Enhancer(Class<?> hostClass, Map<Method, Method> bridgeDelegates) {
+  Enhancer(Class<?> hostClass, Map<Method, Method> bridgeDelegates) {
     super(hostClass, ENHANCER_BY_GUICE_MARKER);
     this.bridgeDelegates = bridgeDelegates;
 

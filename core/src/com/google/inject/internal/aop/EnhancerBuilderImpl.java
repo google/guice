@@ -29,6 +29,7 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -55,7 +56,7 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
 
   private final Map<Method, Method> bridgeDelegates;
 
-  public EnhancerBuilderImpl(
+  EnhancerBuilderImpl(
       Class<?> hostClass,
       Collection<Method> enhanceableMethods,
       Map<Method, Method> bridgeDelegates) {
@@ -83,7 +84,7 @@ final class EnhancerBuilderImpl implements BytecodeGen.EnhancerBuilder {
   }
 
   private Function<String, BiFunction> doBuildEnhancer(BitSet methodIndices) {
-    Map<String, Executable> glueMap = new TreeMap<>();
+    SortedMap<String, Executable> glueMap = new TreeMap<>();
 
     visitMembers(
         hostClass.getDeclaredConstructors(),

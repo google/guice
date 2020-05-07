@@ -84,7 +84,7 @@ public class ImmutableStringTrieTest extends TestCase {
     }
   }
 
-  private void randomize(Random random, StringBuilder buf) {
+  private static void randomize(Random random, StringBuilder buf) {
     int length = random.nextInt(MAX_STRING_LENGTH) + 1;
     while (buf.length() < length) {
       char c = (char) random.nextInt(Character.MAX_VALUE + 1);

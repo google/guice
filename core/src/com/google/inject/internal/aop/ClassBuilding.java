@@ -34,6 +34,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -117,10 +118,12 @@ public final class ClassBuilding {
     String partitionKey = method.getName() + '/' + method.getParameterCount();
     // common case: assume only one method with that key, store method directly to reduce overhead
     Object existingPartition = partitions.putIfAbsent(partitionKey, method);
-    if (existingPartition instanceof Method) {
+    if (existingPartition == null) {
+      // first method in this partition, nothing else to do here
+    } else if (existingPartition instanceof Method) {
       // this is the second matching method, inflate to MethodPartition containing the two methods
       partitions.put(partitionKey, new MethodPartition((Method) existingPartition, method));
-    } else if (existingPartition instanceof MethodPartition) {
+    } else {
       // continue to add methods to the existing MethodPartition
       ((MethodPartition) existingPartition).addCandidate(method);
     }
@@ -227,7 +230,7 @@ public final class ClassBuilding {
 
   /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
   public static Function<String, BiFunction> buildFastClass(Class<?> hostClass) {
-    Map<String, Executable> glueMap = new TreeMap<>();
+    SortedMap<String, Executable> glueMap = new TreeMap<>();
 
     visitFastConstructors(hostClass, ctor -> glueMap.put(signature(ctor), ctor));
     visitFastMethods(hostClass, method -> glueMap.put(signature(method), method));
