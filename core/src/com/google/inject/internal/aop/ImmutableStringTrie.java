@@ -73,7 +73,7 @@ import java.util.function.ToIntFunction;
  * After matching 'g' we skip to the end of 'getName' before checking if there are any more
  * characters to match.
  *
- * <p>More complex example with 3 strings "getName", "getValue", "getVersion"
+ * <p>More complex example with 3 strings "getName", "getValue", "getVersion":
  *
  * <pre>
  * +---+---+---+---+---+---+--------+---+---+---+---+---+--------+--------+
