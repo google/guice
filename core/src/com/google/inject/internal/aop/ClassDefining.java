@@ -58,7 +58,8 @@ public final class ClassDefining {
     if (loadingOption == CustomClassLoadingOption.CHILD) {
       return new ChildClassDefiner(); // override default choice
     } else if (UnsafeClassDefiner.isAccessible()) {
-      return new UnsafeClassDefiner(); // preferred if available
+      // preferred if available, the BRIDGE/ANONYMOUS modes change how it loads classes
+      return new UnsafeClassDefiner();
     } else if (loadingOption != CustomClassLoadingOption.OFF) {
       return new ChildClassDefiner(); // second choice unless forbidden
     } else {
