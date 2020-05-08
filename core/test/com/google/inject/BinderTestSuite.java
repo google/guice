@@ -233,6 +233,7 @@ public class BinderTestSuite extends TestCase {
           .creationException(
               "No implementation for %s annotated with %s was bound",
               AWithProvidedBy.class.getName(), named("apple"))
+          .scoper(scoper)
           .addToSuite(suite);
 
       new Builder()
@@ -247,6 +248,7 @@ public class BinderTestSuite extends TestCase {
           .creationException(
               "No implementation for %s annotated with %s was bound",
               AWithImplementedBy.class.getName(), named("apple"))
+          .scoper(scoper)
           .addToSuite(suite);
 
       new Builder()
@@ -261,6 +263,7 @@ public class BinderTestSuite extends TestCase {
           .creationException(
               "No implementation for %s annotated with %s was bound",
               ScopedA.class.getName(), named("apple"))
+          .scoper(scoper)
           .addToSuite(suite);
     }
 

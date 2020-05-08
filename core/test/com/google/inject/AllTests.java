@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.MoreTypesTest;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.internal.WeakKeySetTest;
@@ -49,11 +48,6 @@ import junit.framework.TestSuite;
 
 /** @author crazybob@google.com (Bob Lee) */
 public class AllTests {
-
-  private static final ImmutableSet<String> SUPPRESSED_TEST_NAMES =
-      ImmutableSet.of(
-          "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
-          "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")");
 
   public static Test suite() {
     TestSuite suite = new TestSuite();
@@ -157,6 +151,6 @@ public class AllTests {
     suite.addTestSuite(com.google.inject.internal.RealElementTest.class);
     suite.addTestSuite(com.google.inject.multibindings.ProvidesIntoTest.class);
 
-    return SuiteUtils.removeSuppressedTests(suite, SUPPRESSED_TEST_NAMES);
+    return suite;
   }
 }
