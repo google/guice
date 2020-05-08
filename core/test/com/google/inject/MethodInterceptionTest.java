@@ -488,7 +488,11 @@ public class MethodInterceptionTest extends TestCase {
     assertEquals(0, count.get());
     assertEquals("I am a horse.", injector.getInstance(Unicorn.class).identifyMyself());
     assertEquals(1, count.get()); // unicorn is grounded
+
+    count.set(0); // reset
+
+    assertEquals(0, count.get());
     assertEquals("I am a flying horse.", injector.getInstance(Pegasus.class).identifyMyself());
-    assertEquals(1, count.get()); // pegasus is not grounded
+    assertEquals(0, count.get()); // pegasus is not grounded
   }
 }
