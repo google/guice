@@ -269,6 +269,7 @@ final class Enhancer extends AbstractGlueGenerator {
     pushInteger(mv, methodIndex);
     mv.visitInsn(AALOAD);
     mv.visitInsn(SWAP);
+    // we don't use the method argument in InterceptorStackCallback.invoke, so can use null here
     mv.visitInsn(ACONST_NULL);
     packArguments(mv, method.getParameterTypes());
 
