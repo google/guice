@@ -314,7 +314,6 @@ final class Enhancer extends AbstractGlueGenerator {
     // with virtual dispatch to avoid skipping other interceptors overriding the target method
     int invokeOpcode = target != method ? INVOKEVIRTUAL : INVOKESPECIAL;
 
-    mv.visitInsn(ACONST_NULL);
     mv.visitVarInsn(ALOAD, 1);
     mv.visitTypeInsn(CHECKCAST, checkcastToProxy);
     unpackArguments(mv, target.getParameterTypes());
