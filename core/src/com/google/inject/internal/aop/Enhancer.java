@@ -103,6 +103,7 @@ final class Enhancer extends AbstractGlueGenerator {
           + "[Ljava/lang/Object;)"
           + "Ljava/lang/Object;";
 
+  // Describes the LambdaMetafactory.metafactory method arguments and return type
   private static final String METAFACTORY_DESCRIPTOR =
       "(Ljava/lang/invoke/MethodHandles$Lookup;"
           + "Ljava/lang/String;"
