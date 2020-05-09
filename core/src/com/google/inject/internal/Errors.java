@@ -165,7 +165,7 @@ public final class Errors implements Serializable {
    * things unnecessarily complex.
    */
   public Errors missingImplementation(Key key) {
-    return addMessage("No implementation for %s was bound.", key);
+    return addMessage(ErrorId.MISSING_IMPLEMENTATION, "No implementation for %s was bound.", key);
   }
 
   /** Within guice's core, allow for better missing binding messages */
@@ -237,15 +237,19 @@ public final class Errors implements Serializable {
       sb.append(format("%nThe key seems very generic, did you forget an annotation?"));
     }
 
-    return addMessage(sb.toString());
+    return addMessage(ErrorId.MISSING_IMPLEMENTATION, sb.toString());
   }
 
   public Errors jitDisabled(Key<?> key) {
-    return addMessage("Explicit bindings are required and %s is not explicitly bound.", key);
+    return addMessage(
+        ErrorId.JIT_DISABLED,
+        "Explicit bindings are required and %s is not explicitly bound.",
+        key);
   }
 
   public Errors jitDisabledInParent(Key<?> key) {
     return addMessage(
+        ErrorId.JIT_DISABLED_IN_PARENT,
         "Explicit bindings are required and %s would be bound in a parent injector.%n"
             + "Please add an explicit binding for it, either in the child or the parent.",
         key);
@@ -253,6 +257,7 @@ public final class Errors implements Serializable {
 
   public Errors atInjectRequired(Class clazz) {
     return addMessage(
+        ErrorId.AT_INJECT_REQUIRED,
         "Explicit @Inject annotations are required on constructors,"
             + " but %s has no constructors annotated with @Inject.",
         clazz);
@@ -264,8 +269,12 @@ public final class Errors implements Serializable {
       TypeLiteral<?> type,
       TypeConverterBinding typeConverterBinding) {
     return addMessage(
+        ErrorId.CONVERTER_RETURNED_NULL,
         "Received null converting '%s' (bound at %s) to %s%n using %s.",
-        stringValue, convert(source), type, typeConverterBinding);
+        stringValue,
+        convert(source),
+        type,
+        typeConverterBinding);
   }
 
   public Errors conversionTypeError(
@@ -275,10 +284,15 @@ public final class Errors implements Serializable {
       TypeConverterBinding typeConverterBinding,
       Object converted) {
     return addMessage(
+        ErrorId.CONVERSION_TYPE_ERROR,
         "Type mismatch converting '%s' (bound at %s) to %s%n"
             + " using %s.%n"
             + " Converter returned %s.",
-        stringValue, convert(source), type, typeConverterBinding, converted);
+        stringValue,
+        convert(source),
+        type,
+        typeConverterBinding,
+        converted);
   }
 
   public Errors conversionError(
@@ -304,64 +318,84 @@ public final class Errors implements Serializable {
       TypeConverterBinding a,
       TypeConverterBinding b) {
     return addMessage(
+        ErrorId.AMBIGUOUS_TYPE_CONVERSION,
         "Multiple converters can convert '%s' (bound at %s) to %s:%n"
             + " %s and%n"
             + " %s.%n"
             + " Please adjust your type converter configuration to avoid overlapping matches.",
-        stringValue, convert(source), type, a, b);
+        stringValue,
+        convert(source),
+        type,
+        a,
+        b);
   }
 
   public Errors bindingToProvider() {
-    return addMessage("Binding to Provider is not allowed.");
+    return addMessage(ErrorId.BINDING_TO_PROVIDER, "Binding to Provider is not allowed.");
   }
 
   public Errors notASubtype(Class<?> implementationType, Class<?> type) {
-    return addMessage("%s doesn't extend %s.", implementationType, type);
+    return addMessage(ErrorId.NOT_A_SUBTYPE, "%s doesn't extend %s.", implementationType, type);
   }
 
   public Errors recursiveImplementationType() {
-    return addMessage("@ImplementedBy points to the same class it annotates.");
+    return addMessage(
+        ErrorId.RECURSIVE_BINDING, "@ImplementedBy points to the same class it annotates.");
   }
 
   public Errors recursiveProviderType() {
-    return addMessage("@ProvidedBy points to the same class it annotates.");
+    return addMessage(
+        ErrorId.RECURSIVE_PROVIDER_TYPE, "@ProvidedBy points to the same class it annotates.");
   }
 
   public Errors missingRuntimeRetention(Class<? extends Annotation> annotation) {
-    return addMessage(format("Please annotate %s with @Retention(RUNTIME).", annotation));
+    return addMessage(
+        ErrorId.MISSING_RUNTIME_RETENTION,
+        format("Please annotate %s with @Retention(RUNTIME).", annotation));
   }
 
   public Errors missingScopeAnnotation(Class<? extends Annotation> annotation) {
-    return addMessage(format("Please annotate %s with @ScopeAnnotation.", annotation));
+    return addMessage(
+        ErrorId.MISSING_SCOPE_ANNOTATION,
+        format("Please annotate %s with @ScopeAnnotation.", annotation));
   }
 
   public Errors optionalConstructor(Constructor constructor) {
     return addMessage(
+        ErrorId.OPTIONAL_CONSTRUCTOR,
         "%s is annotated @Inject(optional=true), but constructors cannot be optional.",
         constructor);
   }
 
   public Errors cannotBindToGuiceType(String simpleName) {
-    return addMessage("Binding to core guice framework type is not allowed: %s.", simpleName);
+    return addMessage(
+        ErrorId.BINDING_TO_GUICE_TYPE,
+        "Binding to core guice framework type is not allowed: %s.",
+        simpleName);
   }
 
   public Errors scopeNotFound(Class<? extends Annotation> scopeAnnotation) {
-    return addMessage("No scope is bound to %s.", scopeAnnotation);
+    return addMessage(ErrorId.SCOPE_NOT_FOUND, "No scope is bound to %s.", scopeAnnotation);
   }
 
   public Errors scopeAnnotationOnAbstractType(
       Class<? extends Annotation> scopeAnnotation, Class<?> type, Object source) {
     return addMessage(
+        ErrorId.SCOPE_ANNOTATION_ON_ABSTRACT_TYPE,
         "%s is annotated with %s, but scope annotations are not supported "
             + "for abstract types.%n Bound at %s.",
-        type, scopeAnnotation, convert(source));
+        type,
+        scopeAnnotation,
+        convert(source));
   }
 
   public Errors misplacedBindingAnnotation(Member member, Annotation bindingAnnotation) {
     return addMessage(
+        ErrorId.MISPLACED_BINDING_ANNOTATION,
         "%s is annotated with %s, but binding annotations should be applied "
             + "to its parameters instead.",
-        member, bindingAnnotation);
+        member,
+        bindingAnnotation);
   }
 
   // TODO(diamondm) don't mention zero-arg constructors if requireAtInjectOnConstructors is true
@@ -375,6 +409,7 @@ public final class Errors implements Serializable {
     String typeString = type.toString();
     String rawTypeString = getRawType(type.getType()).getName();
     return addMessage(
+        ErrorId.MISSING_CONSTRUCTOR,
         "No implementation for %s (with no qualifier annotation) was bound, and could not find an"
             + " injectable constructor%s. %s",
         typeString,
@@ -384,31 +419,41 @@ public final class Errors implements Serializable {
 
   public Errors tooManyConstructors(Class<?> implementation) {
     return addMessage(
+        ErrorId.TOO_MANY_CONSTRUCTORS,
         "%s has more than one constructor annotated with @Inject. %s",
-        implementation, CONSTRUCTOR_RULES);
+        implementation,
+        CONSTRUCTOR_RULES);
   }
 
   public Errors constructorNotDefinedByType(Constructor<?> constructor, TypeLiteral<?> type) {
-    return addMessage("%s does not define %s", type, constructor);
+    return addMessage(
+        ErrorId.CONSTRUCTOR_NOT_DEFINED_BY_TYPE, "%s does not define %s", type, constructor);
   }
 
   public Errors duplicateScopes(
       ScopeBinding existing, Class<? extends Annotation> annotationType, Scope scope) {
     return addMessage(
+        ErrorId.DUPLICATE_SCOPES,
         "Scope %s is already bound to %s at %s.%n Cannot bind %s.",
-        existing.getScope(), annotationType, existing.getSource(), scope);
+        existing.getScope(),
+        annotationType,
+        existing.getSource(),
+        scope);
   }
 
   public Errors voidProviderMethod() {
-    return addMessage("Provider methods must return a value. Do not return void.");
+    return addMessage(
+        ErrorId.VOID_PROVIDER_METHOD, "Provider methods must return a value. Do not return void.");
   }
 
   public Errors missingConstantValues() {
-    return addMessage("Missing constant value. Please call to(...).");
+    return addMessage(
+        ErrorId.MISSING_CONSTANT_VALUES, "Missing constant value. Please call to(...).");
   }
 
   public Errors cannotInjectInnerClass(Class<?> type) {
     return addMessage(
+        ErrorId.INJECT_INNER_CLASS,
         "Injecting into inner classes is not supported.  "
             + "Please use a 'static' class (top-level or nested) instead of %s.",
         type);
@@ -417,42 +462,62 @@ public final class Errors implements Serializable {
   public Errors duplicateBindingAnnotations(
       Member member, Class<? extends Annotation> a, Class<? extends Annotation> b) {
     return addMessage(
+        ErrorId.DUPLICATE_BINDING_ANNOTATIONS,
         "%s has more than one annotation annotated with @BindingAnnotation: %s and %s",
-        member, a, b);
+        member,
+        a,
+        b);
   }
 
   public Errors staticInjectionOnInterface(Class<?> clazz) {
-    return addMessage("%s is an interface, but interfaces have no static injection points.", clazz);
+    return addMessage(
+        ErrorId.STATIC_INJECTION_ON_INTERFACE,
+        "%s is an interface, but interfaces have no static injection points.",
+        clazz);
   }
 
   public Errors cannotInjectFinalField(Field field) {
-    return addMessage("Injected field %s cannot be final.", field);
+    return addMessage(ErrorId.INJECT_FINAL_FIELD, "Injected field %s cannot be final.", field);
   }
 
   public Errors cannotInjectAbstractMethod(Method method) {
-    return addMessage("Injected method %s cannot be abstract.", method);
+    return addMessage(
+        ErrorId.INJECT_ABSTRACT_METHOD, "Injected method %s cannot be abstract.", method);
   }
 
   public Errors cannotInjectMethodWithTypeParameters(Method method) {
-    return addMessage("Injected method %s cannot declare type parameters of its own.", method);
+    return addMessage(
+        ErrorId.INJECT_METHOD_WITH_TYPE_PARAMETER,
+        "Injected method %s cannot declare type parameters of its own.",
+        method);
   }
 
   public Errors duplicateScopeAnnotations(
       Class<? extends Annotation> a, Class<? extends Annotation> b) {
-    return addMessage("More than one scope annotation was found: %s and %s.", a, b);
+    return addMessage(
+        ErrorId.DUPLICATE_SCOPE_ANNOTATIONS,
+        "More than one scope annotation was found: %s and %s.",
+        a,
+        b);
   }
 
   public Errors recursiveBinding() {
-    return addMessage("Binding points to itself.");
+    return addMessage(ErrorId.RECURSIVE_BINDING, "Binding points to itself.");
   }
 
   public Errors bindingAlreadySet(Key<?> key, Object source) {
-    return addMessage("A binding to %s was already configured at %s.", key, convert(source));
+    return addMessage(
+        ErrorId.BINDING_ALREADY_SET,
+        "A binding to %s was already configured at %s.",
+        key,
+        convert(source));
   }
 
   public Errors jitBindingAlreadySet(Key<?> key) {
     return addMessage(
-        "A just-in-time binding to %s was already configured on a parent injector.", key);
+        ErrorId.JIT_BINDING_ALREADY_SET,
+        "A just-in-time binding to %s was already configured on a parent injector.",
+        key);
   }
 
   public Errors childBindingAlreadySet(Key<?> key, Set<Object> sources) {
@@ -466,19 +531,24 @@ public final class Errors implements Serializable {
     }
     Errors errors =
         addMessage(
+            ErrorId.CHILD_BINDING_ALREADY_SET,
             "Unable to create binding for %s."
                 + " It was already configured on one or more child injectors or private modules"
                 + "%s%n"
                 + "  If it was in a PrivateModule, did you forget to expose the binding?",
-            key, allSources.out());
+            key,
+            allSources.out());
     return errors;
   }
 
   public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {
     return addMessage(
+        ErrorId.OTHER,
         "A binding to %s was already configured at %s and an error was thrown "
             + "while checking duplicate bindings.  Error: %s",
-        key, convert(source), t);
+        key,
+        convert(source),
+        t);
   }
 
   public Errors errorNotifyingTypeListener(
@@ -493,11 +563,15 @@ public final class Errors implements Serializable {
   }
 
   public Errors exposedButNotBound(Key<?> key) {
-    return addMessage("Could not expose() %s, it must be explicitly bound.", key);
+    return addMessage(
+        ErrorId.EXPOSED_BUT_NOT_BOUND, "Could not expose() %s, it must be explicitly bound.", key);
   }
 
   public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
-    return addMessage("%s cannot be used as a key; It is not fully specified.", typeLiteral);
+    return addMessage(
+        ErrorId.EXPOSED_BUT_NOT_BOUND,
+        "%s cannot be used as a key; It is not fully specified.",
+        typeLiteral);
   }
 
   public Errors errorEnhancingClass(Class<?> clazz, Throwable cause) {
@@ -522,24 +596,28 @@ public final class Errors implements Serializable {
     if (!messages.isEmpty()) {
       return merge(messages);
     } else {
-      return addMessage(cause, messageFormat, arguments);
+      return addMessage(ErrorId.ERROR_IN_USER_CODE, cause, messageFormat, arguments);
     }
   }
 
   public Errors cannotInjectRawProvider() {
-    return addMessage("Cannot inject a Provider that has no type parameter");
+    return addMessage(
+        ErrorId.INJECT_RAW_PROVIDER, "Cannot inject a Provider that has no type parameter");
   }
 
   public Errors cannotInjectRawMembersInjector() {
-    return addMessage("Cannot inject a MembersInjector that has no type parameter");
+    return addMessage(
+        ErrorId.INJECT_RAW_MEMBERS_INJECTOR,
+        "Cannot inject a MembersInjector that has no type parameter");
   }
 
   public Errors cannotInjectTypeLiteralOf(Type unsupportedType) {
-    return addMessage("Cannot inject a TypeLiteral of %s", unsupportedType);
+    return addMessage(ErrorId.OTHER, "Cannot inject a TypeLiteral of %s", unsupportedType);
   }
 
   public Errors cannotInjectRawTypeLiteral() {
-    return addMessage("Cannot inject a TypeLiteral that has no type parameter");
+    return addMessage(
+        ErrorId.INJECT_RAW_TYPE_LITERAL, "Cannot inject a TypeLiteral that has no type parameter");
   }
 
   public void throwCreationExceptionIfErrorsExist() {
@@ -616,11 +694,16 @@ public final class Errors implements Serializable {
   }
 
   public Errors addMessage(String messageFormat, Object... arguments) {
-    return addMessage(null, messageFormat, arguments);
+    return addMessage(ErrorId.OTHER, null, messageFormat, arguments);
   }
 
-  private Errors addMessage(Throwable cause, String messageFormat, Object... arguments) {
-    addMessage(Messages.create(cause, getSources(), messageFormat, arguments));
+  public Errors addMessage(ErrorId errorId, String messageFormat, Object... arguments) {
+    return addMessage(errorId, null, messageFormat, arguments);
+  }
+
+  private Errors addMessage(
+      ErrorId errorId, Throwable cause, String messageFormat, Object... arguments) {
+    addMessage(Messages.create(errorId, cause, getSources(), messageFormat, arguments));
     return this;
   }
 

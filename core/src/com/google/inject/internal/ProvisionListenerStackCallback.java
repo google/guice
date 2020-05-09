@@ -74,6 +74,7 @@ final class ProvisionListenerStackCallback<T> {
       Object listener =
           provision.erredListener != null ? provision.erredListener.getClass() : "(unknown)";
       throw InternalProvisionException.errorInUserCode(
+          ErrorId.OTHER,
           caught,
           "Error notifying ProvisionListener %s of %s.%n Reason: %s",
           listener,
