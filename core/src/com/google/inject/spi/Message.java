@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
+import com.google.inject.internal.ErrorId;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.util.SourceProvider;
 import java.io.ObjectStreamException;
@@ -42,15 +43,22 @@ import java.util.List;
  * @author crazybob@google.com (Bob Lee)
  */
 public final class Message implements Serializable, Element {
+  private final ErrorId errorId;
   private final String message;
   private final Throwable cause;
   private final List<Object> sources;
 
   /** @since 2.0 */
-  public Message(List<Object> sources, String message, Throwable cause) {
+  public Message(ErrorId errorId, List<Object> sources, String message, Throwable cause) {
+    this.errorId = errorId;
     this.sources = ImmutableList.copyOf(sources);
     this.message = checkNotNull(message, "message");
     this.cause = cause;
+  }
+
+  /** @since 2.0 */
+  public Message(List<Object> sources, String message, Throwable cause) {
+    this(ErrorId.OTHER, sources, message, cause);
   }
 
   /** @since 4.0 */
@@ -122,6 +130,11 @@ public final class Message implements Serializable, Element {
   @Override
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).addError(this);
+  }
+
+  /** Returns a copy of this {@link Message} with its sources replaced. */
+  public Message withSource(List<Object> newSources) {
+    return new Message(errorId, newSources, message, cause);
   }
 
   /**

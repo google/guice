@@ -71,63 +71,84 @@ public final class InternalProvisionException extends Exception {
 
   public static InternalProvisionException circularDependenciesDisabled(Class<?> expectedType) {
     return create(
+        ErrorId.CIRCULAR_PROXY_DISABLED,
         "Found a circular dependency involving %s, and circular dependencies are disabled.",
         expectedType);
   }
 
   public static InternalProvisionException cannotProxyClass(Class<?> expectedType) {
     return create(
+        ErrorId.CAN_NOT_PROXY_CLASS,
         "Tried proxying %s to support a circular dependency, but it is not an interface.",
         expectedType);
   }
 
-  public static InternalProvisionException create(String format, Object... arguments) {
-    return new InternalProvisionException(Messages.create(format, arguments));
+  public static InternalProvisionException create(
+      ErrorId errorId, String format, Object... arguments) {
+    return new InternalProvisionException(Messages.create(errorId, format, arguments));
   }
 
   public static InternalProvisionException errorInUserCode(
-      Throwable cause, String messageFormat, Object... arguments) {
+      ErrorId errorId, Throwable cause, String messageFormat, Object... arguments) {
     Collection<Message> messages = Errors.getMessagesFromThrowable(cause);
     if (!messages.isEmpty()) {
       // TODO(lukes): it seems like we are dropping some valuable context here..
       // consider eliminating this special case
       return new InternalProvisionException(messages);
     } else {
-      return new InternalProvisionException(Messages.create(cause, messageFormat, arguments));
+      return new InternalProvisionException(
+          Messages.create(errorId, cause, messageFormat, arguments));
     }
   }
 
   public static InternalProvisionException subtypeNotProvided(
       Class<? extends javax.inject.Provider<?>> providerType, Class<?> type) {
-    return create("%s doesn't provide instances of %s.", providerType, type);
+    return create(
+        ErrorId.SUBTYPE_NOT_PROVIDED, "%s doesn't provide instances of %s.", providerType, type);
   }
 
   public static InternalProvisionException errorInProvider(Throwable cause) {
-    return errorInUserCode(cause, "Error in custom provider, %s", cause);
+    return errorInUserCode(
+        ErrorId.ERROR_IN_CUSTOM_PROVIDER, cause, "Error in custom provider, %s", cause);
   }
 
   public static InternalProvisionException errorInjectingMethod(Throwable cause) {
-    return errorInUserCode(cause, "Error injecting method, %s", cause);
+    return errorInUserCode(
+        ErrorId.ERROR_INJECTING_METHOD, cause, "Error injecting method, %s", cause);
   }
 
   public static InternalProvisionException errorInjectingConstructor(Throwable cause) {
-    return errorInUserCode(cause, "Error injecting constructor, %s", cause);
+    return errorInUserCode(
+        ErrorId.ERROR_INJECTING_CONSTRUCTOR, cause, "Error injecting constructor, %s", cause);
   }
 
   public static InternalProvisionException errorInUserInjector(
       MembersInjector<?> listener, TypeLiteral<?> type, RuntimeException cause) {
     return errorInUserCode(
-        cause, "Error injecting %s using %s.%n Reason: %s", type, listener, cause);
+        ErrorId.ERROR_IN_USER_INJECTOR,
+        cause,
+        "Error injecting %s using %s.%n Reason: %s",
+        type,
+        listener,
+        cause);
   }
 
   public static InternalProvisionException jitDisabled(Key<?> key) {
-    return create("Explicit bindings are required and %s is not explicitly bound.", key);
+    return create(
+        ErrorId.JIT_DISABLED,
+        "Explicit bindings are required and %s is not explicitly bound.",
+        key);
   }
 
   public static InternalProvisionException errorNotifyingInjectionListener(
       InjectionListener<?> listener, TypeLiteral<?> type, RuntimeException cause) {
     return errorInUserCode(
-        cause, "Error notifying InjectionListener %s of %s.%n Reason: %s", listener, type, cause);
+        ErrorId.OTHER,
+        cause,
+        "Error notifying InjectionListener %s of %s.%n Reason: %s",
+        listener,
+        type,
+        cause);
   }
 
   /**
@@ -168,7 +189,10 @@ public final class InternalProvisionException extends Exception {
             : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
 
     throw InternalProvisionException.create(
-            "null returned by binding at %s%n but %s is not @Nullable", source, formattedDependency)
+            ErrorId.NULL_INJECTED_INTO_NON_NULLABLE,
+            "null returned by binding at %s%n but %s is not @Nullable",
+            source,
+            formattedDependency)
         .addSource(source);
   }
 
