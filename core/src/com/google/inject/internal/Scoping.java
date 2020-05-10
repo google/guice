@@ -26,6 +26,7 @@ import com.google.inject.Stage;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ScopeBinding;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -162,6 +163,9 @@ public abstract class Scoping {
   public static Scoping forAnnotation(final Class<? extends Annotation> scopingAnnotation) {
     if (scopingAnnotation == Singleton.class || scopingAnnotation == javax.inject.Singleton.class) {
       return SINGLETON_ANNOTATION;
+    }
+    if (scopingAnnotation == EagerSingleton.class) {
+        return EAGER_SINGLETON;
     }
 
     return new Scoping() {
