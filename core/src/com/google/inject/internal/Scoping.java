@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
+import com.google.inject.EagerSingleton;
 import com.google.inject.Stage;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
