@@ -319,7 +319,7 @@ final class Enhancer extends AbstractGlueGenerator {
     unpackArguments(mv, target.getParameterTypes());
 
     mv.visitMethodInsn(
-        invokeOpcode, hostName, method.getName(), Type.getMethodDescriptor(target), false);
+        invokeOpcode, hostName, target.getName(), Type.getMethodDescriptor(target), false);
 
     Class<?> returnType = target.getReturnType();
     if (returnType == void.class) {
