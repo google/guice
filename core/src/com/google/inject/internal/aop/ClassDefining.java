@@ -54,12 +54,12 @@ public final class ClassDefining {
 
   /** Binds the preferred {@link ClassDefiner} instance. */
   static ClassDefiner bindClassDefiner() {
+    // ANONYMOUS acts like OFF, it picks the Unsafe definer but changes how it defines classes
     CustomClassLoadingOption loadingOption = InternalFlags.getCustomClassLoadingOption();
     if (loadingOption == CustomClassLoadingOption.CHILD) {
       return new ChildClassDefiner(); // override default choice
     } else if (UnsafeClassDefiner.isAccessible()) {
-      // preferred if available, the BRIDGE/ANONYMOUS modes change how it loads classes
-      return new UnsafeClassDefiner();
+      return new UnsafeClassDefiner(); // default choice if available
     } else if (loadingOption != CustomClassLoadingOption.OFF) {
       return new ChildClassDefiner(); // second choice unless forbidden
     } else {
