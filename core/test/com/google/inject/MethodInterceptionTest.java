@@ -25,6 +25,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
 import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.inject.Named;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -494,5 +496,37 @@ public class MethodInterceptionTest extends TestCase {
     assertEquals(0, count.get());
     assertEquals("I am a flying horse.", injector.getInstance(Pegasus.class).identifyMyself());
     assertEquals(0, count.get()); // pegasus is not grounded
+  }
+
+  static class BaseSetter {
+    String text;
+
+    @Inject
+    void setText(@Named("text") String text) {
+      this.text = text;
+    }
+  }
+
+  static class Setter extends BaseSetter {}
+
+  public void testSetterInterception() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(Names.named("text")).to("Hello, world");
+                bindInterceptor(
+                    Matchers.any(),
+                    Matchers.annotatedWith(Inject.class),
+                    mi -> {
+                      mi.getArguments()[0] = ">>" + mi.getArguments()[0] + "<<";
+                      return mi.proceed();
+                    });
+              }
+            });
+
+    Setter setter = injector.getInstance(Setter.class);
+    assertEquals(">>Hello, world<<", setter.text);
   }
 }
