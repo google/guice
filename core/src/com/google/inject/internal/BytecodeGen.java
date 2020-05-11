@@ -69,7 +69,15 @@ public final class BytecodeGen {
 
   /** Builder of enhanced classes. */
   public interface EnhancerBuilder {
-    /** Lists the methods in the host class that can be enhanced. */
+    /**
+     * Lists the methods in the host class that can be enhanced.
+     *
+     * <p>This always includes public and protected methods that are neither static nor final.
+     *
+     * <p>Package-private methods can only be enhanced if they're in the same package as the host
+     * and we can define types in the same class loader with Unsafe. The {@link #finalize} method
+     * can never be enhanced.
+     */
     Method[] getEnhanceableMethods();
 
     /** Generates an enhancer for the selected subset of methods. */
@@ -107,7 +115,7 @@ public final class BytecodeGen {
    * Returns a fast invoker for the given constructor. The invoker function ignores the first
    * parameter and accepts an array of arguments for the constructor in the second parameter.
    *
-   * Returns {@code null} if the constructor cannot be "fast-invoked" due to visibility issues.
+   * <p>Returns {@code null} if the constructor cannot be "fast-invoked" due to visibility issues.
    */
   @SuppressWarnings("unchecked")
   static BiFunction<Object, Object[], Object> fastConstructor(Constructor<?> constructor) {
@@ -121,7 +129,7 @@ public final class BytecodeGen {
    * Returns a fast invoker for the given method. The invoker function accepts an instance, which
    * will be {@code null} for static methods, and an array of arguments for the method.
    *
-   * Returns {@code null} if the method cannot be "fast-invoked" due to visibility issues.
+   * <p>Returns {@code null} if the method cannot be "fast-invoked" due to visibility issues.
    */
   @SuppressWarnings("unchecked")
   static BiFunction<Object, Object[], Object> fastMethod(Method method) {
