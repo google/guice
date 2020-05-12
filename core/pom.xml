@@ -101,6 +101,16 @@
             <exclude>**/TypeConversionTest*</exclude>
           </excludes>
         </configuration>
+        <executions>
+          <execution>
+            <id>anonymous-class-loading</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <argLine>-Dguice_custom_class_loading=ANONYMOUS</argLine>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <!--
        | Add OSGi manifest
