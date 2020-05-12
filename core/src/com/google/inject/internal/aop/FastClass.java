@@ -64,6 +64,39 @@ import org.objectweb.asm.Type;
  *
  * <p>A handle to the fast-class constructor is used as the invoker table, mapping index to invoker.
  *
+ * <p>Fast-classes have the following pseudo-Java structure:
+ *
+ * <pre>
+ * public final class HostClass$$FastClassByGuice
+ *   implements BiFunction // each fast-class instance represents a bound invoker
+ * {
+ *   private final int index; // the bound trampoline index
+ *
+ *   public HostClass$$FastClassByGuice(int index) {
+ *     this.index = index;
+ *   }
+ *
+ *   public Object apply(Object context, Object args) {
+ *     return trampoline(index, context, (Object[]) args);
+ *   }
+ *
+ *   public static Object GUICE$TRAMPOLINE(int index, Object context, Object[] args) {
+ *     switch (index) {
+ *       case 0: {
+ *         return new HostClass(...);
+ *       }
+ *       case 1: {
+ *         return ((HostClass) context).instanceMethod(...);
+ *       }
+ *       case 2: {
+ *         return HostClass.staticMethod(...);
+ *       }
+ *     }
+ *     return null;
+ *   }
+ * }
+ * </pre>
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 final class FastClass extends AbstractGlueGenerator {

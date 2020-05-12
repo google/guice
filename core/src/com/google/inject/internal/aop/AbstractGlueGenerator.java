@@ -42,6 +42,35 @@ import org.objectweb.asm.Type;
 /**
  * Support code for generating enhancer/fast-class glue.
  *
+ * <p>Each glue class has a trampoline that accepts an index, context object, and argument array:
+ *
+ * <pre>
+ * public static Object GUICE$TRAMPOLINE(int index, Object context, Object[] args) {
+ *   switch (index) {
+ *     case 0: {
+ *       return ...;
+ *     }
+ *     case 1: {
+ *       return ...;
+ *     }
+ *   }
+ *   return null;
+ * }
+ * </pre>
+ *
+ * Each indexed statement in the trampoline invokes a constructor or method, returning the result.
+ * The expected context object depends on the statement; it could be the invocation target, some
+ * additional constructor context, or it may be unused. Arguments are unpacked from the array onto
+ * the call stack, unboxing or casting them as necessary. Primitive results are autoboxed before
+ * being returned.
+ *
+ * <p>Where possible the trampoline is converted into a lookup {@link Function} mapping an integer
+ * to an invoker function, each invoker represented as a {@link BiFunction} that accepts a context
+ * object plus argument array and returns the result. These functional interfaces are used to avoid
+ * introducing a dependency from the glue class to Guice specific types. This means the glue class
+ * can be loaded anywhere that can see the host class, it doesn't need access to Guice's own {@link
+ * ClassLoader}. (In other words it removes any need for bridge {@link ClassLoader}s.)
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 abstract class AbstractGlueGenerator {

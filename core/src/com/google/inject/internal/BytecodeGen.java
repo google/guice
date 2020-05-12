@@ -41,6 +41,12 @@ import java.util.function.Function;
 /**
  * Utility methods for circular proxies, faster reflection, and method interception.
  *
+ * <p>This class makes heavy use of {@link Function} and {@link BiFunction} types when interacting
+ * with generated fast-classes and enhanced proxies. This is a deliberate design decision to avoid
+ * using Guice-specific types in the generated classes. This means generated classes can be defined
+ * in the same {@link ClassLoader} as their host class without needing access to Guice's own {@link
+ * ClassLoader}. (In other words it removes any need for bridge {@link ClassLoader}s.)
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -80,7 +86,19 @@ public final class BytecodeGen {
      */
     Method[] getEnhanceableMethods();
 
-    /** Generates an enhancer for the selected subset of methods. */
+    /**
+     * Generates an enhancer for the selected subset of methods.
+     *
+     * <p>The enhancer maps constructor and method signatures to invokers, where each invoker is
+     * represented as a {@link BiFunction} that accepts a context object and an argument array.
+     *
+     * <p>Constructor invokers take an array of {@link InvocationHandler}s as their context object.
+     * This is stored in the enhanced class before the original host class constructor is called,
+     * with arguments unpacked from the argument array. The enhanced instance is then returned.
+     *
+     * <p>Method invokers take an enhanced instance as their context object and call the original
+     * super-method with arguments unpacked from the argument array, ie. provides super-invocation.
+     */
     Function<String, BiFunction> buildEnhancer(BitSet methodIndices);
   }
 

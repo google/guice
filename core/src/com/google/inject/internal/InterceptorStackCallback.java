@@ -30,6 +30,8 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Intercepts a method with a stack of interceptors.
  *
+ * <p>Acts as a JDK {@link InvocationHandler} so the proxy using it can avoid Guice-specific types.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 final class InterceptorStackCallback implements InvocationHandler {

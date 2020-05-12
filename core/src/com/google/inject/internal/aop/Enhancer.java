@@ -81,6 +81,43 @@ import org.objectweb.asm.Type;
  * handler array) with an argument array and invokes the appropriate enhanced constructor. These
  * invokers are used in the proxy factory to create enhanced instances.
  *
+ * <p>Enhanced classes have the following pseudo-Java structure:
+ *
+ * <pre>
+ * public class HostClass$$EnhancerByGuice
+ *   extends HostClass
+ * {
+ *   // InterceptorStackCallbacks, one per enhanced method
+ *   private final InvocationHandler[] GUICE$HANDLERS;
+ *
+ *   public HostClass$$EnhancerByGuice(InvocationHandler[] handlers, ...) {
+ *      // JVM lets us store this before calling the superclass constructor
+ *     GUICE$HANDLERS = handlers;
+ *     super(...);
+ *   }
+ *
+ *   public static Object GUICE$TRAMPOLINE(int index, Object context, Object[] args) {
+ *     switch (index) {
+ *       case 0: {
+ *         return new HostClass$$EnhancerByGuice((InvocationHandler[]) context, ...);
+ *       }
+ *       case 1: {
+ *         return context.super.instanceMethod(...); // call original unenhanced method
+ *       }
+ *     }
+ *     return null;
+ *   }
+ *
+ *   // enhanced method
+ *   public final Object instanceMethod(...) {
+ *     // pack arguments and trigger the associated InterceptorStackCallback
+ *     return GUICE$HANDLERS[0].invoke(this, null, args);
+ *   }
+ *
+ *   // ...
+ * }
+ * </pre>
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 final class Enhancer extends AbstractGlueGenerator {
