@@ -278,7 +278,7 @@ public class MethodInterceptionTest extends TestCase {
     assertFalse(Arrays.toString(interceptable.lastElements), proxyFrameFound);
   }
 
-  static class Foo {}
+  public static class Foo {}
 
   static class Bar {}
 
@@ -469,10 +469,10 @@ public class MethodInterceptionTest extends TestCase {
   static class HorseImpl implements Horse {}
 
   // MythicalAnimal shouldn't disturb earlier hierarchy
-  static class Unicorn extends HorseImpl implements MythicalAnimal {}
+  public static class Unicorn extends HorseImpl implements MythicalAnimal {}
 
   // FlyingHorse should be merged into earlier hierarchy
-  static class Pegasus extends HorseImpl implements MythicalAnimal, FlyingHorse {}
+  public static class Pegasus extends HorseImpl implements MythicalAnimal, FlyingHorse {}
 
   public void testDefaultMethodInterception() {
     Injector injector =
@@ -502,12 +502,12 @@ public class MethodInterceptionTest extends TestCase {
     String text;
 
     @Inject
-    void setText(@Named("text") String text) {
+    protected void setText(@Named("text") String text) {
       this.text = text;
     }
   }
 
-  static class Setter extends BaseSetter {}
+  public static class Setter extends BaseSetter {}
 
   public void testSetterInterception() {
     Injector injector =
