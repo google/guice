@@ -223,9 +223,25 @@ public final class ClassBuilding {
 
   /** Returns true if the given member can be fast-invoked. */
   public static boolean canFastInvoke(Executable member) {
-    // must be public unless we have package-access in which case anything non-private is ok
     int modifiers = member.getModifiers() & (PUBLIC | PRIVATE);
-    return modifiers == PUBLIC || (modifiers == 0 && hasPackageAccess());
+    if (hasPackageAccess()) {
+      // can fast-invoke anything except private members
+      return modifiers != PRIVATE;
+    }
+    // can fast-invoke public members in public types whose parameters are all public
+    boolean visible = (modifiers == PUBLIC) && isPublic(member.getDeclaringClass());
+    if (visible) {
+      for (Class<?> type : member.getParameterTypes()) {
+        if (!isPublic(type)) {
+          return false;
+        }
+      }
+    }
+    return visible;
+  }
+
+  private static boolean isPublic(Class<?> clazz) {
+    return (clazz.getModifiers() & PUBLIC) != 0;
   }
 
   /** Builds a 'fast-class' invoker that uses bytecode generation in place of reflection. */
