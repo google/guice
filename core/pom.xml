@@ -110,6 +110,14 @@
               <argLine>-Dguice_custom_class_loading=ANONYMOUS</argLine>
             </configuration>
           </execution>
+          <execution>
+            <id>child-class-loading</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <argLine>-Dguice_custom_class_loading=CHILD</argLine>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <!--
