@@ -505,6 +505,7 @@ public class ScopesTest extends TestCase {
         }
       };
 
+  @SuppressWarnings("ScopeOrQualifierAnnotationRetention") // intentional, to check failure mode
   @Target({ElementType.TYPE, ElementType.METHOD})
   @ScopeAnnotation
   public @interface NotRuntimeRetainedScoped {}
