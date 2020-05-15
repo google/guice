@@ -129,6 +129,9 @@ final class InjectorShell {
       checkState(stage != null, "Stage not initialized");
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
+      checkState(
+          (privateElements == null && elements.isEmpty()) || modules.isEmpty(),
+          "The shell is either built from modules (root) or from PrivateElements (children).");
 
       // bind Singleton if this is a top-level injector
       if (parent == null) {
