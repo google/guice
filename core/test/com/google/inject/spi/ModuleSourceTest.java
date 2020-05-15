@@ -81,7 +81,7 @@ public class ModuleSourceTest extends TestCase {
   private ModuleSource createWithSizeOne() {
     StackTraceElement[] partialCallStack = new StackTraceElement[1];
     partialCallStack[0] = BINDER_INSTALL;
-    return new ModuleSource(A.class, partialCallStack);
+    return new ModuleSource(A.class, partialCallStack, /* permitMap = */ null);
   }
 
   private ModuleSource createWithSizeTwo() {
