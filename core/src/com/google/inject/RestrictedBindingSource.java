@@ -15,9 +15,10 @@ import java.lang.annotation.Target;
  *
  * <p>If a binding's type or qualifier annotation type is annotated with
  * {@code @RestrictedBindingSource}, then only modules annotated with a permit from {@link #permits}
- * are allowed to create it (note that if both the type and qualifier annotation type are restricted
- * this way, both restrictions are enforced) -- otherwise, an error message including the {@link
- * #explanation} is issued.
+ * are allowed to create it -- otherwise, an error message including the {@link #explanation} is
+ * issued. Note that if both the type and qualifier annotation type are restricted this way, the
+ * qualifier annotation restriction overrides the type restriction (annotating is essentially
+ * syntactic sugar for creating a new type that wraps the annotated type).
  *
  * <p>This allows libraries to prevent their clients from binding their keys, similar to how
  * declaring a class final prevents subtyping. For example, a library may want to prevent users from

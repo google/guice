@@ -128,7 +128,7 @@ public class ElementSourceTest extends TestCase {
     // First module
     StackTraceElement[] partialCallStack = new StackTraceElement[1];
     partialCallStack[0] = BINDER_INSTALL;
-    ModuleSource moduleSource = new ModuleSource(A.class, partialCallStack);
+    ModuleSource moduleSource = new ModuleSource(A.class, partialCallStack, /* permitMap = */ null);
     // Second module
     partialCallStack = new StackTraceElement[2];
     partialCallStack[0] = BINDER_INSTALL;

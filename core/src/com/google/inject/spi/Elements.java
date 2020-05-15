@@ -107,6 +107,7 @@ public final class Elements {
     for (RecordingBinder child : binder.privateBinders) {
       child.scanForAnnotatedMethods();
     }
+    binder.permitMapConstruction.finish();
     // Free the memory consumed by the stack trace elements cache
     StackTraceElements.clearCache();
     return Collections.unmodifiableList(binder.elements);
@@ -168,6 +169,8 @@ public final class Elements {
     /** All children private binders, so we can scan through them. */
     private final List<RecordingBinder> privateBinders;
 
+    private final BindingSourceRestriction.PermitMapConstruction permitMapConstruction;
+
     private RecordingBinder(Stage stage) {
       this.stage = stage;
       this.modules = Maps.newLinkedHashMap();
@@ -185,6 +188,7 @@ public final class Elements {
       this.parent = null;
       this.privateElements = null;
       this.privateBinders = Lists.newArrayList();
+      this.permitMapConstruction = new BindingSourceRestriction.PermitMapConstruction();
     }
 
     /** Creates a recording binder that's backed by {@code prototype}. */
@@ -202,6 +206,7 @@ public final class Elements {
       this.parent = prototype.parent;
       this.privateElements = prototype.privateElements;
       this.privateBinders = prototype.privateBinders;
+      this.permitMapConstruction = prototype.permitMapConstruction;
     }
 
     /** Creates a private recording binder. */
@@ -216,6 +221,7 @@ public final class Elements {
       this.parent = parent;
       this.privateElements = privateElements;
       this.privateBinders = parent.privateBinders;
+      this.permitMapConstruction = parent.permitMapConstruction;
     }
 
     /*if[AOP]*/
@@ -318,8 +324,8 @@ public final class Elements {
       if (modules.containsKey(module)) {
         return;
       }
+      Class<?> newModuleClass = null;
       RecordingBinder binder = this;
-      boolean unwrapModuleSource = false;
       // Update the module source for the new module
       if (module instanceof ProviderMethodsModule) {
         // There are two reason's we'd want to get the module source in a ProviderMethodsModule.
@@ -329,12 +335,14 @@ public final class Elements {
         Class<?> delegateClass = ((ProviderMethodsModule) module).getDelegateModuleClass();
         if (moduleSource == null
             || !moduleSource.getModuleClassName().equals(delegateClass.getName())) {
-          moduleSource = getModuleSource(delegateClass);
-          unwrapModuleSource = true;
+          newModuleClass = delegateClass;
         }
       } else {
-        moduleSource = getModuleSource(module.getClass());
-        unwrapModuleSource = true;
+        newModuleClass = module.getClass();
+      }
+      if (newModuleClass != null) {
+        moduleSource = getModuleSource(newModuleClass);
+        permitMapConstruction.pushModule(newModuleClass, moduleSource);
       }
       boolean skipScanning = false;
       if (module instanceof PrivateModule) {
@@ -358,8 +366,9 @@ public final class Elements {
       }
       binder.install(ProviderMethodsModule.forModule(module));
       // We are done with this module, so undo module source change
-      if (unwrapModuleSource) {
+      if (newModuleClass != null) {
         moduleSource = moduleSource.getParent();
+        permitMapConstruction.popModule();
       }
     }
 
@@ -524,7 +533,7 @@ public final class Elements {
         partialCallStack = new StackTraceElement[0];
       }
       if (moduleSource == null) {
-        return new ModuleSource(module, partialCallStack);
+        return new ModuleSource(module, partialCallStack, permitMapConstruction.getPermitMap());
       }
       return moduleSource.createChild(module, partialCallStack);
     }
