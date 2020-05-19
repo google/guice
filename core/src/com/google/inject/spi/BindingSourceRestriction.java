@@ -3,6 +3,7 @@ package com.google.inject.spi;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -283,6 +284,12 @@ public final class BindingSourceRestriction {
     /** Finishes the {@link PermitMap}. Called by the Binder when all modules are installed. */
     void finish() {
       permitMap.modulePermits = modulePermits.build();
+    }
+
+    @VisibleForTesting
+    static boolean isElementSourceCleared(ElementSource elementSource) {
+      PermitMapImpl permitMap = (PermitMapImpl) elementSource.moduleSource.getPermitMap();
+      return permitMap.modulePermits == null;
     }
   }
 }
