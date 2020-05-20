@@ -27,7 +27,7 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.LinkedKeyBinding;
 import java.util.Set;
 
-public final class LinkedBindingImpl<T> extends BindingImpl<T>
+final class LinkedBindingImpl<T> extends BindingImpl<T>
     implements LinkedKeyBinding<T>, HasDependencies {
 
   final Key<? extends T> targetKey;

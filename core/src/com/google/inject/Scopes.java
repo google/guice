@@ -16,11 +16,12 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.CircularDependencyProxy;
-import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.internal.SingletonScope;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ExposedBinding;
+import com.google.inject.spi.LinkedKeyBinding;
 import java.lang.annotation.Annotation;
 
 /**
@@ -97,9 +98,9 @@ public class Scopes {
         return true;
       }
 
-      if (binding instanceof LinkedBindingImpl) {
-        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
-        Injector injector = linkedBinding.getInjector();
+      if (binding instanceof LinkedKeyBinding) {
+        LinkedKeyBinding<?> linkedBinding = (LinkedKeyBinding) binding;
+        Injector injector = getInjector(linkedBinding);
         if (injector != null) {
           binding = injector.getBinding(linkedBinding.getLinkedKey());
           continue;
@@ -159,9 +160,9 @@ public class Scopes {
         return true;
       }
 
-      if (binding instanceof LinkedBindingImpl) {
-        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
-        Injector injector = linkedBinding.getInjector();
+      if (binding instanceof LinkedKeyBinding) {
+        LinkedKeyBinding<?> linkedBinding = (LinkedKeyBinding) binding;
+        Injector injector = getInjector(linkedBinding);
         if (injector != null) {
           binding = injector.getBinding(linkedBinding.getLinkedKey());
           continue;
@@ -177,6 +178,13 @@ public class Scopes {
 
       return false;
     } while (true);
+  }
+
+  private static Injector getInjector(LinkedKeyBinding<?> linkedKeyBinding) {
+    if (linkedKeyBinding instanceof BindingImpl) {
+      return ((BindingImpl<?>) linkedKeyBinding).getInjector();
+    }
+    return null;
   }
 
   /**

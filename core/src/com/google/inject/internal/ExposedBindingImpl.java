@@ -27,11 +27,11 @@ import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
 import java.util.Set;
 
-public final class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBinding<T> {
+final class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBinding<T> {
 
   private final PrivateElements privateElements;
 
-  public ExposedBindingImpl(
+  ExposedBindingImpl(
       InjectorImpl injector,
       Object source,
       Key<T> key,
