@@ -167,6 +167,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("InjectScopeAnnotationOnInterfaceOrAbstractClass") // for testing
   @Singleton
   interface A {}
 
@@ -175,6 +176,7 @@ public class ScopesTest extends TestCase {
   @Retention(RUNTIME)
   @interface Component {}
 
+  @SuppressWarnings("InjectScopeAnnotationOnInterfaceOrAbstractClass") // for testing
   @Component
   @Singleton
   interface ComponentAnnotationTest {}
@@ -204,6 +206,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("InjectScopeAnnotationOnInterfaceOrAbstractClass") // for testing
   @Singleton
   @ImplementedBy(DImpl.class)
   interface D {}
@@ -223,6 +226,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("InjectScopeAnnotationOnInterfaceOrAbstractClass") // for testing
   @Singleton
   @ProvidedBy(EProvider.class)
   interface E {}
@@ -505,7 +509,7 @@ public class ScopesTest extends TestCase {
         }
       };
 
-  @SuppressWarnings("ScopeOrQualifierAnnotationRetention") // intentional, to check failure mode
+  @SuppressWarnings("InjectScopeOrQualifierAnnotationRetention") // to check failure mode
   @Target({ElementType.TYPE, ElementType.METHOD})
   @ScopeAnnotation
   public @interface NotRuntimeRetainedScoped {}

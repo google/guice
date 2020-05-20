@@ -250,7 +250,7 @@ public class KeyTest extends TestCase {
   @BindingAnnotation
   @interface Foo {}
 
-  @SuppressWarnings("ScopeOrQualifierAnnotationRetention") // intentional, to check failure mode
+  @SuppressWarnings("InjectScopeOrQualifierAnnotationRetention") // to check failure mode
   @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
   @BindingAnnotation
   @interface Bar {}
