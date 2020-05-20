@@ -63,6 +63,19 @@ public @interface RestrictedBindingSource {
    */
   Class<? extends Annotation>[] permits();
 
+  /**
+   * Exempt modules whose fully qualified class names match this regex.
+   *
+   * <p>If any module on the binding's module stack matches this regex, the binding is allowed (no
+   * permit necessary). No module is exempt by default (empty string).
+   *
+   * <p>Inteded to be used when retrofitting a binding with this restriction. When restricting an
+   * existing binding, it's often practical to first restrict with exemptions for existing
+   * violations (to prevent new violations), before updating the code in violation to use the
+   * permitted module(s).
+   */
+  String exemptModules() default "";
+
   /** Level of restriction. Determines how violations are handled. */
   public static enum RestrictionLevel {
     WARNING,
@@ -70,6 +83,4 @@ public @interface RestrictedBindingSource {
   }
 
   RestrictionLevel restrictionLevel() default RestrictionLevel.ERROR;
-
-  // TODO(user): Add exemption mechanism similar to RestrictedApi's allowedOnPath.
 }
