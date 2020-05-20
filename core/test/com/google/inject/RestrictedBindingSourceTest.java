@@ -203,6 +203,106 @@ public class RestrictedBindingSourceTest {
   }
 
   // --------------------------------------------------------------------------
+  // Module Exemption Tests
+  // --------------------------------------------------------------------------
+
+  private static final String USE_DNS_MODULE = "Use the official DNS module";
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = USE_DNS_MODULE,
+      permits = {NetworkLibrary.class},
+      exemptModules =
+          "com.google.inject.RestrictedBindingSourceTest\\$FooRogueDnsModule"
+              + "|com.google.inject.RestrictedBindingSourceTest\\$BarRogueDnsModule"
+              + "|com.google.inject.RestrictedBindingSourceTest\\$TopLevelModulePrivatelyBindingDnsAddress")
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface DnsAddress {}
+
+  static class FooRogueDnsModule extends AbstractModule {
+    @Provides
+    @DnsAddress
+    int rogueDns() {
+      return 4;
+    }
+  }
+
+  static class BarRogueDnsModule extends AbstractModule {
+    @Provides
+    @DnsAddress
+    int rogueDns() {
+      return 5;
+    }
+  }
+
+  // Non-exempt
+  static class BazRogueDnsModule extends AbstractModule {
+    @Provides
+    @DnsAddress
+    int rogueDns() {
+      return 5;
+    }
+  }
+
+  static class TopLevelModulePrivatelyBindingDnsAddress extends AbstractModule {
+    @Override
+    protected void configure() {
+      install(
+          new PrivateModule() {
+            @Override
+            protected void configure() {
+              // Non-exempt module.
+              install(new BazRogueDnsModule());
+            }
+          });
+    }
+  }
+
+  @Test
+  public void exemptModulesCanCreateRestrictedBinding() {
+    Guice.createInjector(new FooRogueDnsModule());
+    Guice.createInjector(new BarRogueDnsModule());
+  }
+
+  @Test
+  public void nonExemptModuleCantCreateRestrictedBinding() {
+    CreationException expected = assertThatInjectorCreationFails(new BazRogueDnsModule());
+
+    assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);
+    assertThat(expected).hasMessageThat().contains(USE_DNS_MODULE);
+  }
+
+  @Test
+  public void parentModuleExeptionAppliesToChildPrivateModule() {
+    Guice.createInjector(new TopLevelModulePrivatelyBindingDnsAddress());
+  }
+
+  @Test
+  public void exemptModuleCanBeOverridenIfRestrictedBindingIsNotOverriden() {
+    // This tests that we check for exemptions on the module stack of the original element source.
+    Guice.createInjector(
+        Modules.override(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    install(new BarRogueDnsModule());
+                  }
+
+                  @Provides
+                  String random() {
+                    return "foo";
+                  }
+                })
+            .with(
+                new AbstractModule() {
+                  @Provides
+                  String random() {
+                    return "bar";
+                  }
+                }));
+  }
+
+  // --------------------------------------------------------------------------
   // Binder.withSource Tests
   // --------------------------------------------------------------------------
 

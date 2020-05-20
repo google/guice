@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.RestrictedBindingSource;
@@ -17,7 +18,9 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Contains abstractions for enforcing {@link RestrictedBindingSource}.
@@ -124,17 +127,14 @@ public final class BindingSourceRestriction {
     ImmutableSet<Class<? extends Annotation>> acceptablePermits =
         ImmutableSet.copyOf(restriction.permits());
     boolean bindingPermitted = permits.stream().anyMatch(acceptablePermits::contains);
-    if (!bindingPermitted) {
-      return Optional.of(
-          new Message(
-              elementSource,
-              getErrorMessage(
-                  key,
-                  restriction.explanation(),
-                  acceptablePermits,
-                  annotationRestriction != null)));
+    if (bindingPermitted || isExempt(elementSource, restriction.exemptModules())) {
+      return Optional.empty();
     }
-    return Optional.empty();
+    return Optional.of(
+        new Message(
+            elementSource,
+            getErrorMessage(
+                key, restriction.explanation(), acceptablePermits, annotationRestriction != null)));
   }
 
   private static String getErrorMessage(
@@ -161,19 +161,42 @@ public final class BindingSourceRestriction {
     ImmutableSet.Builder<Class<? extends Annotation>> permitsBuilder = ImmutableSet.builder();
     ImmutableSet<Class<? extends Annotation>> permits =
         elementSource.moduleSource.getPermitMap().getPermits(elementSource);
-    // Only trust if the element comes from Modules.override because otherwise the original element
-    // source can be spoofed.
-    // TODO(b/156495326): Remove this special case once we resolve the spoofing issue.
     if (elementSource.getOriginalElementSource() == null
-        || !elementSource
-            .moduleSource
-            .getModuleClassName()
-            .equals("com.google.inject.util.Modules$OverrideModule")) {
+        || !isOriginalElementSourceTrustworthy(elementSource)) {
       return permits;
     }
     permitsBuilder.addAll(permits);
     permitsBuilder.addAll(getAllPermits(elementSource.getOriginalElementSource()));
     return permitsBuilder.build();
+  }
+
+  private static boolean isExempt(ElementSource elementSource, String exemptModulesRegex) {
+    if (exemptModulesRegex.isEmpty()) {
+      return false;
+    }
+    Pattern exemptModulePattern = Pattern.compile(exemptModulesRegex);
+    //TODO(b/156759807): Switch to Streams.stream (instead of inlining it).
+    return StreamSupport.stream(getAllModules(elementSource).spliterator(), false)
+        .anyMatch(moduleName -> exemptModulePattern.matcher(moduleName).matches());
+  }
+
+  private static Iterable<String> getAllModules(ElementSource elementSource) {
+    List<String> modules = elementSource.getModuleClassNames();
+    if (elementSource.getOriginalElementSource() == null
+        || !isOriginalElementSourceTrustworthy(elementSource)) {
+      return modules;
+    }
+    return Iterables.concat(modules, getAllModules(elementSource.getOriginalElementSource()));
+  }
+
+  private static boolean isOriginalElementSourceTrustworthy(ElementSource elementSource) {
+    // Only trust if the element comes from Modules.override because otherwise the original element
+    // source can be spoofed.
+    // TODO(b/156495326): Remove this special case once we resolve the spoofing issue.
+    return elementSource
+        .moduleSource
+        .getModuleClassName()
+        .equals("com.google.inject.util.Modules$OverrideModule");
   }
 
   private static void clear(Element element) {
