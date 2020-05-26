@@ -234,17 +234,17 @@ public class Key<T> {
 
   /** Gets a key for an injection type. */
   public static Key<?> get(Type type) {
-    return new Key<Object>(type, NullAnnotationStrategy.INSTANCE);
+    return new Key<>(type, NullAnnotationStrategy.INSTANCE);
   }
 
   /** Gets a key for an injection type and an annotation type. */
   public static Key<?> get(Type type, Class<? extends Annotation> annotationType) {
-    return new Key<Object>(type, strategyFor(annotationType));
+    return new Key<>(type, strategyFor(annotationType));
   }
 
   /** Gets a key for an injection type and an annotation. */
   public static Key<?> get(Type type, Annotation annotation) {
-    return new Key<Object>(type, strategyFor(annotation));
+    return new Key<>(type, strategyFor(annotation));
   }
 
   /** Gets a key for an injection type. */
@@ -268,8 +268,8 @@ public class Key<T> {
    *
    * @since 3.0
    */
-  public <T> Key<T> ofType(Class<T> type) {
-    return new Key<T>(type, annotationStrategy);
+  public <U> Key<U> ofType(Class<U> type) {
+    return new Key<>(type, annotationStrategy);
   }
 
   /**
@@ -278,7 +278,7 @@ public class Key<T> {
    * @since 3.0
    */
   public Key<?> ofType(Type type) {
-    return new Key<Object>(type, annotationStrategy);
+    return new Key<>(type, annotationStrategy);
   }
 
   /**
@@ -286,8 +286,8 @@ public class Key<T> {
    *
    * @since 3.0
    */
-  public <T> Key<T> ofType(TypeLiteral<T> type) {
-    return new Key<T>(type, annotationStrategy);
+  public <U> Key<U> ofType(TypeLiteral<U> type) {
+    return new Key<U>(type, annotationStrategy);
   }
 
   /**
