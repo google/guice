@@ -291,6 +291,30 @@ public class Key<T> {
   }
 
   /**
+   * Returns a new key of the same type with the specified annotation.
+   *
+   * <p>This is equivalent to {@code Key.get(key.getTypeLiteral(), annotation)} but may be more
+   * convenient to use in certain cases.
+   *
+   * @since vNext
+   */
+  public Key<T> withAnnotation(Class<? extends Annotation> annotationType) {
+    return new Key<T>(typeLiteral, strategyFor(annotationType));
+  }
+
+  /**
+   * Returns a new key of the same type with the specified annotation.
+   *
+   * <p>This is equivalent to {@code Key.get(key.getTypeLiteral(), annotation)} but may be more
+   * convenient to use in certain cases.
+   *
+   * @since vNext
+   */
+  public Key<T> withAnnotation(Annotation annotation) {
+    return new Key<T>(typeLiteral, strategyFor(annotation));
+  }
+
+  /**
    * Returns true if this key has annotation attributes.
    *
    * @since 3.0
