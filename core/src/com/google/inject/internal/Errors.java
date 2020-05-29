@@ -340,7 +340,8 @@ public final class Errors implements Serializable {
 
   public Errors recursiveImplementationType() {
     return addMessage(
-        ErrorId.RECURSIVE_BINDING, "@ImplementedBy points to the same class it annotates.");
+        ErrorId.RECURSIVE_IMPLEMENTATION_TYPE,
+        "@ImplementedBy points to the same class it annotates.");
   }
 
   public Errors recursiveProviderType() {
@@ -569,7 +570,7 @@ public final class Errors implements Serializable {
 
   public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
     return addMessage(
-        ErrorId.EXPOSED_BUT_NOT_BOUND,
+        ErrorId.KEY_NOT_FULLY_SPECIFIED,
         "%s cannot be used as a key; It is not fully specified.",
         typeLiteral);
   }
