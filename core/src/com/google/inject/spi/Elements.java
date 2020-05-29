@@ -139,12 +139,10 @@ public final class Elements {
   }
 
   private static class ModuleInfo {
-    private final Binder binder;
     private final ModuleSource moduleSource;
     private final boolean skipScanning;
 
-    private ModuleInfo(Binder binder, ModuleSource moduleSource, boolean skipScanning) {
-      this.binder = binder;
+    private ModuleInfo(ModuleSource moduleSource, boolean skipScanning) {
       this.moduleSource = moduleSource;
       this.skipScanning = skipScanning;
     }
@@ -304,7 +302,7 @@ public final class Elements {
           }
           moduleSource = entry.getValue().moduleSource;
           try {
-            info.binder.install(ProviderMethodsModule.forModule(module, scanner));
+            install(ProviderMethodsModule.forModule(module, scanner));
           } catch (RuntimeException e) {
             Collection<Message> messages = Errors.getMessagesFromThrowable(e);
             if (!messages.isEmpty()) {
@@ -348,12 +346,12 @@ public final class Elements {
       if (module instanceof PrivateModule) {
         binder = (RecordingBinder) binder.newPrivateBinder();
         // Store the module in the private binder too so we scan for it.
-        binder.modules.put(module, new ModuleInfo(binder, moduleSource, false));
+        binder.modules.put(module, new ModuleInfo(moduleSource, false));
         skipScanning = true; // don't scan this module in the parent's module set.
       }
       // Always store this in the parent binder (even if it was a private module)
       // so that we know not to process it again, and so that scanners inherit down.
-      modules.put(module, new ModuleInfo(binder, moduleSource, skipScanning));
+      modules.put(module, new ModuleInfo(moduleSource, skipScanning));
       try {
         module.configure(binder);
       } catch (RuntimeException e) {
