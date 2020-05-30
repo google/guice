@@ -192,7 +192,7 @@ public class ProviderInjectionTest extends TestCase {
     assertEquals(30, injector.getInstance(Key.get(Count.class, named("b"))).value);
     assertEquals(31, injector.getInstance(Key.get(Count.class, named("a"))).value);
     assertEquals(28, StaticallyInjectable.cCountAtInjectionTime);
-  }
+}
 
   static class Count {
     int value;

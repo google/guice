@@ -711,8 +711,19 @@ final class InjectorImpl implements Injector, Lookups {
     ProvidedBy providedBy = rawType.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
       Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
-      // handle other scope annotation with @providedby.
-      Class<? extends Annotation> scopeAnnotation = Annotations.findScopeAnnotation(errors, rawType);
+      Annotation[] annotations = rawType.getAnnotations();
+      Class<? extends Annotation> scopeAnnotation = null;
+
+      for (Annotation annotation : annotations) {
+        Class<? extends Annotation> annotationType = annotation.annotationType();
+        if (Annotations.isScopeAnnotation(annotationType)) {
+          if (scopeAnnotation != null) {
+            errors.duplicateScopeAnnotations(scopeAnnotation, annotationType);
+          } else {
+            scopeAnnotation = annotationType;
+          }
+        }
+      }
       if (scopeAnnotation != null) {
         scoping =
                 Scoping.makeInjectable(
