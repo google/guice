@@ -332,6 +332,12 @@ public class JitBindingsTest extends TestCase {
     ensureWorks(injector, Foo.class);
   }
 
+  public void testChildInjectorInjectInjectorInLinkedBinding() {
+    final Injector parent = Guice.createInjector();
+    final Injector child = parent.createChildInjector(bindsA);
+    assertSame(child, child.getInstance(A.class).getInjector());
+  }
+
   public void testChildInjectorInheritsOption() {
     Injector parent =
         Guice.createInjector(
@@ -840,4 +846,25 @@ public class JitBindingsTest extends TestCase {
       this.set = set;
     }
   }
+
+  interface A {
+    Injector getInjector();
+  }
+
+  static class RealA implements A {
+    @Inject Injector injector;
+
+    @Override
+    public Injector getInjector() {
+      return injector;
+    }
+  }
+
+  private final Module bindsA =
+      new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(A.class).to(RealA.class);
+        }
+      };
 }

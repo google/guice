@@ -831,6 +831,15 @@ final class InjectorImpl implements Injector, Lookups {
   private <T> BindingImpl<T> createJustInTimeBindingRecursive(
       Key<T> key, Errors errors, boolean jitDisabled, JitLimitation jitType)
       throws ErrorsException {
+    boolean childHasLinkedBind = false;
+    Map<Key<?>, Binding<?>> explicitBindings = state.getExplicitBindingsThisLevel();
+    for (Binding<?> binding : explicitBindings.values()) {
+      if (binding instanceof LinkedBindingImpl) {
+        if (((LinkedBindingImpl<?>) binding).getLinkedKey().equals(key)) {
+          childHasLinkedBind = true;
+        }
+      }
+    }
     // ask the parent to create the JIT binding
     if (parent != null) {
       if (jitType == JitLimitation.NEW_OR_EXISTING_JIT
@@ -839,14 +848,15 @@ final class InjectorImpl implements Injector, Lookups {
         // If the binding would be forbidden here but allowed in a parent, report an error instead
         throw errors.jitDisabledInParent(key).toException();
       }
-
-      try {
-        return parent.createJustInTimeBindingRecursive(
-            key,
-            new Errors(),
-            jitDisabled,
-            parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
-      } catch (ErrorsException ignored) {
+      if (!childHasLinkedBind) {
+        try {
+          return parent.createJustInTimeBindingRecursive(
+              key,
+              new Errors(),
+              jitDisabled,
+              parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
+        } catch (ErrorsException ignored) {
+        }
       }
     }
 
