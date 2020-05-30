@@ -104,7 +104,7 @@ public final class InjectionPoint {
   }
 
   private ImmutableList<Dependency<?>> forMember(
-      Member member, TypeLiteral<?> type, Annotation[][] paramterAnnotations) {
+      Member member, TypeLiteral<?> type, Annotation[][] parameterAnnotationsPerParameter) {
     Errors errors = new Errors(member);
 
     List<Dependency<?>> dependencies = Lists.newArrayList();
@@ -112,7 +112,7 @@ public final class InjectionPoint {
 
     for (TypeLiteral<?> parameterType : type.getParameterTypes(member)) {
       try {
-        Annotation[] parameterAnnotations = paramterAnnotations[index];
+        Annotation[] parameterAnnotations = parameterAnnotationsPerParameter[index];
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         dependencies.add(newDependency(key, Nullability.allowsNull(parameterAnnotations), index));
         index++;

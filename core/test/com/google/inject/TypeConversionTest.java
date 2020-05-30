@@ -533,23 +533,4 @@ public class TypeConversionTest extends TestCase {
   static class DateHolder {
     @Inject @NumericValue Date date;
   }
-
-  public void testCannotConvertUnannotatedBindings() {
-    Injector injector =
-        Guice.createInjector(
-            new AbstractModule() {
-              @Override
-              protected void configure() {
-                bind(String.class).toInstance("55");
-              }
-            });
-
-    try {
-      injector.getInstance(Integer.class);
-      fail("Converted an unannotated String to an Integer");
-    } catch (ConfigurationException expected) {
-      Asserts.assertContains(
-          expected.getMessage(), "Could not find a suitable constructor in java.lang.Integer.");
-    }
-  }
 }

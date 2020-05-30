@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.Scopes.SINGLETON;
+import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -31,6 +32,7 @@ import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.Stopwatch;
+import com.google.inject.spi.BindingSourceRestriction;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
@@ -127,6 +129,9 @@ final class InjectorShell {
       checkState(stage != null, "Stage not initialized");
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
+      checkState(
+          (privateElements == null && elements.isEmpty()) || modules.isEmpty(),
+          "The shell is either built from modules (root) or from PrivateElements (children).");
 
       // bind Singleton if this is a top-level injector
       if (parent == null) {
@@ -135,6 +140,14 @@ final class InjectorShell {
         modules.add(0, new InheritedScannersModule(parent.state));
       }
       elements.addAll(Elements.getElements(stage, modules));
+
+      // Check binding source restrictions only for the root shell (note that the root shell
+      // can have a parent Injector, when Injector.createChildInjector is called). It isn't
+      // necessary to call this check on child PrivateElements shells because it walks the entire
+      // tree of elements, recurring on PrivateElements.
+      if (privateElements == null) {
+        elements.addAll(BindingSourceRestriction.check(GUICE_INTERNAL, elements));
+      }
 
       // Look for injector-changing options
       InjectorOptionsProcessor optionsProcessor = new InjectorOptionsProcessor(errors);

@@ -79,9 +79,8 @@ final class ConstructorInjector<T> {
       if (context.getInjectorOptions().disableCircularProxies) {
         throw InternalProvisionException.circularDependenciesDisabled(
             dependency.getKey().getTypeLiteral().getRawType());
-      } else {
-        return t;
       }
+      return t;
     }
 
     constructionContext.startConstruction();

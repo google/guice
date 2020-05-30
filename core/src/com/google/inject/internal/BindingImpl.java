@@ -33,7 +33,7 @@ public abstract class BindingImpl<T> implements Binding<T> {
   private final Scoping scoping;
   private final InternalFactory<? extends T> internalFactory;
 
-  public BindingImpl(
+  BindingImpl(
       InjectorImpl injector,
       Key<T> key,
       Object source,
@@ -46,7 +46,7 @@ public abstract class BindingImpl<T> implements Binding<T> {
     this.scoping = scoping;
   }
 
-  protected BindingImpl(Object source, Key<T> key, Scoping scoping) {
+  BindingImpl(Object source, Key<T> key, Scoping scoping) {
     this.internalFactory = null;
     this.injector = null;
     this.source = source;

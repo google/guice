@@ -27,12 +27,12 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.LinkedKeyBinding;
 import java.util.Set;
 
-public final class LinkedBindingImpl<T> extends BindingImpl<T>
+final class LinkedBindingImpl<T> extends BindingImpl<T>
     implements LinkedKeyBinding<T>, HasDependencies {
 
   final Key<? extends T> targetKey;
 
-  public LinkedBindingImpl(
+  LinkedBindingImpl(
       InjectorImpl injector,
       Key<T> key,
       Object source,
@@ -43,7 +43,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T>
     this.targetKey = targetKey;
   }
 
-  public LinkedBindingImpl(Object source, Key<T> key, Scoping scoping, Key<? extends T> targetKey) {
+  LinkedBindingImpl(Object source, Key<T> key, Scoping scoping, Key<? extends T> targetKey) {
     super(source, key, scoping);
     this.targetKey = targetKey;
   }

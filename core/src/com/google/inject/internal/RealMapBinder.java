@@ -1346,7 +1346,9 @@ public final class RealMapBinder<K, V> implements Module {
   private static <K, V> InternalProvisionException createNullValueException(
       K key, Binding<V> binding) {
     return InternalProvisionException.create(
+        ErrorId.NULL_VALUE_IN_MAP,
         "Map injection failed due to null value for key \"%s\", bound at: %s",
-        key, binding.getSource());
+        key,
+        binding.getSource());
   }
 }
