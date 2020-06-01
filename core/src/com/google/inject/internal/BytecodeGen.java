@@ -298,21 +298,9 @@ public final class BytecodeGen {
     return true;
   }
 
-  /**
-   * All enhanced classes are implemented a marker interface
-   *
-   * @author 11712617@mail.sustech.edu.cn (Xinhao Xiang)
-   */
-  public interface Marker{
-    default boolean isGuiceEnhanced(){
-      return getClass().getName().contains("EnhancedByGuice");
-    }
-  }
-
   public static net.sf.cglib.proxy.Enhancer newEnhancer(Class<?> type, Visibility visibility) {
     net.sf.cglib.proxy.Enhancer enhancer = new net.sf.cglib.proxy.Enhancer();
     enhancer.setSuperclass(type);
-    enhancer.setInterfaces(new Class[]{Marker.class});
     enhancer.setUseFactory(false);
     if (visibility == Visibility.PUBLIC) {
       enhancer.setClassLoader(getClassLoader(type));
