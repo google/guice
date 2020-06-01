@@ -86,7 +86,7 @@ public final class Guice {
   public static Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
     return new InternalInjectorCreator().stage(stage).addModules(modules).build();
   }
-
+  
   /**
    * A static helper that returns whether a given instance has been enhanced
    *
