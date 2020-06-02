@@ -35,6 +35,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.name.Named;
@@ -690,6 +691,139 @@ public class ModuleAnnotatedMethodScannerTest {
                 new ModuleWithMethodsToIgnore(), new TestScanner(TestProvides.class)));
     assertThat(unfilteredInjector.getInstance(Key.get(Boolean.class))).isTrue();
     assertThat(unfilteredInjector.getInstance(Integer.class)).isEqualTo(0);
+  }
+
+  @Test
+  public void scannerCantRegisterScanner() {
+    ModuleAnnotatedMethodScanner scannerRegisteringScanner =
+        new TestScanner(TestProvides.class) {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            binder.scanModulesForAnnotatedMethods(new TestScanner(TestProvides2.class));
+            return key;
+          }
+        };
+
+    CreationException creationException =
+        assertThatInjectorCreationFails(
+            scannerModule(scannerRegisteringScanner),
+            new AbstractModule() {
+              @TestProvides
+              boolean bogus() {
+                return true;
+              }
+            });
+
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains("Scanners are not allowed to register other scanners");
+  }
+
+  @Test
+  public void scannerCantInstallModuleWithCustomProvidesMethods() {
+    ModuleAnnotatedMethodScanner scannerInstallingScannableModule =
+        new TestScanner(TestProvides.class) {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            binder.install(
+                new AbstractModule() {
+                  @TestProvides2
+                  int bogus() {
+                    return 0;
+                  }
+                });
+            return key;
+          }
+        };
+
+    CreationException creationException =
+        assertThatInjectorCreationFails(
+            scannerModule(scannerInstallingScannableModule),
+            scannerModule(new TestScanner(TestProvides2.class)),
+            new AbstractModule() {
+              @TestProvides
+              boolean bogus() {
+                return true;
+              }
+            });
+
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains(
+            "Installing modules with custom provides methods from a ModuleAnnotatedMethodScanner"
+                + " is not supported");
+  }
+
+  @Test
+  public void scannerCantInstallPrivateModuleWithCustomProvidesMethods() {
+    ModuleAnnotatedMethodScanner scannerInstallingScannablePrivateModule =
+        new TestScanner(TestProvides.class) {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            binder.install(
+                new PrivateModule() {
+                  @Override
+                  protected void configure() {}
+
+                  @TestProvides2
+                  int bogus() {
+                    return 0;
+                  }
+                });
+            return key;
+          }
+        };
+
+    CreationException creationException =
+        assertThatInjectorCreationFails(
+            scannerModule(scannerInstallingScannablePrivateModule),
+            scannerModule(new TestScanner(TestProvides2.class)),
+            new AbstractModule() {
+              @TestProvides
+              boolean bogus() {
+                return true;
+              }
+            });
+
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains(
+            "Installing modules with custom provides methods from a ModuleAnnotatedMethodScanner"
+                + " is not supported");
+  }
+
+  @Test
+  public void scannerCanInstallModuleWithRegularProvidesMethods() {
+    ModuleAnnotatedMethodScanner scanner =
+        new TestScanner(TestProvides.class) {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            binder.install(
+                new AbstractModule() {
+                  @Provides
+                  int provideAnswer() {
+                    return 42;
+                  }
+                });
+            return key;
+          }
+        };
+
+    Injector injector =
+        Guice.createInjector(
+            scannerModule(scanner),
+            new AbstractModule() {
+              @TestProvides
+              boolean bogus() {
+                return true;
+              }
+            });
+
+    assertThat(injector.getInstance(Integer.class)).isEqualTo(42);
   }
 
   CreationException assertThatInjectorCreationFails(Module... modules) {

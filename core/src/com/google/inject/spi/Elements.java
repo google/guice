@@ -47,6 +47,7 @@ import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.PrivateElementsImpl;
+import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.StackTraceElements;
@@ -104,7 +105,7 @@ public final class Elements {
       binder.install(module);
     }
     binder.scanForAnnotatedMethods();
-    for (RecordingBinder child : binder.privateBinders) {
+    for (RecordingBinder child : binder.privateBindersForScanning) {
       child.scanForAnnotatedMethods();
     }
     binder.permitMapConstruction.finish();
@@ -156,6 +157,8 @@ public final class Elements {
     /** The current modules stack */
     private ModuleSource moduleSource = null;
 
+    private ModuleAnnotatedMethodScanner currentScanner = null;
+
     private final SourceProvider sourceProvider;
     private final Set<ModuleAnnotatedMethodScanner> scanners;
 
@@ -165,7 +168,7 @@ public final class Elements {
     private final PrivateElementsImpl privateElements;
 
     /** All children private binders, so we can scan through them. */
-    private final List<RecordingBinder> privateBinders;
+    private final List<RecordingBinder> privateBindersForScanning;
 
     private final BindingSourceRestriction.PermitMapConstruction permitMapConstruction;
 
@@ -185,7 +188,7 @@ public final class Elements {
               BindingBuilder.class);
       this.parent = null;
       this.privateElements = null;
-      this.privateBinders = Lists.newArrayList();
+      this.privateBindersForScanning = Lists.newArrayList();
       this.permitMapConstruction = new BindingSourceRestriction.PermitMapConstruction();
     }
 
@@ -198,12 +201,13 @@ public final class Elements {
       this.modules = prototype.modules;
       this.elements = prototype.elements;
       this.scanners = prototype.scanners;
+      this.currentScanner = prototype.currentScanner;
       this.source = source;
       this.moduleSource = prototype.moduleSource;
       this.sourceProvider = sourceProvider;
       this.parent = prototype.parent;
       this.privateElements = prototype.privateElements;
-      this.privateBinders = prototype.privateBinders;
+      this.privateBindersForScanning = prototype.privateBindersForScanning;
       this.permitMapConstruction = prototype.permitMapConstruction;
     }
 
@@ -212,13 +216,14 @@ public final class Elements {
       this.stage = parent.stage;
       this.modules = Maps.newLinkedHashMap();
       this.scanners = Sets.newLinkedHashSet(parent.scanners);
+      this.currentScanner = parent.currentScanner;
       this.elements = privateElements.getElementsMutable();
       this.source = parent.source;
       this.moduleSource = parent.moduleSource;
       this.sourceProvider = parent.sourceProvider;
       this.parent = parent;
       this.privateElements = privateElements;
-      this.privateBinders = parent.privateBinders;
+      this.privateBindersForScanning = parent.privateBindersForScanning;
       this.permitMapConstruction = parent.permitMapConstruction;
     }
 
@@ -291,15 +296,16 @@ public final class Elements {
      * maps. (They're stored in both maps to prevent a module from being installed more than once.)
      */
     void scanForAnnotatedMethods() {
-      for (ModuleAnnotatedMethodScanner scanner : scanners) {
-        // Note: we must iterate over a copy of the modules because calling install(..)
-        // will mutate modules, otherwise causing a ConcurrentModificationException.
-        for (Map.Entry<Module, ModuleInfo> entry : Maps.newLinkedHashMap(modules).entrySet()) {
-          Module module = entry.getKey();
-          ModuleInfo info = entry.getValue();
-          if (info.skipScanning) {
-            continue;
-          }
+      // Note: we must iterate over a copy of the modules because calling install(..)
+      // will mutate modules, otherwise causing a ConcurrentModificationException.
+      for (Map.Entry<Module, ModuleInfo> entry : Maps.newLinkedHashMap(modules).entrySet()) {
+        Module module = entry.getKey();
+        ModuleInfo info = entry.getValue();
+        if (info.skipScanning) {
+          continue;
+        }
+        for (ModuleAnnotatedMethodScanner scanner : scanners) {
+          currentScanner = scanner;
           moduleSource = entry.getValue().moduleSource;
           try {
             install(ProviderMethodsModule.forModule(module, scanner));
@@ -336,6 +342,9 @@ public final class Elements {
           newModuleClass = delegateClass;
         }
       } else {
+        if (moduleScanning()) {
+          forbidNestedScannerMethods(module);
+        }
         newModuleClass = module.getClass();
       }
       if (newModuleClass != null) {
@@ -367,6 +376,19 @@ public final class Elements {
       if (newModuleClass != null) {
         moduleSource = moduleSource.getParent();
         permitMapConstruction.popModule();
+      }
+    }
+
+    private void forbidNestedScannerMethods(Module module) {
+      for (ModuleAnnotatedMethodScanner scanner : scanners) {
+        ProviderMethodsModule providerMethodsModule =
+            (ProviderMethodsModule) ProviderMethodsModule.forModule(module, scanner);
+        for (ProviderMethod<?> method : providerMethodsModule.getProviderMethods(this)) {
+          addError(
+              "Scanner %s is installing a module with %s method. Installing modules with custom "
+                  + "provides methods from a ModuleAnnotatedMethodScanner is not supported.",
+              currentScanner, method.getAnnotation().annotationType().getCanonicalName());
+        }
       }
     }
 
@@ -456,8 +478,11 @@ public final class Elements {
     public PrivateBinder newPrivateBinder() {
       PrivateElementsImpl privateElements = new PrivateElementsImpl(getElementSource());
       RecordingBinder binder = new RecordingBinder(this, privateElements);
-      privateBinders.add(binder);
       elements.add(privateElements);
+      // Don't want to scan private modules installed by scanners.
+      if (!moduleScanning()) {
+        privateBindersForScanning.add(binder);
+      }
       return binder;
     }
 
@@ -483,6 +508,13 @@ public final class Elements {
 
     @Override
     public void scanModulesForAnnotatedMethods(ModuleAnnotatedMethodScanner scanner) {
+      if (moduleScanning()) {
+        addError(
+            "Attempting to register ModuleAnnotatedMethodScanner %s from scanner %s. Scanners are"
+                + " not allowed to register other scanners.",
+            currentScanner, scanner);
+        return;
+      }
       scanners.add(scanner);
       elements.add(new ModuleAnnotatedMethodScannerBinding(getElementSource(), scanner));
     }
@@ -589,6 +621,11 @@ public final class Elements {
       StackTraceElement[] partialCallStack = new StackTraceElement[chunkSize];
       System.arraycopy(callStack, 1, partialCallStack, 0, chunkSize);
       return partialCallStack;
+    }
+
+    /** Returns if the binder is in the module scanning phase. */
+    private boolean moduleScanning() {
+      return currentScanner != null;
     }
 
     @Override
