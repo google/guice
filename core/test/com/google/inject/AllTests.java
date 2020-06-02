@@ -31,7 +31,6 @@ import com.google.inject.spi.HasDependenciesTest;
 import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.InjectorSpiTest;
 import com.google.inject.spi.MessageTest;
-import com.google.inject.spi.ModuleAnnotatedMethodScannerTest;
 import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ModuleSourceTest;
 import com.google.inject.spi.ProviderMethodsTest;
@@ -76,7 +75,6 @@ public class AllTests {
     suite.addTestSuite(MembersInjectorTest.class);
     suite.addTestSuite(ModulesTest.class);
     suite.addTestSuite(ModuleTest.class);
-    suite.addTestSuite(ModuleAnnotatedMethodScannerTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
     suite.addTestSuite(OptionalBindingTest.class);
     suite.addTestSuite(OverrideModuleTest.class);
