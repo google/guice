@@ -16,10 +16,11 @@
 
 package com.google.inject.spi;
 
-import static com.google.inject.Asserts.assertContains;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -44,12 +45,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** Tests for {@link ModuleAnnotatedMethodScanner} usage. */
-public class ModuleAnnotatedMethodScannerTest extends TestCase {
+@RunWith(JUnit4.class)
+public class ModuleAnnotatedMethodScannerTest {
 
-  public void testScanning() throws Exception {
+  @Test
+  public void scanning() throws Exception {
     Module module =
         new AbstractModule() {
 
@@ -65,7 +70,7 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
             return "foo2";
           }
         };
-    Injector injector = Guice.createInjector(module, NamedMunger.module());
+    Injector injector = Guice.createInjector(module, scannerModule(new NamedMunger()));
 
     // assert no bindings named "foo" or "foo2" exist -- they were munged.
     assertMungedBinding(injector, String.class, "foo", "foo");
@@ -74,13 +79,14 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     Binding<String> fooBinding = injector.getBinding(Key.get(String.class, named("foo-munged")));
     Binding<String> foo2Binding = injector.getBinding(Key.get(String.class, named("foo2-munged")));
     // Validate the provider has a sane toString
-    assertEquals(
-        methodName(TestProvides.class, "foo", module), fooBinding.getProvider().toString());
-    assertEquals(
-        methodName(TestProvides.class, "foo2", module), foo2Binding.getProvider().toString());
+    assertThat(methodName(TestProvides.class, "foo", module))
+        .isEqualTo(fooBinding.getProvider().toString());
+    assertThat(methodName(TestProvides.class, "foo2", module))
+        .isEqualTo(foo2Binding.getProvider().toString());
   }
 
-  public void testSkipSources() throws Exception {
+  @Test
+  public void skipSources() throws Exception {
     Module module =
         new AbstractModule() {
           @Override
@@ -98,11 +104,12 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     });
           }
         };
-    Injector injector = Guice.createInjector(module, NamedMunger.module());
+    Injector injector = Guice.createInjector(module, scannerModule(new NamedMunger()));
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testWithSource() throws Exception {
+  @Test
+  public void withSource() throws Exception {
     Module module =
         new AbstractModule() {
           @Override
@@ -120,11 +127,12 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                     });
           }
         };
-    Injector injector = Guice.createInjector(module, NamedMunger.module());
+    Injector injector = Guice.createInjector(module, scannerModule(new NamedMunger()));
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testMoreThanOneClaimedAnnotationFails() throws Exception {
+  @Test
+  public void moreThanOneClaimedAnnotationFails() throws Exception {
     Module module =
         new AbstractModule() {
 
@@ -134,18 +142,18 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
             return "foo";
           }
         };
-    try {
-      Guice.createInjector(module, NamedMunger.module());
-      fail();
-    } catch (CreationException expected) {
-      assertEquals(1, expected.getErrorMessages().size());
-      assertContains(
-          expected.getMessage(),
-          "More than one annotation claimed by NamedMunger on method "
-              + module.getClass().getName()
-              + ".foo(). Methods can only have "
-              + "one annotation claimed per scanner.");
-    }
+
+    CreationException creationException =
+        assertThatInjectorCreationFails(module, scannerModule(new NamedMunger()));
+
+    assertThat(creationException.getErrorMessages()).hasSize(1);
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains(
+            "More than one annotation claimed by NamedMunger on method "
+                + module.getClass().getName()
+                + ".foo(). Methods can only have "
+                + "one annotation claimed per scanner.");
   }
 
   private String methodName(Class<? extends Annotation> annotation, String method, Object container)
@@ -167,15 +175,6 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
   private @interface TestProvides2 {}
 
   private static class NamedMunger extends ModuleAnnotatedMethodScanner {
-    static Module module() {
-      return new AbstractModule() {
-        @Override
-        protected void configure() {
-          binder().scanModulesForAnnotatedMethods(new NamedMunger());
-        }
-      };
-    }
-
     @Override
     public String toString() {
       return "NamedMunger";
@@ -196,39 +195,27 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
 
   private void assertMungedBinding(
       Injector injector, Class<?> clazz, String originalName, Object expectedValue) {
-    assertNull(injector.getExistingBinding(Key.get(clazz, named(originalName))));
+    assertThat(injector.getExistingBinding(Key.get(clazz, named(originalName)))).isNull();
     Binding<?> fooBinding = injector.getBinding(Key.get(clazz, named(originalName + "-munged")));
-    assertEquals(expectedValue, fooBinding.getProvider().get());
+    assertThat(fooBinding.getProvider().get()).isEqualTo(expectedValue);
   }
 
-  public void testFailingScanner() {
-    try {
-      Guice.createInjector(new SomeModule(), FailingScanner.module());
-      fail();
-    } catch (CreationException expected) {
-      Message m = Iterables.getOnlyElement(expected.getErrorMessages());
-      assertEquals(
-          "An exception was caught and reported. Message: Failing in the scanner.", m.getMessage());
-      assertEquals(IllegalStateException.class, m.getCause().getClass());
-      ElementSource source = (ElementSource) Iterables.getOnlyElement(m.getSources());
-      assertEquals(
-          SomeModule.class.getName(), Iterables.getOnlyElement(source.getModuleClassNames()));
-      assertEquals(
-          String.class.getName() + " " + SomeModule.class.getName() + ".aString()",
-          source.toString());
-    }
+  @Test
+  public void failingScanner() {
+    CreationException creationException =
+        assertThatInjectorCreationFails(new SomeModule(), scannerModule(new FailingScanner()));
+    Message m = Iterables.getOnlyElement(creationException.getErrorMessages());
+    assertThat(m.getMessage())
+        .isEqualTo("An exception was caught and reported. Message: Failing in the scanner.");
+    assertThat(creationException).hasCauseThat().isInstanceOf(IllegalStateException.class);
+    ElementSource source = (ElementSource) Iterables.getOnlyElement(m.getSources());
+    assertThat(SomeModule.class.getName())
+        .isEqualTo(Iterables.getOnlyElement(source.getModuleClassNames()));
+    assertThat(String.class.getName() + " " + SomeModule.class.getName() + ".aString()")
+        .isEqualTo(source.toString());
   }
 
   public static class FailingScanner extends ModuleAnnotatedMethodScanner {
-    static Module module() {
-      return new AbstractModule() {
-        @Override
-        protected void configure() {
-          binder().scanModulesForAnnotatedMethods(new FailingScanner());
-        }
-      };
-    }
-
     @Override
     public Set<? extends Class<? extends Annotation>> annotationClasses() {
       return ImmutableSet.of(TestProvides.class);
@@ -248,8 +235,9 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     }
   }
 
-  public void testChildInjectorInheritsScanner() {
-    Injector parent = Guice.createInjector(NamedMunger.module());
+  @Test
+  public void childInjectorInheritsScanner() {
+    Injector parent = Guice.createInjector(scannerModule(new NamedMunger()));
     Injector child =
         parent.createChildInjector(
             new AbstractModule() {
@@ -263,7 +251,8 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(child, String.class, "foo", "foo");
   }
 
-  public void testChildInjectorScannersDontImpactSiblings() {
+  @Test
+  public void childInjectorScannersDontImpactSiblings() {
     Module module =
         new AbstractModule() {
 
@@ -274,19 +263,20 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
           }
         };
     Injector parent = Guice.createInjector();
-    Injector child = parent.createChildInjector(NamedMunger.module(), module);
+    Injector child = parent.createChildInjector(scannerModule(new NamedMunger()), module);
     assertMungedBinding(child, String.class, "foo", "foo");
 
     // no foo nor foo-munged in sibling, since scanner never saw it.
     Injector sibling = parent.createChildInjector(module);
-    assertNull(sibling.getExistingBinding(Key.get(String.class, named("foo"))));
-    assertNull(sibling.getExistingBinding(Key.get(String.class, named("foo-munged"))));
+    assertThat(sibling.getExistingBinding(Key.get(String.class, named("foo")))).isNull();
+    assertThat(sibling.getExistingBinding(Key.get(String.class, named("foo-munged")))).isNull();
   }
 
-  public void testPrivateModuleInheritScanner_usingPrivateModule() {
+  @Test
+  public void privateModuleInheritScanner_usingPrivateModule() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new PrivateModule() {
               @Override
               protected void configure() {}
@@ -301,10 +291,11 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModule_skipSourcesWithinPrivateModule() {
+  @Test
+  public void privateModule_skipSourcesWithinPrivateModule() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new PrivateModule() {
               @Override
               protected void configure() {
@@ -325,10 +316,11 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModule_skipSourcesForPrivateModule() {
+  @Test
+  public void privateModule_skipSourcesForPrivateModule() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new AbstractModule() {
               @Override
               protected void configure() {
@@ -351,10 +343,11 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModuleInheritScanner_usingPrivateBinder() {
+  @Test
+  public void privateModuleInheritScanner_usingPrivateBinder() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new AbstractModule() {
               @Override
               protected void configure() {
@@ -375,10 +368,11 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModuleInheritScanner_skipSourcesFromPrivateBinder() {
+  @Test
+  public void privateModuleInheritScanner_skipSourcesFromPrivateBinder() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new AbstractModule() {
               @Override
               protected void configure() {
@@ -400,10 +394,11 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModuleInheritScanner_skipSourcesFromPrivateBinder2() {
+  @Test
+  public void privateModuleInheritScanner_skipSourcesFromPrivateBinder2() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new AbstractModule() {
               @Override
               protected void configure() {
@@ -425,13 +420,14 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModuleScannersDontImpactSiblings_usingPrivateModule() {
+  @Test
+  public void privateModuleScannersDontImpactSiblings_usingPrivateModule() {
     Injector injector =
         Guice.createInjector(
             new PrivateModule() {
               @Override
               protected void configure() {
-                install(NamedMunger.module());
+                install(scannerModule(new NamedMunger()));
               }
 
               @Exposed
@@ -456,7 +452,8 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModuleScannersDontImpactSiblings_usingPrivateBinder() {
+  @Test
+  public void privateModuleScannersDontImpactSiblings_usingPrivateBinder() {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
@@ -468,7 +465,7 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
                         new AbstractModule() {
                           @Override
                           protected void configure() {
-                            install(NamedMunger.module());
+                            install(scannerModule(new NamedMunger()));
                           }
 
                           @Exposed
@@ -501,10 +498,11 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testPrivateModuleWithinPrivateModule() {
+  @Test
+  public void privateModuleWithinPrivateModule() {
     Injector injector =
         Guice.createInjector(
-            NamedMunger.module(),
+            scannerModule(new NamedMunger()),
             new PrivateModule() {
               @Override
               protected void configure() {
@@ -526,7 +524,8 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
-  public void testAbstractMethodsAreScannedForOverrides() {
+  @Test
+  public void abstractMethodsAreScannedForOverrides() {
     abstract class Superclass {
       @TestProvides
       abstract boolean abstractTest();
@@ -551,15 +550,14 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
             return null;
           }
         };
-    try {
-      Guice.createInjector(ProviderMethodsModule.forModule(Subclass.class, testScanner));
-      fail("expected exception not thrown");
-    } catch (CreationException e) {
-      assertContains(
-          e.getMessage(),
-          String.format(
-              "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
-    }
+    CreationException creationException =
+        assertThatInjectorCreationFails(
+            ProviderMethodsModule.forModule(Subclass.class, testScanner));
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
   }
 
   static class Superclass {
@@ -606,36 +604,57 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     }
   }
 
-  public void testIgnoreMethodsScannedForOverridesSubclass() {
+  @Test
+  public void ignoreMethodsScannedForOverridesSubclass() {
     IgnoringScanner scanner = new IgnoringScanner(Subclass.class);
-    try {
-      Guice.createInjector(ProviderMethodsModule.forModule(new Subclass(), scanner));
-      fail("expected exception not thrown");
-    } catch (CreationException e) {
-      assertContains(
-          e.getMessage(),
-          String.format(
-              "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
-    }
-    assertEquals(1, scanner.ignoredCounter()); // checking that there was a method ignored.
+
+    CreationException creationException =
+        assertThatInjectorCreationFails(ProviderMethodsModule.forModule(new Subclass(), scanner));
+
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
+    assertThat(scanner.ignoredCounter()).isEqualTo(1); // checking that there was a method ignored.
   }
 
-  public void testIgnoreMethodsScannedForOverridesSuperclass() {
+  @Test
+  public void ignoreMethodsScannedForOverridesSuperclass() {
     IgnoringScanner scanner = new IgnoringScanner(Superclass.class);
 
-    try {
-      Guice.createInjector(ProviderMethodsModule.forModule(new Subclass(), scanner));
-      fail("expected exception not thrown");
-    } catch (CreationException e) {
-      assertContains(
-          e.getMessage(),
-          String.format(
-              "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
-    }
-    assertEquals(1, scanner.ignoredCounter()); // checking that there was a method ignored.
+    CreationException creationException =
+        assertThatInjectorCreationFails(ProviderMethodsModule.forModule(new Subclass(), scanner));
+
+    assertThat(creationException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
+    assertThat(scanner.ignoredCounter()).isEqualTo(1); // checking that there was a method ignored.
   }
 
-  public void testIgnoreMethods() {
+  static class TestScanner extends ModuleAnnotatedMethodScanner {
+    ImmutableSet<Class<? extends Annotation>> annotations;
+
+    TestScanner(Class<? extends Annotation>... annotations) {
+      this.annotations = ImmutableSet.copyOf(annotations);
+    }
+
+    @Override
+    public Set<? extends Class<? extends Annotation>> annotationClasses() {
+      return annotations;
+    }
+
+    @Override
+    public <T> Key<T> prepareMethod(
+        Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+      return key;
+    }
+  }
+
+  @Test
+  public void ignoreMethods() {
     class ModuleWithMethodsToIgnore {
       @TestProvides
       boolean booleanTest() {
@@ -648,20 +667,8 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
       }
     }
 
-    class TestScanner extends ModuleAnnotatedMethodScanner {
-      @Override
-      public Set<? extends Class<? extends Annotation>> annotationClasses() {
-        return ImmutableSet.of(TestProvides.class);
-      }
-
-      @Override
-      public <T> Key<T> prepareMethod(
-          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
-        return key;
-      }
-    }
     ModuleAnnotatedMethodScanner filteringScanner =
-        new TestScanner() {
+        new TestScanner(TestProvides.class) {
           @Override
           public <T> Key<T> prepareMethod(
               Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
@@ -675,17 +682,26 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     Injector filteredInjector =
         Guice.createInjector(
             ProviderMethodsModule.forModule(new ModuleWithMethodsToIgnore(), filteringScanner));
-    assertTrue(filteredInjector.getInstance(Key.get(Boolean.class)));
-    try {
-      filteredInjector.getInstance(Integer.class);
-      fail();
-    } catch (ConfigurationException expected) {
-      //
-    }
+    assertThat(filteredInjector.getInstance(Key.get(Boolean.class))).isTrue();
+    assertThrows(ConfigurationException.class, () -> filteredInjector.getInstance(Integer.class));
     Injector unfilteredInjector =
         Guice.createInjector(
-            ProviderMethodsModule.forModule(new ModuleWithMethodsToIgnore(), new TestScanner()));
-    assertTrue(unfilteredInjector.getInstance(Key.get(Boolean.class)));
-    assertEquals(Integer.valueOf(0), unfilteredInjector.getInstance(Integer.class));
+            ProviderMethodsModule.forModule(
+                new ModuleWithMethodsToIgnore(), new TestScanner(TestProvides.class)));
+    assertThat(unfilteredInjector.getInstance(Key.get(Boolean.class))).isTrue();
+    assertThat(unfilteredInjector.getInstance(Integer.class)).isEqualTo(0);
+  }
+
+  CreationException assertThatInjectorCreationFails(Module... modules) {
+    return assertThrows(CreationException.class, () -> Guice.createInjector(modules));
+  }
+
+  private static Module scannerModule(ModuleAnnotatedMethodScanner scanner) {
+    return new AbstractModule() {
+      @Override
+      protected void configure() {
+        binder().scanModulesForAnnotatedMethods(scanner);
+      }
+    };
   }
 }
