@@ -77,7 +77,7 @@ import org.objectweb.asm.Type;
  *   }
  *
  *   public Object apply(Object context, Object args) {
- *     return trampoline(index, context, (Object[]) args);
+ *     return GUICE$TRAMPOLINE(index, context, (Object[]) args);
  *   }
  *
  *   public static Object GUICE$TRAMPOLINE(int index, Object context, Object[] args) {
