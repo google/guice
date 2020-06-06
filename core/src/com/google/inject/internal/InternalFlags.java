@@ -53,23 +53,30 @@ public class InternalFlags {
    * The options for Guice custom class loading.
    */
   public enum CustomClassLoadingOption {
-    /** Never create child class loaders, use Unsafe to define types in existing class loaders. */
+    /**
+     * Define fast/enhanced types in the same class loader as their original type, never creates
+     * class loaders. Uses Unsafe.defineAnonymousClass to gain access to existing class loaders.
+     */
     OFF,
 
     /**
-     * Like OFF but uses Unsafe.defineAnonymousClass to reduce the cost of fast/enhanced classes.
+     * Define fast/enhanced types with Unsafe.defineAnonymousClass, never creates class loaders.
+     * This is faster than regular class loading and anonymous classes are easier to unload.
      *
-     * <p>Note: when using this option you cannot look up enhanced types by name or mock/spy them.
+     * <p>Note: with this option you cannot look up fast/enhanced types by name or mock/spy them.
      */
     ANONYMOUS,
 
-    /** Prefer Unsafe, but fall back to child class loaders if Unsafe is not available (Default) */
+    /**
+     * Attempt to define fast/enhanced types in the same class loader as their original type.
+     * Otherwise creates a child class loader whose parent is the original class loader. (Default)
+     */
     BRIDGE,
 
     /**
-     * Always create child class loaders when defining types to make it easier to unload them.
+     * Define fast/enhanced types in a child class loader whose parent is the original class loader.
      *
-     * <p>Note: when using this option you cannot intercept package-private methods.
+     * <p>Note: with this option you cannot intercept package-private methods.
      */
     CHILD
   }
