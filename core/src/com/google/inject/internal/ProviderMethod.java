@@ -257,12 +257,11 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
 
     @SuppressWarnings("unchecked")
     @Override
-    public T doProvision(Object[] parameters)
-        throws IllegalAccessException, InvocationTargetException {
+    public T doProvision(Object[] parameters) throws InvocationTargetException {
       try {
         return (T) fastMethod.apply(instance, parameters);
       } catch (Throwable e) {
-        throw new InvocationTargetException(e);
+        throw new InvocationTargetException(e); // match JDK reflection behaviour
       }
     }
   }

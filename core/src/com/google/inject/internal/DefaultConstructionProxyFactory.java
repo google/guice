@@ -81,7 +81,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
       try {
         return (T) fastConstructor.apply(null, arguments);
       } catch (Throwable e) {
-        throw new InvocationTargetException(e);
+        throw new InvocationTargetException(e); // match JDK reflection behaviour
       }
     }
 

@@ -46,11 +46,11 @@ final class SingleMethodInjector implements SingleMemberInjector {
         return new MethodInvoker() {
           @Override
           public Object invoke(Object target, Object... parameters)
-              throws IllegalAccessException, InvocationTargetException {
+              throws InvocationTargetException {
             try {
               return fastMethod.apply(target, parameters);
             } catch (Throwable e) {
-              throw new InvocationTargetException(e);
+              throw new InvocationTargetException(e); // match JDK reflection behaviour
             }
           }
         };
