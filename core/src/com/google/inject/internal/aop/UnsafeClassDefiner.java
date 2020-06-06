@@ -160,6 +160,7 @@ final class UnsafeClassDefiner implements ClassDefiner {
   private static byte[] buildDefineClassAccess(Class<?> loaderClass) {
     ClassWriter cw = new ClassWriter(COMPUTE_MAXS);
 
+    // target Java8 because that's all we need for the generated helper
     cw.visit(
         V1_8,
         PUBLIC | ACC_SUPER,

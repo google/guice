@@ -175,6 +175,7 @@ final class Enhancer extends AbstractGlueGenerator {
   protected byte[] generateGlue(Collection<Executable> members) {
     ClassWriter cw = new ClassWriter(COMPUTE_MAXS);
 
+    // target Java8 because that's all we need for the generated trampoline code
     cw.visit(V1_8, PUBLIC | ACC_SUPER, proxyName, null, hostName, null);
     cw.visitSource(GENERATED_SOURCE, null);
 

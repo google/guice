@@ -128,6 +128,7 @@ final class FastClass extends AbstractGlueGenerator {
     ClassWriter cw = new ClassWriter(COMPUTE_MAXS);
     MethodVisitor mv;
 
+    // target Java8 because that's all we need for the generated trampoline code
     cw.visit(V1_8, PUBLIC | FINAL | ACC_SUPER, proxyName, null, "java/lang/Object", FAST_CLASS_API);
     cw.visitSource(GENERATED_SOURCE, null);
 
