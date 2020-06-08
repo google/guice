@@ -31,6 +31,7 @@ import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.H_NEWINVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
@@ -38,19 +39,17 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_8;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.function.BiFunction;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
@@ -103,18 +102,17 @@ final class FastClass extends AbstractGlueGenerator {
 
   private static final String[] FAST_CLASS_API = {"java/util/function/BiFunction"};
 
+  private static final String INVOKERS_NAME = "GUICE$INVOKERS";
+
+  private static final String INVOKERS_DESCRIPTOR = "Ljava/lang/invoke/MethodHandle;";
+
+  private static final Type INDEX_TO_INVOKER_METHOD_TYPE =
+      Type.getMethodType("(I)Ljava/util/function/BiFunction;");
+
   private static final String RAW_INVOKER_DESCRIPTOR =
       "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
 
-  private static final MethodType INT_CONSTRUCTOR_TYPE =
-      MethodType.methodType(void.class, int.class);
-
-  private static final MethodType INDEX_TO_INVOKER_METHOD_TYPE =
-      MethodType.methodType(BiFunction.class, int.class);
-
   private static final String OBJECT_ARRAY_TYPE = Type.getInternalName(Object[].class);
-
-  private static final Lookup LOOKUP = MethodHandles.lookup();
 
   private final boolean hostIsInterface;
 
@@ -131,6 +129,12 @@ final class FastClass extends AbstractGlueGenerator {
     // target Java8 because that's all we need for the generated trampoline code
     cw.visit(V1_8, PUBLIC | FINAL | ACC_SUPER, proxyName, null, "java/lang/Object", FAST_CLASS_API);
     cw.visitSource(GENERATED_SOURCE, null);
+
+    // this shared field contains the constructor handle adapted to look like an invoker table
+    cw.visitField(PUBLIC | STATIC | FINAL, INVOKERS_NAME, INVOKERS_DESCRIPTOR, null, null)
+        .visitEnd();
+
+    setupInvokerTable(cw);
 
     cw.visitField(PRIVATE | FINAL, "index", "I", null, null).visitEnd();
 
@@ -165,6 +169,31 @@ final class FastClass extends AbstractGlueGenerator {
 
     cw.visitEnd();
     return cw.toByteArray();
+  }
+
+  /** Generate static initializer to setup invoker table based on the fast-class constructor. */
+  private void setupInvokerTable(ClassWriter cw) {
+    MethodVisitor mv = cw.visitMethod(PRIVATE | STATIC, "<clinit>", "()V", null, null);
+    mv.visitCode();
+
+    Handle constructorHandle = new Handle(H_NEWINVOKESPECIAL, proxyName, "<init>", "(I)V", false);
+
+    mv.visitLdcInsn(constructorHandle);
+
+    // adapt constructor handle to make it look like an invoker table (int -> BiFunction)
+    mv.visitLdcInsn(INDEX_TO_INVOKER_METHOD_TYPE);
+    mv.visitMethodInsn(
+        INVOKEVIRTUAL,
+        "java/lang/invoke/MethodHandle",
+        "asType",
+        "(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+        false);
+
+    mv.visitFieldInsn(PUTSTATIC, proxyName, INVOKERS_NAME, INVOKERS_DESCRIPTOR);
+
+    mv.visitInsn(RETURN);
+    mv.visitMaxs(0, 0);
+    mv.visitEnd();
   }
 
   @Override
@@ -213,9 +242,6 @@ final class FastClass extends AbstractGlueGenerator {
 
   @Override
   protected MethodHandle lookupInvokerTable(Class<?> glueClass) throws Throwable {
-    // adapt constructor to method handle that takes an index and returns an invoker
-    return LOOKUP
-        .findConstructor(glueClass, INT_CONSTRUCTOR_TYPE)
-        .asType(INDEX_TO_INVOKER_METHOD_TYPE);
+    return (MethodHandle) glueClass.getField(INVOKERS_NAME).get(null);
   }
 }
