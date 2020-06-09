@@ -16,6 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Set;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -357,6 +358,11 @@ public class RestrictedBindingSourceTest {
     assertThat(expected).hasMessageThat().contains(USE_NETWORK_MODULE);
   }
 
+  @Test
+  public void getElements_getModule_works() {
+    Guice.createInjector(Elements.getModule(Elements.getElements(new NetworkModule())));
+  }
+
   // --------------------------------------------------------------------------
   // ModuleAnnotatedMethodScanner tests
   // --------------------------------------------------------------------------
@@ -546,7 +552,35 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
-  public void originalElementSourceNotTrustedOutsideModuleOverride() {
+  public void modulesOverridePrivateModule() {
+    Guice.createInjector(
+        Modules.override(
+                new PrivateModule() {
+                  @Override
+                  protected void configure() {
+                    install(new NetworkModule());
+                    expose(Key.get(String.class, Hostname.class));
+                  }
+
+                  @Provides
+                  @Exposed
+                  @Named("custom-gateway")
+                  int customGateway(@GatewayIpAdress int gateway) {
+                    return gateway + 4;
+                  }
+                })
+            .with(
+                new AbstractModule() {
+                  @Provides
+                  @Named("custom-gateway")
+                  int provideCustomGatewayOverride() {
+                    return 12345;
+                  }
+                }));
+  }
+
+  @Test
+  public void originalElementSourceNotTrustedIfSetExternally() {
     ElementSource networkElementSource =
         (ElementSource) Elements.getElements(new NetworkModule()).get(0).getSource();
 
@@ -569,8 +603,8 @@ public class RestrictedBindingSourceTest {
     assertThat(((ElementSource) rogueGatewayBinding.getSource()).getOriginalElementSource())
         .isEqualTo(networkElementSource);
 
-    // Will fail because the original element source isn't trusted, becase it wasn't set by
-    // Modules.override.
+    // Will fail because the original element source isn't trusted, becase it wasn't set by Guice
+    // internals.
     CreationException expected = assertThatInjectorCreationFails(rogueModule);
 
     assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);

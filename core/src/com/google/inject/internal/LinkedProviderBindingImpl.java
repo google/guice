@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
+import static com.google.inject.spi.Elements.withTrustedSource;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -113,7 +116,10 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
   @Override
   public void applyTo(Binder binder) {
     getScoping()
-        .applyTo(binder.withSource(getSource()).bind(getKey()).toProvider(getProviderKey()));
+        .applyTo(
+            withTrustedSource(GUICE_INTERNAL, binder, getSource())
+                .bind(getKey())
+                .toProvider(getProviderKey()));
   }
 
   @Override
