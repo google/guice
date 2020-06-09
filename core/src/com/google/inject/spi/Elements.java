@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -154,23 +155,20 @@ public final class Elements {
     private final Map<Module, ModuleInfo> modules;
     private final List<Element> elements;
     private final Object source;
-    /** The current modules stack */
-    private ModuleSource moduleSource = null;
-
-    private ModuleAnnotatedMethodScanner currentScanner = null;
-
     private final SourceProvider sourceProvider;
     private final Set<ModuleAnnotatedMethodScanner> scanners;
-
     /** The binder where exposed bindings will be created */
     private final RecordingBinder parent;
-
     private final PrivateElementsImpl privateElements;
-
     /** All children private binders, so we can scan through them. */
     private final List<RecordingBinder> privateBindersForScanning;
 
     private final BindingSourceRestriction.PermitMapConstruction permitMapConstruction;
+
+    /** The current modules stack */
+    private ModuleSource moduleSource = null;
+
+    private ModuleAnnotatedMethodScanner currentScanner = null;
 
     private RecordingBinder(Stage stage) {
       this.stage = stage;
@@ -215,7 +213,7 @@ public final class Elements {
     private RecordingBinder(RecordingBinder parent, PrivateElementsImpl privateElements) {
       this.stage = parent.stage;
       this.modules = Maps.newLinkedHashMap();
-      this.scanners = Sets.newLinkedHashSet(parent.scanners);
+      this.scanners = Sets.newLinkedHashSet();
       this.currentScanner = parent.currentScanner;
       this.elements = privateElements.getElementsMutable();
       this.source = parent.source;
@@ -296,6 +294,7 @@ public final class Elements {
      * maps. (They're stored in both maps to prevent a module from being installed more than once.)
      */
     void scanForAnnotatedMethods() {
+      Iterable<ModuleAnnotatedMethodScanner> scanners = getAllScanners();
       // Note: we must iterate over a copy of the modules because calling install(..)
       // will mutate modules, otherwise causing a ConcurrentModificationException.
       for (Map.Entry<Module, ModuleInfo> entry : Maps.newLinkedHashMap(modules).entrySet()) {
@@ -380,7 +379,7 @@ public final class Elements {
     }
 
     private void forbidNestedScannerMethods(Module module) {
-      for (ModuleAnnotatedMethodScanner scanner : scanners) {
+      for (ModuleAnnotatedMethodScanner scanner : getAllScanners()) {
         ProviderMethodsModule providerMethodsModule =
             (ProviderMethodsModule) ProviderMethodsModule.forModule(module, scanner);
         for (ProviderMethod<?> method : providerMethodsModule.getProviderMethods(this)) {
@@ -390,6 +389,20 @@ public final class Elements {
               currentScanner, method.getAnnotation().annotationType().getCanonicalName());
         }
       }
+    }
+
+    /**
+     * Get all scanners registered in this binder and its ancestors.
+     *
+     * <p>Should only be called during module scanning, because at that point registering new
+     * scanners is forbidden.
+     */
+    private Iterable<ModuleAnnotatedMethodScanner> getAllScanners() {
+      if (privateElements == null) {
+        return scanners;
+      }
+      // Private binders have their own set of scanners and they inherit from their parent.
+      return Iterables.concat(scanners, parent.getAllScanners());
     }
 
     @Override

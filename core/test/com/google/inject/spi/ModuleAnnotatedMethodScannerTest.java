@@ -293,6 +293,26 @@ public class ModuleAnnotatedMethodScannerTest {
   }
 
   @Test
+  public void privateModuleInheritsScanner_scannerInstalledAfterPrivateModule() {
+    Injector injector =
+        Guice.createInjector(
+            new PrivateModule() {
+              @Override
+              protected void configure() {}
+
+              @Exposed
+              @TestProvides
+              @Named("foo")
+              String foo() {
+                return "foo";
+              }
+            },
+            // Scanner installed after private module.
+            scannerModule(new NamedMunger()));
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  @Test
   public void privateModule_skipSourcesWithinPrivateModule() {
     Injector injector =
         Guice.createInjector(
@@ -522,6 +542,32 @@ public class ModuleAnnotatedMethodScannerTest {
                     });
               }
             });
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  @Test
+  public void privateModuleWithinPrivateModule_parentScannerInheritedIfInstalledAfter() {
+    Injector injector =
+        Guice.createInjector(
+            new PrivateModule() {
+              @Override
+              protected void configure() {
+                expose(Key.get(String.class, named("foo-munged")));
+                install(
+                    new PrivateModule() {
+                      @Override
+                      protected void configure() {}
+
+                      @Exposed
+                      @TestProvides
+                      @Named("foo")
+                      String foo() {
+                        return "foo";
+                      }
+                    });
+              }
+            },
+            scannerModule(new NamedMunger()));
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
