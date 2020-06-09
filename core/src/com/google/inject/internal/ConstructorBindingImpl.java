@@ -18,6 +18,8 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
+import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
+import static com.google.inject.spi.Elements.withTrustedSource;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -175,13 +177,13 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
     if (factory.constructorInjector == null) {
       builder.add(constructorInjectionPoint);
-      // If the below throws, it's OK -- we just ignore those dependencies, because no one
-      // could have used them anyway.
       try {
         builder.addAll(
             InjectionPoint.forInstanceMethodsAndFields(
                 constructorInjectionPoint.getDeclaringType()));
       } catch (ConfigurationException ignored) {
+        // This is OK -- we just ignore those dependencies, because no one could have used them
+        // anyway.
       }
     } else {
       builder.add(getConstructor()).addAll(getInjectableMembers());
@@ -243,8 +245,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     InjectionPoint constructor = getConstructor();
     getScoping()
         .applyTo(
-            binder
-                .withSource(getSource())
+            withTrustedSource(GUICE_INTERNAL, binder, getSource())
                 .bind(getKey())
                 .toConstructor(
                     (Constructor) getConstructor().getMember(),

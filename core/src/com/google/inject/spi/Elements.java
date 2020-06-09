@@ -45,6 +45,7 @@ import com.google.inject.internal.BindingBuilder;
 import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ExposureBuilder;
+import com.google.inject.internal.GuiceInternal;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.PrivateElementsImpl;
@@ -115,6 +116,25 @@ public final class Elements {
     return Collections.unmodifiableList(binder.elements);
   }
 
+  // TODO(user): Consider moving the RecordingBinder to com.google.inject.internal and removing these
+  // internal 'friend' methods.
+  /**
+   * Internal version of Binder.withSource for establishing a trusted ElementSource chain for
+   * source-restricting bindings that are re-written using {@link Element#applyTo}.
+   *
+   * <p>Using Binder.withSource is not trustworthy because it's a public API that external users can
+   * use to spoof the original ElementSource of a binding by calling withSource(bogusElementSource).
+   */
+  public static Binder withTrustedSource(
+      GuiceInternal guiceInternal, Binder binder, Object source) {
+    checkNotNull(guiceInternal);
+    if (binder instanceof RecordingBinder) {
+      return ((RecordingBinder) binder).withTrustedSource(source);
+    }
+    // Preserve existing (untrusted) behavior for non-standard Binder implementations.
+    return binder.withSource(source);
+  }
+
   private static class ElementsAsModule implements Module {
     private final Iterable<? extends Element> elements;
 
@@ -169,6 +189,7 @@ public final class Elements {
     private ModuleSource moduleSource = null;
 
     private ModuleAnnotatedMethodScanner currentScanner = null;
+    private boolean trustedSource = false;
 
     private RecordingBinder(Stage stage) {
       this.stage = stage;
@@ -192,7 +213,10 @@ public final class Elements {
 
     /** Creates a recording binder that's backed by {@code prototype}. */
     private RecordingBinder(
-        RecordingBinder prototype, Object source, SourceProvider sourceProvider) {
+        RecordingBinder prototype,
+        Object source,
+        SourceProvider sourceProvider,
+        boolean trustedSource) {
       checkArgument(source == null ^ sourceProvider == null);
 
       this.stage = prototype.stage;
@@ -201,6 +225,7 @@ public final class Elements {
       this.scanners = prototype.scanners;
       this.currentScanner = prototype.currentScanner;
       this.source = source;
+      this.trustedSource = trustedSource;
       this.moduleSource = prototype.moduleSource;
       this.sourceProvider = sourceProvider;
       this.parent = prototype.parent;
@@ -473,7 +498,17 @@ public final class Elements {
 
     @Override
     public RecordingBinder withSource(final Object source) {
-      return source == this.source ? this : new RecordingBinder(this, source, null);
+      return source == this.source
+          ? this
+          : new RecordingBinder(
+              this, source, /* sourceProvider = */ null, /* trustedSource = */ false);
+    }
+
+    public RecordingBinder withTrustedSource(final Object source) {
+      return source == this.source
+          ? this
+          : new RecordingBinder(
+              this, source, /* sourceProvider = */ null, /* trustedSource = */ true);
     }
 
     @Override
@@ -484,7 +519,8 @@ public final class Elements {
       }
 
       SourceProvider newSourceProvider = sourceProvider.plusSkippedClasses(classesToSkip);
-      return new RecordingBinder(this, null, newSourceProvider);
+      return new RecordingBinder(
+          this, /* source = */ null, newSourceProvider, /* trustedSource = */ false);
     }
 
     @Override
@@ -615,7 +651,8 @@ public final class Elements {
         }
       }
       // Build the binding call stack
-      return new ElementSource(originalSource, declaringSource, moduleSource, partialCallStack);
+      return new ElementSource(
+          originalSource, trustedSource, declaringSource, moduleSource, partialCallStack);
     }
 
     /**

@@ -39,8 +39,9 @@ public class ElementSourceTest extends TestCase {
             "com.google.inject.spi.moduleSourceTest$C", "configure", "Unknown Source", 100);
     ElementSource elementSource =
         new ElementSource(
-            null /* No original element source */,
-            "" /* Don't care */,
+            /* originalSource = */ null,
+            /* trustedOriginalSource = */ false,
+            /* declaringSource = */ "",
             moduleSource,
             bindingCallStack);
     assertEquals(10 /* call stack size */, elementSource.getStackTrace().length);
