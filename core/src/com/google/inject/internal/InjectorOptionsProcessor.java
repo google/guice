@@ -19,6 +19,9 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.DisableCircularProxiesOption;
@@ -35,6 +38,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
 
   private boolean disableCircularProxies = false;
   private boolean jitDisabled = false;
+  private Predicate<Key<?>> jitDisabledTypesPredicate = Predicates.alwaysFalse();
   private boolean atInjectRequired = false;
   private boolean exactBindingAnnotationsRequired = false;
 
@@ -51,6 +55,14 @@ class InjectorOptionsProcessor extends AbstractProcessor {
   @Override
   public Boolean visit(RequireExplicitBindingsOption option) {
     jitDisabled = true;
+
+    // no types specified results in explicit binding requirement for all classes
+    if (option.getTypes().isEmpty()) {
+      jitDisabledTypesPredicate = Predicates.alwaysTrue();
+    } else {
+      jitDisabledTypesPredicate = Predicates.or(jitDisabledTypesPredicate, key -> option.getTypes().stream()
+          .anyMatch(type -> type.isAssignableFrom(key.getTypeLiteral().getRawType())));
+    }
     return true;
   }
 
@@ -72,6 +84,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
       return new InjectorOptions(
           stage,
           jitDisabled,
+          jitDisabledTypesPredicate,
           disableCircularProxies,
           atInjectRequired,
           exactBindingAnnotationsRequired);
@@ -80,6 +93,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
       return new InjectorOptions(
           stage,
           jitDisabled || parentOptions.jitDisabled,
+          Predicates.or(jitDisabledTypesPredicate, parentOptions.jitDisabledTypesPredicate),
           disableCircularProxies || parentOptions.disableCircularProxies,
           atInjectRequired || parentOptions.atInjectRequired,
           exactBindingAnnotationsRequired || parentOptions.exactBindingAnnotationsRequired);

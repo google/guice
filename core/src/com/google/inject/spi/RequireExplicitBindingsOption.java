@@ -18,7 +18,10 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
+
+import java.util.Set;
 
 /**
  * A request to require explicit bindings.
@@ -28,9 +31,15 @@ import com.google.inject.Binder;
  */
 public final class RequireExplicitBindingsOption implements Element {
   private final Object source;
+  private final Set<Class<?>> types;
 
   RequireExplicitBindingsOption(Object source) {
+    this(source, new Class<?>[0]);
+  }
+
+  RequireExplicitBindingsOption(Object source, Class<?>... types) {
     this.source = checkNotNull(source, "source");
+    this.types = ImmutableSet.copyOf(checkNotNull(types, "types"));
   }
 
   @Override
@@ -38,9 +47,17 @@ public final class RequireExplicitBindingsOption implements Element {
     return source;
   }
 
+  public Set<Class<?>> getTypes() {
+    return types;
+  }
+
   @Override
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).requireExplicitBindings();
+    if (types.isEmpty()) {
+      binder.withSource(getSource()).requireExplicitBindings();
+    } else {
+      binder.withSource(getSource()).requireExplicitBindings(types.toArray(new Class<?>[0]));
+    }
   }
 
   @Override

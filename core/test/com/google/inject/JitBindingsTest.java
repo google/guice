@@ -19,6 +19,7 @@ package com.google.inject;
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING;
+import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING_PROVIDER;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.FAIL_ALL;
 
 import java.util.Set;
@@ -89,6 +90,41 @@ public class JitBindingsTest extends TestCase {
     // It is OK to call getBinding for introspection, but an error to get the provider
     // of the binding
     ensureFails(injector, ALLOW_BINDING, FooImpl.class);
+  }
+
+  public void testMoreBasicWorksWithSpecificTypeRequired() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder.requireExplicitBindings(FooImpl.class);
+                bind(Foo.class).to(FooImpl.class);
+              }
+            });
+
+    // Foo was explicitly bound, Bar & FooBar were implicitly bound
+    ensureWorks(injector, Foo.class, Bar.class, FooBar.class);
+    // FooImpl was implicitly bound, it is an error to call getInstance or getProvider,
+    // It is OK to call getBinding for introspection, but an error to get the provider
+    // of the binding
+    ensureFails(injector, ALLOW_BINDING, FooImpl.class);
+  }
+
+  public void testOptionMultipleInvocationsExtendExplicitRequiredTypes() {
+    Injector injector =
+        Guice.createInjector(new AbstractModule() {
+          @Override
+          protected void configure() {
+            binder().requireExplicitBindings(Foo.class);
+          }
+        }, new AbstractModule() {
+          @Override
+          protected void configure() {
+            binder.requireExplicitBindings(Bar.class);
+          }
+        });
+    ensureFails(injector, FAIL_ALL, Foo.class, Bar.class);
   }
 
   public void testLinkedEagerSingleton() {
@@ -286,6 +322,20 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, ImplByImpl.class);
   }
 
+  public void testImplementedByWithSpecificTypeRequired() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder().requireExplicitBindings(ImplBy.class);
+                bind(ImplBy.class);
+              }
+            });
+    ensureWorks(injector, ImplBy.class, ImplByScoped.class);
+    ensureFails(injector, ALLOW_BINDING, ImplByImpl.class);
+  }
+
   public void testImplementedBySomethingThatIsAnnotated() {
     Injector injector =
         Guice.createInjector(
@@ -388,6 +438,82 @@ public class JitBindingsTest extends TestCase {
     ensureFails(grandchild, ALLOW_BINDING, FooImpl.class);
     ensureFails(child, ALLOW_BINDING, FooImpl.class);
     ensureInChild(parent, FooImpl.class, FooBar.class, Foo.class);
+  }
+
+  public void testChildInjectorInheritsOptionWithSpecificTypeRequired() {
+    Injector parent =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder().requireExplicitBindings(Bar.class, Foo.class);
+                bind(Bar.class);
+              }
+            });
+    ensureWorks(parent, Bar.class);
+    ensureFails(parent, FAIL_ALL, FooImpl.class, Foo.class);
+
+    try {
+      parent.createChildInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(FooBar.class);
+            }
+          });
+      fail("should have failed");
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), jitFailed(Foo.class));
+      assertEquals(1, expected.getErrorMessages().size());
+    }
+
+    Injector child =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(Foo.class).to(FooImpl.class);
+              }
+            });
+    ensureWorks(child, Foo.class, Bar.class);
+    ensureFails(child, ALLOW_BINDING, FooImpl.class);
+    ensureInChild(parent, FooImpl.class, Foo.class);
+
+    Injector grandchild =
+        child.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(FooBar.class);
+              }
+            });
+    ensureWorks(grandchild, FooBar.class, Foo.class, Bar.class);
+    ensureFails(grandchild, ALLOW_BINDING, FooImpl.class);
+    ensureFails(child, ALLOW_BINDING, FooImpl.class);
+    ensureInChild(parent, FooImpl.class, FooBar.class, Foo.class);
+  }
+
+  public void testChildInjectorExtendsExplicitlyRequiredTypes() {
+    Injector parent =
+        Guice.createInjector(new AbstractModule() {
+          @Override
+          protected void configure() {
+            binder().requireExplicitBindings(Foo.class);
+          }
+        });
+    ensureWorks(parent, Bar.class);
+    ensureFails(parent, FAIL_ALL, Foo.class, FooImpl.class);
+
+    Injector child =
+        parent.createChildInjector(new AbstractModule() {
+          @Override
+          protected void configure() {
+            binder().requireExplicitBindings(Bar.class);
+          }
+        });
+    ensureFails(child, FAIL_ALL, Foo.class, FooImpl.class);
+    // Unfortunately Bar might be injected via Binding if it was JITed previously by parent
+    ensureFails(child, ALLOW_BINDING_PROVIDER, Bar.class);
   }
 
   public void testChildInjectorAddsOption() {
