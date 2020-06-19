@@ -16,11 +16,11 @@
 
 package com.google.inject.internal;
 
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.logging.Logger;
+
 /**
  * Contains flags for Guice.
  */
@@ -68,6 +68,11 @@ public class InternalFlags {
     ERROR
   }
 
+  public enum ExperimentalErrorMessagesOption {
+    DISABLED,
+    ENABLED,
+  }
+
   public static IncludeStackTraceOption getIncludeStackTraceOption() {
     return INCLUDE_STACK_TRACES;
   }
@@ -78,6 +83,11 @@ public class InternalFlags {
 
   public static NullableProvidesOption getNullableProvidesOption() {
     return NULLABLE_PROVIDES;
+  }
+
+
+  public static boolean enableExperimentalErrorMessages() {
+    return false;
   }
 
   private static IncludeStackTraceOption parseIncludeStackTraceOption() {
