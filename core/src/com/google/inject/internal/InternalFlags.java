@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.inject.internal;
 
 import java.security.AccessController;
@@ -49,9 +48,7 @@ public class InternalFlags {
     COMPLETE
   }
 
-  /**
-   * The options for Guice custom class loading.
-   */
+  /** The options for Guice custom class loading. */
   public enum CustomClassLoadingOption {
     /** No custom class loading */
     OFF,
@@ -59,6 +56,7 @@ public class InternalFlags {
     BRIDGE
   }
 
+  /** Options for handling nullable parameters used in provides methods. */
   public enum NullableProvidesOption {
     /** Ignore null parameters to @Provides methods. */
     IGNORE,
@@ -68,6 +66,7 @@ public class InternalFlags {
     ERROR
   }
 
+  /** Options for enable or disable the new experimental error messages. */
   public enum ExperimentalErrorMessagesOption {
     DISABLED,
     ENABLED,
