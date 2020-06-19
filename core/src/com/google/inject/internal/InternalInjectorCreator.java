@@ -125,7 +125,7 @@ public final class InternalInjectorCreator {
     stopwatch.resetAndLog("Binding initialization");
 
     for (InjectorShell shell : shells) {
-      shell.getInjector().index();
+      shell.getInjector().indexBindingsByType();
     }
     stopwatch.resetAndLog("Binding indexing");
 
