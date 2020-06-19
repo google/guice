@@ -110,16 +110,12 @@ public final class BindingSourceRestriction {
     Key<?> key = binding.getKey();
     // Module Bindings are all explicit and have an ElementSource.
     ElementSource elementSource = (ElementSource) binding.getSource();
-    RestrictedBindingSource annotationRestriction =
+    // If the key is annotated then only the annotation restriction matters, the type restriction is
+    // ignored (an annotated type is essentially a new type).
+    RestrictedBindingSource restriction =
         key.getAnnotationType() == null
-            ? null
+            ? key.getTypeLiteral().getRawType().getAnnotation(RestrictedBindingSource.class)
             : key.getAnnotationType().getAnnotation(RestrictedBindingSource.class);
-    RestrictedBindingSource restriction = annotationRestriction;
-    if (annotationRestriction == null) {
-      // Annotation restriction overrides type restriction.
-      restriction = key.getTypeLiteral().getRawType().getAnnotation(RestrictedBindingSource.class);
-    }
-    // Exit if there is no binding source restrictions on the key.
     if (restriction == null) {
       return Optional.empty();
     }
@@ -134,7 +130,10 @@ public final class BindingSourceRestriction {
         new Message(
             elementSource,
             getErrorMessage(
-                key, restriction.explanation(), acceptablePermits, annotationRestriction != null)));
+                key,
+                restriction.explanation(),
+                acceptablePermits,
+                key.getAnnotationType() != null)));
   }
 
   private static String getErrorMessage(

@@ -117,6 +117,18 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
+  public void canBindRestrictedTypeWithUnrestrictedQualifierAnnotation() {
+    Guice.createInjector(
+        new AbstractModule() {
+          @Provides
+          @Named("custom")
+          RoutingTable provideRoutingTable() {
+            return ip -> ip;
+          }
+        });
+  }
+
+  @Test
   public void twoRogueNetworkBindingsYieldTwoErrorMessages() {
     AbstractModule rogueModule =
         new AbstractModule() {
