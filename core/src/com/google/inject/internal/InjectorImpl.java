@@ -148,8 +148,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
   }
 
-  /** Indexes bindings by type. */
-  void index() {
+  void indexBindingsByType() {
     for (Binding<?> binding : state.getExplicitBindingsThisLevel().values()) {
       bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
     }
