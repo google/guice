@@ -95,10 +95,6 @@ public final class InternalInjectorCreator {
   }
 
   public Injector build() {
-    if (shellBuilder == null) {
-      throw new AssertionError("Already built, builders are not reusable.");
-    }
-
     // Synchronize while we're building up the bindings and other injector state. This ensures that
     // the JIT bindings in the parent injector don't change while we're being built
     synchronized (shellBuilder.lock()) {
