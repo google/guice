@@ -29,6 +29,7 @@ import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ElementSource;
+import com.google.inject.spi.ErrorDetail;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import java.lang.reflect.Field;
@@ -38,6 +39,7 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /** Utility methods for {@link Message} objects */
 public final class Messages {
@@ -77,22 +79,27 @@ public final class Messages {
     int index = 1;
     boolean displayCauses = getOnlyCause(errorMessages) == null;
 
+    List<ErrorDetail<?>> remainingErrors =
+        errorMessages.stream().map(Message::getErrorDetail).collect(Collectors.toList());
+
     Map<Equivalence.Wrapper<Throwable>, Integer> causes = Maps.newHashMap();
-    for (Message errorMessage : errorMessages) {
-      int thisIdx = index++;
-      fmt.format("%s) %s%n", thisIdx, errorMessage.getMessage());
+    while (!remainingErrors.isEmpty()) {
+      ErrorDetail<?> currentError = remainingErrors.get(0);
+      // Split the remaining errors into 2 groups, one that contains mergeable errors with
+      // currentError and the other that need to be formatted separately in the next iteration.
+      Map<Boolean, List<ErrorDetail<?>>> partitionedByMergeable =
+          remainingErrors.subList(1, remainingErrors.size()).stream()
+              .collect(Collectors.partitioningBy(currentError::isMergeable));
 
-      List<Object> dependencies = errorMessage.getSources();
-      for (int i = dependencies.size() - 1; i >= 0; i--) {
-        Object source = dependencies.get(i);
-        formatSource(fmt, source);
-      }
+      remainingErrors = partitionedByMergeable.get(false);
 
-      Throwable cause = errorMessage.getCause();
+      currentError.format(index, partitionedByMergeable.get(true), fmt);
+
+      Throwable cause = currentError.getCause();
       if (displayCauses && cause != null) {
         Equivalence.Wrapper<Throwable> causeEquivalence = ThrowableEquivalence.INSTANCE.wrap(cause);
         if (!causes.containsKey(causeEquivalence)) {
-          causes.put(causeEquivalence, thisIdx);
+          causes.put(causeEquivalence, index);
           fmt.format("Caused by: %s", Throwables.getStackTraceAsString(cause));
         } else {
           int causeIdx = causes.get(causeEquivalence);
@@ -101,14 +108,14 @@ public final class Messages {
               cause.getClass().getName(), causeIdx);
         }
       }
-
       fmt.format("%n");
+      index++;
     }
 
-    if (errorMessages.size() == 1) {
+    if (index == 2) {
       fmt.format("1 error");
     } else {
-      fmt.format("%s errors", errorMessages.size());
+      fmt.format("%s errors", index - 1);
     }
 
     return fmt.toString();

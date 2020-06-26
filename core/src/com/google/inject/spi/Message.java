@@ -16,13 +16,12 @@
 
 package com.google.inject.spi;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.inject.Binder;
 import com.google.inject.internal.ErrorId;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.GenericErrorDetail;
 import com.google.inject.internal.util.SourceProvider;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -44,16 +43,18 @@ import java.util.List;
  */
 public final class Message implements Serializable, Element {
   private final ErrorId errorId;
-  private final String message;
-  private final Throwable cause;
-  private final List<Object> sources;
+  private final ErrorDetail<?> errorDetail;
+
+  /** @since vNext */
+  public Message(ErrorId errorId, ErrorDetail<?> errorDetail) {
+    this.errorId = errorId;
+    this.errorDetail = errorDetail;
+  }
 
   /** @since 2.0 */
   public Message(ErrorId errorId, List<Object> sources, String message, Throwable cause) {
     this.errorId = errorId;
-    this.sources = ImmutableList.copyOf(sources);
-    this.message = checkNotNull(message, "message");
-    this.cause = cause;
+    this.errorDetail = new GenericErrorDetail(message, sources, cause);
   }
 
   /** @since 2.0 */
@@ -74,21 +75,31 @@ public final class Message implements Serializable, Element {
     this(ImmutableList.of(), message, null);
   }
 
+  /**
+   * Returns details about this error message.
+   *
+   * @since vNext
+   */
+  public ErrorDetail<?> getErrorDetail() {
+    return errorDetail;
+  }
+
   @Override
   public String getSource() {
+    List<Object> sources = errorDetail.getSources();
     return sources.isEmpty()
         ? SourceProvider.UNKNOWN_SOURCE.toString()
-        : Errors.convert(sources.get(sources.size() - 1)).toString();
+        : Errors.convert(Iterables.getLast(sources)).toString();
   }
 
   /** @since 2.0 */
   public List<Object> getSources() {
-    return sources;
+    return errorDetail.getSources();
   }
 
   /** Gets the error message text. */
   public String getMessage() {
-    return message;
+    return errorDetail.getMessage();
   }
 
   /** @since 2.0 */
@@ -104,17 +115,17 @@ public final class Message implements Serializable, Element {
    * @since 2.0
    */
   public Throwable getCause() {
-    return cause;
+    return errorDetail.getCause();
   }
 
   @Override
   public String toString() {
-    return message;
+    return errorDetail.getMessage();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(message, cause, sources);
+    return errorDetail.hashCode();
   }
 
   @Override
@@ -123,7 +134,7 @@ public final class Message implements Serializable, Element {
       return false;
     }
     Message e = (Message) o;
-    return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
+    return errorDetail.equals(e.errorDetail);
   }
 
   /** @since 2.0 */
@@ -134,19 +145,22 @@ public final class Message implements Serializable, Element {
 
   /** Returns a copy of this {@link Message} with its sources replaced. */
   public Message withSource(List<Object> newSources) {
-    return new Message(errorId, newSources, message, cause);
+    return new Message(errorId, errorDetail.withSources(newSources));
   }
 
   /**
-   * When serialized, we eagerly convert sources to strings. This hurts our formatting, but it
-   * guarantees that the receiving end will be able to read the message.
+   * When serialized, we convert the error detail to a {@link GenericErrorDetail} with string
+   * sources. This hurts our formatting, but it guarantees that the receiving end will be able to
+   * read the message.
    */
   private Object writeReplace() throws ObjectStreamException {
-    Object[] sourcesAsStrings = sources.toArray();
+    Object[] sourcesAsStrings = getSources().toArray();
     for (int i = 0; i < sourcesAsStrings.length; i++) {
       sourcesAsStrings[i] = Errors.convert(sourcesAsStrings[i]).toString();
     }
-    return new Message(ImmutableList.copyOf(sourcesAsStrings), message, cause);
+    return new Message(
+        errorId,
+        new GenericErrorDetail(getMessage(), ImmutableList.copyOf(sourcesAsStrings), getCause()));
   }
 
   private static final long serialVersionUID = 0;
