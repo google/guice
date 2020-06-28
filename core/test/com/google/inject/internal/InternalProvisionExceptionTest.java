@@ -25,7 +25,7 @@ public final class InternalProvisionExceptionTest extends TestCase {
   public void testSourceFormatting() {
     // Note that the duplicate source gets dropped as well as the unknown source
     assertThat(
-            InternalProvisionException.create("An error")
+            InternalProvisionException.create(ErrorId.OTHER, "An error")
                 .addSource("Source1")
                 .addSource(SourceProvider.UNKNOWN_SOURCE)
                 .addSource("Source2")

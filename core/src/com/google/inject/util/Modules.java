@@ -408,7 +408,11 @@ public final class Modules {
     };
   }
 
-  /** Returns a module that will configure the injector to require explicit bindings. */
+  /**
+   * Returns a module that will configure the injector to require explicit bindings.
+   *
+   * @since 4.2.3
+   */
   public static Module requireExplicitBindingsModule() {
     return new RequireExplicitBindingsModule();
   }
@@ -424,6 +428,7 @@ public final class Modules {
    * Returns a module that will configure the injector to require {@literal @}{@link Inject} on
    * constructors.
    *
+   * @since 4.2.3
    * @see Binder#requireAtInjectOnConstructors
    */
   public static Module requireAtInjectOnConstructorsModule() {
@@ -441,6 +446,7 @@ public final class Modules {
    * Returns a module that will configure the injector to require an exactly matching binding
    * annotation.
    *
+   * @since 4.2.3
    * @see Binder#requireExactBindingAnnotations
    */
   public static Module requireExactBindingAnnotationsModule() {
@@ -454,7 +460,11 @@ public final class Modules {
     }
   }
 
-  /** Returns a module that will configure the injector to disable circular proxies. */
+  /**
+   * Returns a module that will configure the injector to disable circular proxies.
+   *
+   * @since 4.2.3
+   */
   public static Module disableCircularProxiesModule() {
     return new DisableCircularProxiesModule();
   }

@@ -17,9 +17,12 @@ package com.google.inject.daggeradapter;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -29,11 +32,14 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Providers;
+import dagger.Binds;
 import dagger.multibindings.ElementsIntoSet;
 import dagger.multibindings.IntoSet;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 import java.util.Set;
+import javax.inject.Inject;
 import javax.inject.Qualifier;
 import junit.framework.TestCase;
 
@@ -274,5 +280,74 @@ public class DaggerAdapterTest extends TestCase {
           .hasMessageThat()
           .contains("ProducerModuleWithProvidesMethod must be annotated with @dagger.Module");
     }
+  }
+
+  @dagger.Module
+  abstract static class ModuleWithMethodsToIgnore {
+    interface Inerface {
+      String string();
+    }
+
+    static class InterfaceImpl implements Inerface {
+      @Inject
+      InterfaceImpl() {}
+
+      @Override
+      public String string() {
+        return "class";
+      }
+    }
+
+    @Binds
+    abstract Inerface ignoreInterface(InterfaceImpl impl);
+
+    @dagger.Provides
+    static String string() {
+      return "class";
+    }
+
+    @dagger.Provides
+    static int ignore() {
+      return 0;
+    }
+
+    private ModuleWithMethodsToIgnore() {}
+  }
+
+  public void testFilteringMethods() {
+    Module filteredModule =
+        DaggerAdapter.builder()
+            .addModules(ImmutableList.of(ModuleWithMethodsToIgnore.class))
+            .filter(
+                new Predicate<Method>() {
+                  @Override
+                  public boolean apply(Method method) {
+                    return !method.getName().startsWith("ignore");
+                  }
+                })
+            .build();
+    Injector filteredInjector = Guice.createInjector(filteredModule);
+    assertThat(filteredInjector.getInstance(String.class)).isEqualTo("class");
+    try {
+      filteredInjector.getInstance(Integer.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      //
+    }
+    try {
+      filteredInjector.getInstance(ModuleWithMethodsToIgnore.Inerface.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      //
+    }
+    Module unfilteredModule =
+        DaggerAdapter.builder()
+            .addModules(ImmutableList.of(ModuleWithMethodsToIgnore.class))
+            .build();
+    Injector unfilteredInjector = Guice.createInjector(unfilteredModule);
+    assertThat(unfilteredInjector.getInstance(String.class)).isEqualTo("class");
+    assertThat(unfilteredInjector.getInstance(Integer.class)).isEqualTo(Integer.valueOf(0));
+    assertThat(unfilteredInjector.getInstance(ModuleWithMethodsToIgnore.Inerface.class).string())
+        .isEqualTo("class");
   }
 }

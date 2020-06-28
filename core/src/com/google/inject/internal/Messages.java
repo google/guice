@@ -56,10 +56,8 @@ public final class Messages {
         && Objects.equal(messageSources.get(0), sources.get(sources.size() - 1))) {
       messageSources = messageSources.subList(1, messageSources.size());
     }
-    return new Message(
-        ImmutableList.builder().addAll(sources).addAll(messageSources).build(),
-        message.getMessage(),
-        message.getCause());
+    return message.withSource(
+        ImmutableList.builder().addAll(sources).addAll(messageSources).build());
   }
 
   /**
@@ -119,36 +117,44 @@ public final class Messages {
   /**
    * Creates a new Message without a cause.
    *
+   * @param errorId The enum id for the error
    * @param messageFormat Format string
    * @param arguments format string arguments
    */
-  public static Message create(String messageFormat, Object... arguments) {
-    return create(null, messageFormat, arguments);
+  public static Message create(ErrorId errorId, String messageFormat, Object... arguments) {
+    return create(errorId, null, messageFormat, arguments);
   }
 
   /**
    * Creates a new Message with the given cause.
    *
+   * @param errorId The enum id for the error
    * @param cause The exception that caused the error
    * @param messageFormat Format string
    * @param arguments format string arguments
    */
-  public static Message create(Throwable cause, String messageFormat, Object... arguments) {
-    return create(cause, ImmutableList.of(), messageFormat, arguments);
+  public static Message create(
+      ErrorId errorId, Throwable cause, String messageFormat, Object... arguments) {
+    return create(errorId, cause, ImmutableList.of(), messageFormat, arguments);
   }
 
   /**
    * Creates a new Message with the given cause and a binding source stack.
    *
+   * @param errorId The enum id for the error
    * @param cause The exception that caused the error
    * @param sources The binding sources for the source stack
    * @param messageFormat Format string
    * @param arguments format string arguments
    */
   public static Message create(
-      Throwable cause, List<Object> sources, String messageFormat, Object... arguments) {
+      ErrorId errorId,
+      Throwable cause,
+      List<Object> sources,
+      String messageFormat,
+      Object... arguments) {
     String message = format(messageFormat, arguments);
-    return new Message(sources, message, cause);
+    return new Message(errorId, sources, message, cause);
   }
 
   /** Formats an object in a user friendly way. */

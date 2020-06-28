@@ -69,7 +69,7 @@ import java.util.Set;
  * provider's get method will be called each time the set is injected (unless the binding is also
  * scoped).
  *
- * <p>Annotations are be used to create different sets of the same element type. Each distinct
+ * <p>Annotations are used to create different sets of the same element type. Each distinct
  * annotation gets its own independent collection of elements.
  *
  * <p><strong>Elements must be distinct.</strong> If multiple bound elements have the same value,

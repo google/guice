@@ -39,8 +39,9 @@ public class ElementSourceTest extends TestCase {
             "com.google.inject.spi.moduleSourceTest$C", "configure", "Unknown Source", 100);
     ElementSource elementSource =
         new ElementSource(
-            null /* No original element source */,
-            "" /* Don't care */,
+            /* originalSource = */ null,
+            /* trustedOriginalSource = */ false,
+            /* declaringSource = */ "",
             moduleSource,
             bindingCallStack);
     assertEquals(10 /* call stack size */, elementSource.getStackTrace().length);
@@ -128,7 +129,7 @@ public class ElementSourceTest extends TestCase {
     // First module
     StackTraceElement[] partialCallStack = new StackTraceElement[1];
     partialCallStack[0] = BINDER_INSTALL;
-    ModuleSource moduleSource = new ModuleSource(A.class, partialCallStack);
+    ModuleSource moduleSource = new ModuleSource(A.class, partialCallStack, /* permitMap = */ null);
     // Second module
     partialCallStack = new StackTraceElement[2];
     partialCallStack[0] = BINDER_INSTALL;

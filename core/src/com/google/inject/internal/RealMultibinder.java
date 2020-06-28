@@ -211,7 +211,9 @@ public final class RealMultibinder<T> implements Module {
 
     private InternalProvisionException newNullEntryException(int i) {
       return InternalProvisionException.create(
-          "Set injection failed due to null element bound at: %s", bindings.get(i).getSource());
+          ErrorId.NULL_ELEMENT_IN_SET,
+          "Set injection failed due to null element bound at: %s",
+          bindings.get(i).getSource());
     }
 
     @SuppressWarnings("unchecked")
@@ -254,16 +256,23 @@ public final class RealMultibinder<T> implements Module {
       if (Objects.equal(oldString, newString)) {
         // When the value strings match, just show the source of the bindings
         return InternalProvisionException.create(
+            ErrorId.DUPLICATE_ELEMENT,
             "Set injection failed due to duplicated element \"%s\""
                 + "\n    Bound at %s\n    Bound at %s",
-            newValue, duplicateBinding.getSource(), newBinding.getSource());
+            newValue,
+            duplicateBinding.getSource(),
+            newBinding.getSource());
       } else {
         // When the value strings don't match, include them both as they may be useful for debugging
         return InternalProvisionException.create(
+            ErrorId.DUPLICATE_ELEMENT,
             "Set injection failed due to multiple elements comparing equal:"
                 + "\n    \"%s\"\n        bound at %s"
                 + "\n    \"%s\"\n        bound at %s",
-            oldValue, duplicateBinding.getSource(), newValue, newBinding.getSource());
+            oldValue,
+            duplicateBinding.getSource(),
+            newValue,
+            newBinding.getSource());
       }
     }
 

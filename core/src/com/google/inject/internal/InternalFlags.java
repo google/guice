@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.inject.internal;
 
 import java.security.AccessController;
@@ -49,9 +48,7 @@ public class InternalFlags {
     COMPLETE
   }
 
-  /**
-   * The options for Guice custom class loading.
-   */
+  /** The options for Guice custom class loading. */
   public enum CustomClassLoadingOption {
     /**
      * Define fast/enhanced types in the same class loader as their original type, never creates
@@ -81,6 +78,7 @@ public class InternalFlags {
     CHILD
   }
 
+  /** Options for handling nullable parameters used in provides methods. */
   public enum NullableProvidesOption {
     /** Ignore null parameters to @Provides methods. */
     IGNORE,
@@ -88,6 +86,12 @@ public class InternalFlags {
     WARN,
     /** Error if null parameters are passed to non-@Nullable parameters of provides parameters */
     ERROR
+  }
+
+  /** Options for enable or disable the new experimental error messages. */
+  public enum ExperimentalErrorMessagesOption {
+    DISABLED,
+    ENABLED,
   }
 
   public static IncludeStackTraceOption getIncludeStackTraceOption() {
@@ -100,6 +104,11 @@ public class InternalFlags {
 
   public static NullableProvidesOption getNullableProvidesOption() {
     return NULLABLE_PROVIDES;
+  }
+
+
+  public static boolean enableExperimentalErrorMessages() {
+    return false;
   }
 
   private static IncludeStackTraceOption parseIncludeStackTraceOption() {

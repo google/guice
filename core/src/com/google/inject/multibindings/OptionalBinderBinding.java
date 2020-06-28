@@ -47,7 +47,7 @@ public interface OptionalBinderBinding<T> {
    * entry for {@code Optional<com.google.inject.Provider<V>>} and {@code
    * Optional<javax.inject.Provider<V>>}.
    *
-   * @since 5.0
+   * @since 4.2.3
    */
   Set<Key<?>> getAlternateKeys();
 

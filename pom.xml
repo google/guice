@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>4.2.3-SNAPSHOT</version>
+  <version>4.2.4-SNAPSHOT</version>
 
   <name>Google Guice</name>
 
@@ -159,7 +159,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>4.13</version>
         <scope>test</scope>
       </dependency>
       <dependency>
