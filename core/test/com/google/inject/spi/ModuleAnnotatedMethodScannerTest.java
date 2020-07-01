@@ -46,6 +46,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Set;
+import javax.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -713,7 +714,6 @@ public class ModuleAnnotatedMethodScannerTest {
         return 0;
       }
     }
-
     ModuleAnnotatedMethodScanner filteringScanner =
         new TestScanner(TestProvides.class) {
           @Override
@@ -874,6 +874,149 @@ public class ModuleAnnotatedMethodScannerTest {
 
   CreationException assertThatInjectorCreationFails(Module... modules) {
     return assertThrows(CreationException.class, () -> Guice.createInjector(modules));
+  }
+
+  @Test
+  public void scannerSourceCorrectForNonGuiceModule() {
+    class NonGuiceModule {
+      @TestProvides
+      boolean booleanTest() {
+        return true;
+      }
+    }
+    TestScanner testScanner = new TestScanner(TestProvides.class);
+
+    Injector injector =
+        Guice.createInjector(ProviderMethodsModule.forModule(new NonGuiceModule(), testScanner));
+
+    assertThat(getSourceScanner(injector.getBinding(Boolean.class))).isEqualTo(testScanner);
+  }
+
+  @Qualifier
+  @Retention(RUNTIME)
+  @interface Foo {}
+
+  @Test
+  public void scannerSourceCorrectForGuiceModule() {
+    Module module =
+        new AbstractModule() {
+          @TestProvides
+          @Foo
+          boolean booleanTest() {
+            return true;
+          }
+
+          @Provides
+          String stringTest() {
+            return "";
+          }
+
+          @Override
+          protected void configure() {
+            bind(Long.class).toInstance(1L);
+          }
+        };
+    TestScanner testScanner = new TestScanner(TestProvides.class);
+
+    Injector injector = Guice.createInjector(module, scannerModule(testScanner));
+
+    assertThat(getSourceScanner(injector.getBinding(Key.get(Boolean.class, Foo.class))))
+        .isEqualTo(testScanner);
+    assertThat(getSourceScanner(injector.getBinding(String.class))).isNotEqualTo(testScanner);
+    assertThat(getSourceScanner(injector.getBinding(Long.class))).isNull();
+  }
+
+  @Test
+  public void scannerSourceCorrectForBindingsCreatedByTheScannerDirectly() {
+    ModuleAnnotatedMethodScanner scanner =
+        new TestScanner(TestProvides.class) {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            binder.bind(key.ofType(String.class)).toInstance("bla");
+            return null;
+          }
+        };
+
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @TestProvides
+              @Foo
+              Long discardedLong() {
+                return 1L;
+              }
+            },
+            scannerModule(scanner));
+
+    assertThat(getSourceScanner(injector.getBinding(Key.get(String.class, Foo.class))))
+        .isEqualTo(scanner);
+  }
+
+  @Test
+  public void scannerSourceOfProvidesMethodBindingInsideCustomScannerIsCustomScanner() {
+    ModuleAnnotatedMethodScanner scanner =
+        new TestScanner(TestProvides.class) {
+          @Override
+          public <T> Key<T> prepareMethod(
+              Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+            binder.install(
+                new AbstractModule() {
+                  // All bindings inside custom scanner should have it as their source scanner -
+                  // including those created by a nested built-in @Provides* scanner.
+                  @Provides
+                  String provideString() {
+                    return "bla";
+                  }
+                });
+            return null;
+          }
+        };
+
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @TestProvides
+              @Foo
+              Long discardedLong() {
+                return 1L;
+              }
+            },
+            scannerModule(scanner));
+
+    assertThat(getSourceScanner(injector.getBinding(String.class))).isEqualTo(scanner);
+  }
+
+  @Test
+  public void scannerSourceForPrivateModule() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            install(
+                new PrivateModule() {
+                  @Override
+                  protected void configure() {}
+
+                  @Exposed
+                  @TestProvides
+                  @Foo
+                  String privateString() {
+                    return "bar";
+                  }
+                });
+          }
+        };
+    TestScanner scanner = new TestScanner(TestProvides.class);
+
+    Injector injector = Guice.createInjector(module, scannerModule(scanner));
+
+    assertThat(getSourceScanner(injector.getBinding(Key.get(String.class, Foo.class))))
+        .isEqualTo(scanner);
+  }
+
+  ModuleAnnotatedMethodScanner getSourceScanner(Binding<?> binding) {
+    return ((ElementSource) binding.getSource()).scanner;
   }
 
   private static Module scannerModule(ModuleAnnotatedMethodScanner scanner) {

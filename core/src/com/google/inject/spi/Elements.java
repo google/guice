@@ -179,6 +179,7 @@ public final class Elements {
     private final Set<ModuleAnnotatedMethodScanner> scanners;
     /** The binder where exposed bindings will be created */
     private final RecordingBinder parent;
+
     private final PrivateElementsImpl privateElements;
     /** All children private binders, so we can scan through them. */
     private final List<RecordingBinder> privateBindersForScanning;
@@ -187,6 +188,14 @@ public final class Elements {
 
     /** The current modules stack */
     private ModuleSource moduleSource = null;
+    /**
+     * The current scanner.
+     *
+     * <p>Note that scanners cannot nest, ie. a scanner cannot install a module that requires
+     * scanning - except the built-in @Provides* methods. The built-in scanner isn't tracked by this
+     * variable, only custom scanners are.
+     */
+    private ModuleAnnotatedMethodScanner scannerSource = null;
 
     private ModuleAnnotatedMethodScanner currentScanner = null;
     private boolean trustedSource = false;
@@ -232,6 +241,7 @@ public final class Elements {
       this.privateElements = prototype.privateElements;
       this.privateBindersForScanning = prototype.privateBindersForScanning;
       this.permitMapConstruction = prototype.permitMapConstruction;
+      this.scannerSource = prototype.scannerSource;
     }
 
     /** Creates a private recording binder. */
@@ -248,6 +258,7 @@ public final class Elements {
       this.privateElements = privateElements;
       this.privateBindersForScanning = parent.privateBindersForScanning;
       this.permitMapConstruction = parent.permitMapConstruction;
+      this.scannerSource = parent.scannerSource;
     }
 
     /*if[AOP]*/
@@ -352,15 +363,22 @@ public final class Elements {
       if (modules.containsKey(module)) {
         return;
       }
+      // Whether the module installed is a ProviderMethodModule for a custom scanner.
+      boolean customScanner = false;
       Class<?> newModuleClass = null;
       RecordingBinder binder = this;
       // Update the module source for the new module
       if (module instanceof ProviderMethodsModule) {
+        ProviderMethodsModule providerMethodsModule = (ProviderMethodsModule) module;
+        if (!providerMethodsModule.isScanningBuiltInProvidesMethods()) {
+          scannerSource = providerMethodsModule.getScanner();
+          customScanner = true;
+        }
         // There are two reason's we'd want to get the module source in a ProviderMethodsModule.
         // ModuleAnnotatedMethodScanner lets users scan their own modules for @Provides-like
         // bindings.  If they install the module at a top-level, then moduleSource can be null.
         // Also, if they pass something other than 'this' to it, we'd have the wrong source.
-        Class<?> delegateClass = ((ProviderMethodsModule) module).getDelegateModuleClass();
+        Class<?> delegateClass = providerMethodsModule.getDelegateModuleClass();
         if (moduleSource == null
             || !moduleSource.getModuleClassName().equals(delegateClass.getName())) {
           newModuleClass = delegateClass;
@@ -400,6 +418,13 @@ public final class Elements {
       if (newModuleClass != null) {
         moduleSource = moduleSource.getParent();
         permitMapConstruction.popModule();
+      }
+      // Only wipe the scannerSource once custom scanner installation is finished. This way all
+      // bindings created by the custom scanner will have it as their scanner source, including
+      // bindings created by the built-in scanner scanning @Provides* methods in modules installed
+      // by the custom scanner.
+      if (customScanner) {
+        scannerSource = null;
       }
     }
 
@@ -652,7 +677,12 @@ public final class Elements {
       }
       // Build the binding call stack
       return new ElementSource(
-          originalSource, trustedSource, declaringSource, moduleSource, partialCallStack);
+          originalSource,
+          trustedSource,
+          declaringSource,
+          moduleSource,
+          partialCallStack,
+          scannerSource);
     }
 
     /**

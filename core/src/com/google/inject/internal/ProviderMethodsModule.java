@@ -348,4 +348,13 @@ public final class ProviderMethodsModule implements Module {
   public int hashCode() {
     return Objects.hashCode(delegate, scanner);
   }
+
+  /** Is it scanning the built-in @Provides* methods. */
+  public boolean isScanningBuiltInProvidesMethods() {
+    return scanner == ProvidesMethodScanner.INSTANCE;
+  }
+
+  public ModuleAnnotatedMethodScanner getScanner() {
+    return scanner;
+  }
 }
