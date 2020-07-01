@@ -43,7 +43,8 @@ public class ElementSourceTest extends TestCase {
             /* trustedOriginalSource = */ false,
             /* declaringSource = */ "",
             moduleSource,
-            bindingCallStack);
+            bindingCallStack,
+            /* scanner = */ null);
     assertEquals(10 /* call stack size */, elementSource.getStackTrace().length);
   }
 
