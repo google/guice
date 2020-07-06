@@ -297,7 +297,14 @@ public final class BindingSourceRestriction {
   }
 
   private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
-    return Arrays.stream(clazz.getAnnotations())
+    Stream<Annotation> annotations = Arrays.stream(clazz.getAnnotations());
+    // Pick up annotations on anonymous classes (e.g. new @Bar Foo() { ... }):
+    if (clazz.getAnnotatedSuperclass() != null) {
+      annotations =
+          Stream.concat(
+              annotations, Arrays.stream(clazz.getAnnotatedSuperclass().getAnnotations()));
+    }
+    return annotations
         .map(Annotation::annotationType)
         .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
   }

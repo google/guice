@@ -2,6 +2,7 @@ package com.google.inject;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE_USE;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
@@ -213,6 +214,30 @@ public class RestrictedBindingSourceTest {
 
     assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);
     assertThat(expected).hasMessageThat().contains(USE_ROUTING_MODULE);
+  }
+
+  @RestrictedBindingSource.Permit
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(TYPE_USE)
+  @interface FooPermit {}
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = "Only modules with FooPermit can bind @Foo bindings.",
+      permits = {FooPermit.class})
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface Foo {}
+
+  @Test
+  public void permitOnAnonymousClassWorks() {
+    Guice.createInjector(
+        new @FooPermit AbstractModule() {
+          @Provides
+          @Foo
+          String provideFooString() {
+            return "foo";
+          }
+        });
   }
 
   // --------------------------------------------------------------------------
