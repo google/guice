@@ -11,11 +11,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotation restricting the binding of the target type to permitted modules.
+ * Annotation restricting the binding of the target type to permitted sources.
  *
- * <p>Bindings restricted by this annotation may only be created by modules annotated with a permit
+ * <p>Bindings restricted by this annotation may only be created by sources annotated with a permit
  * from {@link #permits} -- otherwise, an error message including the {@link #explanation} is
  * issued.
+ *
+ * <p>There are two kinds of binding source:
+ *
+ * <ol>
+ *   <li>Module: a module is the source of a binding if it creates it (either directly, or
+ *       indirectly by installing another module). For example: if module A creates restricted
+ *       binding X, and module C installs module B that installs A; then all 3 modules C,B,A are
+ *       sources of X, and it's enough for any one of them to be annotated with a permit from X's
+ *       restriction.
+ *   <li>Method Scanner ({@code ModuleAnnotatedMethodScanner}): If a binding was created by a
+ *       scanner, then that scanner is also a source of the binding (in addition to the module
+ *       sources) and a permit may be given to the scanner by annotating its class.
+ * </ol>
  *
  * <p>Bindings with qualifier annotations are restricted solely by the annotation on their qualifier
  * (restrictions on the type are ignored for qualified bindings). Unqualified bindings are
@@ -27,11 +40,6 @@ import java.lang.annotation.Target;
  * - to point them to a supported testing module.
  *
  * <p>TODO(user): Concrete Example!
- *
- * <p>Note that a binding is created by a stack of modules, where the module at the bottom of the
- * stack creates it directly, and its ancestor modules up the stack create it indirectly. A binding
- * restricted this way can be created if one of the modules on the stack is annotated with one of
- * the annotations in {@link #permits}.
  *
  * <p><b>Warning:</b> This is an experimental API, currently in developement.
  *
@@ -50,8 +58,8 @@ public @interface RestrictedBindingSource {
 
   /**
    * Meta-annotation indicating that the target annotation is a permit for binding restricted
-   * bindings. Annotating a module with a permit gives the module permission to bind the restricted
-   * bindings guarded by the permit (see {@link #permits}).
+   * bindings. Annotating a binding source (defined in top-level javadoc) with a permit gives it
+   * permission to bind the restricted bindings guarded by the permit (see {@link #permits}).
    */
   @Documented
   @Retention(RUNTIME)
@@ -60,7 +68,7 @@ public @interface RestrictedBindingSource {
 
   /**
    * List of {@code Permit} annotations (must be non-empty), one of which has has to be present on a
-   * restricted binding's module stack.
+   * restricted binding's source (defined in top-level javadoc).
    */
   Class<? extends Annotation>[] permits();
 

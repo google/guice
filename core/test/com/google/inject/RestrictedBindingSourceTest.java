@@ -392,15 +392,6 @@ public class RestrictedBindingSourceTest {
 
   // Adds the NetworkLibrary-owned Network annotation to keys produced by @NetworkProvides methods.
   private static class NetworkProvidesScanner extends ModuleAnnotatedMethodScanner {
-    static Module module() {
-      return new AbstractModule() {
-        @Override
-        protected void configure() {
-          binder().scanModulesForAnnotatedMethods(new NetworkProvidesScanner());
-        }
-      };
-    }
-
     @Override
     public String toString() {
       return "NetworkProvidesScanner";
@@ -429,7 +420,7 @@ public class RestrictedBindingSourceTest {
         };
 
     CreationException expected =
-        assertThatInjectorCreationFails(rogueModule, NetworkProvidesScanner.module());
+        assertThatInjectorCreationFails(rogueModule, scannerModule(new NetworkProvidesScanner()));
 
     assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);
     assertThat(expected).hasMessageThat().contains(NETWORK_ANNOTATION_IS_RESTRICTED);
@@ -445,7 +436,67 @@ public class RestrictedBindingSourceTest {
       }
     }
 
-    Guice.createInjector(new NetworkModuleWithCustomProvides(), NetworkProvidesScanner.module());
+    Guice.createInjector(
+        new NetworkModuleWithCustomProvides(), scannerModule(new NetworkProvidesScanner()));
+  }
+
+  @Test
+  public void scannerWithPermitCanCreateRestrictedBinding() {
+    @NetworkLibrary
+    class NetworkProvidesScannerWithPermit extends NetworkProvidesScanner {}
+
+    AbstractModule moduleWithNetworkProvidesMethod =
+        new AbstractModule() {
+          @NetworkProvides
+          String provideNetworkString() {
+            return "lorem ipsum";
+          }
+        };
+
+    Guice.createInjector(
+        moduleWithNetworkProvidesMethod, scannerModule(new NetworkProvidesScannerWithPermit()));
+  }
+
+  @Test
+  public void scannerWithPermitCanCreateRestrictedBindings() {
+    @NetworkLibrary
+    class NetworkProvidesScannerWithPermit extends NetworkProvidesScanner {
+      @Override
+      public <T> Key<T> prepareMethod(
+          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+        binder.install(
+            new AbstractModule() {
+              @Provides
+              @GatewayIpAdress
+              int provideGatewayIp() {
+                return 42;
+              }
+            });
+        return Key.get(key.getTypeLiteral(), Network.class);
+      }
+    }
+    AbstractModule moduleWithNetworkProvidesMethod =
+        new AbstractModule() {
+          @NetworkProvides
+          String provideNetworkString() {
+            return "lorem ipsum";
+          }
+        };
+
+    Injector injector =
+        Guice.createInjector(
+            moduleWithNetworkProvidesMethod, scannerModule(new NetworkProvidesScannerWithPermit()));
+
+    assertThat(injector.getInstance(Key.get(Integer.class, GatewayIpAdress.class))).isEqualTo(42);
+  }
+
+  private static Module scannerModule(ModuleAnnotatedMethodScanner scanner) {
+    return new AbstractModule() {
+      @Override
+      protected void configure() {
+        binder().scanModulesForAnnotatedMethods(scanner);
+      }
+    };
   }
 
   // --------------------------------------------------------------------------

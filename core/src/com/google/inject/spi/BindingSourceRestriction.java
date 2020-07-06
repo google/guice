@@ -151,21 +151,18 @@ public final class BindingSourceRestriction {
         explanation);
   }
 
-  /**
-   * Get all permits on the element source chain. Trusting only original (parent) element sources if
-   * they are set by Modules.override.
-   */
+  /** Get all permits on the element source chain. */
   private static ImmutableSet<Class<? extends Annotation>> getAllPermits(
       ElementSource elementSource) {
     ImmutableSet.Builder<Class<? extends Annotation>> permitsBuilder = ImmutableSet.builder();
-    ImmutableSet<Class<? extends Annotation>> permits =
-        elementSource.moduleSource.getPermitMap().getPermits(elementSource);
-    if (elementSource.getOriginalElementSource() == null
-        || !elementSource.trustedOriginalElementSource) {
-      return permits;
+    permitsBuilder.addAll(elementSource.moduleSource.getPermitMap().getPermits(elementSource));
+    if (elementSource.scanner != null) {
+      getPermits(elementSource.scanner.getClass()).forEach(permitsBuilder::add);
     }
-    permitsBuilder.addAll(permits);
-    permitsBuilder.addAll(getAllPermits(elementSource.getOriginalElementSource()));
+    if (elementSource.getOriginalElementSource() != null
+        && elementSource.trustedOriginalElementSource) {
+      permitsBuilder.addAll(getAllPermits(elementSource.getOriginalElementSource()));
+    }
     return permitsBuilder.build();
   }
 
@@ -281,12 +278,6 @@ public final class BindingSourceRestriction {
       modulePermits.put(moduleSource, currentModulePermits);
     }
 
-    private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
-      return Arrays.stream(clazz.getAnnotations())
-          .map(Annotation::annotationType)
-          .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
-    }
-
     /** Called by the Binder when it exits a module's configure method. */
     void popModule() {
       // Restore the parent module's permits.
@@ -303,5 +294,11 @@ public final class BindingSourceRestriction {
       PermitMapImpl permitMap = (PermitMapImpl) elementSource.moduleSource.getPermitMap();
       return permitMap.modulePermits == null;
     }
+  }
+
+  private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
+    return Arrays.stream(clazz.getAnnotations())
+        .map(Annotation::annotationType)
+        .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
   }
 }
