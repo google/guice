@@ -13,6 +13,10 @@
 
   <name>Google Guice - Core Library</name>
 
+  <properties>
+    <src.osgi.location>${project.build.sourceDirectory}</src.osgi.location>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>javax.inject</groupId>
@@ -114,6 +118,7 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
+          <scrLocation>${src.osgi.location}</scrLocation>
           <instructions>
             <Bundle-Name>${project.artifactId}$(if;$(classes;NAMED;*.MethodAspect);; (no_aop))</Bundle-Name>
             <Import-Package>!net.sf.cglib.*,!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
@@ -159,6 +164,9 @@
        | No-AOP profile: repeat the build lifecycle with munged no-AOP source
       -->
       <id>guice.with.no_aop</id>
+      <properties>
+        <src.osgi.location>${project.build.directory}/munged/main</src.osgi.location>
+      </properties>
       <activation>
         <property>
           <name>guice.with.no_aop</name>
@@ -173,7 +181,7 @@
             <version>1.0</version>
             <executions>
               <execution>
-                <phase>prepare-package</phase>
+                <phase>generate-sources</phase>
                 <goals>
                   <goal>munge-fork</goal>
                 </goals>
