@@ -173,7 +173,7 @@
             <version>1.0</version>
             <executions>
               <execution>
-                <phase>prepare-package</phase>
+                <phase>generate-sources</phase>
                 <goals>
                   <goal>munge-fork</goal>
                 </goals>
