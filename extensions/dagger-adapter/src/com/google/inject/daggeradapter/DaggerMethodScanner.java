@@ -123,7 +123,7 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
   private static <T> Key<T> processSetBinding(Binder binder, Key<T> key) {
     Multibinder<T> setBinder = newSetBinder(binder, key.getTypeLiteral(), key.getAnnotation());
 
-    Key<T> contributionKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
+    Key<T> contributionKey = key.withAnnotation(UniqueAnnotations.create());
     setBinder.addBinding().to(contributionKey);
     return contributionKey;
   }
@@ -133,7 +133,7 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     MapBinder<K, V> mapBinder =
         newMapBinder(binder, mapKeyData.typeLiteral, key.getTypeLiteral(), key.getAnnotation());
 
-    Key<V> contributionKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
+    Key<V> contributionKey = key.withAnnotation(UniqueAnnotations.create());
     mapBinder.addBinding(mapKeyData.key).to(contributionKey);
     return contributionKey;
   }

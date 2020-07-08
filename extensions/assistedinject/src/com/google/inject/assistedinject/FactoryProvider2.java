@@ -694,7 +694,7 @@ final class FactoryProvider2<F>
    */
   private <T> Key<T> assistKey(Method method, Key<T> key, Errors errors) throws ErrorsException {
     if (key.getAnnotationType() == null) {
-      return Key.get(key.getTypeLiteral(), DEFAULT_ANNOTATION);
+      return key.withAnnotation(DEFAULT_ANNOTATION);
     } else if (key.getAnnotationType() == Assisted.class) {
       return key;
     } else {
