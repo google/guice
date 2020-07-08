@@ -190,8 +190,7 @@ public class ModuleAnnotatedMethodScannerTest {
     @Override
     public <T> Key<T> prepareMethod(
         Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
-      return Key.get(
-          key.getTypeLiteral(), Names.named(((Named) key.getAnnotation()).value() + "-munged"));
+      return key.withAnnotation(Names.named(((Named) key.getAnnotation()).value() + "-munged"));
     }
   }
 

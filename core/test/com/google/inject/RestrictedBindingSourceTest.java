@@ -430,7 +430,7 @@ public class RestrictedBindingSourceTest {
     @Override
     public <T> Key<T> prepareMethod(
         Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
-      return Key.get(key.getTypeLiteral(), Network.class);
+      return key.withAnnotation(Network.class);
     }
   }
 

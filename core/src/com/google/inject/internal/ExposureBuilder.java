@@ -44,14 +44,14 @@ public class ExposureBuilder<T> implements AnnotatedElementBuilder {
   public void annotatedWith(Class<? extends Annotation> annotationType) {
     Preconditions.checkNotNull(annotationType, "annotationType");
     checkNotAnnotated();
-    key = Key.get(key.getTypeLiteral(), annotationType);
+    key = key.withAnnotation(annotationType);
   }
 
   @Override
   public void annotatedWith(Annotation annotation) {
     Preconditions.checkNotNull(annotation, "annotation");
     checkNotAnnotated();
-    key = Key.get(key.getTypeLiteral(), annotation);
+    key = key.withAnnotation(annotation);
   }
 
   public Key<?> getKey() {

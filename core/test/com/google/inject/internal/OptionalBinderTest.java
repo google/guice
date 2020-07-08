@@ -1297,9 +1297,9 @@ public class OptionalBinderTest extends TestCase {
       Key<?> bindingKey = entry.getKey();
       Key<?> clonedKey;
       if (bindingKey.getAnnotation() != null) {
-        clonedKey = Key.get(bindingKey.getTypeLiteral(), bindingKey.getAnnotation());
+        clonedKey = bindingKey.ofType(bindingKey.getTypeLiteral());
       } else if (bindingKey.getAnnotationType() != null) {
-        clonedKey = Key.get(bindingKey.getTypeLiteral(), bindingKey.getAnnotationType());
+        clonedKey = bindingKey.ofType(bindingKey.getTypeLiteral());
       } else {
         clonedKey = Key.get(bindingKey.getTypeLiteral());
       }

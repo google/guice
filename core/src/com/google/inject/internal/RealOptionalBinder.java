@@ -609,14 +609,14 @@ public final class RealOptionalBinder<T> implements Module {
 
     Key<T> getKeyForDefaultBinding() {
       if (defaultBindingKey == null) {
-        defaultBindingKey = Key.get(key.getTypeLiteral(), new DefaultImpl(getBindingName()));
+        defaultBindingKey = key.withAnnotation(new DefaultImpl(getBindingName()));
       }
       return defaultBindingKey;
     }
 
     Key<T> getKeyForActualBinding() {
       if (actualBindingKey == null) {
-        actualBindingKey = Key.get(key.getTypeLiteral(), new ActualImpl(getBindingName()));
+        actualBindingKey = key.withAnnotation(new ActualImpl(getBindingName()));
       }
       return actualBindingKey;
     }
