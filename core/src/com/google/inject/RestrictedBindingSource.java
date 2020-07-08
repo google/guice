@@ -39,7 +39,27 @@ import java.lang.annotation.Target;
  * creating mock bindings for tests, using the {@link #explanation} - included in the error message
  * - to point them to a supported testing module.
  *
- * <p>TODO(user): Concrete Example!
+ * <p>Example usage:
+ *
+ * <pre>{@code
+ * @RestrictedBindingSource.Permit
+ * @Retention(RetentionPolicy.RUNTIME)
+ * @interface NetworkPermit {}
+ *
+ * @RestrictedBindingSource(
+ *   explanation = "Only NetworkModule can create network bindings.",
+ *   permits = {NetworkPermit.class})
+ * @Qualifier
+ * @Retention(RetentionPolicy.RUNTIME)
+ * public @interface GatewayIpAdress {}
+ *
+ * @NetworkPermit
+ * public final class NetworkModule extends AbstractModule {
+ *   @Provides
+ *   @GatewayIpAdress // Allowed because the module is annotated with @NetworkPermit.
+ *   int provideGatewayIp() { ... }
+ * }
+ * }</pre>
  *
  * <p><b>Warning:</b> This is an experimental API, currently in developement.
  *
