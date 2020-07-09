@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -116,26 +115,24 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   final State state;
+  private final InjectorJitBindingData jitBindingData;
   final InjectorImpl parent;
   final ListMultimap<TypeLiteral<?>, Binding<?>> bindingsMultimap = ArrayListMultimap.create();
   final InjectorOptions options;
-
-  /** Just-in-time binding cache. Guarded by state.lock() */
-  final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
-  /**
-   * Cache of Keys that we were unable to create JIT bindings for, so we don't keep trying. Also
-   * guarded by state.lock().
-   */
-  final Set<Key<?>> failedJitBindings = Sets.newHashSet();
 
   Lookups lookups = new DeferredLookups(this);
 
   /** The set of types passed to {@link #getMembersInjector} and {@link #injectMembers}. */
   final Set<TypeLiteral<?>> userRequestedMembersInjectorTypes = Sets.newConcurrentHashSet();
 
-  InjectorImpl(InjectorImpl parent, State state, InjectorOptions injectorOptions) {
+  InjectorImpl(
+      InjectorImpl parent,
+      State state,
+      InjectorJitBindingData jitBindingData,
+      InjectorOptions injectorOptions) {
     this.parent = parent;
     this.state = state;
+    this.jitBindingData = jitBindingData;
     this.options = injectorOptions;
 
     if (parent != null) {
@@ -186,7 +183,8 @@ final class InjectorImpl implements Injector, Lookups {
       // See if any jit bindings have been created for this key.
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked")
-        BindingImpl<T> jitBinding = (BindingImpl<T>) injector.jitBindings.get(key);
+        BindingImpl<T> jitBinding =
+            (BindingImpl<T>) injector.jitBindingData.getJitBindings().get(key);
         if (jitBinding != null) {
           return jitBinding;
         }
@@ -250,6 +248,10 @@ final class InjectorImpl implements Injector, Lookups {
     return createChildInjector(ImmutableList.copyOf(modules));
   }
 
+  InjectorJitBindingData getJitBindingData() {
+    return jitBindingData;
+  }
+
   /**
    * Returns a just-in-time binding for {@code key}, creating it if necessary.
    *
@@ -263,7 +265,7 @@ final class InjectorImpl implements Injector, Lookups {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked") // we only store bindings that match their key
-        BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindings.get(key);
+        BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindingData.getJitBindings().get(key);
 
         if (binding != null) {
           // If we found a JIT binding and we don't allow them,
@@ -285,15 +287,15 @@ final class InjectorImpl implements Injector, Lookups {
       // entry in jitBindings (during cleanup), and we may be trying
       // to create it again (in the case of a recursive JIT binding).
       // We need both of these guards for different reasons
-      // failedJitBindings.contains: We want to continue processing if we've never
+      // getFailedJitBindings.contains: We want to continue processing if we've never
       //   failed before, so that our initial error message contains
       //   as much useful information as possible about what errors exist.
       // errors.hasErrors: If we haven't already failed, then it's OK to
       //   continue processing, to make sure the ultimate error message
       //   is the correct one.
       // See: ImplicitBindingsTest#testRecursiveJitBindingsCleanupCorrectly
-      // for where this guard compes into play.
-      if (failedJitBindings.contains(key) && errors.hasErrors()) {
+      // for where this guard comes into play.
+      if (jitBindingData.getFailedJitBindings().contains(key) && errors.hasErrors()) {
         throw errors.toException();
       }
       return createJustInTimeBindingRecursive(key, errors, options.jitDisabled, jitType);
@@ -598,7 +600,7 @@ final class InjectorImpl implements Injector, Lookups {
     // Note: We don't need to synchronize on state.lock() during injector creation.
     if (binding instanceof DelayedInitialize) {
       Key<T> key = binding.getKey();
-      jitBindings.put(key, binding);
+      jitBindingData.getJitBindings().put(key, binding);
       boolean successful = false;
       DelayedInitialize delayed = (DelayedInitialize) binding;
       try {
@@ -629,7 +631,7 @@ final class InjectorImpl implements Injector, Lookups {
       Key<?> depKey = dep.getKey();
       InjectionPoint ip = dep.getInjectionPoint();
       if (encountered.add(depKey)) { // only check if we haven't looked at this key yet
-        BindingImpl depBinding = jitBindings.get(depKey);
+        BindingImpl<?> depBinding = jitBindingData.getJitBindings().get(depKey);
         if (depBinding != null) { // if the binding still exists, validate
           boolean failed = cleanup(depBinding, encountered); // if children fail, we fail
           if (depBinding instanceof ConstructorBindingImpl) {
@@ -655,8 +657,8 @@ final class InjectorImpl implements Injector, Lookups {
 
   /** Cleans up any state that may have been cached when constructing the JIT binding. */
   private void removeFailedJitBinding(Binding<?> binding, InjectionPoint ip) {
-    failedJitBindings.add(binding.getKey());
-    jitBindings.remove(binding.getKey());
+    jitBindingData.getFailedJitBindings().add(binding.getKey());
+    jitBindingData.getJitBindings().remove(binding.getKey());
     membersInjectorStore.remove(binding.getKey().getTypeLiteral());
     provisionListenerStore.remove(binding);
     if (ip != null) {
@@ -846,22 +848,23 @@ final class InjectorImpl implements Injector, Lookups {
             jitDisabled,
             parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
       } catch (ErrorsException ignored) {
+        // TODO(b/160910914): Why are ErrorsExceptions ignored?
       }
     }
 
-    // Retrieve the sources before checking for blacklisting to guard against sources becoming null
-    // due to a full GC happening after calling state.isBlacklisted and
-    // state.getSourcesForBlacklistedKey.
+    // Retrieve the sources before checking for banned key to guard against sources becoming null
+    // due to a full GC happening after calling jitBindingData.isBanned and
+    // state.getSourcesForBannedKey.
     // TODO(user): Consolidate these two APIs.
-    Set<Object> sources = state.getSourcesForBlacklistedKey(key);
-    if (state.isBlacklisted(key)) {
+    Set<Object> sources = jitBindingData.getSourcesForBannedKey(key);
+    if (jitBindingData.isBannedKey(key)) {
       throw errors.childBindingAlreadySet(key, sources).toException();
     }
 
     key = MoreTypes.canonicalizeKey(key); // before storing the key long-term, canonicalize it.
     BindingImpl<T> binding = createJustInTimeBinding(key, errors, jitDisabled, jitType);
-    state.parent().blacklist(key, state, binding.getSource());
-    jitBindings.put(key, binding);
+    jitBindingData.banKeyInParent(key, state, binding.getSource());
+    jitBindingData.getJitBindings().put(key, binding);
     return binding;
   }
 
@@ -884,12 +887,12 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
     int numErrorsBefore = errors.size();
 
-    // Retrieve the sources before checking for blacklisting to guard against sources becoming null
-    // due to a full GC happening after calling state.isBlacklisted and
-    // state.getSourcesForBlacklistedKey.
+    // Retrieve the sources before checking for a banned key to guard against sources becoming null
+    // due to a full GC happening after calling jitBindingData.isBanned and
+    // jitBindingData.getSourcesForBannedKey.
     // TODO(user): Consolidate these two APIs.
-    Set<Object> sources = state.getSourcesForBlacklistedKey(key);
-    if (state.isBlacklisted(key)) {
+    Set<Object> sources = jitBindingData.getSourcesForBannedKey(key);
+    if (jitBindingData.isBannedKey(key)) {
       throw errors.childBindingAlreadySet(key, sources).toException();
     }
 
@@ -958,7 +961,7 @@ final class InjectorImpl implements Injector, Lookups {
     synchronized (state.lock()) {
       return new ImmutableMap.Builder<Key<?>, Binding<?>>()
           .putAll(state.getExplicitBindingsThisLevel())
-          .putAll(jitBindings)
+          .putAll(jitBindingData.getJitBindings())
           .build();
     }
   }

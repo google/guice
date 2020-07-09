@@ -97,7 +97,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     }
 
     // prevent the parent from creating a JIT binding for this key
-    injector.state.parent().blacklist(key, injector.state, binding.getSource());
+    injector.getJitBindingData().banKeyInParent(key, injector.state, binding.getSource());
     injector.state.putBinding(key, binding);
   }
 

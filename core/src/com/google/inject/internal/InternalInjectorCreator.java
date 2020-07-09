@@ -200,7 +200,7 @@ public final class InternalInjectorCreator {
     candidateBindings.addAll(bindingsAtThisLevel);
     synchronized (injector.state.lock()) {
       // jit bindings must be accessed while holding the lock.
-      candidateBindings.addAll(injector.jitBindings.values());
+      candidateBindings.addAll(injector.getJitBindingData().getJitBindings().values());
     }
     InternalContext context = injector.enterContext();
     try {

@@ -64,13 +64,11 @@ final class InheritingState implements State {
   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
   private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList();
   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
-  private final WeakKeySet blacklistedKeys;
   private final Object lock;
 
   InheritingState(State parent) {
     this.parent = checkNotNull(parent, "parent");
     this.lock = (parent == State.NONE) ? this : parent.lock();
-    this.blacklistedKeys = new WeakKeySet(lock);
   }
 
   @Override
@@ -251,22 +249,6 @@ final class InheritingState implements State {
   @Override
   public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
     return scannerBindings;
-  }
-
-  @Override
-  public void blacklist(Key<?> key, State state, Object source) {
-    parent.blacklist(key, state, source);
-    blacklistedKeys.add(key, state, source);
-  }
-
-  @Override
-  public boolean isBlacklisted(Key<?> key) {
-    return blacklistedKeys.contains(key);
-  }
-
-  @Override
-  public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
-    return blacklistedKeys.getSources(key);
   }
 
   @Override
