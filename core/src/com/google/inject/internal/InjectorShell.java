@@ -42,6 +42,7 @@ import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -72,8 +73,9 @@ final class InjectorShell {
     private final List<Element> elements = Lists.newArrayList();
     private final List<Module> modules = Lists.newArrayList();
 
-    /** lazily constructed */
+    // lazily constructed fields
     private State state;
+    private InjectorJitBindingData jitBindingData;
 
     private InjectorImpl parent;
     private InjectorOptions options;
@@ -90,6 +92,8 @@ final class InjectorShell {
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
       this.state = new InheritingState(parent.state);
+      this.jitBindingData =
+          new InjectorJitBindingData(Optional.of(parent.getJitBindingData()), state);
       this.options = parent.options;
       this.stage = options.stage;
       return this;
@@ -154,7 +158,7 @@ final class InjectorShell {
       optionsProcessor.process(null, elements);
       options = optionsProcessor.getOptions(stage, options);
 
-      InjectorImpl injector = new InjectorImpl(parent, state, options);
+      InjectorImpl injector = new InjectorImpl(parent, state, jitBindingData, options);
       if (privateElements != null) {
         privateElements.initInjector(injector);
       }
@@ -216,9 +220,14 @@ final class InjectorShell {
       return injectorShells;
     }
 
+    /**
+     * Lazily initializes state and jitBindingData, if they were not already initialized with a
+     * parent injector by {@link #parent(InjectorImpl)}.
+     */
     private State getState() {
       if (state == null) {
         state = new InheritingState(State.NONE);
+        jitBindingData = new InjectorJitBindingData(Optional.empty(), state);
       }
       return state;
     }

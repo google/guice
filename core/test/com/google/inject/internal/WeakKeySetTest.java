@@ -135,7 +135,8 @@ public class WeakKeySetTest extends TestCase {
     assertSourceNotInSet(set, key, source1);
     assertInSet(set, key, 1, source2);
 
-    source1 = source2 = null;
+    // Clear source1 and source2 fields so the objects can be GCed.
+    Object unused = source1 = source2 = null;
 
     awaitClear(weakSource1Ref);
     // Key1 will be referenced as the key in the sources backingSet and won't be
@@ -583,19 +584,6 @@ public class WeakKeySetTest extends TestCase {
     @Override
     public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
       return ImmutableList.of();
-    }
-
-    @Override
-    public void blacklist(Key<?> key, State state, Object source) {}
-
-    @Override
-    public boolean isBlacklisted(Key<?> key) {
-      return true;
-    }
-
-    @Override
-    public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
-      throw new UnsupportedOperationException();
     }
 
     @Override

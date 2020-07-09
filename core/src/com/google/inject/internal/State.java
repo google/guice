@@ -177,18 +177,7 @@ interface State {
           return ImmutableList.of();
         }
 
-        @Override
-        public void blacklist(Key<?> key, State state, Object source) {}
 
-        @Override
-        public boolean isBlacklisted(Key<?> key) {
-          return true;
-        }
-
-        @Override
-        public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
-          throw new UnsupportedOperationException();
-        }
 
         @Override
         public Object lock() {
@@ -285,22 +274,6 @@ interface State {
   List<ModuleAnnotatedMethodScannerBinding> getScannerBindings();
 
   List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel();
-
-  /**
-   * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors
-   * blacklist their bound keys on their parent injectors to prevent just-in-time bindings on the
-   * parent injector that would conflict and pass along their state to control the lifetimes.
-   */
-  void blacklist(Key<?> key, State state, Object source);
-
-  /**
-   * Returns true if {@code key} is forbidden from being bound in this injector. This indicates that
-   * one of this injector's descendent's has bound the key.
-   */
-  boolean isBlacklisted(Key<?> key);
-
-  /** Returns the source of a blacklisted key. */
-  Set<Object> getSourcesForBlacklistedKey(Key<?> key);
 
   /**
    * Returns the shared lock for all injector data. This is a low-granularity, high-contention lock
