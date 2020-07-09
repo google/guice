@@ -49,7 +49,7 @@ public class IntegrationTest extends TestCase {
     assertEquals(2, counter.count);
   }
 
-  static class Foo {
+  public static class Foo {
     boolean invoked;
 
     public void foo() {

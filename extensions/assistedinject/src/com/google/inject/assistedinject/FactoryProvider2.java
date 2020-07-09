@@ -42,7 +42,6 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.UniqueAnnotations;
@@ -355,9 +354,7 @@ final class FactoryProvider2<F>
       factory =
           factoryRawType.cast(
               Proxy.newProxyInstance(
-                  BytecodeGen.getClassLoader(factoryRawType),
-                  new Class<?>[] {factoryRawType},
-                  this));
+                  factoryRawType.getClassLoader(), new Class<?>[] {factoryRawType}, this));
 
       // Now go back through default methods. Try to use MethodHandles to make things
       // work.  If that doesn't work, fallback to trying to find compatible method

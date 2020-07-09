@@ -673,9 +673,8 @@ public class CircularDependencyTest extends TestCase {
     // entry: Key<IImpl> (3 - another circular dependency, this time from JImpl)
     // At this point, if the first Key<Impl> result was cached, our cache would have
     //  Key<IImpl> caching to an instanceof of I, but not an an instanceof of IImpl.
-    // If returned this, it would result in cglib giving a ClassCastException or
-    // java reflection giving an IllegalArgumentException when filling in parameters
-    // for the constructor, because JImpl wants an IImpl, not an I.
+    // If returned this, it would result in a ClassCastException or IllegalArgumentException
+    // when filling in parameters for the constructor, because JImpl wants an IImpl, not an I.
 
     try {
       injector.getInstance(IImpl.class);

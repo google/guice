@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.BindingImpl;
-import com.google.inject.internal.CircularDependencyProxy;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.SingletonScope;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ExposedBinding;
@@ -197,6 +197,6 @@ public class Scopes {
    * @since 4.0
    */
   public static boolean isCircularProxy(Object object) {
-    return object instanceof CircularDependencyProxy;
+    return BytecodeGen.isCircularProxy(object);
   }
 }
