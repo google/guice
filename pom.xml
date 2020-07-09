@@ -154,12 +154,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>7.2</version>
-      </dependency>
-      <dependency>
-        <groupId>cglib</groupId>
-        <artifactId>cglib</artifactId>
-        <version>3.3.0</version>
+        <version>8.0.1</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -285,6 +280,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <artifactId>java18</artifactId>
               <version>1.0</version>
             </signature>
+            <ignores>
+              <!-- workaround https://github.com/mojohaus/animal-sniffer/issues/18 -->
+              <ignore>java.lang.invoke.MethodHandle</ignore>
+            </ignores>
           </configuration>
           <executions>
             <execution>

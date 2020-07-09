@@ -53,7 +53,7 @@ public class ProxyFactoryTest extends TestCase {
     assertTrue(interceptor.invoked);
   }
 
-  static class Simple {
+  public static class Simple {
     boolean invoked = false;
 
     public void invoke() {
@@ -99,27 +99,27 @@ public class ProxyFactoryTest extends TestCase {
     assertTrue(interceptor.invoked);
   }
 
-  static class Foo {
+  public static class Foo {
     boolean fooCalled;
 
     @Intercept
-    void foo() {
+    protected void foo() {
       fooCalled = true;
     }
   }
 
-  static class Bar {
+  public static class Bar {
 
     boolean barCalled;
 
-    void bar() {
+    protected void bar() {
       barCalled = true;
     }
 
     boolean interceptedCalled;
 
     @Intercept
-    void intercepted() {
+    protected void intercepted() {
       interceptedCalled = true;
     }
   }
@@ -156,7 +156,7 @@ public class ProxyFactoryTest extends TestCase {
     assertEquals(A.class, a.getClass());
   }
 
-  static class A {
+  public static class A {
     final int i;
 
     @Inject
@@ -204,10 +204,10 @@ public class ProxyFactoryTest extends TestCase {
     }
   }
 
-  static class Counter {
+  public static class Counter {
     int count;
 
-    void inc() {
+    protected void inc() {
       count++;
     }
   }

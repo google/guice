@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.only;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -24,13 +25,16 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
+import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.inject.Named;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -254,27 +258,27 @@ public class MethodInterceptionTest extends TestCase {
     Interceptable interceptable = injector.getInstance(Interceptable.class);
     assertNull(interceptable.lastElements);
     interceptable.foo();
-    boolean cglibFound = false;
+    boolean proxyFrameFound = false;
     for (int i = 0; i < interceptable.lastElements.length; i++) {
-      if (interceptable.lastElements[i].toString().contains("cglib")) {
-        cglibFound = true;
+      if (interceptable.lastElements[i].toString().contains("$EnhancerByGuice$")) {
+        proxyFrameFound = true;
         break;
       }
     }
-    assertTrue(Arrays.toString(interceptable.lastElements), cglibFound);
-    cglibFound = false;
+    assertTrue(Arrays.toString(interceptable.lastElements), proxyFrameFound);
+    proxyFrameFound = false;
 
     interceptable.bar();
     for (int i = 0; i < interceptable.lastElements.length; i++) {
-      if (interceptable.lastElements[i].toString().contains("cglib")) {
-        cglibFound = true;
+      if (interceptable.lastElements[i].toString().contains("$EnhancerByGuice$")) {
+        proxyFrameFound = true;
         break;
       }
     }
-    assertFalse(Arrays.toString(interceptable.lastElements), cglibFound);
+    assertFalse(Arrays.toString(interceptable.lastElements), proxyFrameFound);
   }
 
-  static class Foo {}
+  public static class Foo {}
 
   static class Bar {}
 
@@ -433,5 +437,96 @@ public class MethodInterceptionTest extends TestCase {
           });
       return null;
     }
+  }
+
+  @Retention(RUNTIME)
+  @interface Grounded {}
+
+  interface Animal {
+    default String identifyMyself() {
+      return "I am an animal.";
+    }
+  }
+
+  interface Horse extends Animal {
+    @Override
+    @Grounded
+    default String identifyMyself() {
+      return "I am a horse.";
+    }
+  }
+
+  interface MythicalAnimal extends Animal {}
+
+  interface FlyingHorse extends Horse, MythicalAnimal {
+    @Override
+    // not Grounded
+    default String identifyMyself() {
+      return "I am a flying horse.";
+    }
+  }
+
+  static class HorseImpl implements Horse {}
+
+  // MythicalAnimal shouldn't disturb earlier hierarchy
+  public static class Unicorn extends HorseImpl implements MythicalAnimal {}
+
+  // FlyingHorse should be merged into earlier hierarchy
+  public static class Pegasus extends HorseImpl implements MythicalAnimal, FlyingHorse {}
+
+  public void testDefaultMethodInterception() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindInterceptor(
+                    Matchers.any(),
+                    Matchers.annotatedWith(Grounded.class),
+                    new CountingInterceptor());
+              }
+            });
+
+    assertEquals(0, count.get());
+    assertEquals("I am a horse.", injector.getInstance(Unicorn.class).identifyMyself());
+    assertEquals(1, count.get()); // unicorn is grounded
+
+    count.set(0); // reset
+
+    assertEquals(0, count.get());
+    assertEquals("I am a flying horse.", injector.getInstance(Pegasus.class).identifyMyself());
+    assertEquals(0, count.get()); // pegasus is not grounded
+  }
+
+  static class BaseSetter {
+    String text;
+
+    @Inject
+    protected void setText(@Named("text") String text) {
+      this.text = text;
+    }
+  }
+
+  public static class Setter extends BaseSetter {}
+
+  public void testSetterInterception() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindConstant().annotatedWith(Names.named("text")).to("Hello, world");
+                bindInterceptor(
+                    Matchers.any(),
+                    Matchers.annotatedWith(Inject.class),
+                    mi -> {
+                      mi.getArguments()[0] = ">>" + mi.getArguments()[0] + "<<";
+                      return mi.proceed();
+                    });
+              }
+            });
+
+    Setter setter = injector.getInstance(Setter.class);
+    assertEquals(">>Hello, world<<", setter.text);
   }
 }

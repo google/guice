@@ -21,6 +21,7 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.function.BiFunction;
 
 /** Invokes an injectable method. */
 final class SingleMethodInjector implements SingleMemberInjector {
@@ -40,19 +41,21 @@ final class SingleMethodInjector implements SingleMemberInjector {
 
     /*if[AOP]*/
     try {
-      final net.sf.cglib.reflect.FastClass fastClass = BytecodeGen.newFastClassForMember(method);
-      if (fastClass != null) {
-        final int index = fastClass.getMethod(method).getIndex();
-
+      BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
+      if (fastMethod != null) {
         return new MethodInvoker() {
           @Override
           public Object invoke(Object target, Object... parameters)
-              throws IllegalAccessException, InvocationTargetException {
-            return fastClass.invoke(index, target, parameters);
+              throws InvocationTargetException {
+            try {
+              return fastMethod.apply(target, parameters);
+            } catch (Throwable e) {
+              throw new InvocationTargetException(e); // match JDK reflection behaviour
+            }
           }
         };
       }
-    } catch (net.sf.cglib.core.CodeGenerationException e) {
+    } catch (Exception | LinkageError e) {
       /* fall-through */
     }
     /*end[AOP]*/
