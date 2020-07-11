@@ -37,7 +37,7 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
   @Override
   public void notify(Errors errors) {
     InjectorImpl privateInjector = (InjectorImpl) privateElements.getInjector();
-    BindingImpl<T> explicitBinding = privateInjector.state.getExplicitBinding(key);
+    BindingImpl<T> explicitBinding = privateInjector.getBindingData().getExplicitBinding(key);
 
     // validate that the child injector has its own factory. If the getInternalFactory() returns
     // this, then that child injector doesn't have a factory (and getExplicitBinding has returned

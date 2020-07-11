@@ -75,7 +75,7 @@ final class ConstructorInjectorStore {
             injector.membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);
 
     /*if[AOP]*/
-    ImmutableList<MethodAspect> injectorAspects = injector.state.getMethodAspects();
+    ImmutableList<MethodAspect> injectorAspects = injector.getBindingData().getMethodAspects();
     ImmutableList<MethodAspect> methodAspects =
         membersInjector.getAddedAspects().isEmpty()
             ? injectorAspects

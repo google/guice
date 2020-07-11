@@ -32,13 +32,13 @@ final class ListenerBindingProcessor extends AbstractProcessor {
 
   @Override
   public Boolean visit(TypeListenerBinding binding) {
-    injector.state.addTypeListener(binding);
+    injector.getBindingData().addTypeListener(binding);
     return true;
   }
 
   @Override
   public Boolean visit(ProvisionListenerBinding binding) {
-    injector.state.addProvisionListener(binding);
+    injector.getBindingData().addProvisionListener(binding);
     return true;
   }
 }

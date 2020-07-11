@@ -26,8 +26,8 @@ import com.google.inject.spi.UntargettedBinding;
  */
 class UntargettedBindingProcessor extends AbstractBindingProcessor {
 
-  UntargettedBindingProcessor(Errors errors, ProcessedBindingData bindingData) {
-    super(errors, bindingData);
+  UntargettedBindingProcessor(Errors errors, ProcessedBindingData processedBindingData) {
+    super(errors, processedBindingData);
   }
 
   @Override
