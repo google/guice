@@ -6,6 +6,8 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.testing.TestLogHandler;
+import com.google.inject.RestrictedBindingSource.RestrictionLevel;
 import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
@@ -16,7 +18,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 import org.junit.Test;
@@ -238,6 +244,37 @@ public class RestrictedBindingSourceTest {
             return "foo";
           }
         });
+  }
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = USE_NETWORK_MODULE,
+      permits = {NetworkLibrary.class},
+      restrictionLevel = RestrictionLevel.WARNING)
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface HostIp {}
+
+  @Test
+  public void rogueBindingWithWarningRestrictionLevel() {
+    Logger logger = Logger.getLogger(RestrictedBindingSource.class.getName());
+    TestLogHandler testLogHandler = new TestLogHandler();
+    logger.addHandler(testLogHandler);
+
+    Guice.createInjector(
+        new AbstractModule() {
+          @Provides
+          @HostIp
+          int provideRogueHostIp() {
+            return 4;
+          }
+        });
+
+    List<LogRecord> logs = testLogHandler.getStoredLogRecords();
+    assertThat(logs).hasSize(1);
+    assertThat(logs.get(0).getLevel()).isEqualTo(Level.WARNING);
+    assertThat(logs.get(0).getMessage()).contains(USE_NETWORK_MODULE);
+    assertThat(logs.get(0).getMessage()).contains("provideRogueHostIp");
+    logger.removeHandler(testLogHandler);
   }
 
   // --------------------------------------------------------------------------

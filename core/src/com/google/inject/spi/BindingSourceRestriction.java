@@ -11,14 +11,19 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.RestrictedBindingSource;
+import com.google.inject.RestrictedBindingSource.RestrictionLevel;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.GuiceInternal;
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -42,6 +47,8 @@ import java.util.stream.StreamSupport;
  */
 public final class BindingSourceRestriction {
   private BindingSourceRestriction() {}
+
+  private static final Logger logger = Logger.getLogger(RestrictedBindingSource.class.getName());
 
   /** Mapping between an element source and its permit annotations. */
   interface PermitMap {
@@ -126,17 +133,19 @@ public final class BindingSourceRestriction {
     if (bindingPermitted || isExempt(elementSource, restriction.exemptModules())) {
       return Optional.empty();
     }
-    return Optional.of(
-        new Message(
-            elementSource,
-            getErrorMessage(
-                key,
-                restriction.explanation(),
-                acceptablePermits,
-                key.getAnnotationType() != null)));
+    String violationMessage =
+        getViolationMessage(
+            key, restriction.explanation(), acceptablePermits, key.getAnnotationType() != null);
+    if (restriction.restrictionLevel() == RestrictionLevel.WARNING) {
+      Formatter sourceFormatter = new Formatter();
+      Errors.formatSource(sourceFormatter, elementSource);
+      logger.log(Level.WARNING, violationMessage + "\n" + sourceFormatter);
+      return Optional.empty();
+    }
+    return Optional.of(new Message(elementSource, violationMessage));
   }
 
-  private static String getErrorMessage(
+  private static String getViolationMessage(
       Key<?> key,
       String explanation,
       ImmutableSet<Class<? extends Annotation>> acceptablePermits,
