@@ -50,13 +50,13 @@ final class ScopeBindingProcessor extends AbstractProcessor {
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
-    ScopeBinding existing = injector.state.getScopeBinding(annotationType);
+    ScopeBinding existing = injector.getBindingData().getScopeBinding(annotationType);
     if (existing != null) {
       if (!scope.equals(existing.getScope())) {
         errors.duplicateScopes(existing, annotationType, scope);
       }
     } else {
-      injector.state.putScopeBinding(annotationType, command);
+      injector.getBindingData().putScopeBinding(annotationType, command);
     }
 
     return true;

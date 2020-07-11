@@ -311,7 +311,7 @@ public abstract class Scoping {
       return scoping;
     }
 
-    ScopeBinding scope = injector.state.getScopeBinding(scopeAnnotation);
+    ScopeBinding scope = injector.getBindingData().getScopeBinding(scopeAnnotation);
     if (scope != null) {
       return forInstance(scope.getScope());
     }

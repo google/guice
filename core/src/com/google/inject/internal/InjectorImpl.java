@@ -114,7 +114,7 @@ final class InjectorImpl implements Injector, Lookups {
     NEW_OR_EXISTING_JIT,
   }
 
-  final State state;
+  private final State bindingData;
   private final InjectorJitBindingData jitBindingData;
   final InjectorImpl parent;
   final ListMultimap<TypeLiteral<?>, Binding<?>> bindingsMultimap = ArrayListMultimap.create();
@@ -127,11 +127,11 @@ final class InjectorImpl implements Injector, Lookups {
 
   InjectorImpl(
       InjectorImpl parent,
-      State state,
+      State bindingData,
       InjectorJitBindingData jitBindingData,
       InjectorOptions injectorOptions) {
     this.parent = parent;
-    this.state = state;
+    this.bindingData = bindingData;
     this.jitBindingData = jitBindingData;
     this.options = injectorOptions;
 
@@ -146,7 +146,7 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   void indexBindingsByType() {
-    for (Binding<?> binding : state.getExplicitBindingsThisLevel().values()) {
+    for (Binding<?> binding : bindingData.getExplicitBindingsThisLevel().values()) {
       bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
     }
   }
@@ -175,11 +175,11 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public <T> BindingImpl<T> getExistingBinding(Key<T> key) {
     // Check explicit bindings, i.e. bindings created by modules.
-    BindingImpl<T> explicitBinding = state.getExplicitBinding(checkNotNull(key, "key"));
+    BindingImpl<T> explicitBinding = bindingData.getExplicitBinding(checkNotNull(key, "key"));
     if (explicitBinding != null) {
       return explicitBinding;
     }
-    synchronized (state.lock()) {
+    synchronized (bindingData.lock()) {
       // See if any jit bindings have been created for this key.
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked")
@@ -219,7 +219,7 @@ final class InjectorImpl implements Injector, Lookups {
   <T> BindingImpl<T> getBindingOrThrow(Key<T> key, Errors errors, JitLimitation jitType)
       throws ErrorsException {
     // Check explicit bindings, i.e. bindings created by modules.
-    BindingImpl<T> binding = state.getExplicitBinding(key);
+    BindingImpl<T> binding = bindingData.getExplicitBinding(key);
     if (binding != null) {
       return binding;
     }
@@ -248,6 +248,10 @@ final class InjectorImpl implements Injector, Lookups {
     return createChildInjector(ImmutableList.copyOf(modules));
   }
 
+  State getBindingData() {
+    return bindingData;
+  }
+
   InjectorJitBindingData getJitBindingData() {
     return jitBindingData;
   }
@@ -261,7 +265,7 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
 
     boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);
-    synchronized (state.lock()) {
+    synchronized (bindingData.lock()) {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked") // we only store bindings that match their key
@@ -451,7 +455,7 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
     // Find a constant string binding.
     Key<String> stringKey = key.ofType(STRING_TYPE);
-    BindingImpl<String> stringBinding = state.getExplicitBinding(stringKey);
+    BindingImpl<String> stringBinding = bindingData.getExplicitBinding(stringKey);
     if (stringBinding == null || !stringBinding.isConstant()) {
       return null;
     }
@@ -466,7 +470,7 @@ final class InjectorImpl implements Injector, Lookups {
     // Find a matching type converter.
     TypeLiteral<T> type = key.getTypeLiteral();
     TypeConverterBinding typeConverterBinding =
-        state.getConverter(stringValue, type, errors, source);
+        bindingData.getConverter(stringValue, type, errors, source);
 
     if (typeConverterBinding == null) {
       // No converter can handle the given type.
@@ -645,7 +649,7 @@ final class InjectorImpl implements Injector, Lookups {
             removeFailedJitBinding(depBinding, ip);
             bindingFailed = true;
           }
-        } else if (state.getExplicitBinding(depKey) == null) {
+        } else if (bindingData.getExplicitBinding(depKey) == null) {
           // ignore keys if they were explicitly bound, but if neither JIT
           // nor explicit, it's also invalid & should let parent know.
           bindingFailed = true;
@@ -863,7 +867,7 @@ final class InjectorImpl implements Injector, Lookups {
 
     key = MoreTypes.canonicalizeKey(key); // before storing the key long-term, canonicalize it.
     BindingImpl<T> binding = createJustInTimeBinding(key, errors, jitDisabled, jitType);
-    jitBindingData.banKeyInParent(key, state, binding.getSource());
+    jitBindingData.banKeyInParent(key, bindingData, binding.getSource());
     jitBindingData.getJitBindings().put(key, binding);
     return binding;
   }
@@ -953,14 +957,14 @@ final class InjectorImpl implements Injector, Lookups {
 
   @Override
   public Map<Key<?>, Binding<?>> getBindings() {
-    return state.getExplicitBindingsThisLevel();
+    return bindingData.getExplicitBindingsThisLevel();
   }
 
   @Override
   public Map<Key<?>, Binding<?>> getAllBindings() {
-    synchronized (state.lock()) {
+    synchronized (bindingData.lock()) {
       return new ImmutableMap.Builder<Key<?>, Binding<?>>()
-          .putAll(state.getExplicitBindingsThisLevel())
+          .putAll(bindingData.getExplicitBindingsThisLevel())
           .putAll(jitBindingData.getJitBindings())
           .build();
     }
@@ -968,27 +972,27 @@ final class InjectorImpl implements Injector, Lookups {
 
   @Override
   public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
-    return ImmutableMap.copyOf(state.getScopes());
+    return ImmutableMap.copyOf(bindingData.getScopes());
   }
 
   @Override
   public Set<TypeConverterBinding> getTypeConverterBindings() {
-    return ImmutableSet.copyOf(state.getConvertersThisLevel());
+    return ImmutableSet.copyOf(bindingData.getConvertersThisLevel());
   }
 
   @Override
   public List<Element> getElements() {
     ImmutableList.Builder<Element> elements = ImmutableList.builder();
     elements.addAll(getAllBindings().values());
-    elements.addAll(state.getProviderLookupsThisLevel());
-    elements.addAll(state.getConvertersThisLevel());
-    elements.addAll(state.getScopeBindingsThisLevel());
-    elements.addAll(state.getTypeListenerBindingsThisLevel());
-    elements.addAll(state.getProvisionListenerBindingsThisLevel());
-    elements.addAll(state.getScannerBindingsThisLevel());
-    elements.addAll(state.getStaticInjectionRequestsThisLevel());
-    elements.addAll(state.getMembersInjectorLookupsThisLevel());
-    elements.addAll(state.getInjectionRequestsThisLevel());
+    elements.addAll(bindingData.getProviderLookupsThisLevel());
+    elements.addAll(bindingData.getConvertersThisLevel());
+    elements.addAll(bindingData.getScopeBindingsThisLevel());
+    elements.addAll(bindingData.getTypeListenerBindingsThisLevel());
+    elements.addAll(bindingData.getProvisionListenerBindingsThisLevel());
+    elements.addAll(bindingData.getScannerBindingsThisLevel());
+    elements.addAll(bindingData.getStaticInjectionRequestsThisLevel());
+    elements.addAll(bindingData.getMembersInjectorLookupsThisLevel());
+    elements.addAll(bindingData.getInjectionRequestsThisLevel());
 
     return elements.build();
   }
@@ -1185,7 +1189,7 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(Injector.class)
-        .add("bindings", state.getExplicitBindingsThisLevel().values())
+        .add("bindings", bindingData.getExplicitBindingsThisLevel().values())
         .toString();
   }
 }

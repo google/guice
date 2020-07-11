@@ -54,11 +54,11 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
           Stage.class,
           TypeLiteral.class);
 
-  protected final ProcessedBindingData bindingData;
+  protected final ProcessedBindingData processedBindingData;
 
-  AbstractBindingProcessor(Errors errors, ProcessedBindingData bindingData) {
+  AbstractBindingProcessor(Errors errors, ProcessedBindingData processedBindingData) {
     super(errors);
-    this.bindingData = bindingData;
+    this.processedBindingData = processedBindingData;
   }
 
   protected <T> UntargettedBindingImpl<T> invalidBinding(
@@ -78,9 +78,9 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     BindingImpl<?> original = injector.getExistingBinding(key);
     if (original != null) {
       // If it failed because of an explicit duplicate binding...
-      if (injector.state.getExplicitBinding(key) != null) {
+      if (injector.getBindingData().getExplicitBinding(key) != null) {
         try {
-          if (!isOkayDuplicate(original, binding, injector.state)) {
+          if (!isOkayDuplicate(original, binding, injector.getBindingData())) {
             errors.bindingAlreadySet(key, original.getSource());
             return;
           }
@@ -97,8 +97,10 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     }
 
     // prevent the parent from creating a JIT binding for this key
-    injector.getJitBindingData().banKeyInParent(key, injector.state, binding.getSource());
-    injector.state.putBinding(key, binding);
+    injector
+        .getJitBindingData()
+        .banKeyInParent(key, injector.getBindingData(), binding.getSource());
+    injector.getBindingData().putBinding(key, binding);
   }
 
   /**
@@ -157,7 +159,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
      * initialially processed.
      */
     protected void scheduleInitialization(BindingImpl<?> binding) {
-      bindingData.addUninitializedBinding(() -> initializeBinding(binding));
+      processedBindingData.addUninitializedBinding(() -> initializeBinding(binding));
     }
 
     /**
@@ -165,7 +167,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
      * bindings.
      */
     protected void scheduleDelayedInitialization(BindingImpl<?> binding) {
-      bindingData.addDelayedUninitializedBinding(() -> initializeBinding(binding));
+      processedBindingData.addDelayedUninitializedBinding(() -> initializeBinding(binding));
     }
 
     private void initializeBinding(BindingImpl<?> binding) {

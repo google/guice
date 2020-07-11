@@ -91,7 +91,7 @@ final class InjectorShell {
 
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
-      this.state = new InheritingState(parent.state);
+      this.state = new InheritingState(parent.getBindingData());
       this.jitBindingData =
           new InjectorJitBindingData(Optional.of(parent.getJitBindingData()), state);
       this.options = parent.options;
@@ -127,7 +127,7 @@ final class InjectorShell {
      */
     List<InjectorShell> build(
         Initializer initializer,
-        ProcessedBindingData bindingData,
+        ProcessedBindingData processedBindingData,
         Stopwatch stopwatch,
         Errors errors) {
       checkState(stage != null, "Stage not initialized");
@@ -141,7 +141,7 @@ final class InjectorShell {
       if (parent == null) {
         modules.add(0, new RootModule());
       } else {
-        modules.add(0, new InheritedScannersModule(parent.state));
+        modules.add(0, new InheritedScannersModule(parent.getBindingData()));
       }
       elements.addAll(Elements.getElements(stage, modules));
 
@@ -178,10 +178,11 @@ final class InjectorShell {
       /*end[AOP]*/
 
       new ListenerBindingProcessor(errors).process(injector, elements);
-      List<TypeListenerBinding> typeListenerBindings = injector.state.getTypeListenerBindings();
+      List<TypeListenerBinding> typeListenerBindings =
+          injector.getBindingData().getTypeListenerBindings();
       injector.membersInjectorStore = new MembersInjectorStore(injector, typeListenerBindings);
       List<ProvisionListenerBinding> provisionListenerBindings =
-          injector.state.getProvisionListenerBindings();
+          injector.getBindingData().getProvisionListenerBindings();
       injector.provisionListenerStore =
           new ProvisionListenerCallbackStore(provisionListenerBindings);
       stopwatch.resetAndLog("TypeListeners & ProvisionListener creation");
@@ -199,8 +200,8 @@ final class InjectorShell {
       // Process all normal bindings, then UntargettedBindings.
       // This is necessary because UntargettedBindings can create JIT bindings
       // and need all their other dependencies set up ahead of time.
-      new BindingProcessor(errors, initializer, bindingData).process(injector, elements);
-      new UntargettedBindingProcessor(errors, bindingData).process(injector, elements);
+      new BindingProcessor(errors, initializer, processedBindingData).process(injector, elements);
+      new UntargettedBindingProcessor(errors, processedBindingData).process(injector, elements);
       stopwatch.resetAndLog("Binding creation");
 
       new ModuleAnnotatedMethodScannerProcessor(errors).process(injector, elements);
@@ -213,7 +214,7 @@ final class InjectorShell {
       PrivateElementProcessor processor = new PrivateElementProcessor(errors);
       processor.process(injector, elements);
       for (Builder builder : processor.getInjectorShellBuilders()) {
-        injectorShells.addAll(builder.build(initializer, bindingData, stopwatch, errors));
+        injectorShells.addAll(builder.build(initializer, processedBindingData, stopwatch, errors));
       }
       stopwatch.resetAndLog("Private environment creation");
 
@@ -240,16 +241,18 @@ final class InjectorShell {
   private static void bindInjector(InjectorImpl injector) {
     Key<Injector> key = Key.get(Injector.class);
     InjectorFactory injectorFactory = new InjectorFactory(injector);
-    injector.state.putBinding(
-        key,
-        new ProviderInstanceBindingImpl<Injector>(
-            injector,
+    injector
+        .getBindingData()
+        .putBinding(
             key,
-            SourceProvider.UNKNOWN_SOURCE,
-            injectorFactory,
-            Scoping.UNSCOPED,
-            injectorFactory,
-            ImmutableSet.<InjectionPoint>of()));
+            new ProviderInstanceBindingImpl<Injector>(
+                injector,
+                key,
+                SourceProvider.UNKNOWN_SOURCE,
+                injectorFactory,
+                Scoping.UNSCOPED,
+                injectorFactory,
+                ImmutableSet.<InjectionPoint>of()));
   }
 
   private static class InjectorFactory implements InternalFactory<Injector>, Provider<Injector> {
@@ -282,16 +285,18 @@ final class InjectorShell {
   private static void bindLogger(InjectorImpl injector) {
     Key<Logger> key = Key.get(Logger.class);
     LoggerFactory loggerFactory = new LoggerFactory();
-    injector.state.putBinding(
-        key,
-        new ProviderInstanceBindingImpl<Logger>(
-            injector,
+    injector
+        .getBindingData()
+        .putBinding(
             key,
-            SourceProvider.UNKNOWN_SOURCE,
-            loggerFactory,
-            Scoping.UNSCOPED,
-            loggerFactory,
-            ImmutableSet.<InjectionPoint>of()));
+            new ProviderInstanceBindingImpl<Logger>(
+                injector,
+                key,
+                SourceProvider.UNKNOWN_SOURCE,
+                loggerFactory,
+                Scoping.UNSCOPED,
+                loggerFactory,
+                ImmutableSet.<InjectionPoint>of()));
   }
 
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
@@ -324,7 +329,7 @@ final class InjectorShell {
             new ConstantFactory<Stage>(Initializables.of(stage)),
             ImmutableSet.<InjectionPoint>of(),
             stage);
-    injector.state.putBinding(key, stageBinding);
+    injector.getBindingData().putBinding(key, stageBinding);
   }
 
   private static class RootModule implements Module {
