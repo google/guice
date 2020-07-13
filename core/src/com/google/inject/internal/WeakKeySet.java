@@ -88,7 +88,7 @@ final class WeakKeySet {
     backingMap.computeIfAbsent(key, k -> LinkedHashMultiset.create()).add(convertedSource);
 
     // Avoid all the extra work if we can.
-    if (state.parent() != State.NONE) {
+    if (state.parent().isPresent()) {
       Set<KeyAndSource> keyAndSources = evictionCache.getIfPresent(state);
       if (keyAndSources == null) {
         evictionCache.put(state, keyAndSources = Sets.newHashSet());

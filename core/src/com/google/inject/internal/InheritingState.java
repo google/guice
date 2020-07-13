@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -41,12 +39,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
 final class InheritingState implements State {
 
-  private final State parent;
+  // The parent injector's State object, if the parent injector exists.
+  private final Optional<State> parent;
 
   // Must be a linked hashmap in order to preserve order of bindings in Modules.
   private final Map<Key<?>, Binding<?>> explicitBindingsMutable = Maps.newLinkedHashMap();
@@ -66,13 +66,13 @@ final class InheritingState implements State {
   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
   private final Object lock;
 
-  InheritingState(State parent) {
-    this.parent = checkNotNull(parent, "parent");
-    this.lock = (parent == State.NONE) ? this : parent.lock();
+  InheritingState(Optional<State> parent) {
+    this.parent = parent;
+    this.lock = parent.isPresent() ? parent.get().lock() : this;
   }
 
   @Override
-  public State parent() {
+  public Optional<State> parent() {
     return parent;
   }
 
@@ -80,7 +80,10 @@ final class InheritingState implements State {
   @SuppressWarnings("unchecked") // we only put in BindingImpls that match their key types
   public <T> BindingImpl<T> getExplicitBinding(Key<T> key) {
     Binding<?> binding = explicitBindings.get(key);
-    return binding != null ? (BindingImpl<T>) binding : parent.getExplicitBinding(key);
+    if (binding == null && parent.isPresent()) {
+      return parent.get().getExplicitBinding(key);
+    }
+    return (BindingImpl<T>) binding;
   }
 
   @Override
@@ -136,7 +139,10 @@ final class InheritingState implements State {
   @Override
   public ScopeBinding getScopeBinding(Class<? extends Annotation> annotationType) {
     ScopeBinding scopeBinding = scopes.get(annotationType);
-    return scopeBinding != null ? scopeBinding : parent.getScopeBinding(annotationType);
+    if (scopeBinding == null && parent.isPresent()) {
+      return parent.get().getScopeBinding(annotationType);
+    }
+    return scopeBinding;
   }
 
   @Override
@@ -163,7 +169,8 @@ final class InheritingState implements State {
   public TypeConverterBinding getConverter(
       String stringValue, TypeLiteral<?> type, Errors errors, Object source) {
     TypeConverterBinding matchingConverter = null;
-    for (State s = this; s != State.NONE; s = s.parent()) {
+    State s = this;
+    while (s != null) {
       for (TypeConverterBinding converter : s.getConvertersThisLevel()) {
         if (converter.getTypeMatcher().matches(type)) {
           if (matchingConverter != null) {
@@ -172,6 +179,7 @@ final class InheritingState implements State {
           matchingConverter = converter;
         }
       }
+      s = s.parent().orElse(null);
     }
     return matchingConverter;
   }
@@ -184,10 +192,13 @@ final class InheritingState implements State {
 
   @Override
   public ImmutableList<MethodAspect> getMethodAspects() {
-    return new ImmutableList.Builder<MethodAspect>()
-        .addAll(parent.getMethodAspects())
-        .addAll(methodAspects)
-        .build();
+    if (parent.isPresent()) {
+      return new ImmutableList.Builder<MethodAspect>()
+          .addAll(parent.get().getMethodAspects())
+          .addAll(methodAspects)
+          .build();
+    }
+    return ImmutableList.copyOf(methodAspects);
   }
   /*end[AOP]*/
 
@@ -197,18 +208,19 @@ final class InheritingState implements State {
   }
 
   @Override
-  public List<TypeListenerBinding> getTypeListenerBindings() {
-    List<TypeListenerBinding> parentBindings = parent.getTypeListenerBindings();
-    List<TypeListenerBinding> result =
-        Lists.newArrayListWithCapacity(parentBindings.size() + typeListenerBindings.size());
-    result.addAll(parentBindings);
-    result.addAll(typeListenerBindings);
-    return result;
+  public ImmutableList<TypeListenerBinding> getTypeListenerBindings() {
+    if (parent.isPresent()) {
+      return new ImmutableList.Builder<TypeListenerBinding>()
+          .addAll(parent.get().getTypeListenerBindings())
+          .addAll(typeListenerBindings)
+          .build();
+    }
+    return ImmutableList.copyOf(typeListenerBindings);
   }
 
   @Override
-  public List<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
-    return typeListenerBindings;
+  public ImmutableList<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
+    return ImmutableList.copyOf(typeListenerBindings);
   }
 
   @Override
@@ -217,18 +229,19 @@ final class InheritingState implements State {
   }
 
   @Override
-  public List<ProvisionListenerBinding> getProvisionListenerBindings() {
-    List<ProvisionListenerBinding> parentBindings = parent.getProvisionListenerBindings();
-    List<ProvisionListenerBinding> result =
-        Lists.newArrayListWithCapacity(parentBindings.size() + provisionListenerBindings.size());
-    result.addAll(parentBindings);
-    result.addAll(provisionListenerBindings);
-    return result;
+  public ImmutableList<ProvisionListenerBinding> getProvisionListenerBindings() {
+    if (parent.isPresent()) {
+      return new ImmutableList.Builder<ProvisionListenerBinding>()
+          .addAll(parent.get().getProvisionListenerBindings())
+          .addAll(provisionListenerBindings)
+          .build();
+    }
+    return ImmutableList.copyOf(provisionListenerBindings);
   }
 
   @Override
-  public List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
-    return provisionListenerBindings;
+  public ImmutableList<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
+    return ImmutableList.copyOf(provisionListenerBindings);
   }
 
   @Override
@@ -237,18 +250,19 @@ final class InheritingState implements State {
   }
 
   @Override
-  public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
-    List<ModuleAnnotatedMethodScannerBinding> parentBindings = parent.getScannerBindings();
-    List<ModuleAnnotatedMethodScannerBinding> result =
-        Lists.newArrayListWithCapacity(parentBindings.size() + scannerBindings.size());
-    result.addAll(parentBindings);
-    result.addAll(scannerBindings);
-    return result;
+  public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
+    if (parent.isPresent()) {
+      return new ImmutableList.Builder<ModuleAnnotatedMethodScannerBinding>()
+          .addAll(parent.get().getScannerBindings())
+          .addAll(scannerBindings)
+          .build();
+    }
+    return ImmutableList.copyOf(scannerBindings);
   }
 
   @Override
-  public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
-    return scannerBindings;
+  public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
+    return ImmutableList.copyOf(scannerBindings);
   }
 
   @Override
