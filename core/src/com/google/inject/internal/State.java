@@ -17,8 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Scope;
@@ -34,8 +32,8 @@ import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -45,172 +43,7 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 interface State {
-
-  static final State NONE =
-      new State() {
-        @Override
-        public State parent() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public <T> BindingImpl<T> getExplicitBinding(Key<T> key) {
-          return null;
-        }
-
-        @Override
-        public Map<Key<?>, Binding<?>> getExplicitBindingsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void putBinding(Key<?> key, BindingImpl<?> binding) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void putProviderLookup(ProviderLookup<?> lookup) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Set<ProviderLookup<?>> getProviderLookupsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void putStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Set<StaticInjectionRequest> getStaticInjectionRequestsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Set<InjectionRequest<?>> getInjectionRequestsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Set<MembersInjectorLookup<?>> getMembersInjectorLookupsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void putInjectionRequest(InjectionRequest<?> injectionRequest) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void putMembersInjectorLookup(MembersInjectorLookup<?> membersInjectorLookup) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation) {
-          return null;
-        }
-
-        @Override
-        public void putScopeBinding(
-            Class<? extends Annotation> annotationType, ScopeBinding scope) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void addConverter(TypeConverterBinding typeConverterBinding) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public TypeConverterBinding getConverter(
-            String stringValue, TypeLiteral<?> type, Errors errors, Object source) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Iterable<TypeConverterBinding> getConvertersThisLevel() {
-          return ImmutableSet.of();
-        }
-
-        /*if[AOP]*/
-        @Override
-        public void addMethodAspect(MethodAspect methodAspect) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public ImmutableList<MethodAspect> getMethodAspects() {
-          return ImmutableList.of();
-        }
-        /*end[AOP]*/
-
-        @Override
-        public void addTypeListener(TypeListenerBinding typeListenerBinding) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<TypeListenerBinding> getTypeListenerBindings() {
-          return ImmutableList.of();
-        }
-
-        @Override
-        public void addProvisionListener(ProvisionListenerBinding provisionListenerBinding) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<ProvisionListenerBinding> getProvisionListenerBindings() {
-          return ImmutableList.of();
-        }
-
-        @Override
-        public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
-          return ImmutableList.of();
-        }
-
-
-
-        @Override
-        public Object lock() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Map<Class<? extends Annotation>, Scope> getScopes() {
-          return ImmutableMap.of();
-        }
-
-        @Override
-        public List<ScopeBinding> getScopeBindingsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
-          throw new UnsupportedOperationException();
-        }
-      };
-
-  State parent();
+  Optional<State> parent();
 
   /** Gets a binding which was specified explicitly in a module, or null. */
   <T> BindingImpl<T> getExplicitBinding(Key<T> key);
@@ -259,21 +92,21 @@ interface State {
 
   void addTypeListener(TypeListenerBinding typeListenerBinding);
 
-  List<TypeListenerBinding> getTypeListenerBindings();
+  ImmutableList<TypeListenerBinding> getTypeListenerBindings();
 
-  List<TypeListenerBinding> getTypeListenerBindingsThisLevel();
+  ImmutableList<TypeListenerBinding> getTypeListenerBindingsThisLevel();
 
   void addProvisionListener(ProvisionListenerBinding provisionListenerBinding);
 
-  List<ProvisionListenerBinding> getProvisionListenerBindings();
+  ImmutableList<ProvisionListenerBinding> getProvisionListenerBindings();
 
-  List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel();
+  ImmutableList<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel();
 
   void addScanner(ModuleAnnotatedMethodScannerBinding scanner);
 
-  List<ModuleAnnotatedMethodScannerBinding> getScannerBindings();
+  ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindings();
 
-  List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel();
+  ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel();
 
   /**
    * Returns the shared lock for all injector data. This is a low-granularity, high-contention lock

@@ -47,6 +47,7 @@ import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import junit.framework.TestCase;
 
@@ -459,8 +460,8 @@ public class WeakKeySetTest extends TestCase {
 
   private static class TestState implements State {
     @Override
-    public State parent() {
-      return new TestState();
+    public Optional<State> parent() {
+      return Optional.of(new TestState());
     }
 
     @Override
@@ -562,7 +563,7 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
-    public List<TypeListenerBinding> getTypeListenerBindings() {
+    public ImmutableList<TypeListenerBinding> getTypeListenerBindings() {
       return ImmutableList.of();
     }
 
@@ -572,7 +573,7 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
-    public List<ProvisionListenerBinding> getProvisionListenerBindings() {
+    public ImmutableList<ProvisionListenerBinding> getProvisionListenerBindings() {
       return ImmutableList.of();
     }
 
@@ -582,7 +583,7 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
-    public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
+    public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
       return ImmutableList.of();
     }
 
@@ -602,17 +603,17 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
-    public List<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
+    public ImmutableList<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
+    public ImmutableList<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
+    public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
       throw new UnsupportedOperationException();
     }
   }

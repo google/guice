@@ -91,7 +91,7 @@ final class InjectorShell {
 
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
-      this.state = new InheritingState(parent.getBindingData());
+      this.state = new InheritingState(Optional.of(parent.getBindingData()));
       this.jitBindingData =
           new InjectorJitBindingData(Optional.of(parent.getJitBindingData()), state);
       this.options = parent.options;
@@ -227,7 +227,7 @@ final class InjectorShell {
      */
     private State getState() {
       if (state == null) {
-        state = new InheritingState(State.NONE);
+        state = new InheritingState(Optional.empty());
         jitBindingData = new InjectorJitBindingData(Optional.empty(), state);
       }
       return state;
