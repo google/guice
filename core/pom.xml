@@ -116,13 +116,6 @@
             <goals><goal>test</goal></goals>
             <configuration>
               <argLine>-Dguice_custom_class_loading=CHILD</argLine>
-              <!--
-               | These tests rely on package access which CHILD loading doesn't have
-              -->
-              <excludes combine.children="append">
-                <exclude>**/BytecodeGenTest*</exclude>
-                <exclude>**/ProviderMethodsTest*</exclude>
-              </excludes>
             </configuration>
           </execution>
         </executions>
