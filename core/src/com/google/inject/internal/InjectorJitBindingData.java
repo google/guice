@@ -9,16 +9,16 @@ import java.util.Set;
 
 /** A container for just-in-time (JIT) binding data corresponding to an Injector. */
 final class InjectorJitBindingData {
-  // TODO(b/159459925): the State object is currently used as the lock for accessing all the JIT
-  //   binding data fields. Migrate to using InjectorJitBindingData as a lock for these accesses
-  //   instead.
+  // TODO(b/159459925): the injectorBindingData object is currently used as the lock for accessing
+  //   all the JIT binding data fields. Migrate to using InjectorJitBindingData as a lock for these
+  //   accesses instead.
   // TODO(b/159459925): Hide direct access to internal jitBindings and failedJitBindings fields once
   //  locks are managed by this class
-  /** Just-in-time binding cache. Guarded by state.lock() */
+  /** Just-in-time binding cache. Guarded by injectorBindingData.lock() */
   private final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
   /**
    * Cache of Keys that we were unable to create JIT bindings for, so we don't keep trying. Also
-   * guarded by state.lock().
+   * guarded by injectorBindingData.lock().
    */
   private final Set<Key<?>> failedJitBindings = Sets.newHashSet();
 
@@ -29,14 +29,15 @@ final class InjectorJitBindingData {
   // The InjectorJitBindingData corresponding to the Injector's parent, if it exists.
   private final Optional<InjectorJitBindingData> parent;
 
-  InjectorJitBindingData(Optional<InjectorJitBindingData> parent, State state) {
+  InjectorJitBindingData(
+      Optional<InjectorJitBindingData> parent, InjectorBindingData injectorBindingData) {
     this.parent = parent;
-    this.bannedKeys = new WeakKeySet(state.lock());
+    this.bannedKeys = new WeakKeySet(injectorBindingData.lock());
   }
 
   /**
    * Returns a mutable map containing the JIT bindings for the injector. Accesses to this need to be
-   * guarded by state.lock().
+   * guarded by injectorBindingData.lock().
    */
   Map<Key<?>, BindingImpl<?>> getJitBindings() {
     return jitBindings;
@@ -44,7 +45,7 @@ final class InjectorJitBindingData {
 
   /**
    * Returns a mutable set containing the failed JIT bindings for the injector. Accesses to this
-   * need to be guarded by state.lock().
+   * need to be guarded by injectorBindingData.lock().
    */
   Set<Key<?>> getFailedJitBindings() {
     return failedJitBindings;
@@ -53,22 +54,22 @@ final class InjectorJitBindingData {
   /**
    * Forbids the corresponding injector and its ancestors from creating a binding to {@code key}.
    * Child injectors ban their bound keys on their parent injectors to prevent just-in-time bindings
-   * on the parent injector that would conflict, and pass along their State to control the banned
-   * key's lifetime.
+   * on the parent injector that would conflict, and pass along their InjectorBindingData to control
+   * the banned key's lifetime.
    */
-  void banKey(Key<?> key, State state, Object source) {
-    banKeyInParent(key, state, source);
-    bannedKeys.add(key, state, source);
+  void banKey(Key<?> key, InjectorBindingData injectorBindingData, Object source) {
+    banKeyInParent(key, injectorBindingData, source);
+    bannedKeys.add(key, injectorBindingData, source);
   }
 
   /**
-   * Similar to {@link #banKey(Key, State, Object)} but we only begin banning the binding at the
-   * parent level. This is used to prevent JIT bindings in the parent injector from overriding
-   * explicit bindings declared in a child injector.
+   * Similar to {@link #banKey(Key, InjectorBindingData, Object)} but we only begin banning the
+   * binding at the parent level. This is used to prevent JIT bindings in the parent injector from
+   * overriding explicit bindings declared in a child injector.
    */
-  void banKeyInParent(Key<?> key, State state, Object source) {
+  void banKeyInParent(Key<?> key, InjectorBindingData injectorBindingData, Object source) {
     if (parent.isPresent()) {
-      parent.get().banKey(key, state, source);
+      parent.get().banKey(key, injectorBindingData, source);
     }
   }
 

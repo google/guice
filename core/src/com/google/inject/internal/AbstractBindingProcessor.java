@@ -110,13 +110,14 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
    * @param original the binding in the parent injector (candidate for an exposing binding)
    * @param binding the binding to check (candidate for the exposed binding)
    */
-  private boolean isOkayDuplicate(BindingImpl<?> original, BindingImpl<?> binding, State state) {
+  private static boolean isOkayDuplicate(
+      BindingImpl<?> original, BindingImpl<?> binding, InjectorBindingData bindingData) {
     if (original instanceof ExposedBindingImpl) {
       ExposedBindingImpl exposed = (ExposedBindingImpl) original;
       InjectorImpl exposedFrom = (InjectorImpl) exposed.getPrivateElements().getInjector();
       return (exposedFrom == binding.getInjector());
     } else {
-      original = (BindingImpl<?>) state.getExplicitBindingsThisLevel().get(binding.getKey());
+      original = (BindingImpl<?>) bindingData.getExplicitBindingsThisLevel().get(binding.getKey());
       // If no original at this level, the original was on a parent, and we don't
       // allow deduplication between parents & children.
       if (original == null) {

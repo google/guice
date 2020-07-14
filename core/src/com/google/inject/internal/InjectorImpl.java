@@ -114,7 +114,7 @@ final class InjectorImpl implements Injector, Lookups {
     NEW_OR_EXISTING_JIT,
   }
 
-  private final State bindingData;
+  private final InjectorBindingData bindingData;
   private final InjectorJitBindingData jitBindingData;
   final InjectorImpl parent;
   final ListMultimap<TypeLiteral<?>, Binding<?>> bindingsMultimap = ArrayListMultimap.create();
@@ -127,7 +127,7 @@ final class InjectorImpl implements Injector, Lookups {
 
   InjectorImpl(
       InjectorImpl parent,
-      State bindingData,
+      InjectorBindingData bindingData,
       InjectorJitBindingData jitBindingData,
       InjectorOptions injectorOptions) {
     this.parent = parent;
@@ -248,7 +248,7 @@ final class InjectorImpl implements Injector, Lookups {
     return createChildInjector(ImmutableList.copyOf(modules));
   }
 
-  State getBindingData() {
+  InjectorBindingData getBindingData() {
     return bindingData;
   }
 

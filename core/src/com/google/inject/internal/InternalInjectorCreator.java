@@ -99,7 +99,7 @@ public final class InternalInjectorCreator {
       throw new AssertionError("Already built, builders are not reusable.");
     }
 
-    // Synchronize while we're building up the bindings and other injector state. This ensures that
+    // Synchronize while we're building up the bindings and other injector data. This ensures that
     // the JIT bindings in the parent injector don't change while we're being built
     synchronized (shellBuilder.lock()) {
       shells = shellBuilder.build(initializer, processedBindingData, stopwatch, errors);
