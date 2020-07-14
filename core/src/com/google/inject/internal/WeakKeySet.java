@@ -50,10 +50,11 @@ final class WeakKeySet {
    * Tracks child injector lifetimes and evicts blacklisted keys/sources after the child injector is
    * garbage collected.
    */
-  private final Cache<State, Set<KeyAndSource>> evictionCache =
+  private final Cache<InjectorBindingData, Set<KeyAndSource>> evictionCache =
       CacheBuilder.newBuilder().weakKeys().removalListener(this::cleanupOnRemoval).build();
 
-  private void cleanupOnRemoval(RemovalNotification<State, Set<KeyAndSource>> notification) {
+  private void cleanupOnRemoval(
+      RemovalNotification<InjectorBindingData, Set<KeyAndSource>> notification) {
     Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
 
     // There may be multiple child injectors blacklisting a certain key so only remove the source
@@ -75,7 +76,7 @@ final class WeakKeySet {
     this.lock = lock;
   }
 
-  public void add(Key<?> key, State state, Object source) {
+  public void add(Key<?> key, InjectorBindingData state, Object source) {
     if (backingMap == null) {
       backingMap = Maps.newHashMap();
     }

@@ -74,7 +74,7 @@ final class InjectorShell {
     private final List<Module> modules = Lists.newArrayList();
 
     // lazily constructed fields
-    private State state;
+    private InjectorBindingData bindingData;
     private InjectorJitBindingData jitBindingData;
 
     private InjectorImpl parent;
@@ -91,9 +91,9 @@ final class InjectorShell {
 
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
-      this.state = new InheritingState(Optional.of(parent.getBindingData()));
+      this.bindingData = new InjectorBindingData(Optional.of(parent.getBindingData()));
       this.jitBindingData =
-          new InjectorJitBindingData(Optional.of(parent.getJitBindingData()), state);
+          new InjectorJitBindingData(Optional.of(parent.getJitBindingData()), bindingData);
       this.options = parent.options;
       this.stage = options.stage;
       return this;
@@ -117,7 +117,7 @@ final class InjectorShell {
 
     /** Synchronize on this before calling {@link #build}. */
     Object lock() {
-      return getState().lock();
+      return getBindingData().lock();
     }
 
     /**
@@ -132,7 +132,7 @@ final class InjectorShell {
         Errors errors) {
       checkState(stage != null, "Stage not initialized");
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
-      checkState(state != null, "no state. Did you remember to lock() ?");
+      checkState(bindingData != null, "no binding data. Did you remember to lock() ?");
       checkState(
           (privateElements == null && elements.isEmpty()) || modules.isEmpty(),
           "The shell is either built from modules (root) or from PrivateElements (children).");
@@ -158,7 +158,7 @@ final class InjectorShell {
       optionsProcessor.process(null, elements);
       options = optionsProcessor.getOptions(stage, options);
 
-      InjectorImpl injector = new InjectorImpl(parent, state, jitBindingData, options);
+      InjectorImpl injector = new InjectorImpl(parent, bindingData, jitBindingData, options);
       if (privateElements != null) {
         privateElements.initInjector(injector);
       }
@@ -222,15 +222,15 @@ final class InjectorShell {
     }
 
     /**
-     * Lazily initializes state and jitBindingData, if they were not already initialized with a
-     * parent injector by {@link #parent(InjectorImpl)}.
+     * Lazily initializes bindingData and jitBindingData, if they were not already initialized with
+     * a parent injector by {@link #parent(InjectorImpl)}.
      */
-    private State getState() {
-      if (state == null) {
-        state = new InheritingState(Optional.empty());
-        jitBindingData = new InjectorJitBindingData(Optional.empty(), state);
+    private InjectorBindingData getBindingData() {
+      if (bindingData == null) {
+        bindingData = new InjectorBindingData(Optional.empty());
+        jitBindingData = new InjectorJitBindingData(Optional.empty(), bindingData);
       }
-      return state;
+      return bindingData;
     }
   }
 
@@ -342,15 +342,15 @@ final class InjectorShell {
   }
 
   private static class InheritedScannersModule implements Module {
-    private final State state;
+    private final InjectorBindingData bindingData;
 
-    InheritedScannersModule(State state) {
-      this.state = state;
+    InheritedScannersModule(InjectorBindingData bindingData) {
+      this.bindingData = bindingData;
     }
 
     @Override
     public void configure(Binder binder) {
-      for (ModuleAnnotatedMethodScannerBinding binding : state.getScannerBindings()) {
+      for (ModuleAnnotatedMethodScannerBinding binding : bindingData.getScannerBindings()) {
         binding.applyTo(binder);
       }
     }
