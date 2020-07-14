@@ -61,8 +61,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <p><b>Warning:</b> This is an experimental API, currently in developement.
- *
  * @author vzm@google.com (Vladimir Makaric)
  */
 @Inherited
