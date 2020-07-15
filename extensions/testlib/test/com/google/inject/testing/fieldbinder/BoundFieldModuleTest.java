@@ -17,6 +17,7 @@
 package com.google.inject.testing.fieldbinder;
 
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.Iterables;
@@ -29,11 +30,14 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.RestrictedBindingSource;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.testing.fieldbinder.BoundFieldModule.BoundFieldInfo;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Qualifier;
@@ -1018,5 +1022,29 @@ public class BoundFieldModuleTest extends TestCase {
     BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
 
     assertTrue(info.getBindAnnotation().lazy());
+  }
+
+  @RestrictedBindingSource.Permit
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(TYPE_USE)
+  @interface FooPermit {}
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = "",
+      permits = {FooPermit.class})
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface Foo {}
+
+  public void testBoundFieldModuleWithPermits() {
+    class Bindings {
+      @Bind @Foo int foo = 17;
+    }
+    Bindings bindings = new Bindings();
+
+    Injector injector =
+        Guice.createInjector(new @FooPermit BoundFieldModule.WithPermits(bindings) {});
+
+    assertEquals((Integer) bindings.foo, injector.getInstance(Key.get(Integer.class, Foo.class)));
   }
 }
