@@ -20,12 +20,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.RestrictedBindingSource;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -38,6 +40,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 /**
  * Automatically creates Guice bindings for fields in an object annotated with {@link Bind}.
@@ -119,6 +122,40 @@ public final class BoundFieldModule implements Module {
    */
   public static BoundFieldModule of(Object instance) {
     return new BoundFieldModule(instance);
+  }
+
+  /**
+   * Wrapper of BoundFieldModule which enables attaching {@link @RestrictedBindingSource} permits to
+   * instances of it.
+   *
+   * <p>To create an instance of BoundFieldModule with permits (to enable it to bind restricted
+   * bindings), create an instance of an anonymous class extending this one and annotate it with
+   * those permits. For example: {@code new @Permit1 @Permit2 BoundFieldModule.WithPermits(instance)
+   * {}}.
+   */
+  public static class WithPermits extends AbstractModule {
+    private final Object instance;
+
+    protected WithPermits(Object instance) {
+      this.instance = instance;
+      // TODO(user): Enforce this at compile-time (e.g. via ErrorProne).
+      Preconditions.checkState(
+          getClass().isAnonymousClass()
+              && Arrays.stream(getClass().getAnnotatedSuperclass().getAnnotations())
+                  .anyMatch(
+                      annotation ->
+                          annotation
+                              .annotationType()
+                              .isAnnotationPresent(RestrictedBindingSource.Permit.class)),
+          "This class should only be used as a base class for an anonymous class with"
+              + " @RestrictedBindingSource.Permit annotations, for example: new @FooPermit"
+              + " BoundFieldModule.WithPermits(instance) {}.");
+    }
+
+    @Override
+    protected void configure() {
+      install(BoundFieldModule.of(instance));
+    }
   }
 
   private static class BoundFieldException extends Exception {
