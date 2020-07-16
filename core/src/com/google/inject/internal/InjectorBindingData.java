@@ -16,8 +16,10 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -69,6 +71,10 @@ class InjectorBindingData {
   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
   private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList();
   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
+  // The injector's explicit bindings, indexed by the binding's type.
+  private final ListMultimap<TypeLiteral<?>, Binding<?>> indexedExplicitBindings =
+      ArrayListMultimap.create();
+
   private final Object lock;
 
   InjectorBindingData(Optional<InjectorBindingData> parent) {
@@ -251,5 +257,19 @@ class InjectorBindingData {
       builder.put(entry.getKey(), entry.getValue().getScope());
     }
     return builder.build();
+  }
+
+  /**
+   * Once the injector's explicit bindings are finalized, this method is called to index all
+   * explicit bindings by their return type.
+   */
+  void indexBindingsByType() {
+    for (Binding<?> binding : getExplicitBindingsThisLevel().values()) {
+      indexedExplicitBindings.put(binding.getKey().getTypeLiteral(), binding);
+    }
+  }
+
+  public ListMultimap<TypeLiteral<?>, Binding<?>> getIndexedExplicitBindings() {
+    return indexedExplicitBindings;
   }
 }

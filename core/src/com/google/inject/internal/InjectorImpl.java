@@ -20,12 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -117,7 +115,6 @@ final class InjectorImpl implements Injector, Lookups {
   private final InjectorBindingData bindingData;
   private final InjectorJitBindingData jitBindingData;
   final InjectorImpl parent;
-  final ListMultimap<TypeLiteral<?>, Binding<?>> bindingsMultimap = ArrayListMultimap.create();
   final InjectorOptions options;
 
   Lookups lookups = new DeferredLookups(this);
@@ -145,17 +142,12 @@ final class InjectorImpl implements Injector, Lookups {
     }
   }
 
-  void indexBindingsByType() {
-    for (Binding<?> binding : bindingData.getExplicitBindingsThisLevel().values()) {
-      bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
-    }
-  }
-
   @Override
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
     @SuppressWarnings("unchecked") // safe because we only put matching entries into the map
     List<Binding<T>> list =
-        (List<Binding<T>>) (List) bindingsMultimap.get(checkNotNull(type, "type"));
+        (List<Binding<T>>)
+            (List) bindingData.getIndexedExplicitBindings().get(checkNotNull(type, "type"));
     return Collections.unmodifiableList(list);
   }
 
