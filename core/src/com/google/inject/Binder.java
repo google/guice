@@ -189,9 +189,9 @@ public interface Binder {
    * eligible for interception if:
    *
    * <ul>
-   * <li>Guice created the instance the method is on
-   * <li>Neither the enclosing type nor the method is final
-   * <li>And the method is package-private, protected, or public
+   *   <li>Guice created the instance the method is on
+   *   <li>Neither the enclosing type nor the method is final
+   *   <li>And the method is package-private, protected, or public
    * </ul>
    *
    * @param classMatcher matches classes the interceptor should apply to. For example: {@code
