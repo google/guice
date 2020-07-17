@@ -420,6 +420,16 @@ public interface Binder {
   void requireExplicitBindings();
 
   /**
+   * Extends {@link #requireExplicitBindings()} with an option to list specific types that should
+   * be explicitly bound in a module.
+   *
+   * @param types that require explicit binding.
+   *
+   * @since 4.2.4
+   */
+  void requireExplicitBindings(Class<?>... types);
+
+  /**
    * Prevents Guice from injecting dependencies that form a cycle, unless broken by a {@link
    * Provider}. By default, circular dependencies are not disabled.
    *

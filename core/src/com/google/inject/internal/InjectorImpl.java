@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
@@ -75,6 +76,7 @@ final class InjectorImpl implements Injector, Lookups {
   static class InjectorOptions {
     final Stage stage;
     final boolean jitDisabled;
+    final Predicate<Key<?>> jitDisabledTypesPredicate;
     final boolean disableCircularProxies;
     final boolean atInjectRequired;
     final boolean exactBindingAnnotationsRequired;
@@ -82,14 +84,23 @@ final class InjectorImpl implements Injector, Lookups {
     InjectorOptions(
         Stage stage,
         boolean jitDisabled,
+        Predicate<Key<?>> jitDisabledTypesPredicate,
         boolean disableCircularProxies,
         boolean atInjectRequired,
         boolean exactBindingAnnotationsRequired) {
       this.stage = stage;
       this.jitDisabled = jitDisabled;
+      this.jitDisabledTypesPredicate = jitDisabledTypesPredicate;
       this.disableCircularProxies = disableCircularProxies;
       this.atInjectRequired = atInjectRequired;
       this.exactBindingAnnotationsRequired = exactBindingAnnotationsRequired;
+    }
+
+    final <T> boolean isJitDisabled(Key<T> key) {
+      if (jitDisabled) {
+        return jitDisabledTypesPredicate.test(key);
+      }
+      return false;
     }
 
     @Override
@@ -97,6 +108,7 @@ final class InjectorImpl implements Injector, Lookups {
       return MoreObjects.toStringHelper(getClass())
           .add("stage", stage)
           .add("jitDisabled", jitDisabled)
+          .add("jitDisabledTypesPredicate", jitDisabledTypesPredicate)
           .add("disableCircularProxies", disableCircularProxies)
           .add("atInjectRequired", atInjectRequired)
           .add("exactBindingAnnotationsRequired", exactBindingAnnotationsRequired)
@@ -274,7 +286,7 @@ final class InjectorImpl implements Injector, Lookups {
         if (binding != null) {
           // If we found a JIT binding and we don't allow them,
           // fail.  (But allow bindings created through TypeConverters.)
-          if (options.jitDisabled
+          if (options.isJitDisabled(key)
               && jitType == JitLimitation.NO_JIT
               && !jitOverride
               && !(binding instanceof ConvertedConstantBindingImpl)) {
@@ -302,7 +314,7 @@ final class InjectorImpl implements Injector, Lookups {
       if (jitBindingData.getFailedJitBindings().contains(key) && errors.hasErrors()) {
         throw errors.toException();
       }
-      return createJustInTimeBindingRecursive(key, errors, options.jitDisabled, jitType);
+      return createJustInTimeBindingRecursive(key, errors, options.isJitDisabled(key), jitType);
     } // end synchronized(state.lock())
   }
 
@@ -726,7 +738,7 @@ final class InjectorImpl implements Injector, Lookups {
         source,
         scoping,
         errors,
-        jitBinding && options.jitDisabled,
+        jitBinding && options.isJitDisabled(key),
         options.atInjectRequired);
   }
 
@@ -840,7 +852,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (parent != null) {
       if (jitType == JitLimitation.NEW_OR_EXISTING_JIT
           && jitDisabled
-          && !parent.options.jitDisabled) {
+          && !parent.options.isJitDisabled(key)) {
         // If the binding would be forbidden here but allowed in a parent, report an error instead
         throw errors.jitDisabledInParent(key).toException();
       }
@@ -850,7 +862,7 @@ final class InjectorImpl implements Injector, Lookups {
             key,
             new Errors(),
             jitDisabled,
-            parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
+            parent.options.isJitDisabled(key) ? JitLimitation.NO_JIT : jitType);
       } catch (ErrorsException ignored) {
         // TODO(b/160910914): Why are ErrorsExceptions ignored?
       }

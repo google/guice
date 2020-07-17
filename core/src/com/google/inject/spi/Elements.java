@@ -571,6 +571,11 @@ public final class Elements {
     }
 
     @Override
+    public void requireExplicitBindings(Class<?>... types) {
+      elements.add(new RequireExplicitBindingsOption(getElementSource(), types));
+    }
+
+    @Override
     public void requireAtInjectOnConstructors() {
       elements.add(new RequireAtInjectOnConstructorsOption(getElementSource()));
     }
