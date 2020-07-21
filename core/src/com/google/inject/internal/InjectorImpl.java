@@ -171,7 +171,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (explicitBinding != null) {
       return explicitBinding;
     }
-    synchronized (bindingData.lock()) {
+    synchronized (jitBindingData.lock()) {
       // See if any jit bindings have been created for this key.
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked")
@@ -257,7 +257,7 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
 
     boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);
-    synchronized (bindingData.lock()) {
+    synchronized (jitBindingData.lock()) {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked") // we only store bindings that match their key
@@ -295,7 +295,7 @@ final class InjectorImpl implements Injector, Lookups {
         throw errors.toException();
       }
       return createJustInTimeBindingRecursive(key, errors, options.jitDisabled, jitType);
-    } // end synchronized(state.lock())
+    } // end synchronized(jitBindingData.lock())
   }
 
   /** Returns true if the key type is Provider (but not a subclass of Provider). */
@@ -593,7 +593,7 @@ final class InjectorImpl implements Injector, Lookups {
   <T> void initializeJitBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
-    // Note: We don't need to synchronize on state.lock() during injector creation.
+    // Note: We don't need to synchronize on jitBindingData.lock() during injector creation.
     if (binding instanceof DelayedInitialize) {
       Key<T> key = binding.getKey();
       jitBindingData.getJitBindings().put(key, binding);
@@ -954,7 +954,7 @@ final class InjectorImpl implements Injector, Lookups {
 
   @Override
   public Map<Key<?>, Binding<?>> getAllBindings() {
-    synchronized (bindingData.lock()) {
+    synchronized (jitBindingData.lock()) {
       return new ImmutableMap.Builder<Key<?>, Binding<?>>()
           .putAll(bindingData.getExplicitBindingsThisLevel())
           .putAll(jitBindingData.getJitBindings())

@@ -9,16 +9,13 @@ import java.util.Set;
 
 /** A container for just-in-time (JIT) binding data corresponding to an Injector. */
 final class InjectorJitBindingData {
-  // TODO(b/159459925): the injectorBindingData object is currently used as the lock for accessing
-  //   all the JIT binding data fields. Migrate to using InjectorJitBindingData as a lock for these
-  //   accesses instead.
   // TODO(b/159459925): Hide direct access to internal jitBindings and failedJitBindings fields once
   //  locks are managed by this class
-  /** Just-in-time binding cache. Guarded by injectorBindingData.lock() */
+  /** Just-in-time binding cache. Guarded by {@link lock}. */
   private final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
   /**
    * Cache of Keys that we were unable to create JIT bindings for, so we don't keep trying. Also
-   * guarded by injectorBindingData.lock().
+   * guarded by {@link lock}.
    */
   private final Set<Key<?>> failedJitBindings = Sets.newHashSet();
 
@@ -29,10 +26,16 @@ final class InjectorJitBindingData {
   // The InjectorJitBindingData corresponding to the Injector's parent, if it exists.
   private final Optional<InjectorJitBindingData> parent;
 
-  InjectorJitBindingData(
-      Optional<InjectorJitBindingData> parent, InjectorBindingData injectorBindingData) {
+  /**
+   * This lock is needed for threadsafe InjectorJitBindingData accesses. It corresponds to this
+   * InjectorJitBindingData's highest ancestor.
+   */
+  private final Object lock;
+
+  InjectorJitBindingData(Optional<InjectorJitBindingData> parent) {
     this.parent = parent;
-    this.bannedKeys = new WeakKeySet(injectorBindingData.lock());
+    this.lock = parent.isPresent() ? parent.get().lock() : this;
+    this.bannedKeys = new WeakKeySet(lock);
   }
 
   /**
@@ -84,5 +87,9 @@ final class InjectorJitBindingData {
   /** Returns the source of a banned key. */
   Set<Object> getSourcesForBannedKey(Key<?> key) {
     return bannedKeys.getSources(key);
+  }
+
+  Object lock() {
+    return lock;
   }
 }

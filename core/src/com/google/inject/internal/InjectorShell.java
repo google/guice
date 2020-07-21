@@ -91,9 +91,8 @@ final class InjectorShell {
 
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
+      this.jitBindingData = new InjectorJitBindingData(Optional.of(parent.getJitBindingData()));
       this.bindingData = new InjectorBindingData(Optional.of(parent.getBindingData()));
-      this.jitBindingData =
-          new InjectorJitBindingData(Optional.of(parent.getJitBindingData()), bindingData);
       this.options = parent.options;
       this.stage = options.stage;
       return this;
@@ -117,7 +116,13 @@ final class InjectorShell {
 
     /** Synchronize on this before calling {@link #build}. */
     Object lock() {
-      return getBindingData().lock();
+      // Lazily initializes bindingData and jitBindingData, if they were not already
+      // initialized with a parent injector by {@link #parent(InjectorImpl)}.
+      if (bindingData == null) {
+        jitBindingData = new InjectorJitBindingData(Optional.empty());
+        bindingData = new InjectorBindingData(Optional.empty());
+      }
+      return jitBindingData.lock();
     }
 
     /**
@@ -221,17 +226,6 @@ final class InjectorShell {
       return injectorShells;
     }
 
-    /**
-     * Lazily initializes bindingData and jitBindingData, if they were not already initialized with
-     * a parent injector by {@link #parent(InjectorImpl)}.
-     */
-    private InjectorBindingData getBindingData() {
-      if (bindingData == null) {
-        bindingData = new InjectorBindingData(Optional.empty());
-        jitBindingData = new InjectorJitBindingData(Optional.empty(), bindingData);
-      }
-      return bindingData;
-    }
   }
 
   /**
