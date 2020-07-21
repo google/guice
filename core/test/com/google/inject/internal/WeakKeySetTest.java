@@ -593,11 +593,6 @@ public class WeakKeySetTest extends TestCase {
     }
 
     @Override
-    public Object lock() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Map<Class<? extends Annotation>, Scope> getScopes() {
       return ImmutableMap.of();
     }

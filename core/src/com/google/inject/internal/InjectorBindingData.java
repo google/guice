@@ -75,11 +75,8 @@ class InjectorBindingData {
   private final ListMultimap<TypeLiteral<?>, Binding<?>> indexedExplicitBindings =
       ArrayListMultimap.create();
 
-  private final Object lock;
-
   InjectorBindingData(Optional<InjectorBindingData> parent) {
     this.parent = parent;
-    this.lock = parent.isPresent() ? parent.get().lock() : this;
   }
 
   public Optional<InjectorBindingData> parent() {
@@ -245,10 +242,6 @@ class InjectorBindingData {
 
   public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
     return ImmutableList.copyOf(scannerBindings);
-  }
-
-  public Object lock() {
-    return lock;
   }
 
   public Map<Class<? extends Annotation>, Scope> getScopes() {

@@ -198,7 +198,7 @@ public final class InternalInjectorCreator {
     Collection<BindingImpl<?>> bindingsAtThisLevel =
         (Collection) injector.getBindingData().getExplicitBindingsThisLevel().values();
     candidateBindings.addAll(bindingsAtThisLevel);
-    synchronized (injector.getBindingData().lock()) {
+    synchronized (injector.getJitBindingData().lock()) {
       // jit bindings must be accessed while holding the lock.
       candidateBindings.addAll(injector.getJitBindingData().getJitBindings().values());
     }
