@@ -3,24 +3,27 @@ package com.google.inject.internal;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Key;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/** A container for just-in-time (JIT) binding data corresponding to an Injector. */
+/**
+ * A container for most just-in-time (JIT) binding data corresponding to an Injector. It
+ * includes @Inject constructor bindings. It does not include {@link MembersInjectorStore} or {@link
+ * ProvisionListenerCallbackStore}, which are still stored in {@link InjectorImpl}.
+ */
 final class InjectorJitBindingData {
-  // TODO(b/159459925): Hide direct access to internal jitBindings and failedJitBindings fields once
-  //  locks are managed by this class
-  /** Just-in-time binding cache. Guarded by {@link lock}. */
+  /** Just-in-time binding cache. Guarded by {@link #lock}. */
   private final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
   /**
-   * Cache of Keys that we were unable to create JIT bindings for, so we don't keep trying. Also
-   * guarded by {@link lock}.
+   * Cache of Keys that we were unable to create JIT bindings for, so we don't keep trying. Guarded
+   * by {@link #lock}.
    */
   private final Set<Key<?>> failedJitBindings = Sets.newHashSet();
 
   // The set of JIT binding keys that are banned for this particular injector, because a binding
-  // already exists in a child injector.
+  // already exists in a child injector. Guarded by {@link #lock}.
   private final WeakKeySet bannedKeys;
 
   // The InjectorJitBindingData corresponding to the Injector's parent, if it exists.
@@ -38,20 +41,28 @@ final class InjectorJitBindingData {
     this.bannedKeys = new WeakKeySet(lock);
   }
 
-  /**
-   * Returns a mutable map containing the JIT bindings for the injector. Accesses to this need to be
-   * guarded by injectorBindingData.lock().
-   */
   Map<Key<?>, BindingImpl<?>> getJitBindings() {
-    return jitBindings;
+    return Collections.unmodifiableMap(jitBindings);
   }
 
-  /**
-   * Returns a mutable set containing the failed JIT bindings for the injector. Accesses to this
-   * need to be guarded by injectorBindingData.lock().
-   */
-  Set<Key<?>> getFailedJitBindings() {
-    return failedJitBindings;
+  BindingImpl<?> getJitBinding(Key<?> key) {
+    return jitBindings.get(key);
+  }
+
+  void putJitBinding(Key<?> key, BindingImpl<?> binding) {
+    jitBindings.put(key, binding);
+  }
+
+  void removeJitBinding(Key<?> key) {
+    jitBindings.remove(key);
+  }
+
+  boolean isFailedJitBinding(Key<?> key) {
+    return failedJitBindings.contains(key);
+  }
+
+  void addFailedJitBinding(Key<?> key) {
+    failedJitBindings.add(key);
   }
 
   /**
