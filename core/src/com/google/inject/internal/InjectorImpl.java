@@ -175,8 +175,7 @@ final class InjectorImpl implements Injector, Lookups {
       // See if any jit bindings have been created for this key.
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked")
-        BindingImpl<T> jitBinding =
-            (BindingImpl<T>) injector.jitBindingData.getJitBindings().get(key);
+        BindingImpl<T> jitBinding = (BindingImpl<T>) injector.jitBindingData.getJitBinding(key);
         if (jitBinding != null) {
           return jitBinding;
         }
@@ -283,7 +282,7 @@ final class InjectorImpl implements Injector, Lookups {
       // entry in jitBindings (during cleanup), and we may be trying
       // to create it again (in the case of a recursive JIT binding).
       // We need both of these guards for different reasons
-      // getFailedJitBindings.contains: We want to continue processing if we've never
+      // isFailedJitBinding: We want to continue processing if we've never
       //   failed before, so that our initial error message contains
       //   as much useful information as possible about what errors exist.
       // errors.hasErrors: If we haven't already failed, then it's OK to
@@ -291,7 +290,7 @@ final class InjectorImpl implements Injector, Lookups {
       //   is the correct one.
       // See: ImplicitBindingsTest#testRecursiveJitBindingsCleanupCorrectly
       // for where this guard comes into play.
-      if (jitBindingData.getFailedJitBindings().contains(key) && errors.hasErrors()) {
+      if (jitBindingData.isFailedJitBinding(key) && errors.hasErrors()) {
         throw errors.toException();
       }
       return createJustInTimeBindingRecursive(key, errors, options.jitDisabled, jitType);
@@ -596,7 +595,7 @@ final class InjectorImpl implements Injector, Lookups {
     // Note: We don't need to synchronize on jitBindingData.lock() during injector creation.
     if (binding instanceof DelayedInitialize) {
       Key<T> key = binding.getKey();
-      jitBindingData.getJitBindings().put(key, binding);
+      jitBindingData.putJitBinding(key, binding);
       boolean successful = false;
       DelayedInitialize delayed = (DelayedInitialize) binding;
       try {
@@ -627,7 +626,7 @@ final class InjectorImpl implements Injector, Lookups {
       Key<?> depKey = dep.getKey();
       InjectionPoint ip = dep.getInjectionPoint();
       if (encountered.add(depKey)) { // only check if we haven't looked at this key yet
-        BindingImpl<?> depBinding = jitBindingData.getJitBindings().get(depKey);
+        BindingImpl<?> depBinding = jitBindingData.getJitBinding(depKey);
         if (depBinding != null) { // if the binding still exists, validate
           boolean failed = cleanup(depBinding, encountered); // if children fail, we fail
           if (depBinding instanceof ConstructorBindingImpl) {
@@ -653,8 +652,8 @@ final class InjectorImpl implements Injector, Lookups {
 
   /** Cleans up any state that may have been cached when constructing the JIT binding. */
   private void removeFailedJitBinding(Binding<?> binding, InjectionPoint ip) {
-    jitBindingData.getFailedJitBindings().add(binding.getKey());
-    jitBindingData.getJitBindings().remove(binding.getKey());
+    jitBindingData.addFailedJitBinding(binding.getKey());
+    jitBindingData.removeJitBinding(binding.getKey());
     membersInjectorStore.remove(binding.getKey().getTypeLiteral());
     provisionListenerStore.remove(binding);
     if (ip != null) {
@@ -860,7 +859,7 @@ final class InjectorImpl implements Injector, Lookups {
     key = MoreTypes.canonicalizeKey(key); // before storing the key long-term, canonicalize it.
     BindingImpl<T> binding = createJustInTimeBinding(key, errors, jitDisabled, jitType);
     jitBindingData.banKeyInParent(key, bindingData, binding.getSource());
-    jitBindingData.getJitBindings().put(key, binding);
+    jitBindingData.putJitBinding(key, binding);
     return binding;
   }
 
