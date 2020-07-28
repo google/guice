@@ -9,6 +9,8 @@ import java.util.List;
 /**
  * Details about a single Guice error and supports formatting itself in the context of other Guice
  * errors.
+ *
+ * <p>WARNING: The class and its APIs are still experimental and subject to change.
  */
 public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements Serializable {
   private final String message;

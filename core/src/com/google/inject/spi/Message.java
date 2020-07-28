@@ -16,12 +16,15 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.inject.Binder;
 import com.google.inject.internal.ErrorId;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.GenericErrorDetail;
+import com.google.inject.internal.GuiceInternal;
 import com.google.inject.internal.util.SourceProvider;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -46,7 +49,13 @@ public final class Message implements Serializable, Element {
   private final ErrorDetail<?> errorDetail;
 
   /** @since vNext */
-  public Message(ErrorId errorId, ErrorDetail<?> errorDetail) {
+  public Message(GuiceInternal internalOnly, ErrorId errorId, ErrorDetail<?> errorDetail) {
+    checkNotNull(internalOnly);
+    this.errorId = errorId;
+    this.errorDetail = errorDetail;
+  }
+
+  private Message(ErrorId errorId, ErrorDetail<?> errorDetail) {
     this.errorId = errorId;
     this.errorDetail = errorDetail;
   }

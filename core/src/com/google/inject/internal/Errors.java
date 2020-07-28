@@ -170,6 +170,11 @@ public final class Errors implements Serializable {
 
   /** Within guice's core, allow for better missing binding messages */
   <T> Errors missingImplementationWithHint(Key<T> key, Injector injector) {
+    if (InternalFlags.enableExperimentalErrorMessages()) {
+      MissingImplementationError error = new MissingImplementationError(key, getSources());
+      return addMessage(
+          new Message(GuiceInternal.GUICE_INTERNAL, ErrorId.MISSING_IMPLEMENTATION, error));
+    }
     StringBuilder sb = new StringBuilder();
 
     sb.append(format("No implementation for %s was bound.", key));
