@@ -309,7 +309,7 @@ public final class Messages {
    * @see <a href="https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers">
    *     https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers</a>
    */
-  private static String getOrdinalSuffix(int ordinal) {
+  static String getOrdinalSuffix(int ordinal) {
     // negative ordinals don't make sense, we allow zero though because we are programmers
     checkArgument(ordinal >= 0);
     if ((ordinal / 10) % 10 == 1) {

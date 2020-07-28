@@ -44,9 +44,9 @@ public final class MessagesTest {
     List<Object> sources = ImmutableList.of();
     Throwable cause = null;
     messages.add(new Message("example", cause));
-    messages.add(new Message(ErrorId.OTHER, new ExampleErrorDetail("a", sources, cause)));
-    messages.add(new Message(ErrorId.OTHER, new ExampleErrorDetail("b", sources, cause)));
-    messages.add(new Message(ErrorId.OTHER, new ExampleErrorDetail("a", sources, cause)));
+    messages.add(exampleError("a"));
+    messages.add(exampleError("b"));
+    messages.add(exampleError("a"));
 
     String result = Messages.formatMessages("Example", messages);
 
@@ -59,11 +59,7 @@ public final class MessagesTest {
     Throwable cause = null;
     ProvisionException exception =
         new ProvisionException(
-            ImmutableList.of(
-                new Message(
-                    ErrorId.OTHER,
-                    new ExampleErrorDetail("Custom error", ImmutableList.of(), cause)),
-                new Message("Generic error", cause)));
+            ImmutableList.of(exampleError("Custom error"), new Message("Generic error", cause)));
     assertThat(reserialize(exception))
         .hasMessageThat()
         .isEqualTo(
@@ -71,5 +67,12 @@ public final class MessagesTest {
                 + "1) Custom error\n\n"
                 + "2) Generic error\n\n"
                 + "2 errors");
+  }
+
+  private static Message exampleError(String message) {
+    return new Message(
+        GuiceInternal.GUICE_INTERNAL,
+        ErrorId.OTHER,
+        new ExampleErrorDetail(message, ImmutableList.of(), null));
   }
 }
