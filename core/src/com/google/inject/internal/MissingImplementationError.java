@@ -13,7 +13,8 @@ final class MissingImplementationError extends ErrorDetail<MissingImplementation
   private final Key<?> key;
 
   public MissingImplementationError(Key<?> key, List<Object> sources) {
-    super("", sources, null);
+    super(
+        String.format("No implementation for %s was bound.", Messages.convert(key)), sources, null);
     this.key = key;
   }
 
@@ -29,16 +30,13 @@ final class MissingImplementationError extends ErrorDetail<MissingImplementation
     sourcesList.add(getSources());
     sourcesList.addAll(
         mergeableErrors.stream().map(ErrorDetail::getSources).collect(Collectors.toList()));
-    formatter.format(
-        "%s) [Guice/MissingImplementation]: No implementation for %s was bound.%n",
-        index, Messages.convert(key));
-
     List<List<Object>> filteredSourcesList =
         sourcesList.stream()
             .map(this::trimSource)
             .filter(sources -> !sources.isEmpty())
             .collect(Collectors.toList());
 
+    formatter.format("%s) %s: %s%n", index, "[Guice/MissingImplementation]", getMessage());
     if (!filteredSourcesList.isEmpty()) {
       formatter.format("%n%s%n", "Requested by:");
       int sourceListIndex = 1;
