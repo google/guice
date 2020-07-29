@@ -163,6 +163,10 @@ public class MapBinderTest extends TestCase {
                     collectionOf(
                         Types.javaxProviderOf(
                             mapEntryOf(String.class, Types.providerOf(String.class))))),
+                // Set<? extends Map.Entry<K, Provider<V>>>
+                Key.get(
+                    Types.setOf(
+                        Types.subtypeOf(mapEntryOf(String.class, Types.providerOf(String.class))))),
                 // @Named(...) Boolean
                 Key.get(
                     Boolean.class,

@@ -27,12 +27,12 @@ import java.util.Set;
 /**
  * A binding for a Multibinder.
  *
- * <p>Although Multibinders may be injected through a variety of generic types ({@code Set<V>} and
- * {@code Collection<Provider<V>>}), a MultibinderBinding exists only on the Binding associated with
- * the {@code Set<V>} key. Injectable types can be discovered using {@link #getSetKey} (which will
- * return the {@code Set<V>} key), or{@link #getAlternateSetKeys} (which will return the other keys
- * that can inject this data). Other bindings can be validated to be derived from this
- * MultibinderBinding using {@link #containsElement(Element)}.
+ * <p>Although Multibinders may be injected through a variety of generic types ({@code Set<V>},
+ * {@code Collection<Provider<V>>}, and {@code Set<? extends V>} ), a MultibinderBinding exists only
+ * on the Binding associated with the {@code Set<V>} key. Injectable types can be discovered using
+ * {@link #getSetKey} (which will return the {@code Set<V>} key), or {@link #getAlternateSetKeys}
+ * (which will return the other keys that can inject this data). Other bindings can be validated to
+ * be derived from this MultibinderBinding using {@link #containsElement(Element)}.
  *
  * @param <T> The fully qualified type of the set, including Set. For example: {@code
  *     MultibinderBinding<Set<Boolean>>}
@@ -46,8 +46,8 @@ public interface MultibinderBinding<T> {
 
   /**
    * Returns the keys of other bindings that represent this set. This will return an entry for
-   * {@code Collection<com.google.inject.Provider<V>>} and {@code
-   * Collection<javax.inject.Provider<V>>}.
+   * {@code Collection<com.google.inject.Provider<V>>}, {@code
+   * Collection<javax.inject.Provider<V>>}, and {@code Set<? extends V>}.
    *
    * @since 4.2.3
    */

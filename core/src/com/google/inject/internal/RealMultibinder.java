@@ -81,6 +81,13 @@ public final class RealMultibinder<T> implements Module {
     return (TypeLiteral<Collection<javax.inject.Provider<T>>>) TypeLiteral.get(type);
   }
 
+  @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<Set<? extends T>> setOfExtendsOf(TypeLiteral<T> elementType) {
+    Type extendsType = Types.subtypeOf(elementType.getType());
+    Type setOfExtendsType = Types.setOf(extendsType);
+    return (TypeLiteral<Set<? extends T>>) TypeLiteral.get(setOfExtendsType);
+  }
+
   private final BindingSelection<T> bindingSelection;
   private final Binder binder;
 
@@ -100,6 +107,7 @@ public final class RealMultibinder<T> implements Module {
     binder
         .bind(bindingSelection.getCollectionOfProvidersKey())
         .toProvider(collectionOfProvidersProvider);
+    binder.bind(bindingSelection.getSetOfExtendsKey()).to(bindingSelection.getSetKey());
 
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to javax Provider in the value (since the guice Provider implements
@@ -296,7 +304,8 @@ public final class RealMultibinder<T> implements Module {
     public Set<Key<?>> getAlternateSetKeys() {
       return ImmutableSet.of(
           (Key<?>) bindingSelection.getCollectionOfProvidersKey(),
-          (Key<?>) bindingSelection.getCollectionOfJavaxProvidersKey());
+          (Key<?>) bindingSelection.getCollectionOfJavaxProvidersKey(),
+          (Key<?>) bindingSelection.getSetOfExtendsKey());
     }
 
     @Override
@@ -332,6 +341,7 @@ public final class RealMultibinder<T> implements Module {
     private String setName;
     private Key<Collection<Provider<T>>> collectionOfProvidersKey;
     private Key<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersKey;
+    private Key<Set<? extends T>> setOfExtendsKey;
     private Key<Boolean> permitDuplicatesKey;
 
     private boolean isInitialized;
@@ -457,6 +467,14 @@ public final class RealMultibinder<T> implements Module {
       return local;
     }
 
+    Key<Set<? extends T>> getSetOfExtendsKey() {
+      Key<Set<? extends T>> local = setOfExtendsKey;
+      if (local == null) {
+        local = setOfExtendsKey = setKey.ofType(setOfExtendsOf(elementType));
+      }
+      return local;
+    }
+
     boolean isInitialized() {
       return isInitialized;
     }
@@ -496,7 +514,8 @@ public final class RealMultibinder<T> implements Module {
             || binding.getKey().equals(getPermitDuplicatesKey())
             || binding.getKey().equals(setKey)
             || binding.getKey().equals(collectionOfProvidersKey)
-            || binding.getKey().equals(collectionOfJavaxProvidersKey);
+            || binding.getKey().equals(collectionOfJavaxProvidersKey)
+            || binding.getKey().equals(setOfExtendsKey);
       } else {
         return false;
       }
