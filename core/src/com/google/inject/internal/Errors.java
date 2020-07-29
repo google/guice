@@ -511,6 +511,12 @@ public final class Errors implements Serializable {
     return addMessage(ErrorId.RECURSIVE_BINDING, "Binding points to itself.");
   }
 
+  Errors bindingAlreadySet(Binding<?> binding, Binding<?> original) {
+    BindingAlreadySetError error = new BindingAlreadySetError(binding, original, getSources());
+    return addMessage(
+        new Message(GuiceInternal.GUICE_INTERNAL, ErrorId.BINDING_ALREADY_SET, error));
+  }
+
   public Errors bindingAlreadySet(Key<?> key, Object source) {
     return addMessage(
         ErrorId.BINDING_ALREADY_SET,
