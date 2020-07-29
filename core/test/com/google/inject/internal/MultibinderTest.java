@@ -1530,6 +1530,93 @@ public class MultibinderTest extends TestCase {
         });
   }
 
+  public void testMultibinderWithWildcard() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("a");
+            multibinder.addBinding().toInstance("b");
+            multibinder.addBinding().toInstance("c");
+          }
+        };
+    Injector injector = Guice.createInjector(module);
+
+    Set<String> set = injector.getInstance(new Key<Set<String>>() {});
+    assertEquals(ImmutableSet.of("a", "b", "c"), set);
+
+    Set<? extends String> setOfWildcard = injector.getInstance(new Key<Set<? extends String>>() {});
+    assertEquals(ImmutableSet.of("a", "b", "c"), setOfWildcard);
+  }
+
+  /**
+   * Injection of {@code Set<? extends T>} wasn't added until 2020-07. It's possible that
+   * applications already have a binding to that type. If they do, confirm that Guice fails fast
+   * with a duplicate binding error.
+   */
+  public void testMultibinderConflictsWithExistingWildcard() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("a");
+            multibinder.addBinding().toInstance("b");
+            multibinder.addBinding().toInstance("c");
+          }
+
+          @Provides
+          public Set<? extends String> provideStrings() {
+            return ImmutableSet.of("d", "e", "f");
+          }
+        };
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertTrue(
+          e.getMessage()
+              .contains(
+                  "A binding to java.util.Set<? extends java.lang.String> was already configured"));
+    }
+  }
+
+  /**
+   * This is the same as the previous test, but it gets at the conflicting set through a multibinder
+   * rather than through a regular binding. It's unlikely that application developers would do this
+   * in practice, but if they do we want to make sure it is detected and fails fast.
+   */
+  public void testMultibinderConflictsWithExistingMultibinder() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("a");
+            multibinder.addBinding().toInstance("b");
+            multibinder.addBinding().toInstance("c");
+
+            Multibinder<String> multibinder2 =
+                Multibinder.newSetBinder(
+                    binder(), (TypeLiteral<String>) TypeLiteral.get(Types.subtypeOf(String.class)));
+            multibinder2.addBinding().toInstance("d");
+            multibinder2.addBinding().toInstance("e");
+          }
+        };
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertTrue(
+          e.getMessage()
+              .contains(
+                  "A binding to java.util.Set<? extends java.lang.String> was already configured"));
+    }
+  }
+
   private <T> Collection<T> collectValues(
       Collection<? extends javax.inject.Provider<T>> providers) {
     Collection<T> values = Lists.newArrayList();
