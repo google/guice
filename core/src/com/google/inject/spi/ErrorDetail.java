@@ -2,6 +2,8 @@ package com.google.inject.spi;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.internal.ErrorId;
+import com.google.inject.internal.InternalFlags;
 import java.io.Serializable;
 import java.util.Formatter;
 import java.util.List;
@@ -13,11 +15,15 @@ import java.util.List;
  * <p>WARNING: The class and its APIs are still experimental and subject to change.
  */
 public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements Serializable {
+  private static final String DOC_BASE_URL = "https://github.com/googel/guice/wiki";
+
+  protected final ErrorId errorId;
   private final String message;
   private final ImmutableList<Object> sources;
   private final Throwable cause;
 
-  protected ErrorDetail(String message, List<Object> sources, Throwable cause) {
+  protected ErrorDetail(ErrorId errorId, String message, List<Object> sources, Throwable cause) {
+    this.errorId = errorId;
     this.message = message;
     this.sources = ImmutableList.copyOf(sources);
     this.cause = cause;
@@ -34,18 +40,54 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
   }
 
   /**
-   * Formats this error message along with other errors that are mergeable with this error.
+   * Formats this error along with other errors that are mergeable with this error.
    *
    * <p>{@code mergeableErrors} is a list that contains all other errors that are reported in the
    * same exception that are considered to be mergable with this error base on result of calling
    * {@link #isMergeable}. The list will be empty if non of the other errors are mergable with this
    * error.
    *
+   * <p>Formatted error has the following structure:
+   *
+   * <ul>
+   *   <li>Summary of the error
+   *   <li>Details about the error such as the source of the error
+   *   <li>Hints for fixing the error if available
+   *   <li>Link to the documentation on this error in greater detail
+   *
    * @param index index for this error
    * @param mergeableErrors list of errors that are mergeable with this error
    * @param formatter for printing the error message
    */
-  public abstract void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter);
+  public final void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+    if (InternalFlags.enableExperimentalErrorMessages()) {
+      formatter.format("%s) [Guice/%s]: %s%n%n", index, errorId, getMessage());
+      formatDetail(mergeableErrors, formatter);
+      formatter.format("%n");
+      // TODO(b/151482394): Output potiential fixes for the error
+      formatter.format("Learn more:%n");
+      formatter.format("  %s/%s%n", DOC_BASE_URL, errorId);
+    } else {
+      // TODO(b/151482394): Remove this once the new error messages are enabled.
+      formatter.format("%s) %s%n", index, getMessage());
+      formatDetail(mergeableErrors, formatter);
+      return;
+    }
+  }
+
+  /**
+   * Formats the detail of this error message along with other errors that are mergeable with this
+   * error. This is called from {@link #format}.
+   *
+   * <p>{@code mergeableErrors} is a list that contains all other errors that are reported in the
+   * same exception that are considered to be mergable with this error base on result of calling
+   * {@link #isMergeable}. The list will be empty if non of the other errors are mergable with this
+   * error.
+   *
+   * @param mergeableErrors list of errors that are mergeable with this error
+   * @param formatter for printing the error message
+   */
+  protected abstract void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter);
 
   public String getMessage() {
     return message;

@@ -17,13 +17,13 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class MessagesTest {
   static class ExampleErrorDetail extends ErrorDetail<ExampleErrorDetail> {
-    ExampleErrorDetail(String message, List<Object> sources, Throwable cause) {
-      super(message, sources, cause);
+    ExampleErrorDetail(String message) {
+      super(ErrorId.OTHER, message, ImmutableList.of(), null);
     }
 
     @Override
-    public void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
-      formatter.format("%s) %s (count: %s)", index, getMessage(), mergeableErrors.size() + 1);
+    public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+      formatter.format("Duplicate count: %s%n", mergeableErrors.size() + 1);
     }
 
     @Override
@@ -33,15 +33,14 @@ public final class MessagesTest {
     }
 
     @Override
-    public ExampleErrorDetail withSources(List<Object> newSources) {
-      return new ExampleErrorDetail(getMessage(), newSources, getCause());
+    public ExampleErrorDetail withSources(List<Object> unused) {
+      return new ExampleErrorDetail(getMessage());
     }
   }
 
   @Test
   public void customErrorMessage() {
     List<Message> messages = new ArrayList<>();
-    List<Object> sources = ImmutableList.of();
     Throwable cause = null;
     messages.add(new Message("example", cause));
     messages.add(exampleError("a"));
@@ -51,7 +50,14 @@ public final class MessagesTest {
     String result = Messages.formatMessages("Example", messages);
 
     assertThat(result)
-        .isEqualTo("Example:\n\n1) example\n\n2) a (count: 2)\n3) b (count: 1)\n3 errors");
+        .isEqualTo(
+            "Example:\n\n"
+                + "1) example\n\n"
+                + "2) a\n"
+                + "Duplicate count: 2\n\n"
+                + "3) b\n"
+                + "Duplicate count: 1\n\n"
+                + "3 errors");
   }
 
   @Test
@@ -71,8 +77,6 @@ public final class MessagesTest {
 
   private static Message exampleError(String message) {
     return new Message(
-        GuiceInternal.GUICE_INTERNAL,
-        ErrorId.OTHER,
-        new ExampleErrorDetail(message, ImmutableList.of(), null));
+        GuiceInternal.GUICE_INTERNAL, ErrorId.OTHER, new ExampleErrorDetail(message));
   }
 }

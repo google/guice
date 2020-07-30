@@ -15,6 +15,7 @@ final class BindingAlreadySetError extends ErrorDetail<BindingAlreadySetError> {
 
   BindingAlreadySetError(Binding<?> binding, Binding<?> original, List<Object> sources) {
     super(
+        ErrorId.BINDING_ALREADY_SET,
         String.format("%s was bound multiple times.", Messages.convert(binding.getKey())),
         sources,
         null);
@@ -29,7 +30,7 @@ final class BindingAlreadySetError extends ErrorDetail<BindingAlreadySetError> {
   }
 
   @Override
-  public void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+  public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     List<List<Object>> sourcesList = new ArrayList<>();
     sourcesList.add(ImmutableList.of(original.getSource()));
     sourcesList.add(ImmutableList.of(binding.getSource()));
@@ -38,13 +39,10 @@ final class BindingAlreadySetError extends ErrorDetail<BindingAlreadySetError> {
             .map(e -> ((BindingAlreadySetError) e).binding.getSource())
             .map(ImmutableList::of)
             .collect(Collectors.toList()));
-
-    formatter.format("%s) %s %s%n%n", index, "[Guice/BindingAlreadySet]", getMessage());
     formatter.format("Bound at the following %s locations:%n", sourcesList.size());
     for (int i = 0; i < sourcesList.size(); i++) {
       ErrorFormatter.formatSources(i + 1, sourcesList.get(i), formatter);
     }
-    formatter.format("%n");
   }
 
   @Override
