@@ -16,26 +16,36 @@
 
 package com.google.inject.internal.util;
 
+import com.google.common.base.Stopwatch;
 import java.util.logging.Logger;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- * Enables simple performance monitoring.
+ * A continuously timing stopwatch that is used for simple performance monitoring.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class Stopwatch {
-  private static final Logger logger = Logger.getLogger(Stopwatch.class.getName());
+@NotThreadSafe
+public final class ContinuousStopwatch {
+  private final Logger logger = Logger.getLogger(ContinuousStopwatch.class.getName());
+  private final Stopwatch stopwatch;
 
-  private long start = System.currentTimeMillis();
+  /**
+   * Constructs a ContinuousStopwatch.
+   *
+   * @param stopwatch the internal stopwatch used by ContinuousStopwatch
+   */
+  public ContinuousStopwatch(Stopwatch stopwatch) {
+    this.stopwatch = stopwatch;
+    reset();
+  }
 
   /** Resets and returns elapsed time in milliseconds. */
   public long reset() {
-    long now = System.currentTimeMillis();
-    try {
-      return now - start;
-    } finally {
-      start = now;
-    }
+    long elapsedTimeMs = stopwatch.elapsed().toMillis();
+    stopwatch.reset();
+    stopwatch.start();
+    return elapsedTimeMs;
   }
 
   /** Resets and logs elapsed time in milliseconds. */
