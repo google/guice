@@ -30,8 +30,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
-import com.google.inject.internal.util.ContinuousStopwatch;
 import com.google.inject.internal.util.SourceProvider;
+import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.BindingSourceRestriction;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
@@ -133,7 +133,7 @@ final class InjectorShell {
     List<InjectorShell> build(
         Initializer initializer,
         ProcessedBindingData processedBindingData,
-        ContinuousStopwatch stopwatch,
+        Stopwatch stopwatch,
         Errors errors) {
       checkState(stage != null, "Stage not initialized");
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
