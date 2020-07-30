@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Stopwatch;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -26,7 +25,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ContinuousStopwatch;
+import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
@@ -60,8 +59,7 @@ import java.util.Set;
  */
 public final class InternalInjectorCreator {
 
-  private final ContinuousStopwatch stopwatch =
-      new ContinuousStopwatch(Stopwatch.createUnstarted());
+  private final Stopwatch stopwatch = new Stopwatch();
   private final Errors errors = new Errors();
 
   private final Initializer initializer = new Initializer();
