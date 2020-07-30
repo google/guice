@@ -63,7 +63,7 @@ public final class Message implements Serializable, Element {
   /** @since 2.0 */
   public Message(ErrorId errorId, List<Object> sources, String message, Throwable cause) {
     this.errorId = errorId;
-    this.errorDetail = new GenericErrorDetail(message, sources, cause);
+    this.errorDetail = new GenericErrorDetail(errorId, message, sources, cause);
   }
 
   /** @since 2.0 */
@@ -169,7 +169,8 @@ public final class Message implements Serializable, Element {
     }
     return new Message(
         errorId,
-        new GenericErrorDetail(getMessage(), ImmutableList.copyOf(sourcesAsStrings), getCause()));
+        new GenericErrorDetail(
+            errorId, getMessage(), ImmutableList.copyOf(sourcesAsStrings), getCause()));
   }
 
   private static final long serialVersionUID = 0;

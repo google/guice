@@ -14,7 +14,10 @@ final class MissingImplementationError extends ErrorDetail<MissingImplementation
 
   public MissingImplementationError(Key<?> key, List<Object> sources) {
     super(
-        String.format("No implementation for %s was bound.", Messages.convert(key)), sources, null);
+        ErrorId.MISSING_IMPLEMENTATION,
+        String.format("No implementation for %s was bound.", Messages.convert(key)),
+        sources,
+        null);
     this.key = key;
   }
 
@@ -25,26 +28,25 @@ final class MissingImplementationError extends ErrorDetail<MissingImplementation
   }
 
   @Override
-  public void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+  public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     List<List<Object>> sourcesList = new ArrayList<>();
     sourcesList.add(getSources());
     sourcesList.addAll(
         mergeableErrors.stream().map(ErrorDetail::getSources).collect(Collectors.toList()));
+
     List<List<Object>> filteredSourcesList =
         sourcesList.stream()
             .map(this::trimSource)
             .filter(sources -> !sources.isEmpty())
             .collect(Collectors.toList());
 
-    formatter.format("%s) %s: %s%n", index, "[Guice/MissingImplementation]", getMessage());
     if (!filteredSourcesList.isEmpty()) {
-      formatter.format("%n%s%n", "Requested by:");
+      formatter.format("%s%n", "Requested by:");
       int sourceListIndex = 1;
       for (List<Object> sources : filteredSourcesList) {
         ErrorFormatter.formatSources(sourceListIndex++, Lists.reverse(sources), formatter);
       }
     }
-    formatter.format("%n");
   }
 
   @Override

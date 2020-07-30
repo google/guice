@@ -12,15 +12,14 @@ import java.util.List;
 /** Generic error message representing a Guice error. */
 public final class GenericErrorDetail extends ErrorDetail<GenericErrorDetail>
     implements Serializable {
-  public GenericErrorDetail(String message, List<Object> sources, Throwable cause) {
-    super(checkNotNull(message, "message"), sources, cause);
+  public GenericErrorDetail(
+      ErrorId errorId, String message, List<Object> sources, Throwable cause) {
+    super(errorId, checkNotNull(message, "message"), sources, cause);
   }
 
   @Override
-  public void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+  public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     Preconditions.checkArgument(mergeableErrors.isEmpty(), "Unexpected mergeable errors");
-    formatter.format("%s) %s%n", index, getMessage());
-
     List<Object> dependencies = getSources();
     for (Object source : Lists.reverse(dependencies)) {
       Messages.formatSource(formatter, source);
@@ -29,6 +28,6 @@ public final class GenericErrorDetail extends ErrorDetail<GenericErrorDetail>
 
   @Override
   public GenericErrorDetail withSources(List<Object> newSources) {
-    return new GenericErrorDetail(getMessage(), newSources, getCause());
+    return new GenericErrorDetail(errorId, getMessage(), newSources, getCause());
   }
 }
