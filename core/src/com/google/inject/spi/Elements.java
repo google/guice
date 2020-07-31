@@ -342,6 +342,7 @@ public final class Elements {
         for (ModuleAnnotatedMethodScanner scanner : scanners) {
           currentScanner = scanner;
           moduleSource = entry.getValue().moduleSource;
+          permitMapConstruction.restoreCurrentModulePermits(moduleSource);
           try {
             install(ProviderMethodsModule.forModule(module, scanner));
           } catch (RuntimeException e) {

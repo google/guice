@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Binding;
@@ -19,7 +18,9 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.logging.Level;
@@ -237,8 +238,7 @@ public final class BindingSourceRestriction {
    */
   static final class PermitMapConstruction {
     private static final class PermitMapImpl implements PermitMap {
-      // TODO(user): Include permits on ModuleAnnotatedMethodScanners here.
-      ImmutableMap<ModuleSource, ImmutableSet<Class<? extends Annotation>>> modulePermits;
+      Map<ModuleSource, ImmutableSet<Class<? extends Annotation>>> modulePermits;
 
       @Override
       public ImmutableSet<Class<? extends Annotation>> getPermits(ElementSource elementSource) {
@@ -251,8 +251,8 @@ public final class BindingSourceRestriction {
       }
     }
 
-    final ImmutableMap.Builder<ModuleSource, ImmutableSet<Class<? extends Annotation>>>
-        modulePermits = ImmutableMap.builder();
+    final Map<ModuleSource, ImmutableSet<Class<? extends Annotation>>> modulePermits =
+        new HashMap<>();
     // Maintains the permits on the current module installation path.
     ImmutableSet<Class<? extends Annotation>> currentModulePermits = ImmutableSet.of();
     // Stack tracking the currentModulePermits during module traversal.
@@ -266,6 +266,15 @@ public final class BindingSourceRestriction {
      */
     PermitMap getPermitMap() {
       return permitMap;
+    }
+
+    /**
+     * Sets the permits on the current module installation path to the permits on the given module
+     * source so that subsequently installed modules may inherit them. Used only for method
+     * scanning, so that modules installed by scanners inherit permits from the method's module.
+     */
+    void restoreCurrentModulePermits(ModuleSource moduleSource) {
+      currentModulePermits = modulePermits.get(moduleSource);
     }
 
     /** Called by the Binder prior to entering a module's configure method. */
@@ -295,7 +304,7 @@ public final class BindingSourceRestriction {
 
     /** Finishes the {@link PermitMap}. Called by the Binder when all modules are installed. */
     void finish() {
-      permitMap.modulePermits = modulePermits.build();
+      permitMap.modulePermits = modulePermits;
     }
 
     @VisibleForTesting
