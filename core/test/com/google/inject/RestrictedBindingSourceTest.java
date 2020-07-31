@@ -552,6 +552,39 @@ public class RestrictedBindingSourceTest {
     assertThat(injector.getInstance(Key.get(Integer.class, GatewayIpAdress.class))).isEqualTo(42);
   }
 
+  @Test
+  public void moduleInstalledByScannerInheritsMethodModulePermit() {
+    class NetworkProvidesScannerWithoutPermit extends NetworkProvidesScanner {
+      @Override
+      public <T> Key<T> prepareMethod(
+          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+        binder.install(
+            new AbstractModule() {
+              @Provides
+              @GatewayIpAdress
+              int provideGatewayIp() {
+                return 42;
+              }
+            });
+        return key.withAnnotation(Network.class);
+      }
+    }
+    @NetworkLibrary
+    class ScannedModuleWithPermit extends AbstractModule {
+      @NetworkProvides
+      String provideNetworkString() {
+        return "lorem ipsum";
+      }
+    }
+
+    Injector injector =
+        Guice.createInjector(
+            new ScannedModuleWithPermit(),
+            scannerModule(new NetworkProvidesScannerWithoutPermit()));
+
+    assertThat(injector.getInstance(Key.get(Integer.class, GatewayIpAdress.class))).isEqualTo(42);
+  }
+
   private static Module scannerModule(ModuleAnnotatedMethodScanner scanner) {
     return new AbstractModule() {
       @Override
