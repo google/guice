@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2020 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,38 @@
 
 package com.google.inject.internal.util;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import com.google.common.base.Stopwatch;
 import java.util.logging.Logger;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- * Enables simple performance monitoring.
+ * A continuously timing stopwatch that is used for simple performance monitoring.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class Stopwatch {
-  private static final Logger logger = Logger.getLogger(Stopwatch.class.getName());
+@NotThreadSafe
+public final class ContinuousStopwatch {
+  private final Logger logger = Logger.getLogger(ContinuousStopwatch.class.getName());
+  private final Stopwatch stopwatch;
 
-  private long start = System.currentTimeMillis();
+  /**
+   * Constructs a ContinuousStopwatch, which will start timing immediately after construction.
+   *
+   * @param stopwatch the internal stopwatch used by ContinuousStopwatch
+   */
+  public ContinuousStopwatch(Stopwatch stopwatch) {
+    this.stopwatch = stopwatch;
+    reset();
+  }
 
   /** Resets and returns elapsed time in milliseconds. */
   public long reset() {
-    long now = System.currentTimeMillis();
-    try {
-      return now - start;
-    } finally {
-      start = now;
-    }
+    long elapsedTimeMs = stopwatch.elapsed(MILLISECONDS);
+    stopwatch.reset();
+    stopwatch.start();
+    return elapsedTimeMs;
   }
 
   /** Resets and logs elapsed time in milliseconds. */
