@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /** Error reported by Guice when a key is bound at multiple places the injector. */
-final class BindingAlreadySetError extends ErrorDetail<BindingAlreadySetError> {
+final class BindingAlreadySetError extends InternalErrorDetail<BindingAlreadySetError> {
   private final Binding<?> binding;
   private final Binding<?> original;
 

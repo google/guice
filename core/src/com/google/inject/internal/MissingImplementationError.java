@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /** Error reported by Guice when a key is not bound in the injector. */
-final class MissingImplementationError extends ErrorDetail<MissingImplementationError> {
+final class MissingImplementationError extends InternalErrorDetail<MissingImplementationError> {
   private final Key<?> key;
 
   public MissingImplementationError(Key<?> key, List<Object> sources) {

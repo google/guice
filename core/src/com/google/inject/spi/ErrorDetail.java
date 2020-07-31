@@ -2,11 +2,11 @@ package com.google.inject.spi;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.internal.ErrorId;
 import com.google.inject.internal.InternalFlags;
 import java.io.Serializable;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Details about a single Guice error and supports formatting itself in the context of other Guice
@@ -15,15 +15,14 @@ import java.util.List;
  * <p>WARNING: The class and its APIs are still experimental and subject to change.
  */
 public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements Serializable {
-  private static final String DOC_BASE_URL = "https://github.com/googel/guice/wiki";
-
-  protected final ErrorId errorId;
+  private final String errorIdentifier;
   private final String message;
   private final ImmutableList<Object> sources;
   private final Throwable cause;
 
-  protected ErrorDetail(ErrorId errorId, String message, List<Object> sources, Throwable cause) {
-    this.errorId = errorId;
+  protected ErrorDetail(
+      String errorIdentifier, String message, List<Object> sources, Throwable cause) {
+    this.errorIdentifier = errorIdentifier;
     this.message = message;
     this.sources = ImmutableList.copyOf(sources);
     this.cause = cause;
@@ -61,12 +60,15 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    */
   public final void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     if (InternalFlags.enableExperimentalErrorMessages()) {
-      formatter.format("%s) [Guice/%s]: %s%n%n", index, errorId, getMessage());
+      formatter.format("%s) [%s]: %s%n%n", index, errorIdentifier, getMessage());
       formatDetail(mergeableErrors, formatter);
       formatter.format("%n");
       // TODO(b/151482394): Output potiential fixes for the error
-      formatter.format("Learn more:%n");
-      formatter.format("  %s/%s%n", DOC_BASE_URL, errorId);
+      Optional<String> learnMoreLink = getLearnMoreLink();
+      if (learnMoreLink.isPresent()) {
+        formatter.format("Learn more:%n");
+        formatter.format("  %s%n", learnMoreLink.get());
+      }
     } else {
       // TODO(b/151482394): Remove this once the new error messages are enabled.
       formatter.format("%s) %s%n", index, getMessage());
@@ -89,6 +91,14 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    */
   protected abstract void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter);
 
+  /**
+   * Returns an optional link to additional documentation about this error to be included in the
+   * formatted error message.
+   */
+  protected Optional<String> getLearnMoreLink() {
+    return Optional.empty();
+  }
+
   public String getMessage() {
     return message;
   }
@@ -103,7 +113,7 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(message, cause, sources);
+    return Objects.hashCode(errorIdentifier, message, cause, sources);
   }
 
   @Override
@@ -112,7 +122,10 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
       return false;
     }
     ErrorDetail<?> e = (ErrorDetail<?>) o;
-    return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
+    return errorIdentifier.equals(e.errorIdentifier)
+        && message.equals(e.message)
+        && Objects.equal(cause, e.cause)
+        && sources.equals(e.sources);
   }
 
   /** Returns a new instance of the same {@link ErrorDetail} with updated sources. */

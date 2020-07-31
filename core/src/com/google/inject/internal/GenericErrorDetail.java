@@ -9,8 +9,8 @@ import java.io.Serializable;
 import java.util.Formatter;
 import java.util.List;
 
-/** Generic error message representing a Guice error. */
-public final class GenericErrorDetail extends ErrorDetail<GenericErrorDetail>
+/** Generic error message representing a Guice internal error. */
+public final class GenericErrorDetail extends InternalErrorDetail<GenericErrorDetail>
     implements Serializable {
   public GenericErrorDetail(
       ErrorId errorId, String message, List<Object> sources, Throwable cause) {
