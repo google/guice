@@ -106,10 +106,10 @@ public class ToolStageInjectorTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.toString(),
-          "No implementation for java.util.Collection was bound.",
-          "No implementation for java.util.Map was bound.",
-          "No implementation for java.util.List was bound.",
-          "No implementation for java.util.Set was bound.");
+          "No implementation for java.util.Collection<java.lang.String> was bound.",
+          "No implementation for java.util.Map<java.lang.String, java.lang.String> was bound.",
+          "No implementation for java.util.List<java.lang.String> was bound.",
+          "No implementation for java.util.Set<java.lang.String> was bound.");
     }
   }
 
@@ -130,23 +130,22 @@ public class ToolStageInjectorTest extends TestCase {
     assertNotNull(tooled.m);
   }
 
-  @SuppressWarnings("unchecked")
   private static class Bar {
     @SuppressWarnings("unused")
     @Inject
-    private static List list;
+    private static List<String> list;
 
     @SuppressWarnings("unused")
     @Inject
-    private Set set;
+    private Set<String> set;
 
     @SuppressWarnings("unused")
     @Inject
-    void method(Collection c) {}
+    void method(Collection<String> c) {}
 
     @SuppressWarnings("unused")
     @Inject
-    static void staticMethod(Map map) {}
+    static void staticMethod(Map<String, String> map) {}
   }
 
   private static class Foo implements Provider<Object> {

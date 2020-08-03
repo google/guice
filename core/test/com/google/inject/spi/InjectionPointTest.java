@@ -159,6 +159,7 @@ public class InjectionPointTest extends TestCase {
   }
 
   public void testForConstructor() throws NoSuchMethodException {
+    @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
     Constructor<HashSet> constructor = HashSet.class.getConstructor();
     TypeLiteral<HashSet<String>> hashSet = new TypeLiteral<HashSet<String>>() {};
 

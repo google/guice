@@ -80,7 +80,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertNotSame(bob, clone);
     assertSame(bob.getDaughter(), clone.getDaughter());
 
-    Key soleBobKey = Key.get(Bob.class, Sole.class);
+    Key<Bob> soleBobKey = Key.get(Bob.class, Sole.class);
     assertSame(injector.getInstance(soleBobKey), injector.getInstance(soleBobKey));
   }
 
@@ -413,8 +413,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
         element + " instanceof ProviderInstanceBinding",
         element instanceof ProviderInstanceBinding);
 
-    ProviderInstanceBinding binding = (ProviderInstanceBinding) element;
-    javax.inject.Provider provider = binding.getUserSuppliedProvider();
+    ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) element;
+    javax.inject.Provider<?> provider = binding.getUserSuppliedProvider();
     assertTrue(provider instanceof ProviderMethod);
     assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());
     assertSame(provider, binding.getProviderInstance());
@@ -680,12 +680,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
     @Provides
     @Named("rawlist")
+    @SuppressWarnings("rawtypes") // Testing rawtypes.
     List rawProvider(@Named("list") List<String> f) {
       return f;
     }
 
     @Provides
     @Named("unrawlist")
+    @SuppressWarnings({"unchecked", "rawtypes"}) // Testing rawtypes
     List<String> rawParameterProvider(@Named("rawlist") List f) {
       return f;
     }
@@ -840,6 +842,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testOverrideProviderMethod_subclassRawTypes_returnType() {
     class SubClassModule extends SuperClassModule {
       @Override
+      @SuppressWarnings({"unchecked", "rawtypes"}) // Testing rawtypes.
       List annotatedGenericProviderMethod() {
         return super.annotatedGenericProviderMethod();
       }
@@ -860,6 +863,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   public void testOverrideProviderMethod_subclassRawTypes_parameterType() {
     class SubClassModule extends SuperClassModule {
+      @SuppressWarnings("rawtypes") // Testing rawtypes
       @Override
       Collection<String> annotatedGenericParameterProviderMethod(List foo) {
         return super.annotatedGenericParameterProviderMethod(foo);
@@ -1041,12 +1045,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
     // sanity check that the injector works
     Injector injector = Guice.createInjector(module);
     assertEquals(1, injector.getInstance(Integer.class).intValue());
-    ProviderInstanceBinding injectorBinding =
-        (ProviderInstanceBinding) injector.getBinding(Integer.class);
-    assertEquals(1, injectorBinding.getUserSuppliedProvider().get());
+    ProviderInstanceBinding<Integer> injectorBinding =
+        (ProviderInstanceBinding<Integer>) injector.getBinding(Integer.class);
+    assertEquals(1, injectorBinding.getUserSuppliedProvider().get().intValue());
 
-    ProviderInstanceBinding moduleBinding =
-        (ProviderInstanceBinding) Iterables.getOnlyElement(Elements.getElements(module));
+    ProviderInstanceBinding<?> moduleBinding =
+        (ProviderInstanceBinding<?>) Iterables.getOnlyElement(Elements.getElements(module));
     try {
       moduleBinding.getUserSuppliedProvider().get();
       fail();
