@@ -613,6 +613,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testArray, injector.getInstance(Integer[].class));
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes
   public void testRawProviderCannotBeBound() {
     final Integer testValue = 1024;
     Object instance =
@@ -640,6 +641,7 @@ public class BoundFieldModuleTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes
   public void testExplicitlyBoundRawProviderCanBeBound() {
     final Integer testValue = 1024;
     Object instance =
@@ -660,6 +662,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes
   public void testRawProviderCanBindToIncorrectType() {
     final Integer testValue = 1024;
     Object instance =
@@ -683,7 +686,7 @@ public class BoundFieldModuleTest extends TestCase {
   public void testMultipleBindErrorsAreAggregated() {
     Object instance =
         new Object() {
-          @Bind private Provider aProvider;
+          @Bind private Provider<Object> aProvider;
 
           @Bind(to = String.class)
           private Integer anInt;

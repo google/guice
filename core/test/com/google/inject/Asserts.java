@@ -52,7 +52,7 @@ public class Asserts {
   /**
    * Returns the String that would appear in an error message for this chain of classes as modules.
    */
-  public static String asModuleChain(Class... classes) {
+  public static String asModuleChain(Class<?>... classes) {
     return Joiner.on(" -> ")
         .appendTo(
             new StringBuilder(" (via modules: "),
@@ -65,7 +65,7 @@ public class Asserts {
    * Returns the source file appears in error messages based on {@link
    * #getIncludeStackTraceOption()} value.
    */
-  public static String getDeclaringSourcePart(Class clazz) {
+  public static String getDeclaringSourcePart(Class<?> clazz) {
     if (getIncludeStackTraceOption() == IncludeStackTraceOption.OFF) {
       return ".configure(Unknown Source";
     }
@@ -189,7 +189,7 @@ public class Asserts {
     // so we put a second latch and wait for a ReferenceQueue to tell us.
     Object data = ref.get();
     ReferenceQueue<Object> queue = null;
-    WeakReference extraRef = null;
+    WeakReference<Object> extraRef = null;
     if (data != null) {
       queue = new ReferenceQueue<>();
       extraRef = new WeakReference<>(data, queue);

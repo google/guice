@@ -568,17 +568,17 @@ public class BinderTest extends TestCase {
 
     @Override
     protected void configure() {
-      bind(AbstractModule.class).annotatedWith(red).toProvider(Providers.<AbstractModule>of(null));
-      bind(Binder.class).annotatedWith(red).toProvider(Providers.<Binder>of(null));
-      bind(Binding.class).annotatedWith(red).toProvider(Providers.<Binding>of(null));
-      bind(Injector.class).annotatedWith(red).toProvider(Providers.<Injector>of(null));
-      bind(Key.class).annotatedWith(red).toProvider(Providers.<Key>of(null));
-      bind(Module.class).annotatedWith(red).toProvider(Providers.<Module>of(null));
-      bind(Provider.class).annotatedWith(red).toProvider(Providers.<Provider>of(null));
-      bind(Scope.class).annotatedWith(red).toProvider(Providers.<Scope>of(null));
-      bind(Stage.class).annotatedWith(red).toProvider(Providers.<Stage>of(null));
-      bind(TypeLiteral.class).annotatedWith(red).toProvider(Providers.<TypeLiteral>of(null));
-      bind(new TypeLiteral<Key<String>>() {}).toProvider(Providers.<Key<String>>of(null));
+      bind(AbstractModule.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Binder.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Binding.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Injector.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Key.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Module.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Provider.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Scope.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(Stage.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(TypeLiteral.class).annotatedWith(red).toProvider(Providers.of(null));
+      bind(new TypeLiteral<Key<String>>() {}).toProvider(Providers.of(null));
     }
   }
 
