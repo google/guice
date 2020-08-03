@@ -320,14 +320,15 @@ public class BytecodeGenTest extends TestCase {
     }
     ClassLoader testClassLoader = new TestVisibilityClassLoader(false);
 
-    Class hiddenMethodReturnClass = testClassLoader.loadClass(HiddenMethodReturn.class.getName());
-    Class hiddenMethodParameterClass =
+    Class<?> hiddenMethodReturnClass =
+        testClassLoader.loadClass(HiddenMethodReturn.class.getName());
+    Class<?> hiddenMethodParameterClass =
         testClassLoader.loadClass(HiddenMethodParameter.class.getName());
 
     Injector injector = Guice.createInjector(noopInterceptorModule);
 
-    Class hiddenClass = testClassLoader.loadClass(Hidden.class.getName());
-    Constructor ctor = hiddenClass.getDeclaredConstructor();
+    Class<?> hiddenClass = testClassLoader.loadClass(Hidden.class.getName());
+    Constructor<?> ctor = hiddenClass.getDeclaredConstructor();
 
     ctor.setAccessible(true);
 

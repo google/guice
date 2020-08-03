@@ -574,13 +574,13 @@ public class CircularDependencyTest extends TestCase {
 
               @Provides
               @Singleton
-              Integer provideInteger(List list) {
+              Integer provideInteger(List<Object> list) {
                 return 2;
               }
 
               @Provides
-              List provideList(Integer integer) {
-                return new ArrayList();
+              List<Object> provideList(Integer integer) {
+                return new ArrayList<>();
               }
             });
     try {

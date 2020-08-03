@@ -266,6 +266,7 @@ public class BindingTest extends TestCase {
   }
 
   public void testToConstructorBindingsOnParameterizedTypes() throws NoSuchMethodException {
+    @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw types.
     final Constructor<C> constructor = C.class.getConstructor(Stage.class, Object.class);
     final Key<Object> s = new Key<Object>(named("s")) {};
     final Key<Object> i = new Key<Object>(named("i")) {};
@@ -280,11 +281,15 @@ public class BindingTest extends TestCase {
               }
             });
 
+    // Safe because the correct generic type was used when the constructor was bound
+    @SuppressWarnings("unchecked")
     C<Stage> one = (C<Stage>) injector.getInstance(s);
     assertEquals(Stage.DEVELOPMENT, one.stage);
     assertEquals(Stage.DEVELOPMENT, one.t);
     assertEquals(Stage.DEVELOPMENT, one.anotherT);
 
+    // Safe because the correct generic type was used when the constructor was bound
+    @SuppressWarnings("unchecked")
     C<Injector> two = (C<Injector>) injector.getInstance(i);
     assertEquals(Stage.DEVELOPMENT, two.stage);
     assertEquals(injector, two.t);
@@ -292,7 +297,8 @@ public class BindingTest extends TestCase {
   }
 
   public void testToConstructorBindingsFailsOnRawTypes() throws NoSuchMethodException {
-    final Constructor constructor = C.class.getConstructor(Stage.class, Object.class);
+    @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw types.
+    final Constructor<C> constructor = C.class.getConstructor(Stage.class, Object.class);
 
     try {
       Guice.createInjector(
