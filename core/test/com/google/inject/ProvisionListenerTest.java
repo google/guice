@@ -570,7 +570,7 @@ public class ProvisionListenerTest extends TestCase {
   }
 
   private static class Capturer implements ProvisionListener {
-    List<Key> keys = Lists.newArrayList();
+    List<Key<?>> keys = Lists.newArrayList();
 
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
@@ -590,14 +590,14 @@ public class ProvisionListenerTest extends TestCase {
       }
     }
 
-    Set<Key> getAsSetAndClear() {
-      Set<Key> copy = ImmutableSet.copyOf(keys);
+    Set<Key<?>> getAsSetAndClear() {
+      Set<Key<?>> copy = ImmutableSet.copyOf(keys);
       keys.clear();
       return copy;
     }
 
-    List<Key> getAndClear() {
-      List<Key> copy = ImmutableList.copyOf(keys);
+    List<Key<?>> getAndClear() {
+      List<Key<?>> copy = ImmutableList.copyOf(keys);
       keys.clear();
       return copy;
     }

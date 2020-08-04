@@ -103,6 +103,7 @@ public class KeyTest extends TestCase {
   /**
    * Key canonicalizes {@link int.class} to {@code Integer.class}, and won't expose wrapper types.
    */
+  @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type
   public void testPrimitivesAndWrappersAreEqual() {
     Class[] primitives =
         new Class[] {
@@ -223,7 +224,7 @@ public class KeyTest extends TestCase {
           e.getMessage(), "java.util.List<T> cannot be used as a key; It is not fully specified.");
     }
 
-    TypeVariable tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
+    TypeVariable<?> tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
     TypeLiteral<?> t = TypeLiteral.get(tType);
     try {
       Key.get(t);
