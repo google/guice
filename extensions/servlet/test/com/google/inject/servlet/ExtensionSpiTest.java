@@ -55,7 +55,8 @@ public class ExtensionSpiTest extends TestCase {
     int count = 0;
     for (Element element : Elements.getElements(new Module())) {
       if (element instanceof Binding) {
-        assertEquals(count++, ((Binding) element).acceptTargetVisitor(visitor));
+        int actual = ((Binding<?>) element).acceptTargetVisitor(visitor);
+        assertEquals(count++, actual);
       }
     }
     validateVisitor(visitor);
@@ -65,8 +66,9 @@ public class ExtensionSpiTest extends TestCase {
     ServletSpiVisitor visitor = new ServletSpiVisitor(true);
     int count = 0;
     Injector injector = Guice.createInjector(new Module());
-    for (Binding binding : injector.getBindings().values()) {
-      assertEquals(count++, binding.acceptTargetVisitor(visitor));
+    for (Binding<?> binding : injector.getBindings().values()) {
+      int actual = binding.acceptTargetVisitor(visitor);
+      assertEquals(count++, actual);
     }
     validateVisitor(visitor);
   }

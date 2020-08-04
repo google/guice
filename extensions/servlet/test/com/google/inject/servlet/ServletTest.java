@@ -166,7 +166,7 @@ public class ServletTest extends TestCase {
     final HttpServletRequestWrapper requestWrapper =
         new HttpServletRequestWrapper(request) {
           @Override
-          public Map getParameterMap() {
+          public Map<String, String[]> getParameterMap() {
             return wrappedParamMap;
           }
 

@@ -1473,7 +1473,7 @@ public class MultibinderTest extends TestCase {
     assertEquals(setBinding.getDependencies().toString(), 2, setBinding.getDependencies().size());
     Set<Dependency<?>> expected = Sets.newHashSet();
     for (Dependency<?> dep : setBinding.getDependencies()) {
-      Key key = dep.getKey();
+      Key<?> key = dep.getKey();
       Dependency<?> providerDependency =
           Dependency.get(key.ofType(Types.providerOf(key.getTypeLiteral().getType())));
       expected.add(providerDependency);
@@ -1598,6 +1598,8 @@ public class MultibinderTest extends TestCase {
             multibinder.addBinding().toInstance("b");
             multibinder.addBinding().toInstance("c");
 
+            // Safe because Set<? extends String> can be used as Set<String> in this context
+            @SuppressWarnings("unchecked")
             Multibinder<String> multibinder2 =
                 Multibinder.newSetBinder(
                     binder(), (TypeLiteral<String>) TypeLiteral.get(Types.subtypeOf(String.class)));

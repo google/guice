@@ -45,5 +45,6 @@ public @interface Finder {
    * impl to autobox result lists into. The impl must have a default no-arg constructor and be a
    * subclass of {@code java.util.Collection}.
    */
+  @SuppressWarnings({"rawtypes"}) // Unavoidable because class literal uses raw types.
   Class<? extends Collection> returnAs() default Collection.class;
 }

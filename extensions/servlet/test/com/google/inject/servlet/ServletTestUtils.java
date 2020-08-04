@@ -70,7 +70,7 @@ public class ServletTestUtils {
       }
 
       @Override
-      public Map getParameterMap() {
+      public Map<String, String[]> getParameterMap() {
         return ImmutableMap.of();
       }
 
@@ -98,7 +98,7 @@ public class ServletTestUtils {
     return (HttpServletResponse)
         Proxy.newProxyInstance(
             HttpServletResponse.class.getClassLoader(),
-            new Class[] {HttpServletResponse.class},
+            new Class<?>[] {HttpServletResponse.class},
             new ThrowingInvocationHandler());
   }
 
@@ -124,7 +124,7 @@ public class ServletTestUtils {
     return (HttpSession)
         Proxy.newProxyInstance(
             HttpSession.class.getClassLoader(),
-            new Class[] {HttpSession.class},
+            new Class<?>[] {HttpSession.class},
             new FakeHttpSessionHandler());
   }
 }

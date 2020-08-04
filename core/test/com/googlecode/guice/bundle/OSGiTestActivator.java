@@ -482,6 +482,7 @@ public class OSGiTestActivator implements BundleActivator {
 
             // this registers: A + PUBLIC -> AA, A + PROTECTED -> AB, etc...
             String suffix = TEST_CLAZZES[visibility.ordinal()].getSimpleName();
+            @SuppressWarnings("rawtypes") // Must use raw type here because of wildcard in api.
             Class imp = bundle.loadClass(api.getName() + suffix);
             bind(api).annotatedWith(named(visibility.name())).to(imp);
 

@@ -46,11 +46,13 @@ import junit.framework.TestCase;
  */
 public class ServletDefinitionTest extends TestCase {
 
+  @SuppressWarnings("unchecked") // Safe because mock will only ever return HttpServlet
   public final void testServletInitAndConfig() throws ServletException {
     Injector injector = createMock(Injector.class);
-    Binding binding = createMock(Binding.class);
+    Binding<HttpServlet> binding = createMock(Binding.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
     final HttpServlet mockServlet = new HttpServlet() {};
     expect(injector.getInstance(Key.get(HttpServlet.class))).andReturn(mockServlet).anyTimes();
@@ -86,7 +88,7 @@ public class ServletDefinitionTest extends TestCase {
     assertEquals(Key.get(HttpServlet.class).toString(), mockServlet.getServletName());
 
     final ServletConfig servletConfig = mockServlet.getServletConfig();
-    final Enumeration names = servletConfig.getInitParameterNames();
+    final Enumeration<?> names = servletConfig.getInitParameterNames();
     while (names.hasMoreElements()) {
       String name = (String) names.nextElement();
 
