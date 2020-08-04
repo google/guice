@@ -98,7 +98,7 @@ public class Struts2Factory extends ObjectFactory {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"}) // Parent class uses raw type.
   public Object buildBean(Class clazz, Map<String, Object> extraContext) {
     if (strutsInjector == null) {
       synchronized (this) {
@@ -150,7 +150,8 @@ public class Struts2Factory extends ObjectFactory {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
+  public Interceptor buildInterceptor(
+      InterceptorConfig interceptorConfig, Map<String, String> interceptorRefParams)
       throws ConfigurationException {
     // Ensure the interceptor class is present.
     Class<? extends Interceptor> interceptorClass;

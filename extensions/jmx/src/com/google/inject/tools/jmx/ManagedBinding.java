@@ -20,9 +20,9 @@ import com.google.inject.Binding;
 
 class ManagedBinding implements ManagedBindingMBean {
 
-  final Binding binding;
+  final Binding<?> binding;
 
-  ManagedBinding(Binding binding) {
+  ManagedBinding(Binding<?> binding) {
     this.binding = binding;
   }
 
