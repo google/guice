@@ -46,8 +46,17 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
- * A partially-initialized injector. See {@link InternalInjectorCreator}, which uses this to build a
- * tree of injectors in batch.
+ * InjectorShell is used by {@link InternalInjectorCreator} to recursively create a tree of
+ * uninitialized {@link Injector}s. Each InjectorShell corresponds to either the top-level root
+ * injector, or a private child injector.
+ *
+ * <p>The root InjectorShell extracts elements from its list of modules and processes these elements
+ * to aggregate data that is used to populate its injector's fields. Child injectors are constructed
+ * similarly, but using {@link PrivateElements} instead of modules.
+ *
+ * <p>It is necessary to create the root and child injectors in a single batch because there can be
+ * bidirectional parent <-> child injector dependencies that require the entire tree of injectors to
+ * be initialized together in the {@link InternalInjectorCreator}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
