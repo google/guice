@@ -195,7 +195,7 @@ public class MembersInjectorTest extends TestCase {
           new AbstractModule() {
             @Override
             protected void configure() {
-              bind(MembersInjector.class).toProvider(Providers.<MembersInjector>of(null));
+              bind(MembersInjector.class).toProvider(Providers.of(null));
             }
           });
       fail();

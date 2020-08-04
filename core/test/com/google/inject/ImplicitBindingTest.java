@@ -143,10 +143,10 @@ public class ImplicitBindingTest extends TestCase {
             });
 
     // Capture good bindings.
-    Binding v1 = injector.getBinding(Valid.class);
-    Binding v2 = injector.getBinding(Valid2.class);
-    Binding jv1 = injector.getBinding(JitValid.class);
-    Binding jv2 = injector.getBinding(JitValid2.class);
+    Binding<Valid> v1 = injector.getBinding(Valid.class);
+    Binding<Valid2> v2 = injector.getBinding(Valid2.class);
+    Binding<JitValid> jv1 = injector.getBinding(JitValid.class);
+    Binding<JitValid2> jv2 = injector.getBinding(JitValid2.class);
 
     // Then validate that a whole series of invalid bindings are erased.
     assertFailure(injector, Invalid.class);
@@ -169,8 +169,7 @@ public class ImplicitBindingTest extends TestCase {
     assertSame(jv2, injector.getBinding(JitValid2.class));
   }
 
-  @SuppressWarnings("unchecked")
-  private void assertFailure(Injector injector, Class clazz) {
+  private static void assertFailure(Injector injector, Class<?> clazz) {
     try {
       injector.getBinding(clazz);
       fail("Shouldn't have been able to get binding of: " + clazz);

@@ -28,7 +28,6 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
-import com.google.inject.util.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -596,7 +595,7 @@ public class PrivateModuleTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for java.util.List.",
+          "Unable to create binding for java.util.List<java.lang.String>.",
           "It was already configured on one or more child injectors or private modules",
           "bound at " + FailingPrivateModule.class.getName() + ".configure(",
           asModuleChain(FailingModule.class, ManyPrivateModules.class, FailingPrivateModule.class),
@@ -611,20 +610,20 @@ public class PrivateModuleTest extends TestCase {
   public void testParentBindingToPrivateLinkedJitBinding() {
     Injector injector = Guice.createInjector(new ManyPrivateModules());
     try {
-      injector.getBinding(Key.get(Types.providerOf(List.class)));
+      injector.getBinding(new Key<Provider<List<String>>>() {});
       fail();
     } catch (ConfigurationException expected) {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for com.google.inject.Provider<java.util.List>.",
+          "Unable to create binding for java.util.List<java.lang.String>",
           "It was already configured on one or more child injectors or private modules",
           "bound at " + FailingPrivateModule.class.getName() + ".configure(",
           asModuleChain(ManyPrivateModules.class, FailingPrivateModule.class),
           "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
           asModuleChain(ManyPrivateModules.class, SecondFailingPrivateModule.class),
           "If it was in a PrivateModule, did you forget to expose the binding?",
-          "while locating com.google.inject.Provider<java.util.List>");
+          "while locating com.google.inject.Provider<java.util.List<java.lang.String>>");
     }
   }
 
@@ -648,7 +647,7 @@ public class PrivateModuleTest extends TestCase {
   private static class FailingModule extends AbstractModule {
     @Override
     protected void configure() {
-      bind(Collection.class).to(List.class);
+      bind(new Key<Collection<String>>() {}).to(new Key<List<String>>() {});
       install(new ManyPrivateModules());
     }
   }
@@ -667,11 +666,12 @@ public class PrivateModuleTest extends TestCase {
   private static class FailingPrivateModule extends PrivateModule {
     @Override
     protected void configure() {
-      bind(List.class).toInstance(new ArrayList());
+      Key<List<String>> key = new Key<List<String>>() {};
+      bind(key).toInstance(new ArrayList<String>());
 
       // Add the Provider<List> binding, created just-in-time,
       // to make sure our linked JIT bindings have the correct source.
-      getProvider(Key.get(Types.providerOf(List.class)));
+      getProvider(key);
 
       // Request a JIT binding for PrivateFoo, which can only
       // be created in the private module because it depends
@@ -684,11 +684,12 @@ public class PrivateModuleTest extends TestCase {
   private static class SecondFailingPrivateModule extends PrivateModule {
     @Override
     protected void configure() {
-      bind(List.class).toInstance(new ArrayList());
+      Key<List<String>> key = new Key<List<String>>() {};
+      bind(key).toInstance(new ArrayList<String>());
 
       // Add the Provider<List> binding, created just-in-time,
       // to make sure our linked JIT bindings have the correct source.
-      getProvider(Key.get(Types.providerOf(List.class)));
+      getProvider(key);
 
       // Request a JIT binding for PrivateFoo, which can only
       // be created in the private module because it depends
@@ -698,6 +699,6 @@ public class PrivateModuleTest extends TestCase {
   }
 
   private static class PrivateFoo {
-    @Inject List list;
+    @Inject List<String> list;
   }
 }

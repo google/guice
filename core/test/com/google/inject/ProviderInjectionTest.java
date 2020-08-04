@@ -95,7 +95,7 @@ public class ProviderInjectionTest extends TestCase {
                           private String value;
 
                           @Inject
-                          void initialize(List list) {
+                          void initialize(List<Boolean> list) {
                             value = list.toString();
                           }
 
@@ -106,13 +106,13 @@ public class ProviderInjectionTest extends TestCase {
                         });
 
                 // should bind List to [true]
-                bind(List.class)
+                bind(new Key<List<Boolean>>() {})
                     .toProvider(
-                        new Provider<List>() {
+                        new Provider<List<Boolean>>() {
                           @Inject Boolean injectedYet = Boolean.FALSE;
 
                           @Override
-                          public List get() {
+                          public List<Boolean> get() {
                             return Arrays.asList(injectedYet);
                           }
                         });

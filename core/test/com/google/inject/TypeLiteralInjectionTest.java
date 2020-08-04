@@ -66,7 +66,7 @@ public class TypeLiteralInjectionTest extends TestCase {
   }
 
   public void testInjectTypeLiteralWithRawTypes() {
-    C c = Guice.createInjector().getInstance(C.class);
+    C<?> c = Guice.createInjector().getInstance(C.class);
     assertEquals(TypeLiteral.get(String.class), c.string);
     assertEquals(TypeLiteral.get(A.class), c.a);
 
@@ -110,6 +110,7 @@ public class TypeLiteralInjectionTest extends TestCase {
     @Inject TypeLiteral<T> t;
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes.
   static class C<T> {
     @Inject TypeLiteral<String> string;
     @Inject TypeLiteral<A> a;
