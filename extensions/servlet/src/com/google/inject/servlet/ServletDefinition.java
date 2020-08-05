@@ -115,7 +115,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       return;
     }
 
-    //initialize our servlet with the configured context params and servlet context
+    // initialize our servlet with the configured context params and servlet context
     httpServlet.init(
         new ServletConfig() {
           @Override
@@ -134,7 +134,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
           }
 
           @Override
-          public Enumeration getInitParameterNames() {
+          public Enumeration<?> getInitParameterNames() {
             return Iterators.asEnumeration(initParams.keySet().iterator());
           }
         });

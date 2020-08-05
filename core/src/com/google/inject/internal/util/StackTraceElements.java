@@ -65,7 +65,7 @@ public class StackTraceElements {
       return SourceProvider.UNKNOWN_SOURCE;
     }
 
-    Class declaringClass = member.getDeclaringClass();
+    Class<?> declaringClass = member.getDeclaringClass();
 
     /*if[AOP]*/
     LineNumbers lineNumbers = lineNumbersCache.getUnchecked(declaringClass);

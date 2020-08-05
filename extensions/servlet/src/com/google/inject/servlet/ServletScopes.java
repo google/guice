@@ -398,7 +398,7 @@ public class ServletScopes {
   }
 
   private static class Context implements RequestScoper {
-    final Map<Key, Object> map = Maps.newHashMap();
+    final Map<Key<?>, Object> map = Maps.newHashMap();
 
     // Synchronized to prevent two threads from using the same request
     // scope concurrently.

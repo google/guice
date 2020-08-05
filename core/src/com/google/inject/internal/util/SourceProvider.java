@@ -54,7 +54,7 @@ public final class SourceProvider {
   }
 
   /** Returns a new instance that also skips {@code moreClassesToSkip}. */
-  public SourceProvider plusSkippedClasses(Class... moreClassesToSkip) {
+  public SourceProvider plusSkippedClasses(Class<?>... moreClassesToSkip) {
     return new SourceProvider(this, asStrings(moreClassesToSkip));
   }
 
@@ -65,9 +65,9 @@ public final class SourceProvider {
   }
 
   /** Returns the class names as Strings */
-  private static List<String> asStrings(Class... classes) {
+  private static List<String> asStrings(Class<?>... classes) {
     List<String> strings = Lists.newArrayList();
-    for (Class c : classes) {
+    for (Class<?> c : classes) {
       strings.add(c.getName());
     }
     return strings;

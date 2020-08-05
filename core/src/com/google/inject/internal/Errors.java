@@ -164,7 +164,7 @@ public final class Errors implements Serializable {
    * Otherwise we need to know who's calling when resolving a just-in-time binding, which makes
    * things unnecessarily complex.
    */
-  public Errors missingImplementation(Key key) {
+  public Errors missingImplementation(Key<?> key) {
     return addMessage(ErrorId.MISSING_IMPLEMENTATION, "No implementation for %s was bound.", key);
   }
 
@@ -260,7 +260,7 @@ public final class Errors implements Serializable {
         key);
   }
 
-  public Errors atInjectRequired(Class clazz) {
+  public Errors atInjectRequired(Class<?> clazz) {
     return addMessage(
         ErrorId.AT_INJECT_REQUIRED,
         "Explicit @Inject annotations are required on constructors,"
@@ -366,7 +366,7 @@ public final class Errors implements Serializable {
         format("Please annotate %s with @ScopeAnnotation.", annotation));
   }
 
-  public Errors optionalConstructor(Constructor constructor) {
+  public Errors optionalConstructor(Constructor<?> constructor) {
     return addMessage(
         ErrorId.OPTIONAL_CONSTRUCTOR,
         "%s is annotated @Inject(optional=true), but constructors cannot be optional.",

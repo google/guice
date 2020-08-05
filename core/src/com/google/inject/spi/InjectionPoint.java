@@ -828,7 +828,7 @@ public final class InjectionPoint {
   static class Signature {
 
     final String name;
-    final Class[] parameterTypes;
+    final Class<?>[] parameterTypes;
     final int hash;
 
     Signature(Method method) {
@@ -837,7 +837,7 @@ public final class InjectionPoint {
 
       int h = name.hashCode();
       h = h * 31 + parameterTypes.length;
-      for (Class parameterType : parameterTypes) {
+      for (Class<?> parameterType : parameterTypes) {
         h = h * 31 + parameterType.hashCode();
       }
       this.hash = h;

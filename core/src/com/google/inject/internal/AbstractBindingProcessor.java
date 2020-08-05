@@ -117,7 +117,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
   private static boolean isOkayDuplicate(
       BindingImpl<?> original, BindingImpl<?> binding, InjectorBindingData bindingData) {
     if (original instanceof ExposedBindingImpl) {
-      ExposedBindingImpl exposed = (ExposedBindingImpl) original;
+      ExposedBindingImpl<?> exposed = (ExposedBindingImpl<?>) original;
       InjectorImpl exposedFrom = (InjectorImpl) exposed.getPrivateElements().getInjector();
       return (exposedFrom == binding.getInjector());
     } else {
