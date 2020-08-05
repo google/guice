@@ -165,7 +165,7 @@ public class InjectionPointTest extends TestCase {
 
     InjectionPoint injectionPoint = InjectionPoint.forConstructor(constructor, hashSet);
     assertSame(constructor, injectionPoint.getMember());
-    assertEquals(ImmutableList.<Dependency>of(), injectionPoint.getDependencies());
+    assertEquals(ImmutableList.of(), injectionPoint.getDependencies());
     assertFalse(injectionPoint.isOptional());
 
     try {
@@ -180,7 +180,9 @@ public class InjectionPointTest extends TestCase {
     }
 
     try {
-      InjectionPoint.forConstructor((Constructor) constructor, new TypeLiteral<Set<String>>() {});
+      @SuppressWarnings({"unchecked", "rawtypes"}) // Testing incorrect types
+      Constructor<Set<String>> c = (Constructor) constructor;
+      InjectionPoint.forConstructor(c, new TypeLiteral<Set<String>>() {});
       fail("Expected ConfigurationException");
     } catch (ConfigurationException expected) {
       assertContains(

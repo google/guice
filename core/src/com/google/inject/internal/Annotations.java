@@ -83,6 +83,7 @@ public class Annotations {
    * Generates an Annotation for the annotation class. Requires that the annotation is all
    * optionals.
    */
+  @SuppressWarnings("unchecked") // Safe because generateAnnotationImpl returns T for Class<T>
   public static <T extends Annotation> T generateAnnotation(Class<T> annotationType) {
     Preconditions.checkState(
         isAllDefaultMethods(annotationType), "%s is not all default methods", annotationType);

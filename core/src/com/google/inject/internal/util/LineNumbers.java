@@ -44,7 +44,7 @@ final class LineNumbers {
 
   private static final int ASM_API_LEVEL = Opcodes.ASM7;
 
-  private final Class type;
+  private final Class<?> type;
   private final Map<String, Integer> lines = Maps.newHashMap();
   private String source;
   private int firstLine = Integer.MAX_VALUE;
@@ -54,7 +54,7 @@ final class LineNumbers {
    *
    * @param type the class to read line number information from
    */
-  public LineNumbers(Class type) throws IOException {
+  public LineNumbers(Class<?> type) throws IOException {
     this.type = type;
 
     if (!type.isArray()) {
@@ -125,7 +125,7 @@ final class LineNumbers {
 
     } else if (member instanceof Constructor) {
       StringBuilder sb = new StringBuilder().append("<init>(");
-      for (Class param : ((Constructor) member).getParameterTypes()) {
+      for (Class<?> param : ((Constructor<?>) member).getParameterTypes()) {
         sb.append(org.objectweb.asm.Type.getDescriptor(param));
       }
       return sb.append(")V").toString();

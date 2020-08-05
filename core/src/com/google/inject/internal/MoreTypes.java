@@ -282,7 +282,7 @@ public class MoreTypes {
 
     // we skip searching through interfaces if unknown is an interface
     if (toResolve.isInterface()) {
-      Class[] interfaces = rawType.getInterfaces();
+      Class<?>[] interfaces = rawType.getInterfaces();
       for (int i = 0, length = interfaces.length; i < length; i++) {
         if (interfaces[i] == toResolve) {
           return rawType.getGenericInterfaces()[i];
@@ -309,7 +309,7 @@ public class MoreTypes {
     return toResolve;
   }
 
-  public static Type resolveTypeVariable(Type type, Class<?> rawType, TypeVariable unknown) {
+  public static Type resolveTypeVariable(Type type, Class<?> rawType, TypeVariable<?> unknown) {
     Class<?> declaredByRaw = declaringClassOf(unknown);
 
     // we can't reduce this further
@@ -339,7 +339,7 @@ public class MoreTypes {
    * Returns the declaring class of {@code typeVariable}, or {@code null} if it was not declared by
    * a class.
    */
-  private static Class<?> declaringClassOf(TypeVariable typeVariable) {
+  private static Class<?> declaringClassOf(TypeVariable<?> typeVariable) {
     GenericDeclaration genericDeclaration = typeVariable.getGenericDeclaration();
     return genericDeclaration instanceof Class ? (Class<?>) genericDeclaration : null;
   }
@@ -427,7 +427,7 @@ public class MoreTypes {
 
     private static void ensureOwnerType(Type ownerType, Type rawType) {
       if (rawType instanceof Class<?>) {
-        Class rawTypeAsClass = (Class) rawType;
+        Class<?> rawTypeAsClass = (Class<?>) rawType;
         checkArgument(
             ownerType != null || rawTypeAsClass.getEnclosingClass() == null,
             "No owner type for enclosed %s",

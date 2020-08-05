@@ -454,7 +454,6 @@ final class InjectorImpl implements Injector, Lookups {
     // We can't call getProvider().get() because this InstanceBinding may not have been inintialized
     // yet (because we may have been called during InternalInjectorCreator.initializeStatically and
     // instance binding validation hasn't happened yet.)
-    @SuppressWarnings("unchecked")
     String stringValue = ((InstanceBinding<String>) stringBinding).getInstance();
     Object source = stringBinding.getSource();
 
@@ -607,7 +606,7 @@ final class InjectorImpl implements Injector, Lookups {
           // so that cached exceptions while constructing it get stored.
           // See TypeListenerTest#testTypeListenerThrows
           removeFailedJitBinding(binding, null);
-          cleanup(binding, new HashSet<Key>());
+          cleanup(binding, new HashSet<Key<?>>());
         }
       }
     }
@@ -619,10 +618,10 @@ final class InjectorImpl implements Injector, Lookups {
    * added to allow circular dependency support, so dependencies may pass where they should have
    * failed.
    */
-  private boolean cleanup(BindingImpl<?> binding, Set<Key> encountered) {
+  private boolean cleanup(BindingImpl<?> binding, Set<Key<?>> encountered) {
     boolean bindingFailed = false;
     Set<Dependency<?>> deps = getInternalDependencies(binding);
-    for (Dependency dep : deps) {
+    for (Dependency<?> dep : deps) {
       Key<?> depKey = dep.getKey();
       InjectionPoint ip = dep.getInjectionPoint();
       if (encountered.add(depKey)) { // only check if we haven't looked at this key yet
@@ -630,7 +629,7 @@ final class InjectorImpl implements Injector, Lookups {
         if (depBinding != null) { // if the binding still exists, validate
           boolean failed = cleanup(depBinding, encountered); // if children fail, we fail
           if (depBinding instanceof ConstructorBindingImpl) {
-            ConstructorBindingImpl ctorBinding = (ConstructorBindingImpl) depBinding;
+            ConstructorBindingImpl<?> ctorBinding = (ConstructorBindingImpl<?>) depBinding;
             ip = ctorBinding.getInternalConstructor();
             if (!ctorBinding.isInitialized()) {
               failed = true;
@@ -662,7 +661,6 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   /** Safely gets the dependencies of possibly not initialized bindings. */
-  @SuppressWarnings("unchecked")
   private Set<Dependency<?>> getInternalDependencies(BindingImpl<?> binding) {
     if (binding instanceof ConstructorBindingImpl) {
       return ((ConstructorBindingImpl) binding).getInternalDependencies();
@@ -992,13 +990,16 @@ final class InjectorImpl implements Injector, Lookups {
   public Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints() {
     // Note, this is a safe cast per the ListMultimap javadocs.
     // We could use Multimaps.asMap to avoid the cast, but unfortunately it's a @Beta method.
-    return (Map<TypeLiteral<?>, List<InjectionPoint>>)
-        (Map<TypeLiteral<?>, ?>)
-            ImmutableListMultimap.copyOf(
-                    Multimaps.filterKeys(
-                        membersInjectorStore.getAllInjectionPoints(),
-                        userRequestedMembersInjectorTypes::contains))
-                .asMap();
+    @SuppressWarnings("unchecked")
+    Map<TypeLiteral<?>, List<InjectionPoint>> res =
+        (Map<TypeLiteral<?>, List<InjectionPoint>>)
+            (Map<TypeLiteral<?>, ?>)
+                ImmutableListMultimap.copyOf(
+                        Multimaps.filterKeys(
+                            membersInjectorStore.getAllInjectionPoints(),
+                            userRequestedMembersInjectorTypes::contains))
+                    .asMap();
+    return res;
   }
 
   /** Returns parameter injectors, or {@code null} if there are no parameters. */
@@ -1046,7 +1047,10 @@ final class InjectorImpl implements Injector, Lookups {
   ProvisionListenerCallbackStore provisionListenerStore;
 
   @Override
-  @SuppressWarnings("unchecked") // the members injector type is consistent with instance's type
+  @SuppressWarnings({
+    "unchecked",
+    "rawtypes"
+  }) // the members injector type is consistent with instance's type
   public void injectMembers(Object instance) {
     MembersInjector membersInjector = getMembersInjector(instance.getClass());
     membersInjector.injectMembers(instance);

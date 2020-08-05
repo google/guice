@@ -863,7 +863,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   public void testOverrideProviderMethod_subclassRawTypes_parameterType() {
     class SubClassModule extends SuperClassModule {
-      @SuppressWarnings("rawtypes") // Testing rawtypes
+      @SuppressWarnings({"unchecked", "rawtypes"}) // Testing rawtypes
       @Override
       Collection<String> annotatedGenericParameterProviderMethod(List foo) {
         return super.annotatedGenericParameterProviderMethod(foo);
