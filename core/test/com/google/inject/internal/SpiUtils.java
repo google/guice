@@ -75,6 +75,7 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.ProviderLookup;
+import com.google.inject.util.Types;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +199,9 @@ public class SpiUtils {
         mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> setOfExtendsOfEntryOfProvider =
         mapKey.ofType(setOfExtendsOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> mapOfKeyExtendsValueKey =
+        mapKey.ofType(mapOf(keyType, TypeLiteral.get(Types.subtypeOf(valueType.getType()))));
+
     assertEquals(
         ImmutableSet.of(
             mapOfJavaxProvider,
@@ -206,7 +210,8 @@ public class SpiUtils {
             mapOfSetOfJavaxProvider,
             mapOfCollectionOfProvider,
             mapOfCollectionOfJavaxProvider,
-            mapOfSet),
+            mapOfSet,
+            mapOfKeyExtendsValueKey),
         mapbinder.getAlternateMapKeys());
 
     boolean entrySetMatch = false;
@@ -221,6 +226,7 @@ public class SpiUtils {
     boolean collectionOfProvidersOfEntryOfProviderMatch = false;
     boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     boolean setOfExtendsOfEntryOfProviderMatch = false;
+    boolean mapOfKeyExtendsValueKeyMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Binding<?>> otherMatches = Lists.newArrayList();
     Multimap<Object, IndexedBinding> indexedEntries =
@@ -275,6 +281,9 @@ public class SpiUtils {
       } else if (b.getKey().equals(setOfExtendsOfEntryOfProvider)) {
         assertTrue(contains);
         setOfExtendsOfEntryOfProviderMatch = true;
+      } else if (b.getKey().equals(mapOfKeyExtendsValueKey)) {
+        assertTrue(contains);
+        mapOfKeyExtendsValueKeyMatch = true;
       } else if (contains) {
         if (b instanceof ProviderInstanceBinding) {
           ProviderInstanceBinding<?> pib = (ProviderInstanceBinding<?>) b;
@@ -310,6 +319,7 @@ public class SpiUtils {
     assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
     assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertTrue(setOfExtendsOfEntryOfProviderMatch);
+    assertTrue(mapOfKeyExtendsValueKeyMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
@@ -395,6 +405,9 @@ public class SpiUtils {
         mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> setOfExtendsOfEntryOfProvider =
         mapKey.ofType(setOfExtendsOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> mapOfKeyExtendsValueKey =
+        mapKey.ofType(mapOf(keyType, TypeLiteral.get(Types.subtypeOf(valueType.getType()))));
+
     assertEquals(
         ImmutableSet.of(
             mapOfProvider,
@@ -403,7 +416,8 @@ public class SpiUtils {
             mapOfSetOfJavaxProvider,
             mapOfCollectionOfProvider,
             mapOfCollectionOfJavaxProvider,
-            mapOfSet),
+            mapOfSet,
+            mapOfKeyExtendsValueKey),
         mapbinder.getAlternateMapKeys());
 
     boolean entrySetMatch = false;
@@ -418,6 +432,7 @@ public class SpiUtils {
     boolean collectionOfProvidersOfEntryOfProviderMatch = false;
     boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     boolean setOfExtendsOfEntryOfProviderMatch = false;
+    boolean mapOfKeyExtendsValueKeyMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Element> otherMatches = Lists.newArrayList();
     List<Element> otherElements = Lists.newArrayList();
@@ -516,6 +531,10 @@ public class SpiUtils {
           matched = true;
           assertTrue(contains);
           setOfExtendsOfEntryOfProviderMatch = true;
+        } else if (key.equals(mapOfKeyExtendsValueKey)) {
+          matched = true;
+          assertTrue(contains);
+          mapOfKeyExtendsValueKeyMatch = true;
         }
       }
 
@@ -542,6 +561,7 @@ public class SpiUtils {
     assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
     assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertTrue(setOfExtendsOfEntryOfProviderMatch);
+    assertTrue(mapOfKeyExtendsValueKeyMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals(allowDuplicates, mapSetJavaxProviderMatch);

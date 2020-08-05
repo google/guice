@@ -29,12 +29,13 @@ import java.util.Set;
  * A binding for a MapBinder.
  *
  * <p>Although MapBinders may be injected through a variety of generic types ({@code Map<K, V>},
- * {@code Map<K, Provider<V>>}, {@code Map<K, Set<V>>}, {@ocde Map<K, Set<Provider<V>>}, and even
- * {@code Set<Map.Entry<K, Provider<V>>}), a MapBinderBinding exists only on the Binding associated
- * with the Map&lt;K, V> key. Injectable map types can be discovered using {@link #getMapKey} (which
- * will return the {@code Map<K, V>} key), or{@link #getAlternateMapKeys} (which will return the
- * other keys that can inject this data). Other bindings can be validated to be derived from this
- * MapBinderBinding using {@link #containsElement(Element)}.
+ * {@code Map<K, ? extends V>}, {@code Map<K, Provider<V>>}, {@code Map<K, Set<V>>}, {@code Map<K,
+ * Set<Provider<V>>}, and even {@code Set<Map.Entry<K, Provider<V>>}), a MapBinderBinding exists
+ * only on the Binding associated with the Map&lt;K, V> key. Injectable map types can be discovered
+ * using {@link #getMapKey} (which will return the {@code Map<K, V>} key), or{@link
+ * #getAlternateMapKeys} (which will return the other keys that can inject this data). Other
+ * bindings can be validated to be derived from this MapBinderBinding using {@link
+ * #containsElement(Element)}.
  *
  * @param <T> The fully qualified type of the map, including Map. For example: {@code
  *     MapBinderBinding<Map<String, Snack>>}
@@ -51,7 +52,7 @@ public interface MapBinderBinding<T> {
    * {@code Map<K, com.google.inject.Provider<V>>}, {@code Map<K, javax.inject.Provider<V>>}, {@code
    * Map<K, Set<com.google.inject.Provider<V>>>}, {@code Map<K, Set<javax.inject.Provider<V>>>},
    * {@code Map<K, Collection<com.google.inject.Provider<V>>>}, {@code Map<K,
-   * Collection<javax.inject.Provider<V>>>}, and {@code Map<K, Set<V>}.
+   * Collection<javax.inject.Provider<V>>>}, {@code Map<K, Set<V>}, and {@code Map<K, ? extends V>}.
    *
    * @since 4.2.3
    */
