@@ -93,10 +93,10 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       throws ErrorsException {
     int numErrors = errors.size();
 
-    Class<? super T> rawType =
+    Class<?> rawType =
         constructorInjector == null
             ? key.getTypeLiteral().getRawType()
-            : (Class) constructorInjector.getDeclaringType().getRawType();
+            : constructorInjector.getDeclaringType().getRawType();
 
     // We can't inject abstract classes.
     if (Modifier.isAbstract(rawType.getModifiers())) {

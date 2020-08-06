@@ -40,6 +40,7 @@ import java.lang.annotation.Target;
 public @interface CheckedProvides {
 
   /** The interface that provides this value, a subinterface of {@link CheckedProvider}. */
+  @SuppressWarnings("rawtypes") // Class literal uses raw type.
   Class<? extends CheckedProvider> value();
 
   /**

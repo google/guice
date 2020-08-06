@@ -47,7 +47,7 @@ public class ServletTestUtils {
         (HttpServletRequest)
             Proxy.newProxyInstance(
                 HttpServletRequest.class.getClassLoader(),
-                new Class[] {HttpServletRequest.class},
+                new Class<?>[] {HttpServletRequest.class},
                 new ThrowingInvocationHandler());
 
     return new HttpServletRequestWrapper(delegate) {
