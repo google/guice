@@ -260,12 +260,19 @@ public final class Errors implements Serializable {
         key);
   }
 
-  public Errors atInjectRequired(Class<?> clazz) {
+  public Errors atInjectRequired(TypeLiteral<?> type) {
+    if (InternalFlags.enableExperimentalErrorMessages()) {
+      return addMessage(
+          new Message(
+              GuiceInternal.GUICE_INTERNAL,
+              ErrorId.MISSING_CONSTRUCTOR,
+              new MissingConstructorError(type, /* atInjectRequired= */ true, getSources())));
+    }
     return addMessage(
         ErrorId.AT_INJECT_REQUIRED,
         "Explicit @Inject annotations are required on constructors,"
             + " but %s has no constructors annotated with @Inject.",
-        clazz);
+        type.getRawType());
   }
 
   public Errors converterReturnedNull(
@@ -410,6 +417,13 @@ public final class Errors implements Serializable {
           + " or a zero-argument constructor that is not private.";
 
   public Errors missingConstructor(TypeLiteral<?> type) {
+    if (InternalFlags.enableExperimentalErrorMessages()) {
+      return addMessage(
+          new Message(
+              GuiceInternal.GUICE_INTERNAL,
+              ErrorId.MISSING_CONSTRUCTOR,
+              new MissingConstructorError(type, /* atInjectRequired= */ false, getSources())));
+    }
     // Don't bother including the type in the message twice, unless the type is generic (i.e. the
     // type has generics that the raw class loses)
     String typeString = type.toString();

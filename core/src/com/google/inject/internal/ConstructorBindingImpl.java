@@ -26,7 +26,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
-import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
@@ -89,7 +88,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       Scoping scoping,
       Errors errors,
       boolean failIfNotLinked,
-      boolean failIfNotExplicit)
+      boolean atInjectRequired)
       throws ErrorsException {
     int numErrors = errors.size();
 
@@ -113,10 +112,8 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     // Find a constructor annotated @Inject
     if (constructorInjector == null) {
       try {
-        constructorInjector = InjectionPoint.forConstructorOf(key.getTypeLiteral());
-        if (failIfNotExplicit && !hasAtInject((Constructor) constructorInjector.getMember())) {
-          errors.atInjectRequired(rawType);
-        }
+        constructorInjector =
+            InjectionPoint.forConstructorOf(key.getTypeLiteral(), atInjectRequired);
       } catch (ConfigurationException e) {
         throw errors.merge(e.getErrorMessages()).toException();
       }
@@ -141,12 +138,6 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
     return new ConstructorBindingImpl<T>(
         injector, key, source, scopedFactory, scoping, factoryFactory, constructorInjector);
-  }
-
-  /** Returns true if the inject annotation is on the constructor. */
-  private static boolean hasAtInject(Constructor<?> cxtor) {
-    return cxtor.isAnnotationPresent(Inject.class)
-        || cxtor.isAnnotationPresent(javax.inject.Inject.class);
   }
 
   @Override

@@ -547,6 +547,9 @@ final class FactoryProvider2<F>
     if (!anyAssistedInjectConstructors) {
       // If none existed, use @Inject.
       try {
+        // TODO(b/151482394): Change this to enforce that there is a @Inject annotated cosntructor
+        // since it doesn't make sense to use assisted inject with a no-arg constructor, regardless
+        // if the injector is configured to require @Inject annotation or not.
         return InjectionPoint.forConstructorOf(implementation);
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
