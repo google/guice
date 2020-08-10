@@ -20,6 +20,7 @@ import static com.google.inject.internal.MoreTypes.getRawType;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
@@ -39,6 +40,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,6 +49,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * A constructor, field or method that can receive injections. Typically this is a member with the
@@ -229,6 +232,9 @@ public final class InjectionPoint {
   /**
    * Returns a new injection point for the injectable constructor of {@code type}.
    *
+   * <p>Either a {@code @Inject} annotated constructor or a non-private no arg constructor is
+   * required to be defined by the class corresponding to {@code type}.
+   *
    * @param type a concrete type with exactly one constructor annotated {@literal @}{@link Inject},
    *     or a no-arguments constructor that is not private.
    * @throws ConfigurationException if there is no injectable constructor, more than one injectable
@@ -236,36 +242,53 @@ public final class InjectionPoint {
    *     parameter with multiple binding annotations.
    */
   public static InjectionPoint forConstructorOf(TypeLiteral<?> type) {
+    return forConstructorOf(type, false);
+  }
+
+  /**
+   * Returns a new injection point for the injectable constructor of {@code type}.
+   *
+   * <p>If {@code atInjectRequired} is true, the constructor must be annotated with {@code @Inject}.
+   * If {@code atInjectRequired} is false, either a {@code @Inject} annotated constructor or a
+   * non-private no arg constructor is required to be defined by the class corresponding to {@code
+   * type}.
+   *
+   * @param type a concrete type with exactly one constructor annotated {@code @Inject}, or a
+   *     no-arguments constructor that is not private.
+   * @param atInjectRequired whether the constructor must be annotated with {@code Inject}.
+   * @throws ConfigurationException if there is no injectable constructor, more than one injectable
+   *     constructor, or if parameters of the injectable constructor are malformed, such as a
+   *     parameter with multiple binding annotations.
+   */
+  public static InjectionPoint forConstructorOf(TypeLiteral<?> type, boolean atInjectRequired) {
     Class<?> rawType = getRawType(type.getType());
     Errors errors = new Errors(rawType);
 
+    List<Constructor<?>> atInjectConstructors =
+        Arrays.stream(rawType.getDeclaredConstructors())
+            .filter(
+                constructor ->
+                    constructor.isAnnotationPresent(Inject.class)
+                        || constructor.isAnnotationPresent(javax.inject.Inject.class))
+            .collect(Collectors.toList());
+
     Constructor<?> injectableConstructor = null;
-    for (Constructor<?> constructor : rawType.getDeclaredConstructors()) {
+    atInjectConstructors.stream()
+        .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+        .filter(constructor -> constructor.getAnnotation(Inject.class).optional())
+        .forEach(errors::optionalConstructor);
 
-      boolean optional;
-      Inject guiceInject = constructor.getAnnotation(Inject.class);
-      if (guiceInject == null) {
-        javax.inject.Inject javaxInject = constructor.getAnnotation(javax.inject.Inject.class);
-        if (javaxInject == null) {
-          continue;
-        }
-        optional = false;
-      } else {
-        optional = guiceInject.optional();
-      }
-
-      if (optional) {
-        errors.optionalConstructor(constructor);
-      }
-
+    if (atInjectConstructors.size() > 1) {
+      errors.tooManyConstructors(rawType);
+    } else {
+      injectableConstructor = Iterables.getOnlyElement(atInjectConstructors, null);
       if (injectableConstructor != null) {
-        errors.tooManyConstructors(rawType);
+        checkForMisplacedBindingAnnotations(injectableConstructor, errors);
       }
-
-      injectableConstructor = constructor;
-      checkForMisplacedBindingAnnotations(injectableConstructor, errors);
     }
-
+    if (atInjectRequired && injectableConstructor == null) {
+      errors.atInjectRequired(type);
+    }
     errors.throwConfigurationExceptionIfErrorsExist();
 
     if (injectableConstructor != null) {

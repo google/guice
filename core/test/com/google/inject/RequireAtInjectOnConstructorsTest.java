@@ -139,12 +139,12 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       Asserts.assertContains(
           ce.getMessage(),
           "1) Explicit @Inject annotations are required on constructors, but "
-              + NoCxtors.class.getName()
+              + AnotherNoCxtors.class.getName()
               + " has no constructors annotated with @Inject",
           "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
           "configure",
           "2) Explicit @Inject annotations are required on constructors, but "
-              + AnotherNoCxtors.class.getName()
+              + NoCxtors.class.getName()
               + " has no constructors annotated with @Inject",
           "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
           "configure");

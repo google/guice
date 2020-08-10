@@ -22,6 +22,7 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.name.Names.named;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -196,6 +197,80 @@ public class InjectionPointTest extends TestCase {
   public void testForConstructorOf() {
     InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(Constructable.class);
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
+  }
+
+  public void testForConstructorOfRequireAtInject_success() {
+    InjectionPoint injectionPoint =
+        InjectionPoint.forConstructorOf(
+            TypeLiteral.get(Constructable.class), /* atInjectRequired= */ true);
+    assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
+  }
+
+  public void testForConstructorOfRequireAtInject_fail() {
+    ConfigurationException exception =
+        assertThrows(
+            ConfigurationException.class,
+            () ->
+                InjectionPoint.forConstructorOf(
+                    TypeLiteral.get(NoArgNonConstructable.class), /* atInjectRequired= */ true));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("Explicit @Inject annotations are required on constructors");
+  }
+
+  static class NoArgNonConstructable {
+    NoArgNonConstructable() {}
+  }
+
+  public void testTooManyConstructors() {
+    ConfigurationException exception =
+        assertThrows(
+            ConfigurationException.class,
+            () -> InjectionPoint.forConstructorOf(TypeLiteral.get(TooManyConstructors.class)));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("has more than one constructor annotated with @Inject.");
+  }
+
+  @SuppressWarnings("MoreThanOneInjectableConstructor") // Testing too many constructors
+  static class TooManyConstructors {
+    @Inject
+    TooManyConstructors() {}
+
+    @Inject
+    TooManyConstructors(String str) {}
+  }
+
+  public void testTooManyConstructors_withOptionalConstructorError() {
+    ConfigurationException exception =
+        assertThrows(
+            ConfigurationException.class,
+            () ->
+                InjectionPoint.forConstructorOf(
+                    TypeLiteral.get(TooManyConstructorsWithOptional.class)));
+
+    // Verify that both errors are reported in the exception
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("has more than one constructor annotated with @Inject.");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            "TooManyConstructorsWithOptional.<init>() is annotated @Inject(optional=true), but"
+                + " constructors cannot be optional.");
+  }
+
+  @SuppressWarnings({
+    "MoreThanOneInjectableConstructor",
+    "InjectedConstructorAnnotations"
+  }) // Testing too many constructors and optional constructor annotation
+  static class TooManyConstructorsWithOptional {
+    @Inject(optional = true)
+    TooManyConstructorsWithOptional() {}
+
+    @Inject
+    TooManyConstructorsWithOptional(String str) {}
   }
 
   public void testAddForInstanceMethodsAndFields() throws Exception {
