@@ -16,7 +16,11 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.Asserts.assertContains;
+import static org.junit.Assert.assertThrows;
+
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.MoreTypes.ParameterizedTypeImpl;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
@@ -47,6 +51,34 @@ public class MoreTypesTest extends TestCase {
         MoreTypes.typeToString(mapInnerLongToSetInnerLong.getType()));
   }
 
+  public void testParameterizedType_lessArgs() {
+    IllegalArgumentException expected =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              new ParameterizedTypeImpl(MoreTypesTest.class, D.class, String.class);
+            });
+    assertContains(
+        expected.getMessage(),
+        "Length of provided type arguments is less than length of required parameters for"
+            + " class");
+  }
+
+  public void testParameterizedType_correctArgs() {
+
+    ParameterizedTypeImpl parameterizedType =
+        new ParameterizedTypeImpl(MoreTypesTest.class, D.class, String.class, Integer.class);
+    assertEquals(parameterizedType.getRawType(), D.class);
+  }
+
+  public void testParameterizedType_moreArgs() {
+
+    ParameterizedTypeImpl parameterizedType =
+        new ParameterizedTypeImpl(
+            MoreTypesTest.class, D.class, String.class, Integer.class, Integer.class);
+    assertEquals(parameterizedType.getRawType(), D.class);
+  }
+
   public <T> void testEquals_typeVariable() throws Exception {
     Type type = getClass().getMethod("testEquals_typeVariable").getTypeParameters()[0];
     assertTrue(MoreTypes.equals(new TypeLiteral<T>() {}.getType(), type));
@@ -61,4 +93,8 @@ public class MoreTypesTest extends TestCase {
   }
 
   public static class Inner<T> {}
+
+  static class D<S, T> {}
+
+  static class E extends D<String, Integer> {}
 }

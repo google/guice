@@ -356,11 +356,32 @@ public class MoreTypes {
 
       this.ownerType = ownerType == null ? null : canonicalize(ownerType);
       this.rawType = canonicalize(rawType);
-      this.typeArguments = typeArguments.clone();
-      for (int t = 0; t < this.typeArguments.length; t++) {
-        checkNotNull(this.typeArguments[t], "type parameter");
-        checkNotPrimitive(this.typeArguments[t], "type parameters");
-        this.typeArguments[t] = canonicalize(this.typeArguments[t]);
+      int providedArgumentLength = typeArguments.length;
+      Type[] clonedTypeArguments = typeArguments.clone();
+      int validArgLength = providedArgumentLength;
+      if (this.rawType instanceof Class) {
+        Class<?> klass = (Class) this.rawType;
+        int classArgumentLength = klass.getTypeParameters().length;
+        // TODO(b/163147654): change following if condition from < to =
+        if (providedArgumentLength < classArgumentLength) {
+          throw new IllegalArgumentException(
+              "Length of provided type arguments is less than length of required parameters for"
+                  + " class:"
+                  + klass.getName()
+                  + " provided type argument length:"
+                  + providedArgumentLength
+                  + " length of class parameters:"
+                  + classArgumentLength);
+        } else if (providedArgumentLength > classArgumentLength) {
+          validArgLength = classArgumentLength;
+        }
+      }
+
+      this.typeArguments = new Type[validArgLength];
+      for (int t = 0; t < validArgLength; t++) {
+        checkNotNull(clonedTypeArguments[t], "type parameter");
+        checkNotPrimitive(clonedTypeArguments[t], "type parameters");
+        this.typeArguments[t] = canonicalize(clonedTypeArguments[t]);
       }
     }
 
