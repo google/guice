@@ -388,6 +388,13 @@ public final class Errors implements Serializable {
   }
 
   public Errors scopeNotFound(Class<? extends Annotation> scopeAnnotation) {
+    if (InternalFlags.enableExperimentalErrorMessages()) {
+      return addMessage(
+          new Message(
+              GuiceInternal.GUICE_INTERNAL,
+              ErrorId.SCOPE_NOT_FOUND,
+              new ScopeNotFoundError(scopeAnnotation, getSources())));
+    }
     return addMessage(ErrorId.SCOPE_NOT_FOUND, "No scope is bound to %s.", scopeAnnotation);
   }
 
