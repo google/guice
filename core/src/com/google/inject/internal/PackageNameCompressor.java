@@ -117,8 +117,12 @@ final class PackageNameCompressor {
           .append("\n");
     }
 
-    return legendBuilder.length() == 0 ? replacedString
-        : replacedString + LEGEND_HEADER + legendBuilder + LEGEND_FOOTER;
+    return legendBuilder.length() == 0
+        ? replacedString
+        : replacedString
+            + Messages.bold(LEGEND_HEADER)
+            + Messages.faint(legendBuilder.toString())
+            + Messages.bold(LEGEND_FOOTER);
   }
 
   /**

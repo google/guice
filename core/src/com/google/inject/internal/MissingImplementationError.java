@@ -41,7 +41,7 @@ final class MissingImplementationError extends InternalErrorDetail<MissingImplem
             .collect(Collectors.toList());
 
     if (!filteredSourcesList.isEmpty()) {
-      formatter.format("%s%n", "Requested by:");
+      formatter.format("%s%n", Messages.bold("Requested by:"));
       int sourceListIndex = 1;
       for (List<Object> sources : filteredSourcesList) {
         ErrorFormatter.formatSources(sourceListIndex++, Lists.reverse(sources), formatter);

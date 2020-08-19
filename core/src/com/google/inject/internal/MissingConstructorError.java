@@ -67,7 +67,7 @@ final class MissingConstructorError extends InternalErrorDetail<MissingConstruct
     sourcesList.add(getSources());
     mergeableErrors.forEach(error -> sourcesList.add(error.getSources()));
 
-    formatter.format("%s%n", "Requested by:");
+    formatter.format("%s%n", Messages.bold("Requested by:"));
     int sourceListIndex = 1;
     for (List<Object> sources : sourcesList) {
       ErrorFormatter.formatSources(sourceListIndex++, Lists.reverse(sources), formatter);
