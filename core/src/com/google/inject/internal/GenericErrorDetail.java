@@ -22,7 +22,11 @@ public final class GenericErrorDetail extends InternalErrorDetail<GenericErrorDe
     Preconditions.checkArgument(mergeableErrors.isEmpty(), "Unexpected mergeable errors");
     List<Object> dependencies = getSources();
     for (Object source : Lists.reverse(dependencies)) {
-      Messages.formatSource(formatter, source);
+      if (InternalFlags.enableExperimentalErrorMessages()) {
+        new SourceFormatter(source, formatter).format();
+      } else {
+        Messages.formatSource(formatter, source);
+      }
     }
   }
 

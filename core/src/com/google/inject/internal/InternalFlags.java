@@ -35,10 +35,10 @@ public class InternalFlags {
   private static final NullableProvidesOption NULLABLE_PROVIDES
       = parseNullableProvidesOption(NullableProvidesOption.ERROR);
 
+  private static final ColorizeOption COLORIZE_OPTION = parseColorizeOption();
 
-  /**
-   * The options for Guice stack trace collection.
-   */
+
+  /** The options for Guice stack trace collection. */
   public enum IncludeStackTraceOption {
     /** No stack trace collection */
     OFF,
@@ -94,6 +94,30 @@ public class InternalFlags {
     ENABLED,
   }
 
+  /** Options for enable or disable using ansi color in error messages. */
+  public enum ColorizeOption {
+    AUTO {
+      @Override
+      boolean enabled() {
+        return System.console() != null && System.getenv("TERM") != null;
+      }
+    },
+    ON {
+      @Override
+      boolean enabled() {
+        return true;
+      }
+    },
+    OFF {
+      @Override
+      boolean enabled() {
+        return false;
+      }
+    };
+
+    abstract boolean enabled();
+  }
+
   public static IncludeStackTraceOption getIncludeStackTraceOption() {
     return INCLUDE_STACK_TRACES;
   }
@@ -111,6 +135,10 @@ public class InternalFlags {
     return false;
   }
 
+  public static boolean enableColorizeErrorMessages() {
+    return COLORIZE_OPTION.enabled();
+  }
+
   private static IncludeStackTraceOption parseIncludeStackTraceOption() {
     return getSystemOption("guice_include_stack_traces",
         IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE);
@@ -124,6 +152,10 @@ public class InternalFlags {
   private static NullableProvidesOption parseNullableProvidesOption(
       NullableProvidesOption defaultValue) {
     return getSystemOption("guice_check_nullable_provides_params", defaultValue);
+  }
+
+  private static ColorizeOption parseColorizeOption() {
+    return getSystemOption("guice_colorize_error_messages", ColorizeOption.OFF);
   }
 
   /**

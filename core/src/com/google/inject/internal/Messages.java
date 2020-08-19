@@ -16,6 +16,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.stream.Collectors.joining;
 
 import com.google.common.base.Equivalence;
 import com.google.common.base.Objects;
@@ -414,5 +415,47 @@ public final class Messages {
     protected int doHash(Throwable t) {
       return Objects.hashCode(t.getClass().hashCode(), t.getMessage(), hash(t.getCause()));
     }
+  }
+
+  private enum FormatOptions {
+    RED("\u001B[31m"),
+    BOLD("\u001B[1m"),
+    FAINT("\u001B[2m"),
+    ITALIC("\u001B[3m"),
+    UNDERLINE("\u001B[4m"),
+    RESET("\u001B[0m");
+
+    private final String ansiCode;
+
+    FormatOptions(String ansiCode) {
+      this.ansiCode = ansiCode;
+    }
+  }
+
+  private static final String formatText(String text, FormatOptions... options) {
+    if (!InternalFlags.enableColorizeErrorMessages()) {
+      return text;
+    }
+    return String.format(
+        "%s%s%s",
+        Arrays.stream(options).map(option -> option.ansiCode).collect(joining()),
+        text,
+        FormatOptions.RESET.ansiCode);
+  }
+
+  public static final String bold(String text) {
+    return formatText(text, FormatOptions.BOLD);
+  }
+
+  public static final String redBold(String text) {
+    return formatText(text, FormatOptions.RED, FormatOptions.BOLD);
+  }
+
+  public static final String underline(String text) {
+    return formatText(text, FormatOptions.UNDERLINE);
+  }
+
+  public static final String faint(String text) {
+    return formatText(text, FormatOptions.FAINT);
   }
 }

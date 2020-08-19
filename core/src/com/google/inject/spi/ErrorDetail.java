@@ -3,6 +3,7 @@ package com.google.inject.spi;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.InternalFlags;
+import com.google.inject.internal.Messages;
 import java.io.Serializable;
 import java.util.Formatter;
 import java.util.List;
@@ -60,14 +61,14 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    */
   public final void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     if (InternalFlags.enableExperimentalErrorMessages()) {
-      formatter.format("%s) [%s]: %s%n%n", index, errorIdentifier, getMessage());
+      formatter.format("%s) [%s]: %s%n%n", index, Messages.redBold(errorIdentifier), getMessage());
       formatDetail(mergeableErrors, formatter);
       formatter.format("%n");
       // TODO(b/151482394): Output potiential fixes for the error
       Optional<String> learnMoreLink = getLearnMoreLink();
       if (learnMoreLink.isPresent()) {
-        formatter.format("Learn more:%n");
-        formatter.format("  %s%n", learnMoreLink.get());
+        formatter.format("%s%n", Messages.bold("Learn more:"));
+        formatter.format("  %s%n", Messages.underline(learnMoreLink.get()));
       }
     } else {
       // TODO(b/151482394): Remove this once the new error messages are enabled.

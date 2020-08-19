@@ -38,6 +38,7 @@ final class SourceFormatter {
   }
 
   void format() {
+    // TODO(b/151482394): Omit the prepositions for first source in the list.
     boolean appendModuleSource = !moduleStack.isEmpty();
     if (source instanceof Dependency) {
       formatDependency((Dependency<?>) source);
@@ -85,13 +86,13 @@ final class SourceFormatter {
     Class<? extends Member> memberType = Classes.memberType(member);
     formatMember(injectionPoint.getMember());
     if (memberType == Field.class) {
-      formatter.format("%s \\_ for field %s%n", INDENT, member.getName());
+      formatter.format("%s \\_ for field %s%n", INDENT, Messages.redBold(member.getName()));
     } else if (dependency != null) {
       int ordinal = dependency.getParameterIndex() + 1;
       Optional<String> name = getParameterName(member, dependency.getParameterIndex());
       formatter.format(
           "%s \\_ for %s parameter %s%n",
-          INDENT, ordinal + Messages.getOrdinalSuffix(ordinal), name.orElse(""));
+          INDENT, ordinal + Messages.getOrdinalSuffix(ordinal), Messages.redBold(name.orElse("")));
     }
   }
 
