@@ -21,11 +21,13 @@ import java.util.Optional;
 /** Formatting a single source in Guice error message. */
 final class SourceFormatter {
   static final String INDENT = Strings.repeat(" ", 5);
+
   private final Object source;
   private final Formatter formatter;
+  private final boolean omitPreposition;
   private final String moduleStack;
 
-  SourceFormatter(Object source, Formatter formatter) {
+  SourceFormatter(Object source, Formatter formatter, boolean omitPreposition) {
     if (source instanceof ElementSource) {
       ElementSource elementSource = (ElementSource) source;
       this.source = elementSource.getDeclaringSource();
@@ -35,33 +37,40 @@ final class SourceFormatter {
       this.moduleStack = "";
     }
     this.formatter = formatter;
+    this.omitPreposition = omitPreposition;
   }
 
   void format() {
-    // TODO(b/151482394): Omit the prepositions for first source in the list.
     boolean appendModuleSource = !moduleStack.isEmpty();
     if (source instanceof Dependency) {
       formatDependency((Dependency<?>) source);
     } else if (source instanceof InjectionPoint) {
       formatInjectionPoint(null, (InjectionPoint) source);
     } else if (source instanceof Class) {
-      formatter.format("at %s%n", StackTraceElements.forType((Class<?>) source));
+      formatter.format("%s%s%n", preposition("at "), StackTraceElements.forType((Class<?>) source));
     } else if (source instanceof Member) {
       formatMember((Member) source);
     } else if (source instanceof TypeLiteral) {
-      formatter.format("while locating %s%n", source);
+      formatter.format("%s%s%n", preposition("while locating "), source);
     } else if (source instanceof Key) {
       formatKey((Key<?>) source);
     } else if (source instanceof Thread) {
       appendModuleSource = false;
-      formatter.format("in thread %s%n", source);
+      formatter.format("%s%s%n", preposition("in thread "), source);
     } else {
-      formatter.format("at %s%n", source);
+      formatter.format("%s%s%n", preposition("at "), source);
     }
 
     if (appendModuleSource) {
       formatter.format("%s \\_ installed by: %s%n", INDENT, moduleStack);
     }
+  }
+
+  private String preposition(String prepostition) {
+    if (omitPreposition) {
+      return "";
+    }
+    return prepostition;
   }
 
   private void formatDependency(Dependency<?> dependency) {
@@ -74,11 +83,11 @@ final class SourceFormatter {
   }
 
   private void formatKey(Key<?> key) {
-    formatter.format("for %s%n", Messages.convert(key));
+    formatter.format("%s%s%n", preposition("for "), Messages.convert(key));
   }
 
   private void formatMember(Member member) {
-    formatter.format("at %s%n", StackTraceElements.forMember(member));
+    formatter.format("%s%s%n", preposition("at "), StackTraceElements.forMember(member));
   }
 
   private void formatInjectionPoint(Dependency<?> dependency, InjectionPoint injectionPoint) {

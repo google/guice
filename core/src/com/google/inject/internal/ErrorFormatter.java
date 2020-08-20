@@ -15,7 +15,7 @@ final class ErrorFormatter {
       } else {
         formatter.format("%s", SourceFormatter.INDENT);
       }
-      new SourceFormatter(source, formatter).format();
+      new SourceFormatter(source, formatter, i == 0).format();
     }
   }
 }
