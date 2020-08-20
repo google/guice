@@ -579,8 +579,8 @@ public final class Errors implements Serializable {
       return;
     }
 
-
-    throw new CreationException(getMessages());
+    CreationException exception = new CreationException(getMessages());
+    throw exception;
   }
 
   public void throwConfigurationExceptionIfErrorsExist() {
@@ -588,8 +588,8 @@ public final class Errors implements Serializable {
       return;
     }
 
-
-    throw new ConfigurationException(getMessages());
+    ConfigurationException exception = new ConfigurationException(getMessages());
+    throw exception;
   }
 
   // Guice no longer calls this, but external callers do
@@ -597,9 +597,8 @@ public final class Errors implements Serializable {
     if (!hasErrors()) {
       return;
     }
-
-
-    throw new ProvisionException(getMessages());
+    ProvisionException exception = new ProvisionException(getMessages());
+    throw exception;
   }
 
   public Errors merge(Collection<Message> messages) {
@@ -639,8 +638,8 @@ public final class Errors implements Serializable {
       return;
     }
 
-
-    throw toException();
+    ErrorsException exception = toException();
+    throw exception;
   }
 
   public ErrorsException toException() {
