@@ -247,6 +247,7 @@ public final class InternalProvisionException extends Exception {
 
   /** Returns this exception convered to a ProvisionException. */
   public ProvisionException toProvisionException() {
-    return new ProvisionException(getErrors());
+    ProvisionException exception = new ProvisionException(getErrors());
+    return exception;
   }
 }
