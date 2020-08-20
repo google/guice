@@ -32,15 +32,14 @@ abstract class InternalErrorDetail<T extends ErrorDetail<T>> extends ErrorDetail
           .add(ErrorId.TOO_MANY_CONSTRUCTORS)
           .build();
 
-  private static final String DOC_BASE_URL = "https://github.com/googel/guice/wiki";
+  private static final String DOC_BASE_URL = "https://github.com/google/guice/wiki/";
 
   protected final ErrorId errorId;
 
   protected InternalErrorDetail(
       ErrorId errorId, String message, List<Object> sources, Throwable cause) {
     super(
-        String.format(
-            "Guice/%s", CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, errorId.name())),
+        "Guice/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, errorId.name()),
         message,
         sources,
         cause);
@@ -50,7 +49,7 @@ abstract class InternalErrorDetail<T extends ErrorDetail<T>> extends ErrorDetail
   @Override
   protected final Optional<String> getLearnMoreLink() {
     if (DOCUMENTED_ERRORS.contains(errorId)) {
-      return Optional.of(String.format("%s/%s", DOC_BASE_URL, errorId.name()));
+      return Optional.of(DOC_BASE_URL + errorId.name());
     }
     return Optional.empty();
   }
