@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import com.google.common.primitives.Primitives;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
@@ -44,11 +43,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,11 +65,6 @@ import java.util.Set;
  */
 public final class Errors implements Serializable {
 
-  /** When a binding is not found, show at most this many bindings with the same type */
-  private static final int MAX_MATCHING_TYPES_REPORTED = 3;
-
-  /** When a binding is not found, show at most this many bindings that have some similarities */
-  private static final int MAX_RELATED_TYPES_REPORTED = 3;
 
   /**
    * Throws a ConfigurationException with an NullPointerExceptions as the cause if the given
@@ -98,17 +90,6 @@ public final class Errors implements Serializable {
 
     throw new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
   }
-
-  /**
-   * If the key is unknown and it is one of these types, it generally means there is a missing
-   * annotation.
-   */
-  private static final ImmutableSet<Class<?>> COMMON_AMBIGUOUS_TYPES =
-      ImmutableSet.<Class<?>>builder()
-          .add(Object.class)
-          .add(String.class)
-          .addAll(Primitives.allWrapperTypes())
-          .build();
 
   /** The root errors object. Used to access the list of error messages. */
   private final Errors root;
@@ -171,7 +152,8 @@ public final class Errors implements Serializable {
   /** Within guice's core, allow for better missing binding messages */
   <T> Errors missingImplementationWithHint(Key<T> key, Injector injector) {
     if (InternalFlags.enableExperimentalErrorMessages()) {
-      MissingImplementationError error = new MissingImplementationError(key, getSources());
+      MissingImplementationError<T> error =
+          new MissingImplementationError<T>(key, injector, getSources());
       return addMessage(
           new Message(GuiceInternal.GUICE_INTERNAL, ErrorId.MISSING_IMPLEMENTATION, error));
     }
@@ -179,68 +161,7 @@ public final class Errors implements Serializable {
 
     sb.append(format("No implementation for %s was bound.", key));
 
-    // Keys which have similar strings as the desired key
-    List<String> possibleMatches = new ArrayList<>();
-
-    // Check for other keys that may have the same type,
-    // but not the same annotation
-    TypeLiteral<T> type = key.getTypeLiteral();
-    List<Binding<T>> sameTypes = injector.findBindingsByType(type);
-    if (!sameTypes.isEmpty()) {
-      sb.append(format("%n  Did you mean?"));
-      int howMany = Math.min(sameTypes.size(), MAX_MATCHING_TYPES_REPORTED);
-      for (int i = 0; i < howMany; ++i) {
-        // TODO: Look into a better way to prioritize suggestions. For example, possbily
-        // use levenshtein distance of the given annotation vs actual annotation.
-        sb.append(format("%n    * %s", sameTypes.get(i).getKey()));
-      }
-      int remaining = sameTypes.size() - MAX_MATCHING_TYPES_REPORTED;
-      if (remaining > 0) {
-        String plural = (remaining == 1) ? "" : "s";
-        sb.append(format("%n    %d more binding%s with other annotations.", remaining, plural));
-      }
-    } else {
-      // For now, do a simple substring search for possibilities. This can help spot
-      // issues when there are generics being used (such as a wrapper class) and the
-      // user has forgotten they need to bind based on the wrapper, not the underlying
-      // class. In the future, consider doing a strict in-depth type search.
-      // TODO: Look into a better way to prioritize suggestions. For example, possbily
-      // use levenshtein distance of the type literal strings.
-      String want = type.toString();
-      Map<Key<?>, Binding<?>> bindingMap = injector.getAllBindings();
-      for (Key<?> bindingKey : bindingMap.keySet()) {
-        String have = bindingKey.getTypeLiteral().toString();
-        if (have.contains(want) || want.contains(have)) {
-          Formatter fmt = new Formatter();
-          Messages.formatSource(fmt, bindingMap.get(bindingKey).getSource());
-          String match = String.format("%s bound%s", convert(bindingKey), fmt.toString());
-          possibleMatches.add(match);
-          // TODO: Consider a check that if there are more than some number of results,
-          // don't suggest any.
-          if (possibleMatches.size() > MAX_RELATED_TYPES_REPORTED) {
-            // Early exit if we have found more than we need.
-            break;
-          }
-        }
-      }
-
-      if ((possibleMatches.size() > 0) && (possibleMatches.size() <= MAX_RELATED_TYPES_REPORTED)) {
-        sb.append(format("%n  Did you mean?"));
-        for (String possibleMatch : possibleMatches) {
-          sb.append(format("%n    %s", possibleMatch));
-        }
-      }
-    }
-
-    // If where are no possibilities to suggest, then handle the case of missing
-    // annotations on simple types. This is usually a bad idea.
-    if (sameTypes.isEmpty()
-        && possibleMatches.isEmpty()
-        && key.getAnnotationType() == null
-        && COMMON_AMBIGUOUS_TYPES.contains(key.getTypeLiteral().getRawType())) {
-      // We don't recommend using such simple types without annotations.
-      sb.append(format("%nThe key seems very generic, did you forget an annotation?"));
-    }
+    MissingImplementationErrorHints.getSuggestions(key, injector).forEach(sb::append);
 
     return addMessage(ErrorId.MISSING_IMPLEMENTATION, sb.toString());
   }

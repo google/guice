@@ -1,6 +1,8 @@
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.spi.ErrorDetail;
 import java.util.ArrayList;
@@ -9,16 +11,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /** Error reported by Guice when a key is not bound in the injector. */
-final class MissingImplementationError extends InternalErrorDetail<MissingImplementationError> {
-  private final Key<?> key;
+final class MissingImplementationError<T>
+    extends InternalErrorDetail<MissingImplementationError<T>> {
 
-  public MissingImplementationError(Key<?> key, List<Object> sources) {
+  private final Key<T> key;
+  private final ImmutableList<String> suggestions;
+
+  public MissingImplementationError(Key<T> key, Injector injector, List<Object> sources) {
+    this(key, MissingImplementationErrorHints.getSuggestions(key, injector), sources);
+  }
+
+  private MissingImplementationError(
+      Key<T> key, ImmutableList<String> suggestions, List<Object> sources) {
     super(
         ErrorId.MISSING_IMPLEMENTATION,
         String.format("No implementation for %s was bound.", Messages.convert(key)),
         sources,
         null);
     this.key = key;
+    this.suggestions = suggestions;
   }
 
   @Override
@@ -29,6 +40,10 @@ final class MissingImplementationError extends InternalErrorDetail<MissingImplem
 
   @Override
   public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+    if (!suggestions.isEmpty()) {
+      suggestions.forEach(formatter::format);
+      formatter.format("%n");
+    }
     List<List<Object>> sourcesList = new ArrayList<>();
     sourcesList.add(getSources());
     sourcesList.addAll(
@@ -50,8 +65,8 @@ final class MissingImplementationError extends InternalErrorDetail<MissingImplem
   }
 
   @Override
-  public MissingImplementationError withSources(List<Object> newSources) {
-    return new MissingImplementationError(key, newSources);
+  public MissingImplementationError<T> withSources(List<Object> newSources) {
+    return new MissingImplementationError<T>(key, suggestions, newSources);
   }
 
   /** Omit the key itself in the source list since the information is redundant. */
