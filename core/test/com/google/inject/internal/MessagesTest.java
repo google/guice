@@ -18,7 +18,7 @@ import org.junit.runners.JUnit4;
 public final class MessagesTest {
   static class ExampleErrorDetail extends ErrorDetail<ExampleErrorDetail> {
     ExampleErrorDetail(String message) {
-      super("Example", message, ImmutableList.of(), null);
+      super(message, ImmutableList.of(), null);
     }
 
     @Override

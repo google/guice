@@ -38,11 +38,7 @@ abstract class InternalErrorDetail<T extends ErrorDetail<T>> extends ErrorDetail
 
   protected InternalErrorDetail(
       ErrorId errorId, String message, List<Object> sources, Throwable cause) {
-    super(
-        "Guice/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, errorId.name()),
-        message,
-        sources,
-        cause);
+    super(message, sources, cause);
     this.errorId = errorId;
   }
 
@@ -52,5 +48,14 @@ abstract class InternalErrorDetail<T extends ErrorDetail<T>> extends ErrorDetail
       return Optional.of(DOC_BASE_URL + errorId.name());
     }
     return Optional.empty();
+  }
+
+  @Override
+  protected final Optional<String> getErrorIdentifier() {
+    if (errorId == ErrorId.OTHER) {
+      return Optional.empty();
+    }
+    String id = "Guice/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, errorId.name());
+    return Optional.of(id);
   }
 }

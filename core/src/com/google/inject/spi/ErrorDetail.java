@@ -16,14 +16,11 @@ import java.util.Optional;
  * <p>WARNING: The class and its APIs are still experimental and subject to change.
  */
 public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements Serializable {
-  private final String errorIdentifier;
   private final String message;
   private final ImmutableList<Object> sources;
   private final Throwable cause;
 
-  protected ErrorDetail(
-      String errorIdentifier, String message, List<Object> sources, Throwable cause) {
-    this.errorIdentifier = errorIdentifier;
+  protected ErrorDetail(String message, List<Object> sources, Throwable cause) {
     this.message = message;
     this.sources = ImmutableList.copyOf(sources);
     this.cause = cause;
@@ -61,13 +58,13 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    */
   public final void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     if (InternalFlags.enableExperimentalErrorMessages()) {
-      formatter.format("%s) [%s]: %s%n%n", index, Messages.redBold(errorIdentifier), getMessage());
+      String id = getErrorIdentifier().map(s -> "[" + Messages.redBold(s) + "]: ").orElse("");
+      formatter.format("%s) %s%s%n%n", index, id, getMessage());
       formatDetail(mergeableErrors, formatter);
-      formatter.format("%n");
       // TODO(b/151482394): Output potiential fixes for the error
       Optional<String> learnMoreLink = getLearnMoreLink();
       if (learnMoreLink.isPresent()) {
-        formatter.format("%s%n", Messages.bold("Learn more:"));
+        formatter.format("%n%s%n", Messages.bold("Learn more:"));
         formatter.format("  %s%n", Messages.underline(learnMoreLink.get()));
       }
     } else {
@@ -100,6 +97,11 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
     return Optional.empty();
   }
 
+  /** Returns an optional string identifier for this error. */
+  protected Optional<String> getErrorIdentifier() {
+    return Optional.empty();
+  }
+
   public String getMessage() {
     return message;
   }
@@ -114,7 +116,7 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(errorIdentifier, message, cause, sources);
+    return Objects.hashCode(message, cause, sources);
   }
 
   @Override
@@ -123,10 +125,7 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
       return false;
     }
     ErrorDetail<?> e = (ErrorDetail<?>) o;
-    return errorIdentifier.equals(e.errorIdentifier)
-        && message.equals(e.message)
-        && Objects.equal(cause, e.cause)
-        && sources.equals(e.sources);
+    return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
   }
 
   /** Returns a new instance of the same {@link ErrorDetail} with updated sources. */
