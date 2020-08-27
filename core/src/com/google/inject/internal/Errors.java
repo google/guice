@@ -21,6 +21,7 @@ import static com.google.inject.internal.MoreTypes.getRawType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
@@ -46,6 +47,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -376,6 +378,14 @@ public final class Errors implements Serializable {
   public Errors constructorNotDefinedByType(Constructor<?> constructor, TypeLiteral<?> type) {
     return addMessage(
         ErrorId.CONSTRUCTOR_NOT_DEFINED_BY_TYPE, "%s does not define %s", type, constructor);
+  }
+
+  public <K, V> Errors duplicateMapKey(Key<Map<K, V>> mapKey, Multimap<K, Binding<V>> duplicates) {
+    return addMessage(
+        new Message(
+            GuiceInternal.GUICE_INTERNAL,
+            ErrorId.DUPLICATE_MAP_KEY,
+            new DuplicateMapKeyError<K, V>(mapKey, duplicates, getSources())));
   }
 
   public Errors duplicateScopes(
