@@ -490,7 +490,7 @@ public final class RealMapBinder<K, V> implements Module {
       // we don't build up this data structure
       if (duplicates != null) {
         initializationState = InitializationState.HAS_ERRORS;
-        reportDuplicateKeysError(duplicates, errors);
+        reportDuplicateKeysError(mapKey, duplicates, errors);
 
         return false;
       }
@@ -514,7 +514,11 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     private static <K, V> void reportDuplicateKeysError(
-        Multimap<K, Binding<V>> duplicates, Errors errors) {
+        Key<Map<K, V>> mapKey, Multimap<K, Binding<V>> duplicates, Errors errors) {
+      if (InternalFlags.enableExperimentalErrorMessages()) {
+        errors.duplicateMapKey(mapKey, duplicates);
+        return;
+      }
       StringBuilder sb = new StringBuilder("Map injection failed due to duplicated key ");
       boolean first = true;
       for (Map.Entry<K, Collection<Binding<V>>> entry : duplicates.asMap().entrySet()) {
