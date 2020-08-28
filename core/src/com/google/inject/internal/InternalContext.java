@@ -47,7 +47,6 @@ final class InternalContext implements AutoCloseable {
 
   private int dependencyStackSize = 0;
 
-
   /**
    * The number of times {@link #enter()} has been called + 1 for initial construction. This value
    * is decremented when {@link #exit()} is called.
@@ -111,19 +110,16 @@ final class InternalContext implements AutoCloseable {
     return previous;
   }
 
-
   /** Pops the current state & sets the new dependency. */
   void popStateAndSetDependency(Dependency<?> newDependency) {
     popState();
     this.dependency = newDependency;
   }
 
-
   /** Adds to the state without setting the dependency. */
   void pushState(com.google.inject.Key<?> key, Object source) {
     doPushState(key, source);
   }
-
 
   private void doPushState(Object dependencyOrKey, Object source) {
     int localSize = dependencyStackSize;
@@ -137,7 +133,6 @@ final class InternalContext implements AutoCloseable {
     dependencyStackSize = localSize;
   }
 
-
   /** Pops from the state without setting a dependency. */
   void popState() {
     // N.B. we don't null out the array entries.  It isn't necessary since all the objects in the
@@ -146,7 +141,6 @@ final class InternalContext implements AutoCloseable {
     // doesn't matter.
     dependencyStackSize -= 2;
   }
-
 
   /** Returns the current dependency chain (all the state stored in the dependencyStack). */
   java.util.List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
@@ -164,5 +158,4 @@ final class InternalContext implements AutoCloseable {
     }
     return builder.build();
   }
-
 }

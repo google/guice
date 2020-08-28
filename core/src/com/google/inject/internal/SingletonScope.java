@@ -72,7 +72,7 @@ public class SingletonScope implements Scope {
    * Cycles are detected properly as cycle detection does not rely on user locks ids, but error
    * message generated could be less than ideal.
    */
-  // TODO(user): we may use one factory per injector tree for optimization reasons
+  // TODO(timofeyb): we may use one factory per injector tree for optimization reasons
   private static final CycleDetectingLockFactory<Key<?>> cycleDetectingLockFactory =
       new CycleDetectingLockFactory<Key<?>>();
 

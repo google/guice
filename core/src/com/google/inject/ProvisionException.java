@@ -26,7 +26,6 @@ import java.util.Collection;
 /**
  * Indicates that there was a runtime failure while providing an instance.
  *
- *
  * @author kevinb@google.com (Kevin Bourrillion)
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

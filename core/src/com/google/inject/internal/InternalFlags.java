@@ -37,7 +37,6 @@ public class InternalFlags {
 
   private static final ColorizeOption COLORIZE_OPTION = parseColorizeOption();
 
-
   /** The options for Guice stack trace collection. */
   public enum IncludeStackTraceOption {
     /** No stack trace collection */
@@ -130,7 +129,6 @@ public class InternalFlags {
     return NULLABLE_PROVIDES;
   }
 
-
   public static boolean enableExperimentalErrorMessages() {
     return false;
   }
@@ -160,10 +158,10 @@ public class InternalFlags {
 
   /**
    * Gets the system option indicated by the specified key; runs as a privileged action.
-   *
+   * 
    * @param name of the system option
    * @param defaultValue if the option is not set
-   *
+   * 
    * @return value of the option, defaultValue if not set
    */
   private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue) {
@@ -172,11 +170,11 @@ public class InternalFlags {
 
   /**
    * Gets the system option indicated by the specified key; runs as a privileged action.
-   *
+   * 
    * @param name of the system option
    * @param defaultValue if the option is not set
    * @param secureValue if the security manager disallows access to the option
-   *
+   * 
    * @return value of the option, defaultValue if not set, secureValue if no access
    */
   private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue,

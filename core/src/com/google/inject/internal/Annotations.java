@@ -203,7 +203,7 @@ public class Annotations {
 
   static boolean containsComponentAnnotation(Annotation[] annotations) {
     for (Annotation annotation : annotations) {
-      // TODO(user): Should we scope this down to dagger.Component?
+      // TODO(dweis): Should we scope this down to dagger.Component?
       if (annotation.annotationType().getSimpleName().equals("Component")) {
         return true;
       }

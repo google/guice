@@ -210,7 +210,6 @@ public final class InternalInjectorCreator {
         if (isEagerSingleton(injector, binding, stage)) {
           Dependency<?> dependency = Dependency.get(binding.getKey());
           Dependency previous = context.pushDependency(dependency, binding.getSource());
-
           try {
             binding.getInternalFactory().get(context, dependency, false);
           } catch (InternalProvisionException e) {

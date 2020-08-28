@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.Element.Type;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 

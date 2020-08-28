@@ -100,6 +100,5 @@ public interface ProvisionListener {
      */
     @Deprecated
     public abstract java.util.List<DependencyAndSource> getDependencyChain();
-
   }
 }

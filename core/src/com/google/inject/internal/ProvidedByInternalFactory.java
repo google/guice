@@ -64,7 +64,6 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
     }
     Key<? extends Provider<T>> localProviderKey = providerKey;
     context.pushState(localProviderKey, localProviderBinding.getSource());
-
     try {
       Provider<? extends T> provider =
           localProviderBinding.getInternalFactory().get(context, dependency, true);
@@ -73,7 +72,6 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
       throw ipe.addSource(localProviderKey);
       } finally {
         context.popState();
-
     }
   }
 

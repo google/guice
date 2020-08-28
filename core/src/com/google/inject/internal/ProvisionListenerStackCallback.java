@@ -146,6 +146,5 @@ final class ProvisionListenerStackCallback<T> {
     public List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
       return context.getDependencyChain();
     }
-
   }
 }

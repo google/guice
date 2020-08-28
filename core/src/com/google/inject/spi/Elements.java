@@ -116,7 +116,7 @@ public final class Elements {
     return Collections.unmodifiableList(binder.elements);
   }
 
-  // TODO(user): Consider moving the RecordingBinder to com.google.inject.internal and removing these
+  // TODO(vzm): Consider moving the RecordingBinder to com.google.inject.internal and removing these
   // internal 'friend' methods.
   /**
    * Internal version of Binder.withSource for establishing a trusted ElementSource chain for

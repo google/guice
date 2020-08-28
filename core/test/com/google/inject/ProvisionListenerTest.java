@@ -655,7 +655,6 @@ public class ProvisionListenerTest extends TestCase {
         actual.add(dep.getDependency().getKey().getRawType());
       }
       assertEquals(expected, actual);
-
       provisionList.add(provision.getBinding().getKey().getRawType());
     }
   }
@@ -820,7 +819,6 @@ public class ProvisionListenerTest extends TestCase {
       assertContains(
           provision.getDependencyChain().get(1).getBindingSource(),
           notifyType.getName() + ".class(");
-
     }
   }
 

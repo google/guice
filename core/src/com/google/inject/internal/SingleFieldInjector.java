@@ -47,7 +47,6 @@ final class SingleFieldInjector implements SingleMemberInjector {
   @Override
   public void inject(InternalContext context, Object o) throws InternalProvisionException {
     Dependency previous = context.pushDependency(dependency, binding.getSource());
-
     try {
       Object value = binding.getInternalFactory().get(context, dependency, false);
       field.set(o, value);

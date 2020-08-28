@@ -272,7 +272,6 @@ public final class RealOptionalBinder<T> implements Module {
       Dependency<?> localDependency = targetDependency;
       T result;
       Dependency previous = context.pushDependency(localDependency, getSource());
-
       try {
         // See comments in RealOptionalKeyProvider, about how localDependency may be more specific
         // than what we actually need.
@@ -281,7 +280,6 @@ public final class RealOptionalBinder<T> implements Module {
         throw ipe.addSource(localDependency);
         } finally {
           context.popStateAndSetDependency(previous);
-
       }
       return java.util.Optional.ofNullable(result);
     }
@@ -390,14 +388,12 @@ public final class RealOptionalBinder<T> implements Module {
         throws InternalProvisionException {
       // This is what linked bindings do (see FactoryProxy), and we are pretty similar.
       context.pushState(targetKey, targetSource);
-
       try {
         return targetFactory.get(context, dependency, true);
       } catch (InternalProvisionException ipe) {
         throw ipe.addSource(targetKey);
         } finally {
           context.popState();
-
       }
     }
 
@@ -471,7 +467,6 @@ public final class RealOptionalBinder<T> implements Module {
       Dependency<?> localDependency = targetDependency;
       T result;
       Dependency previous = context.pushDependency(localDependency, getSource());
-
       try {
         // currentDependency is Optional<? super T>, so we really just need to set the target
         // dependency to ? super T, but we are currently setting it to T.  We could hypothetically
@@ -482,7 +477,6 @@ public final class RealOptionalBinder<T> implements Module {
         throw ipe.addSource(localDependency);
         } finally {
           context.popStateAndSetDependency(previous);
-
       }
       return Optional.fromNullable(result);
     }
