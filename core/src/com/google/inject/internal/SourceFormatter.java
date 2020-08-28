@@ -83,7 +83,7 @@ final class SourceFormatter {
   }
 
   private void formatKey(Key<?> key) {
-    formatter.format("%s%s%n", preposition("for "), Messages.convert(key));
+    formatter.format("%s%s%n", preposition("while locating "), Messages.convert(key));
   }
 
   private void formatMember(Member member) {
