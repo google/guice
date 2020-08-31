@@ -106,6 +106,13 @@ public class PackageNameCompressorTest {
   }
 
   @Test
+  public void testDoesNotCompressShortPackageNames() {
+    // This shouldn't try to compress the foo.Foo.
+    String input = "Something is wrong with foo.Foo should not be empty!";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(input);
+  }
+
+  @Test
   public void testNoClassNamesDoNotPutInLegend() {
     String input = "Something is wrong with something!";
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(input);

@@ -57,11 +57,15 @@ final class PackageNameCompressor {
   // extra complications with taking apart types like List<Foo> to get the inner class names.
   private static final Pattern CLASSNAME_PATTERN =
       // Match lowercase package names with trailing dots. Start with a non-word character so we
-      // don't match substrings in like Bar.Foo and match the ar.Foo. Start a group to not include
-      // the non-word character.
-      Pattern.compile("[\\W](([a-z_0-9]++[.])++"
-          // Then match a name starting with an uppercase letter. This is the outer class name.
-          + "[A-Z][\\w$]++)");
+      // don't match substrings in like Bar.Foo and match the com.foo.Foo. Require at least 2
+      // package names to avoid matching non package names like a sentence ending with a period and
+      // starting with an upper case letter without space, for example:
+      // foo.Must in message "Invalid value for foo.Must not be empty." should not be compressed.
+      // Start a group to not include the non-word character.
+      Pattern.compile(
+          "[\\W](([a-z_0-9]++[.]){2,}+"
+              // Then match a name starting with an uppercase letter. This is the outer class name.
+              + "[A-Z][\\w$]++)");
 
   /**
    * Compresses an error message by stripping the packages out of class names and adding them
