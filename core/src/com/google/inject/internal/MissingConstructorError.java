@@ -37,6 +37,7 @@ final class MissingConstructorError extends InternalErrorDetail<MissingConstruct
 
   @Override
   protected void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+    formatter.format("%n");
     Class<?> rawType = type.getRawType();
     if (atInjectRequired) {
       formatter.format(

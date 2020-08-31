@@ -57,6 +57,7 @@ final class MissingImplementationErrorHints {
         suggestions.add(
             Messages.format("%n    %d more binding%s with other annotations.", remaining, plural));
       }
+      suggestions.add("%n");
     } else {
       // For now, do a simple substring search for possibilities. This can help spot
       // issues when there are generics being used (such as a wrapper class) and the

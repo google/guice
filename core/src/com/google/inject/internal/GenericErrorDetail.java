@@ -21,14 +21,13 @@ public final class GenericErrorDetail extends InternalErrorDetail<GenericErrorDe
   public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     Preconditions.checkArgument(mergeableErrors.isEmpty(), "Unexpected mergeable errors");
     List<Object> dependencies = getSources();
-    boolean omitPreposition = true;
     for (Object source : Lists.reverse(dependencies)) {
       if (InternalFlags.enableExperimentalErrorMessages()) {
-        new SourceFormatter(source, formatter, omitPreposition).format();
+        formatter.format("  ");
+        new SourceFormatter(source, formatter, /* omitPreposition= */ false).format();
       } else {
         Messages.formatSource(formatter, source);
       }
-      omitPreposition = false;
     }
   }
 

@@ -30,7 +30,7 @@ final class DuplicateMapKeyError<K, V> extends InternalErrorDetail<DuplicateMapK
 
   @Override
   protected final void formatDetail(List<ErrorDetail<?>> others, Formatter formatter) {
-    formatter.format("%s%n", Messages.bold("Duplicates:"));
+    formatter.format("%n%s%n", Messages.bold("Duplicates:"));
 
     for (Map.Entry<K, Collection<Binding<V>>> entry : duplicates.asMap().entrySet()) {
       formatter.format("  Key:%n");

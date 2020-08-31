@@ -33,7 +33,7 @@ final class ScopeNotFoundError extends InternalErrorDetail<ScopeNotFoundError> {
     sourcesSet.add(getSources());
     mergeableErrors.stream().map(ErrorDetail::getSources).forEach(sourcesSet::add);
 
-    formatter.format("%s%n", "Used at:");
+    formatter.format("%n%s%n", "Used at:");
     int sourceListIndex = 1;
     for (List<Object> sources : sourcesSet) {
       ErrorFormatter.formatSources(sourceListIndex++, Lists.reverse(sources), formatter);

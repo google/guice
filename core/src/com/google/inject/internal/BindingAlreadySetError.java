@@ -39,7 +39,7 @@ final class BindingAlreadySetError extends InternalErrorDetail<BindingAlreadySet
             .map(e -> ((BindingAlreadySetError) e).binding.getSource())
             .map(ImmutableList::of)
             .collect(Collectors.toList()));
-    formatter.format("%s%n", Messages.bold("Bound at:"));
+    formatter.format("%n%s%n", Messages.bold("Bound at:"));
     for (int i = 0; i < sourcesList.size(); i++) {
       ErrorFormatter.formatSources(i + 1, sourcesList.get(i), formatter);
     }
