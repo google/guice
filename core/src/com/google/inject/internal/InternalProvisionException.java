@@ -208,7 +208,7 @@ public final class InternalProvisionException extends Exception {
   private final List<Object> sourcesToPrepend = new ArrayList<>();
   private final ImmutableList<Message> errors;
 
-  private InternalProvisionException(Message error) {
+  InternalProvisionException(Message error) {
     this(ImmutableList.of(error));
   }
 

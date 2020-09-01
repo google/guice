@@ -24,6 +24,7 @@ import com.google.inject.multibindings.MultibinderBinding;
 import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
@@ -237,6 +238,15 @@ public final class RealMultibinder<T> implements Module {
 
     private InternalProvisionException newDuplicateValuesException(
         ImmutableSet<T> set, T[] values) {
+      if (InternalFlags.enableExperimentalErrorMessages()) {
+        Message message =
+            new Message(
+                GuiceInternal.GUICE_INTERNAL,
+                ErrorId.DUPLICATE_ELEMENT,
+                new DuplicateElementError<T>(
+                    getSetKey(), bindings, values, ImmutableList.of(getSource())));
+        return new InternalProvisionException(message);
+      }
       // TODO(lukes): consider reporting all duplicate values, the easiest way would be to rebuild
       // a new set and detect dupes as we go
       // Find the duplicate binding
