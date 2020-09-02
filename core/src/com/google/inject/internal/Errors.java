@@ -485,14 +485,6 @@ public final class Errors implements Serializable {
   }
 
   public Errors childBindingAlreadySet(Key<?> key, Set<Object> sources) {
-    if (InternalFlags.enableExperimentalErrorMessages()) {
-      Message message =
-          new Message(
-              GuiceInternal.GUICE_INTERNAL,
-              ErrorId.CHILD_BINDING_ALREADY_SET,
-              new ChildBindingAlreadySetError(key, sources, getSources()));
-      return addMessage(message);
-    }
     Formatter allSources = new Formatter();
     for (Object source : sources) {
       if (source == null) {
