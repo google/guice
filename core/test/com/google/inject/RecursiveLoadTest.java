@@ -15,10 +15,12 @@
  */
 package com.google.inject;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import static com.google.inject.Asserts.assertContains;
+import static org.junit.Assert.fail;
 
 @RunWith(JUnit4.class)
 public final class RecursiveLoadTest {
@@ -26,13 +28,19 @@ public final class RecursiveLoadTest {
    * This test uses failed optional bindings to trigger a recursive load crash.
    * https://github.com/google/guice/issues/785
    */
-  @Ignore
   @Test public void recursiveLoadWithOptionals() {
-    Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(A.class);
-      }
-    });
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(A.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(
+          expected.getMessage(),
+          "Recursive load of " + B.class.getName() + ".<init>()");
+    }
   }
 
   static class A {
@@ -57,25 +65,22 @@ public final class RecursiveLoadTest {
     @Inject B b;
   }
 
-  @Ignore
   @Test public void recursiveLoadWithoutOptionals() {
-    Guice.createInjector(new AbstractModule() {
-      @Provides public V provideV(Z z) {
-        return null;
-      }
-    });
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Provides public V provideV(Z z) {
+          return null;
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(
+          expected.getMessage(),
+          "1) Recursive load of " + Z.class.getName() + ".<init>()");
+    }
   }
 
   static class V {
-  }
-
-  static class X {
-    @Inject Z z;
-  }
-
-  static class Z {
-    @Inject W w;
-    @Inject X x;
   }
 
   static class W {
@@ -83,8 +88,17 @@ public final class RecursiveLoadTest {
     @Inject Z z;
   }
 
+  static class X {
+    @Inject Z z;
+  }
+
   static class Y {
     @Inject Unresolved unresolved;
+  }
+
+  static class Z {
+    @Inject W w;
+    @Inject X x;
   }
 
   interface Unresolved {

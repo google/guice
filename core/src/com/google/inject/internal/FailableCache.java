@@ -16,65 +16,103 @@
 
 package com.google.inject.internal;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * Lazily creates (and caches) values for keys. If creating the value fails (with errors), an
  * exception is thrown on retrieval.
  *
+ * This defends against re-entrant loads, and removals of elements while they are being loaded.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public abstract class FailableCache<K, V> {
 
-  private final LoadingCache<K, Object> delegate =
-      CacheBuilder.newBuilder()
-          .build(
-              new CacheLoader<K, Object>() {
-                @Override
-                public Object load(K key) {
-                  Errors errors = new Errors();
-                  V result = null;
-                  try {
-                    result = FailableCache.this.create(key, errors);
-                  } catch (ErrorsException e) {
-                    errors.merge(e.getErrors());
-                  }
-                  return errors.hasErrors() ? errors : result;
-                }
-              });
+  private final Map<K, FutureTask<V>> delegate = new LinkedHashMap<>();
+
+  private final ThreadLocal<Set<K>> computingThreadLocal = ThreadLocal.withInitial(HashSet::new);
 
   protected abstract V create(K key, Errors errors) throws ErrorsException;
 
   public V get(K key, Errors errors) throws ErrorsException {
-    Object resultOrError = delegate.getUnchecked(key);
-    if (resultOrError instanceof Errors) {
-      errors.merge((Errors) resultOrError);
+    Set<K> computing = computingThreadLocal.get();
+    if (!computing.add(key)) {
+      errors.addMessage("Recursive load of %s", key);
       throw errors.toException();
-    } else {
-      @SuppressWarnings("unchecked") // create returned a non-error result, so this is safe
-      V result = (V) resultOrError;
-      return result;
     }
+
+    V result = null;
+    try {
+      FutureTask<V> futureTask;
+      synchronized (delegate) {
+        futureTask = delegate.computeIfAbsent(key, this::newFutureTask);
+      }
+
+      futureTask.run();
+      result = futureTask.get();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof ErrorsException) {
+        errors.merge(((ErrorsException) cause).getErrors());
+      } else {
+        throw new RuntimeException(e);
+      }
+    } finally {
+      computing.remove(key);
+    }
+
+    if (errors.hasErrors()) {
+      throw errors.toException();
+    }
+
+    return result;
+  }
+
+  private FutureTask<V> newFutureTask(K key) {
+    return new FutureTask<>(() -> {
+      Errors errors = new Errors();
+      V result = null;
+      try {
+        result = create(key, errors);
+      } catch (ErrorsException e) {
+        errors.merge(e.getErrors());
+      }
+      if (errors.hasErrors()) throw errors.toException();
+      return result;
+    });
   }
 
   boolean remove(K key) {
-    return delegate.asMap().remove(key) != null;
+    Set<K> computing = computingThreadLocal.get();
+    if (computing.contains(key)) {
+      return false; // Don't remove a value that's still being computed.
+    }
+    synchronized (delegate) {
+      return delegate.remove(key) != null;
+    }
   }
 
   Map<K, V> asMap() {
-    return Maps.transformValues(
-        Maps.filterValues(
-            ImmutableMap.copyOf(delegate.asMap()),
-            resultOrError -> !(resultOrError instanceof Errors)),
-        resultOrError -> {
-          @SuppressWarnings("unchecked") // create returned a non-error result, so this is safe
-          V result = (V) resultOrError;
-          return result;
-        });
+    synchronized (delegate) {
+      ImmutableMap.Builder<K, V> result = ImmutableMap.builder();
+      for (Map.Entry<K, FutureTask<V>> entry : delegate.entrySet()) {
+        FutureTask<V> futureTask = entry.getValue();
+        try {
+          if (futureTask.isDone()) {
+            result.put(entry.getKey(), futureTask.get());
+          }
+        } catch (Exception ignored) {
+        }
+      }
+      return result.build();
+    }
   }
 }
