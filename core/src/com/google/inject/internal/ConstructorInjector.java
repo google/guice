@@ -67,7 +67,7 @@ final class ConstructorInjector<T> {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
-      // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
+      // TODO (user): if we can't proxy this object, can we proxy the other object?
       return constructionContext.createProxy(
           context.getInjectorOptions(), dependency.getKey().getTypeLiteral().getRawType());
     }

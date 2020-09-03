@@ -52,7 +52,7 @@ final class PackageNameCompressor {
 
   private static final Joiner PACKAGE_JOINER = Joiner.on('.');
 
-  // TODO(erichang): Consider validating this regex by also passing in all of the known types from
+  // TODO(user): Consider validating this regex by also passing in all of the known types from
   // keys, module names, component names, etc and checking against that list. This may have some
   // extra complications with taking apart types like List<Foo> to get the inner class names.
   private static final Pattern CLASSNAME_PATTERN =

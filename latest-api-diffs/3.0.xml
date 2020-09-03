@@ -6284,7 +6284,7 @@
     <![CDATA[Persistence provider service. Use this to manage the overall
  startup and stop of the persistence module(s).
 
- TODO(dhanji): Integrate with Service API when appropriate.
+ TODO(user): Integrate with Service API when appropriate.
 
  @author dhanji@gmail.com (Dhanji R. Prasanna)]]>
     </doc>

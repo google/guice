@@ -848,7 +848,7 @@ final class InjectorImpl implements Injector, Lookups {
     // Retrieve the sources before checking for banned key to guard against sources becoming null
     // due to a full GC happening after calling jitBindingData.isBanned and
     // state.getSourcesForBannedKey.
-    // TODO(dweis): Consolidate these two APIs.
+    // TODO(user): Consolidate these two APIs.
     Set<Object> sources = jitBindingData.getSourcesForBannedKey(key);
     if (jitBindingData.isBannedKey(key)) {
       throw errors.childBindingAlreadySet(key, sources).toException();
@@ -883,7 +883,7 @@ final class InjectorImpl implements Injector, Lookups {
     // Retrieve the sources before checking for a banned key to guard against sources becoming null
     // due to a full GC happening after calling jitBindingData.isBanned and
     // jitBindingData.getSourcesForBannedKey.
-    // TODO(dweis): Consolidate these two APIs.
+    // TODO(user): Consolidate these two APIs.
     Set<Object> sources = jitBindingData.getSourcesForBannedKey(key);
     if (jitBindingData.isBannedKey(key)) {
       throw errors.childBindingAlreadySet(key, sources).toException();

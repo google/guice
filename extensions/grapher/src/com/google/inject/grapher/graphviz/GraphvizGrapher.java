@@ -242,7 +242,7 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
 
   @Override
   protected void newInterfaceNode(InterfaceNode node) {
-    // TODO(phopkins): Show the Module on the graph, which comes from the
+    // TODO(user): Show the Module on the graph, which comes from the
     // class name when source is a StackTraceElement.
 
     NodeId nodeId = node.getId();

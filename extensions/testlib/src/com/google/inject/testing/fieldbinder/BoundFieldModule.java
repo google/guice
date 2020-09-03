@@ -138,7 +138,7 @@ public final class BoundFieldModule implements Module {
 
     protected WithPermits(Object instance) {
       this.instance = instance;
-      // TODO(vzm): Enforce this at compile-time (e.g. via ErrorProne).
+      // TODO(user): Enforce this at compile-time (e.g. via ErrorProne).
       Preconditions.checkState(
           getClass().isAnonymousClass()
               && Arrays.stream(getClass().getAnnotatedSuperclass().getAnnotations())

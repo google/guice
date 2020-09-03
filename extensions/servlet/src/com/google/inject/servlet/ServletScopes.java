@@ -76,7 +76,7 @@ public class ServletScopes {
           // request is in progress.
           if (null == GuiceFilter.localContext.get()) {
 
-            // NOTE(dhanji): We don't need to synchronize on the scope map
+            // NOTE(user): We don't need to synchronize on the scope map
             // unlike the HTTP request because we're the only ones who have
             // a reference to it, and it is only available via a threadlocal.
             Context context = requestScopeContext.get();

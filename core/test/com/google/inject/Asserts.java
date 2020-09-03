@@ -208,7 +208,7 @@ public class Asserts {
   }
 
   /** Returns the URLs in the system class path. */
-  // TODO(https://github.com/google/guava/issues/2956): Use a common API once that's available.
+  // TODO(user): Use a common API once that's available.
   public static URL[] getClassPathUrls() {
     if (Asserts.class.getClassLoader() instanceof URLClassLoader) {
       return ((URLClassLoader) Asserts.class.getClassLoader()).getURLs();

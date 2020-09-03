@@ -355,7 +355,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
     public List<? super T> superT;
   }
 
-  // TODO(jessewilson): tests for tricky bounded types like <T extends Collection, Serializable>
+  // TODO(user): tests for tricky bounded types like <T extends Collection, Serializable>
 
   public void testEqualsAndHashCode() throws IOException {
     TypeLiteral<?> a1 = TypeLiteral.get(arrayListOfString);
