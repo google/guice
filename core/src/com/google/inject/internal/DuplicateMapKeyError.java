@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Error reported by Guice when a duplicate key is found in a {@link MapBinder} that does not permit
@@ -19,11 +20,7 @@ final class DuplicateMapKeyError<K, V> extends InternalErrorDetail<DuplicateMapK
 
   DuplicateMapKeyError(
       Key<Map<K, V>> mapKey, Multimap<K, Binding<V>> duplicates, List<Object> sources) {
-    super(
-        ErrorId.DUPLICATE_MAP_KEY,
-        String.format("Duplicate keys found in MapBinder for key %s", Messages.convert(mapKey)),
-        sources,
-        null);
+    super(ErrorId.DUPLICATE_MAP_KEY, getDuplicateKeysMessage(mapKey, duplicates), sources, null);
     this.mapKey = mapKey;
     this.duplicates = duplicates;
   }
@@ -33,8 +30,7 @@ final class DuplicateMapKeyError<K, V> extends InternalErrorDetail<DuplicateMapK
     formatter.format("%n%s%n", Messages.bold("Duplicates:"));
 
     for (Map.Entry<K, Collection<Binding<V>>> entry : duplicates.asMap().entrySet()) {
-      formatter.format("  Key:%n");
-      formatter.format("    %s%n", Messages.redBold(entry.getKey().toString()));
+      formatter.format("  Key: %s%n", Messages.redBold(entry.getKey().toString()));
       formatter.format("  Bound at:%n");
       int index = 1;
       for (Binding<V> binding : entry.getValue()) {
@@ -56,5 +52,19 @@ final class DuplicateMapKeyError<K, V> extends InternalErrorDetail<DuplicateMapK
   @Override
   public DuplicateMapKeyError<K, V> withSources(List<Object> newSources) {
     return new DuplicateMapKeyError<>(mapKey, duplicates, newSources);
+  }
+
+  private static <K, V> String getDuplicateKeysMessage(
+      Key<Map<K, V>> mapKey, Multimap<K, Binding<V>> duplicates) {
+    Set<K> duplicateKeys = duplicates.keySet();
+    String mapBinderKey = Messages.convert(mapKey).toString();
+    String firstDuplicateKey = duplicateKeys.iterator().next().toString();
+    if (duplicateKeys.size() == 1) {
+      return String.format("Duplicate key \"%s\" found in %s.", firstDuplicateKey, mapBinderKey);
+    } else {
+      return String.format(
+          "\"%s\" and %s other duplicate keys found in %s.",
+          firstDuplicateKey, duplicateKeys.size() - 1, mapBinderKey);
+    }
   }
 }
