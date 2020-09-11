@@ -18,7 +18,10 @@ package com.google.inject.persist.jpa;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import java.lang.reflect.Method;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -28,32 +31,28 @@ import org.aopalliance.intercept.MethodInvocation;
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
-  // TODO(gak): Move these args to the cxtor & make these final.
-  @Inject private JpaPersistService emProvider = null;
-
-  @Inject private UnitOfWork unitOfWork = null;
-
   @Transactional
   private static class Internal {}
-
-  // Tracks if the unit of work was begun implicitly by this transaction.
-  private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<>();
-
+  
+  // TODO(gak): Move this arg to the cxtor & make this final.
+  @Inject
+  private UnitOfWorkHandler unitOfWorkHandler;
+  
   @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 
-    // Should we start a unit of work?
-    if (!emProvider.isWorking()) {
-      emProvider.begin();
-      didWeStartWork.set(true);
-    }
+    unitOfWorkHandler.requireUnitOfWork();
 
     Transactional transactional = readTransactionMetadata(methodInvocation);
-    EntityManager em = this.emProvider.get();
+    EntityManager em = unitOfWorkHandler.getEntityManager();
 
     // Allow 'joining' of transactions if there is an enclosing @Transactional method.
     if (em.getTransaction().isActive()) {
-      return methodInvocation.proceed();
+      try {
+        return methodInvocation.proceed();
+      } finally {
+        unitOfWorkHandler.endRequireUnitOfWork();
+      }
     }
 
     final EntityTransaction txn = em.getTransaction();
@@ -72,10 +71,8 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       //propagate whatever exception is thrown anyway
       throw e;
     } finally {
-      // Close the em if necessary (guarded so this code doesn't run unless catch fired).
-      if (null != didWeStartWork.get() && !txn.isActive()) {
-        didWeStartWork.remove();
-        unitOfWork.end();
+      if (!txn.isActive()) {
+        unitOfWorkHandler.endRequireUnitOfWork();
       }
     }
 
@@ -84,11 +81,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     try {
       txn.commit();
     } finally {
-      //close the em if necessary
-      if (null != didWeStartWork.get()) {
-        didWeStartWork.remove();
-        unitOfWork.end();
-      }
+      unitOfWorkHandler.endRequireUnitOfWork();
     }
 
     //or return result

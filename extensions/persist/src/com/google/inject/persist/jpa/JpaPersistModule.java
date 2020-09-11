@@ -26,6 +26,10 @@ import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.DynamicFinder;
 import com.google.inject.persist.finder.Finder;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -53,6 +57,7 @@ public final class JpaPersistModule extends PersistModule {
 
   private Map<?, ?> properties;
   private MethodInterceptor transactionInterceptor;
+  private MethodInterceptor requiresUnitOfWorkInterceptor;
 
   @Override
   protected void configurePersistence() {
@@ -65,9 +70,13 @@ public final class JpaPersistModule extends PersistModule {
     bind(EntityManager.class).toProvider(JpaPersistService.class);
     bind(EntityManagerFactory.class)
         .toProvider(JpaPersistService.EntityManagerFactoryProvider.class);
+    bind(UnitOfWorkHandler.class);
 
     transactionInterceptor = new JpaLocalTxnInterceptor();
     requestInjection(transactionInterceptor);
+    
+    requiresUnitOfWorkInterceptor = new RequiresUnitOfWorkInterceptor();
+    requestInjection(requiresUnitOfWorkInterceptor);
 
     // Bind dynamic finders.
     for (Class<?> finder : dynamicFinders) {
@@ -80,9 +89,11 @@ public final class JpaPersistModule extends PersistModule {
     return transactionInterceptor;
   }
 
-  @Provides
-  @Jpa
-  Map<?, ?> provideProperties() {
+  @Override protected MethodInterceptor getRequiresUnitOfWorkInterceptor() {
+    return requiresUnitOfWorkInterceptor;
+  }
+
+  @Provides @Jpa Map<?, ?> provideProperties() {
     return properties;
   }
 
