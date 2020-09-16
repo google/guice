@@ -24,6 +24,7 @@ import static com.google.inject.internal.SpiUtils.linked;
 import static com.google.inject.internal.SpiUtils.providerInstance;
 import static com.google.inject.internal.SpiUtils.providerKey;
 import static com.google.inject.name.Names.named;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -107,7 +108,6 @@ public class OptionalBinderTest extends TestCase {
             requireBinding(new Key<Optional<String>>() {}); // the above specifies this.
             requireBinding(String.class); // but it doesn't specify this.
             binder().requireExplicitBindings(); // need to do this, otherwise String will JIT
-
             requireBinding(Key.get(javaOptionalOfString));
           }
         };
@@ -121,6 +121,44 @@ public class OptionalBinderTest extends TestCase {
           "1) Explicit bindings are required and java.lang.String is not explicitly bound.");
       assertEquals(1, ce.getErrorMessages().size());
     }
+  }
+
+  public void testLinkedTypeSameAsBaseType() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            OptionalBinder.newOptionalBinder(binder(), MyClass.class)
+                .setBinding()
+                .to(MyClass.class);
+          }
+        };
+
+    CreationException ce =
+        assertThrows(CreationException.class, () -> Guice.createInjector(module));
+    assertContains(
+        ce.getMessage(),
+        "1) Binding points to itself. Key: com.google.inject.internal.OptionalBinderTest$MyClass");
+  }
+
+  public void testLinkedAndBaseTypeHaveDifferentAnnotations() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            OptionalBinder.newOptionalBinder(binder(), Key.get(MyClass.class, Names.named("foo")))
+                .setBinding()
+                .to(Key.get(MyClass.class, Names.named("moo")));
+          }
+
+          @Provides
+          @Named("moo")
+          MyClass provideString() {
+            return new MyClass();
+          }
+        };
+    Injector injector = Guice.createInjector(module);
+    assertNotNull(injector);
   }
 
   public void testOptionalIsAbsentByDefault() throws Exception {
@@ -1430,4 +1468,6 @@ public class OptionalBinderTest extends TestCase {
   private <V> Set<V> setOf(V... elements) {
     return ImmutableSet.copyOf(elements);
   }
+
+  static class MyClass {}
 }

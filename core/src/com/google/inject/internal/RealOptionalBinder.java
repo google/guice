@@ -565,12 +565,11 @@ public final class RealOptionalBinder<T> implements Module {
       checkConfiguration(!initialized, "already initialized");
     }
 
-    void initialize(InjectorImpl injector) {
+    void initialize(InjectorImpl injector, Errors errors) {
       // Every one of our providers will call this method, so only execute the logic once.
       if (initialized) {
         return;
       }
-
       actualBinding = injector.getExistingBinding(getKeyForActualBinding());
       defaultBinding = injector.getExistingBinding(getKeyForDefaultBinding());
       // We should never create Jit bindings, but we can use them if some other binding created it.
@@ -598,7 +597,18 @@ public final class RealOptionalBinder<T> implements Module {
         dependencies = ImmutableSet.of();
         providerDependencies = ImmutableSet.of();
       }
+      checkBindingIsNotRecursive(errors);
       initialized = true;
+    }
+
+    private void checkBindingIsNotRecursive(Errors errors) {
+      if (binding instanceof LinkedBindingImpl) {
+        LinkedBindingImpl<T> linkedBindingImpl = (LinkedBindingImpl<T>) binding;
+        if (linkedBindingImpl.getLinkedKey().equals(key)) {
+          // TODO: b/168656899 check for transitive recursive binding
+          errors.recursiveBinding(key, linkedBindingImpl.getLinkedKey());
+        }
+      }
     }
 
     Key<T> getKeyForDefaultBinding() {
@@ -718,7 +728,7 @@ public final class RealOptionalBinder<T> implements Module {
 
     @Override
     final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-      bindingSelection.initialize(injector);
+      bindingSelection.initialize(injector, errors);
       doInitialize();
     }
 

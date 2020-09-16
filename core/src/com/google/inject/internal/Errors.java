@@ -459,8 +459,9 @@ public final class Errors implements Serializable {
         b);
   }
 
-  public Errors recursiveBinding() {
-    return addMessage(ErrorId.RECURSIVE_BINDING, "Binding points to itself.");
+  public Errors recursiveBinding(Key<?> key, Key<?> linkedKey) {
+    return addMessage(
+        ErrorId.RECURSIVE_BINDING, "Binding points to itself. Key: %s", Messages.convert(key));
   }
 
   Errors bindingAlreadySet(Binding<?> binding, Binding<?> original) {

@@ -173,7 +173,8 @@ final class BindingProcessor extends AbstractBindingProcessor {
             prepareBinding();
             Key<? extends T> linkedKey = binding.getLinkedKey();
             if (key.equals(linkedKey)) {
-              errors.recursiveBinding();
+              // TODO: b/168656899 check for transitive recursive binding
+              errors.recursiveBinding(key, linkedKey);
             }
 
             FactoryProxy<T> factory = new FactoryProxy<>(injector, key, linkedKey, source);
