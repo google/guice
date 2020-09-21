@@ -657,8 +657,7 @@ public final class Errors implements Serializable {
       return;
     }
 
-    ErrorsException exception = toException();
-    throw exception;
+    throw toException();
   }
 
   public ErrorsException toException() {

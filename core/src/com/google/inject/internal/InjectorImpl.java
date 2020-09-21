@@ -160,7 +160,11 @@ final class InjectorImpl implements Injector, Lookups {
       errors.throwConfigurationExceptionIfErrorsExist();
       return result;
     } catch (ErrorsException e) {
-      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+      ConfigurationException exception =
+          new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+
+
+      throw exception;
     }
   }
 
@@ -193,7 +197,8 @@ final class InjectorImpl implements Injector, Lookups {
           return getBinding(key);
         }
       } catch (ErrorsException e) {
-        throw new ConfigurationException(e.getErrors().getMessages());
+        ConfigurationException exception = new ConfigurationException(e.getErrors().getMessages());
+        throw exception;
       }
     }
 
@@ -1065,7 +1070,9 @@ final class InjectorImpl implements Injector, Lookups {
     try {
       return membersInjectorStore.get(typeLiteral, errors);
     } catch (ErrorsException e) {
-      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+      ConfigurationException exception =
+          new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+      throw exception;
     }
   }
 
@@ -1118,7 +1125,9 @@ final class InjectorImpl implements Injector, Lookups {
       errors.throwIfNewErrors(0);
       return result;
     } catch (ErrorsException e) {
-      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+      ConfigurationException exception =
+          new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+      throw exception;
     }
   }
 
