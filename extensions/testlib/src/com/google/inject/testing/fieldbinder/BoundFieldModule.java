@@ -445,7 +445,8 @@ public final class BoundFieldModule implements Module {
   }
 
   private static void bindField(Binder binder, final BoundFieldInfo fieldInfo) {
-    LinkedBindingBuilder<?> linkedBinder = binder.bind(fieldInfo.boundKey);
+    LinkedBindingBuilder<?> linkedBinder =
+        binder.withSource(fieldInfo.field).bind(fieldInfo.boundKey);
 
     // It's unfortunate that Field.get() just returns Object rather than the actual type (although
     // that would be impossible) because as a result calling binder.toInstance or binder.toProvider
@@ -463,16 +464,12 @@ public final class BoundFieldModule implements Module {
               @Override
               // @Nullable
               public Object get() {
-                // This is safe because we checked that the field's type is Provider above.
-                @SuppressWarnings("unchecked")
                 javax.inject.Provider<?> provider =
                     (javax.inject.Provider<?>) getFieldValue(fieldInfo);
                 return provider.get();
               }
             });
       } else {
-        // This is safe because we checked that the field's type is Provider above.
-        @SuppressWarnings("unchecked")
         javax.inject.Provider<?> fieldValueUnsafe =
             (javax.inject.Provider<?>) getFieldValue(fieldInfo);
         binderUnsafe.toProvider(fieldValueUnsafe);

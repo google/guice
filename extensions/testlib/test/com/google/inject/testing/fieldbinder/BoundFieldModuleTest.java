@@ -33,6 +33,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.RestrictedBindingSource;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.ElementSource;
 import com.google.inject.testing.fieldbinder.BoundFieldModule.BoundFieldInfo;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
@@ -1049,5 +1050,17 @@ public class BoundFieldModuleTest extends TestCase {
         Guice.createInjector(new @FooPermit BoundFieldModule.WithPermits(bindings) {});
 
     assertEquals((Integer) bindings.foo, injector.getInstance(Key.get(Integer.class, Foo.class)));
+  }
+
+  public void testSourceSetOnBinding() throws Exception {
+    Object instance =
+        new Object() {
+          @Bind Integer value = 1;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+    assertEquals(
+        instance.getClass().getDeclaredField("value"),
+        ((ElementSource) injector.getBinding(Integer.class).getSource()).getDeclaringSource());
   }
 }
