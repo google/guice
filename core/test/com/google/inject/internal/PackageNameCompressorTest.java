@@ -28,6 +28,12 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class PackageNameCompressorTest {
   @Test
+  public void testEmptyInput() {
+    String input = "";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(input);
+  }
+
+  @Test
   public void testSimple() {
     String input = "Something is wrong with foo.bar.baz.Foo class!";
     String expectedOutput = "Something is wrong with Foo class!"
@@ -95,6 +101,62 @@ public class PackageNameCompressorTest {
         + "b.c.Foo: z.b.c.Foo\n"
         + "c.c.Foo: z.c.c.Foo\n"
         + LEGEND_FOOTER;
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testSingleGeneric() {
+    String input = "No implementation found for java.util.Set<java.lang.String>.";
+    String expectedOutput = "No implementation found for Set<String>.";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testMultipleGeneric() {
+    String input = "No implementation found for java.util.Map<java.lang.String, java.lang.String>.";
+    String expectedOutput = "No implementation found for Map<String, String>.";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testNestedGeneric() {
+    String input =
+        "No implementation found for java.util.Map<java.lang.String,"
+            + " java.util.Set<java.lang.String>>.";
+    String expectedOutput = "No implementation found for Map<String, Set<String>>.";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testQuotedStringShouldNotBeCompressed() {
+    String input =
+        "Duplicate key \"com.google.Foo\" found in java.util.Map<java.lang.String,"
+            + " java.lang.Object>.";
+    String expectedOutput = "Duplicate key \"com.google.Foo\" found in Map<String, Object>.";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testEmptyQuotedString() {
+    String input =
+        "Duplicate key \"\" found in java.util.Map<java.lang.String," + " java.lang.Object>.";
+    String expectedOutput = "Duplicate key \"\" found in Map<String, Object>.";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testUnbalancedQuotedString() {
+    String input =
+        "Duplicate key \"java.util.List found in java.util.Map<java.lang.String,"
+            + " java.lang.Object>.";
+    String expectedOutput = "Duplicate key \"List found in Map<String, Object>.";
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testQuotedStringSpanMultipleLines() {
+    String input = "Some strange string with \"java.util.List, \n and java.lang.Integer\".";
+    String expectedOutput = "Some strange string with \"List, \n and Integer\".";
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
