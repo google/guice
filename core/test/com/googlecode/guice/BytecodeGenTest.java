@@ -186,6 +186,8 @@ public class BytecodeGenTest {
 
   @Before
   public void setUp() throws Exception {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
+
     ClassLoader testClassLoader = new TestVisibilityClassLoader(true);
     proxyTestClass = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTest.class.getName());
     realClass = (Class<ProxyTestImpl>) testClassLoader.loadClass(ProxyTestImpl.class.getName());

@@ -118,6 +118,14 @@
               <argLine>-Dguice_custom_class_loading=CHILD</argLine>
             </configuration>
           </execution>
+          <execution>
+            <id>without-aop</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <argLine>-Dguice_aop_option=DISABLED</argLine>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <!--
@@ -128,7 +136,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Bundle-Name>${project.artifactId}$(if;$(classes;NAMED;*.MethodAspect);; (no_aop))</Bundle-Name>
+            <Bundle-Name>${project.artifactId}</Bundle-Name>
             <Import-Package>!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
             <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
           </instructions>
@@ -167,73 +175,6 @@
   </build>
 
   <profiles>
-    <profile>
-      <!--
-       | No-AOP profile: repeat the build lifecycle with munged no-AOP source
-      -->
-      <id>guice.with.no_aop</id>
-      <activation>
-        <property>
-          <name>guice.with.no_aop</name>
-          <value>!false</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>munge-maven-plugin</artifactId>
-            <version>1.0</version>
-            <executions>
-              <execution>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>munge-fork</goal>
-                </goals>
-                <configuration>
-                  <symbols>NO_AOP</symbols>
-                  <excludes>
-                    **/aop/*.java,
-                    **/InterceptorBinding.java,
-                    **/InterceptorBindingProcessor.java,
-                    **/InterceptorStackCallback.java,
-                    **/LineNumbers.java,
-                    **/MethodAspect.java,
-                    **/ProxyFactory.java,
-                    **/BytecodeGenTest.java,
-                    **/IntegrationTest.java,
-                    **/MethodInterceptionTest.java,
-                    **/ProxyFactoryTest.java
-                  </excludes>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <!--
-           | Package the no-AOP build with its own OSGi manifest and attach using "no_aop" classifier
-          -->
-          <plugin>
-            <artifactId>maven-jar-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>no_aop</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <classesDirectory>${project.build.directory}/munged/classes</classesDirectory>
-                  <classifier>no_aop</classifier>
-                  <archive>
-                    <manifestFile>${project.build.directory}/munged/classes/META-INF/MANIFEST.MF</manifestFile>
-                  </archive>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <!--
        | JarJar build profile: Embed ASM classes under a Guice namespace

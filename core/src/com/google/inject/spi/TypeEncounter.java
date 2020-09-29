@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Context of an injectable type encounter. Enables reporting errors, registering injection
@@ -98,23 +99,19 @@ public interface TypeEncounter<I> {
    */
   void register(InjectionListener<? super I> listener);
 
-  /*if[AOP]*/
   /**
    * Binds method interceptor[s] to methods matched in type {@code I} and its supertypes. A method
    * is eligible for interception if:
    *
    * <ul>
-   * <li>Guice created the instance the method is on
-   * <li>Neither the enclosing type nor the method is final
-   * <li>And the method is package-private or more accessible
+   *   <li>Guice created the instance the method is on
+   *   <li>Neither the enclosing type nor the method is final
+   *   <li>And the method is package-private or more accessible
    * </ul>
    *
    * @param methodMatcher matches methods the interceptor should apply to. For example: {@code
    *     annotatedWith(Transactional.class)}.
    * @param interceptors to bind
    */
-  void bindInterceptor(
-      Matcher<? super Method> methodMatcher,
-      org.aopalliance.intercept.MethodInterceptor... interceptors);
-  /*end[AOP]*/
+  void bindInterceptor(Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors);
 }

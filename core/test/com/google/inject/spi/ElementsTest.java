@@ -728,7 +728,6 @@ public class ElementsTest extends TestCase {
         });
   }
 
-  /*if[AOP]*/
   public void testBindIntercepor() {
     @SuppressWarnings("rawtypes") // Unavoidable since subclassesOf returns raw type
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
@@ -758,7 +757,6 @@ public class ElementsTest extends TestCase {
           }
         });
   }
-  /*end[AOP]*/
 
   public void testBindScope() {
     checkModule(
@@ -1272,9 +1270,7 @@ public class ElementsTest extends TestCase {
                         field,
                         getOnlyElement(constructorBinding.getInjectableMembers()).getMember());
                     assertEquals(2, constructorBinding.getDependencies().size());
-                    /*if[AOP]*/
                     assertEquals(ImmutableMap.of(), constructorBinding.getMethodInterceptors());
-                    /*end[AOP]*/
                     return null;
                   }
                 });

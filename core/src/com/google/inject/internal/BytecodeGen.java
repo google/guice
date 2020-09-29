@@ -17,18 +17,16 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
-/*if[AOP]*/
 import static com.google.inject.internal.aop.ClassBuilding.buildFastClass;
 import static com.google.inject.internal.aop.ClassBuilding.canEnhance;
 import static com.google.inject.internal.aop.ClassBuilding.canFastInvoke;
 import static com.google.inject.internal.aop.ClassBuilding.signature;
 
-import com.google.inject.internal.aop.ClassBuilding;
-/*end[AOP]*/
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.MapMaker;
+import com.google.inject.internal.aop.ClassBuilding;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
@@ -67,8 +65,6 @@ public final class BytecodeGen {
     circularProxyTypeCache.put(proxy.getClass(), Boolean.TRUE);
     return type.cast(proxy);
   }
-
-  /*if[AOP]*/
 
   public static final String ENHANCER_BY_GUICE_MARKER = "$$EnhancerByGuice$$";
 
@@ -180,6 +176,4 @@ public final class BytecodeGen {
           return buildFastClass(hostClass);
         }
       };
-
-  /*end[AOP]*/
 }

@@ -73,19 +73,18 @@ final class ConstructorInjectorStore {
     MembersInjectorImpl<T> membersInjector =
         (MembersInjectorImpl<T>)
             injector.membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);
-
-    /*if[AOP]*/
-    ImmutableList<MethodAspect> injectorAspects = injector.getBindingData().getMethodAspects();
-    ImmutableList<MethodAspect> methodAspects =
-        membersInjector.getAddedAspects().isEmpty()
-            ? injectorAspects
-            : Stream.concat(injectorAspects.stream(), membersInjector.getAddedAspects().stream())
-                .collect(toImmutableList());
-    ConstructionProxyFactory<T> factory = new ProxyFactory<>(injectionPoint, methodAspects);
-    /*end[AOP]*/
-    /*if[NO_AOP]
-    ConstructionProxyFactory<T> factory = new DefaultConstructionProxyFactory<>(injectionPoint);
-    end[NO_AOP]*/
+    ConstructionProxyFactory<T> factory = null;
+    if (InternalFlags.isBytecodeGenEnabled()) {
+      ImmutableList<MethodAspect> injectorAspects = injector.getBindingData().getMethodAspects();
+      ImmutableList<MethodAspect> methodAspects =
+          membersInjector.getAddedAspects().isEmpty()
+              ? injectorAspects
+              : Stream.concat(injectorAspects.stream(), membersInjector.getAddedAspects().stream())
+                  .collect(toImmutableList());
+      factory = new ProxyFactory<>(injectionPoint, methodAspects);
+    } else {
+      factory = new DefaultConstructionProxyFactory<>(injectionPoint);
+    }
 
     errors.throwIfNewErrors(numErrorsBefore);
 

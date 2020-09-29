@@ -20,6 +20,7 @@ import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.internal.InternalFlags;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -35,14 +36,12 @@ public abstract class PersistModule extends AbstractModule {
 
     requireBinding(PersistService.class);
     requireBinding(UnitOfWork.class);
-    /*if[AOP]*/
-    // wrapping in an if[AOP] just to allow this to compile in NO_AOP -- it won't be used
-
-    // class-level @Transacational
-    bindInterceptor(annotatedWith(Transactional.class), any(), getTransactionInterceptor());
-    // method-level @Transacational
-    bindInterceptor(any(), annotatedWith(Transactional.class), getTransactionInterceptor());
-    /*end[AOP]*/
+    if (InternalFlags.isBytecodeGenEnabled()) {
+      // class-level @Transacational
+      bindInterceptor(annotatedWith(Transactional.class), any(), getTransactionInterceptor());
+      // method-level @Transacational
+      bindInterceptor(any(), annotatedWith(Transactional.class), getTransactionInterceptor());
+    }
   }
 
   protected abstract void configurePersistence();

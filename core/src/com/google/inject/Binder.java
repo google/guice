@@ -28,6 +28,7 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be used to create an
@@ -183,7 +184,6 @@ import java.lang.reflect.Method;
  */
 public interface Binder {
 
-  /*if[AOP]*/
   /**
    * Binds method interceptor[s] to methods matched by class and method matchers. A method is
    * eligible for interception if:
@@ -203,8 +203,7 @@ public interface Binder {
   void bindInterceptor(
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      org.aopalliance.intercept.MethodInterceptor... interceptors);
-  /*end[AOP]*/
+      MethodInterceptor... interceptors);
 
   /** Binds a scope to an annotation. */
   void bindScope(Class<? extends Annotation> annotationType, Scope scope);

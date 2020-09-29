@@ -3,6 +3,7 @@ package com.google.inject.internal;
 /** Enum used to identify a specific Guice error. */
 public enum ErrorId {
   AMBIGUOUS_TYPE_CONVERSION,
+  AOP_DISABLED,
   AT_INJECT_REQUIRED,
   BINDING_ALREADY_SET,
   BINDING_TO_GUICE_TYPE,

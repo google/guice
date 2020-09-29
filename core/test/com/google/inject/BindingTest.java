@@ -24,11 +24,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Runnables;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint;
@@ -332,9 +334,10 @@ public class BindingTest {
     }
   }
 
-  /*if[AOP]*/
   @Test
   public void testToConstructorAndMethodInterceptors() throws NoSuchMethodException {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
+
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
     final AtomicInteger count = new AtomicInteger();
     final MethodInterceptor countingInterceptor =
@@ -361,7 +364,6 @@ public class BindingTest {
     d.hashCode();
     assertEquals(2, count.get());
   }
-  /*end[AOP]*/
 
   @Test
   public void testInaccessibleConstructor() throws NoSuchMethodException {

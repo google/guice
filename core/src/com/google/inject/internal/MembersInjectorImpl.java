@@ -38,8 +38,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   /* @Nullable */ private final ImmutableList<SingleMemberInjector> memberInjectors;
   /* @Nullable */ private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
   /* @Nullable */ private final ImmutableList<InjectionListener<? super T>> injectionListeners;
-  /*if[AOP]*//* @Nullable */ private final ImmutableList<MethodAspect> addedAspects;
-  /*end[AOP]*/
+  /* @Nullable */ private final ImmutableList<MethodAspect> addedAspects;
 
   MembersInjectorImpl(
       InjectorImpl injector,
@@ -55,9 +54,10 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
         encounter.getInjectionListeners().isEmpty()
             ? null
             : encounter.getInjectionListeners().asList();
-    /*if[AOP]*/
-    this.addedAspects = encounter.getAspects().isEmpty() ? null : encounter.getAspects();
-    /*end[AOP]*/
+    this.addedAspects =
+        (InternalFlags.isBytecodeGenEnabled() && !encounter.getAspects().isEmpty())
+            ? encounter.getAspects()
+            : null;
   }
 
   public ImmutableList<SingleMemberInjector> getMemberInjectors() {
@@ -184,9 +184,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     return ImmutableSet.of();
   }
 
-  /*if[AOP]*/
   public ImmutableList<MethodAspect> getAddedAspects() {
     return addedAspects == null ? ImmutableList.<MethodAspect>of() : addedAspects;
   }
-  /*end[AOP]*/
 }

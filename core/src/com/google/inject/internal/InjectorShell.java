@@ -186,10 +186,8 @@ final class InjectorShell {
 
       new MessageProcessor(errors).process(injector, elements);
 
-      /*if[AOP]*/
       new InterceptorBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Interceptors creation");
-      /*end[AOP]*/
 
       new ListenerBindingProcessor(errors).process(injector, elements);
       List<TypeListenerBinding> typeListenerBindings =

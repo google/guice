@@ -550,7 +550,6 @@ public class WeakKeySetTest extends TestCase {
       return ImmutableSet.of();
     }
 
-    /*if[AOP]*/
     @Override
     public void addMethodAspect(MethodAspect methodAspect) {
       throw new UnsupportedOperationException();
@@ -560,7 +559,6 @@ public class WeakKeySetTest extends TestCase {
     public ImmutableList<MethodAspect> getMethodAspects() {
       return ImmutableList.of();
     }
-    /*end[AOP]*/
 
     @Override
     public void addTypeListener(TypeListenerBinding typeListenerBinding) {
