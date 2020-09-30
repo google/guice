@@ -44,6 +44,14 @@ public class PackageNameCompressorTest {
   }
 
   @Test
+  public void testSingleLetterClassName() {
+    String input = "Something is wrong with foo.bar.baz.F class!";
+    String expectedOutput =
+        "Something is wrong with F class!" + LEGEND_HEADER + "F: foo.bar.baz.F\n" + LEGEND_FOOTER;
+    assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
   public void testSameSimpleNames() {
     String input = "Something is wrong with foo.bar.baz.Foo and foo.bar.qux.Foo class!";
     String expectedOutput = "Something is wrong with baz.Foo and qux.Foo class!"

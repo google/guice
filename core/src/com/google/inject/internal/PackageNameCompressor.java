@@ -58,7 +58,6 @@ final class PackageNameCompressor {
   // TODO(erichang): Consider validating this regex by also passing in all of the known types from
   // keys, module names, component names, etc and checking against that list. This may have some
   // extra complications with taking apart types like List<Foo> to get the inner class names.
-  // TODO(user): Update the regular expression to handle single letter class names.
   private static final Pattern CLASSNAME_PATTERN =
       // Match lowercase package names with trailing dots. Start with a non-word character so we
       // don't match substrings in like Bar.Foo and match the com.foo.Foo. Require at least 2
@@ -69,7 +68,7 @@ final class PackageNameCompressor {
       Pattern.compile(
           "[\\W](([a-z_0-9]++[.]){2,}+"
               // Then match a name starting with an uppercase letter. This is the outer class name.
-              + "[A-Z][\\w$]++)");
+              + "[A-Z][\\w$]*)");
 
   // Pattern used to filter out quoted strings that should not have their package name compressed.
   // Picked '"' here because Guice uses it when including a string literal in an error message. This
