@@ -34,6 +34,9 @@ after_success:
   - util/generate-latest-docs.sh
   - util/publish-snapshot-on-commit.sh
 
+after_failure:
+  - cat target/surefire-reports/*.txt
+
 branches:
   only:
     - master
