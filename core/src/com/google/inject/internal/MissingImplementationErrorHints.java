@@ -9,6 +9,7 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.BindingSourceRestriction;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -40,6 +41,10 @@ final class MissingImplementationErrorHints {
   static <T> ImmutableList<String> getSuggestions(Key<T> key, Injector injector) {
     ImmutableList.Builder<String> suggestions = ImmutableList.builder();
     TypeLiteral<T> type = key.getTypeLiteral();
+
+    BindingSourceRestriction.getMissingImplementationSuggestion(GuiceInternal.GUICE_INTERNAL, key)
+        .ifPresent(suggestions::add);
+
     // Keys which have similar strings as the desired key
     List<String> possibleMatches = new ArrayList<>();
     List<Binding<T>> sameTypes = injector.findBindingsByType(type);

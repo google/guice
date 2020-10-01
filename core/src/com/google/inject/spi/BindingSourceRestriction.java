@@ -58,6 +58,21 @@ public final class BindingSourceRestriction {
     void clear();
   }
 
+  /** Returns a suggestion for how a restricted binding should be created in case it's missing. */
+  public static Optional<String> getMissingImplementationSuggestion(
+      GuiceInternal guiceInternal, Key<?> key) {
+    checkNotNull(guiceInternal);
+    RestrictedBindingSource restriction = getRestriction(key);
+    if (restriction == null) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        String.format(
+            "%nHint: This key is restricted and cannot be bound directly. Restriction explanation:"
+                + " %s",
+            restriction.explanation()));
+  }
+
   /**
    * Returns all the restriction violations found on the given Module Elements, as error messages.
    *
@@ -118,12 +133,7 @@ public final class BindingSourceRestriction {
     Key<?> key = binding.getKey();
     // Module Bindings are all explicit and have an ElementSource.
     ElementSource elementSource = (ElementSource) binding.getSource();
-    // If the key is annotated then only the annotation restriction matters, the type restriction is
-    // ignored (an annotated type is essentially a new type).
-    RestrictedBindingSource restriction =
-        key.getAnnotationType() == null
-            ? key.getTypeLiteral().getRawType().getAnnotation(RestrictedBindingSource.class)
-            : key.getAnnotationType().getAnnotation(RestrictedBindingSource.class);
+    RestrictedBindingSource restriction = getRestriction(key);
     if (restriction == null) {
       return Optional.empty();
     }
@@ -222,6 +232,18 @@ public final class BindingSourceRestriction {
       elementSource.moduleSource.getPermitMap().clear();
       elementSource = elementSource.getOriginalElementSource();
     }
+  }
+
+  /*
+   * Returns the restriction on the given key (null if there is none).
+   *
+   * If the key is annotated then only the annotation restriction matters, the type restriction is
+   * ignored (an annotated type is essentially a new type).
+   **/
+  private static RestrictedBindingSource getRestriction(Key<?> key) {
+    return key.getAnnotationType() == null
+        ? key.getTypeLiteral().getRawType().getAnnotation(RestrictedBindingSource.class)
+        : key.getAnnotationType().getAnnotation(RestrictedBindingSource.class);
   }
 
   /**

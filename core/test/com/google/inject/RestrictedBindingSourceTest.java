@@ -124,6 +124,17 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
+  public void missingImplementationErrorForRestrictedBindingIncludesExplanation() {
+    CreationException expected = assertThatInjectorCreationFails(new RoutingModule());
+
+    assertThat(expected)
+        .hasMessageThat()
+        .contains(
+            "Hint: This key is restricted and cannot be bound directly. Restriction explanation:"
+                + " Please install NetworkModule.");
+  }
+
+  @Test
   public void canBindRestrictedTypeWithUnrestrictedQualifierAnnotation() {
     Guice.createInjector(
         new AbstractModule() {
