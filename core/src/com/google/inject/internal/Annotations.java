@@ -222,6 +222,16 @@ public class Annotations {
     return QUOTE_MEMBER_VALUES ? "\"" + value + "\"" : value;
   }
 
+  private static final boolean SINGLE_VALUE_MEMBER_PREFIX = determineWhetherToElideValuePrefix();
+
+  /**
+   * Returns the member value key prefix {@code value=}, or the empty string. In Java
+   * 14, annotations with just one element named {@code value} elide the `value=` prefix.
+   */
+  public static String memberKeyString() {
+    return SINGLE_VALUE_MEMBER_PREFIX ? "value=" : "";
+  }
+
   @Retention(RUNTIME)
   private @interface TestAnnotation {
     String value();
@@ -236,6 +246,20 @@ public class Annotations {
               .getAnnotation(TestAnnotation.class)
               .toString();
       return annotation.contains("\"determineWhetherToQuote\"");
+    } catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  @TestAnnotation("determineWhetherToElideValuePrefix")
+  private static boolean determineWhetherToElideValuePrefix() {
+    try {
+      String annotation =
+          Annotations.class
+              .getDeclaredMethod("determineWhetherToElideValuePrefix")
+              .getAnnotation(TestAnnotation.class)
+              .toString();
+      return annotation.contains("value=");
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }

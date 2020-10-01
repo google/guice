@@ -51,7 +51,10 @@ public class UniqueAnnotations {
 
       @Override
       public String toString() {
-        return "@" + Internal.class.getName() + "(value=" + value + ")";
+        return String.format("@%s(%s%s)",
+                Internal.class.getName(),
+                Annotations.memberKeyString(),
+                value);
       }
 
       @Override

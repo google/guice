@@ -121,7 +121,8 @@ final class FactoryProvider2<F>
         public String toString() {
           return "@"
               + Assisted.class.getName()
-              + "(value="
+              + "("
+              + Annotations.memberKeyString()
               + Annotations.memberValueString("")
               + ")";
         }

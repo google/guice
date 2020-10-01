@@ -22,6 +22,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
+
+import com.google.inject.internal.Annotations;
 import junit.framework.TestCase;
 
 /** @author crazybob@google.com (Bob Lee) */
@@ -60,7 +62,7 @@ public class BindingAnnotationTest extends TestCase {
           expected.getMessage(),
           true,
           "No implementation for java.lang.String annotated with",
-          "BindingAnnotationTest$Blue(value=5) was bound",
+          "BindingAnnotationTest$Blue(" + Annotations.memberKeyString() + "5) was bound",
           "at " + BindingAnnotationTest.class.getName(),
           getDeclaringSourcePart(getClass()));
     }
@@ -119,7 +121,7 @@ public class BindingAnnotationTest extends TestCase {
           expected.getMessage(),
           true,
           "No implementation for java.lang.String annotated with",
-          "BindingAnnotationTest$Blue(value=5) was bound",
+          "BindingAnnotationTest$Blue(" + Annotations.memberKeyString() + "5) was bound",
           "at " + BindingAnnotationTest.class.getName(),
           getDeclaringSourcePart(getClass()));
     }
