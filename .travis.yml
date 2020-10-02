@@ -35,7 +35,7 @@ after_success:
   - util/publish-snapshot-on-commit.sh
 
 after_failure:
-  - cat target/surefire-reports/*.txt
+  - grep -r . -e "Tests run: .*, Failures: [^0]" | cut -d ':' -f 1 | xargs cat
 
 branches:
   only:
