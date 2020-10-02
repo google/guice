@@ -18,6 +18,13 @@ package com.googlecode.guice;
 
 import static com.google.inject.Asserts.getClassPathUrls;
 import static com.google.inject.matcher.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
@@ -33,16 +40,20 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 import javax.inject.Inject;
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * This test is in a separate package so we can test package-level visibility with confidence.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-public class BytecodeGenTest extends TestCase {
+@RunWith(JUnit4.class)
+public class BytecodeGenTest {
 
   private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
@@ -78,25 +89,26 @@ public class BytecodeGenTest extends TestCase {
         }
       };
 
+  @Test
   public void testPackageVisibility() {
     Injector injector = Guice.createInjector(new PackageVisibilityTestModule());
     injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
   }
 
+  @Test
   public void testInterceptedPackageVisibility() {
     // Test relies on package access which CHILD loading doesn't have
-    if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
-      return;
-    }
+    assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
+
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
   }
 
+  @Test
   public void testEnhancerNaming() {
     // Test relies on package access which CHILD loading doesn't have
-    if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
-      return;
-    }
+    assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
+
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     PublicUserOfPackagePrivate pupp = injector.getInstance(PublicUserOfPackagePrivate.class);
     assertTrue(
@@ -172,11 +184,8 @@ public class BytecodeGenTest extends TestCase {
   private Class<ProxyTestImpl> realClass;
   private Module testModule;
 
-  @Override
-  @SuppressWarnings("unchecked")
-  protected void setUp() throws Exception {
-    super.setUp();
-
+  @Before
+  public void setUp() throws Exception {
     ClassLoader testClassLoader = new TestVisibilityClassLoader(true);
     proxyTestClass = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTest.class.getName());
     realClass = (Class<ProxyTestImpl>) testClassLoader.loadClass(ProxyTestImpl.class.getName());
@@ -211,6 +220,7 @@ public class BytecodeGenTest extends TestCase {
     }
   }
 
+  @Test
   public void testProxyClassLoading() throws Exception {
     Object testObject =
         Guice.createInjector(interceptorModule, testModule).getInstance(proxyTestClass);
@@ -220,6 +230,7 @@ public class BytecodeGenTest extends TestCase {
     assertEquals("HELLO WORLD", m.invoke(testObject));
   }
 
+  @Test
   public void testSystemClassLoaderIsUsedIfProxiedClassUsesIt() {
     // Test relies on package access which CHILD loading doesn't have
     if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
@@ -243,6 +254,7 @@ public class BytecodeGenTest extends TestCase {
     }
   }
 
+  @Test
   public void testProxyClassUnloading() {
     Object testObject =
         Guice.createInjector(interceptorModule, testModule).getInstance(proxyTestClass);
@@ -272,6 +284,7 @@ public class BytecodeGenTest extends TestCase {
     assertNull("Proxy class was not unloaded.", clazzRef.get());
   }
 
+  @Test
   public void testProxyingPackagePrivateMethods() {
     // Test relies on package access which CHILD loading doesn't have
     if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
@@ -313,6 +326,7 @@ public class BytecodeGenTest extends TestCase {
     public void method(Hidden h) {}
   }
 
+  @Test
   public void testClassLoaderBridging() throws Exception {
     // Test relies on package access which CHILD loading doesn't have
     if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
@@ -342,6 +356,7 @@ public class BytecodeGenTest extends TestCase {
   }
 
   // This tests for a situation where an osgi bundle contains a different version of guice.
+  @Test
   public void testFastClassWithDifferentVersionsOfGuice() throws Throwable {
     // Test relies on package access which CHILD loading doesn't have
     if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {

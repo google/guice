@@ -33,14 +33,12 @@ import com.google.inject.spi.InjectorSpiTest;
 import com.google.inject.spi.MessageTest;
 import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ModuleSourceTest;
-import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
 import com.google.inject.spi.ToolStageInjectorTest;
 import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.OverrideModuleTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-import com.googlecode.guice.GuiceTck;
 import com.googlecode.guice.Jsr330Test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -51,7 +49,6 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    suite.addTest(GuiceTck.suite());
     suite.addTestSuite(BinderTest.class);
     suite.addTest(BinderTestSuite.suite());
     suite.addTestSuite(BindingAnnotationTest.class);
@@ -116,7 +113,6 @@ public class AllTests {
     suite.addTestSuite(InjectionPointTest.class);
     suite.addTestSuite(InjectorSpiTest.class);
     suite.addTestSuite(ModuleRewriterTest.class);
-    suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(SpiBindingsTest.class);
     suite.addTestSuite(ToolStageInjectorTest.class);
     suite.addTestSuite(ModuleSourceTest.class);
@@ -135,11 +131,9 @@ public class AllTests {
     suite.addTestSuite(com.google.inject.internal.ProxyFactoryTest.class);
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(MethodInterceptionTest.class);
-    suite.addTestSuite(com.googlecode.guice.BytecodeGenTest.class);
     /*end[AOP]*/
 
     // googlecode.guice
-    suite.addTestSuite(com.googlecode.guice.OSGiContainerTest.class);
     suite.addTestSuite(Jsr330Test.class);
 
     // multibindings tests

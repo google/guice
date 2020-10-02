@@ -16,6 +16,8 @@
 
 package com.googlecode.guice;
 
+import static org.junit.Assume.assumeTrue;
+
 import aQute.bnd.main.bnd;
 import com.googlecode.guice.bundle.OSGiTestActivator;
 import java.io.BufferedOutputStream;
@@ -25,7 +27,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 import java.util.ServiceLoader;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
@@ -35,7 +40,8 @@ import org.osgi.framework.launch.FrameworkFactory;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-public class OSGiContainerTest extends TestCase {
+@RunWith(JUnit4.class)
+public class OSGiContainerTest {
 
   // build properties passed from Ant
   static final String VERSION = System.getProperty("version", "snapshot");
@@ -55,18 +61,18 @@ public class OSGiContainerTest extends TestCase {
   static final String GUAVA_JAR = System.getProperty("guava.jar", "lib/guava-25.1-android.jar");
 
   // dynamically build test bundles
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
 
     // verify properties
-    assertTrue(failMsg(), new File(BUILD_DIR).isDirectory());
-    assertTrue(failMsg(), new File(GUICE_JAR).isFile());
+    assumeTrue(failMsg(), new File(BUILD_DIR).isDirectory());
+    assumeTrue(failMsg(), new File(GUICE_JAR).isFile());
 
     /*if[AOP]*/
-    assertTrue(failMsg(), new File(AOPALLIANCE_JAR).isFile());
+    assumeTrue(failMsg(), new File(AOPALLIANCE_JAR).isFile());
     /*end[AOP]*/
-    assertTrue(failMsg(), new File(JAVAX_INJECT_JAR).isFile());
-    assertTrue(failMsg(), new File(GUAVA_JAR).isFile());
+    assumeTrue(failMsg(), new File(JAVAX_INJECT_JAR).isFile());
+    assumeTrue(failMsg(), new File(GUAVA_JAR).isFile());
 
     Properties instructions = new Properties();
 
@@ -124,9 +130,10 @@ public class OSGiContainerTest extends TestCase {
         + "is properly setup to load in an OSGi container";
   }
 
-  //This test may fail if it is not run from ant, or if it is not run after ant has
-  //compiled & built jars. This is because the test is validating that the Guice jar
-  //is properly setup to load in an OSGi container
+  // This test may fail if it is not run from ant, or if it is not run after ant has
+  // compiled & built jars. This is because the test is validating that the Guice jar
+  // is properly setup to load in an OSGi container
+  @Test
   public void testGuiceWorksInOSGiContainer() throws Throwable {
 
     // ask framework to clear cache on startup
