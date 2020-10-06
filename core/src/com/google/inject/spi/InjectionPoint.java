@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -72,7 +73,12 @@ public final class InjectionPoint {
     this.member = method;
     this.declaringType = declaringType;
     this.optional = optional;
-    this.dependencies = forMember(method, declaringType, method.getParameterAnnotations());
+    this.dependencies =
+        forMember(
+            method,
+            declaringType,
+            method.getParameterAnnotations(),
+            KotlinNullabilitySupport.getInstance().getParameterPredicate(method));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Constructor<?> constructor) {
@@ -80,7 +86,11 @@ public final class InjectionPoint {
     this.declaringType = declaringType;
     this.optional = false;
     this.dependencies =
-        forMember(constructor, declaringType, constructor.getParameterAnnotations());
+        forMember(
+            constructor,
+            declaringType,
+            constructor.getParameterAnnotations(),
+            KotlinNullabilitySupport.getInstance().getParameterPredicate(constructor));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
@@ -107,7 +117,10 @@ public final class InjectionPoint {
   }
 
   private ImmutableList<Dependency<?>> forMember(
-      Member member, TypeLiteral<?> type, Annotation[][] parameterAnnotationsPerParameter) {
+      Member member,
+      TypeLiteral<?> type,
+      Annotation[][] parameterAnnotationsPerParameter,
+      Predicate<Integer> isParameterKotlinNullable) {
     Errors errors = new Errors(member);
 
     List<Dependency<?>> dependencies = Lists.newArrayList();
@@ -117,7 +130,9 @@ public final class InjectionPoint {
       try {
         Annotation[] parameterAnnotations = parameterAnnotationsPerParameter[index];
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
-        dependencies.add(newDependency(key, Nullability.allowsNull(parameterAnnotations), index));
+        boolean isNullable =
+            Nullability.allowsNull(parameterAnnotations) || isParameterKotlinNullable.test(index);
+        dependencies.add(newDependency(key, isNullable, index));
         index++;
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
