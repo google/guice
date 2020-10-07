@@ -26,16 +26,25 @@ import java.util.logging.Logger;
 public class InternalFlags {
   private static final Logger logger = Logger.getLogger(InternalFlags.class.getName());
 
-  private static final IncludeStackTraceOption INCLUDE_STACK_TRACES
-      = parseIncludeStackTraceOption();
+  private static final IncludeStackTraceOption INCLUDE_STACK_TRACES =
+      getSystemOption(
+          "guice_include_stack_traces",
+          IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE);
 
-  private static final CustomClassLoadingOption CUSTOM_CLASS_LOADING
-      = parseCustomClassLoadingOption();
+  private static final CustomClassLoadingOption CUSTOM_CLASS_LOADING =
+      getSystemOption(
+          "guice_custom_class_loading",
+          CustomClassLoadingOption.BRIDGE,
+          CustomClassLoadingOption.OFF);
 
-  private static final NullableProvidesOption NULLABLE_PROVIDES
-      = parseNullableProvidesOption(NullableProvidesOption.ERROR);
+  private static final NullableProvidesOption NULLABLE_PROVIDES =
+      getSystemOption("guice_check_nullable_provides_params", NullableProvidesOption.ERROR);
 
-  private static final ColorizeOption COLORIZE_OPTION = parseColorizeOption();
+  private static final AopOption AOP_OPTION =
+      getSystemOption("guice_aop_option", AopOption.ENABLED);
+
+  private static final ColorizeOption COLORIZE_OPTION =
+      getSystemOption("guice_colorize_error_messages", ColorizeOption.OFF);
 
   /** The options for Guice stack trace collection. */
   public enum IncludeStackTraceOption {
@@ -87,6 +96,32 @@ public class InternalFlags {
     ERROR
   }
 
+  /**
+   * Options for controlling whether Guice supports AOP (Aspect-oriented programming). When AOP is
+   * enabled, the following features will be enabled in Guice:
+   *
+   * <ul>
+   *   <li>Runtime bytecode generation (instead of reflection) will be used when Guice need to
+   *       invoke application code.
+   *   <li>Method interception.
+   *   <li>Additional debug information like line numbers and source file in error messages.
+   * </ul>
+   *
+   * <p>Bytecode generation is generally faster than using reflection when invoking application
+   * code, however, it can use more memory and slower in certain cases due to the time spent in
+   * generating the classes. If you prefer to use reflection over bytecode generation then set
+   * {@link AopOption} to {@code DISABLED}.
+   */
+  public enum AopOption {
+    /**
+     * AOP is disabled and using features that require bytecode generation such as method
+     * interception will throw errors at run time.
+     */
+    DISABLED,
+    /** AOP is enabled. */
+    ENABLED,
+  }
+
   /** Options for enable or disable the new experimental error messages. */
   public enum ExperimentalErrorMessagesOption {
     DISABLED,
@@ -129,31 +164,16 @@ public class InternalFlags {
     return NULLABLE_PROVIDES;
   }
 
+  public static boolean isAopEnabled() {
+    return AOP_OPTION == AopOption.ENABLED;
+  }
+
   public static boolean enableExperimentalErrorMessages() {
     return false;
   }
 
   public static boolean enableColorizeErrorMessages() {
     return COLORIZE_OPTION.enabled();
-  }
-
-  private static IncludeStackTraceOption parseIncludeStackTraceOption() {
-    return getSystemOption("guice_include_stack_traces",
-        IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE);
-  }
-
-  private static CustomClassLoadingOption parseCustomClassLoadingOption() {
-    return getSystemOption("guice_custom_class_loading",
-        CustomClassLoadingOption.BRIDGE, CustomClassLoadingOption.OFF);
-  }
-
-  private static NullableProvidesOption parseNullableProvidesOption(
-      NullableProvidesOption defaultValue) {
-    return getSystemOption("guice_check_nullable_provides_params", defaultValue);
-  }
-
-  private static ColorizeOption parseColorizeOption() {
-    return getSystemOption("guice_colorize_error_messages", ColorizeOption.OFF);
   }
 
   /**
