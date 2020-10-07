@@ -16,11 +16,15 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.MapBinderTest;
 import com.google.inject.internal.MoreTypesTest;
+import com.google.inject.internal.MultibinderTest;
+import com.google.inject.internal.OptionalBinderTest;
+import com.google.inject.internal.RealElementTest;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.internal.WeakKeySetTest;
-import com.google.inject.internal.util.LineNumbersTest;
 import com.google.inject.matcher.MatcherTest;
+import com.google.inject.multibindings.ProvidesIntoTest;
 import com.google.inject.name.NamedEquivalanceTest;
 import com.google.inject.name.NamesTest;
 import com.google.inject.spi.BindingTargetVisitorTest;
@@ -53,7 +57,6 @@ public class AllTests {
     suite.addTest(BinderTestSuite.suite());
     suite.addTestSuite(BindingAnnotationTest.class);
     suite.addTestSuite(BindingOrderTest.class);
-    suite.addTestSuite(BindingTest.class);
     suite.addTestSuite(BoundInstanceInjectionTest.class);
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
@@ -62,25 +65,20 @@ public class AllTests {
     suite.addTestSuite(EagerSingletonTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
-    suite.addTestSuite(TypeListenerTest.class);
     suite.addTestSuite(InjectorTest.class);
     suite.addTestSuite(JitBindingsTest.class);
-    // IntegrationTest is AOP-only
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);
-    // MethodInterceptionTest is AOP-only
     suite.addTestSuite(MembersInjectorTest.class);
     suite.addTestSuite(ModulesTest.class);
     suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
     suite.addTestSuite(OptionalBindingTest.class);
     suite.addTestSuite(OverrideModuleTest.class);
-    suite.addTestSuite(ParentInjectorTest.class);
     suite.addTestSuite(PrivateModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
     suite.addTestSuite(ProvisionListenerTest.class);
-    // ProxyFactoryTest is AOP-only
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(RequireAtInjectOnConstructorsTest.class);
@@ -94,7 +92,6 @@ public class AllTests {
     suite.addTestSuite(WeakKeySetTest.class);
 
     // internal
-    suite.addTestSuite(LineNumbersTest.class);
     suite.addTestSuite(MoreTypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
 
@@ -127,21 +124,15 @@ public class AllTests {
     suite.addTestSuite(ProvidersTest.class);
     suite.addTestSuite(TypesTest.class);
 
-    /*if[AOP]*/
-    suite.addTestSuite(com.google.inject.internal.ProxyFactoryTest.class);
-    suite.addTestSuite(IntegrationTest.class);
-    suite.addTestSuite(MethodInterceptionTest.class);
-    /*end[AOP]*/
-
     // googlecode.guice
     suite.addTestSuite(Jsr330Test.class);
 
     // multibindings tests
-    suite.addTestSuite(com.google.inject.internal.MapBinderTest.class);
-    suite.addTestSuite(com.google.inject.internal.MultibinderTest.class);
-    suite.addTestSuite(com.google.inject.internal.OptionalBinderTest.class);
-    suite.addTestSuite(com.google.inject.internal.RealElementTest.class);
-    suite.addTestSuite(com.google.inject.multibindings.ProvidesIntoTest.class);
+    suite.addTestSuite(MapBinderTest.class);
+    suite.addTestSuite(MultibinderTest.class);
+    suite.addTestSuite(OptionalBinderTest.class);
+    suite.addTestSuite(RealElementTest.class);
+    suite.addTestSuite(ProvidesIntoTest.class);
 
     return suite;
   }

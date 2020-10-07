@@ -18,6 +18,13 @@ package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.only;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -35,12 +42,15 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Named;
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class MethodInterceptionTest extends TestCase {
+@RunWith(JUnit4.class)
+public class MethodInterceptionTest {
 
   private AtomicInteger count = new AtomicInteger();
 
@@ -66,6 +76,7 @@ public class MethodInterceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testSharedProxyClasses() {
     Injector injector =
         Guice.createInjector(
@@ -124,6 +135,7 @@ public class MethodInterceptionTest extends TestCase {
         separateNullFoos.getClass());
   }
 
+  @Test
   public void testGetThis() {
     final AtomicReference<Object> lastTarget = new AtomicReference<>();
 
@@ -150,6 +162,7 @@ public class MethodInterceptionTest extends TestCase {
     assertSame(interceptable, lastTarget.get());
   }
 
+  @Test
   public void testInterceptingFinalClass() {
     Injector injector =
         Guice.createInjector(
@@ -180,6 +193,7 @@ public class MethodInterceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testSpiAccessToInterceptors() throws NoSuchMethodException {
     final MethodInterceptor countingInterceptor = new CountingInterceptor();
     final MethodInterceptor returnNullInterceptor = new ReturnNullInterceptor();
@@ -217,6 +231,7 @@ public class MethodInterceptionTest extends TestCase {
     assertEquals("expected counting interceptor to be invoked first", 1, count.get());
   }
 
+  @Test
   public void testInterceptedMethodThrows() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -244,6 +259,7 @@ public class MethodInterceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testNotInterceptedMethodsInInterceptedClassDontAddFrames() {
     Injector injector =
         Guice.createInjector(
@@ -303,6 +319,7 @@ public class MethodInterceptionTest extends TestCase {
 
   public static final class NotInterceptable {}
 
+  @Test
   public void testInterceptingNonBridgeWorks() {
     Injector injector =
         Guice.createInjector(
@@ -343,6 +360,7 @@ public class MethodInterceptionTest extends TestCase {
 
   public static class Impl extends Superclass<RetType> implements Interface {}
 
+  @Test
   public void testInterceptionOrder() {
     final List<String> callList = Lists.newArrayList();
     Injector injector =
@@ -381,6 +399,7 @@ public class MethodInterceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testDeDuplicateInterceptors() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -398,6 +417,7 @@ public class MethodInterceptionTest extends TestCase {
     assertEquals(1, count.get());
   }
 
+  @Test
   public void testCallLater() {
     final Queue<Runnable> queue = Lists.newLinkedList();
     Injector injector =
@@ -474,6 +494,7 @@ public class MethodInterceptionTest extends TestCase {
   // FlyingHorse should be merged into earlier hierarchy
   public static class Pegasus extends HorseImpl implements MythicalAnimal, FlyingHorse {}
 
+  @Test
   public void testDefaultMethodInterception() {
     Injector injector =
         Guice.createInjector(
@@ -509,6 +530,7 @@ public class MethodInterceptionTest extends TestCase {
 
   public static class Setter extends BaseSetter {}
 
+  @Test
   public void testSetterInterception() {
     Injector injector =
         Guice.createInjector(

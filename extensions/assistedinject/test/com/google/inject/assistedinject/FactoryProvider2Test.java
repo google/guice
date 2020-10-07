@@ -18,6 +18,12 @@ package com.google.inject.assistedinject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
@@ -39,10 +45,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 @SuppressWarnings("deprecation")
-public class FactoryProvider2Test extends TestCase {
+@RunWith(JUnit4.class)
+public class FactoryProvider2Test {
 
   private enum Color {
     BLUE,
@@ -54,6 +65,7 @@ public class FactoryProvider2Test extends TestCase {
     PINK
   }
 
+  @Test
   public void testAssistedFactory() {
     Injector injector =
         Guice.createInjector(
@@ -76,6 +88,7 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(5.0d, redMustang.engineSize, 0.0);
   }
 
+  @Test
   public void testAssistedFactoryWithAnnotations() {
     Injector injector =
         Guice.createInjector(
@@ -141,6 +154,7 @@ public class FactoryProvider2Test extends TestCase {
     Car create(Color color, boolean convertable);
   }
 
+  @Test
   public void testFactoryUsesInjectedConstructor() {
     Injector injector =
         Guice.createInjector(
@@ -179,6 +193,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testConstructorDoesntNeedAllFactoryMethodArguments() {
     Injector injector =
         Guice.createInjector(
@@ -204,6 +219,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testMethodsAndFieldsGetInjected() {
     Injector injector =
         Guice.createInjector(
@@ -244,6 +260,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testProviderInjection() {
     Injector injector =
         Guice.createInjector(
@@ -274,6 +291,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testAssistedProviderInjection() {
     Injector injector =
         Guice.createInjector(
@@ -311,6 +329,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testTypeTokenInjection() {
     Injector injector =
         Guice.createInjector(
@@ -347,6 +366,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testTypeTokenProviderInjection() {
     Injector injector =
         Guice.createInjector(
@@ -385,6 +405,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testAssistInjectionInNonPublicConstructor() {
     Injector injector =
         Guice.createInjector(
@@ -406,6 +427,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionDuringConstruction() {
     Injector injector =
         Guice.createInjector(
@@ -448,6 +470,7 @@ public class FactoryProvider2Test extends TestCase {
     Car createCar() throws FireException, ExplosionException;
   }
 
+  @Test
   public void testConstructorExceptionsAreThrownByFactory() {
     Injector injector =
         Guice.createInjector(
@@ -479,6 +502,7 @@ public class FactoryProvider2Test extends TestCase {
     public WildcardCollection(@SuppressWarnings("unused") @Assisted Collection<?> items) {}
   }
 
+  @Test
   public void testWildcardGenerics() {
     Injector injector =
         Guice.createInjector(
@@ -508,6 +532,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryWithImplicitBindings() {
     Injector injector =
         Guice.createInjector(
@@ -525,6 +550,7 @@ public class FactoryProvider2Test extends TestCase {
     assertNotNull(fiat.steeringWheel);
   }
 
+  @Test
   public void testFactoryFailsWithMissingBinding() {
     try {
       Guice.createInjector(
@@ -544,6 +570,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryFailsWithMissingBindingInToolStage() {
     try {
       Guice.createInjector(
@@ -564,6 +591,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testMethodsDeclaredInObject() {
     Injector injector =
         Guice.createInjector(
@@ -585,6 +613,7 @@ public class FactoryProvider2Test extends TestCase {
     @Inject @Assisted Provider<Color> colorProvider;
   }
 
+  @Test
   public void testInjectingProviderOfParameter() {
     Injector injector =
         Guice.createInjector(
@@ -610,6 +639,7 @@ public class FactoryProvider2Test extends TestCase {
     assertSame(Color.RED, subaru.colorProvider.get());
   }
 
+  @Test
   public void testInjectingNullParameter() {
     Injector injector =
         Guice.createInjector(
@@ -634,6 +664,7 @@ public class FactoryProvider2Test extends TestCase {
     Mustang createMustang(@Assisted("color") Provider<Color> colorProvider);
   }
 
+  @Test
   public void testAssistedProviderIsDisallowed() {
     try {
       Guice.createInjector(
@@ -693,6 +724,7 @@ public class FactoryProvider2Test extends TestCase {
     Mustang createMustang(@Assisted("color") javax.inject.Provider<Color> colorProvider);
   }
 
+  @Test
   public void testAssistedJavaxProviderIsDisallowed() {
     try {
       Guice.createInjector(
@@ -744,6 +776,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryUseBeforeInitialization() {
     ColoredCarFactory carFactory =
         FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class).get();
@@ -761,6 +794,7 @@ public class FactoryProvider2Test extends TestCase {
     Mustang create(Color color);
   }
 
+  @Test
   public void testFactoryBuildingConcreteTypes() {
     Injector injector =
         Guice.createInjector(
@@ -789,6 +823,7 @@ public class FactoryProvider2Test extends TestCase {
     Fleet createFleet(Color color);
   }
 
+  @Test
   public void testInjectDeepIntoConstructedObjects() {
     Injector injector =
         Guice.createInjector(
@@ -827,6 +862,7 @@ public class FactoryProvider2Test extends TestCase {
     Color fabric;
   }
 
+  @Test
   public void testDistinctKeys() {
     Injector injector =
         Guice.createInjector(
@@ -848,6 +884,7 @@ public class FactoryProvider2Test extends TestCase {
     Car create(@Assisted("paint") Color paint, @Assisted("paint") Color morePaint);
   }
 
+  @Test
   public void testDuplicateKeys() {
     try {
       Guice.createInjector(
@@ -873,13 +910,13 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   /*if[AOP]*/
+  @Test
   public void testMethodInterceptorsOnAssistedTypes() {
     final AtomicInteger invocationCount = new AtomicInteger();
-    final org.aopalliance.intercept.MethodInterceptor interceptor =
-        new org.aopalliance.intercept.MethodInterceptor() {
+    final MethodInterceptor interceptor =
+        new MethodInterceptor() {
           @Override
-          public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation)
-              throws Throwable {
+          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
             invocationCount.incrementAndGet();
             return methodInvocation.proceed();
           }
@@ -909,6 +946,7 @@ public class FactoryProvider2Test extends TestCase {
    * Our factories aren't reusable across injectors. Although this behaviour isn't something we
    * like, I have a test case to make sure the error message is pretty.
    */
+  @Test
   public void testFactoryReuseErrorMessageIsPretty() {
     final Provider<ColoredCarFactory> factoryProvider =
         FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class);
@@ -938,6 +976,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testNonAssistedFactoryMethodParameter() {
     try {
       FactoryProvider.newFactory(NamedParameterFactory.class, Mustang.class);
@@ -953,6 +992,7 @@ public class FactoryProvider2Test extends TestCase {
     Car create(@Named("seats") int seats, double engineSize);
   }
 
+  @Test
   public void testDefaultAssistedAnnotation() throws NoSuchFieldException {
     Assisted plainAssisted =
         Subaru.class.getDeclaredField("colorProvider").getAnnotation(Assisted.class);
@@ -964,6 +1004,7 @@ public class FactoryProvider2Test extends TestCase {
     T create(Color color);
   }
 
+  @Test
   public void testGenericAssistedFactory() {
     final TypeLiteral<GenericColoredCarFactory<Mustang>> mustangTypeLiteral =
         new TypeLiteral<GenericColoredCarFactory<Mustang>>() {};
@@ -1051,6 +1092,7 @@ public class FactoryProvider2Test extends TestCase {
     public Insurance<Camaro> create(Camaro car, double premium);
   }
 
+  @Test
   public void testAssistedFactoryForConcreteType() {
 
     Injector injector =
@@ -1092,6 +1134,7 @@ public class FactoryProvider2Test extends TestCase {
     public Insurance<T> create(T car, double premium);
   }
 
+  @Test
   public void testAssistedFactoryForParameterizedType() {
     final TypeLiteral<InsuranceFactory<Mustang>> mustangInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Mustang>>() {};
@@ -1148,6 +1191,7 @@ public class FactoryProvider2Test extends TestCase {
     public void sell() {}
   }
 
+  @Test
   public void testAssistedFactoryForTypeVariableParameters() {
     final TypeLiteral<InsuranceFactory<Camaro>> camaroInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Camaro>>() {};
@@ -1177,6 +1221,7 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(camaro, camaroPolicy.car);
   }
 
+  @Test
   public void testInjectingAndUsingInjector() {
     Injector injector =
         Guice.createInjector(
@@ -1199,6 +1244,7 @@ public class FactoryProvider2Test extends TestCase {
     assertSame(Color.GREEN, green.getColor());
   }
 
+  @Test
   public void testDuplicateAssistedFactoryBinding() {
     Injector injector =
         Guice.createInjector(
@@ -1246,6 +1292,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryMethodCalledEquals() {
     Injector injector =
         Guice.createInjector(
@@ -1272,6 +1319,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  @Test
   public void testReturnValueMatchesParamValue() {
     Injector injector =
         Guice.createInjector(
@@ -1357,6 +1405,7 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   // See https://github.com/google/guice/issues/904
+  @Test
   public void testGeneratedDefaultMethodsForwardCorrectly() {
     final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =
         new Key<AbstractAssisted.Factory<ConcreteAssisted, String>>() {};

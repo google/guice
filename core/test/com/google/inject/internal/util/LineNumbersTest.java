@@ -18,6 +18,8 @@ package com.google.inject.internal.util;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
@@ -26,11 +28,17 @@ import com.google.inject.Injector;
 import com.google.inject.matcher.Matchers;
 import java.lang.reflect.Modifier;
 import javax.inject.Inject;
-import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class LineNumbersTest extends TestCase {
+@RunWith(JUnit4.class)
+public class LineNumbersTest {
 
+  @Test
   public void testLineNumbers() {
     try {
       Guice.createInjector(
@@ -59,6 +67,7 @@ public class LineNumbersTest extends TestCase {
   public interface B {}
 
   /*if[AOP]*/
+  @Test
   public void testCanHandleLineNumbersForGuiceGeneratedClasses() {
     try {
       Guice.createInjector(
@@ -68,10 +77,9 @@ public class LineNumbersTest extends TestCase {
               bindInterceptor(
                   Matchers.only(A.class),
                   Matchers.any(),
-                  new org.aopalliance.intercept.MethodInterceptor() {
+                  new MethodInterceptor() {
                     @Override
-                    public Object invoke(
-                        org.aopalliance.intercept.MethodInvocation methodInvocation) {
+                    public Object invoke(MethodInvocation methodInvocation) {
                       return null;
                     }
                   });
@@ -132,6 +140,7 @@ public class LineNumbersTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnavailableByteCodeShowsUnknownSource() {
     try {
       Guice.createInjector(
@@ -152,6 +161,7 @@ public class LineNumbersTest extends TestCase {
     }
   }
 
+  @Test
   public void testGeneratedClassesCanSucceed() {
     final Class<?> generated = new GeneratingClassLoader().generate();
     Injector injector =

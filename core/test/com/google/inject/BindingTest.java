@@ -18,6 +18,12 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -36,16 +42,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
-/*if[AOP]*/
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-/*end[AOP]*/
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
-public class BindingTest extends TestCase {
+/** @author crazybob@google.com (Bob Lee) */
+@RunWith(JUnit4.class)
+public class BindingTest {
 
   static class Dependent {
     @Inject A a;
@@ -53,6 +58,7 @@ public class BindingTest extends TestCase {
     @Inject void injectBob(Bob bob) {}
   }
 
+  @Test
   public void testExplicitCyclicDependency() {
     Guice.createInjector(
             new AbstractModule() {
@@ -115,6 +121,7 @@ public class BindingTest extends TestCase {
 
   public static class Bar {}
 
+  @Test
   public void testBindToUnboundLinkedBinding() {
     try {
       Guice.createInjector(
@@ -131,9 +138,10 @@ public class BindingTest extends TestCase {
   }
 
   /**
-   * This test ensures that the asEagerSingleton() scoping applies to the key,
-   * not to what the key is linked to.
+   * This test ensures that the asEagerSingleton() scoping applies to the key, not to what the key
+   * is linked to.
    */
+  @Test
   public void testScopeIsAppliedToKeyNotTarget() {
     Injector injector =
         Guice.createInjector(
@@ -156,6 +164,7 @@ public class BindingTest extends TestCase {
     }
   }
 
+  @Test
   public void testAnnotatedNoArgConstructor() {
     assertBindingSucceeds(PublicNoArgAnnotated.class);
     assertBindingSucceeds(ProtectedNoArgAnnotated.class);
@@ -179,7 +188,8 @@ public class BindingTest extends TestCase {
     @Inject private PrivateNoArgAnnotated() { }
   }
 
-  public void testUnannotatedNoArgConstructor() throws Exception{
+  @Test
+  public void testUnannotatedNoArgConstructor() throws Exception {
     assertBindingSucceeds(PublicNoArg.class);
     assertBindingSucceeds(ProtectedNoArg.class);
     assertBindingSucceeds(PackagePrivateNoArg.class);
@@ -226,6 +236,7 @@ public class BindingTest extends TestCase {
     }
   }
 
+  @Test
   public void testTooManyConstructors() {
     try {
       Guice.createInjector().getInstance(TooManyConstructors.class);
@@ -249,6 +260,7 @@ public class BindingTest extends TestCase {
     TooManyConstructors() {}
   }
 
+  @Test
   public void testToConstructorBinding() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
 
@@ -265,6 +277,7 @@ public class BindingTest extends TestCase {
     assertEquals(Stage.DEVELOPMENT, d.stage);
   }
 
+  @Test
   public void testToConstructorBindingsOnParameterizedTypes() throws NoSuchMethodException {
     @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw types.
     final Constructor<C> constructor = C.class.getConstructor(Stage.class, Object.class);
@@ -296,6 +309,7 @@ public class BindingTest extends TestCase {
     assertEquals(injector, two.anotherT);
   }
 
+  @Test
   public void testToConstructorBindingsFailsOnRawTypes() throws NoSuchMethodException {
     @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw types.
     final Constructor<C> constructor = C.class.getConstructor(Stage.class, Object.class);
@@ -318,7 +332,8 @@ public class BindingTest extends TestCase {
     }
   }
 
-/*if[AOP]*/
+  /*if[AOP]*/
+  @Test
   public void testToConstructorAndMethodInterceptors() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
     final AtomicInteger count = new AtomicInteger();
@@ -346,8 +361,9 @@ public class BindingTest extends TestCase {
     d.hashCode();
     assertEquals(2, count.get());
   }
-/*end[AOP]*/
+  /*end[AOP]*/
 
+  @Test
   public void testInaccessibleConstructor() throws NoSuchMethodException {
     final Constructor<E> constructor = E.class.getDeclaredConstructor(Stage.class);
 
@@ -364,6 +380,7 @@ public class BindingTest extends TestCase {
     assertEquals(Stage.DEVELOPMENT, e.stage);
   }
 
+  @Test
   public void testToConstructorAndScopes() throws NoSuchMethodException {
     final Constructor<F> constructor = F.class.getConstructor(Stage.class);
 
@@ -399,6 +416,7 @@ public class BindingTest extends TestCase {
     assertEquals(expectedCount, builder.build().size());
   }
 
+  @Test
   public void testToConstructorSpiData() throws NoSuchMethodException {
     final Set<TypeLiteral<?>> heardTypes = Sets.newHashSet();
 
@@ -426,6 +444,7 @@ public class BindingTest extends TestCase {
     assertEquals(ImmutableSet.of(TypeLiteral.get(D.class)), heardTypes);
   }
 
+  @Test
   public void testInterfaceToImplementationConstructor() throws NoSuchMethodException {
     final Constructor<CFoo> constructor = CFoo.class.getDeclaredConstructor();
 
@@ -444,6 +463,7 @@ public class BindingTest extends TestCase {
   public static interface IFoo {}
   public static class CFoo implements IFoo {}
 
+  @Test
   public void testGetAllBindings() {
     Injector injector =
         Guice.createInjector(
@@ -478,6 +498,7 @@ public class BindingTest extends TestCase {
     assertEquals(injector, bindings.get(Key.get(Injector.class)).getProvider().get());
   }
 
+  @Test
   public void testGetAllServletBindings() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -524,7 +545,8 @@ public class BindingTest extends TestCase {
       this.stage = stage;
     }
   }
-  
+
+  @Test
   public void testTurkeyBaconProblemUsingToConstuctor() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @SuppressWarnings("unchecked")
@@ -580,6 +602,7 @@ public class BindingTest extends TestCase {
     }
   }
 
+  @Test
   public void testMissingAnnotationOneChoice() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @SuppressWarnings("unchecked")
@@ -637,6 +660,7 @@ public class BindingTest extends TestCase {
     public boolean isCooked() { return false; }
   }
 
+  @Test
   public void testMissingAnnotationRelated() {
     try {
       final TypeLiteral<List<Butter>> list = new TypeLiteral<List<Butter>>() {};

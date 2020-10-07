@@ -17,14 +17,20 @@
 package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class IntegrationTest extends TestCase {
+@RunWith(JUnit4.class)
+public class IntegrationTest {
 
+  @Test
   public void testIntegration() throws CreationException {
     final CountingInterceptor counter = new CountingInterceptor();
 

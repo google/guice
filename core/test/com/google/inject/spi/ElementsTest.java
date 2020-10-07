@@ -65,6 +65,8 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
 public class ElementsTest extends TestCase {
@@ -731,10 +733,10 @@ public class ElementsTest extends TestCase {
     @SuppressWarnings("rawtypes") // Unavoidable since subclassesOf returns raw type
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
     final Matcher<Object> methodMatcher = Matchers.any();
-    final org.aopalliance.intercept.MethodInterceptor methodInterceptor =
-        new org.aopalliance.intercept.MethodInterceptor() {
+    final MethodInterceptor methodInterceptor =
+        new MethodInterceptor() {
           @Override
-          public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
+          public Object invoke(MethodInvocation methodInvocation) {
             return null;
           }
         };

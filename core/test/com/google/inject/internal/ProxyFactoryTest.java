@@ -20,6 +20,9 @@ import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.matcher.Matchers.only;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -28,15 +31,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class ProxyFactoryTest extends TestCase {
+@RunWith(JUnit4.class)
+public class ProxyFactoryTest {
 
   List<MethodAspect> aspects = Lists.newArrayList();
 
+  @Test
   public void testSimpleCase()
       throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
@@ -72,6 +79,7 @@ public class ProxyFactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testInterceptOneMethod()
       throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
@@ -127,6 +135,7 @@ public class ProxyFactoryTest extends TestCase {
   @Retention(RetentionPolicy.RUNTIME)
   @interface Intercept {}
 
+  @Test
   public void testWithConstructorArguments()
       throws InvocationTargetException, NoSuchMethodException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
@@ -142,6 +151,7 @@ public class ProxyFactoryTest extends TestCase {
     assertEquals(5, a.i);
   }
 
+  @Test
   public void testNotProxied()
       throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
@@ -167,6 +177,7 @@ public class ProxyFactoryTest extends TestCase {
     public void a() {}
   }
 
+  @Test
   public void testMultipleInterceptors()
       throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     DoubleInterceptor doubleInterceptor = new DoubleInterceptor();
