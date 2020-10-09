@@ -38,27 +38,26 @@ final class SingleMethodInjector implements SingleMemberInjector {
   }
 
   private MethodInvoker createMethodInvoker(final Method method) {
-
-    /*if[AOP]*/
-    try {
-      BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
-      if (fastMethod != null) {
-        return new MethodInvoker() {
-          @Override
-          public Object invoke(Object target, Object... parameters)
-              throws InvocationTargetException {
-            try {
-              return fastMethod.apply(target, parameters);
-            } catch (Throwable e) {
-              throw new InvocationTargetException(e); // match JDK reflection behaviour
+    if (InternalFlags.isBytecodeGenEnabled()) {
+      try {
+        BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
+        if (fastMethod != null) {
+          return new MethodInvoker() {
+            @Override
+            public Object invoke(Object target, Object... parameters)
+                throws InvocationTargetException {
+              try {
+                return fastMethod.apply(target, parameters);
+              } catch (Throwable e) {
+                throw new InvocationTargetException(e); // match JDK reflection behaviour
+              }
             }
-          }
-        };
+          };
+        }
+      } catch (Exception | LinkageError e) {
+        /* fall-through */
       }
-    } catch (Exception | LinkageError e) {
-      /* fall-through */
     }
-    /*end[AOP]*/
 
     int modifiers = method.getModifiers();
     if (!Modifier.isPublic(modifiers)

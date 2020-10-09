@@ -28,6 +28,7 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be used to create an
@@ -183,7 +184,6 @@ import java.lang.reflect.Method;
  */
 public interface Binder {
 
-  /*if[AOP]*/
   /**
    * Binds method interceptor[s] to methods matched by class and method matchers. A method is
    * eligible for interception if:
@@ -194,6 +194,8 @@ public interface Binder {
    *   <li>And the method is package-private, protected, or public
    * </ul>
    *
+   * <p>Note: this API only works if {@code guice_bytecode_gen_option} is set to {@code ENABLED}.
+   *
    * @param classMatcher matches classes the interceptor should apply to. For example: {@code
    *     only(Runnable.class)}.
    * @param methodMatcher matches methods the interceptor should apply to. For example: {@code
@@ -203,8 +205,7 @@ public interface Binder {
   void bindInterceptor(
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      org.aopalliance.intercept.MethodInterceptor... interceptors);
-  /*end[AOP]*/
+      MethodInterceptor... interceptors);
 
   /** Binds a scope to an annotation. */
   void bindScope(Class<? extends Annotation> annotationType, Scope scope);

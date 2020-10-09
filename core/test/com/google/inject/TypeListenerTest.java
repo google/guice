@@ -27,9 +27,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
@@ -171,7 +173,6 @@ public class TypeListenerTest {
     assertEquals(ImmutableList.of(a1, a2, b1, a3, a4), injectees);
   }
 
-  /*if[AOP]*/
   private static MethodInterceptor prefixInterceptor(final String prefix) {
     return new MethodInterceptor() {
       @Override
@@ -183,6 +184,8 @@ public class TypeListenerTest {
 
   @Test
   public void testAddingInterceptors() throws NoSuchMethodException {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
+
     final Matcher<Object> buzz = only(C.class.getMethod("buzz"));
 
     Injector injector =
@@ -210,7 +213,6 @@ public class TypeListenerTest {
     assertEquals("kafelinobuzz", c.buzz());
     assertEquals("felibeep", c.beep());
   }
-  /*end[AOP]*/
 
   class OuterThrowsModule extends AbstractModule {
     @Override
@@ -695,7 +697,6 @@ public class TypeListenerTest {
     } catch (IllegalStateException expected) {
     }
 
-    /*if[AOP]*/
     try {
       encounter.bindInterceptor(
           any(),
@@ -708,7 +709,6 @@ public class TypeListenerTest {
       fail();
     } catch (IllegalStateException expected) {
     }
-    /*end[AOP]*/
 
     try {
       encounter.addError(new Exception());

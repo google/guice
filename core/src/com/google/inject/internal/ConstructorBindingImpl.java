@@ -40,6 +40,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 final class ConstructorBindingImpl<T> extends BindingImpl<T>
     implements ConstructorBinding<T>, DelayedInitialize {
@@ -200,13 +201,11 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     return factory.constructorInjector.getInjectableMembers();
   }
 
-  /*if[AOP]*/
   @Override
-  public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors() {
+  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
     checkState(factory.constructorInjector != null, "Binding is not ready");
     return factory.constructorInjector.getConstructionProxy().getMethodInterceptors();
   }
-  /*end[AOP]*/
 
   @Override
   public Set<Dependency<?>> getDependencies() {

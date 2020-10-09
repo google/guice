@@ -33,6 +33,7 @@ import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.spi.ElementSource;
+import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
@@ -128,6 +129,14 @@ public final class Errors implements Serializable {
     return source == this.source || source == SourceProvider.UNKNOWN_SOURCE
         ? this
         : new Errors(this, source);
+  }
+
+  public Errors aopDisabled(InterceptorBinding binding) {
+    return addMessage(
+        ErrorId.AOP_DISABLED,
+        "Binding interceptor is not supported when bytecode generation is disabled. %nInterceptor"
+            + " bound at: %s",
+        binding.getSource());
   }
 
   /**

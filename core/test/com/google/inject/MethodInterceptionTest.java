@@ -25,11 +25,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
@@ -44,6 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Named;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -74,6 +77,11 @@ public class MethodInterceptionTest {
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       return methodInvocation.proceed();
     }
+  }
+
+  @Before
+  public void checkBytecodeGenIsEnabled() {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
   }
 
   @Test

@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Proxies calls to a {@link java.lang.reflect.Constructor} for a class {@code T}.
@@ -42,8 +43,6 @@ interface ConstructionProxy<T> {
    */
   Constructor<T> getConstructor();
 
-  /*if[AOP]*/
   /** Returns the interceptors applied to each method, in order of invocation. */
-  ImmutableMap<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors();
-  /*end[AOP]*/
+  ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors();
 }

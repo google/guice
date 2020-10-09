@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Exposes elements of a module so they can be inspected, validated or {@link
@@ -261,16 +262,14 @@ public final class Elements {
       this.scannerSource = parent.scannerSource;
     }
 
-    /*if[AOP]*/
     @Override
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
-        org.aopalliance.intercept.MethodInterceptor... interceptors) {
+        MethodInterceptor... interceptors) {
       elements.add(
           new InterceptorBinding(getElementSource(), classMatcher, methodMatcher, interceptors));
     }
-    /*end[AOP]*/
 
     @Override
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {

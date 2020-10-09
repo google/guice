@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.function.BiFunction;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Produces construction proxies that invoke the class constructor.
@@ -44,22 +45,21 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
-    /*if[AOP]*/
-    try {
-      BiFunction<Object, Object[], Object> fastConstructor =
-          BytecodeGen.fastConstructor(constructor);
-      if (fastConstructor != null) {
-        return new FastClassProxy<T>(injectionPoint, constructor, fastConstructor);
+    if (InternalFlags.isBytecodeGenEnabled()) {
+      try {
+        BiFunction<Object, Object[], Object> fastConstructor =
+            BytecodeGen.fastConstructor(constructor);
+        if (fastConstructor != null) {
+          return new FastClassProxy<T>(injectionPoint, constructor, fastConstructor);
+        }
+      } catch (Exception | LinkageError e) {
+        /* fall-through */
       }
-    } catch (Exception | LinkageError e) {
-      /* fall-through */
     }
-    /*end[AOP]*/
 
     return new ReflectiveProxy<T>(injectionPoint, constructor);
   }
 
-  /*if[AOP]*/
   /** A {@link ConstructionProxy} that uses bytecode generation to invoke the constructor. */
   private static final class FastClassProxy<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
@@ -96,12 +96,10 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     }
 
     @Override
-    public ImmutableMap<Method, List<org.aopalliance.intercept.MethodInterceptor>>
-        getMethodInterceptors() {
+    public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
       return ImmutableMap.of();
     }
   }
-  /*end[AOP]*/
 
   private static final class ReflectiveProxy<T> implements ConstructionProxy<T> {
     final Constructor<T> constructor;
@@ -137,12 +135,9 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
       return constructor;
     }
 
-    /*if[AOP]*/
     @Override
-    public ImmutableMap<Method, List<org.aopalliance.intercept.MethodInterceptor>>
-        getMethodInterceptors() {
+    public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
       return ImmutableMap.of();
     }
-    /*end[AOP]*/
   }
 }

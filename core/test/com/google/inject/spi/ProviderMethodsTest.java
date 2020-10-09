@@ -634,11 +634,13 @@ public class ProviderMethodsTest implements Module {
     }
   }
 
-  /*if[AOP]*/
   @Test
   public void testShareFastClass() {
-    // Test relies on package access which CHILD loading doesn't have.
-    assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
+    // FastClass is only used when bytecode generation is enabled and this test relies on package
+    // access which CHILD loading doesn't have.
+    assumeTrue(
+        InternalFlags.isBytecodeGenEnabled()
+            && InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
 
     CallerInspecterModule module = new CallerInspecterModule();
     Guice.createInjector(Stage.PRODUCTION, module);
@@ -668,8 +670,11 @@ public class ProviderMethodsTest implements Module {
 
   @Test
   public void testShareFastClassWithSuperClass() {
-    // Test relies on package access which CHILD loading doesn't have.
-    assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
+    // FastClass is only used when bytecode generation is enabled and this test relies on package
+    // access which CHILD loading doesn't have.
+    assumeTrue(
+        InternalFlags.isBytecodeGenEnabled()
+            && InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
 
     CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
     Guice.createInjector(Stage.PRODUCTION, module);

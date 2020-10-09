@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
@@ -38,6 +39,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider2Test.Equals.ComparisonMethod;
 import com.google.inject.assistedinject.FactoryProvider2Test.Equals.Impl;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -909,9 +911,9 @@ public class FactoryProvider2Test {
     }
   }
 
-  /*if[AOP]*/
   @Test
   public void testMethodInterceptorsOnAssistedTypes() {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
     final AtomicInteger invocationCount = new AtomicInteger();
     final MethodInterceptor interceptor =
         new MethodInterceptor() {
@@ -940,7 +942,6 @@ public class FactoryProvider2Test {
     mustang.drive();
     assertEquals(1, invocationCount.get());
   }
-  /*end[AOP]*/
 
   /**
    * Our factories aren't reusable across injectors. Although this behaviour isn't something we

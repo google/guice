@@ -29,6 +29,7 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A module whose configuration information is hidden from its environment by default. Only bindings
@@ -196,7 +197,6 @@ public abstract class PrivateModule implements Module {
     binder().requestStaticInjection(types);
   }
 
-  /*if[AOP]*/
   /**
    * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
    *     com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])
@@ -204,10 +204,9 @@ public abstract class PrivateModule implements Module {
   protected final void bindInterceptor(
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      org.aopalliance.intercept.MethodInterceptor... interceptors) {
+      MethodInterceptor... interceptors) {
     binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
-  /*end[AOP]*/
 
   /** Instructs Guice to require a binding to the given key. */
   protected final void requireBinding(Key<?> key) {

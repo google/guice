@@ -63,8 +63,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       boolean skipFastClassGeneration,
       Annotation annotation) {
     int modifiers = method.getModifiers();
-    /*if[AOP]*/
-    if (!skipFastClassGeneration) {
+    if (InternalFlags.isBytecodeGenEnabled() && !skipFastClassGeneration) {
       try {
         BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
         if (fastMethod != null) {
@@ -75,7 +74,6 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
         /* fall-through */
       }
     }
-    /*end[AOP]*/
 
     if (!Modifier.isPublic(modifiers)
         || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
@@ -235,7 +233,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     return Objects.hashCode(method, annotation);
   }
 
-  /*if[AOP]*/
+
   /**
    * A {@link ProviderMethod} implementation that uses bytecode generation to invoke the provider
    * method.
@@ -265,7 +263,6 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       }
     }
   }
-  /*end[AOP]*/
 
   /**
    * A {@link ProviderMethod} implementation that invokes the method using normal java reflection.

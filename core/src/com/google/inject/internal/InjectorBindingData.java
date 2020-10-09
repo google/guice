@@ -65,9 +65,7 @@ class InjectorBindingData {
   private final Set<MembersInjectorLookup<?>> membersInjectorLookups = Sets.newLinkedHashSet();
   private final Set<InjectionRequest<?>> injectionRequests = Sets.newLinkedHashSet();
   private final List<TypeConverterBinding> converters = Lists.newArrayList();
-  /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
-  /*end[AOP]*/
   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
   private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList();
   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
@@ -174,7 +172,6 @@ class InjectorBindingData {
     return matchingConverter;
   }
 
-  /*if[AOP]*/
   public void addMethodAspect(MethodAspect methodAspect) {
     methodAspects.add(methodAspect);
   }
@@ -188,7 +185,6 @@ class InjectorBindingData {
     }
     return ImmutableList.copyOf(methodAspects);
   }
-  /*end[AOP]*/
 
   public void addTypeListener(TypeListenerBinding listenerBinding) {
     typeListenerBindings.add(listenerBinding);

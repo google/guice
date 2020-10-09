@@ -25,9 +25,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeConverter;
@@ -161,7 +163,6 @@ public class ParentInjectorTest {
     assertSame(child.getInstance(A.class), child.getInstance(A.class));
   }
 
-  /*if[AOP]*/
   private final MethodInterceptor returnNullInterceptor =
       new MethodInterceptor() {
         @Override
@@ -172,6 +173,7 @@ public class ParentInjectorTest {
 
   @Test
   public void testInterceptorsInherited() {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
     Injector parent =
         Guice.createInjector(
             new AbstractModule() {
@@ -195,7 +197,6 @@ public class ParentInjectorTest {
 
     assertNull(child.getInstance(C.class).interceptedMethod());
   }
-  /*end[AOP]*/
 
   @Test
   public void testTypeConvertersInherited() {
