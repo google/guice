@@ -62,7 +62,7 @@ public class IntegrationTest {
           assertThrows(CreationException.class, () -> Guice.createInjector(module));
       assertThat(exception)
           .hasMessageThat()
-          .contains("Binding interceptor is not supported when AOP is disabled.");
+          .contains("Binding interceptor is not supported when bytecode generation is disabled.");
     }
   }
 
