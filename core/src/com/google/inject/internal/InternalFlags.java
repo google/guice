@@ -20,10 +20,8 @@ import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-/**
- * Contains flags for Guice.
- */
-public class InternalFlags {
+/** Contains flags for Guice. */
+public final class InternalFlags {
   private static final Logger logger = Logger.getLogger(InternalFlags.class.getName());
 
   private static final IncludeStackTraceOption INCLUDE_STACK_TRACES =
@@ -40,8 +38,8 @@ public class InternalFlags {
   private static final NullableProvidesOption NULLABLE_PROVIDES =
       getSystemOption("guice_check_nullable_provides_params", NullableProvidesOption.ERROR);
 
-  private static final AopOption AOP_OPTION =
-      getSystemOption("guice_aop_option", AopOption.ENABLED);
+  private static final BytecodeGenOption BYTECODE_GEN_OPTION =
+      getSystemOption("guice_bytecode_gen_option", BytecodeGenOption.ENABLED);
 
   private static final ColorizeOption COLORIZE_OPTION =
       getSystemOption("guice_colorize_error_messages", ColorizeOption.OFF);
@@ -97,28 +95,27 @@ public class InternalFlags {
   }
 
   /**
-   * Options for controlling whether Guice supports AOP (Aspect-oriented programming). When AOP is
-   * enabled, the following features will be enabled in Guice:
+   * Options for controlling whether Guice uses bytecode generation at runtime. When bytecode
+   * generation is enabled, the following features will be enabled in Guice:
    *
    * <ul>
    *   <li>Runtime bytecode generation (instead of reflection) will be used when Guice need to
    *       invoke application code.
    *   <li>Method interception.
-   *   <li>Additional debug information like line numbers and source file in error messages.
    * </ul>
    *
    * <p>Bytecode generation is generally faster than using reflection when invoking application
    * code, however, it can use more memory and slower in certain cases due to the time spent in
    * generating the classes. If you prefer to use reflection over bytecode generation then set
-   * {@link AopOption} to {@code DISABLED}.
+   * {@link BytecodeGenOption} to {@code DISABLED}.
    */
-  public enum AopOption {
+  public enum BytecodeGenOption {
     /**
-     * AOP is disabled and using features that require bytecode generation such as method
+     * Bytecode generation is disabled and using features that require it such as method
      * interception will throw errors at run time.
      */
     DISABLED,
-    /** AOP is enabled. */
+    /** Bytecode generation is enabled. */
     ENABLED,
   }
 
@@ -164,8 +161,8 @@ public class InternalFlags {
     return NULLABLE_PROVIDES;
   }
 
-  public static boolean isAopEnabled() {
-    return AOP_OPTION == AopOption.ENABLED;
+  public static boolean isBytecodeGenEnabled() {
+    return BYTECODE_GEN_OPTION == BytecodeGenOption.ENABLED;
   }
 
   public static boolean enableExperimentalErrorMessages() {
@@ -219,4 +216,6 @@ public class InternalFlags {
       return defaultValue;
     }
   }
+
+  private InternalFlags() {}
 }
