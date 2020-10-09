@@ -36,10 +36,11 @@ public class PackageNameCompressorTest {
   @Test
   public void testSimple() {
     String input = "Something is wrong with foo.bar.baz.Foo class!";
-    String expectedOutput = "Something is wrong with Foo class!"
-        + LEGEND_HEADER
-        + "Foo: foo.bar.baz.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with Foo class!"
+            + LEGEND_HEADER
+            + "Foo: \"foo.bar.baz.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
@@ -47,40 +48,46 @@ public class PackageNameCompressorTest {
   public void testSingleLetterClassName() {
     String input = "Something is wrong with foo.bar.baz.F class!";
     String expectedOutput =
-        "Something is wrong with F class!" + LEGEND_HEADER + "F: foo.bar.baz.F\n" + LEGEND_FOOTER;
+        "Something is wrong with F class!"
+            + LEGEND_HEADER
+            + "F: \"foo.bar.baz.F\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
   @Test
   public void testSameSimpleNames() {
     String input = "Something is wrong with foo.bar.baz.Foo and foo.bar.qux.Foo class!";
-    String expectedOutput = "Something is wrong with baz.Foo and qux.Foo class!"
-        + LEGEND_HEADER
-        + "baz.Foo: foo.bar.baz.Foo\n"
-        + "qux.Foo: foo.bar.qux.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with baz.Foo and qux.Foo class!"
+            + LEGEND_HEADER
+            + "baz.Foo: \"foo.bar.baz.Foo\"\n"
+            + "qux.Foo: \"foo.bar.qux.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
   @Test
   public void testMethodNames() {
     String input = "Something is wrong with foo.bar.baz.Foo.provideFoo()!";
-    String expectedOutput = "Something is wrong with Foo.provideFoo()!"
-        + LEGEND_HEADER
-        + "Foo: foo.bar.baz.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with Foo.provideFoo()!"
+            + LEGEND_HEADER
+            + "Foo: \"foo.bar.baz.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
   @Test
   public void testMultipleLevelsOfConflicts() {
     String input = "Something is wrong with z.a.b.c.Foo, z.b.b.c.Foo, z.a.b.d.Foo class!";
-    String expectedOutput = "Something is wrong with a.b.c.Foo, b.b.c.Foo, d.Foo class!"
-        + LEGEND_HEADER
-        + "a.b.c.Foo: z.a.b.c.Foo\n"
-        + "b.b.c.Foo: z.b.b.c.Foo\n"
-        + "d.Foo:     z.a.b.d.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with a.b.c.Foo, b.b.c.Foo, d.Foo class!"
+            + LEGEND_HEADER
+            + "a.b.c.Foo: \"z.a.b.c.Foo\"\n"
+            + "b.b.c.Foo: \"z.b.b.c.Foo\"\n"
+            + "d.Foo:     \"z.a.b.d.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
@@ -89,10 +96,11 @@ public class PackageNameCompressorTest {
   @Test
   public void testInnerClassesKeepOuterClassNameToo() {
     String input = "Something is wrong with foo.bar.baz.Foo.Bar.Baz class!";
-    String expectedOutput = "Something is wrong with Foo.Bar.Baz class!"
-        + LEGEND_HEADER
-        + "Foo: foo.bar.baz.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with Foo.Bar.Baz class!"
+            + LEGEND_HEADER
+            + "Foo: \"foo.bar.baz.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
@@ -103,12 +111,13 @@ public class PackageNameCompressorTest {
   @Test
   public void testThreeMultiLevelConflicts() {
     String input = "Something is wrong with z.a.c.Foo, z.b.c.Foo, and z.c.c.Foo class!";
-    String expectedOutput = "Something is wrong with a.c.Foo, b.c.Foo, and c.c.Foo class!"
-        + LEGEND_HEADER
-        + "a.c.Foo: z.a.c.Foo\n"
-        + "b.c.Foo: z.b.c.Foo\n"
-        + "c.c.Foo: z.c.c.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with a.c.Foo, b.c.Foo, and c.c.Foo class!"
+            + LEGEND_HEADER
+            + "a.c.Foo: \"z.a.c.Foo\"\n"
+            + "b.c.Foo: \"z.b.c.Foo\"\n"
+            + "c.c.Foo: \"z.c.c.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
@@ -199,11 +208,12 @@ public class PackageNameCompressorTest {
   public void testLegendDoesNotIncludeJavaLang() {
     String input = "Something is wrong with java.lang.Set, java.lang.a.Foo,"
         + " and java.lang.b.Foo class!";
-    String expectedOutput = "Something is wrong with Set, a.Foo, and b.Foo class!"
-        + LEGEND_HEADER
-        + "a.Foo: java.lang.a.Foo\n"
-        + "b.Foo: java.lang.b.Foo\n"
-        + LEGEND_FOOTER;
+    String expectedOutput =
+        "Something is wrong with Set, a.Foo, and b.Foo class!"
+            + LEGEND_HEADER
+            + "a.Foo: \"java.lang.a.Foo\"\n"
+            + "b.Foo: \"java.lang.b.Foo\"\n"
+            + LEGEND_FOOTER;
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
   }
 
@@ -212,5 +222,43 @@ public class PackageNameCompressorTest {
     String input = "Something is wrong with java.lang.Set class!";
     String expectedOutput = "Something is wrong with Set class!";
     assertThat(PackageNameCompressor.compressPackagesInMessage(input)).isEqualTo(expectedOutput);
+  }
+
+  @Test
+  public void testWrappedErrorMessageRemovesEmbeddedLegend() {
+    String error =
+        "No implement bound for com.google.foo.bar.Baz. Required by com.google.foo.BarImpl.";
+    String compressedError = PackageNameCompressor.compressPackagesInMessage(error);
+    String input =
+        "Something's gone wrong while locating com.google.foo.baz.BazImpl. See error:\n"
+            + compressedError;
+
+    String expected =
+        "Something's gone wrong while locating BazImpl. See error:\n"
+            + compressedError
+            + LEGEND_HEADER
+            + "BazImpl: \"com.google.foo.baz.BazImpl\"\n"
+            + LEGEND_FOOTER;
+    String actual = PackageNameCompressor.compressPackagesInMessage(input);
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  public void wrappedErrorMessageRemovesEmbeddedLegend_differentCompressionNames() {
+    String error =
+        "No implement bound for com.google.foo.bar.Baz. Required by com.google.foo.BazImpl.";
+    String compressedError = PackageNameCompressor.compressPackagesInMessage(error);
+    String input =
+        "Something's gone wrong while locating com.google.foo.baz.BazImpl. See error:\n"
+            + compressedError;
+
+    String expected =
+        "Something's gone wrong while locating baz.BazImpl. See error:\n"
+            + compressedError
+            + LEGEND_HEADER
+            + "baz.BazImpl: \"com.google.foo.baz.BazImpl\"\n"
+            + LEGEND_FOOTER;
+    String actual = PackageNameCompressor.compressPackagesInMessage(input);
+    assertThat(actual).isEqualTo(expected);
   }
 }

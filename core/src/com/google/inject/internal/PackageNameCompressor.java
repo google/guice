@@ -178,7 +178,11 @@ final class PackageNameCompressor {
           .append(": ")
           // Add enough spaces to adjust the columns
           .append(Strings.repeat(" ", longestKey - shortName.length()))
+          // Surround the full class name with quotes to avoid them getting compressed again if
+          // the error is wrapped inside another Guice error.
+          .append('"')
           .append(fullName)
+          .append('"')
           .append("\n");
     }
 
