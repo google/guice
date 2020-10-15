@@ -16,9 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.only;
 import static com.google.inject.name.Names.named;
@@ -238,16 +236,15 @@ public class TypeListenerTest {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
-          "of " + B.class.getName(),
-          "Reason: java.lang.ClassCastException: whoops, failure #1",
-          "2) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
-          "of " + C.class.getName(),
-          "Reason: java.lang.ClassCastException: whoops, failure #2");
+          "Error notifying TypeListener clumsy",
+          "bound at TypeListenerTest$InnerThrowsModule.configure",
+          "of TypeListenerTest$B",
+          "Reason: ClassCastException: whoops, failure #1",
+          "Error notifying TypeListener clumsy",
+          "bound at TypeListenerTest$InnerThrowsModule.configure",
+          "TypeListenerTest$OuterThrowsModule -> TypeListenerTest$InnerThrowsModule",
+          "of TypeListenerTest$C",
+          "Reason: ClassCastException: whoops, failure #2");
     }
 
     Injector injector =
@@ -264,10 +261,9 @@ public class TypeListenerTest {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          "of " + B.class.getName(),
-          "Reason: java.lang.ClassCastException: whoops, failure #3");
+          "Error notifying TypeListener clumsy",
+          "of TypeListenerTest$B",
+          "Reason: ClassCastException: whoops, failure #3");
     }
 
     // getting it again should yield the same exception #3
@@ -277,10 +273,9 @@ public class TypeListenerTest {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          "of " + B.class.getName(),
-          "Reason: java.lang.ClassCastException: whoops, failure #3");
+          "Error notifying TypeListener clumsy",
+          "of TypeListenerTest$B",
+          "Reason: ClassCastException: whoops, failure #3");
     }
 
     // non-injected types do not participate
@@ -312,8 +307,8 @@ public class TypeListenerTest {
     } catch (ProvisionException e) {
       assertContains(
           e.getMessage(),
-          "1) Error notifying InjectionListener goofy of " + A.class.getName(),
-          " Reason: java.lang.ClassCastException: whoops, failure #1");
+          "Error notifying InjectionListener goofy of TypeListenerTest$A.",
+          " Reason: ClassCastException: whoops, failure #1");
     }
 
     // second time through should be a new cause (#2)
@@ -323,8 +318,8 @@ public class TypeListenerTest {
     } catch (ProvisionException e) {
       assertContains(
           e.getMessage(),
-          "1) Error notifying InjectionListener goofy of " + A.class.getName(),
-          " Reason: java.lang.ClassCastException: whoops, failure #2");
+          "Error notifying InjectionListener goofy of ",
+          " Reason: ClassCastException: whoops, failure #2");
     }
 
     // we should get errors for all types, but only on getInstance()
@@ -335,8 +330,8 @@ public class TypeListenerTest {
     } catch (ProvisionException e) {
       assertContains(
           e.getMessage(),
-          "1) Error notifying InjectionListener goofy of " + B.class.getName(),
-          " Reason: java.lang.ClassCastException: whoops, failure #3");
+          "Error notifying InjectionListener goofy of TypeListenerTest$B.",
+          " Reason: ClassCastException: whoops, failure #3");
     }
 
     // non-injected types do not participate
@@ -358,11 +353,9 @@ public class TypeListenerTest {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Error notifying TypeListener clumsy (bound at ",
-          TypeListenerTest.class.getName(),
-          getDeclaringSourcePart(getClass()),
-          "of " + A.class.getName(),
-          " Reason: java.lang.ClassCastException: whoops, failure #1");
+          "Error notifying TypeListener clumsy (bound at TypeListenerTest$16.configure",
+          "of TypeListenerTest$A",
+          " Reason: ClassCastException: whoops, failure #1");
     }
   }
 
@@ -604,8 +597,8 @@ public class TypeListenerTest {
     } catch (ProvisionException e) {
       assertContains(
           e.getMessage(),
-          "1) Error injecting " + A.class.getName() + " using awkward.",
-          "Reason: java.lang.ClassCastException: whoops, failure #1");
+          "Error injecting TypeListenerTest$A using awkward",
+          "Reason: ClassCastException: whoops, failure #1");
     }
 
     // second time through should be a new cause (#2)
@@ -615,8 +608,8 @@ public class TypeListenerTest {
     } catch (ProvisionException e) {
       assertContains(
           e.getMessage(),
-          "1) Error injecting " + A.class.getName() + " using awkward.",
-          "Reason: java.lang.ClassCastException: whoops, failure #2");
+          "Error injecting TypeListenerTest$A using awkward",
+          "Reason: ClassCastException: whoops, failure #2");
     }
 
     // we should get errors for all types, but only on getInstance()
@@ -627,8 +620,8 @@ public class TypeListenerTest {
     } catch (ProvisionException e) {
       assertContains(
           e.getMessage(),
-          "1) Error injecting " + B.class.getName() + " using awkward.",
-          "Reason: java.lang.ClassCastException: whoops, failure #3");
+          "Error injecting TypeListenerTest$B using awkward",
+          "Reason: ClassCastException: whoops, failure #3");
     }
 
     // non-injected types do not participate
@@ -754,10 +747,10 @@ public class TypeListenerTest {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) There was an error on java.lang.Object",
-          "2) An exception was caught and reported. Message: whoops!",
+          "1) There was an error on Object",
+          "2) [Guice/ErrorInUserCode]: An exception was caught and reported. Message: whoops!",
           "3) And another problem",
-          "4) An exception was caught and reported. Message: null",
+          "4) [Guice/ErrorInUserCode]: An exception was caught and reported. Message: null",
           "4 errors");
     }
   }

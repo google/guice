@@ -38,7 +38,6 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
-import com.google.inject.internal.Errors;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletScopes.NullObject;
@@ -112,14 +111,14 @@ public class ServletTest extends TestCase {
       injector.getInstance(String.class);
       fail();
     } catch (ProvisionException oose) {
-      assertContains(oose.getMessage(), "Cannot access scoped [java.lang.String].");
+      assertContains(oose.getMessage(), "Cannot access scoped [String].");
     }
 
     try {
       injector.getInstance(Integer.class);
       fail();
     } catch (ProvisionException oose) {
-      assertContains(oose.getMessage(), "Cannot access scoped [java.lang.Integer].");
+      assertContains(oose.getMessage(), "Cannot access scoped [Integer].");
     }
 
     Key<?> key = Key.get(String.class, Names.named("foo"));
@@ -127,7 +126,8 @@ public class ServletTest extends TestCase {
       injector.getInstance(key);
       fail();
     } catch (ProvisionException oose) {
-      assertContains(oose.getMessage(), "Cannot access scoped [" + Errors.convert(key) + "]");
+      assertContains(
+          oose.getMessage(), "Cannot access scoped [String annotated with @Named(value=\"foo\")]");
     }
   }
 

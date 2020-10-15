@@ -29,7 +29,6 @@ import static org.junit.Assume.assumeTrue;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Runnables;
-import com.google.inject.internal.Annotations;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
@@ -135,7 +134,7 @@ public class BindingTest {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.util.List was bound.");
+      assertContains(expected.getMessage(), "No implementation for List was bound.");
     }
   }
 
@@ -230,11 +229,8 @@ public class BindingTest {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "No implementation for "
-              + PrivateNoArg.class.getName()
-              + " (with no qualifier annotation) was bound, and could not find an injectable"
-              + " constructor",
-          "at " + PrivateNoArg.class.getName() + ".class(BindingTest.java:");
+          "No injectable constructor for type BindingTest$PrivateNoArg",
+          "BindingTest$PrivateNoArg.class(BindingTest.java:");
     }
   }
 
@@ -246,10 +242,9 @@ public class BindingTest {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          TooManyConstructors.class.getName()
-              + " has more than one constructor annotated with "
+          "BindingTest$TooManyConstructors has more than one constructor annotated with "
               + "@Inject. Injectable classes must have either one (and only one) constructor",
-          "at " + TooManyConstructors.class.getName() + ".class(BindingTest.java:");
+          "at BindingTest$TooManyConstructors.class(BindingTest.java:");
     }
   }
 
@@ -326,11 +321,12 @@ public class BindingTest {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "1) T cannot be used as a key; It is not fully specified.",
-          "at " + C.class.getName() + ".<init>(BindingTest.java:",
-          "2) T cannot be used as a key; It is not fully specified.",
-          "at " + C.class.getName() + ".anotherT(BindingTest.java:");
+      assertContains(
+          expected.getMessage(),
+          "T cannot be used as a key; It is not fully specified.",
+          "at BindingTest$C.<init>(BindingTest.java:",
+          "T cannot be used as a key; It is not fully specified.",
+          "at BindingTest$C.anotherT(BindingTest.java:");
     }
   }
 
@@ -582,25 +578,12 @@ public class BindingTest {
       assertContains(
           msg,
           "Guice configuration errors:",
-          "1) No implementation for"
-              + " com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("Turky")
-              + ") was bound.",
+          "No implementation for BindingTest$Bacon annotated with"
+              + " @Named(value=\"Turky\") was bound.",
           "Did you mean?",
-          "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("Turkey")
-              + ")",
-          "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("Tofu")
-              + ")",
-          "1 more binding with other annotations.",
-          "while locating com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("Turky")
-              + ")");
+          "* BindingTest$Bacon annotated with @Named(value=\"Turkey\")",
+          "* BindingTest$Bacon annotated with @Named(value=\"Tofu\")",
+          "1 more binding with other annotations.");
     }
   }
 
@@ -623,20 +606,10 @@ public class BindingTest {
       assertContains(msg, "Guice configuration errors:");
       assertContains(
           msg,
-          "1) No implementation for com.google.inject.BindingTest$Bacon"
-              + " annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("turkey")
-              + ") was bound.",
+          "No implementation for BindingTest$Bacon annotated with @Named(value=\"turkey\")"
+              + " was bound.",
           "Did you mean?",
-          "* com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("Turkey")
-              + ")",
-          "while locating com.google.inject.BindingTest$Bacon annotated with"
-              + " @com.google.inject.name.Named(value="
-              + Annotations.memberValueString("turkey")
-              + ")");
+          "* BindingTest$Bacon annotated with @Named(value=\"Turkey\")");
     }
   }
 
@@ -679,10 +652,11 @@ public class BindingTest {
       fail();
     } catch (CreationException e) {
       final String msg = e.getMessage();
-      assertContains(msg, "Unable to create injector, see the following errors:",
+      assertContains(
+          msg,
+          "Unable to create injector, see the following errors:",
           "Did you mean?",
-          "java.util.List<com.google.inject.BindingTest$Butter> bound"
-          + "  at com.google.inject.BindingTest$24.configure");
+          "List<BindingTest$Butter> bound at BindingTest$24.configure");
     }
   }
 

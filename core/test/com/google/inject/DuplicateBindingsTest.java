@@ -84,12 +84,9 @@ public class DuplicateBindingsTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "A binding to "
-              + Foo.class.getName()
-              + " was already configured "
-              + "at "
-              + FailingProviderModule.class.getName(),
-          "at " + FailingProviderModule.class.getName());
+          "DuplicateBindingsTest$Foo was bound multiple times.",
+          "1  : DuplicateBindingsTest$FailingProviderModule.foo",
+          "2  : DuplicateBindingsTest$FailingProviderModule.foo");
     }
   }
 
@@ -128,33 +125,14 @@ public class DuplicateBindingsTest extends TestCase {
           new ScopedModule(Scopes.SINGLETON, foo, pFoo, pclFoo, clFoo, cFoo));
       fail("expected exception");
     } catch (CreationException ce) {
-      String segment1 =
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("pInstance")
-              + " was already configured at "
-              + SimpleModule.class.getName();
-      String segment2 =
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("pKey")
-              + " was already configured at "
-              + SimpleModule.class.getName();
-      String segment3 =
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("constructor")
-              + " was already configured at "
-              + SimpleModule.class.getName();
-      String segment4 =
-          "A binding to "
-              + FooImpl.class.getName()
-              + " was already configured at "
-              + SimpleModule.class.getName();
-      String atSegment = "at " + ScopedModule.class.getName();
+      String template =
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"%s\")"
+              + " was bound multiple times.";
+      String segment1 = String.format(template, "pInstance");
+      String segment2 = String.format(template, "pKey");
+      String segment3 = String.format(template, "constructor");
+      String segment4 = "DuplicateBindingsTest$FooImpl was bound multiple times";
+      String atSegment = "DuplicateBindingsTest$ScopedModule.configure";
       if (isIncludeStackTraceOff()) {
         assertContains(
             ce.getMessage(),
@@ -196,34 +174,26 @@ public class DuplicateBindingsTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("pInstance")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("pKey")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("linkedKey")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("constructor")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName());
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"instance\") was bound multiple"
+              + " times.",
+          "1  : DuplicateBindingsTest$SimpleModule.configure",
+          "2  : DuplicateBindingsTest$SimpleModule.configure",
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"pInstance\") was bound multiple"
+              + " times.",
+          "1  : DuplicateBindingsTest$SimpleModule.configure",
+          "2  : DuplicateBindingsTest$SimpleModule.configure",
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"pKey\") was bound multiple"
+              + " times.",
+          "1  : DuplicateBindingsTest$SimpleModule.configure",
+          "2  : DuplicateBindingsTest$SimpleModule.configure",
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"linkedKey\") was bound multiple"
+              + " times.",
+          "1  : DuplicateBindingsTest$SimpleModule.configure",
+          "2  : DuplicateBindingsTest$SimpleModule.configure",
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"constructor\") was bound"
+              + " multiple times.",
+          "1  : DuplicateBindingsTest$SimpleModule.configure",
+          "2  : DuplicateBindingsTest$SimpleModule.configure");
     }
   }
 
@@ -234,12 +204,11 @@ public class DuplicateBindingsTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "A binding to "
-              + Foo.class.getName()
-              + " was already configured at "
-              + ThrowingModule.class.getName(),
-          "and an error was thrown while checking duplicate bindings.  Error: java.lang.RuntimeException: Boo!",
-          "at " + ThrowingModule.class.getName());
+          "A binding to DuplicateBindingsTest$Foo was already configured at"
+              + " DuplicateBindingsTest$ThrowingModule.configure",
+          "and an error was thrown while checking duplicate bindings.  Error:"
+              + " RuntimeException: Boo!",
+          "at DuplicateBindingsTest$ThrowingModule.configure");
     }
   }
 
@@ -250,43 +219,24 @@ public class DuplicateBindingsTest extends TestCase {
       injector.createChildInjector(new SimpleModule(foo, pFoo, pclFoo, clFoo, cFoo));
       fail("expected exception");
     } catch (CreationException ce) {
+      String tempalete =
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"%s\") was bound"
+              + " multiple times.";
+      String atSegment = "DuplicateBindingsTest$SimpleModule.configure";
       assertContains(
           ce.getMessage(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("pInstance")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("pKey")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("linkedKey")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("constructor")
-              + " was already configured at "
-              + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName(),
-          "A binding to "
-              + Foo.class.getName()
-              + " annotated with "
-              + named("providerMethod")
-              + " was already configured at "
-              + SimpleProviderModule.class.getName(),
-          "at " + SimpleProviderModule.class.getName());
+          String.format(tempalete, "instance"),
+          atSegment,
+          String.format(tempalete, "pKey"),
+          atSegment,
+          String.format(tempalete, "linkedKey"),
+          atSegment,
+          String.format(tempalete, "constructor"),
+          atSegment,
+          "DuplicateBindingsTest$Foo annotated with @Named(value=\"providerMethod\") was bound "
+              + "multiple times.",
+          "1  : DuplicateBindingsTest$SimpleProviderModule.foo",
+          "2  : DuplicateBindingsTest$SimpleProviderModule.foo");
     }
   }
 
@@ -314,11 +264,9 @@ public class DuplicateBindingsTest extends TestCase {
           if (e1 != e2) {
             assertContains(
                 expected.getMessage(),
-                "A binding to "
-                    + Foo.class.getName()
-                    + " was already configured at "
-                    + FailedModule.class.getName(),
-                "at " + FailedModule.class.getName());
+                "DuplicateBindingsTest$Foo was bound multiple times.",
+                "1  : DuplicateBindingsTest$FailedModule.",
+                "2  : DuplicateBindingsTest$FailedModule.");
           } else {
             throw expected;
           }
@@ -504,7 +452,10 @@ public class DuplicateBindingsTest extends TestCase {
     }
 
     @Override
-    @SuppressWarnings({"EqualsHashCode", "EqualsBrokenForNull"}) // intentionally NPE on null for the test
+    @SuppressWarnings({
+      "EqualsHashCode",
+      "EqualsBrokenForNull"
+    }) // intentionally NPE on null for the test
     public boolean equals(Object obj) {
       return obj.getClass() == getClass();
     }

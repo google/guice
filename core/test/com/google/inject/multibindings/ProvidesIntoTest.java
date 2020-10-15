@@ -273,9 +273,9 @@ public class ProvidesIntoTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "Array types are not allowed in a MapKey with unwrapValue=true: "
-              + ArrayUnwrappedKey.class.getName(),
-          "at " + m.getClass().getName() + ".provideFoo(");
+          "Array types are not allowed in a MapKey with unwrapValue=true:"
+              + " ProvidesIntoTest$ArrayUnwrappedKey",
+          "at ProvidesIntoTest$14.provideFoo");
     }
   }
 
@@ -351,9 +351,7 @@ public class ProvidesIntoTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "Found a MapKey annotation on non map binding at "
-              + m.getClass().getName()
-              + ".provideFoo");
+          "Found a MapKey annotation on non map binding at ProvidesIntoTest$17.provideFoo()");
     }
   }
 
@@ -374,9 +372,7 @@ public class ProvidesIntoTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "Found a MapKey annotation on non map binding at "
-              + m.getClass().getName()
-              + ".provideFoo");
+          "Found a MapKey annotation on non map binding at ProvidesIntoTest$18.provideFoo");
     }
   }
 
@@ -395,8 +391,7 @@ public class ProvidesIntoTest extends TestCase {
     } catch (CreationException ce) {
       assertEquals(1, ce.getErrorMessages().size());
       assertContains(
-          ce.getMessage(),
-          "No MapKey found for map binding at " + m.getClass().getName() + ".provideFoo");
+          ce.getMessage(), "No MapKey found for map binding at ProvidesIntoTest$19.provideFoo()");
     }
   }
 
@@ -424,7 +419,7 @@ public class ProvidesIntoTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "Found more than one MapKey annotations on " + m.getClass().getName() + ".provideFoo");
+          "Found more than one MapKey annotations on ProvidesIntoTest$20.provideFoo().");
     }
   }
 
@@ -449,8 +444,7 @@ public class ProvidesIntoTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "No 'value' method in MapKey with unwrapValue=true: "
-              + MissingValueMethod.class.getName());
+          "No 'value' method in MapKey with unwrapValue=true: ProvidesIntoTest$MissingValueMethod");
     }
   }
 }

@@ -1,0 +1,32 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/ScopeNotFound]: No scope is bound to ScopeNotFoundErrorTest$BatchScoped.
+
+Used at:
+1  : ScopeNotFoundErrorTest$ErrorModule.configure(ScopeNotFoundErrorTest.java:36)
+
+Learn more:
+  https://github.com/google/guice/wiki/SCOPE_NOT_FOUND
+
+2) [Guice/ScopeNotFound]: No scope is bound to ScopeNotFoundErrorTest$RequestScoped.
+
+Used at:
+1  : ScopeNotFoundErrorTest$ErrorModule.provideString(ScopeNotFoundErrorTest.java:43)
+2  : ScopeNotFoundErrorTest$RequestHelper.class(ScopeNotFoundErrorTest.java:29)
+     at ScopeNotFoundErrorTest$ErrorModule.configure(ScopeNotFoundErrorTest.java:37)
+
+Learn more:
+  https://github.com/google/guice/wiki/SCOPE_NOT_FOUND
+
+2 errors
+
+======================
+Full classname legend:
+======================
+ScopeNotFoundErrorTest$BatchScoped:   "com.google.inject.errors.ScopeNotFoundErrorTest$BatchScoped"
+ScopeNotFoundErrorTest$ErrorModule:   "com.google.inject.errors.ScopeNotFoundErrorTest$ErrorModule"
+ScopeNotFoundErrorTest$RequestHelper: "com.google.inject.errors.ScopeNotFoundErrorTest$RequestHelper"
+ScopeNotFoundErrorTest$RequestScoped: "com.google.inject.errors.ScopeNotFoundErrorTest$RequestScoped"
+========================
+End of classname legend:
+========================

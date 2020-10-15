@@ -95,7 +95,7 @@ public class ModuleIncludesTest extends TestCase {
       assertThat(e)
           .hasMessageThat()
           .contains(
-              "Duplicate module instances provided for " + ModuleWithIdentity.class.getName());
+              "Duplicate module instances provided for ModuleIncludesTest$ModuleWithIdentity:");
     }
   }
 

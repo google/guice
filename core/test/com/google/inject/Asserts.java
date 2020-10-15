@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.common.base.StandardSystemProperty.JAVA_CLASS_PATH;
 import static com.google.common.base.StandardSystemProperty.PATH_SEPARATOR;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -145,7 +146,7 @@ public class Asserts {
   /** Fails unless {@code object} has the same toString value when reserialized. */
   public static void assertSimilarWhenReserialized(Object object) throws IOException {
     Object reserialized = reserialize(object);
-    assertEquals(object.toString(), reserialized.toString());
+    assertThat(reserialized.toString()).isEqualTo(object.toString());
   }
 
   public static <E> E reserialize(E original) throws IOException {

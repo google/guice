@@ -117,8 +117,7 @@ public class OptionalBinderTest extends TestCase {
       fail();
     } catch (CreationException ce) {
       assertContains(
-          ce.getMessage(),
-          "1) Explicit bindings are required and java.lang.String is not explicitly bound.");
+          ce.getMessage(), "Explicit bindings are required and String is not explicitly bound.");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }
@@ -136,9 +135,7 @@ public class OptionalBinderTest extends TestCase {
 
     CreationException ce =
         assertThrows(CreationException.class, () -> Guice.createInjector(module));
-    assertContains(
-        ce.getMessage(),
-        "1) Binding points to itself. Key: com.google.inject.internal.OptionalBinderTest$MyClass");
+    assertContains(ce.getMessage(), "Binding points to itself. Key: OptionalBinderTest$MyClass");
   }
 
   public void testLinkedAndBaseTypeHaveDifferentAnnotations() {
@@ -642,12 +639,7 @@ public class OptionalBinderTest extends TestCase {
       assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "1) A binding to java.lang.String annotated with @"
-              + RealOptionalBinder.Default.class.getName()
-              + " was already configured at "
-              + module.getClass().getName()
-              + ".configure(",
-          "at " + module.getClass().getName() + ".configure(");
+          "String annotated with @RealOptionalBinder$Default was bound multiple times.");
     }
   }
 
@@ -667,12 +659,9 @@ public class OptionalBinderTest extends TestCase {
       assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "1) A binding to java.lang.String annotated with @"
-              + RealOptionalBinder.Actual.class.getName()
-              + " was already configured at "
-              + module.getClass().getName()
-              + ".configure(",
-          "at " + module.getClass().getName() + ".configure(");
+          "String annotated with @RealOptionalBinder$Actual was bound multiple times.",
+          "1  : " + getShortName(module) + ".configure",
+          "2  : " + getShortName(module) + ".configure");
     }
   }
 
@@ -694,18 +683,8 @@ public class OptionalBinderTest extends TestCase {
       assertEquals(ce.getMessage(), 2, ce.getErrorMessages().size());
       assertContains(
           ce.getMessage(),
-          "1) A binding to java.lang.String annotated with @"
-              + RealOptionalBinder.Default.class.getName()
-              + " was already configured at "
-              + module.getClass().getName()
-              + ".configure(",
-          "at " + module.getClass().getName() + ".configure(",
-          "2) A binding to java.lang.String annotated with @"
-              + RealOptionalBinder.Actual.class.getName()
-              + " was already configured at "
-              + module.getClass().getName()
-              + ".configure(",
-          "at " + module.getClass().getName() + ".configure(");
+          "String annotated with @RealOptionalBinder$Default was bound multiple times.",
+          "String annotated with @RealOptionalBinder$Actual was bound multiple times.");
     }
   }
 
@@ -1012,20 +991,21 @@ public class OptionalBinderTest extends TestCase {
   }
 
   public void testSourceLinesInException() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            OptionalBinder.newOptionalBinder(binder(), Integer.class).setDefault();
+          }
+        };
     try {
-      Guice.createInjector(
-          new AbstractModule() {
-            @Override
-            protected void configure() {
-              OptionalBinder.newOptionalBinder(binder(), Integer.class).setDefault();
-            }
-          });
+      Guice.createInjector(module);
       fail();
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "No implementation for java.lang.Integer",
-          "at " + getClass().getName());
+          "No implementation for Integer",
+          getShortName(module) + ".configure");
     }
   }
 
@@ -1458,6 +1438,15 @@ public class OptionalBinderTest extends TestCase {
     assertFalse(impl1.equals(other2));
     assertFalse(impl2.equals(other1));
     assertFalse(other1.equals(other2));
+  }
+
+  /**
+   * Returns the short name for a module instance. Used to get the name of the anoymous class that
+   * can change depending on the order the module intance is created.
+   */
+  private static String getShortName(Module module) {
+    String fullName = module.getClass().getName();
+    return fullName.substring(fullName.lastIndexOf(".") + 1);
   }
 
   @RealOptionalBinder.Actual("foo")

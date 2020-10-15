@@ -1,7 +1,6 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
 
 import com.google.common.base.Optional;
 import com.google.inject.multibindings.OptionalBinder;
@@ -25,8 +24,8 @@ public class NullableInjectionPointTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "null returned by binding at " + getClass().getName(),
-          "the 1st parameter of " + FooConstructor.class.getName() + ".<init>(",
+          "null returned by binding at NullableInjectionPointTest$1.configure",
+          "the 1st parameter of NullableInjectionPointTest$FooConstructor.<init>(",
           "is not @Nullable");
     }
   }
@@ -38,8 +37,8 @@ public class NullableInjectionPointTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "null returned by binding at " + getClass().getName(),
-          "the 1st parameter of " + FooMethod.class.getName() + ".setFoo(",
+          "null returned by binding at NullableInjectionPointTest$1.configure",
+          "the 1st parameter of NullableInjectionPointTest$FooMethod.setFoo(",
           "is not @Nullable");
     }
   }
@@ -51,8 +50,8 @@ public class NullableInjectionPointTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "null returned by binding at " + getClass().getName(),
-          " but " + FooField.class.getName() + ".foo",
+          "null returned by binding at NullableInjectionPointTest$1.configure(",
+          " but NullableInjectionPointTest$FooField.foo",
           " is not @Nullable");
     }
   }
@@ -118,8 +117,7 @@ public class NullableInjectionPointTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "Binding to null instances is not allowed.",
-          "at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()));
+          "at NullableInjectionPointTest$2.configure(");
     }
   }
 
@@ -180,8 +178,7 @@ public class NullableInjectionPointTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(
-          expected.getMessage(),
-          "null returned by binding " + "at com.google.inject.NullableInjectionPointTest");
+          expected.getMessage(), "null returned by binding at NullableInjectionPointTest");
     }
   }
 

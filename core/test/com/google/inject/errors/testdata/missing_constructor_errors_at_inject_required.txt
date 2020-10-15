@@ -1,0 +1,39 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingConstructor]: No injectable constructor for type MissingConstructorErrorTest$NoArgConstructorWithoutAtInject.
+
+Injector is configured to require @Inject constructors but class MissingConstructorErrorTest$NoArgConstructorWithoutAtInject does not have a @Inject annotated constructor.
+
+Requested by:
+1  : MissingConstructorErrorTest$NoArgConstructorWithoutAtInject.class(MissingConstructorErrorTest.java:23)
+     at MissingConstructorErrorTest$MissingConstructorAtInjectRequiredModule.provideObject(MissingConstructorErrorTest.java:74)
+      \_ for 2nd parameter noArgConstructorWithoutAtInject
+     at MissingConstructorErrorTest$MissingConstructorAtInjectRequiredModule.provideObject(MissingConstructorErrorTest.java:74)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_CONSTRUCTOR
+
+2) [Guice/MissingConstructor]: No injectable constructor for type MissingConstructorErrorTest$PrivateConstructor.
+
+Injector is configured to require @Inject constructors but class MissingConstructorErrorTest$PrivateConstructor does not have a @Inject annotated constructor.
+
+Requested by:
+1  : MissingConstructorErrorTest$PrivateConstructor.class(MissingConstructorErrorTest.java:1)
+     at MissingConstructorErrorTest$MissingConstructorAtInjectRequiredModule.provideObject(MissingConstructorErrorTest.java:74)
+      \_ for 3rd parameter privateConstructor
+     at MissingConstructorErrorTest$MissingConstructorAtInjectRequiredModule.provideObject(MissingConstructorErrorTest.java:74)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_CONSTRUCTOR
+
+2 errors
+
+======================
+Full classname legend:
+======================
+MissingConstructorErrorTest$MissingConstructorAtInjectRequiredModule: "com.google.inject.errors.MissingConstructorErrorTest$MissingConstructorAtInjectRequiredModule"
+MissingConstructorErrorTest$NoArgConstructorWithoutAtInject:          "com.google.inject.errors.MissingConstructorErrorTest$NoArgConstructorWithoutAtInject"
+MissingConstructorErrorTest$PrivateConstructor:                       "com.google.inject.errors.MissingConstructorErrorTest$PrivateConstructor"
+========================
+End of classname legend:
+========================

@@ -16,7 +16,6 @@
 
 package com.google.inject.util;
 
-import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
@@ -225,17 +224,13 @@ public class OverrideModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "A binding to java.lang.String was already configured at "
-              + InnerReplacementsModule.class.getName(),
-          asModuleChain(
-              Modules.OverrideModule.class,
-              OuterReplacementsModule.class,
-              InnerReplacementsModule.class),
-          "at " + InnerReplacementsModule.class.getName(),
-          asModuleChain(
-              Modules.OverrideModule.class,
-              OuterReplacementsModule.class,
-              InnerReplacementsModule.class));
+          "String was bound multiple times.",
+          "1  : OverrideModuleTest$InnerReplacementsModule.configure(",
+          "Modules$OverrideModule -> OverrideModuleTest$OuterReplacementsModule ->"
+              + " OverrideModuleTest$InnerReplacementsModule",
+          "2  : OverrideModuleTest$InnerReplacementsModule.configure(",
+          "Modules$OverrideModule -> OverrideModuleTest$OuterReplacementsModule ->"
+              + " OverrideModuleTest$InnerReplacementsModule");
     }
   }
 
@@ -266,11 +261,11 @@ public class OverrideModuleTest extends TestCase {
       // then we encounter B and freak out.
       assertContains(
           expected.getMessage(),
-          "1) A binding to java.lang.String was already configured at "
-              + replacements.getClass().getName(),
-          asModuleChain(Modules.OverrideModule.class, replacements.getClass()),
-          "at " + original.getClass().getName(),
-          asModuleChain(Modules.OverrideModule.class, original.getClass()));
+          "String was bound multiple times.",
+          "1  : OverrideModuleTest$12.configure(",
+          "Modules$OverrideModule -> OverrideModuleTest$12",
+          "2  : OverrideModuleTest$11.configure(",
+          "Modules$OverrideModule -> OverrideModuleTest$11");
     }
   }
 
@@ -388,18 +383,22 @@ public class OverrideModuleTest extends TestCase {
       createInjector(Modules.override(originalWrapper).with(replacements));
       fail("Exception expected");
     } catch (CreationException e) {
+      String className = original.getClass().getName().replace("com.google.inject.util.", "");
+      String moduleChain =
+          originalWrapper.getClass().getName().replace("com.google.inject.util.", "")
+              + " -> "
+              + className;
       assertContains(
           e.getMessage(),
           "1) The scope for @TestScopeAnnotation is bound directly and cannot be overridden.",
-          "original binding at " + original.getClass().getName() + ".configure(",
-          asModuleChain(originalWrapper.getClass(), original.getClass()),
-          "bound directly at " + original.getClass().getName() + ".configure(",
-          asModuleChain(originalWrapper.getClass(), original.getClass()),
-          "bound directly at " + original.getClass().getName() + ".configure(",
-          asModuleChain(originalWrapper.getClass(), original.getClass()),
-          "at ",
-          replacements.getClass().getName() + ".configure(",
-          asModuleChain(Modules.OverrideModule.class, replacements.getClass()));
+          "original binding at " + className + ".configure(",
+          moduleChain,
+          "bound directly at " + className + ".configure(",
+          moduleChain,
+          "bound directly at " + className + ".configure(",
+          moduleChain,
+          "at OverrideModuleTest$22.configure",
+          "Modules$OverrideModule -> OverrideModuleTest$22");
     }
   }
 

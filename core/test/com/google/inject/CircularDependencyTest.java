@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -237,7 +236,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Tried proxying " + C.class.getName() + " to support a circular dependency, ",
+          "Tried proxying CircularDependencyTest$C to support a circular dependency, ",
           "but it is not an interface.");
     }
   }
@@ -262,7 +261,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Tried proxying " + C.class.getName() + " to support a circular dependency, ",
+          "Tried proxying CircularDependencyTest$C to support a circular dependency, ",
           "but it is not an interface.");
     }
   }
@@ -282,7 +281,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Tried proxying " + C2.class.getName() + " to support a circular dependency, ",
+          "Tried proxying CircularDependencyTest$C2 to support a circular dependency, ",
           "but it is not an interface.");
     }
   }
@@ -294,7 +293,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Tried proxying " + C2.class.getName() + " to support a circular dependency, ",
+          "Tried proxying CircularDependencyTest$C2 to support a circular dependency, ",
           "but it is not an interface.");
     }
   }
@@ -355,8 +354,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + C.class.getName()
+          "Found a circular dependency involving CircularDependencyTest$C"
               + ", and circular dependencies are disabled.");
     }
   }
@@ -385,8 +383,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + C.class.getName()
+          "Found a circular dependency involving CircularDependencyTest$C"
               + ", and circular dependencies are disabled.");
     }
   }
@@ -407,8 +404,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + C2.class.getName()
+          "Found a circular dependency involving CircularDependencyTest$C2"
               + ", and circular dependencies are disabled.");
     }
   }
@@ -427,8 +423,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + C2.class.getName()
+          "Found a circular dependency involving CircularDependencyTest$C2"
               + ", and circular dependencies are disabled.");
     }
   }
@@ -468,9 +463,8 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + A.class.getName()
-              + ", and circular dependencies are disabled.");
+          "Found a circular dependency involving CircularDependencyTest$A, and circular"
+              + " dependencies are disabled.");
     }
   }
 
@@ -589,7 +583,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Tried proxying " + Integer.class.getName() + " to support a circular dependency, ",
+          "Tried proxying Integer to support a circular dependency, ",
           "but it is not an interface.");
     }
   }
@@ -681,10 +675,10 @@ public class CircularDependencyTest extends TestCase {
       fail();
     } catch (ProvisionException pe) {
       assertContains(
-          Iterables.getOnlyElement(pe.getErrorMessages()).getMessage(),
-          "Tried proxying "
-              + IImpl.class.getName()
-              + " to support a circular dependency, but it is not an interface.");
+          pe.getMessage(),
+          "Tried proxying CircularDependencyTest$IImpl"
+              + " to support a circular dependency, but it is not an interface.",
+          "1 error");
     }
   }
 
@@ -755,8 +749,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + K.class.getName()
+          "Found a circular dependency involving CircularDependencyTest$K"
               + ", and circular dependencies are disabled.");
     }
 
@@ -766,8 +759,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving "
-              + L.class.getName()
+          "Found a circular dependency involving CircularDependencyTest$L"
               + ", and circular dependencies are disabled.");
     }
   }
