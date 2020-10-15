@@ -16,6 +16,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
 import java.util.Formatter;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
@@ -130,7 +131,7 @@ public class SingletonScope implements Scope {
        * The singleton provider needs a reference back to the injector, in order to get ahold of
        * InternalContext during instantiation.
        */
-      final /* @Nullable */ InjectorImpl injector;
+      final @Nullable InjectorImpl injector;
 
       {
         // If we are getting called by Scoping
@@ -271,7 +272,7 @@ public class SingletonScope implements Scope {
        * printing it to the end user.
        */
       private Message createCycleDependenciesMessage(
-          ListMultimap<Thread, Key<?>> locksCycle, /* @Nullable */ Message proxyCreationError) {
+          ListMultimap<Thread, Key<?>> locksCycle, @Nullable Message proxyCreationError) {
         // this is the main thing that we'll show in an error message,
         // current thread is populate by Guice
         StringBuilder sb = new StringBuilder();

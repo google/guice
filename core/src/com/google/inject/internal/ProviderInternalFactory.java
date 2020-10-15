@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
 import javax.inject.Provider;
+import javax.annotation.Nullable;
 
 /**
  * Base class for InternalFactories that are used by Providers, to handle circular dependencies.
@@ -39,7 +40,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       final Provider<? extends T> provider,
       InternalContext context,
       final Dependency<?> dependency,
-      /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
+      @Nullable ProvisionListenerStackCallback<T> provisionCallback)
       throws InternalProvisionException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 

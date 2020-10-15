@@ -24,6 +24,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
+import javax.annotation.Nullable;
 
 /**
  * Injects members of instances of a given type.
@@ -35,10 +36,10 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final InjectorImpl injector;
   // a null list means empty. Since it is common for many of these lists to be empty we can save
   // some memory lookups by representing empty as null.
-  /* @Nullable */ private final ImmutableList<SingleMemberInjector> memberInjectors;
-  /* @Nullable */ private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
-  /* @Nullable */ private final ImmutableList<InjectionListener<? super T>> injectionListeners;
-  /* @Nullable */ private final ImmutableList<MethodAspect> addedAspects;
+  @Nullable private final ImmutableList<SingleMemberInjector> memberInjectors;
+  @Nullable private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
+  @Nullable private final ImmutableList<InjectionListener<? super T>> injectionListeners;
+  @Nullable private final ImmutableList<MethodAspect> addedAspects;
 
   MembersInjectorImpl(
       InjectorImpl injector,

@@ -22,6 +22,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * Creates instances using an injectable constructor. After construction, all injectable fields and
@@ -62,7 +63,7 @@ final class ConstructorInjector<T> {
   Object construct(
       final InternalContext context,
       Dependency<?> dependency,
-      /* @Nullable */ ProvisionListenerStackCallback<T> provisionCallback)
+      @Nullable ProvisionListenerStackCallback<T> provisionCallback)
       throws InternalProvisionException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
     // We have a circular reference between constructors. Return a proxy.
