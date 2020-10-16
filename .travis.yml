@@ -7,7 +7,6 @@ cache:
 
 jdk:
   - openjdk11
-  - openjdk9
   - openjdk8
 
 before_install:
@@ -33,7 +32,3 @@ script:
 after_success:
   - util/generate-latest-docs.sh
   - util/publish-snapshot-on-commit.sh
-
-branches:
-  only:
-    - master
