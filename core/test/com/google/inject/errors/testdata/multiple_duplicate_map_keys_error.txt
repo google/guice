@@ -1,0 +1,32 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/DuplicateMapKey]: "first" and 1 other duplicate keys found in Map<String, String>.
+
+Duplicates:
+  Key: "first"
+  Bound at:
+    1 : DuplicateMapKeyErrorTest$MapModule.configure(DuplicateMapKeyErrorTest.java:32)
+    2 : DuplicateMapKeyErrorTest$MapModule.configure(DuplicateMapKeyErrorTest.java:33)
+    3 : DuplicateMapKeyErrorTest$ContributorModule.provideFirstIntoMap(DuplicateMapKeyErrorTest.java:47)
+
+  Key: "second"
+  Bound at:
+    1 : DuplicateMapKeyErrorTest$ContributorModule.provideSecondIntoMap(DuplicateMapKeyErrorTest.java:53)
+    2 : DuplicateMapKeyErrorTest$SecondContributorModule.provideSecondIntoMap(DuplicateMapKeyErrorTest.java:75)
+
+MapBinder declared at:
+  DuplicateMapKeyErrorTest$MapModule.configure(DuplicateMapKeyErrorTest.java:31)
+      \_ installed by: DuplicateMapKeyErrorTest$MapModule -> RealMapBinder
+
+1 error
+
+======================
+Full classname legend:
+======================
+DuplicateMapKeyErrorTest$ContributorModule:       "com.google.inject.errors.DuplicateMapKeyErrorTest$ContributorModule"
+DuplicateMapKeyErrorTest$MapModule:               "com.google.inject.errors.DuplicateMapKeyErrorTest$MapModule"
+DuplicateMapKeyErrorTest$SecondContributorModule: "com.google.inject.errors.DuplicateMapKeyErrorTest$SecondContributorModule"
+RealMapBinder:                                    "com.google.inject.internal.RealMapBinder"
+========================
+End of classname legend:
+========================

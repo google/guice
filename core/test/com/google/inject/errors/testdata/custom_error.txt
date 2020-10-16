@@ -1,0 +1,14 @@
+Unable to create injector, see the following errors:
+
+1) Custom error
+  at GenericErrorTest$ErrorModule.configure(GenericErrorTest.java:22)
+
+1 error
+
+======================
+Full classname legend:
+======================
+GenericErrorTest$ErrorModule: "com.google.inject.errors.GenericErrorTest$ErrorModule"
+========================
+End of classname legend:
+========================

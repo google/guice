@@ -16,9 +16,10 @@
 
 package com.google.inject;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.Iterables;
 import com.google.inject.internal.Annotations;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 import java.util.List;
@@ -97,18 +98,10 @@ public class ImplicitBindingTest extends TestCase {
     } catch (ConfigurationException expected) {
       Asserts.assertContains(
           expected.getMessage(),
-          "1) No implementation for " + I.class.getName(),
-          "annotated with @"
-              + Named.class.getName()
-              + "(value="
-              + Annotations.memberValueString("i")
-              + ") was bound.",
-          "while locating " + I.class.getName(),
-          " annotated with @"
-              + Named.class.getName()
-              + "(value="
-              + Annotations.memberValueString("i")
-              + ")");
+          String.format(
+              "No implementation for ImplicitBindingTest$I annotated with @Named(value=%s) was"
+                  + " bound.",
+              Annotations.memberValueString("i")));
     }
   }
 
@@ -347,13 +340,9 @@ public class ImplicitBindingTest extends TestCase {
       injector.getInstance(A.class);
       fail("Expected failure");
     } catch (ConfigurationException expected) {
-      Message msg = Iterables.getOnlyElement(expected.getErrorMessages());
+      assertThat(expected.getErrorMessages()).hasSize(1);
       Asserts.assertContains(
-          msg.getMessage(),
-          "No implementation for "
-              + D.class.getName()
-              + " (with no qualifier annotation) was bound, and could not find an injectable"
-              + " constructor");
+          expected.getMessage(), "No injectable constructor for type ImplicitBindingTest$D.");
     }
     // Assert that we've removed all the bindings.
     assertNull(injector.getExistingBinding(Key.get(A.class)));

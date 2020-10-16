@@ -16,9 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.Iterables;
@@ -190,13 +188,12 @@ public class TypeConversionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "Error converting 'invalid' (bound at "
-              + InnerErrorModule.class.getName()
-              + getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterErrorModule.class, InnerErrorModule.class),
-          "using TypeConverter<Integer> which matches identicalTo(class java.lang.Integer)"
+          "Error converting 'invalid' ",
+          "bound at TypeConversionTest$InnerErrorModule.configure",
+          "TypeConversionTest$OuterErrorModule -> TypeConversionTest$InnerErrorModule",
+          "TypeConverter<Integer> which matches identicalTo(class Integer)"
               + " (bound at [unknown source]).",
-          "Reason: java.lang.RuntimeException: For input string: \"invalid\"");
+          "Reason: RuntimeException: For input string: \"invalid\"");
     }
   }
 
@@ -219,8 +216,8 @@ public class TypeConversionTest extends TestCase {
       fail();
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
-      assertContains(expected.getMessage(), "bound at " + getClass().getName());
-      assertContains(expected.getMessage(), "to java.lang.Character");
+      assertContains(expected.getMessage(), "bound at TypeConversionTest$4.configure");
+      assertContains(expected.getMessage(), "to Character");
     }
   }
 
@@ -243,8 +240,8 @@ public class TypeConversionTest extends TestCase {
       fail();
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
-      assertContains(expected.getMessage(), "bound at " + getClass().getName());
-      assertContains(expected.getMessage(), "to " + Bar.class.getName());
+      assertContains(expected.getMessage(), "bound at TypeConversionTest$5.configure");
+      assertContains(expected.getMessage(), "to TypeConversionTest$Bar");
     }
   }
 
@@ -316,15 +313,13 @@ public class TypeConversionTest extends TestCase {
       assertTrue(cause instanceof UnsupportedOperationException);
       assertContains(
           expected.getMessage(),
-          "1) Error converting 'invalid' (bound at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          "to java.util.Date",
-          "using BrokenConverter which matches only(java.util.Date) ",
-          "(bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          "Reason: java.lang.UnsupportedOperationException: Cannot convert",
-          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
+          "Error converting 'invalid'",
+          "bound at TypeConversionTest$InvalidCustomValueModule.configure",
+          "to Date",
+          "using BrokenConverter which matches only(Date)",
+          "bound at TypeConversionTest$InvalidCustomValueModule.configure",
+          "Reason: UnsupportedOperationException: Cannot convert",
+          "at TypeConversionTest$DateHolder.date");
     }
   }
 
@@ -370,17 +365,14 @@ public class TypeConversionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Received null converting 'foo' (bound at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterModule.class, InnerModule.class),
-          "to java.util.Date",
-          "using CustomConverter which matches only(java.util.Date) ",
-          "(bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterModule.class, InnerModule.class, ConverterNullModule.class),
-          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
-          asModuleChain(OuterModule.class, InnerModule.class));
+          "Received null converting 'foo'",
+          "bound at TypeConversionTest$InnerModule.configure",
+          "TypeConversionTest$OuterModule -> TypeConversionTest$InnerModule",
+          "to Date",
+          "using CustomConverter which matches only(Date) ",
+          "bound at TypeConversionTest$ConverterNullModule.configure",
+          "TypeConversionTest$OuterModule -> TypeConversionTest$InnerModule ->"
+              + " TypeConversionTest$ConverterNullModule");
     }
   }
 
@@ -398,18 +390,12 @@ public class TypeConversionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Type mismatch converting 'foo' (bound at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterModule.class, InnerModule.class),
-          "to java.util.Date",
-          "using CustomConverter which matches only(java.util.Date) ",
-          "(bound at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterModule.class, InnerModule.class, ConverterCustomModule.class),
+          " Type mismatch converting 'foo'",
+          "to Date",
+          "using CustomConverter which matches only(Date) ",
           "Converter returned -1.",
-          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
-          asModuleChain(OuterModule.class, InnerModule.class));
+          "at TypeConversionTest$DateHolder.date(TypeConversionTest.java:",
+          "TypeConversionTest$OuterModule -> TypeConversionTest$InnerModule");
     }
   }
 
@@ -481,24 +467,9 @@ public class TypeConversionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Multiple converters can convert 'foo' (bound at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterAmbiguousModule.class, InnerAmbiguousModule.class),
-          "to java.util.Date:",
-          "CustomConverter which matches only(java.util.Date) (bound at "
-              + Ambiguous1Module.class.getName()
-              + getDeclaringSourcePart(getClass()),
-          asModuleChain(
-              OuterAmbiguousModule.class, InnerAmbiguousModule.class, Ambiguous1Module.class),
-          "and",
-          "CustomConverter which matches only(java.util.Date) (bound at "
-              + Ambiguous2Module.class.getName()
-              + getDeclaringSourcePart(getClass()),
-          asModuleChain(
-              OuterAmbiguousModule.class, InnerAmbiguousModule.class, Ambiguous2Module.class),
+          "Multiple converters can convert 'foo'",
           "Please adjust your type converter configuration to avoid overlapping matches.",
-          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
+          "at TypeConversionTest$DateHolder.date(TypeConversionTest.java:");
     }
   }
 

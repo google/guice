@@ -76,9 +76,7 @@ public class TypeLiteralInjectionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          TypeLiteral.class.getName()
-              + "<java.util.List<T>> "
-              + "cannot be used as a key; It is not fully specified.");
+          "TypeLiteral<List<T>> cannot be used as a key; It is not fully specified.");
     }
   }
 

@@ -567,8 +567,8 @@ public class FactoryProvider2Test {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "No implementation for java.lang.Double (with no qualifier annotation) was bound",
-          "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
+          "No injectable constructor for type Double.",
+          "at FactoryProvider2Test$ColoredCarFactory.create(FactoryProvider2Test.java");
     }
   }
 
@@ -588,8 +588,8 @@ public class FactoryProvider2Test {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "No implementation for java.lang.Double (with no qualifier annotation) was bound",
-          "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
+          "No injectable constructor for type Double.",
+          "at FactoryProvider2Test$ColoredCarFactory.create(FactoryProvider2Test.java");
     }
   }
 
@@ -685,37 +685,25 @@ public class FactoryProvider2Test {
       // Assert each method individually, because JDK7 doesn't guarantee method ordering.
       assertContains(
           expected.getMessage(),
-          ") A Provider may not be a type in a factory method of an AssistedInject."
-              + "\n  Offending instance is parameter [1] with key"
-              + " [com.google.inject.Provider<"
-              + Color.class.getName()
-              + ">] on method ["
-              + ProviderBasedColoredCarFactory.class.getName()
-              + ".createCar()]");
-      assertContains(
-          expected.getMessage(),
-          ") A Provider may not be a type in a factory method of an AssistedInject."
-              + "\n  Offending instance is parameter [2] with key"
-              + " [com.google.inject.Provider<java.lang.String>] on method ["
-              + ProviderBasedColoredCarFactory.class.getName()
-              + ".createCar()]");
-      assertContains(
-          expected.getMessage(),
-          ") A Provider may not be a type in a factory method of an AssistedInject."
-              + "\n  Offending instance is parameter [1] with key"
-              + " [com.google.inject.Provider<"
-              + Color.class.getName()
-              + ">"
-              + " annotated with @com.google.inject.assistedinject.Assisted(value="
+          "A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [1] with key [Provider<FactoryProvider2Test$Color>"
+              + " annotated with @Assisted(value="
               + Annotations.memberValueString("color")
-              + ")]"
-              + " on method ["
-              + ProviderBasedColoredCarFactory.class.getName()
-              + ".createMustang()]");
+              + ")] on method"
+              + " [FactoryProvider2Test$ProviderBasedColoredCarFactory.createMustang()]");
       assertContains(
           expected.getMessage(),
-          ") No implementation for com.google.inject.assistedinject."
-              + "FactoryProvider2Test$ProviderBasedColoredCarFactory was bound.");
+          "A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [1] with key [Provider<FactoryProvider2Test$Color>] on"
+              + " method [FactoryProvider2Test$ProviderBasedColoredCarFactory.createCar()]");
+      assertContains(
+          expected.getMessage(),
+          "A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [2] with key [Provider<String>] on method"
+              + " [FactoryProvider2Test$ProviderBasedColoredCarFactory.createCar()]");
+      assertContains(
+          expected.getMessage(),
+          "No implementation for FactoryProvider2Test$ProviderBasedColoredCarFactory was bound.");
     }
   }
 
@@ -744,37 +732,27 @@ public class FactoryProvider2Test {
       assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
       assertContains(
           expected.getMessage(),
-          ") A Provider may not be a type in a factory method of an AssistedInject."
-              + "\n  Offending instance is parameter [1] with key"
-              + " [com.google.inject.Provider<"
-              + Color.class.getName()
-              + ">] on method ["
-              + JavaxProviderBasedColoredCarFactory.class.getName()
-              + ".createCar()]");
-      assertContains(
-          expected.getMessage(),
-          ") A Provider may not be a type in a factory method of an AssistedInject."
-              + "\n  Offending instance is parameter [2] with key"
-              + " [com.google.inject.Provider<java.lang.String>] on method ["
-              + JavaxProviderBasedColoredCarFactory.class.getName()
-              + ".createCar()]");
-      assertContains(
-          expected.getMessage(),
-          ") A Provider may not be a type in a factory method of an AssistedInject."
-              + "\n  Offending instance is parameter [1] with key"
-              + " [com.google.inject.Provider<"
-              + Color.class.getName()
-              + ">"
-              + " annotated with @com.google.inject.assistedinject.Assisted(value="
+          ") A Provider may not be a type in a factory method of an AssistedInject.\n"
+              + "  Offending instance is parameter [1] with key"
+              + " [Provider<FactoryProvider2Test$Color> annotated with @Assisted(value="
               + Annotations.memberValueString("color")
               + ")]"
-              + " on method ["
-              + JavaxProviderBasedColoredCarFactory.class.getName()
-              + ".createMustang()]");
+              + " on method"
+              + " [FactoryProvider2Test$JavaxProviderBasedColoredCarFactory.createMustang()]");
       assertContains(
           expected.getMessage(),
-          ") No implementation for com.google.inject.assistedinject."
-              + "FactoryProvider2Test$JavaxProviderBasedColoredCarFactory was bound.");
+          ") A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [1] with key [Provider<FactoryProvider2Test$Color>] on"
+              + " method [FactoryProvider2Test$JavaxProviderBasedColoredCarFactory.createCar()]");
+      assertContains(
+          expected.getMessage(),
+          ") A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [2] with key [Provider<String>] on method"
+              + " [FactoryProvider2Test$JavaxProviderBasedColoredCarFactory.createCar()]");
+      assertContains(
+          expected.getMessage(),
+          "No implementation for FactoryProvider2Test$JavaxProviderBasedColoredCarFactory was"
+              + " bound.");
     }
   }
 
@@ -901,13 +879,9 @@ public class FactoryProvider2Test {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "A binding to "
-              + Color.class.getName()
-              + " annotated with @"
-              + Assisted.class.getName()
-              + "(value="
+          "FactoryProvider2Test$Color annotated with @Assisted(value="
               + Annotations.memberValueString("paint")
-              + ") was already configured at");
+              + ") was bound multiple times.");
     }
   }
 
@@ -985,7 +959,7 @@ public class FactoryProvider2Test {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "Only @Assisted is allowed for factory parameters, but found @" + Named.class.getName());
+          "Only @Assisted is allowed for factory parameters, but found @Named");
     }
   }
 

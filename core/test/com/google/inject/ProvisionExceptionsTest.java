@@ -47,9 +47,7 @@ public class ProvisionExceptionsTest extends TestCase {
     } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
       Asserts.assertContains(
-          pe.getMessage(),
-          "1) Error injecting constructor",
-          "java.lang.IllegalStateException: boom!");
+          pe.getMessage(), "1) [Guice/ErrorInjectingConstructor]: IllegalStateException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
       assertEquals(
@@ -74,7 +72,7 @@ public class ProvisionExceptionsTest extends TestCase {
     } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
       Asserts.assertContains(
-          pe.getMessage(), "1) Error injecting constructor", "java.io.IOException: boom!");
+          pe.getMessage(), "[Guice/ErrorInjectingConstructor]: IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
       assertEquals(IOException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
@@ -104,7 +102,7 @@ public class ProvisionExceptionsTest extends TestCase {
     } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
       Asserts.assertContains(
-          pe.getMessage(), "1) Error in custom provider", "java.lang.IllegalStateException: boom!");
+          pe.getMessage(), "1) [Guice/ErrorInCustomProvider]: IllegalStateException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
       assertEquals(
@@ -132,7 +130,7 @@ public class ProvisionExceptionsTest extends TestCase {
     } catch (ProvisionException pe) {
       // Make sure our initial error message gives the user exception.
       Asserts.assertContains(
-          pe.getMessage(), "1) Error in custom provider", "java.lang.IllegalStateException: boom!");
+          pe.getMessage(), "1) [Guice/ErrorInCustomProvider]: IllegalStateException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IllegalStateException.class, pe.getCause().getClass());
       assertEquals(
@@ -161,7 +159,7 @@ public class ProvisionExceptionsTest extends TestCase {
       pe.printStackTrace();
       // Make sure our initial error message gives the user exception.
       Asserts.assertContains(
-          pe.getMessage(), "1) Error in custom provider", "java.io.IOException: boom!");
+          pe.getMessage(), "1) [Guice/ErrorInCustomProvider]: IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
       assertEquals(IOException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());

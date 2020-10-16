@@ -71,8 +71,7 @@ public class LoggerInjectionTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(
-          expected.getMessage(), "A binding to java.util.logging.Logger was already configured");
+      assertContains(expected.getMessage(), "Logger was bound multiple times.");
     }
   }
 }

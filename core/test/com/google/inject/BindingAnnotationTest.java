@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
@@ -59,10 +58,9 @@ public class BindingAnnotationTest extends TestCase {
       assertContains(
           expected.getMessage(),
           true,
-          "No implementation for java.lang.String annotated with",
+          "No implementation for String annotated with",
           "BindingAnnotationTest$Blue(value=5) was bound",
-          "at " + BindingAnnotationTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "at BindingAnnotationTest$2.configure");
     }
   }
 
@@ -95,10 +93,9 @@ public class BindingAnnotationTest extends TestCase {
       assertContains(
           expected.getMessage(),
           true,
-          "No implementation for java.lang.String annotated with",
+          "No implementation for String annotated with",
           "BindingAnnotationTest$Color",
-          "at " + BindingAnnotationTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "at BindingAnnotationTest$4.configure");
     }
   }
 
@@ -118,10 +115,9 @@ public class BindingAnnotationTest extends TestCase {
       assertContains(
           expected.getMessage(),
           true,
-          "No implementation for java.lang.String annotated with",
+          "No implementation for String annotated with",
           "BindingAnnotationTest$Blue(value=5) was bound",
-          "at " + BindingAnnotationTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "at BindingAnnotationTest$5.configure");
     }
   }
 

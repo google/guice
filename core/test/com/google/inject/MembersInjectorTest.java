@@ -159,9 +159,7 @@ public class MembersInjectorTest extends TestCase {
       membersInjector.injectMembers(new InjectionFailure());
       fail();
     } catch (ProvisionException expected) {
-      assertContains(
-          expected.getMessage(),
-          "1) Error injecting method, java.lang.ClassCastException: whoops, failure #1");
+      assertContains(expected.getMessage(), "ClassCastException: whoops, failure #1");
     }
   }
 
@@ -202,7 +200,7 @@ public class MembersInjectorTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Binding to core guice framework type is not allowed: MembersInjector.");
+          "Binding to core guice framework type is not allowed: MembersInjector.");
     }
 
     try {
@@ -218,7 +216,7 @@ public class MembersInjectorTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Binding to core guice framework type is not allowed: MembersInjector.");
+          "Binding to core guice framework type is not allowed: MembersInjector.");
     }
   }
 
@@ -229,12 +227,13 @@ public class MembersInjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for " + Unimplemented.class.getName() + " was bound.",
-          "while locating " + Unimplemented.class.getName(),
-          "for field at " + A.class.getName() + ".t(MembersInjectorTest.java:",
-          "while locating com.google.inject.MembersInjector<",
-          "for field at " + InjectsBrokenMembersInjector.class.getName() + ".aMembersInjector(",
-          "while locating " + InjectsBrokenMembersInjector.class.getName());
+          "No implementation for MembersInjectorTest$Unimplemented was bound.",
+          "MembersInjectorTest$A.t(MembersInjectorTest.java:",
+          "for field t",
+          "at MembersInjectorTest$InjectsBrokenMembersInjector.aMembersInjector("
+              + "MembersInjectorTest.java:",
+          "for field aMembersInjector",
+          "while locating MembersInjectorTest$InjectsBrokenMembersInjector");
     }
   }
 
@@ -279,8 +278,7 @@ public class MembersInjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for com.google.inject.MembersInjector<java.lang.String> "
-              + "annotated with @com.google.inject.name.Named(value="
+          "No implementation for MembersInjector<String> annotated with @Named(value="
               + Annotations.memberValueString("foo")
               + ") was bound.");
     }

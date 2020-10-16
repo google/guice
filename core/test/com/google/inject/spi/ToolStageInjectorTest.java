@@ -106,10 +106,10 @@ public class ToolStageInjectorTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.toString(),
-          "No implementation for java.util.Collection<java.lang.String> was bound.",
-          "No implementation for java.util.Map<java.lang.String, java.lang.String> was bound.",
-          "No implementation for java.util.List<java.lang.String> was bound.",
-          "No implementation for java.util.Set<java.lang.String> was bound.");
+          "No implementation for Collection<String> was bound.",
+          "No implementation for Map<String, String> was bound.",
+          "No implementation for List<String> was bound.",
+          "No implementation for Set<String> was bound.");
     }
   }
 

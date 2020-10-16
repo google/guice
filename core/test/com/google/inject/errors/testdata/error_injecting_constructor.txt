@@ -1,0 +1,22 @@
+Unable to provision, see the following errors:
+
+1) [Guice/ErrorInjectingConstructor]: RuntimeException: bad
+  at GenericErrorTest$BadConstructor.<init>(GenericErrorTest.java:27)
+  at GenericErrorTest$ProvisionErrorModule.provideObject(GenericErrorTest.java:41)
+      \_ for 1st parameter bad
+  at GenericErrorTest$ProvisionErrorModule.provideObject(GenericErrorTest.java:41)
+  while locating Object
+
+Learn more:
+  https://github.com/google/guice/wiki/ERROR_INJECTING_CONSTRUCTOR
+
+1 error
+
+======================
+Full classname legend:
+======================
+GenericErrorTest$BadConstructor:       "com.google.inject.errors.GenericErrorTest$BadConstructor"
+GenericErrorTest$ProvisionErrorModule: "com.google.inject.errors.GenericErrorTest$ProvisionErrorModule"
+========================
+End of classname legend:
+========================

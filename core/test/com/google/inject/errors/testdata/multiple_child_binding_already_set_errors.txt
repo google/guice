@@ -1,0 +1,32 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/ChildBindingAlreadySet]: Unable to create binding for ChildBindingAlreadySetErrorTest$Foo because it was already configured on one or more child injectors or private modules.
+
+Bound at:
+1 : ChildBindingAlreadySetErrorTest$ChildModule.configure(ChildBindingAlreadySetErrorTest.java:34)
+2 : ChildBindingAlreadySetErrorTest$ChildModule2.provideFoo()
+
+Requested by:
+1  : ChildBindingAlreadySetErrorTest$BarModule.configure(ChildBindingAlreadySetErrorTest.java:77)
+     at ChildBindingAlreadySetErrorTest$Bar.<init>(ChildBindingAlreadySetErrorTest.java:71)
+      \_ for 1st parameter foo
+2  : ChildBindingAlreadySetErrorTest$BarModule.configure(ChildBindingAlreadySetErrorTest.java:77)
+     at ChildBindingAlreadySetErrorTest$Bar.<init>(ChildBindingAlreadySetErrorTest.java:71)
+      \_ for 2nd parameter dependsOnFoo
+     at ChildBindingAlreadySetErrorTest$DependsOnFoo.<init>(ChildBindingAlreadySetErrorTest.java:58)
+      \_ for 1st parameter foo
+
+1 error
+
+======================
+Full classname legend:
+======================
+ChildBindingAlreadySetErrorTest$Bar:          "com.google.inject.errors.ChildBindingAlreadySetErrorTest$Bar"
+ChildBindingAlreadySetErrorTest$BarModule:    "com.google.inject.errors.ChildBindingAlreadySetErrorTest$BarModule"
+ChildBindingAlreadySetErrorTest$ChildModule:  "com.google.inject.errors.ChildBindingAlreadySetErrorTest$ChildModule"
+ChildBindingAlreadySetErrorTest$ChildModule2: "com.google.inject.errors.ChildBindingAlreadySetErrorTest$ChildModule2"
+ChildBindingAlreadySetErrorTest$DependsOnFoo: "com.google.inject.errors.ChildBindingAlreadySetErrorTest$DependsOnFoo"
+ChildBindingAlreadySetErrorTest$Foo:          "com.google.inject.errors.ChildBindingAlreadySetErrorTest$Foo"
+========================
+End of classname legend:
+========================

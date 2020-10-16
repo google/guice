@@ -1,0 +1,22 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/BindingAlreadySet]: BindingAlreadySetErrorTest$First was bound multiple times.
+
+Bound at:
+1  : BindingAlreadySetErrorTest$BindWithProviderMethodModule.provideFirstClass(BindingAlreadySetErrorTest.java:33)
+2  : BindingAlreadySetErrorTest$BindWithDslModule.configure(BindingAlreadySetErrorTest.java:40)
+
+Learn more:
+  https://github.com/google/guice/wiki/BINDING_ALREADY_SET
+
+1 error
+
+======================
+Full classname legend:
+======================
+BindingAlreadySetErrorTest$BindWithDslModule:            "com.google.inject.errors.BindingAlreadySetErrorTest$BindWithDslModule"
+BindingAlreadySetErrorTest$BindWithProviderMethodModule: "com.google.inject.errors.BindingAlreadySetErrorTest$BindWithProviderMethodModule"
+BindingAlreadySetErrorTest$First:                        "com.google.inject.errors.BindingAlreadySetErrorTest$First"
+========================
+End of classname legend:
+========================

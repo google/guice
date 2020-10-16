@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.Asserts.asModuleChain;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
 import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
@@ -537,7 +537,7 @@ public class MapBinderTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Map injection failed due to duplicated key \"a\"");
+      assertContains(expected.getMessage(), "Duplicate key \"a\" found in Map<String, String>.");
     }
 
     assertMapVisitor(
@@ -603,14 +603,15 @@ public class MapBinderTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "Map injection failed due to duplicated key \"a\", from bindings:",
-          asModuleChain(Main.class, Module1.class),
-          asModuleChain(Main.class, Module2.class),
-          "and key: \"b\", from bindings:",
-          asModuleChain(Main.class, Module2.class),
-          asModuleChain(Main.class, Module3.class),
-          "at " + Main.class.getName() + ".configure(",
-          asModuleChain(Main.class, RealMapBinder.class));
+          "\"a\" and 1 other duplicate keys found in Map<String, Object>",
+          "Key: \"a\"",
+          "Bound at:",
+          "MapBinderTest$1Main -> MapBinderTest$1Module1",
+          "MapBinderTest$1Main -> MapBinderTest$1Module2",
+          "Key: \"b\"",
+          "Bound at:",
+          "MapBinderTest$1Main -> MapBinderTest$1Module2",
+          "MapBinderTest$1Main -> MapBinderTest$1Module3");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }
@@ -846,9 +847,8 @@ public class MapBinderTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Map injection failed due to null value for key \"null\", bound at: "
-              + m.getClass().getName()
-              + ".configure(");
+          "Map injection failed due to null value for key \"null\", bound at:"
+              + " MapBinderTest$30.configure");
     }
   }
 
@@ -892,8 +892,8 @@ public class MapBinderTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for java.lang.Integer",
-          "at " + getClass().getName());
+          "No implementation for Integer",
+          "1  : MapBinderTest$33.configure");
     }
   }
 
@@ -1583,11 +1583,9 @@ public class MapBinderTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertTrue(
-          e.getMessage()
-              .contains(
-                  "A binding to java.util.Map<java.lang.Integer, ? extends java.lang.String> was"
-                      + " already configured"));
+      assertThat(e)
+          .hasMessageThat()
+          .contains("Map<Integer, ? extends String> was bound multiple times.");
     }
   }
 
@@ -1622,11 +1620,9 @@ public class MapBinderTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertTrue(
-          e.getMessage()
-              .contains(
-                  "A binding to java.util.Map<java.lang.Integer, ? extends java.lang.String> was"
-                      + " already configured"));
+      assertThat(e)
+          .hasMessageThat()
+          .contains("Map<Integer, ? extends String> was bound multiple times.");
     }
   }
 

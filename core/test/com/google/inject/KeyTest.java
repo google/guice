@@ -220,8 +220,7 @@ public class KeyTest extends TestCase {
       Key.get(listOfT);
       fail("Guice should not allow keys for java.util.List<T>");
     } catch (ConfigurationException e) {
-      assertContains(
-          e.getMessage(), "java.util.List<T> cannot be used as a key; It is not fully specified.");
+      assertContains(e.getMessage(), "List<T> cannot be used as a key; It is not fully specified.");
     }
 
     TypeVariable<?> tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];

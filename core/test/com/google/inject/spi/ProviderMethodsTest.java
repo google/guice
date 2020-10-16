@@ -235,8 +235,7 @@ public class ProviderMethodsTest implements Module {
           "more than one annotation annotated with @BindingAnnotation:",
           "Named",
           "Blue",
-          "at " + getClass().getName(),
-          ".provideString(ProviderMethodsTest.java:");
+          "at ProviderMethodsTest$5.provideString(ProviderMethodsTest.java:");
     }
   }
 
@@ -454,9 +453,8 @@ public class ProviderMethodsTest implements Module {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Provider methods must return a value. Do not return void.",
-          getClass().getName(),
-          ".provideFoo(ProviderMethodsTest.java:");
+          "Provider methods must return a value. Do not return void.",
+          "at ProviderMethodsTest$14.provideFoo(ProviderMethodsTest.java:");
     }
   }
 
@@ -594,8 +592,8 @@ public class ProviderMethodsTest implements Module {
       // both of our super class bindings cause errors
       assertContains(
           expected.getMessage(),
-          "A binding to java.lang.Long was already configured",
-          "A binding to java.lang.Integer was already configured");
+          "Long was bound multiple times.",
+          "Integer was bound multiple times.");
     }
   }
 
@@ -758,8 +756,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$1SubClassModule.providerMethod()");
     }
   }
 
@@ -780,8 +778,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$2SubClassModule.providerMethod()");
     }
   }
 
@@ -800,8 +798,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$3SubClassModule.providerMethod()");
     }
   }
 
@@ -821,8 +819,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$4SubClassModule.providerMethod()");
     }
   }
 
@@ -841,8 +839,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$5SubClassModule.providerMethod()");
     }
   }
 
@@ -862,8 +860,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$6SubClassModule.providerMethod()");
     }
   }
 
@@ -894,10 +892,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: "
-              + SuperClassModule.class.getName()
-              + ".annotatedGenericProviderMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".annotatedGenericProviderMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.annotatedGenericProviderMethod()",
+          "overridden by: ProviderMethodsTest$8SubClassModule.annotatedGenericProviderMethod()");
     }
   }
 
@@ -918,10 +914,10 @@ public class ProviderMethodsTest implements Module {
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
           "@Provides method: "
-              + SuperClassModule.class.getName()
+              + "ProviderMethodsTest$SuperClassModule"
               + ".annotatedGenericParameterProviderMethod()",
           "overridden by: "
-              + SubClassModule.class.getName()
+              + "ProviderMethodsTest$9SubClassModule"
               + ".annotatedGenericParameterProviderMethod()");
     }
   }
@@ -942,8 +938,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".rawProvider()",
-          "overridden by: " + SubClassModule.class.getName() + ".rawProvider()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.rawProvider()",
+          "overridden by: ProviderMethodsTest$10SubClassModule.rawProvider()");
     }
   }
 
@@ -976,8 +972,8 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + GenericSuperModule.class.getName() + ".provide()",
-          "overridden by: " + SubClassModule.class.getName() + ".provide()");
+          "@Provides method: ProviderMethodsTest$GenericSuperModule.provide()",
+          "overridden by: ProviderMethodsTest$11SubClassModule.provide()");
     }
   }
 
@@ -1043,7 +1039,7 @@ public class ProviderMethodsTest implements Module {
     } catch (ProvisionException pe) {
       // by default assertContains asserts that the last item doesn't repeat... which is the main
       // thing we are testing for
-      assertContains(pe.getMessage(), "java.lang.RuntimeException: boom", "provideInt");
+      assertContains(pe.getMessage(), "RuntimeException: boom", "provideInt");
     }
   }
 
@@ -1127,7 +1123,7 @@ public class ProviderMethodsTest implements Module {
       Guice.createInjector(Stage.PRODUCTION, new DeduplicateModule(), new DeduplicateModule());
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "A binding to java.lang.String was already configured");
+      assertContains(expected.getMessage(), "String was bound multiple times.");
     }
   }
 
@@ -1169,14 +1165,14 @@ public class ProviderMethodsTest implements Module {
       injector.getInstance(Integer.class);
       fail();
     } catch (ProvisionException expected) {
+      String moduleName = module.getClass().getName().replace("com.google.inject.spi.", "");
       assertContains(
           expected.getMessage(),
-          "1) null returned by binding at " + module.getClass().getName() + ".configure(",
-          "but the 1st parameter of " + module.getClass().getName() + ".fail(",
+          "null returned by binding at " + moduleName + ".configure(",
+          "but the 1st parameter of " + moduleName + ".fail(",
           "is not @Nullable",
-          "while locating java.lang.String",
-          "for the 1st parameter of " + module.getClass().getName() + ".fail(",
-          "while locating java.lang.Integer");
+          "for 1st parameter",
+          "while locating Integer");
 
       assertEquals(1, expected.getErrorMessages().size());
     }
