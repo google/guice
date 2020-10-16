@@ -238,8 +238,11 @@ public class InjectorTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "InjectorTest$Interface is an interface, but interfaces have no static injection points.",
-          "at InjectorTest$5.configure");
+          "1) "
+              + Interface.class.getName()
+              + " is an interface, but interfaces have no static injection points.",
+          "at " + InjectorTest.class.getName(),
+          "configure");
     }
   }
 
@@ -342,9 +345,11 @@ public class InjectorTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "InjectorTest$Tree doesn't provide instances of InjectorTest$Money.",
-          "while locating InjectorTest$Tree",
-          "while locating InjectorTest$Money");
+          Tree.class.getName() + " doesn't provide instances of " + Money.class.getName(),
+          "while locating ",
+          Tree.class.getName(),
+          "while locating ",
+          Money.class.getName());
     }
   }
 
@@ -355,8 +360,9 @@ public class InjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "InjectorTest$Tree doesn't extend InjectorTest$PineTree.",
-          "while locating InjectorTest$PineTree");
+          Tree.class.getName() + " doesn't extend " + PineTree.class.getName(),
+          "while locating ",
+          PineTree.class.getName());
     }
   }
 

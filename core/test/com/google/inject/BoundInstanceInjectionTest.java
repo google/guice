@@ -92,9 +92,10 @@ public class BoundInstanceInjectionTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.getMessage(),
-          "BoundInstanceInjectionTest$MalformedInjectable.doublyAnnotated() has more than one ",
+          MalformedInjectable.class.getName(),
+          ".doublyAnnotated() has more than one ",
           "annotation annotated with @BindingAnnotation: ",
-          "Named and BoundInstanceInjectionTest$Another");
+          Named.class.getName() + " and " + Another.class.getName());
     }
   }
 
@@ -111,9 +112,10 @@ public class BoundInstanceInjectionTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.getMessage(),
-          "BoundInstanceInjectionTest$MalformedProvider.doublyAnnotated() has more than one ",
+          MalformedProvider.class.getName(),
+          ".doublyAnnotated() has more than one ",
           "annotation annotated with @BindingAnnotation: ",
-          "Named and BoundInstanceInjectionTest$Another");
+          Named.class.getName() + " and " + Another.class.getName());
     }
   }
 

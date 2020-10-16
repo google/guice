@@ -130,9 +130,11 @@ public class ManyConstructorsTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.getMessage(),
-          "1) ManyConstructorsTest$TooManyMatches has more than one constructor annotated with"
-              + " @AssistedInject that matches the parameters in method"
-              + " ManyConstructorsTest$SimpleFactory2.create().");
+          "1) "
+              + TooManyMatches.class.getName()
+              + " has more than one constructor annotated with @AssistedInject that "
+              + "matches the parameters in method "
+              + SimpleFactory2.class.getName());
     }
   }
 
@@ -149,8 +151,11 @@ public class ManyConstructorsTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.getMessage(),
-          "1) ManyConstructorsTest$Foo has @AssistedInject constructors, but none of them match"
-              + " the parameters in method ManyConstructorsTest$ComplexFactory.create().");
+          "1) "
+              + Foo.class.getName()
+              + " has @AssistedInject constructors, but none of them match the parameters in"
+              + " method "
+              + ComplexFactory.class.getName());
     }
   }
 
@@ -167,8 +172,11 @@ public class ManyConstructorsTest extends TestCase {
     } catch (CreationException expected) {
       Asserts.assertContains(
           expected.getMessage(),
-          "1) ManyConstructorsTest$Foo has @AssistedInject constructors, but none of them match"
-              + " the parameters in method ManyConstructorsTest$NullFactory.create().");
+          "1) "
+              + Foo.class.getName()
+              + " has @AssistedInject constructors, but none of them match the parameters in"
+              + " method "
+              + NullFactory.class.getName());
     }
   }
 

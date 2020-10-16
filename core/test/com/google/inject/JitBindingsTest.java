@@ -36,8 +36,7 @@ public class JitBindingsTest extends TestCase {
   }
 
   private String jitFailed(TypeLiteral<?> clazz) {
-    String shortName = "JitBindingsTest$" + clazz.getRawType().getSimpleName();
-    return "Explicit bindings are required and " + shortName + " is not explicitly bound.";
+    return "Explicit bindings are required and " + clazz + " is not explicitly bound.";
   }
 
   private String jitInParentFailed(Class<?> clazz) {
@@ -45,17 +44,13 @@ public class JitBindingsTest extends TestCase {
   }
 
   private String jitInParentFailed(TypeLiteral<?> clazz) {
-    String shortName = "JitBindingsTest$" + clazz.getRawType().getSimpleName();
-    return "Explicit bindings are required and "
-        + shortName
-        + " would be bound in a parent injector.";
+    return "Explicit bindings are required and " + clazz + " would be bound in a parent injector.";
   }
 
   private String inChildMessage(Class<?> clazz) {
     return "Unable to create binding for "
-        + "JitBindingsTest$"
-        + clazz.getSimpleName()
-        + " because it was already configured on one or more child injectors or private modules";
+        + clazz.getName()
+        + ". It was already configured on one or more child injectors or private modules";
   }
 
   public void testLinkedBindingWorks() {

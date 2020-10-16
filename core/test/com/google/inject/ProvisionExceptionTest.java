@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.Asserts.reserialize;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
@@ -43,13 +44,10 @@ public class ProvisionExceptionTest extends TestCase {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(
           e.getMessage(),
-          "UnsupportedOperationException",
-          "at ProvisionExceptionTest$C.setD",
-          "for 1st parameter d",
-          "at ProvisionExceptionTest$B.c",
-          "for field c",
-          "at ProvisionExceptionTest$A.<init>",
-          "for 1st parameter b");
+          "Error injecting constructor",
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$C.setD",
+          "for field at com.google.inject.ProvisionExceptionTest$B.c",
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$A");
     }
   }
 
@@ -73,13 +71,10 @@ public class ProvisionExceptionTest extends TestCase {
       assertFalse(e.getMessage().contains("custom provider"));
       assertContains(
           e.getMessage(),
-          "UnsupportedOperationException",
-          "at ProvisionExceptionTest$C.setD",
-          "for 1st parameter d",
-          "at ProvisionExceptionTest$B.c",
-          "for field c",
-          "at ProvisionExceptionTest$A.<init>",
-          "for 1st parameter b");
+          "Error injecting constructor",
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$C.setD",
+          "for field at com.google.inject.ProvisionExceptionTest$B.c",
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$A");
     }
   }
 
@@ -91,8 +86,8 @@ public class ProvisionExceptionTest extends TestCase {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(
           e.getMessage(),
-          "[Guice/ErrorInjectingMethod]: UnsupportedOperationException",
-          "at ProvisionExceptionTest$E.setObject");
+          "Error injecting method",
+          "at " + E.class.getName() + ".setObject(ProvisionExceptionTest.java:");
     }
   }
 
@@ -111,8 +106,9 @@ public class ProvisionExceptionTest extends TestCase {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(
           e.getMessage(),
-          "1) [Guice/ErrorInCustomProvider]: UnsupportedOperationException",
-          "at ProvisionExceptionTest$2.configure");
+          "1) Error in custom provider, java.lang.UnsupportedOperationException",
+          "at " + ProvisionExceptionTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -124,7 +120,10 @@ public class ProvisionExceptionTest extends TestCase {
       Guice.createInjector().getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(), "1) User Exception", "at ProvisionExceptionTest$F.<init>");
+      assertContains(
+          e.getMessage(),
+          "1) User Exception",
+          "at " + F.class.getName() + ".<init>(ProvisionExceptionTest.java:");
     }
   }
 
@@ -143,8 +142,10 @@ public class ProvisionExceptionTest extends TestCase {
       assertContains(
           e.getMessage(),
           "1) User Exception",
-          "while locating ProvisionExceptionTest$FProvider",
-          "while locating ProvisionExceptionTest$F");
+          "while locating ",
+          FProvider.class.getName(),
+          "while locating ",
+          F.class.getName());
     }
   }
 
@@ -160,7 +161,11 @@ public class ProvisionExceptionTest extends TestCase {
           .getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(), "1) User Exception", "at ProvisionExceptionTest$4.configure");
+      assertContains(
+          e.getMessage(),
+          "1) User Exception",
+          "at " + ProvisionExceptionTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -172,15 +177,15 @@ public class ProvisionExceptionTest extends TestCase {
       ProvisionException reserialized = reserialize(expected);
       assertContains(
           reserialized.getMessage(),
-          "1) [Guice/ErrorInjectingConstructor]: UnsupportedOperationException",
-          "at ProvisionExceptionTest$RealD.<init>()",
-          "at Key[type=ProvisionExceptionTest$RealD, annotation=[none]]",
-          "@ProvisionExceptionTest$C.setD()[0]",
-          "at Key[type=ProvisionExceptionTest$C, annotation=[none]]",
-          "@ProvisionExceptionTest$B.c",
-          "at Key[type=ProvisionExceptionTest$B, annotation=[none]]",
-          "@ProvisionExceptionTest$A.<init>()[0]",
-          "at Key[type=ProvisionExceptionTest$A, annotation=[none]]");
+          "1) Error injecting constructor, java.lang.UnsupportedOperationException",
+          "at com.google.inject.ProvisionExceptionTest$RealD.<init>()",
+          "at Key[type=com.google.inject.ProvisionExceptionTest$RealD, annotation=[none]]",
+          "@com.google.inject.ProvisionExceptionTest$C.setD()[0]",
+          "at Key[type=com.google.inject.ProvisionExceptionTest$C, annotation=[none]]",
+          "@com.google.inject.ProvisionExceptionTest$B.c",
+          "at Key[type=com.google.inject.ProvisionExceptionTest$B, annotation=[none]]",
+          "@com.google.inject.ProvisionExceptionTest$A.<init>()[0]",
+          "at Key[type=com.google.inject.ProvisionExceptionTest$A, annotation=[none]]");
     }
   }
 
@@ -207,11 +212,11 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),
-          "IllegalArgumentException",
-          "Caused by: IllegalArgumentException: UnsupportedOperationException",
-          "Caused by: UnsupportedOperationException: Unsupported",
-          "NullPointerException: can't inject second either",
-          "Caused by: NullPointerException: can't inject second either",
+          "1) Error in custom provider, java.lang.IllegalArgumentException",
+          "Caused by: java.lang.IllegalArgumentException: java.lang.UnsupportedOperationException",
+          "Caused by: java.lang.UnsupportedOperationException: Unsupported",
+          "2) Error in custom provider, java.lang.NullPointerException: can't inject second either",
+          "Caused by: java.lang.NullPointerException: can't inject second either",
           "2 errors");
     }
   }
@@ -225,7 +230,7 @@ public class ProvisionExceptionTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "Injecting into inner classes is not supported.",
-          "while locating ProvisionExceptionTest$InnerClass");
+          "while locating " + InnerClass.class.getName());
     }
   }
 
@@ -240,7 +245,7 @@ public class ProvisionExceptionTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "Injecting into inner classes is not supported.",
-          "while locating ProvisionExceptionTest$1LocalClass");
+          "while locating " + LocalClass.class.getName());
     }
   }
 
@@ -252,10 +257,10 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "ProvisionExceptionTest$MethodWithBindingAnnotation.injectMe() is annotated "
-              + "with @ProvisionExceptionTest$Green(), but binding annotations should be "
-              + "applied to its parameters instead.",
-          "while locating ProvisionExceptionTest$MethodWithBindingAnnotation");
+          MethodWithBindingAnnotation.class.getName() + ".injectMe() is annotated with @",
+          Green.class.getName() + "(), ",
+          "but binding annotations should be applied to its parameters instead.",
+          "while locating " + MethodWithBindingAnnotation.class.getName());
     }
 
     try {
@@ -264,11 +269,11 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "ProvisionExceptionTest$ConstructorWithBindingAnnotation.<init>() is annotated with"
-              + " @ProvisionExceptionTest$Green(), but binding annotations should be applied to"
-              + " its parameters instead.",
-          "at ProvisionExceptionTest$ConstructorWithBindingAnnotation.class",
-          "while locating ProvisionExceptionTest$ConstructorWithBindingAnnotation");
+          ConstructorWithBindingAnnotation.class.getName() + ".<init>() is annotated with @",
+          Green.class.getName() + "(), ",
+          "but binding annotations should be applied to its parameters instead.",
+          "at " + ConstructorWithBindingAnnotation.class.getName() + ".class",
+          "while locating " + ConstructorWithBindingAnnotation.class.getName());
     }
   }
 
@@ -300,9 +305,9 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "at ProvisionExceptionTest$RealD.<init>",
-          "while locating ProvisionExceptionTest$RealD",
-          "while locating ProvisionExceptionTest$D");
+          "at " + RealD.class.getName() + ".<init>(ProvisionExceptionTest.java:",
+          "while locating " + RealD.class.getName(),
+          "while locating " + D.class.getName());
     }
   }
 
@@ -322,8 +327,8 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "while locating ProvisionExceptionTest$DProvider",
-          "while locating ProvisionExceptionTest$D");
+          "while locating " + DProvider.class.getName(),
+          "while locating " + D.class.getName());
     }
   }
 
@@ -372,11 +377,11 @@ public class ProvisionExceptionTest extends TestCase {
       assertContains(
           ce.getMessage(),
           "\n1) ",
-          "Caused by: RuntimeException: fail",
+          e1,
           "\n2) ",
           "(same stack trace as error #1)",
           "\n3) ",
-          "Caused by: RuntimeException: abort",
+          e2,
           "\n4) ",
           "(same stack trace as error #3)");
     }

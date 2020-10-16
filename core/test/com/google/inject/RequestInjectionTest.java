@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.matcher.Matchers;
@@ -110,8 +111,9 @@ public class RequestInjectionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "No implementation for Runnable was bound",
-          "RequestInjectionTest$NeedsRunnable.runnable(RequestInjectionTest.java:");
+          "1) No implementation for java.lang.Runnable was bound",
+          "at " + NeedsRunnable.class.getName(),
+          ".runnable(RequestInjectionTest.java:");
     }
   }
 
@@ -135,9 +137,10 @@ public class RequestInjectionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "[Guice/ErrorInCustomProvider]: UnsupportedOperationException",
-          "at RequestInjectionTest$NeedsRunnable.runnable(RequestInjectionTest.java:",
-          "for field runnable");
+          "1) Error in custom provider, java.lang.UnsupportedOperationException",
+          "for field at " + NeedsRunnable.class.getName() + ".runnable(RequestInjectionTest.java:",
+          "at " + getClass().getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -154,8 +157,8 @@ public class RequestInjectionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) [Guice/ErrorInjectingMethod]: UnsupportedOperationException: Pop",
-          "at RequestInjectionTest$BlowsUpOnInject.injectInstance(RequestInjectionTest.java:");
+          "1) Error injecting method, java.lang.UnsupportedOperationException: Pop",
+          "at " + BlowsUpOnInject.class.getName() + ".injectInstance(RequestInjectionTest.java:");
     }
   }
 
@@ -172,8 +175,8 @@ public class RequestInjectionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) [Guice/ErrorInjectingMethod]: UnsupportedOperationException: Snap",
-          "at RequestInjectionTest$BlowsUpOnInject.injectStatically(RequestInjectionTest.java:");
+          "1) Error injecting method, java.lang.UnsupportedOperationException: Snap",
+          "at " + BlowsUpOnInject.class.getName() + ".injectStatically(RequestInjectionTest.java:");
     }
   }
 

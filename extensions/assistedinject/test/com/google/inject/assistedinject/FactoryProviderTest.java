@@ -637,9 +637,10 @@ public class FactoryProviderTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Factory method FactoryProviderTest$AssistedParamsFactory.create() has an @Assisted"
-              + " parameter, which is incompatible with the deprecated @AssistedInject"
-              + " annotation.");
+          "Factory method "
+              + AssistedParamsFactory.class.getName()
+              + ".create() has an @Assisted parameter, which "
+              + "is incompatible with the deprecated @AssistedInject annotation.");
     }
   }
 

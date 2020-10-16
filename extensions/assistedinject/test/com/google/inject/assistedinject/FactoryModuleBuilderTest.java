@@ -70,10 +70,10 @@ public class FactoryModuleBuilderTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "FactoryModuleBuilderTest$Car is an interface, not a concrete class.",
+          "1) " + Car.class.getName() + " is an interface, not a concrete class.",
           "Unable to create AssistedInject factory.",
-          "while locating FactoryModuleBuilderTest$Car",
-          "at FactoryModuleBuilderTest$ColoredCarFactory.create(");
+          "while locating " + Car.class.getName(),
+          "at " + ColoredCarFactory.class.getName() + ".create(");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }
@@ -92,10 +92,10 @@ public class FactoryModuleBuilderTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "FactoryModuleBuilderTest$AbstractCar is abstract, not a concrete class.",
+          "1) " + AbstractCar.class.getName() + " is abstract, not a concrete class.",
           "Unable to create AssistedInject factory.",
-          "while locating FactoryModuleBuilderTest$AbstractCar",
-          "at FactoryModuleBuilderTest$ColoredAbstractCarFactory.create(");
+          "while locating " + AbstractCar.class.getName(),
+          "at " + ColoredAbstractCarFactory.class.getName() + ".create(");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }
@@ -140,11 +140,11 @@ public class FactoryModuleBuilderTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "FactoryModuleBuilderTest$Volkswagen is an interface, not a concrete class.",
+          "1) " + Volkswagen.class.getName() + " is an interface, not a concrete class.",
           "Unable to create AssistedInject factory.",
-          "while locating FactoryModuleBuilderTest$Volkswagen",
-          "while locating FactoryModuleBuilderTest$Car",
-          "at FactoryModuleBuilderTest$ColoredCarFactory.create(");
+          "while locating " + Volkswagen.class.getName(),
+          "while locating " + Car.class.getName(),
+          "at " + ColoredCarFactory.class.getName() + ".create(");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }
@@ -166,11 +166,11 @@ public class FactoryModuleBuilderTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(),
-          "FactoryModuleBuilderTest$AbstractCar is abstract, not a concrete class.",
+          "1) " + AbstractCar.class.getName() + " is abstract, not a concrete class.",
           "Unable to create AssistedInject factory.",
-          "while locating FactoryModuleBuilderTest$AbstractCar",
-          "while locating FactoryModuleBuilderTest$Car",
-          "at FactoryModuleBuilderTest$ColoredCarFactory.create(");
+          "while locating " + AbstractCar.class.getName(),
+          "while locating " + Car.class.getName(),
+          "at " + ColoredCarFactory.class.getName() + ".create(");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }
@@ -342,7 +342,8 @@ public class FactoryModuleBuilderTest extends TestCase {
       fail();
     } catch (CreationException ce) {
       assertContains(
-          ce.getMessage(), "FactoryModuleBuilderTest$ColoredCarFactory was bound multiple times");
+          ce.getMessage(),
+          "A binding to " + ColoredCarFactory.class.getName() + " was already configured");
       assertEquals(1, ce.getErrorMessages().size());
     }
   }

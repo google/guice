@@ -40,8 +40,11 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$NoCxtors.",
-          "at RequireAtInjectOnConstructorsTest$1.configure");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + NoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure");
     }
   }
 
@@ -60,8 +63,10 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     } catch (ConfigurationException ce) {
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$NoCxtors.",
-          "while locating RequireAtInjectOnConstructorsTest$NoCxtors");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + NoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "while locating " + NoCxtors.class.getName());
     }
   }
 
@@ -80,8 +85,11 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$NoCxtors",
-          "at RequireAtInjectOnConstructorsTest$3.configure");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + NoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure");
     }
   }
 
@@ -106,8 +114,11 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$NoCxtors.",
-          "at RequireAtInjectOnConstructorsTest$4$1.configure");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + NoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure");
     }
   }
 
@@ -127,10 +138,16 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       assertEquals(2, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$AnotherNoCxtors.",
-          "at RequireAtInjectOnConstructorsTest$5.configure",
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$NoCxtors.",
-          "at RequireAtInjectOnConstructorsTest$5.configure");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + AnotherNoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure",
+          "2) Explicit @Inject annotations are required on constructors, but "
+              + NoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure");
     }
   }
 
@@ -158,9 +175,11 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$NoCxtors.",
-          "Injector is configured to require @Inject constructors",
-          "at RequireAtInjectOnConstructorsTest$6$1.configure");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + NoCxtors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure");
     }
   }
 
@@ -179,8 +198,11 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
       assertEquals(1, ce.getErrorMessages().size());
       Asserts.assertContains(
           ce.getMessage(),
-          "No injectable constructor for type RequireAtInjectOnConstructorsTest$ManyConstructors.",
-          "at RequireAtInjectOnConstructorsTest$7.configure");
+          "1) Explicit @Inject annotations are required on constructors, but "
+              + ManyConstructors.class.getName()
+              + " has no constructors annotated with @Inject",
+          "at " + RequireAtInjectOnConstructorsTest.class.getName() + "$",
+          "configure");
     }
   }
 

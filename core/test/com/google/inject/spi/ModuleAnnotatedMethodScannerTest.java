@@ -152,9 +152,10 @@ public class ModuleAnnotatedMethodScannerTest {
     assertThat(creationException)
         .hasMessageThat()
         .contains(
-            "More than one annotation claimed by NamedMunger on method"
-                + " ModuleAnnotatedMethodScannerTest$4.foo(). Methods can only have one annotation"
-                + " claimed per scanner.");
+            "More than one annotation claimed by NamedMunger on method "
+                + module.getClass().getName()
+                + ".foo(). Methods can only have "
+                + "one annotation claimed per scanner.");
   }
 
   private String methodName(Class<? extends Annotation> annotation, String method, Object container)
@@ -602,7 +603,8 @@ public class ModuleAnnotatedMethodScannerTest {
     assertThat(creationException)
         .hasMessageThat()
         .contains(
-            "Overriding @ModuleAnnotatedMethodScannerTest.TestProvides methods is not allowed.");
+            String.format(
+                "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
   }
 
   static class Superclass {
@@ -659,7 +661,8 @@ public class ModuleAnnotatedMethodScannerTest {
     assertThat(creationException)
         .hasMessageThat()
         .contains(
-            "Overriding @ModuleAnnotatedMethodScannerTest.TestProvides methods is not allowed.");
+            String.format(
+                "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
     assertThat(scanner.ignoredCounter()).isEqualTo(1); // checking that there was a method ignored.
   }
 
@@ -673,7 +676,8 @@ public class ModuleAnnotatedMethodScannerTest {
     assertThat(creationException)
         .hasMessageThat()
         .contains(
-            "Overriding @ModuleAnnotatedMethodScannerTest.TestProvides methods is not allowed.");
+            String.format(
+                "Overriding @%s methods is not allowed", TestProvides.class.getCanonicalName()));
     assertThat(scanner.ignoredCounter()).isEqualTo(1); // checking that there was a method ignored.
   }
 

@@ -149,7 +149,9 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(), "No injectable constructor for type Integer.");
+      assertContains(
+          e.getMessage(),
+          "No implementation for java.lang.Integer (with no qualifier annotation) was bound");
     }
   }
 
@@ -550,7 +552,9 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(), "No injectable constructor for type Integer.");
+      assertContains(
+          e.getMessage(),
+          "No implementation for java.lang.Integer (with no qualifier annotation) was bound");
     }
   }
 
@@ -799,7 +803,7 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(), "at BoundFieldModuleTest$InvalidBindableClass.anInt");
+      assertContains(e.getMessage(), "at " + InvalidBindableClass.class.getName() + ".anInt");
     }
   }
 

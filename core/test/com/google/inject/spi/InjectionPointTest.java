@@ -175,8 +175,9 @@ public class InjectionPointTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "LinkedHashSet<String> does not define HashSet.<init>()",
-          "while locating LinkedHashSet<String>");
+          "java.util.LinkedHashSet<java.lang.String>",
+          " does not define java.util.HashSet.<init>()",
+          "  while locating java.util.LinkedHashSet<java.lang.String>");
     }
 
     try {
@@ -187,8 +188,9 @@ public class InjectionPointTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "Set<String> does not define HashSet.<init>()",
-          "while locating Set<String>");
+          "java.util.Set<java.lang.String>",
+          " does not define java.util.HashSet.<init>()",
+          "  while locating java.util.Set<java.lang.String>");
     }
   }
 
@@ -213,10 +215,7 @@ public class InjectionPointTest extends TestCase {
                     TypeLiteral.get(NoArgNonConstructable.class), /* atInjectRequired= */ true));
     assertThat(exception)
         .hasMessageThat()
-        .contains(
-            "Injector is configured to require @Inject constructors but class"
-                + " InjectionPointTest$NoArgNonConstructable does not have a @Inject annotated"
-                + " constructor.");
+        .contains("Explicit @Inject annotations are required on constructors");
   }
 
   static class NoArgNonConstructable {

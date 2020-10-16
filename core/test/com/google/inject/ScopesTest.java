@@ -16,7 +16,9 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -159,9 +161,9 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "ScopesTest$A is annotated with Singleton, but scope annotations are not supported for"
-              + " abstract types.",
-          "at ScopesTest$A.class");
+          A.class.getName() + " is annotated with " + Singleton.class.getName(),
+          "but scope annotations are not supported for abstract types.",
+          "at " + A.class.getName() + ".class(ScopesTest.java:");
     }
   }
 
@@ -198,9 +200,9 @@ public class ScopesTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "ScopesTest$D is annotated with Singleton, but scope annotations are not supported for"
-              + " abstract types.",
-          "at ScopesTest$D.class");
+          D.class.getName() + " is annotated with " + Singleton.class.getName(),
+          "but scope annotations are not supported for abstract types.",
+          "at " + D.class.getName() + ".class(ScopesTest.java:");
     }
   }
 
@@ -218,9 +220,9 @@ public class ScopesTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "ScopesTest$E is annotated with Singleton, but scope annotations are not supported for"
-              + " abstract types.",
-          "at ScopesTest$E.class");
+          E.class.getName() + " is annotated with " + Singleton.class.getName(),
+          "but scope annotations are not supported for abstract types.",
+          "at " + E.class.getName() + ".class(ScopesTest.java:");
     }
   }
 
@@ -250,9 +252,11 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "No scope is bound to ScopesTest$CustomScoped.",
-          "1  : ScopesTest$5.configure",
-          "2  : ScopesTest$C.class");
+          "1) No scope is bound to " + CustomScoped.class.getName(),
+          "at " + getClass().getName(),
+          getDeclaringSourcePart(getClass()),
+          "2) No scope is bound to " + CustomScoped.class.getName(),
+          "at " + C.class.getName() + ".class");
     }
   }
 
@@ -333,9 +337,11 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Please annotate ScopesTest$NotRuntimeRetainedScoped with @Retention(RUNTIME).",
-          "at ScopesTest$InnerRuntimeModule.configure",
-          "ScopesTest$OuterRuntimeModule -> ScopesTest$InnerRuntimeModule");
+          "1) Please annotate "
+              + NotRuntimeRetainedScoped.class.getName()
+              + " with @Retention(RUNTIME).",
+          "at " + InnerRuntimeModule.class.getName() + getDeclaringSourcePart(getClass()),
+          asModuleChain(OuterRuntimeModule.class, InnerRuntimeModule.class));
     }
   }
 
@@ -360,9 +366,9 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Please annotate Deprecated with @ScopeAnnotation.",
-          "at ScopesTest$InnerDeprecatedModule.configure",
-          "installed by: ScopesTest$OuterDeprecatedModule -> ScopesTest$InnerDeprecatedModule");
+          "1) Please annotate " + Deprecated.class.getName() + " with @ScopeAnnotation.",
+          "at " + InnerDeprecatedModule.class.getName() + getDeclaringSourcePart(getClass()),
+          asModuleChain(OuterDeprecatedModule.class, InnerDeprecatedModule.class));
     }
   }
 
@@ -395,11 +401,16 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Scope Scopes.NO_SCOPE is already bound to ScopesTest$CustomScoped",
-          "ScopesTest$OuterScopeModule -> ScopesTest$CustomNoScopeModule",
+          "1) Scope Scopes.NO_SCOPE is already bound to "
+              + CustomScoped.class.getName()
+              + " at "
+              + CustomNoScopeModule.class.getName()
+              + getDeclaringSourcePart(getClass()),
+          asModuleChain(OuterScopeModule.class, CustomNoScopeModule.class),
           "Cannot bind Scopes.SINGLETON.",
-          "at ScopesTest$CustomSingletonModule.configure",
-          "ScopesTest$OuterScopeModule -> ScopesTest$CustomSingletonModule");
+          "at " + ScopesTest.class.getName(),
+          getDeclaringSourcePart(getClass()),
+          asModuleChain(OuterScopeModule.class, CustomSingletonModule.class));
     }
   }
 
@@ -435,8 +446,8 @@ public class ScopesTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "More than one scope annotation was found: Singleton and ScopesTest$CustomScoped.",
-          "while locating ScopesTest$SingletonAndCustomScoped");
+          "1) More than one scope annotation was found: ",
+          "while locating " + SingletonAndCustomScoped.class.getName());
     }
   }
 

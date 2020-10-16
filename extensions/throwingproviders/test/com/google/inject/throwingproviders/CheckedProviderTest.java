@@ -1528,8 +1528,10 @@ public class CheckedProviderTest extends TestCase {
       fail();
     } catch (CreationException ce) {
       assertContains(
-          ce.getMessage(),
-          "No injectable constructor for type CheckedProviderTest$FailingProvider.");
+          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage(),
+          "No implementation for "
+              + FailingProvider.class.getName()
+              + " (with no qualifier annotation) was bound");
     }
   }
 
@@ -1638,7 +1640,8 @@ public class CheckedProviderTest extends TestCase {
     } catch (ProvisionException pe) {
       Message message = Iterables.getOnlyElement(pe.getErrorMessages());
       assertEquals(
-          "com.google.inject.OutOfScopeException: failure: " + Key.get(Unscoped1.class),
+          "Error in custom provider, com.google.inject.OutOfScopeException: failure: "
+              + Key.get(Unscoped1.class),
           message.getMessage());
     }
   }

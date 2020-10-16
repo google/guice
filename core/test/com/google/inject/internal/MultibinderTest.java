@@ -33,6 +33,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -419,11 +420,9 @@ public class MultibinderTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Duplicate elements found in Multibinder Set<String>.",
-          "Element: A",
-          "Bound at:",
-          "1 : MultibinderTest$19.configure",
-          "2 : MultibinderTest$20.configure");
+          "1) Set injection failed due to duplicated element \"A\"",
+          "Bound at " + module1.getClass().getName(),
+          "Bound at " + module2.getClass().getName());
     }
 
     // But we can still visit the module!
@@ -494,11 +493,11 @@ public class MultibinderTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Duplicate elements found in Multibinder Set<MultibinderTest$1ValueType>.",
-          "Element: ValueType(1,2)",
-          "Bound at: MultibinderTest$21.configure",
-          "Element: ValueType(1,3)",
-          "Bound at: MultibinderTest$22.configure");
+          "1) Set injection failed due to multiple elements comparing equal:",
+          "\"ValueType(1,2)\"",
+          "bound at " + module1.getClass().getName(),
+          "\"ValueType(1,3)\"",
+          "bound at " + module2.getClass().getName());
     }
 
     // But we can still visit the module!
@@ -643,7 +642,9 @@ public class MultibinderTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Set injection failed due to null element bound at: " + "MultibinderTest$30.configure");
+          "1) Set injection failed due to null element bound at: "
+              + m.getClass().getName()
+              + ".configure(");
     }
   }
 
@@ -661,8 +662,8 @@ public class MultibinderTest extends TestCase {
       assertContains(
           expected.getMessage(),
           true,
-          "No implementation for Integer",
-          "1  : MultibinderTest$31.configure");
+          "No implementation for java.lang.Integer",
+          "at " + getClass().getName());
     }
   }
 
@@ -1215,7 +1216,9 @@ public class MultibinderTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertEquals(1, e.getErrorMessages().size());
-      assertContains(e.getMessage(), "Duplicate elements found in Multibinder Set<List<String>>.");
+      assertContains(
+          Iterables.getOnlyElement(e.getErrorMessages()).getMessage().toString(),
+          "Set injection failed due to duplicated element \"[A, B]\"");
     }
 
     // Finally, we change the lists again so they are once more different, and ensure the set
@@ -1573,7 +1576,10 @@ public class MultibinderTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertTrue(e.getMessage().contains("Set<? extends String> was bound multiple times."));
+      assertTrue(
+          e.getMessage()
+              .contains(
+                  "A binding to java.util.Set<? extends java.lang.String> was already configured"));
     }
   }
 
@@ -1606,7 +1612,10 @@ public class MultibinderTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertTrue(e.getMessage().contains("Set<? extends String> was bound multiple times"));
+      assertTrue(
+          e.getMessage()
+              .contains(
+                  "A binding to java.util.Set<? extends java.lang.String> was already configured"));
     }
   }
 

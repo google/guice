@@ -169,7 +169,8 @@ public class DaggerAdapterTest extends TestCase {
           .hasMessageThat()
           .contains(
               "noGuiceEquivalentForElementsIntoSet() is annotated with"
-                  + " @ElementsIntoSet which is not supported by DaggerAdapter");
+                  + " @dagger.multibindings.ElementsIntoSet which is not supported by"
+                  + " DaggerAdapter");
     }
 
     try {
@@ -180,7 +181,8 @@ public class DaggerAdapterTest extends TestCase {
           .hasMessageThat()
           .contains(
               "noGuiceEquivalentForElementsIntoSet() is annotated with"
-                  + " @ElementsIntoSet which is not supported by DaggerAdapter");
+                  + " @dagger.multibindings.ElementsIntoSet which is not supported by"
+                  + " DaggerAdapter");
     }
   }
 

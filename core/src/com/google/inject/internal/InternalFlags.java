@@ -166,7 +166,7 @@ public final class InternalFlags {
   }
 
   public static boolean enableExperimentalErrorMessages() {
-    return true;
+    return false;
   }
 
   public static boolean enableColorizeErrorMessages() {
