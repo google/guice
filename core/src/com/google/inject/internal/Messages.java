@@ -119,11 +119,7 @@ public final class Messages {
       fmt.format("%s errors", index - 1);
     }
 
-    String message = fmt.toString();
-    if (InternalFlags.enableExperimentalErrorMessages()) {
-      return PackageNameCompressor.compressPackagesInMessage(message);
-    }
-    return message;
+    return PackageNameCompressor.compressPackagesInMessage(fmt.toString());
   }
 
   /**

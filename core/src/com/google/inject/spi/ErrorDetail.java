@@ -2,7 +2,6 @@ package com.google.inject.spi;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.Messages;
 import java.io.Serializable;
 import java.util.Formatter;
@@ -57,21 +56,14 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    * @param formatter for printing the error message
    */
   public final void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
-    if (InternalFlags.enableExperimentalErrorMessages()) {
-      String id = getErrorIdentifier().map(s -> "[" + Messages.redBold(s) + "]: ").orElse("");
-      formatter.format("%s) %s%s%n", index, id, getMessage());
-      formatDetail(mergeableErrors, formatter);
-      // TODO(b/151482394): Output potiential fixes for the error
-      Optional<String> learnMoreLink = getLearnMoreLink();
-      if (learnMoreLink.isPresent()) {
-        formatter.format("%n%s%n", Messages.bold("Learn more:"));
-        formatter.format("  %s%n", Messages.underline(learnMoreLink.get()));
-      }
-    } else {
-      // TODO(b/151482394): Remove this once the new error messages are enabled.
-      formatter.format("%s) %s%n", index, getMessage());
-      formatDetail(mergeableErrors, formatter);
-      return;
+    String id = getErrorIdentifier().map(s -> "[" + Messages.redBold(s) + "]: ").orElse("");
+    formatter.format("%s) %s%s%n", index, id, getMessage());
+    formatDetail(mergeableErrors, formatter);
+    // TODO(b/151482394): Output potiential fixes for the error
+    Optional<String> learnMoreLink = getLearnMoreLink();
+    if (learnMoreLink.isPresent()) {
+      formatter.format("%n%s%n", Messages.bold("Learn more:"));
+      formatter.format("  %s%n", Messages.underline(learnMoreLink.get()));
     }
   }
 

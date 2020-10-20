@@ -81,12 +81,8 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       if (injector.getBindingData().getExplicitBinding(key) != null) {
         try {
           if (!isOkayDuplicate(original, binding, injector.getBindingData())) {
-            if (InternalFlags.enableExperimentalErrorMessages()) {
               errors.bindingAlreadySet(binding, original);
               return;
-            }
-            errors.bindingAlreadySet(key, original.getSource());
-            return;
           }
         } catch (Throwable t) {
           errors.errorCheckingDuplicateBinding(key, original.getSource(), t);

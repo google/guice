@@ -76,15 +76,10 @@ final class MissingImplementationErrorHints {
         String have = bindingKey.getTypeLiteral().toString();
         if (have.contains(want) || want.contains(have)) {
           Formatter fmt = new Formatter();
-          if (InternalFlags.enableExperimentalErrorMessages()) {
-            fmt.format("%s bound ", Messages.convert(bindingKey));
-            new SourceFormatter(
-                    bindingMap.get(bindingKey).getSource(), fmt, /* omitPreposition= */ false)
-                .format();
-          } else {
-            fmt.format("%s bound", Messages.convert(bindingKey));
-            Messages.formatSource(fmt, bindingMap.get(bindingKey).getSource());
-          }
+          fmt.format("%s bound ", Messages.convert(bindingKey));
+          new SourceFormatter(
+                  bindingMap.get(bindingKey).getSource(), fmt, /* omitPreposition= */ false)
+              .format();
           possibleMatches.add(fmt.toString());
           // TODO: Consider a check that if there are more than some number of results,
           // don't suggest any.

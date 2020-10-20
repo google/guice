@@ -119,12 +119,6 @@ public final class InternalFlags {
     ENABLED,
   }
 
-  /** Options for enable or disable the new experimental error messages. */
-  public enum ExperimentalErrorMessagesOption {
-    DISABLED,
-    ENABLED,
-  }
-
   /** Options for enable or disable using ansi color in error messages. */
   public enum ColorizeOption {
     AUTO {
@@ -165,20 +159,15 @@ public final class InternalFlags {
     return BYTECODE_GEN_OPTION == BytecodeGenOption.ENABLED;
   }
 
-  public static boolean enableExperimentalErrorMessages() {
-    return true;
-  }
-
   public static boolean enableColorizeErrorMessages() {
     return COLORIZE_OPTION.enabled();
   }
 
   /**
    * Gets the system option indicated by the specified key; runs as a privileged action.
-   * 
+   *
    * @param name of the system option
    * @param defaultValue if the option is not set
-   * 
    * @return value of the option, defaultValue if not set
    */
   private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue) {

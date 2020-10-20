@@ -5,7 +5,6 @@ import static com.google.inject.internal.Errors.checkConfiguration;
 import static com.google.inject.internal.Errors.checkNotNull;
 import static com.google.inject.name.Names.named;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -213,7 +212,7 @@ public final class RealMultibinder<T> implements Module {
       ImmutableSet<T> set = ImmutableSet.copyOf(values);
       // There are fewer items in the set than the array.  Figure out which one got dropped.
       if (!permitDuplicates && set.size() < values.length) {
-        throw newDuplicateValuesException(set, values);
+        throw newDuplicateValuesException(values);
       }
       return set;
     }
@@ -236,62 +235,14 @@ public final class RealMultibinder<T> implements Module {
       }
     }
 
-    private InternalProvisionException newDuplicateValuesException(
-        ImmutableSet<T> set, T[] values) {
-      if (InternalFlags.enableExperimentalErrorMessages()) {
-        Message message =
-            new Message(
-                GuiceInternal.GUICE_INTERNAL,
-                ErrorId.DUPLICATE_ELEMENT,
-                new DuplicateElementError<T>(
-                    getSetKey(), bindings, values, ImmutableList.of(getSource())));
+    private InternalProvisionException newDuplicateValuesException(T[] values) {
+      Message message =
+          new Message(
+              GuiceInternal.GUICE_INTERNAL,
+              ErrorId.DUPLICATE_ELEMENT,
+              new DuplicateElementError<T>(
+                  getSetKey(), bindings, values, ImmutableList.of(getSource())));
         return new InternalProvisionException(message);
-      }
-      // TODO(lukes): consider reporting all duplicate values, the easiest way would be to rebuild
-      // a new set and detect dupes as we go
-      // Find the duplicate binding
-      // To do this we take advantage of the fact that set, values and bindings all have the same
-      // ordering for a non-empty prefix of the set.
-      // First we scan for the first item dropped from the set.
-      int newBindingIndex = 0;
-      for (T item : set) {
-        if (item != values[newBindingIndex]) {
-          break;
-        }
-        newBindingIndex++;
-      }
-      // once we exit the loop newBindingIndex will point at the first item in values that was
-      // dropped.
-
-      Binding<T> newBinding = bindings.get(newBindingIndex);
-      T newValue = values[newBindingIndex];
-      // Now we scan again to find the index of the value, we are guaranteed to find it.
-      int oldBindingIndex = set.asList().indexOf(newValue);
-      T oldValue = values[oldBindingIndex];
-      Binding<T> duplicateBinding = bindings.get(oldBindingIndex);
-      String oldString = oldValue.toString();
-      String newString = newValue.toString();
-      if (Objects.equal(oldString, newString)) {
-        // When the value strings match, just show the source of the bindings
-        return InternalProvisionException.create(
-            ErrorId.DUPLICATE_ELEMENT,
-            "Set injection failed due to duplicated element \"%s\""
-                + "\n    Bound at %s\n    Bound at %s",
-            newValue,
-            duplicateBinding.getSource(),
-            newBinding.getSource());
-      } else {
-        // When the value strings don't match, include them both as they may be useful for debugging
-        return InternalProvisionException.create(
-            ErrorId.DUPLICATE_ELEMENT,
-            "Set injection failed due to multiple elements comparing equal:"
-                + "\n    \"%s\"\n        bound at %s"
-                + "\n    \"%s\"\n        bound at %s",
-            oldValue,
-            duplicateBinding.getSource(),
-            newValue,
-            newBinding.getSource());
-      }
     }
 
     @Override
