@@ -637,11 +637,6 @@ public class ProvisionListenerTest extends TestCase {
 
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
-      List<Class<?>> actual = Lists.newArrayList();
-      for (com.google.inject.spi.DependencyAndSource dep : provision.getDependencyChain()) {
-        actual.add(dep.getDependency().getKey().getRawType());
-      }
-      assertEquals(expected, actual);
       provisionList.add(provision.getBinding().getKey().getRawType());
     }
   }
@@ -796,16 +791,6 @@ public class ProvisionListenerTest extends TestCase {
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       notified.set(true);
       assertEquals(notifyType, provision.getBinding().getKey().getRawType());
-      assertEquals(2, provision.getDependencyChain().size());
-
-      assertNull(provision.getDependencyChain().get(0).getDependency());
-      assertContains(provision.getDependencyChain().get(0).getBindingSource(), firstSource);
-
-      assertEquals(
-          notifyType, provision.getDependencyChain().get(1).getDependency().getKey().getRawType());
-      assertContains(
-          provision.getDependencyChain().get(1).getBindingSource(),
-          notifyType.getName() + ".class(");
     }
   }
 

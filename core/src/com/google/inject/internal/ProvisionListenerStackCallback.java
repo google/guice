@@ -60,7 +60,7 @@ final class ProvisionListenerStackCallback<T> {
 
   public T provision(InternalContext context, ProvisionCallback<T> callable)
       throws InternalProvisionException {
-    Provision provision = new Provision(context, callable);
+    Provision provision = new Provision(callable);
     RuntimeException caught = null;
     try {
       provision.provision();
@@ -91,18 +91,14 @@ final class ProvisionListenerStackCallback<T> {
   }
 
   private class Provision extends ProvisionListener.ProvisionInvocation<T> {
-
-    final InternalContext context;
-
     final ProvisionCallback<T> callable;
     int index = -1;
     T result;
     InternalProvisionException exceptionDuringProvision;
     ProvisionListener erredListener;
 
-    public Provision(InternalContext context, ProvisionCallback<T> callable) {
+    public Provision(ProvisionCallback<T> callable) {
       this.callable = callable;
-      this.context = context;
     }
 
     @Override
@@ -139,12 +135,6 @@ final class ProvisionListenerStackCallback<T> {
       // we can't decorate this to prevent calling getProvider().get(), which means
       // if someone calls that they'll get strange errors.
       return binding;
-    }
-
-    @Deprecated
-    @Override
-    public List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
-      return context.getDependencyChain();
     }
   }
 }

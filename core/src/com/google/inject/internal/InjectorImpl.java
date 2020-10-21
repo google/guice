@@ -1091,20 +1091,17 @@ final class InjectorImpl implements Injector, Lookups {
     Key<T> key = dependency.getKey();
     BindingImpl<? extends T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
     final InternalFactory<? extends T> internalFactory = binding.getInternalFactory();
-    final Object source = binding.getSource();
 
     return new Provider<T>() {
       @Override
       public T get() {
         InternalContext currentContext = enterContext();
-        Dependency previous = currentContext.pushDependency(dependency, source);
         try {
           T t = internalFactory.get(currentContext, dependency, false);
           return t;
         } catch (InternalProvisionException e) {
           throw e.addSource(dependency).toProvisionException();
         } finally {
-          currentContext.popStateAndSetDependency(previous);
           currentContext.close();
         }
       }

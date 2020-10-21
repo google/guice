@@ -271,15 +271,13 @@ public final class RealOptionalBinder<T> implements Module {
       }
       Dependency<?> localDependency = targetDependency;
       T result;
-      Dependency previous = context.pushDependency(localDependency, getSource());
+
       try {
         // See comments in RealOptionalKeyProvider, about how localDependency may be more specific
         // than what we actually need.
         result = local.get(context, localDependency, false);
       } catch (InternalProvisionException ipe) {
         throw ipe.addSource(localDependency);
-        } finally {
-          context.popStateAndSetDependency(previous);
       }
       return java.util.Optional.ofNullable(result);
     }
@@ -365,8 +363,6 @@ public final class RealOptionalBinder<T> implements Module {
       extends RealOptionalBinderProviderWithDependencies<T, T> {
     private Key<? extends T> targetKey;
 
-    private Object targetSource;
-
     private InternalFactory<? extends T> targetFactory;
 
     RealDirectTypeProvider(BindingSelection<T> bindingSelection) {
@@ -379,21 +375,16 @@ public final class RealOptionalBinder<T> implements Module {
       // we only install this factory if they call setBinding()/setDefault() so we know that
       // targetBinding will be non-null.
       this.targetKey = targetBinding.getKey();
-      this.targetSource = targetBinding.getSource();
       this.targetFactory = targetBinding.getInternalFactory();
     }
 
     @Override
     protected T doProvision(InternalContext context, Dependency<?> dependency)
         throws InternalProvisionException {
-      // This is what linked bindings do (see FactoryProxy), and we are pretty similar.
-      context.pushState(targetKey, targetSource);
       try {
         return targetFactory.get(context, dependency, true);
       } catch (InternalProvisionException ipe) {
         throw ipe.addSource(targetKey);
-        } finally {
-          context.popState();
       }
     }
 
@@ -466,7 +457,6 @@ public final class RealOptionalBinder<T> implements Module {
       }
       Dependency<?> localDependency = targetDependency;
       T result;
-      Dependency previous = context.pushDependency(localDependency, getSource());
       try {
         // currentDependency is Optional<? super T>, so we really just need to set the target
         // dependency to ? super T, but we are currently setting it to T.  We could hypothetically
@@ -475,8 +465,6 @@ public final class RealOptionalBinder<T> implements Module {
         result = local.get(context, localDependency, false);
       } catch (InternalProvisionException ipe) {
         throw ipe.addSource(localDependency);
-        } finally {
-          context.popStateAndSetDependency(previous);
       }
       return Optional.fromNullable(result);
     }

@@ -36,13 +36,10 @@ final class SingleParameterInjector<T> {
 
   T inject(InternalContext context) throws InternalProvisionException {
     Dependency<T> localDependency = dependency;
-    Dependency previous = context.pushDependency(localDependency, source);
     try {
       return factory.get(context, localDependency, false);
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(localDependency);
-      } finally {
-        context.popStateAndSetDependency(previous);
     }
   }
 

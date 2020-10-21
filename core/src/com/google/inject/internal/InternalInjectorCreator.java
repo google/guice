@@ -209,14 +209,11 @@ public final class InternalInjectorCreator {
       for (BindingImpl<?> binding : candidateBindings) {
         if (isEagerSingleton(injector, binding, stage)) {
           Dependency<?> dependency = Dependency.get(binding.getKey());
-          Dependency previous = context.pushDependency(dependency, binding.getSource());
           try {
             binding.getInternalFactory().get(context, dependency, false);
           } catch (InternalProvisionException e) {
             errors.withSource(dependency).merge(e);
-          } finally {
-              context.popStateAndSetDependency(previous);
-            }
+          }
         }
       }
     } finally {
