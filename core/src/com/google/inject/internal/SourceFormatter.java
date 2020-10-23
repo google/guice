@@ -1,5 +1,7 @@
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Key;
@@ -16,7 +18,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Formatter;
 import java.util.List;
-import java.util.Optional;
 
 /** Formatting a single source in Guice error message. */
 final class SourceFormatter {
@@ -97,28 +98,15 @@ final class SourceFormatter {
     if (memberType == Field.class) {
       formatter.format("%s \\_ for field %s%n", INDENT, Messages.redBold(member.getName()));
     } else if (dependency != null) {
-      int ordinal = dependency.getParameterIndex() + 1;
-      Optional<String> name = getParameterName(member, dependency.getParameterIndex());
-      formatter.format(
-          "%s \\_ for %s parameter %s%n",
-          INDENT, ordinal + Messages.getOrdinalSuffix(ordinal), Messages.redBold(name.orElse("")));
+
+      formatter.format("%s \\_ for %s%n", INDENT, getParameterName(dependency));
     }
   }
 
-  private static Optional<String> getParameterName(Member member, int parameterIndex) {
-    Parameter parameter = null;
-    if (member instanceof Constructor) {
-      parameter = ((Constructor<?>) member).getParameters()[parameterIndex];
-    } else if (member instanceof Method) {
-      parameter = ((Method) member).getParameters()[parameterIndex];
+  static String getModuleStack(ElementSource elementSource) {
+    if (elementSource == null) {
+      return "";
     }
-    if (parameter != null && parameter.isNamePresent()) {
-      return Optional.of(parameter.getName());
-    }
-    return Optional.empty();
-  }
-
-  private static String getModuleStack(ElementSource elementSource) {
     List<String> modules = Lists.newArrayList(elementSource.getModuleClassNames());
     // Insert any original element sources w/ module info into the path.
     while (elementSource.getOriginalElementSource() != null) {
@@ -129,5 +117,53 @@ final class SourceFormatter {
       return "";
     }
     return String.join(" -> ", Lists.reverse(modules));
+  }
+
+  static String getParameterName(Dependency<?> dependency) {
+    int parameterIndex = dependency.getParameterIndex();
+    int ordinal = parameterIndex + 1;
+    Member member = dependency.getInjectionPoint().getMember();
+    Parameter parameter = null;
+    if (member instanceof Constructor) {
+      parameter = ((Constructor<?>) member).getParameters()[parameterIndex];
+    } else if (member instanceof Method) {
+      parameter = ((Method) member).getParameters()[parameterIndex];
+    }
+    String parameterName = "";
+    if (parameter != null && parameter.isNamePresent()) {
+      parameterName = parameter.getName();
+    }
+    return String.format(
+        "%s%s parameter%s",
+        ordinal,
+        getOrdinalSuffix(ordinal),
+        parameterName.isEmpty() ? "" : " " + Messages.redBold(parameterName));
+  }
+
+  /**
+   * Maps {@code 1} to the string {@code "1st"} ditto for all non-negative numbers
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers">
+   *     https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers</a>
+   */
+  private static String getOrdinalSuffix(int ordinal) {
+    // negative ordinals don't make sense, we allow zero though because we are programmers
+    checkArgument(ordinal >= 0);
+    if ((ordinal / 10) % 10 == 1) {
+      // all the 'teens' are weird
+      return "th";
+    } else {
+      // could use a lookup table? any better?
+      switch (ordinal % 10) {
+        case 1:
+          return "st";
+        case 2:
+          return "nd";
+        case 3:
+          return "rd";
+        default:
+          return "th";
+      }
+    }
   }
 }

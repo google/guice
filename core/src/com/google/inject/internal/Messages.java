@@ -15,25 +15,18 @@
  */
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.base.Equivalence;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
-import com.google.inject.internal.util.StackTraceElements;
-import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.ErrorDetail;
-import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
-import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.Arrays;
 import java.util.Collection;
@@ -185,145 +178,11 @@ public final class Messages {
   }
 
   private static Object appendModules(Object source, ElementSource elementSource) {
-    String modules = moduleSourceString(elementSource);
+    String modules = SourceFormatter.getModuleStack(elementSource);
     if (modules.length() == 0) {
       return source;
     } else {
       return source + modules;
-    }
-  }
-
-  private static String moduleSourceString(ElementSource elementSource) {
-    // if we only have one module (or don't know what they are), then don't bother
-    // reporting it, because the source already is going to report exactly that module.
-    if (elementSource == null) {
-      return "";
-    }
-    List<String> modules = Lists.newArrayList(elementSource.getModuleClassNames());
-    // Insert any original element sources w/ module info into the path.
-    while (elementSource.getOriginalElementSource() != null) {
-      elementSource = elementSource.getOriginalElementSource();
-      modules.addAll(0, elementSource.getModuleClassNames());
-    }
-    if (modules.size() <= 1) {
-      return "";
-    }
-
-    // Ideally we'd do:
-    //    return Joiner.on(" -> ")
-    //        .appendTo(new StringBuilder(" (via modules: "), Lists.reverse(modules))
-    //        .append(")").toString();
-    // ... but for some reason we can't find Lists.reverse, so do it the boring way.
-    StringBuilder builder = new StringBuilder(" (via modules: ");
-    for (int i = modules.size() - 1; i >= 0; i--) {
-      builder.append(modules.get(i));
-      if (i != 0) {
-        builder.append(" -> ");
-      }
-    }
-    builder.append(")");
-    return builder.toString();
-  }
-
-  static void formatSource(Formatter formatter, Object source) {
-    ElementSource elementSource = null;
-    if (source instanceof ElementSource) {
-      elementSource = (ElementSource) source;
-      source = elementSource.getDeclaringSource();
-    }
-    formatSource(formatter, source, elementSource);
-  }
-
-  static void formatSource(Formatter formatter, Object source, ElementSource elementSource) {
-    String modules = moduleSourceString(elementSource);
-    if (source instanceof Dependency) {
-      Dependency<?> dependency = (Dependency<?>) source;
-      InjectionPoint injectionPoint = dependency.getInjectionPoint();
-      if (injectionPoint != null) {
-        formatInjectionPoint(formatter, dependency, injectionPoint, elementSource);
-      } else {
-        formatSource(formatter, dependency.getKey(), elementSource);
-      }
-
-    } else if (source instanceof InjectionPoint) {
-      formatInjectionPoint(formatter, null, (InjectionPoint) source, elementSource);
-
-    } else if (source instanceof Class) {
-      formatter.format("  at %s%s%n", StackTraceElements.forType((Class<?>) source), modules);
-
-    } else if (source instanceof Member) {
-      formatter.format("  at %s%s%n", StackTraceElements.forMember((Member) source), modules);
-
-    } else if (source instanceof TypeLiteral) {
-      formatter.format("  while locating %s%s%n", source, modules);
-
-    } else if (source instanceof Key) {
-      Key<?> key = (Key<?>) source;
-      formatter.format("  while locating %s%n", convert(key, elementSource));
-
-    } else if (source instanceof Thread) {
-      formatter.format("  in thread %s%n", source);
-
-    } else {
-      formatter.format("  at %s%s%n", source, modules);
-    }
-  }
-
-  private static void formatInjectionPoint(
-      Formatter formatter,
-      Dependency<?> dependency,
-      InjectionPoint injectionPoint,
-      ElementSource elementSource) {
-    Member member = injectionPoint.getMember();
-    Class<? extends Member> memberType = Classes.memberType(member);
-
-    if (memberType == Field.class) {
-      dependency = injectionPoint.getDependencies().get(0);
-      formatter.format("  while locating %s%n", convert(dependency.getKey(), elementSource));
-      formatter.format("    for field at %s%n", StackTraceElements.forMember(member));
-
-    } else if (dependency != null) {
-      formatter.format("  while locating %s%n", convert(dependency.getKey(), elementSource));
-      formatter.format("    for %s%n", formatParameter(dependency));
-
-    } else {
-      formatSource(formatter, injectionPoint.getMember());
-    }
-  }
-
-  static String formatParameter(Dependency<?> dependency) {
-    int ordinal = dependency.getParameterIndex() + 1;
-    return String.format(
-        "the %s%s parameter of %s",
-        ordinal,
-        getOrdinalSuffix(ordinal),
-        StackTraceElements.forMember(dependency.getInjectionPoint().getMember()));
-  }
-
-  /**
-   * Maps {@code 1} to the string {@code "1st"} ditto for all non-negative numbers
-   *
-   * @see <a href="https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers">
-   *     https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers</a>
-   */
-  static String getOrdinalSuffix(int ordinal) {
-    // negative ordinals don't make sense, we allow zero though because we are programmers
-    checkArgument(ordinal >= 0);
-    if ((ordinal / 10) % 10 == 1) {
-      // all the 'teens' are weird
-      return "th";
-    } else {
-      // could use a lookup table? any better?
-      switch (ordinal % 10) {
-        case 1:
-          return "st";
-        case 2:
-          return "nd";
-        case 3:
-          return "rd";
-        default:
-          return "th";
-      }
     }
   }
 

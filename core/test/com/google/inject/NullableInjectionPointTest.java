@@ -25,7 +25,7 @@ public class NullableInjectionPointTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "null returned by binding at NullableInjectionPointTest$1.configure",
-          "the 1st parameter of NullableInjectionPointTest$FooConstructor.<init>(",
+          "the 1st parameter foo of NullableInjectionPointTest$FooConstructor.<init>(",
           "is not @Nullable");
     }
   }
@@ -38,7 +38,7 @@ public class NullableInjectionPointTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "null returned by binding at NullableInjectionPointTest$1.configure",
-          "the 1st parameter of NullableInjectionPointTest$FooMethod.setFoo(",
+          "the 1st parameter foo of NullableInjectionPointTest$FooMethod.setFoo(",
           "is not @Nullable");
     }
   }

@@ -680,7 +680,7 @@ public final class Errors implements Serializable {
 
   // TODO(lukes): inline in callers.  There are some callers outside of guice, so this is difficult
   public static void formatSource(Formatter formatter, Object source) {
-    Messages.formatSource(formatter, source);
+    formatter.format("  ");
+    new SourceFormatter(source, formatter, false).format();
   }
-
 }

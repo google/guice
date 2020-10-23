@@ -172,7 +172,8 @@ public final class InternalProvisionException extends Exception {
                       + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
                       + " error.",
                   new Object[] {
-                    Messages.formatParameter(dependency), Messages.convert(dependency.getKey())
+                    SourceFormatter.getParameterName(dependency),
+                    Messages.convert(dependency.getKey())
                   });
             }
             return;
@@ -180,11 +181,14 @@ public final class InternalProvisionException extends Exception {
       }
     }
 
+    String parameterName =
+        (dependency.getParameterIndex() != -1) ? SourceFormatter.getParameterName(dependency) : "";
+    Object memberStackTraceElement =
+        StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
     Object formattedDependency =
-        (dependency.getParameterIndex() != -1)
-            ? Messages.formatParameter(dependency)
-            : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
-
+        parameterName.isEmpty()
+            ? memberStackTraceElement
+            : "the " + parameterName + " of " + memberStackTraceElement;
     throw InternalProvisionException.create(
             ErrorId.NULL_INJECTED_INTO_NON_NULLABLE,
             "null returned by binding at %s%n but %s is not @Nullable",

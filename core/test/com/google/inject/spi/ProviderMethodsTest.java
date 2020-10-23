@@ -1169,7 +1169,7 @@ public class ProviderMethodsTest implements Module {
       assertContains(
           expected.getMessage(),
           "null returned by binding at " + moduleName + ".configure(",
-          "but the 1st parameter of " + moduleName + ".fail(",
+          "but the 1st parameter foo of " + moduleName + ".fail(",
           "is not @Nullable",
           "for 1st parameter",
           "while locating Integer");
