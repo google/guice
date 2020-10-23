@@ -42,7 +42,7 @@ import org.objectweb.asm.Opcodes;
  */
 final class LineNumbers {
 
-  private static final int ASM_API_LEVEL = Opcodes.ASM7;
+  private static final int ASM_API_LEVEL = Opcodes.ASM9;
 
   private final Class<?> type;
   private final Map<String, Integer> lines = Maps.newHashMap();
