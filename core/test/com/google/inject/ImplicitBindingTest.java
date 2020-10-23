@@ -99,9 +99,9 @@ public class ImplicitBindingTest extends TestCase {
       Asserts.assertContains(
           expected.getMessage(),
           String.format(
-              "No implementation for ImplicitBindingTest$I annotated with @Named(value=%s) was"
+              "No implementation for ImplicitBindingTest$I annotated with @Named(%s) was"
                   + " bound.",
-              Annotations.memberValueString("i")));
+              Annotations.memberValueString("value", "i")));
     }
   }
 

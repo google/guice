@@ -19,6 +19,7 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.inject.internal.Annotations;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import junit.framework.TestCase;
@@ -59,7 +60,7 @@ public class BindingAnnotationTest extends TestCase {
           expected.getMessage(),
           true,
           "No implementation for String annotated with",
-          "BindingAnnotationTest$Blue(value=5) was bound",
+          "BindingAnnotationTest$Blue(" + Annotations.memberValueString("value", 5) + ") was bound",
           "at BindingAnnotationTest$2.configure");
     }
   }
@@ -116,7 +117,7 @@ public class BindingAnnotationTest extends TestCase {
           expected.getMessage(),
           true,
           "No implementation for String annotated with",
-          "BindingAnnotationTest$Blue(value=5) was bound",
+          "BindingAnnotationTest$Blue(" + Annotations.memberValueString("value", 5) + ") was bound",
           "at BindingAnnotationTest$5.configure");
     }
   }

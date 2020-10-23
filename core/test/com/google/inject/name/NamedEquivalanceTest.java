@@ -124,8 +124,8 @@ public class NamedEquivalanceTest extends TestCase {
       assertContains(
           e.getMessage(),
           "No implementation for String annotated with "
-              + "@Named(value="
-              + Annotations.memberValueString("foo")
+              + "@Named("
+              + Annotations.memberValueString("value", "foo")
               + ") was bound.");
     }
   }
@@ -140,8 +140,8 @@ public class NamedEquivalanceTest extends TestCase {
       if (fails) {
         assertContains(
             e.getMessage(),
-            "String annotated with @Named(value="
-                + Annotations.memberValueString("foo")
+            "String annotated with @Named("
+                + Annotations.memberValueString("value", "foo")
                 + ") was bound multiple times.");
       } else {
         throw e;
@@ -239,7 +239,7 @@ public class NamedEquivalanceTest extends TestCase {
       return "@"
           + javax.inject.Named.class.getName()
           + "(value="
-          + Annotations.memberValueString(value)
+          + Annotations.memberValueString("value", value)
           + ")";
     }
 
@@ -284,7 +284,7 @@ public class NamedEquivalanceTest extends TestCase {
       return "@"
           + com.google.inject.name.Named.class.getName()
           + "(value="
-          + Annotations.memberValueString(value)
+          + Annotations.memberValueString("value", value)
           + ")";
     }
 

@@ -278,8 +278,8 @@ public class MembersInjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "No implementation for MembersInjector<String> annotated with @Named(value="
-              + Annotations.memberValueString("foo")
+          "No implementation for MembersInjector<String> annotated with @Named("
+              + Annotations.memberValueString("value", "foo")
               + ") was bound.");
     }
   }

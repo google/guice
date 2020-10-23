@@ -129,8 +129,8 @@ public class BinderTest extends TestCase {
       String segment3 = "No implementation for Callable<String> was bound.";
       String segment4 =
           String.format(
-              "No implementation for Date annotated with @Named(value=%s) was bound.",
-              Annotations.memberValueString("date"));
+              "No implementation for Date annotated with @Named(%s) was bound.",
+              Annotations.memberValueString("value", "date"));
       String sourceFileName = getDeclaringSourcePart(getClass());
       assertContains(
           e.getMessage(),

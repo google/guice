@@ -687,8 +687,8 @@ public class FactoryProvider2Test {
           expected.getMessage(),
           "A Provider may not be a type in a factory method of an AssistedInject.",
           "Offending instance is parameter [1] with key [Provider<FactoryProvider2Test$Color>"
-              + " annotated with @Assisted(value="
-              + Annotations.memberValueString("color")
+              + " annotated with @Assisted("
+              + Annotations.memberValueString("value", "color")
               + ")] on method"
               + " [FactoryProvider2Test$ProviderBasedColoredCarFactory.createMustang()]");
       assertContains(
@@ -734,8 +734,8 @@ public class FactoryProvider2Test {
           expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject.\n"
               + "  Offending instance is parameter [1] with key"
-              + " [Provider<FactoryProvider2Test$Color> annotated with @Assisted(value="
-              + Annotations.memberValueString("color")
+              + " [Provider<FactoryProvider2Test$Color> annotated with @Assisted("
+              + Annotations.memberValueString("value", "color")
               + ")]"
               + " on method"
               + " [FactoryProvider2Test$JavaxProviderBasedColoredCarFactory.createMustang()]");
@@ -879,8 +879,8 @@ public class FactoryProvider2Test {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "FactoryProvider2Test$Color annotated with @Assisted(value="
-              + Annotations.memberValueString("paint")
+          "FactoryProvider2Test$Color annotated with @Assisted("
+              + Annotations.memberValueString("value", "paint")
               + ") was bound multiple times.");
     }
   }

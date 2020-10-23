@@ -127,11 +127,12 @@ public class DuplicateBindingsTest extends TestCase {
       fail("expected exception");
     } catch (CreationException ce) {
       String template =
-          "DuplicateBindingsTest$Foo annotated with @Named(value=%s)"
-              + " was bound multiple times.";
-      String segment1 = String.format(template, Annotations.memberValueString("pInstance"));
-      String segment2 = String.format(template, Annotations.memberValueString("pKey"));
-      String segment3 = String.format(template, Annotations.memberValueString("constructor"));
+          "DuplicateBindingsTest$Foo annotated with @Named(%s)" + " was bound multiple times.";
+      String segment1 =
+          String.format(template, Annotations.memberValueString("value", "pInstance"));
+      String segment2 = String.format(template, Annotations.memberValueString("value", "pKey"));
+      String segment3 =
+          String.format(template, Annotations.memberValueString("value", "constructor"));
       String segment4 = "DuplicateBindingsTest$FooImpl was bound multiple times";
       String atSegment = "DuplicateBindingsTest$ScopedModule.configure";
       if (isIncludeStackTraceOff()) {
@@ -174,12 +175,15 @@ public class DuplicateBindingsTest extends TestCase {
       fail("expected exception");
     } catch (CreationException ce) {
       String template =
-          "DuplicateBindingsTest$Foo annotated with @Named(value=%s) was bound multiple times.";
-      String segment1 = String.format(template, Annotations.memberValueString("instance"));
-      String segment2 = String.format(template, Annotations.memberValueString("pInstance"));
-      String segment3 = String.format(template, Annotations.memberValueString("pKey"));
-      String segment4 = String.format(template, Annotations.memberValueString("linkedKey"));
-      String segment5 = String.format(template, Annotations.memberValueString("constructor"));
+          "DuplicateBindingsTest$Foo annotated with @Named(%s) was bound multiple times.";
+      String segment1 = String.format(template, Annotations.memberValueString("value", "instance"));
+      String segment2 =
+          String.format(template, Annotations.memberValueString("value", "pInstance"));
+      String segment3 = String.format(template, Annotations.memberValueString("value", "pKey"));
+      String segment4 =
+          String.format(template, Annotations.memberValueString("value", "linkedKey"));
+      String segment5 =
+          String.format(template, Annotations.memberValueString("value", "constructor"));
       assertContains(
           ce.getMessage(),
           segment1,
@@ -223,20 +227,19 @@ public class DuplicateBindingsTest extends TestCase {
       fail("expected exception");
     } catch (CreationException ce) {
       String template =
-          "DuplicateBindingsTest$Foo annotated with @Named(value=%s) was bound"
-              + " multiple times.";
+          "DuplicateBindingsTest$Foo annotated with @Named(%s) was bound" + " multiple times.";
       String atSegment = "DuplicateBindingsTest$SimpleModule.configure";
       assertContains(
           ce.getMessage(),
-          String.format(template, Annotations.memberValueString("instance")),
+          String.format(template, Annotations.memberValueString("value", "instance")),
           atSegment,
-          String.format(template, Annotations.memberValueString("pKey")),
+          String.format(template, Annotations.memberValueString("value", "pKey")),
           atSegment,
-          String.format(template, Annotations.memberValueString("linkedKey")),
+          String.format(template, Annotations.memberValueString("value", "linkedKey")),
           atSegment,
-          String.format(template, Annotations.memberValueString("constructor")),
+          String.format(template, Annotations.memberValueString("value", "constructor")),
           atSegment,
-          String.format(template, Annotations.memberValueString("providerMethod")),
+          String.format(template, Annotations.memberValueString("value", "providerMethod")),
           "1  : DuplicateBindingsTest$SimpleProviderModule.foo",
           "2  : DuplicateBindingsTest$SimpleProviderModule.foo");
     }

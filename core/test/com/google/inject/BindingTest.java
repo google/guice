@@ -579,15 +579,15 @@ public class BindingTest {
       assertContains(
           msg,
           "Guice configuration errors:",
-          "No implementation for BindingTest$Bacon annotated with @Named(value="
-              + Annotations.memberValueString("Turky")
+          "No implementation for BindingTest$Bacon annotated with @Named("
+              + Annotations.memberValueString("value", "Turky")
               + ") was bound.",
           "Did you mean?",
-          "* BindingTest$Bacon annotated with @Named(value="
-              + Annotations.memberValueString("Turkey")
+          "* BindingTest$Bacon annotated with @Named("
+              + Annotations.memberValueString("value", "Turkey")
               + ")",
-          "* BindingTest$Bacon annotated with @Named(value="
-              + Annotations.memberValueString("Tofu")
+          "* BindingTest$Bacon annotated with @Named("
+              + Annotations.memberValueString("value", "Tofu")
               + ")",
           "1 more binding with other annotations.");
     }
@@ -612,12 +612,12 @@ public class BindingTest {
       assertContains(msg, "Guice configuration errors:");
       assertContains(
           msg,
-          "No implementation for BindingTest$Bacon annotated with @Named(value="
-              + Annotations.memberValueString("turkey")
+          "No implementation for BindingTest$Bacon annotated with @Named("
+              + Annotations.memberValueString("value", "turkey")
               + ") was bound.",
           "Did you mean?",
-          "* BindingTest$Bacon annotated with @Named(value="
-              + Annotations.memberValueString("Turkey")
+          "* BindingTest$Bacon annotated with @Named("
+              + Annotations.memberValueString("value", "Turkey")
               + ")");
     }
   }

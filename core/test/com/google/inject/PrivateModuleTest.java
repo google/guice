@@ -285,13 +285,13 @@ public class PrivateModuleTest extends TestCase {
           "No implementation for PrivateModuleTest$C was bound.",
           "1  : PrivateModuleTest$8.configure",
           String.format(
-              "No implementation for String annotated with @Named(value=%s) was bound.",
-              Annotations.memberValueString("a")),
+              "No implementation for String annotated with @Named(%s) was bound.",
+              Annotations.memberValueString("value", "a")),
           "1  : PrivateModuleTest$AB.a",
           "for field a",
           String.format(
-              "No implementation for String annotated with @Named(value=%s) was bound.",
-              Annotations.memberValueString("b")),
+              "No implementation for String annotated with @Named(%s) was bound.",
+              Annotations.memberValueString("value", "b")),
           "PrivateModuleTest$AB.b",
           "for field b",
           "3 errors");

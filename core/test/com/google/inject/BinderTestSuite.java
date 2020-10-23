@@ -65,7 +65,8 @@ public class BinderTestSuite extends TestCase {
               }
             })
         .creationException(
-            "No implementation for BinderTestSuite$PlainA annotated with @Named(value=\"apple\")"
+            "No implementation for BinderTestSuite$PlainA annotated with "
+                + shortNamed(named("apple"))
                 + " was bound")
         .addToSuite(suite);
 
@@ -102,8 +103,9 @@ public class BinderTestSuite extends TestCase {
         .name("no binding, AWithProvidedBy named apple")
         .key(Key.get(AWithProvidedBy.class, named("apple")), InjectsAWithProvidedByNamedApple.class)
         .configurationException(
-            "No implementation for BinderTestSuite$AWithProvidedBy annotated with"
-                + " @Named(value=\"apple\") was bound")
+            "No implementation for BinderTestSuite$AWithProvidedBy annotated with "
+                + shortNamed(named("apple"))
+                + " was bound")
         .addToSuite(suite);
 
     new Builder()
@@ -112,15 +114,17 @@ public class BinderTestSuite extends TestCase {
             Key.get(AWithImplementedBy.class, named("apple")),
             InjectsAWithImplementedByNamedApple.class)
         .configurationException(
-            "No implementation for BinderTestSuite$AWithImplementedBy annotated with"
-                + " @Named(value=\"apple\") was bound")
+            "No implementation for BinderTestSuite$AWithImplementedBy annotated with "
+                + shortNamed(named("apple"))
+                + " was bound")
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, ScopedA named apple")
         .key(Key.get(ScopedA.class, named("apple")), InjectsScopedANamedApple.class)
         .configurationException(
-            "No implementation for BinderTestSuite$ScopedA annotated with @Named(value=\"apple\")"
+            "No implementation for BinderTestSuite$ScopedA annotated with "
+                + shortNamed(named("apple"))
                 + " was bound")
         .addToSuite(suite);
 
@@ -231,8 +235,9 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for BinderTestSuite$AWithProvidedBy annotated with"
-                  + " @Named(value=\"apple\") was bound")
+              "No implementation for BinderTestSuite$AWithProvidedBy annotated with "
+                  + shortNamed(named("apple"))
+                  + " was bound")
           .scoper(scoper)
           .addToSuite(suite);
 
@@ -246,8 +251,9 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for BinderTestSuite$AWithImplementedBy annotated with"
-                  + " @Named(value=\"apple\") was bound")
+              "No implementation for BinderTestSuite$AWithImplementedBy annotated with "
+                  + shortNamed(named("apple"))
+                  + " was bound")
           .scoper(scoper)
           .addToSuite(suite);
 
@@ -261,8 +267,9 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for BinderTestSuite$ScopedA annotated with"
-                  + " @Named(value=\"apple\") was bound")
+              "No implementation for BinderTestSuite$ScopedA annotated with "
+                  + shortNamed(named("apple"))
+                  + " was bound")
           .scoper(scoper)
           .addToSuite(suite);
     }
@@ -851,5 +858,9 @@ public class BinderTestSuite extends TestCase {
   static class Injectable {
     Object value = new Object();
     Provider<?> provider = Providers.of(new Object());
+  }
+
+  private static String shortNamed(Named named) {
+    return named.toString().replace("com.google.inject.name.", "");
   }
 }

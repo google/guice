@@ -129,8 +129,8 @@ public class ServletTest extends TestCase {
     } catch (ProvisionException oose) {
       assertContains(
           oose.getMessage(),
-          "Cannot access scoped [String annotated with @Named(value="
-              + Annotations.memberValueString("foo")
+          "Cannot access scoped [String annotated with @Named("
+              + Annotations.memberValueString("value", "foo")
               + ")]");
     }
   }
