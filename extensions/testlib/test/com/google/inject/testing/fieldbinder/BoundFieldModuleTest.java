@@ -1043,7 +1043,7 @@ public class BoundFieldModuleTest extends TestCase {
     Bindings bindings = new Bindings();
 
     Injector injector =
-        Guice.createInjector(new @FooPermit BoundFieldModule.WithPermits(bindings) {});
+        Guice.createInjector(new BoundFieldModule.@FooPermit WithPermits(bindings) {});
 
     assertEquals((Integer) bindings.foo, injector.getInstance(Key.get(Integer.class, Foo.class)));
   }
