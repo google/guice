@@ -6,6 +6,7 @@ cache:
     - $HOME/.m2
 
 jdk:
+  - openjdk15
   - openjdk11
   - openjdk8
 
