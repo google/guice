@@ -900,13 +900,26 @@ final class FactoryProvider2<F>
       findMethodHandlesLookupCxtor();
 
   private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor() {
-    try {
-      Constructor<MethodHandles.Lookup> cxtor =
-          MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+    // Different JDK implementations have different constructors so look for a constructor that
+    // takes a class and an int first (openjdk-8, openjdk-11) and fallback to a constructor that
+    // takes two classes and an int (openjdk-15).
+    // TODO(b/171738889): Figure out a better way to handle this.
+    Constructor<MethodHandles.Lookup> cxtor = findMethodHandlesLookupCxtor(Class.class, int.class);
+    if (cxtor == null) {
+      cxtor = findMethodHandlesLookupCxtor(Class.class, Class.class, int.class);
+    }
+    if (cxtor != null) {
       cxtor.setAccessible(true);
-      return cxtor;
-    } catch (ReflectiveOperationException ignored) {
-      // Ignore, the code falls back to a less-precise check if we can't create method handles.
+    }
+    return cxtor;
+  }
+
+  private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor(
+      Class<?>... parameterTypes) {
+    try {
+      return MethodHandles.Lookup.class.getDeclaredConstructor(parameterTypes);
+    } catch (NoSuchMethodException e) {
+      // Ignored if the constructor doesn't exist.
       return null;
     }
   }
@@ -919,7 +932,12 @@ final class FactoryProvider2<F>
     int allModes =
         Modifier.PRIVATE | Modifier.STATIC /* package */ | Modifier.PUBLIC | Modifier.PROTECTED;
     try {
-      MethodHandles.Lookup lookup = methodHandlesLookupCxtor.newInstance(declaringClass, allModes);
+      MethodHandles.Lookup lookup;
+      if (methodHandlesLookupCxtor.getParameterCount() == 2) {
+        lookup = methodHandlesLookupCxtor.newInstance(declaringClass, allModes);
+      } else {
+        lookup = methodHandlesLookupCxtor.newInstance(declaringClass, null, allModes);
+      }
       method.setAccessible(true);
       return lookup.unreflectSpecial(method, declaringClass).bindTo(proxy);
     } catch (ReflectiveOperationException roe) {
