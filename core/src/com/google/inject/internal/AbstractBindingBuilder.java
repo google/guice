@@ -73,15 +73,14 @@ public abstract class AbstractBindingBuilder<T> {
   protected BindingImpl<T> annotatedWithInternal(Class<? extends Annotation> annotationType) {
     checkNotNull(annotationType, "annotationType");
     checkNotAnnotated();
-    return setBinding(
-        binding.withKey(Key.get(this.binding.getKey().getTypeLiteral(), annotationType)));
+    return setBinding(binding.withKey(this.binding.getKey().withAnnotation(annotationType)));
   }
 
   /** Sets the binding to a copy with the specified annotation on the bound key */
   protected BindingImpl<T> annotatedWithInternal(Annotation annotation) {
     checkNotNull(annotation, "annotation");
     checkNotAnnotated();
-    return setBinding(binding.withKey(Key.get(this.binding.getKey().getTypeLiteral(), annotation)));
+    return setBinding(binding.withKey(this.binding.getKey().withAnnotation(annotation)));
   }
 
   public void in(final Class<? extends Annotation> scopeAnnotation) {

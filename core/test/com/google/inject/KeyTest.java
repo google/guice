@@ -58,6 +58,23 @@ public class KeyTest extends TestCase {
     assertEquals(Foo.class, ki.getAnnotationType());
   }
 
+  public void testWithAnnotation() {
+    Key<Object> k = Key.get(Object.class);
+    Key<Object> kf = k.withAnnotation(Foo.class);
+    assertNull(k.getAnnotationType());
+    assertEquals(Foo.class, kf.getAnnotationType());
+  }
+
+  public void testWithAnnotationInstance() throws NoSuchFieldException {
+    Foo annotation = getClass().getDeclaredField("baz").getAnnotation(Foo.class);
+    Key<Object> k = Key.get(Object.class);
+    Key<Object> kf = k.withAnnotation(annotation);
+    assertNull(k.getAnnotationType());
+    assertNull(k.getAnnotation());
+    assertEquals(Foo.class, kf.getAnnotationType());
+    assertEquals(annotation, kf.getAnnotation());
+  }
+
   public void testKeyEquality() {
     Key<List<String>> a = new Key<List<String>>(Foo.class) {};
     Key<List<String>> b = Key.get(new TypeLiteral<List<String>>() {}, Foo.class);
@@ -86,6 +103,7 @@ public class KeyTest extends TestCase {
   /**
    * Key canonicalizes {@link int.class} to {@code Integer.class}, and won't expose wrapper types.
    */
+  @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type
   public void testPrimitivesAndWrappersAreEqual() {
     Class[] primitives =
         new Class[] {
@@ -202,11 +220,10 @@ public class KeyTest extends TestCase {
       Key.get(listOfT);
       fail("Guice should not allow keys for java.util.List<T>");
     } catch (ConfigurationException e) {
-      assertContains(
-          e.getMessage(), "java.util.List<T> cannot be used as a key; It is not fully specified.");
+      assertContains(e.getMessage(), "List<T> cannot be used as a key; It is not fully specified.");
     }
 
-    TypeVariable tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
+    TypeVariable<?> tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
     TypeLiteral<?> t = TypeLiteral.get(tType);
     try {
       Key.get(t);
@@ -250,6 +267,7 @@ public class KeyTest extends TestCase {
   @BindingAnnotation
   @interface Foo {}
 
+  @SuppressWarnings("InjectScopeOrQualifierAnnotationRetention") // to check failure mode
   @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
   @BindingAnnotation
   @interface Bar {}

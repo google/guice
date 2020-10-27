@@ -17,23 +17,35 @@ limitations under the License.
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
-import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class ParentInjectorTest extends TestCase {
+@RunWith(JUnit4.class)
+public class ParentInjectorTest {
 
+  @Test
   public void testParentAndChildCannotShareExplicitBindings() {
     Injector parent = Guice.createInjector(bindsA);
     try {
@@ -42,18 +54,13 @@ public class ParentInjectorTest extends TestCase {
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),
-          "A binding to ",
-          A.class.getName(),
-          " was already configured",
-          " at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          " at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()));
+          "ParentInjectorTest$A was bound multiple times.",
+          "1  : ParentInjectorTest$9.configure",
+          "2  : ParentInjectorTest$9.configure");
     }
   }
 
+  @Test
   public void testParentJitBindingWontClobberChildBinding() {
     Injector parent = Guice.createInjector();
     parent.createChildInjector(bindsA);
@@ -63,14 +70,13 @@ public class ParentInjectorTest extends TestCase {
     } catch (ConfigurationException e) {
       assertContains(
           e.getMessage(),
-          "Unable to create binding for " + A.class.getName(),
-          "It was already configured on one or more child injectors or private modules",
-          "bound at " + bindsA.getClass().getName() + ".configure(",
-          "If it was in a PrivateModule, did you forget to expose the binding?",
-          "while locating " + A.class.getName());
+          "Unable to create binding for ParentInjectorTest$A because it was already configured on"
+              + " one or more child injectors or private modules.",
+          "ParentInjectorTest$9.configure");
     }
   }
 
+  @Test
   public void testChildCannotBindToAParentJitBinding() {
     Injector parent = Guice.createInjector();
     parent.getInstance(A.class);
@@ -86,6 +92,7 @@ public class ParentInjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testJustInTimeBindingsAreSharedWithParentIfPossible() {
     Injector parent = Guice.createInjector();
     Injector child = parent.createChildInjector();
@@ -98,12 +105,14 @@ public class ParentInjectorTest extends TestCase {
     assertSame(grandchild.getInstance(A.class), parent.getInstance(A.class));
   }
 
+  @Test
   public void testBindingsInherited() {
     Injector parent = Guice.createInjector(bindsB);
     Injector child = parent.createChildInjector();
     assertSame(RealB.class, child.getInstance(B.class).getClass());
   }
 
+  @Test
   public void testGetParent() {
     Injector top = Guice.createInjector(bindsA);
     Injector middle = top.createChildInjector(bindsB);
@@ -113,6 +122,7 @@ public class ParentInjectorTest extends TestCase {
     assertNull(top.getParent());
   }
 
+  @Test
   public void testChildBindingsNotVisibleToParent() {
     Injector parent = Guice.createInjector();
     parent.createChildInjector(bindsB);
@@ -123,6 +133,7 @@ public class ParentInjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testScopesInherited() {
     Injector parent =
         Guice.createInjector(
@@ -143,16 +154,17 @@ public class ParentInjectorTest extends TestCase {
     assertSame(child.getInstance(A.class), child.getInstance(A.class));
   }
 
-  /*if[AOP]*/
-  private final org.aopalliance.intercept.MethodInterceptor returnNullInterceptor =
-      new org.aopalliance.intercept.MethodInterceptor() {
+  private final MethodInterceptor returnNullInterceptor =
+      new MethodInterceptor() {
         @Override
-        public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
+        public Object invoke(MethodInvocation methodInvocation) {
           return null;
         }
       };
 
+  @Test
   public void testInterceptorsInherited() {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
     Injector parent =
         Guice.createInjector(
             new AbstractModule() {
@@ -176,8 +188,8 @@ public class ParentInjectorTest extends TestCase {
 
     assertNull(child.getInstance(C.class).interceptedMethod());
   }
-  /*end[AOP]*/
 
+  @Test
   public void testTypeConvertersInherited() {
     Injector parent = Guice.createInjector(bindListConverterModule);
     Injector child = parent.createChildInjector(bindStringNamedB);
@@ -185,6 +197,7 @@ public class ParentInjectorTest extends TestCase {
     assertEquals(ImmutableList.of(), child.getInstance(Key.get(List.class, Names.named("B"))));
   }
 
+  @Test
   public void testTypeConvertersConflicting() {
     Injector parent = Guice.createInjector(bindListConverterModule);
     Injector child = parent.createChildInjector(bindListConverterModule, bindStringNamedB);
@@ -197,6 +210,7 @@ public class ParentInjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectorInjectionSpanningInjectors() {
     Injector parent = Guice.createInjector();
     Injector child =
@@ -215,6 +229,7 @@ public class ParentInjectorTest extends TestCase {
     assertSame(e.injector, parent);
   }
 
+  @Test
   public void testSeveralLayersOfHierarchy() {
     Injector top = Guice.createInjector(bindsA);
     Injector left = top.createChildInjector();
@@ -242,6 +257,7 @@ public class ParentInjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testScopeBoundInChildInjectorOnly() {
     Injector parent = Guice.createInjector();
     Injector child =
@@ -259,14 +275,15 @@ public class ParentInjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "No scope is bound to com.google.inject.ParentInjectorTest$MyScope.",
-          "at " + F.class.getName() + ".class(ParentInjectorTest.java",
-          "  while locating " + F.class.getName());
+          "No scope is bound to ParentInjectorTest$MyScope.",
+          "ParentInjectorTest$F.class",
+          "while locating ParentInjectorTest$F");
     }
 
     assertNotNull(child.getProvider(F.class).get());
   }
 
+  @Test
   public void testErrorInParentButOkayInChild() {
     Injector parent = Guice.createInjector();
     Injector childInjector =
@@ -283,6 +300,7 @@ public class ParentInjectorTest extends TestCase {
     assertSame(one, two);
   }
 
+  @Test
   public void testErrorInParentAndChild() {
     Injector parent = Guice.createInjector();
     Injector childInjector = parent.createChildInjector();
@@ -293,9 +311,10 @@ public class ParentInjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "No scope is bound to " + MyScope.class.getName(),
-          "at " + F.class.getName() + ".class(ParentInjectorTest.java:",
-          "  while locating " + G.class.getName());
+          "No scope is bound to ParentInjectorTest$MyScope.",
+          "ParentInjectorTest$F.class",
+          "at ParentInjectorTest$G.class",
+          "while locating ParentInjectorTest$G");
     }
   }
 

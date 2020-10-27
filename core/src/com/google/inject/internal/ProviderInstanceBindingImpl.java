@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
+import static com.google.inject.spi.Elements.withTrustedSource;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -61,7 +64,6 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
   }
 
   @Override
-  @SuppressWarnings("unchecked") // the extension type is always consistent with the provider type
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     if (providerInstance instanceof ProviderWithExtensionVisitor) {
       return ((ProviderWithExtensionVisitor<? extends T>) providerInstance)
@@ -108,7 +110,9 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
   public void applyTo(Binder binder) {
     getScoping()
         .applyTo(
-            binder.withSource(getSource()).bind(getKey()).toProvider(getUserSuppliedProvider()));
+            withTrustedSource(GUICE_INTERNAL, binder, getSource())
+                .bind(getKey())
+                .toProvider(getUserSuppliedProvider()));
   }
 
   @Override

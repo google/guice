@@ -18,6 +18,15 @@ package com.google.inject.spi;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -41,6 +50,7 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.InternalFlags;
+import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;
@@ -60,13 +70,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author crazybob@google.com (Bob Lee) */
 @SuppressWarnings("ProvidesMethodOutsideOfModule")
-public class ProviderMethodsTest extends TestCase implements Module {
+@RunWith(JUnit4.class)
+public class ProviderMethodsTest implements Module {
 
   @SuppressWarnings("unchecked")
+  @Test
   public void testProviderMethods() {
     Injector injector = Guice.createInjector(this);
 
@@ -79,7 +93,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertNotSame(bob, clone);
     assertSame(bob.getDaughter(), clone.getDaughter());
 
-    Key soleBobKey = Key.get(Bob.class, Sole.class);
+    Key<Bob> soleBobKey = Key.get(Bob.class, Sole.class);
     assertSame(injector.getInstance(soleBobKey), injector.getInstance(soleBobKey));
   }
 
@@ -144,6 +158,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   @BindingAnnotation
   @interface Sole {}
 
+  @Test
   public void testCircularDependency() {
     Injector injector =
         Guice.createInjector(
@@ -200,6 +215,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     int getI();
   }
 
+  @Test
   public void testMultipleBindingAnnotations() {
     try {
       Guice.createInjector(
@@ -219,8 +235,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
           "more than one annotation annotated with @BindingAnnotation:",
           "Named",
           "Blue",
-          "at " + getClass().getName(),
-          ".provideString(ProviderMethodsTest.java:");
+          "at ProviderMethodsTest$5.provideString(ProviderMethodsTest.java:");
     }
   }
 
@@ -228,6 +243,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   @BindingAnnotation
   @interface Blue {}
 
+  @Test
   public void testGenericProviderMethods() {
     Injector injector =
         Guice.createInjector(new ProvideTs<String>("A", "B") {}, new ProvideTs<Integer>(1, 2) {});
@@ -269,6 +285,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  @Test
   public void testAutomaticProviderMethods() {
     Injector injector =
         Guice.createInjector(
@@ -293,6 +310,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
    * If the user installs provider methods for the module manually, that shouldn't cause a double
    * binding of the provider methods' types.
    */
+  @Test
   public void testAutomaticProviderMethodsDoNotCauseDoubleBinding() {
     Module installsSelf =
         new AbstractModule() {
@@ -312,6 +330,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertEquals("A5", injector.getInstance(String.class));
   }
 
+  @Test
   public void testWildcardProviderMethods() {
     final List<String> strings = ImmutableList.of("A", "B", "C");
     final List<Number> numbers = ImmutableList.<Number>of(1, 2, 3);
@@ -350,6 +369,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     @Inject Class<?> type;
   }
 
+  @Test
   public void testProviderMethodDependenciesAreExposed() throws Exception {
     Module module =
         new AbstractModule() {
@@ -380,6 +400,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
         binding.getDependencies());
   }
 
+  @Test
   public void testNonModuleProviderMethods() {
     final Object methodsObject =
         new Object() {
@@ -412,13 +433,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
         element + " instanceof ProviderInstanceBinding",
         element instanceof ProviderInstanceBinding);
 
-    ProviderInstanceBinding binding = (ProviderInstanceBinding) element;
-    javax.inject.Provider provider = binding.getUserSuppliedProvider();
+    ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) element;
+    javax.inject.Provider<?> provider = binding.getUserSuppliedProvider();
     assertTrue(provider instanceof ProviderMethod);
     assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());
     assertSame(provider, binding.getProviderInstance());
   }
 
+  @Test
   public void testVoidProviderMethods() {
     try {
       Guice.createInjector(
@@ -431,12 +453,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) Provider methods must return a value. Do not return void.",
-          getClass().getName(),
-          ".provideFoo(ProviderMethodsTest.java:");
+          "Provider methods must return a value. Do not return void.",
+          "at ProviderMethodsTest$14.provideFoo(ProviderMethodsTest.java:");
     }
   }
 
+  @Test
   public void testInjectsJustOneLogger() {
     AtomicReference<Logger> loggerRef = new AtomicReference<>();
     Injector injector = Guice.createInjector(new FooModule(loggerRef));
@@ -466,6 +488,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  @Test
   public void testSpi() throws Exception {
     Module m1 =
         new AbstractModule() {
@@ -523,6 +546,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  @Test
   public void testProvidesMethodVisibility() {
     Injector injector = Guice.createInjector(new VisibilityModule());
 
@@ -559,6 +583,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  @Test
   public void testProvidesMethodInheritenceHierarchy() {
     try {
       Guice.createInjector(new Sub1Module(), new Sub2Module());
@@ -567,11 +592,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       // both of our super class bindings cause errors
       assertContains(
           expected.getMessage(),
-          "A binding to java.lang.Long was already configured",
-          "A binding to java.lang.Integer was already configured");
+          "Long was bound multiple times.",
+          "Integer was bound multiple times.");
     }
   }
 
+  @Test
   public void testProvidesMethodsDefinedInSuperClass() {
     Injector injector = Guice.createInjector(new Sub1Module());
     assertEquals(42, injector.getInstance(Integer.class).intValue());
@@ -606,8 +632,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
-  /*if[AOP]*/
+  @Test
   public void testShareFastClass() {
+    // FastClass is only used when bytecode generation is enabled and this test relies on package
+    // access which CHILD loading doesn't have.
+    assumeTrue(
+        InternalFlags.isBytecodeGenEnabled()
+            && InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
+
     CallerInspecterModule module = new CallerInspecterModule();
     Guice.createInjector(Stage.PRODUCTION, module);
     assertEquals(module.fooCallerClass, module.barCallerClass);
@@ -634,7 +666,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  @Test
   public void testShareFastClassWithSuperClass() {
+    // FastClass is only used when bytecode generation is enabled and this test relies on package
+    // access which CHILD loading doesn't have.
+    assumeTrue(
+        InternalFlags.isBytecodeGenEnabled()
+            && InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
+
     CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
     Guice.createInjector(Stage.PRODUCTION, module);
     assertEquals(
@@ -671,12 +710,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
     @Provides
     @Named("rawlist")
+    @SuppressWarnings("rawtypes") // Testing rawtypes.
     List rawProvider(@Named("list") List<String> f) {
       return f;
     }
 
     @Provides
     @Named("unrawlist")
+    @SuppressWarnings({"unchecked", "rawtypes"}) // Testing rawtypes
     List<String> rawParameterProvider(@Named("rawlist") List f) {
       return f;
     }
@@ -699,6 +740,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_overrideHasProvides() {
     class SubClassModule extends SuperClassModule {
       @Override
@@ -714,11 +756,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$1SubClassModule.providerMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_overrideHasProvides_withNewAnnotation() {
     class SubClassModule extends SuperClassModule {
       @Override
@@ -735,11 +778,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$2SubClassModule.providerMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_overrideDoesntHaveProvides() {
     class SubClassModule extends SuperClassModule {
       @Override
@@ -754,11 +798,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$3SubClassModule.providerMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_overrideDoesntHaveProvides_withNewAnnotation() {
     class SubClassModule extends SuperClassModule {
       @Override
@@ -774,11 +819,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$4SubClassModule.providerMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_covariantOverrideDoesntHaveProvides() {
     class SubClassModule extends SuperClassModule {
       @Override
@@ -793,11 +839,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$5SubClassModule.providerMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_covariantOverrideHasProvides() {
     class SubClassModule extends SuperClassModule {
       @Override
@@ -813,11 +860,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.providerMethod()",
+          "overridden by: ProviderMethodsTest$6SubClassModule.providerMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_fakeOverridePrivateMethod() {
     class SubClassModule extends SuperClassModule {
       // not actually an override, just looks like it
@@ -828,9 +876,11 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertEquals("hello", Guice.createInjector(new SubClassModule()).getInstance(String.class));
   }
 
+  @Test
   public void testOverrideProviderMethod_subclassRawTypes_returnType() {
     class SubClassModule extends SuperClassModule {
       @Override
+      @SuppressWarnings({"unchecked", "rawtypes"}) // Testing rawtypes.
       List annotatedGenericProviderMethod() {
         return super.annotatedGenericProviderMethod();
       }
@@ -842,15 +892,15 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: "
-              + SuperClassModule.class.getName()
-              + ".annotatedGenericProviderMethod()",
-          "overridden by: " + SubClassModule.class.getName() + ".annotatedGenericProviderMethod()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.annotatedGenericProviderMethod()",
+          "overridden by: ProviderMethodsTest$8SubClassModule.annotatedGenericProviderMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_subclassRawTypes_parameterType() {
     class SubClassModule extends SuperClassModule {
+      @SuppressWarnings({"unchecked", "rawtypes"}) // Testing rawtypes
       @Override
       Collection<String> annotatedGenericParameterProviderMethod(List foo) {
         return super.annotatedGenericParameterProviderMethod(foo);
@@ -864,14 +914,15 @@ public class ProviderMethodsTest extends TestCase implements Module {
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
           "@Provides method: "
-              + SuperClassModule.class.getName()
+              + "ProviderMethodsTest$SuperClassModule"
               + ".annotatedGenericParameterProviderMethod()",
           "overridden by: "
-              + SubClassModule.class.getName()
+              + "ProviderMethodsTest$9SubClassModule"
               + ".annotatedGenericParameterProviderMethod()");
     }
   }
 
+  @Test
   public void testOverrideProviderMethod_superclassRawTypes_returnType() {
     class SubClassModule extends SuperClassModule {
       // remove the rawtype from the override
@@ -887,8 +938,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + SuperClassModule.class.getName() + ".rawProvider()",
-          "overridden by: " + SubClassModule.class.getName() + ".rawProvider()");
+          "@Provides method: ProviderMethodsTest$SuperClassModule.rawProvider()",
+          "overridden by: ProviderMethodsTest$10SubClassModule.rawProvider()");
     }
   }
 
@@ -901,6 +952,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   // This is a tricky case where signatures don't match, but it is an override (facilitated via a
   // bridge method)
+  @Test
   public void testOverrideProviderMethod_erasureBasedOverrides() {
     class SubClassModule extends GenericSuperModule<Integer> {
       @Override
@@ -920,8 +972,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(
           e.getMessage(),
           "Overriding @Provides methods is not allowed.",
-          "@Provides method: " + GenericSuperModule.class.getName() + ".provide()",
-          "overridden by: " + SubClassModule.class.getName() + ".provide()");
+          "@Provides method: ProviderMethodsTest$GenericSuperModule.provide()",
+          "overridden by: ProviderMethodsTest$11SubClassModule.provide()");
     }
   }
 
@@ -935,6 +987,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   public static class ExposedSub extends RestrictedSuper {}
 
+  @Test
   public void testOverrideProviderMethod_increasedVisibility() {
     // ensure we don't detect the synthetic provideFoo method in ExposedSub as an override (it is,
     // but since it is synthetic it would be annoying to throw an error on it).
@@ -962,10 +1015,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
      */
   }
 
+  @Test
   public void testIgnoreSyntheticBridgeMethods() {
     Guice.createInjector(new ModuleImpl());
   }
 
+  @Test
   public void testScopedProviderMethodThrowsException() {
     Injector injector =
         Guice.createInjector(
@@ -984,10 +1039,11 @@ public class ProviderMethodsTest extends TestCase implements Module {
     } catch (ProvisionException pe) {
       // by default assertContains asserts that the last item doesn't repeat... which is the main
       // thing we are testing for
-      assertContains(pe.getMessage(), "java.lang.RuntimeException: boom", "provideInt");
+      assertContains(pe.getMessage(), "RuntimeException: boom", "provideInt");
     }
   }
 
+  @Test
   public void testNullability() throws Exception {
     Module module =
         new AbstractModule() {
@@ -1020,6 +1076,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     injector.getInstance(Long.class);
   }
 
+  @Test
   public void testModuleBindings() throws Exception {
     Module module =
         new AbstractModule() {
@@ -1032,12 +1089,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
     // sanity check that the injector works
     Injector injector = Guice.createInjector(module);
     assertEquals(1, injector.getInstance(Integer.class).intValue());
-    ProviderInstanceBinding injectorBinding =
-        (ProviderInstanceBinding) injector.getBinding(Integer.class);
-    assertEquals(1, injectorBinding.getUserSuppliedProvider().get());
+    ProviderInstanceBinding<Integer> injectorBinding =
+        (ProviderInstanceBinding<Integer>) injector.getBinding(Integer.class);
+    assertEquals(1, injectorBinding.getUserSuppliedProvider().get().intValue());
 
-    ProviderInstanceBinding moduleBinding =
-        (ProviderInstanceBinding) Iterables.getOnlyElement(Elements.getElements(module));
+    ProviderInstanceBinding<?> moduleBinding =
+        (ProviderInstanceBinding<?>) Iterables.getOnlyElement(Elements.getElements(module));
     try {
       moduleBinding.getUserSuppliedProvider().get();
       fail();
@@ -1045,6 +1102,48 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertEquals(
           "This Provider cannot be used until the Injector has been created.", ise.getMessage());
     }
+  }
+
+  static final class DeduplicateModule extends AbstractModule {
+    @Provides
+    String provideString() {
+      return "";
+    }
+  }
+
+  @Test
+  public void testDeduplicateProviderMethodsBindings_sameInstance() {
+    Module module = new DeduplicateModule();
+    Guice.createInjector(Stage.PRODUCTION, module, module);
+  }
+
+  @Test
+  public void testDeduplicateProviderMethodsBindings_differentInstances() {
+    try {
+      Guice.createInjector(Stage.PRODUCTION, new DeduplicateModule(), new DeduplicateModule());
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "String was bound multiple times.");
+    }
+  }
+
+  static final class DeduplicateStaticModule extends AbstractModule {
+    @Provides
+    static String provideString() {
+      return "";
+    }
+  }
+
+  @Test
+  public void testDeduplicateProviderMethodsBindings_sameInstance_staticMethod() {
+    Module module = new DeduplicateStaticModule();
+    Guice.createInjector(Stage.PRODUCTION, module, module);
+  }
+
+  @Test
+  public void testDeduplicateProviderMethodsBindings_differentInstances_staticMethod() {
+    Guice.createInjector(
+        Stage.PRODUCTION, new DeduplicateStaticModule(), new DeduplicateStaticModule());
   }
 
   private void runNullableTest(Injector injector, Dependency<?> dependency, Module module) {
@@ -1066,14 +1165,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
       injector.getInstance(Integer.class);
       fail();
     } catch (ProvisionException expected) {
+      String moduleName = module.getClass().getName().replace("com.google.inject.spi.", "");
       assertContains(
           expected.getMessage(),
-          "1) null returned by binding at " + module.getClass().getName() + ".configure(",
-          "but the 1st parameter of " + module.getClass().getName() + ".fail(",
+          "null returned by binding at " + moduleName + ".configure(",
+          "but the 1st parameter foo of " + moduleName + ".fail(",
           "is not @Nullable",
-          "while locating java.lang.String",
-          "for the 1st parameter of " + module.getClass().getName() + ".fail(",
-          "while locating java.lang.Integer");
+          "for 1st parameter",
+          "while locating Integer");
 
       assertEquals(1, expected.getErrorMessages().size());
     }

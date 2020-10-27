@@ -54,11 +54,11 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
           Stage.class,
           TypeLiteral.class);
 
-  protected final ProcessedBindingData bindingData;
+  protected final ProcessedBindingData processedBindingData;
 
-  AbstractBindingProcessor(Errors errors, ProcessedBindingData bindingData) {
+  AbstractBindingProcessor(Errors errors, ProcessedBindingData processedBindingData) {
     super(errors);
-    this.bindingData = bindingData;
+    this.processedBindingData = processedBindingData;
   }
 
   protected <T> UntargettedBindingImpl<T> invalidBinding(
@@ -78,11 +78,11 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     BindingImpl<?> original = injector.getExistingBinding(key);
     if (original != null) {
       // If it failed because of an explicit duplicate binding...
-      if (injector.state.getExplicitBinding(key) != null) {
+      if (injector.getBindingData().getExplicitBinding(key) != null) {
         try {
-          if (!isOkayDuplicate(original, binding, injector.state)) {
-            errors.bindingAlreadySet(key, original.getSource());
-            return;
+          if (!isOkayDuplicate(original, binding, injector.getBindingData())) {
+              errors.bindingAlreadySet(binding, original);
+              return;
           }
         } catch (Throwable t) {
           errors.errorCheckingDuplicateBinding(key, original.getSource(), t);
@@ -97,8 +97,10 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     }
 
     // prevent the parent from creating a JIT binding for this key
-    injector.state.parent().blacklist(key, injector.state, binding.getSource());
-    injector.state.putBinding(key, binding);
+    injector
+        .getJitBindingData()
+        .banKeyInParent(key, injector.getBindingData(), binding.getSource());
+    injector.getBindingData().putBinding(key, binding);
   }
 
   /**
@@ -108,13 +110,14 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
    * @param original the binding in the parent injector (candidate for an exposing binding)
    * @param binding the binding to check (candidate for the exposed binding)
    */
-  private boolean isOkayDuplicate(BindingImpl<?> original, BindingImpl<?> binding, State state) {
+  private static boolean isOkayDuplicate(
+      BindingImpl<?> original, BindingImpl<?> binding, InjectorBindingData bindingData) {
     if (original instanceof ExposedBindingImpl) {
-      ExposedBindingImpl exposed = (ExposedBindingImpl) original;
+      ExposedBindingImpl<?> exposed = (ExposedBindingImpl<?>) original;
       InjectorImpl exposedFrom = (InjectorImpl) exposed.getPrivateElements().getInjector();
       return (exposedFrom == binding.getInjector());
     } else {
-      original = (BindingImpl<?>) state.getExplicitBindingsThisLevel().get(binding.getKey());
+      original = (BindingImpl<?>) bindingData.getExplicitBindingsThisLevel().get(binding.getKey());
       // If no original at this level, the original was on a parent, and we don't
       // allow deduplication between parents & children.
       if (original == null) {
@@ -157,7 +160,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
      * initialially processed.
      */
     protected void scheduleInitialization(BindingImpl<?> binding) {
-      bindingData.addUninitializedBinding(() -> initializeBinding(binding));
+      processedBindingData.addUninitializedBinding(() -> initializeBinding(binding));
     }
 
     /**
@@ -165,7 +168,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
      * bindings.
      */
     protected void scheduleDelayedInitialization(BindingImpl<?> binding) {
-      bindingData.addDelayedUninitializedBinding(() -> initializeBinding(binding));
+      processedBindingData.addDelayedUninitializedBinding(() -> initializeBinding(binding));
     }
 
     private void initializeBinding(BindingImpl<?> binding) {

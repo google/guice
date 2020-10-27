@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc.
+ * Copyright (C) 2020 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.internal.aop;
 
-/** @author jessewilson@google.com (Jesse Wilson) */
-public interface CircularDependencyProxy {
-  // marker interface
+/** Thrown when errors occur defining enhancer/fast-class glue. */
+final class GlueException extends RuntimeException {
+  public GlueException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  private static final long serialVersionUID = 0;
 }

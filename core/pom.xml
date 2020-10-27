@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>4.2.2</version>
+    <version>4.2.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>guice</artifactId>
@@ -27,16 +27,11 @@
       <artifactId>guava</artifactId>
     </dependency>
     <!--
-     | CGLIB is embedded by default by the JarJar build profile
+     | ASM is embedded by default by the JarJar build profile
     -->
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
       <optional>true</optional>
     </dependency>
     <!--
@@ -106,6 +101,32 @@
             <exclude>**/TypeConversionTest*</exclude>
           </excludes>
         </configuration>
+        <executions>
+          <execution>
+            <id>anonymous-class-loading</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <argLine>-Dguice_custom_class_loading=ANONYMOUS</argLine>
+            </configuration>
+          </execution>
+          <execution>
+            <id>child-class-loading</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <argLine>-Dguice_custom_class_loading=CHILD</argLine>
+            </configuration>
+          </execution>
+          <execution>
+            <id>without-bytecode-generation</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <argLine>-Dguice_bytecode_gen_option=DISABLED</argLine>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <!--
        | Add OSGi manifest
@@ -115,8 +136,8 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Bundle-Name>${project.artifactId}$(if;$(classes;NAMED;*.MethodAspect);; (no_aop))</Bundle-Name>
-            <Import-Package>!net.sf.cglib.*,!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
+            <Bundle-Name>${project.artifactId}</Bundle-Name>
+            <Import-Package>!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
             <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
           </instructions>
         </configuration>
@@ -156,73 +177,7 @@
   <profiles>
     <profile>
       <!--
-       | No-AOP profile: repeat the build lifecycle with munged no-AOP source
-      -->
-      <id>guice.with.no_aop</id>
-      <activation>
-        <property>
-          <name>guice.with.no_aop</name>
-          <value>!false</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>munge-maven-plugin</artifactId>
-            <version>1.0</version>
-            <executions>
-              <execution>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>munge-fork</goal>
-                </goals>
-                <configuration>
-                  <symbols>NO_AOP</symbols>
-                  <excludes>
-                    **/InterceptorBinding.java,
-                    **/InterceptorBindingProcessor.java,
-                    **/InterceptorStackCallback.java,
-                    **/LineNumbers.java,
-                    **/MethodAspect.java,
-                    **/ProxyFactory.java,
-                    **/BytecodeGenTest.java,
-                    **/IntegrationTest.java,
-                    **/MethodInterceptionTest.java,
-                    **/ProxyFactoryTest.java
-                  </excludes>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <!--
-           | Package the no-AOP build with its own OSGi manifest and attach using "no_aop" classifier
-          -->
-          <plugin>
-            <artifactId>maven-jar-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>no_aop</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <classesDirectory>${project.build.directory}/munged/classes</classesDirectory>
-                  <classifier>no_aop</classifier>
-                  <archive>
-                    <manifestFile>${project.build.directory}/munged/classes/META-INF/MANIFEST.MF</manifestFile>
-                  </archive>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <!--
-       | JarJar build profile: Embed CGLIB (and ASM) classes under a Guice namespace
+       | JarJar build profile: Embed ASM classes under a Guice namespace
       -->
       <id>guice.with.jarjar</id>
       <activation>
@@ -247,17 +202,8 @@
               <overwrite>true</overwrite>
               <includes>
                 <include>*:asm*</include>
-                <include>*:cglib</include>
               </includes>
               <rules>
-                <rule>
-                  <pattern>net.sf.cglib.*</pattern>
-                  <result>com.google.inject.internal.cglib.$@1</result>
-                </rule>
-                <rule>
-                  <pattern>net.sf.cglib.**.*</pattern>
-                  <result>com.google.inject.internal.cglib.@1.$@2</result>
-                </rule>
                 <rule>
                   <pattern>org.objectweb.asm.*</pattern>
                   <result>com.google.inject.internal.asm.$@1</result>

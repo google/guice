@@ -88,7 +88,7 @@ final class InternalServletModule extends AbstractModule {
 
     // inject the pipeline into GuiceFilter so it can route requests correctly
     // Unfortunate staticness... =(
-    // NOTE(dhanji): This is maintained for legacy purposes.
+    // NOTE(user): This is maintained for legacy purposes.
     requestStaticInjection(GuiceFilter.class);
 
     bind(ManagedFilterPipeline.class);

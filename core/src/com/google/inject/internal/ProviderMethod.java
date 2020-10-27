@@ -37,6 +37,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * A provider that invokes a method and returns its result.
@@ -49,10 +50,9 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   /**
    * Creates a {@link ProviderMethod}.
    *
-   * <p>Unless {@code skipFastClassGeneration} is set, this will use {@link
-   * net.sf.cglib.reflect.FastClass} to invoke the actual method, since it is significantly faster.
-   * However, this will fail if the method is {@code private} or {@code protected}, since fastclass
-   * is subject to java access policies.
+   * <p>Unless {@code skipFastClassGeneration} is set, this will use bytecode generation to invoke
+   * the actual method, since it is significantly faster. However, this may fail if the method is
+   * {@code private} or {@code protected}, since this approach is subject to java access policies.
    */
   static <T> ProviderMethod<T> create(
       Key<T> key,
@@ -63,19 +63,17 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       boolean skipFastClassGeneration,
       Annotation annotation) {
     int modifiers = method.getModifiers();
-    /*if[AOP]*/
-    if (!skipFastClassGeneration) {
+    if (InternalFlags.isBytecodeGenEnabled() && !skipFastClassGeneration) {
       try {
-        net.sf.cglib.reflect.FastClass fc = BytecodeGen.newFastClassForMember(method);
-        if (fc != null) {
+        BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
+        if (fastMethod != null) {
           return new FastClassProviderMethod<T>(
-              key, fc, method, instance, dependencies, scopeAnnotation, annotation);
+              key, method, instance, dependencies, scopeAnnotation, annotation, fastMethod);
         }
-      } catch (net.sf.cglib.core.CodeGenerationException e) {
+      } catch (Exception | LinkageError e) {
         /* fall-through */
       }
     }
-    /*end[AOP]*/
 
     if (!Modifier.isPublic(modifiers)
         || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
@@ -100,8 +98,8 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
    */
   private SingleParameterInjector<?>[] parameterInjectors;
 
-  /** @param method the method to invoke. It's return type must be the same type as {@code key}. */
-  private ProviderMethod(
+  /** @param method the method to invoke. Its return type must be the same type as {@code key}. */
+  ProviderMethod(
       Key<T> key,
       Method method,
       Object instance,
@@ -235,36 +233,36 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     return Objects.hashCode(method, annotation);
   }
 
-  /*if[AOP]*/
+
   /**
-   * A {@link ProviderMethod} implementation that uses {@link net.sf.cglib.reflect.FastClass#invoke}
-   * to invoke the provider method.
+   * A {@link ProviderMethod} implementation that uses bytecode generation to invoke the provider
+   * method.
    */
   private static final class FastClassProviderMethod<T> extends ProviderMethod<T> {
-    final net.sf.cglib.reflect.FastClass fastClass;
-    final int methodIndex;
+    final BiFunction<Object, Object[], Object> fastMethod;
 
     FastClassProviderMethod(
         Key<T> key,
-        net.sf.cglib.reflect.FastClass fc,
         Method method,
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
         Class<? extends Annotation> scopeAnnotation,
-        Annotation annotation) {
+        Annotation annotation,
+        BiFunction<Object, Object[], Object> fastMethod) {
       super(key, method, instance, dependencies, scopeAnnotation, annotation);
-      this.fastClass = fc;
-      this.methodIndex = fc.getMethod(method).getIndex();
+      this.fastMethod = fastMethod;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public T doProvision(Object[] parameters)
-        throws IllegalAccessException, InvocationTargetException {
-      return (T) fastClass.invoke(methodIndex, instance, parameters);
+    public T doProvision(Object[] parameters) throws InvocationTargetException {
+      try {
+        return (T) fastMethod.apply(instance, parameters);
+      } catch (Throwable e) {
+        throw new InvocationTargetException(e); // match JDK reflection behaviour
+      }
     }
   }
-  /*end[AOP]*/
 
   /**
    * A {@link ProviderMethod} implementation that invokes the method using normal java reflection.

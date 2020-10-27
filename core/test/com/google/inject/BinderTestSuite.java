@@ -52,7 +52,7 @@ public class BinderTestSuite extends TestCase {
                 bind(A.class);
               }
             })
-        .creationException("No implementation for %s was bound", A.class.getName())
+        .creationException("No implementation for BinderTestSuite$A was bound.")
         .addToSuite(suite);
 
     new Builder()
@@ -65,8 +65,9 @@ public class BinderTestSuite extends TestCase {
               }
             })
         .creationException(
-            "No implementation for %s annotated with %s was bound",
-            PlainA.class.getName(), named("apple"))
+            "No implementation for BinderTestSuite$PlainA annotated with "
+                + shortNamed(named("apple"))
+                + " was bound")
         .addToSuite(suite);
 
     new Builder()
@@ -102,8 +103,9 @@ public class BinderTestSuite extends TestCase {
         .name("no binding, AWithProvidedBy named apple")
         .key(Key.get(AWithProvidedBy.class, named("apple")), InjectsAWithProvidedByNamedApple.class)
         .configurationException(
-            "No implementation for %s annotated with %s was bound",
-            AWithProvidedBy.class.getName(), named("apple"))
+            "No implementation for BinderTestSuite$AWithProvidedBy annotated with "
+                + shortNamed(named("apple"))
+                + " was bound")
         .addToSuite(suite);
 
     new Builder()
@@ -112,16 +114,18 @@ public class BinderTestSuite extends TestCase {
             Key.get(AWithImplementedBy.class, named("apple")),
             InjectsAWithImplementedByNamedApple.class)
         .configurationException(
-            "No implementation for %s annotated with %s was bound",
-            AWithImplementedBy.class.getName(), named("apple"))
+            "No implementation for BinderTestSuite$AWithImplementedBy annotated with "
+                + shortNamed(named("apple"))
+                + " was bound")
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, ScopedA named apple")
         .key(Key.get(ScopedA.class, named("apple")), InjectsScopedANamedApple.class)
         .configurationException(
-            "No implementation for %s annotated with %s was bound",
-            ScopedA.class.getName(), named("apple"))
+            "No implementation for BinderTestSuite$ScopedA annotated with "
+                + shortNamed(named("apple"))
+                + " was bound")
         .addToSuite(suite);
 
     for (final Scoper scoper : Scoper.values()) {
@@ -231,8 +235,10 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for %s annotated with %s was bound",
-              AWithProvidedBy.class.getName(), named("apple"))
+              "No implementation for BinderTestSuite$AWithProvidedBy annotated with "
+                  + shortNamed(named("apple"))
+                  + " was bound")
+          .scoper(scoper)
           .addToSuite(suite);
 
       new Builder()
@@ -245,8 +251,10 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for %s annotated with %s was bound",
-              AWithImplementedBy.class.getName(), named("apple"))
+              "No implementation for BinderTestSuite$AWithImplementedBy annotated with "
+                  + shortNamed(named("apple"))
+                  + " was bound")
+          .scoper(scoper)
           .addToSuite(suite);
 
       new Builder()
@@ -259,8 +267,10 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for %s annotated with %s was bound",
-              ScopedA.class.getName(), named("apple"))
+              "No implementation for BinderTestSuite$ScopedA annotated with "
+                  + shortNamed(named("apple"))
+                  + " was bound")
+          .scoper(scoper)
           .addToSuite(suite);
     }
 
@@ -580,10 +590,9 @@ public class BinderTestSuite extends TestCase {
         assertContains(
             expected.getMessage(),
             configurationException,
-            injectsKey.getName() + ".inject",
-            configurationException,
-            injectsKey.getName() + ".inject",
-            "2 errors");
+            injectsKey.getSimpleName() + ".inject",
+            injectsKey.getSimpleName() + ".inject",
+            "1 error");
       }
 
       try {
@@ -594,10 +603,9 @@ public class BinderTestSuite extends TestCase {
         assertContains(
             expected.getMessage(),
             configurationException,
-            injectsKey.getName() + ".inject",
-            configurationException,
-            injectsKey.getName() + ".inject",
-            "2 errors");
+            injectsKey.getSimpleName() + ".inject",
+            injectsKey.getSimpleName() + ".inject",
+            "1 error");
       }
     }
   }
@@ -672,10 +680,7 @@ public class BinderTestSuite extends TestCase {
         newInjector().getInstance(injectsKey);
         fail("Expected ProvisionException");
       } catch (ProvisionException expected) {
-        assertContains(
-            expected.getMessage(),
-            "Illegal value: -1",
-            "for the 1st parameter of " + injectsKey.getName() + ".inject");
+        assertContains(expected.getMessage(), "Illegal value: -1", "for 1st parameter");
       }
 
       nextId.set(201);
@@ -684,10 +689,7 @@ public class BinderTestSuite extends TestCase {
         nextId.set(-1);
         newInjector().injectMembers(injectable);
       } catch (ProvisionException expected) {
-        assertContains(
-            expected.getMessage(),
-            "Illegal value: -1",
-            "for the 1st parameter of " + injectsKey.getName() + ".inject");
+        assertContains(expected.getMessage(), "Illegal value: -1", "for 1st parameter");
       }
 
       nextId.set(201);
@@ -856,5 +858,9 @@ public class BinderTestSuite extends TestCase {
   static class Injectable {
     Object value = new Object();
     Provider<?> provider = Providers.of(new Object());
+  }
+
+  private static String shortNamed(Named named) {
+    return named.toString().replace("com.google.inject.name.", "");
   }
 }

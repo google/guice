@@ -41,6 +41,7 @@ import junit.framework.TestCase;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
+@SuppressWarnings("unchecked") // Safe because mock will only ever return HttpServlet
 public class ServletDefinitionPathsTest extends TestCase {
 
   // Data-driven test.
@@ -62,11 +63,12 @@ public class ServletDefinitionPathsTest extends TestCase {
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
-    Binding binding = createMock(Binding.class);
+    Binding<HttpServlet> binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
     final boolean[] run = new boolean[1];
@@ -152,11 +154,12 @@ public class ServletDefinitionPathsTest extends TestCase {
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
-    Binding binding = createMock(Binding.class);
+    Binding<HttpServlet> binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
     final boolean[] run = new boolean[1];
@@ -263,11 +266,12 @@ public class ServletDefinitionPathsTest extends TestCase {
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
-    Binding binding = createMock(Binding.class);
+    Binding<HttpServlet> binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject())).andReturn(true);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
 
     final boolean[] run = new boolean[1];

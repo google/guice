@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import java.util.IdentityHashMap;
-import java.util.Map;
 
 /**
  * Internal context. Used to coordinate injections and support circular dependencies.
@@ -30,23 +29,11 @@ final class InternalContext implements AutoCloseable {
 
   private final InjectorOptions options;
 
-  private final Map<Object, ConstructionContext<?>> constructionContexts =
-      new IdentityHashMap<Object, ConstructionContext<?>>();
+  private final IdentityHashMap<Object, ConstructionContext<?>> constructionContexts =
+      new IdentityHashMap<>();
 
   /** Keeps track of the type that is currently being requested for injection. */
   private Dependency<?> dependency;
-
-  /**
-   * Keeps track of the hierarchy of types needed during injection.
-   *
-   * <p>This is a pairwise combination of dependencies and sources, with dependencies or keys on
-   * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
-   * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
-   */
-  private Object[] dependencyStack = new Object[16];
-
-  private int dependencyStackSize = 0;
-
 
   /**
    * The number of times {@link #enter()} has been called + 1 for initial construction. This value
@@ -103,66 +90,13 @@ final class InternalContext implements AutoCloseable {
     return dependency;
   }
 
-  /** Sets the new current dependency & adds it to the state. */
-  Dependency<?> pushDependency(Dependency<?> dependency, Object source) {
-    Dependency<?> previous = this.dependency;
+  /**
+   * Used to set the current dependency.
+   *
+   * <p>The currentDependency field is only used by InternalFactoryToProviderAdapter to propagate
+   * information to singleton scope. See comments in that class about alternatives.
+   */
+  void setDependency(Dependency<?> dependency) {
     this.dependency = dependency;
-    doPushState(dependency, source);
-    return previous;
   }
-
-
-  /** Pops the current state & sets the new dependency. */
-  void popStateAndSetDependency(Dependency<?> newDependency) {
-    popState();
-    this.dependency = newDependency;
-  }
-
-
-  /** Adds to the state without setting the dependency. */
-  void pushState(com.google.inject.Key<?> key, Object source) {
-    doPushState(key, source);
-  }
-
-
-  private void doPushState(Object dependencyOrKey, Object source) {
-    int localSize = dependencyStackSize;
-    Object[] localStack = dependencyStack;
-    if (localStack.length < localSize + 2) {
-      localStack = dependencyStack =
-        java.util.Arrays.copyOf(localStack, (localStack.length * 3) / 2 + 2);
-    }
-    localStack[localSize++] = dependencyOrKey;
-    localStack[localSize++] = source;
-    dependencyStackSize = localSize;
-  }
-
-
-  /** Pops from the state without setting a dependency. */
-  void popState() {
-    // N.B. we don't null out the array entries.  It isn't necessary since all the objects in the
-    // array (Key, Dependency, or Binding source objects) are all tied to the lifetime of the
-    // injector, which is greater than the lifetime of this object.  So removing them from the array
-    // doesn't matter.
-    dependencyStackSize -= 2;
-  }
-
-
-  /** Returns the current dependency chain (all the state stored in the dependencyStack). */
-  java.util.List<com.google.inject.spi.DependencyAndSource> getDependencyChain() {
-    com.google.common.collect.ImmutableList.Builder<com.google.inject.spi.DependencyAndSource>
-        builder = com.google.common.collect.ImmutableList.builder();
-    for (int i = 0; i < dependencyStackSize; i += 2) {
-      Object evenEntry = dependencyStack[i];
-      Dependency<?> dependency;
-      if (evenEntry instanceof com.google.inject.Key) {
-        dependency = Dependency.get((com.google.inject.Key<?>) evenEntry);
-      } else {
-        dependency = (Dependency<?>) evenEntry;
-      }
-      builder.add(new com.google.inject.spi.DependencyAndSource(dependency, dependencyStack[i + 1]));
-    }
-    return builder.build();
-  }
-
 }

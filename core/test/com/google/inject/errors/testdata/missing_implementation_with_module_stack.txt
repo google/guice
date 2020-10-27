@@ -1,0 +1,28 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorTest$Dao was bound.
+
+Requested by:
+1  : MissingImplementationErrorTest$RequestHandler.<init>(MissingImplementationErrorTest.java:46)
+      \_ for 1st parameter dao
+     at MissingImplementationErrorTest$Server.<init>(MissingImplementationErrorTest.java:51)
+      \_ for 1st parameter handler
+     at MissingImplementationErrorTest$TestModule1.configure(MissingImplementationErrorTest.java:81)
+      \_ installed by: MissingImplementationErrorTest$TestModule2 -> MissingImplementationErrorTest$TestModule1
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+1 error
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorTest$Dao:            "com.google.inject.errors.MissingImplementationErrorTest$Dao"
+MissingImplementationErrorTest$RequestHandler: "com.google.inject.errors.MissingImplementationErrorTest$RequestHandler"
+MissingImplementationErrorTest$Server:         "com.google.inject.errors.MissingImplementationErrorTest$Server"
+MissingImplementationErrorTest$TestModule1:    "com.google.inject.errors.MissingImplementationErrorTest$TestModule1"
+MissingImplementationErrorTest$TestModule2:    "com.google.inject.errors.MissingImplementationErrorTest$TestModule2"
+========================
+End of classname legend:
+========================

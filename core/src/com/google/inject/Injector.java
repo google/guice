@@ -278,7 +278,7 @@ public interface Injector {
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    *
-   * @since 5.0
+   * @since 4.2.3
    */
   List<Element> getElements();
 
@@ -295,7 +295,7 @@ public interface Injector {
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    *
-   * @since 5.0
+   * @since 4.2.3
    */
   Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints();
 }

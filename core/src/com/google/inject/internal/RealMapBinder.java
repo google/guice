@@ -38,6 +38,7 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -317,6 +318,9 @@ public final class RealMapBinder<K, V> implements Module {
     Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> massagedEntrySetProviderKey =
         (Key) bindingSelection.getEntrySetBinder().getSetKey();
     binder.bind(bindingSelection.getEntrySetJavaxProviderKey()).to(massagedEntrySetProviderKey);
+
+    // Alias Map<K, ? extends V> to Map<K, V>
+    binder.bind(bindingSelection.getMapOfKeyExtendsValueKey()).to(bindingSelection.getMapKey());
   }
 
   @Override
@@ -364,6 +368,7 @@ public final class RealMapBinder<K, V> implements Module {
     private Key<Map<K, Collection<Provider<V>>>> providerCollectionMultimapKey;
     private Key<Map<K, Collection<javax.inject.Provider<V>>>> javaxProviderCollectionMultimapKey;
     private Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> entrySetJavaxProviderKey;
+    private Key<Map<K, ? extends V>> mapOfKeyExtendsValueKey;
 
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
 
@@ -485,7 +490,7 @@ public final class RealMapBinder<K, V> implements Module {
       // we don't build up this data structure
       if (duplicates != null) {
         initializationState = InitializationState.HAS_ERRORS;
-        reportDuplicateKeysError(duplicates, errors);
+        reportDuplicateKeysError(mapKey, duplicates, errors);
 
         return false;
       }
@@ -509,26 +514,9 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     private static <K, V> void reportDuplicateKeysError(
-        Multimap<K, Binding<V>> duplicates, Errors errors) {
-      StringBuilder sb = new StringBuilder("Map injection failed due to duplicated key ");
-      boolean first = true;
-      for (Map.Entry<K, Collection<Binding<V>>> entry : duplicates.asMap().entrySet()) {
-        K dupKey = entry.getKey();
-
-        if (first) {
-          first = false;
-          sb.append("\"").append(dupKey).append("\", from bindings:\n");
-        } else {
-          sb.append("\n and key: \"").append(dupKey).append("\", from bindings:\n");
-        }
-
-        for (Binding<V> dup : entry.getValue()) {
-          sb.append("\t at ").append(Errors.convert(dup.getSource())).append("\n");
-        }
-      }
-
-      // TODO(user): Add a different error for every duplicated key
-      errors.addMessage(sb.toString());
+        Key<Map<K, V>> mapKey, Multimap<K, Binding<V>> duplicates, Errors errors) {
+      errors.duplicateMapKey(mapKey, duplicates);
+        return;
     }
 
     private boolean containsElement(Element element) {
@@ -553,6 +541,7 @@ public final class RealMapBinder<K, V> implements Module {
           || key.equals(getJavaxProviderCollectionMultimapKey())
           || key.equals(entrySetBinder.getSetKey())
           || key.equals(getEntrySetJavaxProviderKey())
+          || key.equals(getMapOfKeyExtendsValueKey())
           || matchesValueKey(key);
     }
 
@@ -634,6 +623,19 @@ public final class RealMapBinder<K, V> implements Module {
         local =
             entrySetJavaxProviderKey =
                 mapKey.ofType(setOfEntryOfJavaxProviderOf(keyType, valueType));
+      }
+      return local;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Key<Map<K, ? extends V>> getMapOfKeyExtendsValueKey() {
+      Key<Map<K, ? extends V>> local = mapOfKeyExtendsValueKey;
+      if (local == null) {
+        Type extendsValue = Types.subtypeOf(valueType.getType());
+        Type mapOfKeyAndExtendsValue = Types.mapOf(keyType.getType(), extendsValue);
+        local =
+            mapOfKeyExtendsValueKey =
+                (Key<Map<K, ? extends V>>) mapKey.ofType(mapOfKeyAndExtendsValue);
       }
       return local;
     }
@@ -831,7 +833,8 @@ public final class RealMapBinder<K, V> implements Module {
           (Key<?>) bindingSelection.getJavaxProviderSetMultimapKey(),
           (Key<?>) bindingSelection.getProviderCollectionMultimapKey(),
           (Key<?>) bindingSelection.getJavaxProviderCollectionMultimapKey(),
-          (Key<?>) bindingSelection.getMultimapKey());
+          (Key<?>) bindingSelection.getMultimapKey(),
+          (Key<?>) bindingSelection.getMapOfKeyExtendsValueKey());
     }
 
     @Override
@@ -1346,7 +1349,9 @@ public final class RealMapBinder<K, V> implements Module {
   private static <K, V> InternalProvisionException createNullValueException(
       K key, Binding<V> binding) {
     return InternalProvisionException.create(
+        ErrorId.NULL_VALUE_IN_MAP,
         "Map injection failed due to null value for key \"%s\", bound at: %s",
-        key, binding.getSource());
+        key,
+        binding.getSource());
   }
 }

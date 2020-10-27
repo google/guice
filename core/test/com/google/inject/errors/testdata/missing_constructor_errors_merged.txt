@@ -1,0 +1,49 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingConstructor]: No injectable constructor for type MissingConstructorErrorTest$MissingNoArgConstructor.
+
+class MissingConstructorErrorTest$MissingNoArgConstructor does not have a @Inject annotated constructor or a no-arg constructor.
+
+Requested by:
+1  : MissingConstructorErrorTest$MissingNoArgConstructor.class(MissingConstructorErrorTest.java:27)
+     at MissingConstructorErrorTest$MissingConstructorModule.provideObject(MissingConstructorErrorTest.java:50)
+      \_ for 3rd parameter missingNoArgConstructor
+     at MissingConstructorErrorTest$MissingConstructorModule.provideObject(MissingConstructorErrorTest.java:50)
+2  : MissingConstructorErrorTest$MissingNoArgConstructor.class(MissingConstructorErrorTest.java:27)
+     at MissingConstructorErrorTest$DependsOnMissingNoArgConstructor.<init>(MissingConstructorErrorTest.java:90)
+      \_ for 1st parameter noArgConstructor
+     at MissingConstructorErrorTest$DependsOnMissingNoArgConstructorModule.configure(MissingConstructorErrorTest.java:96)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_CONSTRUCTOR
+
+2) [Guice/MissingConstructor]: No injectable constructor for type MissingConstructorErrorTest$PrivateConstructor.
+
+class MissingConstructorErrorTest$PrivateConstructor has a private no-arg constructor but it's not private. Guice can only use private no-arg constructor if it is defined in a private class.
+
+Requested by:
+1  : MissingConstructorErrorTest$PrivateConstructor.class(MissingConstructorErrorTest.java:1)
+     at MissingConstructorErrorTest$MissingConstructorModule.provideObject(MissingConstructorErrorTest.java:50)
+      \_ for 4th parameter privateConstructor
+     at MissingConstructorErrorTest$MissingConstructorModule.provideObject(MissingConstructorErrorTest.java:50)
+2  : MissingConstructorErrorTest$PrivateConstructor.class(MissingConstructorErrorTest.java:1)
+     at MissingConstructorErrorTest$DependsOnMissingNoArgConstructorModule.provideString(MissingConstructorErrorTest.java:101)
+      \_ for 1st parameter privateConstructor
+     at MissingConstructorErrorTest$DependsOnMissingNoArgConstructorModule.provideString(MissingConstructorErrorTest.java:101)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_CONSTRUCTOR
+
+2 errors
+
+======================
+Full classname legend:
+======================
+MissingConstructorErrorTest$DependsOnMissingNoArgConstructor:       "com.google.inject.errors.MissingConstructorErrorTest$DependsOnMissingNoArgConstructor"
+MissingConstructorErrorTest$DependsOnMissingNoArgConstructorModule: "com.google.inject.errors.MissingConstructorErrorTest$DependsOnMissingNoArgConstructorModule"
+MissingConstructorErrorTest$MissingConstructorModule:               "com.google.inject.errors.MissingConstructorErrorTest$MissingConstructorModule"
+MissingConstructorErrorTest$MissingNoArgConstructor:                "com.google.inject.errors.MissingConstructorErrorTest$MissingNoArgConstructor"
+MissingConstructorErrorTest$PrivateConstructor:                     "com.google.inject.errors.MissingConstructorErrorTest$PrivateConstructor"
+========================
+End of classname legend:
+========================

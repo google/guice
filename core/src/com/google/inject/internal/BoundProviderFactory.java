@@ -54,16 +54,11 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    context.pushState(providerKey, source);
-
     try {
       javax.inject.Provider<? extends T> provider = providerFactory.get(context, dependency, true);
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(providerKey);
-      } finally {
-        context.popState();
-
     }
   }
 

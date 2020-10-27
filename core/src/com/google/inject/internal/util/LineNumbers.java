@@ -42,9 +42,9 @@ import org.objectweb.asm.Opcodes;
  */
 final class LineNumbers {
 
-  private static final int ASM_API_LEVEL = Opcodes.ASM7;
+  private static final int ASM_API_LEVEL = Opcodes.ASM9;
 
-  private final Class type;
+  private final Class<?> type;
   private final Map<String, Integer> lines = Maps.newHashMap();
   private String source;
   private int firstLine = Integer.MAX_VALUE;
@@ -54,7 +54,7 @@ final class LineNumbers {
    *
    * @param type the class to read line number information from
    */
-  public LineNumbers(Class type) throws IOException {
+  public LineNumbers(Class<?> type) throws IOException {
     this.type = type;
 
     if (!type.isArray()) {
@@ -115,29 +115,21 @@ final class LineNumbers {
 
   private String memberKey(Member member) {
     checkNotNull(member, "member");
-
-    /*if[AOP]*/
     if (member instanceof Field) {
       return member.getName();
-
     } else if (member instanceof Method) {
       return member.getName() + org.objectweb.asm.Type.getMethodDescriptor((Method) member);
 
     } else if (member instanceof Constructor) {
       StringBuilder sb = new StringBuilder().append("<init>(");
-      for (Class param : ((Constructor) member).getParameterTypes()) {
+      for (Class<?> param : ((Constructor<?>) member).getParameterTypes()) {
         sb.append(org.objectweb.asm.Type.getDescriptor(param));
       }
       return sb.append(")V").toString();
-
     } else {
       throw new IllegalArgumentException(
           "Unsupported implementation class for Member, " + member.getClass());
     }
-    /*end[AOP]*/
-    /*if[NO_AOP]
-    return "<NO_MEMBER_KEY>";
-    end[NO_AOP]*/
   }
 
   private class LineNumberReader extends ClassVisitor {

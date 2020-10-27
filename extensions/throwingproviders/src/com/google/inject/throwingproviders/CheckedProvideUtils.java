@@ -19,6 +19,7 @@ package com.google.inject.throwingproviders;
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.ErrorId;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 import java.lang.annotation.Annotation;
@@ -48,6 +49,7 @@ class CheckedProvideUtils {
       if (constructor.isAnnotationPresent(ThrowingInject.class)) {
         if (cxtor != null) {
           errors.addMessage(
+              ErrorId.MISSING_CONSTRUCTOR,
               "%s has more than one constructor annotated with @ThrowingInject. "
                   + CONSTRUCTOR_RULES,
               rawType);
@@ -65,7 +67,9 @@ class CheckedProvideUtils {
 
     if (cxtor == null) {
       errors.addMessage(
-          "Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES, rawType);
+          ErrorId.MISSING_CONSTRUCTOR,
+          "Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES,
+          rawType);
     }
 
     for (Message msg : errors.getMessages()) {
@@ -75,6 +79,7 @@ class CheckedProvideUtils {
   }
 
   /** Adds errors to the binder if the exceptions aren't valid. */
+  @SuppressWarnings("rawtypes") // Class literal uses raw type.
   static void validateExceptions(
       Binder binder,
       Iterable<TypeLiteral<?>> actualExceptionTypes,

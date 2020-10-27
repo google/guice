@@ -25,7 +25,6 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.servlet.ServletModule;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
-import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.config.entities.InterceptorConfig;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.interceptor.Interceptor;
@@ -73,6 +72,7 @@ public class GuiceObjectFactory extends ObjectFactory {
 
   Set<Class<?>> boundClasses = new HashSet<>();
 
+  @SuppressWarnings("rawtypes") // Parent class uses raw type.
   @Override
   public Class getClassInstance(String name) throws ClassNotFoundException {
     Class<?> clazz = super.getClassInstance(name);
@@ -102,8 +102,8 @@ public class GuiceObjectFactory extends ObjectFactory {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public Object buildBean(Class clazz, Map extraContext) {
+  @SuppressWarnings({"unchecked", "rawtypes"}) // Parent class uses raw type.
+  public Object buildBean(Class clazz, Map<String, Object> extraContext) {
     if (injector == null) {
       synchronized (this) {
         if (injector == null) {
@@ -164,8 +164,8 @@ public class GuiceObjectFactory extends ObjectFactory {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Interceptor buildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
-      throws ConfigurationException {
+  public Interceptor buildInterceptor(
+      InterceptorConfig interceptorConfig, Map<String, String> interceptorRefParams) {
     // Ensure the interceptor class is present.
     Class<? extends Interceptor> interceptorClass;
     try {
@@ -180,20 +180,22 @@ public class GuiceObjectFactory extends ObjectFactory {
     return providedInterceptor;
   }
 
-  Interceptor superBuildInterceptor(InterceptorConfig interceptorConfig, Map interceptorRefParams)
-      throws ConfigurationException {
+  Interceptor superBuildInterceptor(
+      InterceptorConfig interceptorConfig, Map<String, String> interceptorRefParams) {
     return super.buildInterceptor(interceptorConfig, interceptorRefParams);
   }
 
   class ProvidedInterceptor implements Interceptor {
 
     final InterceptorConfig config;
-    final Map params;
+    final Map<String, String> params;
     final Class<? extends Interceptor> interceptorClass;
     Interceptor delegate;
 
     ProvidedInterceptor(
-        InterceptorConfig config, Map params, Class<? extends Interceptor> interceptorClass) {
+        InterceptorConfig config,
+        Map<String, String> params,
+        Class<? extends Interceptor> interceptorClass) {
       this.config = config;
       this.params = params;
       this.interceptorClass = interceptorClass;

@@ -52,6 +52,7 @@ import junit.framework.TestCase;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
+@SuppressWarnings("unchecked") // Safe because mock will only ever return HttpServlet
 public class ServletPipelineRequestDispatcherTest extends TestCase {
   private static final Key<HttpServlet> HTTP_SERLVET_KEY = Key.get(HttpServlet.class);
   private static final String A_KEY = "thinglyDEgintly" + new Date() + UUID.randomUUID();
@@ -68,7 +69,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             null);
 
     final Injector injector = createMock(Injector.class);
-    final Binding binding = createMock(Binding.class);
+    final Binding<HttpServlet> binding = createMock(Binding.class);
     final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
     expect(requestMock.getAttribute(A_KEY)).andReturn(A_VALUE);
@@ -128,7 +129,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             null);
 
     final Injector injector = createMock(Injector.class);
-    final Binding binding = createMock(Binding.class);
+    final Binding<HttpServlet> binding = createMock(Binding.class);
     final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 
@@ -208,7 +209,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             null);
 
     final Injector injector = createMock(Injector.class);
-    final Binding binding = createMock(Binding.class);
+    final Binding<HttpServlet> binding = createMock(Binding.class);
     final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 

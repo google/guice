@@ -1,0 +1,33 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for Long annotated with @ErrorMessagesTest$OuterClass$UserId() was bound.
+
+Requested by:
+1  : ErrorMessagesTest$MissingBindingsModule.providerAnotherFoo(ErrorMessagesTest.java:46)
+      \_ for 1st parameter unused
+     at ErrorMessagesTest$MissingBindingsModule.providerAnotherFoo(ErrorMessagesTest.java:46)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+2) [Guice/MissingImplementation]: No implementation for String annotated with @ErrorMessagesTest$UserId() was bound.
+
+Requested by:
+1  : ErrorMessagesTest$MissingBindingsModule.provideFoo(ErrorMessagesTest.java:41)
+      \_ for 1st parameter unused
+     at ErrorMessagesTest$MissingBindingsModule.provideFoo(ErrorMessagesTest.java:41)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+2 errors
+
+======================
+Full classname legend:
+======================
+ErrorMessagesTest$MissingBindingsModule: "com.google.inject.errors.ErrorMessagesTest$MissingBindingsModule"
+ErrorMessagesTest$OuterClass$UserId:     "com.google.inject.errors.ErrorMessagesTest$OuterClass$UserId"
+ErrorMessagesTest$UserId:                "com.google.inject.errors.ErrorMessagesTest$UserId"
+========================
+End of classname legend:
+========================

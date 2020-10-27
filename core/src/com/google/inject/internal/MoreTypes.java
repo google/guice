@@ -282,7 +282,7 @@ public class MoreTypes {
 
     // we skip searching through interfaces if unknown is an interface
     if (toResolve.isInterface()) {
-      Class[] interfaces = rawType.getInterfaces();
+      Class<?>[] interfaces = rawType.getInterfaces();
       for (int i = 0, length = interfaces.length; i < length; i++) {
         if (interfaces[i] == toResolve) {
           return rawType.getGenericInterfaces()[i];
@@ -309,7 +309,7 @@ public class MoreTypes {
     return toResolve;
   }
 
-  public static Type resolveTypeVariable(Type type, Class<?> rawType, TypeVariable unknown) {
+  public static Type resolveTypeVariable(Type type, Class<?> rawType, TypeVariable<?> unknown) {
     Class<?> declaredByRaw = declaringClassOf(unknown);
 
     // we can't reduce this further
@@ -339,7 +339,7 @@ public class MoreTypes {
    * Returns the declaring class of {@code typeVariable}, or {@code null} if it was not declared by
    * a class.
    */
-  private static Class<?> declaringClassOf(TypeVariable typeVariable) {
+  private static Class<?> declaringClassOf(TypeVariable<?> typeVariable) {
     GenericDeclaration genericDeclaration = typeVariable.getGenericDeclaration();
     return genericDeclaration instanceof Class ? (Class<?>) genericDeclaration : null;
   }
@@ -356,11 +356,32 @@ public class MoreTypes {
 
       this.ownerType = ownerType == null ? null : canonicalize(ownerType);
       this.rawType = canonicalize(rawType);
-      this.typeArguments = typeArguments.clone();
-      for (int t = 0; t < this.typeArguments.length; t++) {
-        checkNotNull(this.typeArguments[t], "type parameter");
-        checkNotPrimitive(this.typeArguments[t], "type parameters");
-        this.typeArguments[t] = canonicalize(this.typeArguments[t]);
+      int providedArgumentLength = typeArguments.length;
+      Type[] clonedTypeArguments = typeArguments.clone();
+      int validArgLength = providedArgumentLength;
+      if (this.rawType instanceof Class) {
+        Class<?> klass = (Class) this.rawType;
+        int classArgumentLength = klass.getTypeParameters().length;
+        // TODO(b/163147654): change following if condition from < to =
+        if (providedArgumentLength < classArgumentLength) {
+          throw new IllegalArgumentException(
+              "Length of provided type arguments is less than length of required parameters for"
+                  + " class:"
+                  + klass.getName()
+                  + " provided type argument length:"
+                  + providedArgumentLength
+                  + " length of class parameters:"
+                  + classArgumentLength);
+        } else if (providedArgumentLength > classArgumentLength) {
+          validArgLength = classArgumentLength;
+        }
+      }
+
+      this.typeArguments = new Type[validArgLength];
+      for (int t = 0; t < validArgLength; t++) {
+        checkNotNull(clonedTypeArguments[t], "type parameter");
+        checkNotPrimitive(clonedTypeArguments[t], "type parameters");
+        this.typeArguments[t] = canonicalize(clonedTypeArguments[t]);
       }
     }
 
@@ -427,7 +448,7 @@ public class MoreTypes {
 
     private static void ensureOwnerType(Type ownerType, Type rawType) {
       if (rawType instanceof Class<?>) {
-        Class rawTypeAsClass = (Class) rawType;
+        Class<?> rawTypeAsClass = (Class<?>) rawType;
         checkArgument(
             ownerType != null || rawTypeAsClass.getEnclosingClass() == null,
             "No owner type for enclosed %s",

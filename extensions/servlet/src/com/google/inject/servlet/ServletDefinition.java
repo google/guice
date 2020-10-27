@@ -115,7 +115,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       return;
     }
 
-    //initialize our servlet with the configured context params and servlet context
+    // initialize our servlet with the configured context params and servlet context
     httpServlet.init(
         new ServletConfig() {
           @Override
@@ -134,7 +134,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
           }
 
           @Override
-          public Enumeration getInitParameterNames() {
+          public Enumeration<?> getInitParameterNames() {
             return Iterators.asEnumeration(initParams.keySet().iterator());
           }
         });
@@ -236,9 +236,9 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
             return pathInfo;
           }
 
-          // NOTE(dhanji): These two are a bit of a hack to help ensure that request dispatcher-sent
+          // NOTE(user): These two are a bit of a hack to help ensure that request dispatcher-sent
           // requests don't use the same path info that was memoized for the original request.
-          // NOTE(iqshum): I don't think this is possible, since the dispatcher-sent request would
+          // NOTE(user): I don't think this is possible, since the dispatcher-sent request would
           // perform its own wrapping.
           private boolean isPathInfoComputed() {
             return pathInfoComputed

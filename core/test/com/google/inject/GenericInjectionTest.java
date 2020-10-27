@@ -65,6 +65,8 @@ public class GenericInjectionTest extends TestCase {
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
+              // Unavoidable because class literal uses raw type
+              @SuppressWarnings({"unchecked", "rawtypes"})
               @Override
               protected void configure() {
                 bind(Key.get(new TypeLiteral<Parameterized<String>>() {}))

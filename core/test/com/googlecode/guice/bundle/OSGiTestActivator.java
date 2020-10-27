@@ -27,6 +27,8 @@ import com.google.inject.matcher.AbstractMatcher;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Random;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -482,6 +484,7 @@ public class OSGiTestActivator implements BundleActivator {
 
             // this registers: A + PUBLIC -> AA, A + PROTECTED -> AB, etc...
             String suffix = TEST_CLAZZES[visibility.ordinal()].getSimpleName();
+            @SuppressWarnings("rawtypes") // Must use raw type here because of wildcard in api.
             Class imp = bundle.loadClass(api.getName() + suffix);
             bind(api).annotatedWith(named(visibility.name())).to(imp);
 
@@ -493,7 +496,6 @@ public class OSGiTestActivator implements BundleActivator {
     }
   }
 
-  /*if[AOP]*/
   // applies method-interception to classes with enough visibility
   static class InterceptorModule extends AbstractModule {
     @Override
@@ -524,16 +526,15 @@ public class OSGiTestActivator implements BundleActivator {
               return (methodModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0;
             }
           },
-          new org.aopalliance.intercept.MethodInterceptor() {
+          new MethodInterceptor() {
             @Override
-            public Object invoke(org.aopalliance.intercept.MethodInvocation mi) throws Throwable {
+            public Object invoke(MethodInvocation mi) throws Throwable {
 
               return mi.proceed();
             }
           });
     }
   }
-  /*end[AOP]*/
 
   // called from OSGi when bundle starts
   @Override
@@ -542,25 +543,19 @@ public class OSGiTestActivator implements BundleActivator {
     final Bundle bundle = context.getBundle();
 
     Injector injector = Guice.createInjector(new TestModule(bundle));
-    /*if[AOP]*/
     Injector aopInjector = Guice.createInjector(new TestModule(bundle), new InterceptorModule());
-    /*end[AOP]*/
 
     // test code-generation support
     for (Class<?> api : TEST_CLAZZES) {
       for (Visibility vis : Visibility.values()) {
         injector.getInstance(Key.get(api, named(vis.name())));
-        /*if[AOP]*/
         aopInjector.getInstance(Key.get(api, named(vis.name())));
-        /*end[AOP]*/
       }
     }
 
     // test injection of system class (issue 343)
     injector.getInstance(Random.class);
-    /*if[AOP]*/
     aopInjector.getInstance(Random.class);
-    /*end[AOP]*/
   }
 
   // called from OSGi when bundle stops

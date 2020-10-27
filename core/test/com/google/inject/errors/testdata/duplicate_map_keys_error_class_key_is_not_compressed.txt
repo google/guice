@@ -1,0 +1,24 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/DuplicateMapKey]: Duplicate key "class com.google.inject.errors.DuplicateMapKeyErrorTest$Foo" found in Map<Class<?>, String>.
+
+Duplicates:
+  Key: "class com.google.inject.errors.DuplicateMapKeyErrorTest$Foo"
+  Bound at:
+    1 : DuplicateMapKeyErrorTest$ClassKeyMapBinderModule.provideFoo(DuplicateMapKeyErrorTest.java:104)
+    2 : DuplicateMapKeyErrorTest$ClassKeyMapBinderModule.provideFoo2(DuplicateMapKeyErrorTest.java:110)
+
+MapBinder declared at:
+  DuplicateMapKeyErrorTest$ClassKeyMapBinderModule.provideFoo(DuplicateMapKeyErrorTest.java:104)
+      \_ installed by: DuplicateMapKeyErrorTest$ClassKeyMapBinderModule -> RealMapBinder
+
+1 error
+
+======================
+Full classname legend:
+======================
+DuplicateMapKeyErrorTest$ClassKeyMapBinderModule: "com.google.inject.errors.DuplicateMapKeyErrorTest$ClassKeyMapBinderModule"
+RealMapBinder:                                    "com.google.inject.internal.RealMapBinder"
+========================
+End of classname legend:
+========================

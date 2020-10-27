@@ -65,6 +65,8 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
 public class ElementsTest extends TestCase {
@@ -406,7 +408,7 @@ public class ElementsTest extends TestCase {
             bind(Double.class).toProvider(doubleJavaxProvider);
             bind(List.class).toProvider(ListProvider.class);
             bind(Collection.class).toProvider(Key.get(ListProvider.class));
-            bind(Iterable.class).toProvider(new TypeLiteral<TProvider<List>>() {});
+            bind(Iterable.class).toProvider(new TypeLiteral<TProvider<List<Object>>>() {});
           }
         },
         new FailingElementVisitor() {
@@ -511,7 +513,7 @@ public class ElementsTest extends TestCase {
                 new FailingTargetVisitor<T>() {
                   @Override
                   public Void visit(ProviderKeyBinding<? extends T> binding) {
-                    assertEquals(new Key<TProvider<List>>() {}, binding.getProviderKey());
+                    assertEquals(new Key<TProvider<List<Object>>>() {}, binding.getProviderKey());
                     return null;
                   }
                 });
@@ -726,14 +728,14 @@ public class ElementsTest extends TestCase {
         });
   }
 
-  /*if[AOP]*/
   public void testBindIntercepor() {
+    @SuppressWarnings("rawtypes") // Unavoidable since subclassesOf returns raw type
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
     final Matcher<Object> methodMatcher = Matchers.any();
-    final org.aopalliance.intercept.MethodInterceptor methodInterceptor =
-        new org.aopalliance.intercept.MethodInterceptor() {
+    final MethodInterceptor methodInterceptor =
+        new MethodInterceptor() {
           @Override
-          public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
+          public Object invoke(MethodInvocation methodInvocation) {
             return null;
           }
         };
@@ -755,7 +757,6 @@ public class ElementsTest extends TestCase {
           }
         });
   }
-  /*end[AOP]*/
 
   public void testBindScope() {
     checkModule(
@@ -1012,9 +1013,10 @@ public class ElementsTest extends TestCase {
   }
 
   public void testNewPrivateBinder() {
-    final Key<Collection> collection = Key.get(Collection.class, SampleAnnotation.class);
-    final Key<ArrayList> arrayList = Key.get(ArrayList.class);
-    final ImmutableSet<Key<?>> collections = ImmutableSet.<Key<?>>of(arrayList, collection);
+    final Key<Collection<Object>> collection =
+        new Key<Collection<Object>>(SampleAnnotation.class) {};
+    final Key<ArrayList<Object>> arrayList = new Key<ArrayList<Object>>() {};
+    final ImmutableSet<Key<?>> collections = ImmutableSet.of(arrayList, collection);
 
     final Key<?> a = Key.get(String.class, Names.named("a"));
     final Key<?> b = Key.get(String.class, Names.named("b"));
@@ -1025,15 +1027,15 @@ public class ElementsTest extends TestCase {
           @Override
           protected void configure() {
             PrivateBinder one = binder().newPrivateBinder();
-            one.expose(ArrayList.class);
-            one.expose(Collection.class).annotatedWith(SampleAnnotation.class);
-            one.bind(List.class).to(ArrayList.class);
+            one.expose(arrayList);
+            one.expose(collection);
+            one.bind(new Key<List<Object>>() {}).to(arrayList);
 
             PrivateBinder two =
                 binder().withSource("1 FooBar").newPrivateBinder().withSource("2 FooBar");
             two.expose(String.class).annotatedWith(Names.named("a"));
             two.expose(b);
-            two.bind(List.class).to(ArrayList.class);
+            two.bind(new Key<List<Object>>() {}).to(arrayList);
           }
         },
         new FailingElementVisitor() {
@@ -1045,7 +1047,7 @@ public class ElementsTest extends TestCase {
                 new FailingElementVisitor() {
                   @Override
                   public <T> Void visit(Binding<T> binding) {
-                    assertEquals(Key.get(List.class), binding.getKey());
+                    assertEquals(new Key<List<Object>>() {}, binding.getKey());
                     return null;
                   }
                 });
@@ -1063,7 +1065,7 @@ public class ElementsTest extends TestCase {
                   @Override
                   public <T> Void visit(Binding<T> binding) {
                     assertEquals("2 FooBar", binding.getSource().toString());
-                    assertEquals(Key.get(List.class), binding.getKey());
+                    assertEquals(new Key<List<Object>>() {}, binding.getKey());
                     return null;
                   }
                 });
@@ -1209,6 +1211,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
   public void testBindToConstructor() throws NoSuchMethodException, NoSuchFieldException {
     final Constructor<A> aConstructor = A.class.getDeclaredConstructor();
     final Constructor<B> bConstructor = B.class.getDeclaredConstructor(Object.class);
@@ -1267,9 +1270,7 @@ public class ElementsTest extends TestCase {
                         field,
                         getOnlyElement(constructorBinding.getInjectableMembers()).getMember());
                     assertEquals(2, constructorBinding.getDependencies().size());
-                    /*if[AOP]*/
                     assertEquals(ImmutableMap.of(), constructorBinding.getMethodInterceptors());
-                    /*end[AOP]*/
                     return null;
                   }
                 });
@@ -1376,10 +1377,10 @@ public class ElementsTest extends TestCase {
     }
   }
 
-  private static class ListProvider implements Provider<List> {
+  private static class ListProvider implements Provider<List<Object>> {
     @Override
-    public List get() {
-      return new ArrayList();
+    public List<Object> get() {
+      return new ArrayList<>();
     }
   }
 

@@ -1,0 +1,33 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/BindingAlreadySet]: BindingAlreadySetErrorTest$First was bound multiple times.
+
+Bound at:
+1  : BindingAlreadySetErrorTest$BindWithProviderMethodModule.provideFirstClass(BindingAlreadySetErrorTest.java:33)
+2  : BindingAlreadySetErrorTest$BindWithDslModule.configure(BindingAlreadySetErrorTest.java:40)
+
+Learn more:
+  https://github.com/google/guice/wiki/BINDING_ALREADY_SET
+
+2) [Guice/BindingAlreadySet]: BindingAlreadySetErrorTest$Second was bound multiple times.
+
+Bound at:
+1  : BindingAlreadySetErrorTest$BindWithCustomScannerModule.second(BindingAlreadySetErrorTest.java:57)
+2  : BindingAlreadySetErrorTest$BindWithDslModule.configure(BindingAlreadySetErrorTest.java:41)
+
+Learn more:
+  https://github.com/google/guice/wiki/BINDING_ALREADY_SET
+
+2 errors
+
+======================
+Full classname legend:
+======================
+BindingAlreadySetErrorTest$BindWithCustomScannerModule:  "com.google.inject.errors.BindingAlreadySetErrorTest$BindWithCustomScannerModule"
+BindingAlreadySetErrorTest$BindWithDslModule:            "com.google.inject.errors.BindingAlreadySetErrorTest$BindWithDslModule"
+BindingAlreadySetErrorTest$BindWithProviderMethodModule: "com.google.inject.errors.BindingAlreadySetErrorTest$BindWithProviderMethodModule"
+BindingAlreadySetErrorTest$First:                        "com.google.inject.errors.BindingAlreadySetErrorTest$First"
+BindingAlreadySetErrorTest$Second:                       "com.google.inject.errors.BindingAlreadySetErrorTest$Second"
+========================
+End of classname legend:
+========================

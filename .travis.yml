@@ -6,14 +6,14 @@ cache:
     - $HOME/.m2
 
 jdk:
+  - openjdk15
   - openjdk11
-  - openjdk9
   - openjdk8
 
 before_install:
-  - if [ "$LABEL" == "docs" ]; then wget --no-check-certificate https://www.apache.org/dist/ant/binaries/apache-ant-1.10.6-bin.tar.gz;  fi
-  - if [ "$LABEL" == "docs" ]; then tar -xzvf apache-ant-1.10.6-bin.tar.gz; fi
-  - if [ "$LABEL" == "docs" ]; then export PATH="$(pwd)/apache-ant-1.10.6/bin:$PATH"; fi
+  - if [ "$LABEL" == "docs" ]; then wget --no-check-certificate "https://www.apache.org/dist/ant/binaries/apache-ant-$ANT-bin.tar.gz";  fi
+  - if [ "$LABEL" == "docs" ]; then tar -xzvf "apache-ant-$ANT-bin.tar.gz"; fi
+  - if [ "$LABEL" == "docs" ]; then export PATH="$(pwd)/apache-ant-$ANT/bin:$PATH"; fi
 
 env:
   global:
@@ -21,7 +21,7 @@ env:
     - secure: "pAeI941ODNSo6F7A94WFafxYqp2kdeFTJksMLVHljT0h2nX6/236OXn/iZXiB+FbXe/DkQIHN3n1IZRwE8UJAbSAwoaPUWenPy4mNAhnI4L/rwysREwq5FKSFTWJet9HitfFR57ezLGOV0VLFfH1xGsNWabHzzbwbV3WMl9pH0M="
     - secure: "Pqj194YmdK0va4bOkbjVG0wCZ7sbB5k3Qq66zSG2M26M21uHonwhXprdtSeYZ5Oy9fWcQte7jSA69euyYyLriDH6DU2NE34scK2Y1yO6SCfx5SGr3XuxHWqxtNOxoUaH4RP1WR/9CRkBg8kBxzWus3M2ZeqElu33/p2CtgJEdJg="
   matrix:
-    - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true"
+    - LABEL=docs       CMD="ant javadoc jdiff" INSTALL="/bin/true" ANT=1.10.9
     - LABEL=mvn        CMD="mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn -P!standard-with-extra-repos dependency:go-offline test clean --quiet --fail-never -DskipTests=true"
 
 install:

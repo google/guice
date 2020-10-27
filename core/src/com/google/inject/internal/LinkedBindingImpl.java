@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
+import static com.google.inject.spi.Elements.withTrustedSource;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -27,12 +30,12 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.LinkedKeyBinding;
 import java.util.Set;
 
-public final class LinkedBindingImpl<T> extends BindingImpl<T>
+final class LinkedBindingImpl<T> extends BindingImpl<T>
     implements LinkedKeyBinding<T>, HasDependencies {
 
   final Key<? extends T> targetKey;
 
-  public LinkedBindingImpl(
+  LinkedBindingImpl(
       InjectorImpl injector,
       Key<T> key,
       Object source,
@@ -43,7 +46,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T>
     this.targetKey = targetKey;
   }
 
-  public LinkedBindingImpl(Object source, Key<T> key, Scoping scoping, Key<? extends T> targetKey) {
+  LinkedBindingImpl(Object source, Key<T> key, Scoping scoping, Key<? extends T> targetKey) {
     super(source, key, scoping);
     this.targetKey = targetKey;
   }
@@ -75,7 +78,11 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T>
 
   @Override
   public void applyTo(Binder binder) {
-    getScoping().applyTo(binder.withSource(getSource()).bind(getKey()).to(getLinkedKey()));
+    getScoping()
+        .applyTo(
+            withTrustedSource(GUICE_INTERNAL, binder, getSource())
+                .bind(getKey())
+                .to(getLinkedKey()));
   }
 
   @Override

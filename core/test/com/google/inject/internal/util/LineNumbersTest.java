@@ -17,20 +17,29 @@
 package com.google.inject.internal.util;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import java.lang.reflect.Modifier;
 import javax.inject.Inject;
-import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class LineNumbersTest extends TestCase {
+@RunWith(JUnit4.class)
+public class LineNumbersTest {
 
+  @Test
   public void testLineNumbers() {
     try {
       Guice.createInjector(
@@ -44,10 +53,9 @@ public class LineNumbersTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for " + B.class.getName() + " was bound.",
-          "for the 1st parameter of " + A.class.getName() + ".<init>(LineNumbersTest.java:",
-          "at " + LineNumbersTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "No implementation for LineNumbersTest$B was bound.",
+          "for 1st parameter b",
+          "at LineNumbersTest$1.configure");
     }
   }
 
@@ -58,8 +66,10 @@ public class LineNumbersTest extends TestCase {
 
   public interface B {}
 
-  /*if[AOP]*/
+  @Test
   public void testCanHandleLineNumbersForGuiceGeneratedClasses() {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
+
     try {
       Guice.createInjector(
           new AbstractModule() {
@@ -68,10 +78,9 @@ public class LineNumbersTest extends TestCase {
               bindInterceptor(
                   Matchers.only(A.class),
                   Matchers.any(),
-                  new org.aopalliance.intercept.MethodInterceptor() {
+                  new MethodInterceptor() {
                     @Override
-                    public Object invoke(
-                        org.aopalliance.intercept.MethodInvocation methodInvocation) {
+                    public Object invoke(MethodInvocation methodInvocation) {
                       return null;
                     }
                   });
@@ -83,10 +92,9 @@ public class LineNumbersTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for " + B.class.getName() + " was bound.",
-          "for the 1st parameter of " + A.class.getName() + ".<init>(LineNumbersTest.java:",
-          "at " + LineNumbersTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "No implementation for LineNumbersTest$B was bound.",
+          "for 1st parameter b",
+          "at LineNumbersTest$2.configure");
     }
   }
 
@@ -132,6 +140,7 @@ public class LineNumbersTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnavailableByteCodeShowsUnknownSource() {
     try {
       Guice.createInjector(
@@ -145,13 +154,13 @@ public class LineNumbersTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for " + B.class.getName() + " was bound.",
-          "for the 1st parameter of " + GeneratingClassLoader.name + ".<init>(Unknown Source)",
-          "at " + LineNumbersTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "No implementation for LineNumbersTest$B was bound.",
+          "for 1st parameter",
+          "at LineNumbersTest$3.configure");
     }
   }
 
+  @Test
   public void testGeneratedClassesCanSucceed() {
     final Class<?> generated = new GeneratingClassLoader().generate();
     Injector injector =
@@ -166,5 +175,4 @@ public class LineNumbersTest extends TestCase {
     Object instance = injector.getInstance(generated);
     assertEquals(instance.getClass(), generated);
   }
-  /*end[AOP]*/
 }

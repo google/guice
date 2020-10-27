@@ -81,13 +81,13 @@ public final class WeakKeySetUtils {
     // if we're expecting it to not be blacklisted, loop around and wait for threads to run.
     if (!isBlacklisted) {
       for (int i = 0; i < 10; i++) {
-        if (!((InjectorImpl) injector).state.isBlacklisted(key)) {
+        if (!((InjectorImpl) injector).getJitBindingData().isBannedKey(key)) {
           break;
         }
         sleep();
       }
     }
-    assertEquals(isBlacklisted, ((InjectorImpl) injector).state.isBlacklisted(key));
+    assertEquals(isBlacklisted, ((InjectorImpl) injector).getJitBindingData().isBannedKey(key));
   }
 
   private static void sleep() {
@@ -96,6 +96,7 @@ public final class WeakKeySetUtils {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
+    // TODO(b/160912368): fix the ThreadPriorityCheck errorprone warning on this line.
     Thread.yield();
   }
 }

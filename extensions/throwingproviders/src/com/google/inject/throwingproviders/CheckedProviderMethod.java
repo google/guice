@@ -48,7 +48,10 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   private final ImmutableSet<Dependency<?>> dependencies;
   private final List<Provider<?>> parameterProviders;
   private final boolean exposed;
+
+  @SuppressWarnings("rawtypes") // Class literal uses rawtypes.
   private final Class<? extends CheckedProvider> checkedProvider;
+
   private final List<TypeLiteral<?>> exceptionTypes;
   private final boolean scopeExceptions;
 

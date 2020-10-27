@@ -29,6 +29,7 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A support class for {@link Module}s which reduces repetition and results in a more readable
@@ -134,18 +135,15 @@ public abstract class AbstractModule implements Module {
     binder().requestStaticInjection(types);
   }
 
-  /*if[AOP]*/
   /**
-   * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
-   *     com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])
+   * @see {@link Binder#bindInterceptor(com.google.inject.matcher.Matcher, MethodInterceptor[])}.
    */
   protected void bindInterceptor(
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      org.aopalliance.intercept.MethodInterceptor... interceptors) {
+      MethodInterceptor... interceptors) {
     binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
-  /*end[AOP]*/
 
   /**
    * Adds a dependency from this module to {@code key}. When the injector is created, Guice will

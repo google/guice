@@ -30,13 +30,12 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class StackTraceElements {
+public final class StackTraceElements {
 
   private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
   private static final InMemoryStackTraceElement[] EMPTY_INMEMORY_STACK_TRACE =
       new InMemoryStackTraceElement[0];
 
-  /*if[AOP]*/
   static final LoadingCache<Class<?>, LineNumbers> lineNumbersCache =
       CacheBuilder.newBuilder()
           .weakKeys()
@@ -52,7 +51,6 @@ public class StackTraceElements {
                   }
                 }
               });
-  /*end[AOP]*/
 
   private static final ConcurrentMap<InMemoryStackTraceElement, InMemoryStackTraceElement>
       elementCache = new ConcurrentHashMap<>();
@@ -65,35 +63,20 @@ public class StackTraceElements {
       return SourceProvider.UNKNOWN_SOURCE;
     }
 
-    Class declaringClass = member.getDeclaringClass();
-
-    /*if[AOP]*/
+    Class<?> declaringClass = member.getDeclaringClass();
     LineNumbers lineNumbers = lineNumbersCache.getUnchecked(declaringClass);
     String fileName = lineNumbers.getSource();
     Integer lineNumberOrNull = lineNumbers.getLineNumber(member);
     int lineNumber = lineNumberOrNull == null ? lineNumbers.getFirstLine() : lineNumberOrNull;
-    /*end[AOP]*/
-    /*if[NO_AOP]
-    String fileName = null;
-    int lineNumber = -1;
-    end[NO_AOP]*/
-
     Class<? extends Member> memberType = Classes.memberType(member);
     String memberName = memberType == Constructor.class ? "<init>" : member.getName();
     return new StackTraceElement(declaringClass.getName(), memberName, fileName, lineNumber);
   }
 
   public static Object forType(Class<?> implementation) {
-    /*if[AOP]*/
     LineNumbers lineNumbers = lineNumbersCache.getUnchecked(implementation);
     int lineNumber = lineNumbers.getFirstLine();
     String fileName = lineNumbers.getSource();
-    /*end[AOP]*/
-    /*if[NO_AOP]
-    String fileName = null;
-    int lineNumber = -1;
-    end[NO_AOP]*/
-
     return new StackTraceElement(implementation.getName(), "class", fileName, lineNumber);
   }
 
@@ -164,9 +147,9 @@ public class StackTraceElements {
 
   /** In-Memory version of {@link StackTraceElement} that does not store the file name. */
   public static class InMemoryStackTraceElement {
-    private String declaringClass;
-    private String methodName;
-    private int lineNumber;
+    private final String declaringClass;
+    private final String methodName;
+    private final int lineNumber;
 
     InMemoryStackTraceElement(StackTraceElement ste) {
       this(ste.getClassName(), ste.getMethodName(), ste.getLineNumber());
@@ -216,4 +199,6 @@ public class StackTraceElements {
       return declaringClass + "." + methodName + "(" + lineNumber + ")";
     }
   }
+
+  private StackTraceElements() {}
 }

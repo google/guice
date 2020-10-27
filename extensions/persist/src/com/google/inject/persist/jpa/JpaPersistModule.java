@@ -125,7 +125,7 @@ public final class JpaPersistModule extends PersistModule {
 
             // Don't intercept non-finder methods like equals and hashcode.
             if (!method.isAnnotationPresent(Finder.class)) {
-              // NOTE(dhanji): This is not ideal, we are using the invocation handler's equals
+              // NOTE(user): This is not ideal, we are using the invocation handler's equals
               // and hashcode as a proxy (!) for the proxy's equals and hashcode.
               return method.invoke(this, args);
             }

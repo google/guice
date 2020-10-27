@@ -17,6 +17,7 @@
 package com.google.inject.testing.fieldbinder;
 
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.Iterables;
@@ -29,11 +30,15 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.RestrictedBindingSource;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.ElementSource;
 import com.google.inject.testing.fieldbinder.BoundFieldModule.BoundFieldInfo;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Qualifier;
@@ -144,9 +149,7 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ConfigurationException e) {
-      assertContains(
-          e.getMessage(),
-          "No implementation for java.lang.Integer (with no qualifier annotation) was bound");
+      assertContains(e.getMessage(), "No injectable constructor for type Integer.");
     }
   }
 
@@ -547,9 +550,7 @@ public class BoundFieldModuleTest extends TestCase {
       injector.getInstance(Integer.class);
       fail();
     } catch (ConfigurationException e) {
-      assertContains(
-          e.getMessage(),
-          "No implementation for java.lang.Integer (with no qualifier annotation) was bound");
+      assertContains(e.getMessage(), "No injectable constructor for type Integer.");
     }
   }
 
@@ -609,6 +610,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testArray, injector.getInstance(Integer[].class));
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes
   public void testRawProviderCannotBeBound() {
     final Integer testValue = 1024;
     Object instance =
@@ -636,6 +638,7 @@ public class BoundFieldModuleTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes
   public void testExplicitlyBoundRawProviderCanBeBound() {
     final Integer testValue = 1024;
     Object instance =
@@ -656,6 +659,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes
   public void testRawProviderCanBindToIncorrectType() {
     final Integer testValue = 1024;
     Object instance =
@@ -679,7 +683,7 @@ public class BoundFieldModuleTest extends TestCase {
   public void testMultipleBindErrorsAreAggregated() {
     Object instance =
         new Object() {
-          @Bind private Provider aProvider;
+          @Bind private Provider<Object> aProvider;
 
           @Bind(to = String.class)
           private Integer anInt;
@@ -795,7 +799,7 @@ public class BoundFieldModuleTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException e) {
-      assertContains(e.getMessage(), "at " + InvalidBindableClass.class.getName() + ".anInt");
+      assertContains(e.getMessage(), "at BoundFieldModuleTest$InvalidBindableClass.anInt");
     }
   }
 
@@ -1018,5 +1022,41 @@ public class BoundFieldModuleTest extends TestCase {
     BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
 
     assertTrue(info.getBindAnnotation().lazy());
+  }
+
+  @RestrictedBindingSource.Permit
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(TYPE_USE)
+  @interface FooPermit {}
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = "",
+      permits = {FooPermit.class})
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface Foo {}
+
+  public void testBoundFieldModuleWithPermits() {
+    class Bindings {
+      @Bind @Foo int foo = 17;
+    }
+    Bindings bindings = new Bindings();
+
+    Injector injector =
+        Guice.createInjector(new BoundFieldModule.@FooPermit WithPermits(bindings) {});
+
+    assertEquals((Integer) bindings.foo, injector.getInstance(Key.get(Integer.class, Foo.class)));
+  }
+
+  public void testSourceSetOnBinding() throws Exception {
+    Object instance =
+        new Object() {
+          @Bind Integer value = 1;
+        };
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+    assertEquals(
+        instance.getClass().getDeclaredField("value"),
+        ((ElementSource) injector.getBinding(Integer.class).getSource()).getDeclaringSource());
   }
 }

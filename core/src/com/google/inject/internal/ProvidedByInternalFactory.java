@@ -63,17 +63,12 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
       throw new IllegalStateException("not initialized");
     }
     Key<? extends Provider<T>> localProviderKey = providerKey;
-    context.pushState(localProviderKey, localProviderBinding.getSource());
-
     try {
       Provider<? extends T> provider =
           localProviderBinding.getInternalFactory().get(context, dependency, true);
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(localProviderKey);
-      } finally {
-        context.popState();
-
     }
   }
 
