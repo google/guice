@@ -48,7 +48,7 @@ public final class Message implements Serializable, Element {
   private final ErrorId errorId;
   private final ErrorDetail<?> errorDetail;
 
-  /** @since vNext */
+  /** @since 5.0 */
   public Message(GuiceInternal internalOnly, ErrorId errorId, ErrorDetail<?> errorDetail) {
     checkNotNull(internalOnly);
     this.errorId = errorId;
@@ -87,7 +87,7 @@ public final class Message implements Serializable, Element {
   /**
    * Returns details about this error message.
    *
-   * @since vNext
+   * @since 5.0
    */
   public ErrorDetail<?> getErrorDetail() {
     return errorDetail;
