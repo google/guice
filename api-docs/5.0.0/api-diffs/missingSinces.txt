@@ -1,0 +1,18 @@
+MISSING @SINCE TAG: com.google.inject.spi.BindingSourceRestriction Class
+MISSING @SINCE TAG: com.google.inject.testing.fieldbinder.BoundFieldModule.WithPermits Class
+MISSING @SINCE TAG: com.google.inject.daggeradapter.DaggerAdapter.Builder Class
+MISSING @SINCE TAG: com.google.inject.spi.ErrorDetail Class
+MISSING @SINCE TAG: com.google.inject.RestrictedBindingSource Class
+MISSING @SINCE TAG: com.google.inject.RestrictedBindingSource.Permit Class
+MISSING @SINCE TAG: com.google.inject.RestrictedBindingSource.RestrictionLevel Class
+OK: com.google.inject.spi.Message Constructor (com.google.inject.internal.ErrorId, java.util.List<java.lang.Object>, java.lang.String, java.lang.Throwable)
+OK: com.google.inject.spi.Message Constructor (com.google.inject.internal.GuiceInternal, com.google.inject.internal.ErrorId, com.google.inject.spi.ErrorDetail<?>)
+NO DOC BLOCK: com.google.inject.daggeradapter.DaggerAdapter Method builder()
+MISSING @SINCE TAG: com.google.inject.spi.InjectionPoint Method forConstructorOf(com.google.inject.TypeLiteral<?>, boolean)
+OK: com.google.inject.spi.Message Method getErrorDetail()
+OK: com.google.inject.Key Method ofType(com.google.inject.TypeLiteral<U>)
+OK: com.google.inject.Key Method ofType(java.lang.Class<U>)
+OK: com.google.inject.Key Method withAnnotation(java.lang.Class<? extends java.lang.annotation.Annotation>)
+OK: com.google.inject.Key Method withAnnotation(java.lang.annotation.Annotation)
+MISSING @SINCE TAG: com.google.inject.spi.Message Method withSource(java.util.List<java.lang.Object>)
+MISSING @SINCE TAG: com.google.inject.spi.Elements Method withTrustedSource(com.google.inject.internal.GuiceInternal, com.google.inject.Binder, java.lang.Object)
