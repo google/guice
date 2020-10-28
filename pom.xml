@@ -117,10 +117,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
      | Use "-Dguice.with.jarjar=false" to build without jarjar
     -->
     <guice.with.jarjar>true</guice.with.jarjar>
-    <!--
-     | Use "-Dguice.with.no_aop=false" to skip the no-AOP variant
-    -->
-    <guice.with.no_aop>true</guice.with.no_aop>
     <gpg.skip>true</gpg.skip>
   </properties>
 
