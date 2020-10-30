@@ -125,7 +125,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
           }
 
           @Override
-          public Enumeration<?> getInitParameterNames() {
+          public Enumeration<String> getInitParameterNames() {
             return Iterators.asEnumeration(initParams.keySet().iterator());
           }
         });

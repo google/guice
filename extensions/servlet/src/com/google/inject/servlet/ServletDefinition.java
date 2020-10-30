@@ -134,7 +134,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
           }
 
           @Override
-          public Enumeration<?> getInitParameterNames() {
+          public Enumeration<String> getInitParameterNames() {
             return Iterators.asEnumeration(initParams.keySet().iterator());
           }
         });
