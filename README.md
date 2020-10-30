@@ -1,7 +1,7 @@
 Guice
 ====
 
-**Latest release: [5.0.0-BETA-1](https://github.com/google/guice/wiki/Guice50)**
+**Latest release: [5.0.0-BETA-1](https://github.com/google/guice/wiki/Guice500)**
 
 **Documentation:** [User Guide](https://github.com/google/guice/wiki/Motivation), [5.0.0-BETA-1 javadocs](https://google.github.io/guice/api-docs/5.0.0-BETA-1/javadoc/index.html), [Latest javadocs](https://google.github.io/guice/api-docs/latest/javadoc/index.html) <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/google/guice.png?branch=master)](https://travis-ci.org/google/guice) <br/>
