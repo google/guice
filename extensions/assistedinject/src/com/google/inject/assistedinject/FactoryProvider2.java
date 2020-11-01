@@ -58,6 +58,7 @@ import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -363,10 +364,11 @@ final class FactoryProvider2<F>
       ImmutableMap.Builder<Method, MethodHandle> methodHandleBuilder = ImmutableMap.builder();
       for (Map.Entry<String, Method> entry : defaultMethods.entries()) {
         Method defaultMethod = entry.getValue();
-        MethodHandle handle = createMethodHandle(defaultMethod, factory);
+        MethodHandle handle = superMethodHandle(defaultMethod, factory);
         if (handle != null) {
           methodHandleBuilder.put(defaultMethod, handle);
         } else {
+          // TODO: remove this workaround when Java8 support is dropped
           boolean foundMatch = false;
           for (Method otherMethod : otherMethods.get(defaultMethod.getName())) {
             if (dataSoFar.containsKey(otherMethod) && isCompatible(defaultMethod, otherMethod)) {
@@ -894,54 +896,94 @@ final class FactoryProvider2<F>
     }
   }
 
-  // Note: this isn't a public API, but we need to use it in order to call default methods on (or
-  // with) non-public types.  If it doesn't exist, the code falls back to a less precise check.
-  private static final Constructor<MethodHandles.Lookup> methodHandlesLookupCxtor =
-      findMethodHandlesLookupCxtor();
-
-  private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor() {
-    // Different JDK implementations have different constructors so look for a constructor that
-    // takes a class and an int first (openjdk-8, openjdk-11) and fallback to a constructor that
-    // takes two classes and an int (openjdk-15).
-    // TODO(b/171738889): Figure out a better way to handle this.
-    Constructor<MethodHandles.Lookup> cxtor = findMethodHandlesLookupCxtor(Class.class, int.class);
-    if (cxtor == null) {
-      cxtor = findMethodHandlesLookupCxtor(Class.class, Class.class, int.class);
-    }
-    if (cxtor != null) {
-      cxtor.setAccessible(true);
-    }
-    return cxtor;
-  }
-
-  private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor(
-      Class<?>... parameterTypes) {
+  private static MethodHandle superMethodHandle(Method method, Object proxy) {
     try {
-      return MethodHandles.Lookup.class.getDeclaredConstructor(parameterTypes);
-    } catch (NoSuchMethodException e) {
-      // Ignored if the constructor doesn't exist.
-      return null;
+      MethodHandle handle = SUPER_METHOD_LOOKUP.superMethodHandle(method);
+      return handle != null ? handle.bindTo(proxy) : null;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to access method: " + method, e);
     }
   }
 
-  private static MethodHandle createMethodHandle(Method method, Object proxy) {
-    if (methodHandlesLookupCxtor == null) {
-      return null;
-    }
-    Class<?> declaringClass = method.getDeclaringClass();
-    int allModes =
-        Modifier.PRIVATE | Modifier.STATIC /* package */ | Modifier.PUBLIC | Modifier.PROTECTED;
-    try {
-      MethodHandles.Lookup lookup;
-      if (methodHandlesLookupCxtor.getParameterCount() == 2) {
-        lookup = methodHandlesLookupCxtor.newInstance(declaringClass, allModes);
-      } else {
-        lookup = methodHandlesLookupCxtor.newInstance(declaringClass, null, allModes);
+  // begin by trying unreflectSpecial to find super method handles; this should work on Java14+
+  private static SuperMethodLookup SUPER_METHOD_LOOKUP = SuperMethodLookup.UNREFLECT_SPECIAL;
+
+  private static enum SuperMethodLookup {
+    UNREFLECT_SPECIAL {
+      @Override
+      MethodHandle superMethodHandle(Method method) throws Exception {
+        try {
+          return MethodHandles.lookup().unreflectSpecial(method, method.getDeclaringClass());
+        } catch (Exception e) {
+          // fall back to findSpecial which should work on Java9+; use that for future lookups
+          SUPER_METHOD_LOOKUP = FIND_SPECIAL;
+          return FIND_SPECIAL.superMethodHandle(method);
+        }
       }
-      method.setAccessible(true);
-      return lookup.unreflectSpecial(method, declaringClass).bindTo(proxy);
-    } catch (ReflectiveOperationException roe) {
-      throw new RuntimeException("Unable to access method: " + method, roe);
+    },
+    FIND_SPECIAL {
+      @Override
+      MethodHandle superMethodHandle(Method method) throws Exception {
+        try {
+          Class<?> declaringClass = method.getDeclaringClass();
+          // use findSpecial to workaround https://bugs.openjdk.java.net/browse/JDK-8209005
+          return MethodHandles.lookup().findSpecial(declaringClass, method.getName(),
+              MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+              declaringClass);
+        } catch (Exception e) {
+          // fall back to private Lookup which should work on Java8; use that for future lookups
+          SUPER_METHOD_LOOKUP = PRIVATE_LOOKUP;
+          return PRIVATE_LOOKUP.superMethodHandle(method);
+        }
+      }
+    },
+    PRIVATE_LOOKUP {
+      @Override
+      MethodHandle superMethodHandle(Method method) throws Exception {
+        return PrivateLookup.superMethodHandle(method);
+      }
+    };
+
+    abstract MethodHandle superMethodHandle(Method method) throws Exception;
+  };
+
+  // Note: this isn't a public API, but we need to use it in order to call default methods on (or
+  // with) non-public types. If it doesn't exist, the code falls back to a less precise check.
+  static class PrivateLookup {
+    private static final int ALL_MODES =
+        Modifier.PRIVATE | Modifier.STATIC /* package */ | Modifier.PUBLIC | Modifier.PROTECTED;
+
+    private static final Constructor<MethodHandles.Lookup> privateLookupCxtor =
+        findPrivateLookupCxtor();
+
+    private static Constructor<MethodHandles.Lookup> findPrivateLookupCxtor() {
+      try {
+        Constructor<MethodHandles.Lookup> cxtor;
+        try {
+          cxtor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+        } catch (NoSuchMethodException ignored) {
+          cxtor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class,
+              int.class);
+        }
+        cxtor.setAccessible(true);
+        return cxtor;
+      } catch (ReflectiveOperationException | SecurityException e) {
+        return null;
+      }
+    }
+
+    static MethodHandle superMethodHandle(Method method) throws Exception {
+      if (privateLookupCxtor == null) {
+        return null; // fall back to assistDataBuilder workaround
+      }
+      Class<?> declaringClass = method.getDeclaringClass();
+      MethodHandles.Lookup lookup;
+      if (privateLookupCxtor.getParameterCount() == 2) {
+        lookup = privateLookupCxtor.newInstance(declaringClass, ALL_MODES);
+      } else {
+        lookup = privateLookupCxtor.newInstance(declaringClass, null, ALL_MODES);
+      }
+      return lookup.unreflectSpecial(method, declaringClass);
     }
   }
 }
