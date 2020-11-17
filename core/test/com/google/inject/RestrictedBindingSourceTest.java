@@ -2,9 +2,12 @@ package com.google.inject;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE_USE;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.testing.TestLogHandler;
+import com.google.inject.RestrictedBindingSource.RestrictionLevel;
 import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
@@ -15,7 +18,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -116,6 +124,29 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
+  public void missingImplementationErrorForRestrictedBindingIncludesExplanation() {
+    CreationException expected = assertThatInjectorCreationFails(new RoutingModule());
+
+    assertThat(expected)
+        .hasMessageThat()
+        .contains(
+            "Hint: This key is restricted and cannot be bound directly. Restriction explanation:"
+                + " Please install NetworkModule.");
+  }
+
+  @Test
+  public void canBindRestrictedTypeWithUnrestrictedQualifierAnnotation() {
+    Guice.createInjector(
+        new AbstractModule() {
+          @Provides
+          @Named("custom")
+          RoutingTable provideRoutingTable() {
+            return ip -> ip;
+          }
+        });
+  }
+
+  @Test
   public void twoRogueNetworkBindingsYieldTwoErrorMessages() {
     AbstractModule rogueModule =
         new AbstractModule() {
@@ -200,6 +231,61 @@ public class RestrictedBindingSourceTest {
 
     assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);
     assertThat(expected).hasMessageThat().contains(USE_ROUTING_MODULE);
+  }
+
+  @RestrictedBindingSource.Permit
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(TYPE_USE)
+  @interface FooPermit {}
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = "Only modules with FooPermit can bind @Foo bindings.",
+      permits = {FooPermit.class})
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface Foo {}
+
+  @Test
+  public void permitOnAnonymousClassWorks() {
+    Guice.createInjector(
+        new @FooPermit AbstractModule() {
+          @Provides
+          @Foo
+          String provideFooString() {
+            return "foo";
+          }
+        });
+  }
+
+  @Qualifier
+  @RestrictedBindingSource(
+      explanation = USE_NETWORK_MODULE,
+      permits = {NetworkLibrary.class},
+      restrictionLevel = RestrictionLevel.WARNING)
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface HostIp {}
+
+  @Test
+  public void rogueBindingWithWarningRestrictionLevel() {
+    Logger logger = Logger.getLogger(RestrictedBindingSource.class.getName());
+    TestLogHandler testLogHandler = new TestLogHandler();
+    logger.addHandler(testLogHandler);
+
+    Guice.createInjector(
+        new AbstractModule() {
+          @Provides
+          @HostIp
+          int provideRogueHostIp() {
+            return 4;
+          }
+        });
+
+    List<LogRecord> logs = testLogHandler.getStoredLogRecords();
+    assertThat(logs).hasSize(1);
+    assertThat(logs.get(0).getLevel()).isEqualTo(Level.WARNING);
+    assertThat(logs.get(0).getMessage()).contains(USE_NETWORK_MODULE);
+    assertThat(logs.get(0).getMessage()).contains("provideRogueHostIp");
+    logger.removeHandler(testLogHandler);
   }
 
   // --------------------------------------------------------------------------
@@ -357,6 +443,11 @@ public class RestrictedBindingSourceTest {
     assertThat(expected).hasMessageThat().contains(USE_NETWORK_MODULE);
   }
 
+  @Test
+  public void getElements_getModule_works() {
+    Guice.createInjector(Elements.getModule(Elements.getElements(new NetworkModule())));
+  }
+
   // --------------------------------------------------------------------------
   // ModuleAnnotatedMethodScanner tests
   // --------------------------------------------------------------------------
@@ -374,15 +465,6 @@ public class RestrictedBindingSourceTest {
 
   // Adds the NetworkLibrary-owned Network annotation to keys produced by @NetworkProvides methods.
   private static class NetworkProvidesScanner extends ModuleAnnotatedMethodScanner {
-    static Module module() {
-      return new AbstractModule() {
-        @Override
-        protected void configure() {
-          binder().scanModulesForAnnotatedMethods(new NetworkProvidesScanner());
-        }
-      };
-    }
-
     @Override
     public String toString() {
       return "NetworkProvidesScanner";
@@ -396,7 +478,7 @@ public class RestrictedBindingSourceTest {
     @Override
     public <T> Key<T> prepareMethod(
         Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
-      return Key.get(key.getTypeLiteral(), Network.class);
+      return key.withAnnotation(Network.class);
     }
   }
 
@@ -411,7 +493,7 @@ public class RestrictedBindingSourceTest {
         };
 
     CreationException expected =
-        assertThatInjectorCreationFails(rogueModule, NetworkProvidesScanner.module());
+        assertThatInjectorCreationFails(rogueModule, scannerModule(new NetworkProvidesScanner()));
 
     assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);
     assertThat(expected).hasMessageThat().contains(NETWORK_ANNOTATION_IS_RESTRICTED);
@@ -427,7 +509,100 @@ public class RestrictedBindingSourceTest {
       }
     }
 
-    Guice.createInjector(new NetworkModuleWithCustomProvides(), NetworkProvidesScanner.module());
+    Guice.createInjector(
+        new NetworkModuleWithCustomProvides(), scannerModule(new NetworkProvidesScanner()));
+  }
+
+  @Test
+  public void scannerWithPermitCanCreateRestrictedBinding() {
+    @NetworkLibrary
+    class NetworkProvidesScannerWithPermit extends NetworkProvidesScanner {}
+
+    AbstractModule moduleWithNetworkProvidesMethod =
+        new AbstractModule() {
+          @NetworkProvides
+          String provideNetworkString() {
+            return "lorem ipsum";
+          }
+        };
+
+    Guice.createInjector(
+        moduleWithNetworkProvidesMethod, scannerModule(new NetworkProvidesScannerWithPermit()));
+  }
+
+  @Test
+  public void scannerWithPermitCanCreateRestrictedBindings() {
+    @NetworkLibrary
+    class NetworkProvidesScannerWithPermit extends NetworkProvidesScanner {
+      @Override
+      public <T> Key<T> prepareMethod(
+          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+        binder.install(
+            new AbstractModule() {
+              @Provides
+              @GatewayIpAdress
+              int provideGatewayIp() {
+                return 42;
+              }
+            });
+        return Key.get(key.getTypeLiteral(), Network.class);
+      }
+    }
+    AbstractModule moduleWithNetworkProvidesMethod =
+        new AbstractModule() {
+          @NetworkProvides
+          String provideNetworkString() {
+            return "lorem ipsum";
+          }
+        };
+
+    Injector injector =
+        Guice.createInjector(
+            moduleWithNetworkProvidesMethod, scannerModule(new NetworkProvidesScannerWithPermit()));
+
+    assertThat(injector.getInstance(Key.get(Integer.class, GatewayIpAdress.class))).isEqualTo(42);
+  }
+
+  @Test
+  public void moduleInstalledByScannerInheritsMethodModulePermit() {
+    class NetworkProvidesScannerWithoutPermit extends NetworkProvidesScanner {
+      @Override
+      public <T> Key<T> prepareMethod(
+          Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
+        binder.install(
+            new AbstractModule() {
+              @Provides
+              @GatewayIpAdress
+              int provideGatewayIp() {
+                return 42;
+              }
+            });
+        return key.withAnnotation(Network.class);
+      }
+    }
+    @NetworkLibrary
+    class ScannedModuleWithPermit extends AbstractModule {
+      @NetworkProvides
+      String provideNetworkString() {
+        return "lorem ipsum";
+      }
+    }
+
+    Injector injector =
+        Guice.createInjector(
+            new ScannedModuleWithPermit(),
+            scannerModule(new NetworkProvidesScannerWithoutPermit()));
+
+    assertThat(injector.getInstance(Key.get(Integer.class, GatewayIpAdress.class))).isEqualTo(42);
+  }
+
+  private static Module scannerModule(ModuleAnnotatedMethodScanner scanner) {
+    return new AbstractModule() {
+      @Override
+      protected void configure() {
+        binder().scanModulesForAnnotatedMethods(scanner);
+      }
+    };
   }
 
   // --------------------------------------------------------------------------
@@ -546,7 +721,35 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
-  public void originalElementSourceNotTrustedOutsideModuleOverride() {
+  public void modulesOverridePrivateModule() {
+    Guice.createInjector(
+        Modules.override(
+                new PrivateModule() {
+                  @Override
+                  protected void configure() {
+                    install(new NetworkModule());
+                    expose(Key.get(String.class, Hostname.class));
+                  }
+
+                  @Provides
+                  @Exposed
+                  @Named("custom-gateway")
+                  int customGateway(@GatewayIpAdress int gateway) {
+                    return gateway + 4;
+                  }
+                })
+            .with(
+                new AbstractModule() {
+                  @Provides
+                  @Named("custom-gateway")
+                  int provideCustomGatewayOverride() {
+                    return 12345;
+                  }
+                }));
+  }
+
+  @Test
+  public void originalElementSourceNotTrustedIfSetExternally() {
     ElementSource networkElementSource =
         (ElementSource) Elements.getElements(new NetworkModule()).get(0).getSource();
 
@@ -569,8 +772,8 @@ public class RestrictedBindingSourceTest {
     assertThat(((ElementSource) rogueGatewayBinding.getSource()).getOriginalElementSource())
         .isEqualTo(networkElementSource);
 
-    // Will fail because the original element source isn't trusted, becase it wasn't set by
-    // Modules.override.
+    // Will fail because the original element source isn't trusted, becase it wasn't set by Guice
+    // internals.
     CreationException expected = assertThatInjectorCreationFails(rogueModule);
 
     assertThat(expected).hasMessageThat().contains(BINDING_PERMISSION_ERROR);

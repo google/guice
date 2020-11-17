@@ -24,6 +24,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
+import javax.annotation.Nullable;
 
 /**
  * Injects members of instances of a given type.
@@ -35,11 +36,10 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final InjectorImpl injector;
   // a null list means empty. Since it is common for many of these lists to be empty we can save
   // some memory lookups by representing empty as null.
-  /* @Nullable */ private final ImmutableList<SingleMemberInjector> memberInjectors;
-  /* @Nullable */ private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
-  /* @Nullable */ private final ImmutableList<InjectionListener<? super T>> injectionListeners;
-  /*if[AOP]*//* @Nullable */ private final ImmutableList<MethodAspect> addedAspects;
-  /*end[AOP]*/
+  @Nullable private final ImmutableList<SingleMemberInjector> memberInjectors;
+  @Nullable private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
+  @Nullable private final ImmutableList<InjectionListener<? super T>> injectionListeners;
+  @Nullable private final ImmutableList<MethodAspect> addedAspects;
 
   MembersInjectorImpl(
       InjectorImpl injector,
@@ -55,9 +55,10 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
         encounter.getInjectionListeners().isEmpty()
             ? null
             : encounter.getInjectionListeners().asList();
-    /*if[AOP]*/
-    this.addedAspects = encounter.getAspects().isEmpty() ? null : encounter.getAspects();
-    /*end[AOP]*/
+    this.addedAspects =
+        (InternalFlags.isBytecodeGenEnabled() && !encounter.getAspects().isEmpty())
+            ? encounter.getAspects()
+            : null;
   }
 
   public ImmutableList<SingleMemberInjector> getMemberInjectors() {
@@ -85,7 +86,6 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
       return;
     }
     final InternalContext context = injector.enterContext();
-    context.pushState(key, source);
     try {
       if (provisionCallback != null && provisionCallback.hasListeners()) {
         provisionCallback.provision(
@@ -101,7 +101,6 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
         injectMembers(instance, context, toolableOnly);
       }
     } finally {
-      context.popState();
       context.close();
     }
 
@@ -184,9 +183,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     return ImmutableSet.of();
   }
 
-  /*if[AOP]*/
   public ImmutableList<MethodAspect> getAddedAspects() {
     return addedAspects == null ? ImmutableList.<MethodAspect>of() : addedAspects;
   }
-  /*end[AOP]*/
 }

@@ -168,7 +168,7 @@ public class TypeLiteral<T> {
     // this implementation is made a little more complicated in an attempt to avoid object-creation
     while (true) {
       if (toResolve instanceof TypeVariable) {
-        TypeVariable original = (TypeVariable) toResolve;
+        TypeVariable<?> original = (TypeVariable<?>) toResolve;
         toResolve = MoreTypes.resolveTypeVariable(type, rawType, original);
         if (toResolve == original) {
           return toResolve;

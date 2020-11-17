@@ -1,0 +1,18 @@
+Guice configuration errors:
+
+1) [Guice/ChildBindingAlreadySet]: Unable to create binding for ChildBindingAlreadySetErrorTest$DependsOnFoo because it was already configured on one or more child injectors or private modules.
+
+Bound at:
+1 : ChildBindingAlreadySetErrorTest$ChildModule4.configure(ChildBindingAlreadySetErrorTest.java:105)
+2 : as a just-in-time binding
+
+1 error
+
+======================
+Full classname legend:
+======================
+ChildBindingAlreadySetErrorTest$ChildModule4: "com.google.inject.errors.ChildBindingAlreadySetErrorTest$ChildModule4"
+ChildBindingAlreadySetErrorTest$DependsOnFoo: "com.google.inject.errors.ChildBindingAlreadySetErrorTest$DependsOnFoo"
+========================
+End of classname legend:
+========================

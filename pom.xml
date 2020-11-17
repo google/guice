@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>4.2.4-SNAPSHOT</version>
+  <version>5.0.1-SNAPSHOT</version>
 
   <name>Google Guice</name>
 
@@ -117,10 +117,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
      | Use "-Dguice.with.jarjar=false" to build without jarjar
     -->
     <guice.with.jarjar>true</guice.with.jarjar>
-    <!--
-     | Use "-Dguice.with.no_aop=false" to skip the no-AOP variant
-    -->
-    <guice.with.no_aop>true</guice.with.no_aop>
     <gpg.skip>true</gpg.skip>
   </properties>
 
@@ -154,12 +150,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>7.2</version>
-      </dependency>
-      <dependency>
-        <groupId>cglib</groupId>
-        <artifactId>cglib</artifactId>
-        <version>3.3.0</version>
+        <version>9.0</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -273,6 +264,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
+            <compilerArgs>
+              <arg>-parameters</arg>
+            </compilerArgs>
+            <testCompilerArgument>-parameters</testCompilerArgument>
           </configuration>
         </plugin>
         <plugin>
@@ -285,6 +280,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <artifactId>java18</artifactId>
               <version>1.0</version>
             </signature>
+            <ignores>
+              <!-- workaround https://github.com/mojohaus/animal-sniffer/issues/18 -->
+              <ignore>java.lang.invoke.MethodHandle</ignore>
+            </ignores>
           </configuration>
           <executions>
             <execution>
@@ -489,5 +488,5 @@ See the Apache License Version 2.0 for the specific language governing permissio
       </build>
     </profile>
   </profiles>
-  <!-- TODO(cgruber): Update the google parent pom or migrate to sonatype's -->
+  <!-- TODO(user): Update the google parent pom or migrate to sonatype's -->
 </project>

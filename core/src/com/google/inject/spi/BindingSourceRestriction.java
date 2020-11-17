@@ -5,20 +5,26 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.RestrictedBindingSource;
+import com.google.inject.RestrictedBindingSource.RestrictionLevel;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.GuiceInternal;
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -43,11 +49,28 @@ import java.util.stream.StreamSupport;
 public final class BindingSourceRestriction {
   private BindingSourceRestriction() {}
 
+  private static final Logger logger = Logger.getLogger(RestrictedBindingSource.class.getName());
+
   /** Mapping between an element source and its permit annotations. */
   interface PermitMap {
     ImmutableSet<Class<? extends Annotation>> getPermits(ElementSource elementSource);
 
     void clear();
+  }
+
+  /** Returns a suggestion for how a restricted binding should be created in case it's missing. */
+  public static Optional<String> getMissingImplementationSuggestion(
+      GuiceInternal guiceInternal, Key<?> key) {
+    checkNotNull(guiceInternal);
+    RestrictedBindingSource restriction = getRestriction(key);
+    if (restriction == null) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        String.format(
+            "%nHint: This key is restricted and cannot be bound directly. Restriction explanation:"
+                + " %s",
+            restriction.explanation()));
   }
 
   /**
@@ -110,16 +133,7 @@ public final class BindingSourceRestriction {
     Key<?> key = binding.getKey();
     // Module Bindings are all explicit and have an ElementSource.
     ElementSource elementSource = (ElementSource) binding.getSource();
-    RestrictedBindingSource annotationRestriction =
-        key.getAnnotationType() == null
-            ? null
-            : key.getAnnotationType().getAnnotation(RestrictedBindingSource.class);
-    RestrictedBindingSource restriction = annotationRestriction;
-    if (annotationRestriction == null) {
-      // Annotation restriction overrides type restriction.
-      restriction = key.getTypeLiteral().getRawType().getAnnotation(RestrictedBindingSource.class);
-    }
-    // Exit if there is no binding source restrictions on the key.
+    RestrictedBindingSource restriction = getRestriction(key);
     if (restriction == null) {
       return Optional.empty();
     }
@@ -130,14 +144,19 @@ public final class BindingSourceRestriction {
     if (bindingPermitted || isExempt(elementSource, restriction.exemptModules())) {
       return Optional.empty();
     }
-    return Optional.of(
-        new Message(
-            elementSource,
-            getErrorMessage(
-                key, restriction.explanation(), acceptablePermits, annotationRestriction != null)));
+    String violationMessage =
+        getViolationMessage(
+            key, restriction.explanation(), acceptablePermits, key.getAnnotationType() != null);
+    if (restriction.restrictionLevel() == RestrictionLevel.WARNING) {
+      Formatter sourceFormatter = new Formatter();
+      Errors.formatSource(sourceFormatter, elementSource);
+      logger.log(Level.WARNING, violationMessage + "\n" + sourceFormatter);
+      return Optional.empty();
+    }
+    return Optional.of(new Message(elementSource, violationMessage));
   }
 
-  private static String getErrorMessage(
+  private static String getViolationMessage(
       Key<?> key,
       String explanation,
       ImmutableSet<Class<? extends Annotation>> acceptablePermits,
@@ -152,21 +171,18 @@ public final class BindingSourceRestriction {
         explanation);
   }
 
-  /**
-   * Get all permits on the element source chain. Trusting only original (parent) element sources if
-   * they are set by Modules.override.
-   */
+  /** Get all permits on the element source chain. */
   private static ImmutableSet<Class<? extends Annotation>> getAllPermits(
       ElementSource elementSource) {
     ImmutableSet.Builder<Class<? extends Annotation>> permitsBuilder = ImmutableSet.builder();
-    ImmutableSet<Class<? extends Annotation>> permits =
-        elementSource.moduleSource.getPermitMap().getPermits(elementSource);
-    if (elementSource.getOriginalElementSource() == null
-        || !isOriginalElementSourceTrustworthy(elementSource)) {
-      return permits;
+    permitsBuilder.addAll(elementSource.moduleSource.getPermitMap().getPermits(elementSource));
+    if (elementSource.scanner != null) {
+      getPermits(elementSource.scanner.getClass()).forEach(permitsBuilder::add);
     }
-    permitsBuilder.addAll(permits);
-    permitsBuilder.addAll(getAllPermits(elementSource.getOriginalElementSource()));
+    if (elementSource.getOriginalElementSource() != null
+        && elementSource.trustedOriginalElementSource) {
+      permitsBuilder.addAll(getAllPermits(elementSource.getOriginalElementSource()));
+    }
     return permitsBuilder.build();
   }
 
@@ -175,7 +191,7 @@ public final class BindingSourceRestriction {
       return false;
     }
     Pattern exemptModulePattern = Pattern.compile(exemptModulesRegex);
-    //TODO(b/156759807): Switch to Streams.stream (instead of inlining it).
+    // TODO(b/156759807): Switch to Streams.stream (instead of inlining it).
     return StreamSupport.stream(getAllModules(elementSource).spliterator(), false)
         .anyMatch(moduleName -> exemptModulePattern.matcher(moduleName).matches());
   }
@@ -183,20 +199,10 @@ public final class BindingSourceRestriction {
   private static Iterable<String> getAllModules(ElementSource elementSource) {
     List<String> modules = elementSource.getModuleClassNames();
     if (elementSource.getOriginalElementSource() == null
-        || !isOriginalElementSourceTrustworthy(elementSource)) {
+        || !elementSource.trustedOriginalElementSource) {
       return modules;
     }
     return Iterables.concat(modules, getAllModules(elementSource.getOriginalElementSource()));
-  }
-
-  private static boolean isOriginalElementSourceTrustworthy(ElementSource elementSource) {
-    // Only trust if the element comes from Modules.override because otherwise the original element
-    // source can be spoofed.
-    // TODO(b/156495326): Remove this special case once we resolve the spoofing issue.
-    return elementSource
-        .moduleSource
-        .getModuleClassName()
-        .equals("com.google.inject.util.Modules$OverrideModule");
   }
 
   private static void clear(Element element) {
@@ -228,6 +234,18 @@ public final class BindingSourceRestriction {
     }
   }
 
+  /*
+   * Returns the restriction on the given key (null if there is none).
+   *
+   * If the key is annotated then only the annotation restriction matters, the type restriction is
+   * ignored (an annotated type is essentially a new type).
+   **/
+  private static RestrictedBindingSource getRestriction(Key<?> key) {
+    return key.getAnnotationType() == null
+        ? key.getTypeLiteral().getRawType().getAnnotation(RestrictedBindingSource.class)
+        : key.getAnnotationType().getAnnotation(RestrictedBindingSource.class);
+  }
+
   /**
    * Builds the map from each module to all the permit annotations on its module stack.
    *
@@ -242,8 +260,7 @@ public final class BindingSourceRestriction {
    */
   static final class PermitMapConstruction {
     private static final class PermitMapImpl implements PermitMap {
-      // TODO(user): Include permits on ModuleAnnotatedMethodScanners here.
-      ImmutableMap<ModuleSource, ImmutableSet<Class<? extends Annotation>>> modulePermits;
+      Map<ModuleSource, ImmutableSet<Class<? extends Annotation>>> modulePermits;
 
       @Override
       public ImmutableSet<Class<? extends Annotation>> getPermits(ElementSource elementSource) {
@@ -256,8 +273,8 @@ public final class BindingSourceRestriction {
       }
     }
 
-    final ImmutableMap.Builder<ModuleSource, ImmutableSet<Class<? extends Annotation>>>
-        modulePermits = ImmutableMap.builder();
+    final Map<ModuleSource, ImmutableSet<Class<? extends Annotation>>> modulePermits =
+        new HashMap<>();
     // Maintains the permits on the current module installation path.
     ImmutableSet<Class<? extends Annotation>> currentModulePermits = ImmutableSet.of();
     // Stack tracking the currentModulePermits during module traversal.
@@ -271,6 +288,15 @@ public final class BindingSourceRestriction {
      */
     PermitMap getPermitMap() {
       return permitMap;
+    }
+
+    /**
+     * Sets the permits on the current module installation path to the permits on the given module
+     * source so that subsequently installed modules may inherit them. Used only for method
+     * scanning, so that modules installed by scanners inherit permits from the method's module.
+     */
+    void restoreCurrentModulePermits(ModuleSource moduleSource) {
+      currentModulePermits = modulePermits.get(moduleSource);
     }
 
     /** Called by the Binder prior to entering a module's configure method. */
@@ -292,12 +318,6 @@ public final class BindingSourceRestriction {
       modulePermits.put(moduleSource, currentModulePermits);
     }
 
-    private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
-      return Arrays.stream(clazz.getAnnotations())
-          .map(Annotation::annotationType)
-          .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
-    }
-
     /** Called by the Binder when it exits a module's configure method. */
     void popModule() {
       // Restore the parent module's permits.
@@ -306,7 +326,7 @@ public final class BindingSourceRestriction {
 
     /** Finishes the {@link PermitMap}. Called by the Binder when all modules are installed. */
     void finish() {
-      permitMap.modulePermits = modulePermits.build();
+      permitMap.modulePermits = modulePermits;
     }
 
     @VisibleForTesting
@@ -314,5 +334,18 @@ public final class BindingSourceRestriction {
       PermitMapImpl permitMap = (PermitMapImpl) elementSource.moduleSource.getPermitMap();
       return permitMap.modulePermits == null;
     }
+  }
+
+  private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
+    Stream<Annotation> annotations = Arrays.stream(clazz.getAnnotations());
+    // Pick up annotations on anonymous classes (e.g. new @Bar Foo() { ... }):
+    if (clazz.getAnnotatedSuperclass() != null) {
+      annotations =
+          Stream.concat(
+              annotations, Arrays.stream(clazz.getAnnotatedSuperclass().getAnnotations()));
+    }
+    return annotations
+        .map(Annotation::annotationType)
+        .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
   }
 }

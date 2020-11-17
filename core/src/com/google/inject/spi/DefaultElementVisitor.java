@@ -44,12 +44,10 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitOther(binding);
   }
 
-  /*if[AOP]*/
   @Override
   public V visit(InterceptorBinding interceptorBinding) {
     return visitOther(interceptorBinding);
   }
-  /*end[AOP]*/
 
   @Override
   public V visit(ScopeBinding scopeBinding) {

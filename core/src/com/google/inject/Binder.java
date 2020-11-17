@@ -28,6 +28,7 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be used to create an
@@ -183,16 +184,17 @@ import java.lang.reflect.Method;
  */
 public interface Binder {
 
-  /*if[AOP]*/
   /**
    * Binds method interceptor[s] to methods matched by class and method matchers. A method is
    * eligible for interception if:
    *
    * <ul>
-   * <li>Guice created the instance the method is on
-   * <li>Neither the enclosing type nor the method is final
-   * <li>And the method is package-private, protected, or public
+   *   <li>Guice created the instance the method is on
+   *   <li>Neither the enclosing type nor the method is final
+   *   <li>And the method is package-private, protected, or public
    * </ul>
+   *
+   * <p>Note: this API only works if {@code guice_bytecode_gen_option} is set to {@code ENABLED}.
    *
    * @param classMatcher matches classes the interceptor should apply to. For example: {@code
    *     only(Runnable.class)}.
@@ -203,8 +205,7 @@ public interface Binder {
   void bindInterceptor(
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      org.aopalliance.intercept.MethodInterceptor... interceptors);
-  /*end[AOP]*/
+      MethodInterceptor... interceptors);
 
   /** Binds a scope to an annotation. */
   void bindScope(Class<? extends Annotation> annotationType, Scope scope);
@@ -379,7 +380,7 @@ public interface Binder {
    * @return a binder that shares its configuration with this binder.
    * @since 2.0
    */
-  Binder skipSources(Class... classesToSkip);
+  Binder skipSources(Class<?>... classesToSkip);
 
   /**
    * Creates a new private child environment for bindings and other configuration. The returned

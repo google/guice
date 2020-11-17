@@ -62,10 +62,10 @@
       <doclet name="jdiff.JDiff">
         <param name="-oldapi" value="${old.api}"/>
         <param name="-oldapidir" value="latest-api-diffs"/>
-        <param name="-javadocold" value="http://google.github.io/guice/api-docs/${old.api}/javadoc/"/>
+        <param name="-javadocold" value="https://google.github.io/guice/api-docs/${old.api}/javadoc/"/>
         <param name="-newapi" value="${new.api}"/>
         <param name="-newapidir" value="${jdiff.tmp}"/>
-        <param name="-javadocnew" value="http://google.github.io/guice/api-docs/${new.api}/javadoc/"/>
+        <param name="-javadocnew" value="https://google.github.io/guice/api-docs/${new.api}/javadoc/"/>
         <param name="-stats"/>
         <param name="-docchanges"/>
       </doclet>

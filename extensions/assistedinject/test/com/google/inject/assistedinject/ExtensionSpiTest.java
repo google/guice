@@ -126,7 +126,7 @@ public class ExtensionSpiTest extends TestCase {
   private void validateAssistedMethod(
       AssistedMethod assistedMethod,
       String factoryMethodName,
-      Class clazz,
+      Class<?> clazz,
       List<Key<?>> dependencyKeys) {
     assertEquals(factoryMethodName, assistedMethod.getFactoryMethod().getName());
     assertEquals(clazz, assistedMethod.getImplementationConstructor().getDeclaringClass());
@@ -208,8 +208,8 @@ public class ExtensionSpiTest extends TestCase {
   public static class AssistedInjectSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
       implements AssistedInjectTargetVisitor<Object, Integer> {
 
-    private final Set<Class> allowedClasses =
-        ImmutableSet.<Class>of(
+    private final Set<Class<?>> allowedClasses =
+        ImmutableSet.<Class<?>>of(
             Injector.class, Stage.class, Logger.class, String.class, Integer.class);
 
     private int assistedBindingCount = 0;
@@ -217,14 +217,14 @@ public class ExtensionSpiTest extends TestCase {
     private List<AssistedInjectBinding<?>> assistedInjectBindings = Lists.newArrayList();
 
     @Override
-    public Integer visit(AssistedInjectBinding assistedInjectBinding) {
+    public Integer visit(AssistedInjectBinding<?> assistedInjectBinding) {
       assistedInjectBindings.add(assistedInjectBinding);
       assistedBindingCount++;
       return currentCount++;
     }
 
     @Override
-    protected Integer visitOther(Binding<? extends Object> binding) {
+    protected Integer visitOther(Binding<?> binding) {
       if (!allowedClasses.contains(binding.getKey().getTypeLiteral().getRawType())) {
         throw new AssertionFailedError("invalid other binding: " + binding);
       }

@@ -86,7 +86,7 @@ final class CheckedProviderMethodsModule implements Module {
 
   <T> CheckedProviderMethod<T> createProviderMethod(
       Binder binder, final Method method, CheckedProvides checkedProvides) {
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings("rawtypes") // Class literal uses rawtypes.
     Class<? extends CheckedProvider> throwingProvider = checkedProvides.value();
     binder = binder.withSource(method);
     Errors errors = new Errors(method);

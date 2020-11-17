@@ -63,12 +63,10 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error notifying ProvisionListener "
-              + FailBeforeProvision.class.getName()
-              + " of "
-              + Foo.class.getName(),
-          "Reason: java.lang.RuntimeException: boo",
-          "while locating " + Foo.class.getName());
+          "Error notifying ProvisionListener ProvisionListenerTest$FailBeforeProvision of"
+              + " ProvisionListenerTest$Foo.",
+          "Reason: RuntimeException: boo",
+          "while locating ProvisionListenerTest$Foo");
       assertEquals("boo", pe.getCause().getMessage());
     }
   }
@@ -89,12 +87,10 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error notifying ProvisionListener "
-              + FailAfterProvision.class.getName()
-              + " of "
-              + Foo.class.getName(),
-          "Reason: java.lang.RuntimeException: boo",
-          "while locating " + Foo.class.getName());
+          "1) Error notifying ProvisionListener ProvisionListenerTest$FailAfterProvision of"
+              + " ProvisionListenerTest$Foo.",
+          "Reason: RuntimeException: boo",
+          "while locating ProvisionListenerTest$Foo");
       assertEquals("boo", pe.getCause().getMessage());
     }
   }
@@ -115,9 +111,9 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
-          " at " + FooBomb.class.getName(),
-          " while locating " + FooBomb.class.getName());
+          "1) [Guice/ErrorInjectingConstructor]: RuntimeException: Retry, Abort, Fail",
+          " at ProvisionListenerTest$FooBomb",
+          " while locating ProvisionListenerTest$FooBom");
       assertEquals("Retry, Abort, Fail", pe.getCause().getMessage());
     }
   }
@@ -138,9 +134,9 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
-          " at " + FooBomb.class.getName(),
-          " while locating " + FooBomb.class.getName());
+          "1) [Guice/ErrorInjectingConstructor]: RuntimeException: Retry, Abort, Fail",
+          " at ProvisionListenerTest$FooBomb",
+          " while locating ProvisionListenerTest$FooBom");
       assertEquals("Retry, Abort, Fail", pe.getCause().getMessage());
     }
   }
@@ -172,19 +168,17 @@ public class ProvisionListenerTest extends TestCase {
       expectedMsg = Iterables.getOnlyElement(expected.getErrorMessages()).getMessage();
       assertContains(
           expected.getMessage(),
-          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
-          " at " + FooBomb.class.getName(),
-          " while locating " + FooBomb.class.getName(),
-          " while locating " + DependsOnFooBombInField.class.getName());
+          "1) [Guice/ErrorInjectingConstructor]: RuntimeException: Retry, Abort, Fail",
+          "at ProvisionListenerTest$FooBomb",
+          "while locating ProvisionListenerTest$DependsOnFooBombInField");
       assertContains(
           listener.capture.get().getMessage(),
-          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
-          " at " + FooBomb.class.getName(),
-          " while locating " + FooBomb.class.getName());
+          "1) [Guice/ErrorInjectingConstructor]: RuntimeException: Retry, Abort, Fail",
+          "at ProvisionListenerTest$FooBomb");
       // The message that is captures by the provision listener does not show what is depending on
       // the thing being listened to.
       assertThat(listener.capture.get().getMessage())
-          .doesNotContain(" while locating " + DependsOnFooBombInField.class.getName());
+          .doesNotContain(" while locating ProvisionListenerTestDependsOnFooBombInField");
     }
     assertEquals(1, listener.beforeProvision);
     assertEquals(
@@ -221,19 +215,18 @@ public class ProvisionListenerTest extends TestCase {
       expectedMsg = Iterables.getOnlyElement(expected.getErrorMessages()).getMessage();
       assertContains(
           expected.getMessage(),
-          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
-          " at " + FooBomb.class.getName(),
-          " while locating " + FooBomb.class.getName(),
-          " while locating " + DependsOnFooBombInCxtor.class.getName());
+          "1) [Guice/ErrorInjectingConstructor]: RuntimeException: Retry, Abort, Fail",
+          "at ProvisionListenerTest$FooBomb.<init>(ProvisionListenerTest.java:",
+          "at ProvisionListenerTest$DependsOnFooBombInCxtor.<init>(ProvisionListenerTest.java",
+          "while locating ProvisionListenerTest$DependsOnFooBombInCxtor");
       assertContains(
           listener.capture.get().getMessage(),
-          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
-          " at " + FooBomb.class.getName(),
-          " while locating " + FooBomb.class.getName());
+          "1) [Guice/ErrorInjectingConstructor]: RuntimeException: Retry, Abort, Fail",
+          "at ProvisionListenerTest$FooBomb.<init>(ProvisionListenerTest.java:");
       // The message that is captures by the provision listener does not show what is depending on
       // the thing being listened to.
       assertThat(listener.capture.get().getMessage())
-          .doesNotContain(" while locating " + DependsOnFooBombInField.class.getName());
+          .doesNotContain("while locating ProvisionListenerTest$DependsOnFooBombInField");
     }
     assertEquals(1, listener.beforeProvision);
     assertEquals(
@@ -259,12 +252,10 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error notifying ProvisionListener "
-              + ProvisionTwice.class.getName()
-              + " of "
-              + Foo.class.getName(),
-          "Reason: java.lang.IllegalStateException: Already provisioned in this listener.",
-          "while locating " + Foo.class.getName());
+          "1) Error notifying ProvisionListener ProvisionListenerTest$ProvisionTwice of"
+              + " ProvisionListenerTest$Foo.",
+          "Reason: IllegalStateException: Already provisioned in this listener.",
+          "while locating ProvisionListenerTest$Foo");
       assertEquals("Already provisioned in this listener.", pe.getCause().getMessage());
     }
   }
@@ -326,12 +317,10 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error notifying ProvisionListener "
-              + FailBeforeProvision.class.getName()
-              + " of "
-              + Foo.class.getName(),
-          "Reason: java.lang.RuntimeException: boo",
-          "while locating " + Foo.class.getName());
+          "1) Error notifying ProvisionListener ProvisionListenerTest$FailBeforeProvision of "
+              + "ProvisionListenerTest$Foo.",
+          "Reason: RuntimeException: boo",
+          "while locating ProvisionListenerTest$Foo");
       assertEquals("boo", pe.getCause().getMessage());
 
       assertEquals(1, count1.count);
@@ -357,12 +346,10 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(1, pe.getErrorMessages().size());
       assertContains(
           pe.getMessage(),
-          "1) Error notifying ProvisionListener "
-              + FailAfterProvision.class.getName()
-              + " of "
-              + Foo.class.getName(),
-          "Reason: java.lang.RuntimeException: boo",
-          "while locating " + Foo.class.getName());
+          "1) Error notifying ProvisionListener ProvisionListenerTest$FailAfterProvision of "
+              + "ProvisionListenerTest$Foo.",
+          "Reason: RuntimeException: boo",
+          "while locating ProvisionListenerTest$Foo");
       assertEquals("boo", pe.getCause().getMessage());
 
       assertEquals(1, count1.count);
@@ -570,7 +557,7 @@ public class ProvisionListenerTest extends TestCase {
   }
 
   private static class Capturer implements ProvisionListener {
-    List<Key> keys = Lists.newArrayList();
+    List<Key<?>> keys = Lists.newArrayList();
 
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
@@ -590,14 +577,14 @@ public class ProvisionListenerTest extends TestCase {
       }
     }
 
-    Set<Key> getAsSetAndClear() {
-      Set<Key> copy = ImmutableSet.copyOf(keys);
+    Set<Key<?>> getAsSetAndClear() {
+      Set<Key<?>> copy = ImmutableSet.copyOf(keys);
       keys.clear();
       return copy;
     }
 
-    List<Key> getAndClear() {
-      List<Key> copy = ImmutableList.copyOf(keys);
+    List<Key<?>> getAndClear() {
+      List<Key<?>> copy = ImmutableList.copyOf(keys);
       keys.clear();
       return copy;
     }
@@ -650,12 +637,6 @@ public class ProvisionListenerTest extends TestCase {
 
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
-      List<Class<?>> actual = Lists.newArrayList();
-      for (com.google.inject.spi.DependencyAndSource dep : provision.getDependencyChain()) {
-        actual.add(dep.getDependency().getKey().getRawType());
-      }
-      assertEquals(expected, actual);
-
       provisionList.add(provision.getBinding().getKey().getRawType());
     }
   }
@@ -810,17 +791,6 @@ public class ProvisionListenerTest extends TestCase {
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       notified.set(true);
       assertEquals(notifyType, provision.getBinding().getKey().getRawType());
-      assertEquals(2, provision.getDependencyChain().size());
-
-      assertNull(provision.getDependencyChain().get(0).getDependency());
-      assertContains(provision.getDependencyChain().get(0).getBindingSource(), firstSource);
-
-      assertEquals(
-          notifyType, provision.getDependencyChain().get(1).getDependency().getKey().getRawType());
-      assertContains(
-          provision.getDependencyChain().get(1).getBindingSource(),
-          notifyType.getName() + ".class(");
-
     }
   }
 

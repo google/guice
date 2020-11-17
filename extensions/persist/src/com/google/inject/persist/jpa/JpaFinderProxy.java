@@ -37,7 +37,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * TODO(dhanji): Make this work!!
+ * TODO(user): Make this work!!
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
@@ -80,6 +80,7 @@ class JpaFinderProxy implements MethodInterceptor {
     return result;
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"}) // JPA Query returns raw type.
   private Object getAsCollection(JpaFinderProxy.FinderDescriptor finderDescriptor, List results) {
     Collection<?> collection;
     try {
@@ -91,12 +92,14 @@ class JpaFinderProxy implements MethodInterceptor {
           e);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(
-          "Specified collection class of Finder's returnAs could not be instantated (do not have access privileges): "
+          "Specified collection class of Finder's returnAs could not be instantated (do not have"
+              + " access privileges): "
               + finderDescriptor.returnCollectionType,
           e);
     } catch (InvocationTargetException e) {
       throw new RuntimeException(
-          "Specified collection class of Finder's returnAs could not be instantated (it threw an exception): "
+          "Specified collection class of Finder's returnAs could not be instantated (it threw an"
+              + " exception): "
               + finderDescriptor.returnCollectionType,
           e);
     }
@@ -246,8 +249,11 @@ class JpaFinderProxy implements MethodInterceptor {
     //should we treat the query as having ? instead of :named params
     volatile JpaFinderProxy.ReturnType returnType;
     volatile Class<?> returnClass;
+
+    @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type
     volatile Class<? extends Collection> returnCollectionType;
-    volatile Constructor returnCollectionTypeConstructor;
+
+    volatile Constructor<?> returnCollectionTypeConstructor;
     volatile Object[] parameterAnnotations;
     //contract is: null = no bind, @Named = param, @FirstResult/@MaxResults for paging
 

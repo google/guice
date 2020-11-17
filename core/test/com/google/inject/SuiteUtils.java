@@ -26,7 +26,7 @@ public class SuiteUtils {
   public static TestSuite removeSuppressedTests(TestSuite suite, Set<String> suppressedTestNames) {
     TestSuite result = new TestSuite(suite.getName());
 
-    for (Enumeration e = suite.tests(); e.hasMoreElements(); ) {
+    for (Enumeration<?> e = suite.tests(); e.hasMoreElements(); ) {
       Test test = (Test) e.nextElement();
 
       if (suppressedTestNames.contains(test.toString())) {

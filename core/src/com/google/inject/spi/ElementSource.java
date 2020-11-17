@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.internal.util.StackTraceElements.InMemoryStackTraceElement;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Contains information about where and how an {@link Element element} was bound.
@@ -58,6 +59,15 @@ public final class ElementSource {
    */
   final ElementSource originalElementSource;
 
+  /**
+   * Wheather the originalElementSource was set externaly (untrusted) or by Guice internals
+   * (trusted).
+   *
+   * <p>External code can set the originalElementSource to an arbitrary ElementSource via
+   * Binder.withSource(ElementSource), thereby spoofing the element origin.
+   */
+  final boolean trustedOriginalElementSource;
+
   /** The {@link ModuleSource source} of module creates the element. */
   final ModuleSource moduleSource;
 
@@ -75,10 +85,13 @@ public final class ElementSource {
    */
   final Object declaringSource;
 
+  /** The scanner that created this binding (if it was created by a scanner). */
+  final ModuleAnnotatedMethodScanner scanner;
+
   /**
    * Creates a new {@ElementSource} from the given parameters.
    *
-   * @param originalElementSource The source of element that this element created from (if there is
+   * @param originalSource The source of element that this element was created from (if there is
    *     any), otherwise {@code null}.
    * @param declaringSource the source (in)directly declared the element.
    * @param moduleSource the moduleSource when the element is bound
@@ -86,17 +99,21 @@ public final class ElementSource {
    *     bound
    */
   ElementSource(
-      /* @Nullable */ ElementSource originalSource,
+      @Nullable ElementSource originalSource,
+      boolean trustedOriginalSource,
       Object declaringSource,
       ModuleSource moduleSource,
-      StackTraceElement[] partialCallStack) {
+      StackTraceElement[] partialCallStack,
+      ModuleAnnotatedMethodScanner scanner) {
     Preconditions.checkNotNull(declaringSource, "declaringSource cannot be null.");
     Preconditions.checkNotNull(moduleSource, "moduleSource cannot be null.");
     Preconditions.checkNotNull(partialCallStack, "partialCallStack cannot be null.");
     this.originalElementSource = originalSource;
+    this.trustedOriginalElementSource = trustedOriginalSource;
     this.declaringSource = declaringSource;
     this.moduleSource = moduleSource;
     this.partialCallStack = StackTraceElements.convertToInMemoryStackTraceElement(partialCallStack);
+    this.scanner = scanner;
   }
 
   /**

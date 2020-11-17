@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
@@ -28,7 +27,6 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
-import com.google.inject.util.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -115,10 +113,9 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Cannot expose java.lang.String on a standard binder. ",
+          "Cannot expose String on a standard binder. ",
           "Exposed bindings are only applicable to private binders.",
-          " at " + PrivateModuleTest.class.getName(),
-          "provideString(PrivateModuleTest.java:");
+          "at PrivateModuleTest$3.provideString");
     }
   }
 
@@ -135,10 +132,9 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Cannot expose java.lang.String on a standard binder. ",
+          "Cannot expose String on a standard binder. ",
           "Exposed bindings are only applicable to private binders.",
-          " at " + PrivateModuleTest.class.getName(),
-          getDeclaringSourcePart(getClass()));
+          "at PrivateModuleTest$4.configure");
     }
   }
 
@@ -232,13 +228,7 @@ public class PrivateModuleTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(
-          expected.getMessage(),
-          "A binding to java.lang.String was already configured at ",
-          getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          " at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()));
+      assertContains(expected.getMessage(), "String was bound multiple times.");
     }
   }
 
@@ -264,8 +254,8 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "Could not expose() " + AB.class.getName() + ", it must be explicitly bound",
-          getDeclaringSourcePart(getClass()));
+          "Could not expose() PrivateModuleTest$AB, it must be explicitly bound",
+          "at PrivateModuleTest$7$1.configure");
     }
   }
 
@@ -292,15 +282,18 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
-          "1) No implementation for " + C.class.getName() + " was bound.",
-          "at " + getClass().getName(),
-          getDeclaringSourcePart(getClass()),
-          "2) No implementation for " + String.class.getName(),
-          "Named(value=" + Annotations.memberValueString("a") + ") was bound.",
-          "for field at " + AB.class.getName() + ".a(PrivateModuleTest.java:",
-          "3) No implementation for " + String.class.getName(),
-          "Named(value=" + Annotations.memberValueString("b") + ") was bound.",
-          "for field at " + AB.class.getName() + ".b(PrivateModuleTest.java:",
+          "No implementation for PrivateModuleTest$C was bound.",
+          "1  : PrivateModuleTest$8.configure",
+          String.format(
+              "No implementation for String annotated with @Named(%s) was bound.",
+              Annotations.memberValueString("value", "a")),
+          "1  : PrivateModuleTest$AB.a",
+          "for field a",
+          String.format(
+              "No implementation for String annotated with @Named(%s) was bound.",
+              Annotations.memberValueString("value", "b")),
+          "PrivateModuleTest$AB.b",
+          "for field b",
           "3 errors");
     }
   }
@@ -596,35 +589,33 @@ public class PrivateModuleTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for java.util.List.",
-          "It was already configured on one or more child injectors or private modules",
-          "bound at " + FailingPrivateModule.class.getName() + ".configure(",
-          asModuleChain(FailingModule.class, ManyPrivateModules.class, FailingPrivateModule.class),
-          "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
-          asModuleChain(
-              FailingModule.class, ManyPrivateModules.class, SecondFailingPrivateModule.class),
-          "If it was in a PrivateModule, did you forget to expose the binding?",
-          "at " + FailingModule.class.getName() + ".configure(");
+          "Unable to create binding for List<String> ",
+          "because it was already configured on one or more child injectors or private modules.",
+          "1 : PrivateModuleTest$FailingPrivateModule.configure",
+          "PrivateModuleTest$FailingModule -> PrivateModuleTest$ManyPrivateModules ->"
+              + " PrivateModuleTest$FailingPrivateModule",
+          "2 : PrivateModuleTest$SecondFailingPrivateModule.configure",
+          "PrivateModuleTest$FailingModule -> PrivateModuleTest$ManyPrivateModules ->"
+              + " PrivateModuleTest$SecondFailingPrivateModule",
+          "PrivateModuleTest$FailingModule.configure");
     }
   }
 
   public void testParentBindingToPrivateLinkedJitBinding() {
     Injector injector = Guice.createInjector(new ManyPrivateModules());
     try {
-      injector.getBinding(Key.get(Types.providerOf(List.class)));
+      injector.getBinding(new Key<Provider<List<String>>>() {});
       fail();
     } catch (ConfigurationException expected) {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for com.google.inject.Provider<java.util.List>.",
-          "It was already configured on one or more child injectors or private modules",
-          "bound at " + FailingPrivateModule.class.getName() + ".configure(",
-          asModuleChain(ManyPrivateModules.class, FailingPrivateModule.class),
-          "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
-          asModuleChain(ManyPrivateModules.class, SecondFailingPrivateModule.class),
-          "If it was in a PrivateModule, did you forget to expose the binding?",
-          "while locating com.google.inject.Provider<java.util.List>");
+          "Unable to create binding for List<String> because it was already configured on one or"
+              + " more child injectors or private modules",
+          "1 : PrivateModuleTest$FailingPrivateModule.configure",
+          "PrivateModuleTest$ManyPrivateModules -> PrivateModuleTest$FailingPrivateModule",
+          "2 : PrivateModuleTest$SecondFailingPrivateModule.configure",
+          "PrivateModuleTest$ManyPrivateModules -> PrivateModuleTest$SecondFailingPrivateModule");
     }
   }
 
@@ -637,18 +628,16 @@ public class PrivateModuleTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for " + PrivateFoo.class.getName(),
-          "It was already configured on one or more child injectors or private modules",
-          "(bound by a just-in-time binding)",
-          "If it was in a PrivateModule, did you forget to expose the binding?",
-          "while locating " + PrivateFoo.class.getName());
+          "Unable to create binding for PrivateModuleTest$PrivateFoo because it was already"
+              + " configured on one or more child injectors or private modules.",
+          "as a just-in-time binding");
     }
   }
 
   private static class FailingModule extends AbstractModule {
     @Override
     protected void configure() {
-      bind(Collection.class).to(List.class);
+      bind(new Key<Collection<String>>() {}).to(new Key<List<String>>() {});
       install(new ManyPrivateModules());
     }
   }
@@ -667,11 +656,12 @@ public class PrivateModuleTest extends TestCase {
   private static class FailingPrivateModule extends PrivateModule {
     @Override
     protected void configure() {
-      bind(List.class).toInstance(new ArrayList());
+      Key<List<String>> key = new Key<List<String>>() {};
+      bind(key).toInstance(new ArrayList<String>());
 
       // Add the Provider<List> binding, created just-in-time,
       // to make sure our linked JIT bindings have the correct source.
-      getProvider(Key.get(Types.providerOf(List.class)));
+      getProvider(key);
 
       // Request a JIT binding for PrivateFoo, which can only
       // be created in the private module because it depends
@@ -684,11 +674,12 @@ public class PrivateModuleTest extends TestCase {
   private static class SecondFailingPrivateModule extends PrivateModule {
     @Override
     protected void configure() {
-      bind(List.class).toInstance(new ArrayList());
+      Key<List<String>> key = new Key<List<String>>() {};
+      bind(key).toInstance(new ArrayList<String>());
 
       // Add the Provider<List> binding, created just-in-time,
       // to make sure our linked JIT bindings have the correct source.
-      getProvider(Key.get(Types.providerOf(List.class)));
+      getProvider(key);
 
       // Request a JIT binding for PrivateFoo, which can only
       // be created in the private module because it depends
@@ -698,6 +689,6 @@ public class PrivateModuleTest extends TestCase {
   }
 
   private static class PrivateFoo {
-    @Inject List list;
+    @Inject List<String> list;
   }
 }

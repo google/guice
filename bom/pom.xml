@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>5.0.1-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
@@ -21,12 +21,6 @@
         <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.inject</groupId>
-        <artifactId>guice</artifactId>
-        <version>${project.version}</version>
-        <classifier>no_aop</classifier>
       </dependency>
       <dependency>
         <groupId>com.google.inject</groupId>

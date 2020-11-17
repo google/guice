@@ -43,8 +43,9 @@ final class BindingProcessor extends AbstractBindingProcessor {
 
   private final Initializer initializer;
 
-  BindingProcessor(Errors errors, Initializer initializer, ProcessedBindingData bindingData) {
-    super(errors, bindingData);
+  BindingProcessor(
+      Errors errors, Initializer initializer, ProcessedBindingData processedBindingData) {
+    super(errors, processedBindingData);
     this.initializer = initializer;
   }
 
@@ -153,7 +154,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
                     providerKey,
                     source,
                     injector.provisionListenerStore.get((ProviderKeyBinding<T>) binding));
-            bindingData.addCreationListener(boundProviderFactory);
+            processedBindingData.addCreationListener(boundProviderFactory);
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(
                     key,
@@ -172,11 +173,12 @@ final class BindingProcessor extends AbstractBindingProcessor {
             prepareBinding();
             Key<? extends T> linkedKey = binding.getLinkedKey();
             if (key.equals(linkedKey)) {
-              errors.recursiveBinding();
+              // TODO: b/168656899 check for transitive recursive binding
+              errors.recursiveBinding(key, linkedKey);
             }
 
             FactoryProxy<T> factory = new FactoryProxy<>(injector, key, linkedKey, source);
-            bindingData.addCreationListener(factory);
+            processedBindingData.addCreationListener(factory);
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
             putBinding(
@@ -246,7 +248,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
 
   private <T> void bindExposed(PrivateElements privateElements, Key<T> key) {
     ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<>(key, privateElements);
-    bindingData.addCreationListener(exposedKeyFactory);
+    processedBindingData.addCreationListener(exposedKeyFactory);
     putBinding(
         new ExposedBindingImpl<T>(
             injector,

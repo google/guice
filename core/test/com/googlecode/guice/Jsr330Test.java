@@ -212,8 +212,7 @@ public class Jsr330Test extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      assertContains(
-          expected.getMessage(), "1) Injected field " + L.class.getName() + ".b cannot be final.");
+      assertContains(expected.getMessage(), "Injected field Jsr330Test$L.b cannot be final.");
     }
   }
 
@@ -229,8 +228,7 @@ public class Jsr330Test extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(
-          expected.getMessage(),
-          "1) Injected method " + AbstractM.class.getName() + ".setB() cannot be abstract.");
+          expected.getMessage(), "Injected method Jsr330Test$AbstractM.setB() cannot be abstract.");
     }
   }
 
@@ -246,10 +244,7 @@ public class Jsr330Test extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(
-          expected.getMessage(),
-          "1) Injected method "
-              + N.class.getName()
-              + ".setB() cannot declare type parameters of its own.");
+          expected.getMessage(), "Injected method Jsr330Test$N.setB() cannot declare type ");
     }
   }
 

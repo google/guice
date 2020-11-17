@@ -19,7 +19,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <parent>
     <artifactId>guice-parent</artifactId>
     <groupId>com.google.inject</groupId>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>5.0.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -41,13 +41,17 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava-testlib</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!--
+     | jdk8 tests depend indirectly on asm (via LineNumbers) which is only embedded
+     | with 'mvn package'; make it an explict dependency to support using 'mvn test'.
+    -->
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

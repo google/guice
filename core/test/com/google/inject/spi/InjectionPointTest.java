@@ -22,6 +22,7 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.name.Names.named;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -30,7 +31,6 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint.Signature;
@@ -69,9 +69,9 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
-            + Annotations.memberValueString("a")
-            + ")]@"
+        "Key[type=java.lang.String, annotation="
+            + named("a")
+            + "]@"
             + getClass().getName()
             + ".foo",
         dependency.toString());
@@ -98,9 +98,9 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
-            + Annotations.memberValueString("b")
-            + ")]@"
+        "Key[type=java.lang.String, annotation="
+            + named("b")
+            + "]@"
             + getClass().getName()
             + ".bar()[0]",
         dependency.toString());
@@ -128,9 +128,9 @@ public class InjectionPointTest extends TestCase {
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
-            + Annotations.memberValueString("c")
-            + ")]@"
+        "Key[type=java.lang.String, annotation="
+            + named("c")
+            + "]@"
             + Constructable.class.getName()
             + ".<init>()[0]",
         dependency.toString());
@@ -146,10 +146,7 @@ public class InjectionPointTest extends TestCase {
   public void testUnattachedDependency() throws IOException {
     Dependency<String> dependency = Dependency.get(Key.get(String.class, named("d")));
     assertEquals(
-        "Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value="
-            + Annotations.memberValueString("d")
-            + ")]",
-        dependency.toString());
+        "Key[type=java.lang.String, annotation=" + named("d") + "]", dependency.toString());
     assertNull(dependency.getInjectionPoint());
     assertEquals(-1, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("d")), dependency.getKey());
@@ -159,12 +156,13 @@ public class InjectionPointTest extends TestCase {
   }
 
   public void testForConstructor() throws NoSuchMethodException {
+    @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
     Constructor<HashSet> constructor = HashSet.class.getConstructor();
     TypeLiteral<HashSet<String>> hashSet = new TypeLiteral<HashSet<String>>() {};
 
     InjectionPoint injectionPoint = InjectionPoint.forConstructor(constructor, hashSet);
     assertSame(constructor, injectionPoint.getMember());
-    assertEquals(ImmutableList.<Dependency>of(), injectionPoint.getDependencies());
+    assertEquals(ImmutableList.of(), injectionPoint.getDependencies());
     assertFalse(injectionPoint.isOptional());
 
     try {
@@ -173,26 +171,103 @@ public class InjectionPointTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "java.util.LinkedHashSet<java.lang.String>",
-          " does not define java.util.HashSet.<init>()",
-          "  while locating java.util.LinkedHashSet<java.lang.String>");
+          "LinkedHashSet<String> does not define HashSet.<init>()",
+          "while locating LinkedHashSet<String>");
     }
 
     try {
-      InjectionPoint.forConstructor((Constructor) constructor, new TypeLiteral<Set<String>>() {});
+      @SuppressWarnings({"unchecked", "rawtypes"}) // Testing incorrect types
+      Constructor<Set<String>> c = (Constructor) constructor;
+      InjectionPoint.forConstructor(c, new TypeLiteral<Set<String>>() {});
       fail("Expected ConfigurationException");
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "java.util.Set<java.lang.String>",
-          " does not define java.util.HashSet.<init>()",
-          "  while locating java.util.Set<java.lang.String>");
+          "Set<String> does not define HashSet.<init>()",
+          "while locating Set<String>");
     }
   }
 
   public void testForConstructorOf() {
     InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(Constructable.class);
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
+  }
+
+  public void testForConstructorOfRequireAtInject_success() {
+    InjectionPoint injectionPoint =
+        InjectionPoint.forConstructorOf(
+            TypeLiteral.get(Constructable.class), /* atInjectRequired= */ true);
+    assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
+  }
+
+  public void testForConstructorOfRequireAtInject_fail() {
+    ConfigurationException exception =
+        assertThrows(
+            ConfigurationException.class,
+            () ->
+                InjectionPoint.forConstructorOf(
+                    TypeLiteral.get(NoArgNonConstructable.class), /* atInjectRequired= */ true));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            "Injector is configured to require @Inject constructors but class"
+                + " InjectionPointTest$NoArgNonConstructable does not have a @Inject annotated"
+                + " constructor.");
+  }
+
+  static class NoArgNonConstructable {
+    NoArgNonConstructable() {}
+  }
+
+  public void testTooManyConstructors() {
+    ConfigurationException exception =
+        assertThrows(
+            ConfigurationException.class,
+            () -> InjectionPoint.forConstructorOf(TypeLiteral.get(TooManyConstructors.class)));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("has more than one constructor annotated with @Inject.");
+  }
+
+  @SuppressWarnings("MoreThanOneInjectableConstructor") // Testing too many constructors
+  static class TooManyConstructors {
+    @Inject
+    TooManyConstructors() {}
+
+    @Inject
+    TooManyConstructors(String str) {}
+  }
+
+  public void testTooManyConstructors_withOptionalConstructorError() {
+    ConfigurationException exception =
+        assertThrows(
+            ConfigurationException.class,
+            () ->
+                InjectionPoint.forConstructorOf(
+                    TypeLiteral.get(TooManyConstructorsWithOptional.class)));
+
+    // Verify that both errors are reported in the exception
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("has more than one constructor annotated with @Inject.");
+
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            "TooManyConstructorsWithOptional.<init>() is annotated @Inject(optional=true), but"
+                + " constructors cannot be optional.");
+  }
+
+  @SuppressWarnings({
+    "MoreThanOneInjectableConstructor",
+    "InjectedConstructorAnnotations"
+  }) // Testing too many constructors and optional constructor annotation
+  static class TooManyConstructorsWithOptional {
+    @Inject(optional = true)
+    TooManyConstructorsWithOptional() {}
+
+    @Inject
+    TooManyConstructorsWithOptional(String str) {}
   }
 
   public void testAddForInstanceMethodsAndFields() throws Exception {

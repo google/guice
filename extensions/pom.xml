@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>5.0.1-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
@@ -22,7 +22,6 @@
     <module>grapher</module>
     <module>jmx</module>
     <module>jndi</module>
-    <module>multibindings</module>
     <module>persist</module>
     <module>servlet</module>
     <module>spring</module>
@@ -66,17 +65,12 @@
       <scope>test</scope>
     </dependency>
     <!--
-     | Some extension tests depend on cglib which is not embedded
-     | in an execution that doesn't include package.
+     | Some tests depend indirectly on asm (via LineNumbers) which is only embedded
+     | with 'mvn package'; make it an explict dependency to support using 'mvn test'.
     -->
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

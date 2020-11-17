@@ -104,7 +104,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
   @Override
   public BindingBuilder<T> toProvider(Provider<? extends T> provider) {
-    return toProvider((javax.inject.Provider<T>) provider);
+    return toProvider((javax.inject.Provider<? extends T>) provider);
   }
 
   @Override

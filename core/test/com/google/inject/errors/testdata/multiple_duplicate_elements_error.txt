@@ -1,0 +1,35 @@
+Unable to provision, see the following errors:
+
+1) [Guice/DuplicateElement]: Duplicate elements found in Multibinder Set<DuplicateElementErrorTest$IntWrapper> annotated with interface DuplicateElementErrorTest$Foo.
+
+Duplicates:
+1 : Element: IntWrapper(100)
+    Bound at: DuplicateElementErrorTest$MultipleDuplicateElementsModule.configure(DuplicateElementErrorTest.java:115)
+    Element: IntWrapper(102)
+    Bound at: DuplicateElementErrorTest$MultipleDuplicateElementsModule.provideFirstIntWrapper1(DuplicateElementErrorTest.java:103)
+    Element: IntWrapper(104)
+    Bound at: DuplicateElementErrorTest$MultipleDuplicateElementsModule.provideSecondIntWrapper1(DuplicateElementErrorTest.java:109)
+2 : Element: IntWrapper(101)
+    Bound at: DuplicateElementErrorTest$MultipleDuplicateElementsModule.provideFirstIntWrapper0(DuplicateElementErrorTest.java:91)
+    Element: IntWrapper(103)
+    Bound at: DuplicateElementErrorTest$MultipleDuplicateElementsModule.provideSecondIntWrapper0(DuplicateElementErrorTest.java:97)
+
+Multibinder declared at:
+  DuplicateElementErrorTest$MultipleDuplicateElementsModule.configure(DuplicateElementErrorTest.java:114)
+      \_ installed by: DuplicateElementErrorTest$MultipleDuplicateElementsModule -> RealMultibinder
+
+Learn more:
+  https://github.com/google/guice/wiki/DUPLICATE_ELEMENT
+
+1 error
+
+======================
+Full classname legend:
+======================
+DuplicateElementErrorTest$Foo:                             "com.google.inject.errors.DuplicateElementErrorTest$Foo"
+DuplicateElementErrorTest$IntWrapper:                      "com.google.inject.errors.DuplicateElementErrorTest$IntWrapper"
+DuplicateElementErrorTest$MultipleDuplicateElementsModule: "com.google.inject.errors.DuplicateElementErrorTest$MultipleDuplicateElementsModule"
+RealMultibinder:                                           "com.google.inject.internal.RealMultibinder"
+========================
+End of classname legend:
+========================

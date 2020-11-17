@@ -16,40 +16,57 @@
 
 package com.google.inject;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.matcher.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import com.google.inject.internal.InternalFlags;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class IntegrationTest extends TestCase {
+@RunWith(JUnit4.class)
+public class IntegrationTest {
 
+  @Test
   public void testIntegration() throws CreationException {
     final CountingInterceptor counter = new CountingInterceptor();
 
-    Injector injector =
-        Guice.createInjector(
-            new AbstractModule() {
-              @Override
-              protected void configure() {
-                bind(Foo.class);
-                bindInterceptor(any(), any(), counter);
-              }
-            });
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(Foo.class);
+            bindInterceptor(any(), any(), counter);
+          }
+        };
+    if (InternalFlags.isBytecodeGenEnabled()) {
+      Injector injector = Guice.createInjector(module);
 
-    Foo foo = injector.getInstance(Key.get(Foo.class));
-    foo.foo();
-    assertTrue(foo.invoked);
-    assertEquals(1, counter.count);
+      Foo foo = injector.getInstance(Key.get(Foo.class));
+      foo.foo();
+      assertTrue(foo.invoked);
+      assertEquals(1, counter.count);
 
-    foo = injector.getInstance(Foo.class);
-    foo.foo();
-    assertTrue(foo.invoked);
-    assertEquals(2, counter.count);
+      foo = injector.getInstance(Foo.class);
+      foo.foo();
+      assertTrue(foo.invoked);
+      assertEquals(2, counter.count);
+    } else {
+      CreationException exception =
+          assertThrows(CreationException.class, () -> Guice.createInjector(module));
+      assertThat(exception)
+          .hasMessageThat()
+          .contains("Binding interceptor is not supported when bytecode generation is disabled.");
+    }
   }
 
-  static class Foo {
+  public static class Foo {
     boolean invoked;
 
     public void foo() {

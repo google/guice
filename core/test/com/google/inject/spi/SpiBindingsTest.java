@@ -393,6 +393,7 @@ public class SpiBindingsTest extends TestCase {
                 bind(String.class)
                     .toProvider(
                         new ProviderWithExtensionVisitor<String>() {
+                          @SuppressWarnings("unchecked") // Safe because V is fixed to String
                           @Override
                           public <B, V> V acceptExtensionVisitor(
                               BindingTargetVisitor<B, V> visitor,
@@ -451,7 +452,7 @@ public class SpiBindingsTest extends TestCase {
     }
   }
 
-  public void checkBindingSource(Binding binding) {
+  public void checkBindingSource(Binding<?> binding) {
     assertContains(binding.getSource().toString(), getDeclaringSourcePart(getClass()));
     ElementSource source = (ElementSource) binding.getSource();
     assertFalse(source.getModuleClassNames().isEmpty());

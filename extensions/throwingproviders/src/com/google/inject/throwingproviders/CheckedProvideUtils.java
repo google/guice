@@ -79,6 +79,7 @@ class CheckedProvideUtils {
   }
 
   /** Adds errors to the binder if the exceptions aren't valid. */
+  @SuppressWarnings("rawtypes") // Class literal uses raw type.
   static void validateExceptions(
       Binder binder,
       Iterable<TypeLiteral<?>> actualExceptionTypes,

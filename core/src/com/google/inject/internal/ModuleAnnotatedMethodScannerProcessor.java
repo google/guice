@@ -31,7 +31,7 @@ final class ModuleAnnotatedMethodScannerProcessor extends AbstractProcessor {
 
   @Override
   public Boolean visit(ModuleAnnotatedMethodScannerBinding command) {
-    injector.state.addScanner(command);
+    injector.getBindingData().addScanner(command);
     return true;
   }
 }

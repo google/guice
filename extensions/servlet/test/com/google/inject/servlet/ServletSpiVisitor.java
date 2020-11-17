@@ -51,10 +51,10 @@ class ServletSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
   List<Params> actual = Lists.newArrayList();
 
   /* The set of classes that are allowed to be "other" bindings. */
-  Set<Class> allowedClasses;
+  Set<Class<?>> allowedClasses;
 
   ServletSpiVisitor(boolean forInjector) {
-    ImmutableSet.Builder<Class> builder = ImmutableSet.builder();
+    ImmutableSet.Builder<Class<?>> builder = ImmutableSet.builder();
     // always ignore these things...
     builder.add(
         ServletRequest.class,
@@ -124,7 +124,11 @@ class ServletSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
       this.patternType = binding.getUriPatternType();
     }
 
-    Params(String pattern, Object keyOrInstance, Map params, UriPatternType patternType) {
+    Params(
+        String pattern,
+        Object keyOrInstance,
+        Map<String, String> params,
+        UriPatternType patternType) {
       this.pattern = pattern;
       this.keyOrInstance = keyOrInstance;
       this.params = params;

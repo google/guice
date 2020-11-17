@@ -65,9 +65,14 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
       setOf(newParameterizedTypeWithOwner(Map.class, Map.Entry.class, String.class, Integer.class));
   Field list;
   Field instance;
+
+  @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
   Constructor<GenericConstructor> newHasGenericConstructor;
+
+  @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
   Constructor<Thrower> newThrower;
-  Constructor newString;
+
+  Constructor<?> newString;
   Method stringIndexOf;
   Method comparableCompareTo;
   Method getArray;
@@ -306,13 +311,14 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
 
   static class StringIntegerHashMap extends HashMap<String, Integer> {}
 
+
   public void testGetSupertype() {
     TypeLiteral<AbstractList<String>> listOfString = new TypeLiteral<AbstractList<String>>() {};
     assertEquals(
         Types.newParameterizedType(AbstractCollection.class, String.class),
         listOfString.getSupertype(AbstractCollection.class).getType());
 
-    TypeLiteral arrayListOfE =
+    TypeLiteral<?> arrayListOfE =
         TypeLiteral.get(newParameterizedType(ArrayList.class, ArrayList.class.getTypeParameters()));
     assertEquals(
         newParameterizedType(AbstractCollection.class, ArrayList.class.getTypeParameters()),
@@ -320,9 +326,10 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
   }
 
   public void testGetSupertypeForArraysAsList() {
+    @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
     Class<? extends List> arraysAsListClass = Arrays.asList().getClass();
     Type anotherE = arraysAsListClass.getTypeParameters()[0];
-    TypeLiteral type = TypeLiteral.get(newParameterizedType(AbstractList.class, anotherE));
+    TypeLiteral<?> type = TypeLiteral.get(newParameterizedType(AbstractList.class, anotherE));
     assertEquals(
         newParameterizedType(AbstractCollection.class, anotherE),
         type.getSupertype(AbstractCollection.class).getType());
@@ -348,7 +355,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
     public List<? super T> superT;
   }
 
-  // TODO(jessewilson): tests for tricky bounded types like <T extends Collection, Serializable>
+  // TODO(user): tests for tricky bounded types like <T extends Collection, Serializable>
 
   public void testEqualsAndHashCode() throws IOException {
     TypeLiteral<?> a1 = TypeLiteral.get(arrayListOfString);

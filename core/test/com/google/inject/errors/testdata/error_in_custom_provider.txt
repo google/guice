@@ -1,0 +1,18 @@
+Unable to provision, see the following errors:
+
+1) [Guice/ErrorInCustomProvider]: RuntimeException: can't do that
+  at GenericErrorTest$ProvisionErrorModule.provideString(GenericErrorTest.java:36)
+  while locating String
+
+Learn more:
+  https://github.com/google/guice/wiki/ERROR_IN_CUSTOM_PROVIDER
+
+1 error
+
+======================
+Full classname legend:
+======================
+GenericErrorTest$ProvisionErrorModule: "com.google.inject.errors.GenericErrorTest$ProvisionErrorModule"
+========================
+End of classname legend:
+========================

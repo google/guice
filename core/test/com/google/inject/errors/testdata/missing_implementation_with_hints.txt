@@ -1,0 +1,41 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest$B() was bound.
+
+Did you mean?
+    MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest$A() bound at MissingImplementationErrorTest$HintsModule.provideKlass(MissingImplementationErrorTest.java:117)
+
+Requested by:
+1  : MissingImplementationErrorTest$HintsModule.provideString(MissingImplementationErrorTest.java:123)
+      \_ for 1st parameter missing
+     at MissingImplementationErrorTest$HintsModule.provideString(MissingImplementationErrorTest.java:123)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+2) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorTest$Klass2 annotated with @MissingImplementationErrorTest$A() was bound.
+
+Did you mean?
+    MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest$A() bound at MissingImplementationErrorTest$HintsModule.provideKlass(MissingImplementationErrorTest.java:117)
+
+Requested by:
+1  : MissingImplementationErrorTest$HintsModule.provideAString(MissingImplementationErrorTest.java:130)
+      \_ for 1st parameter klass2
+     at MissingImplementationErrorTest$HintsModule.provideAString(MissingImplementationErrorTest.java:130)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+2 errors
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorTest$A:           "com.google.inject.errors.MissingImplementationErrorTest$A"
+MissingImplementationErrorTest$B:           "com.google.inject.errors.MissingImplementationErrorTest$B"
+MissingImplementationErrorTest$HintsModule: "com.google.inject.errors.MissingImplementationErrorTest$HintsModule"
+MissingImplementationErrorTest$Klass:       "com.google.inject.errors.MissingImplementationErrorTest$Klass"
+MissingImplementationErrorTest$Klass2:      "com.google.inject.errors.MissingImplementationErrorTest$Klass2"
+========================
+End of classname legend:
+========================

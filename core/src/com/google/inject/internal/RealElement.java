@@ -16,12 +16,11 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.Element.Type;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** An implementation of Element. */
-// TODO(cgruber): Use AutoAnnotation when available, here & wherever else is makes sense.
+// TODO(user): Use AutoAnnotation when available, here & wherever else is makes sense.
 class RealElement implements Element {
   private static final AtomicInteger nextUniqueId = new AtomicInteger(1);
 

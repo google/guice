@@ -1,0 +1,56 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorTest$Dao was bound.
+
+Requested by:
+1  : MissingImplementationErrorTest$RequestHandler.<init>(MissingImplementationErrorTest.java:46)
+      \_ for 1st parameter dao
+     at MissingImplementationErrorTest$Server.<init>(MissingImplementationErrorTest.java:51)
+      \_ for 1st parameter handler
+     at MissingImplementationErrorTest$DependsOnMissingBindings.<init>(MissingImplementationErrorTest.java:60)
+      \_ for 4th parameter server
+     at MissingImplementationErrorTest$TestModule.configure(MissingImplementationErrorTest.java:66)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+2) [Guice/MissingImplementation]: No implementation for String annotated with @MissingImplementationErrorTest$Foo() was bound.
+
+Requested by:
+1  : MissingImplementationErrorTest$RequiresFooUsingConstructor.<init>(MissingImplementationErrorTest.java:30)
+      \_ for 1st parameter ctorParam
+     at MissingImplementationErrorTest$DependsOnMissingBindings.<init>(MissingImplementationErrorTest.java:60)
+      \_ for 1st parameter ctorInjection
+     at MissingImplementationErrorTest$TestModule.configure(MissingImplementationErrorTest.java:66)
+2  : MissingImplementationErrorTest$RequiresFooUsingMethod.setMyString(MissingImplementationErrorTest.java:39)
+      \_ for 1st parameter myString
+     at MissingImplementationErrorTest$RequiresFooUsingMethod.setMyString(MissingImplementationErrorTest.java:39)
+     at MissingImplementationErrorTest$DependsOnMissingBindings.<init>(MissingImplementationErrorTest.java:60)
+      \_ for 3rd parameter methodInjection
+     at MissingImplementationErrorTest$TestModule.configure(MissingImplementationErrorTest.java:66)
+3  : MissingImplementationErrorTest$RequiresFooUsingField.unused(MissingImplementationErrorTest.java:33)
+      \_ for field unused
+     at MissingImplementationErrorTest$DependsOnMissingBindings.<init>(MissingImplementationErrorTest.java:60)
+      \_ for 2nd parameter fieldInjection
+     at MissingImplementationErrorTest$TestModule.configure(MissingImplementationErrorTest.java:66)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+2 errors
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorTest$Dao:                         "com.google.inject.errors.MissingImplementationErrorTest$Dao"
+MissingImplementationErrorTest$DependsOnMissingBindings:    "com.google.inject.errors.MissingImplementationErrorTest$DependsOnMissingBindings"
+MissingImplementationErrorTest$Foo:                         "com.google.inject.errors.MissingImplementationErrorTest$Foo"
+MissingImplementationErrorTest$RequestHandler:              "com.google.inject.errors.MissingImplementationErrorTest$RequestHandler"
+MissingImplementationErrorTest$RequiresFooUsingConstructor: "com.google.inject.errors.MissingImplementationErrorTest$RequiresFooUsingConstructor"
+MissingImplementationErrorTest$RequiresFooUsingField:       "com.google.inject.errors.MissingImplementationErrorTest$RequiresFooUsingField"
+MissingImplementationErrorTest$RequiresFooUsingMethod:      "com.google.inject.errors.MissingImplementationErrorTest$RequiresFooUsingMethod"
+MissingImplementationErrorTest$Server:                      "com.google.inject.errors.MissingImplementationErrorTest$Server"
+MissingImplementationErrorTest$TestModule:                  "com.google.inject.errors.MissingImplementationErrorTest$TestModule"
+========================
+End of classname legend:
+========================

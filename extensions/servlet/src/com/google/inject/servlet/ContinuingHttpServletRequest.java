@@ -92,7 +92,7 @@ class ContinuingHttpServletRequest extends HttpServletRequestWrapper {
 
   @Override
   public Cookie[] getCookies() {
-    // NOTE(dhanji): Cookies themselves are mutable. However a ContinuingHttpServletRequest
+    // NOTE(user): Cookies themselves are mutable. However a ContinuingHttpServletRequest
     // snapshots the original set of cookies it received and imprisons them in immutable
     // form. Unfortunately, the cookie array itself is mutable and there is no way for us
     // to avoid this. At worst, however, mutation effects are restricted within the scope

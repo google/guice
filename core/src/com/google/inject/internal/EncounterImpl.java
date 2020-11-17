@@ -40,9 +40,7 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
   private final Lookups lookups;
   private List<MembersInjector<? super T>> membersInjectors; // lazy
   private List<InjectionListener<? super T>> injectionListeners; // lazy
-  /*if[AOP]*/
   private List<MethodAspect> aspects; // lazy
-  /*end[AOP]*/
   private boolean valid = true;
 
   EncounterImpl(Errors errors, Lookups lookups) {
@@ -54,7 +52,6 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
     valid = false;
   }
 
-  /*if[AOP]*/
   ImmutableList<MethodAspect> getAspects() {
     return aspects == null ? ImmutableList.<MethodAspect>of() : ImmutableList.copyOf(aspects);
   }
@@ -72,7 +69,6 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
 
     aspects.add(new MethodAspect(Matchers.any(), methodMatcher, interceptors));
   }
-  /*end[AOP]*/
 
   ImmutableSet<MembersInjector<? super T>> getMembersInjectors() {
     return membersInjectors == null

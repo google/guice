@@ -27,7 +27,9 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- * Bind a value or constant.
+ * Base class used to create a new binding with the Guice EDSL described in {@link Binder}.
+ * Constructing an AbstractBindingBuilder will create a new binding and add it into the {@link
+ * Binder}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -46,9 +48,19 @@ public abstract class AbstractBindingBuilder<T> {
 
   protected static final Key<?> NULL_KEY = Key.get(Void.class);
 
-  protected List<Element> elements;
-  protected int position;
+  /** The binder that the new binding will be added to. */
   protected final Binder binder;
+  /**
+   * The list of elements stored inside the {@link #binder}. The new binding is added to this list.
+   */
+  protected List<Element> elements;
+  /**
+   * The index of the new binding in {@link #elements}. This is used by subclasses of
+   * AbstractBindingBuilder to repeatedly replace the binding object in {@link #elements} as more
+   * Guice EDSL methods are called to update the binding.
+   */
+  protected int position;
+  /** The new binding being added to the {@link #binder}'s {@link #elements} list */
   private BindingImpl<T> binding;
 
   public AbstractBindingBuilder(Binder binder, List<Element> elements, Object source, Key<T> key) {
@@ -73,15 +85,14 @@ public abstract class AbstractBindingBuilder<T> {
   protected BindingImpl<T> annotatedWithInternal(Class<? extends Annotation> annotationType) {
     checkNotNull(annotationType, "annotationType");
     checkNotAnnotated();
-    return setBinding(
-        binding.withKey(Key.get(this.binding.getKey().getTypeLiteral(), annotationType)));
+    return setBinding(binding.withKey(this.binding.getKey().withAnnotation(annotationType)));
   }
 
   /** Sets the binding to a copy with the specified annotation on the bound key */
   protected BindingImpl<T> annotatedWithInternal(Annotation annotation) {
     checkNotNull(annotation, "annotation");
     checkNotAnnotated();
-    return setBinding(binding.withKey(Key.get(this.binding.getKey().getTypeLiteral(), annotation)));
+    return setBinding(binding.withKey(this.binding.getKey().withAnnotation(annotation)));
   }
 
   public void in(final Class<? extends Annotation> scopeAnnotation) {

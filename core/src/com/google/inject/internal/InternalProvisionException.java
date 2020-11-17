@@ -108,18 +108,15 @@ public final class InternalProvisionException extends Exception {
   }
 
   public static InternalProvisionException errorInProvider(Throwable cause) {
-    return errorInUserCode(
-        ErrorId.ERROR_IN_CUSTOM_PROVIDER, cause, "Error in custom provider, %s", cause);
+    return errorInUserCode(ErrorId.ERROR_IN_CUSTOM_PROVIDER, cause, "%s", cause);
   }
 
   public static InternalProvisionException errorInjectingMethod(Throwable cause) {
-    return errorInUserCode(
-        ErrorId.ERROR_INJECTING_METHOD, cause, "Error injecting method, %s", cause);
+      return errorInUserCode(ErrorId.ERROR_INJECTING_METHOD, cause, "%s", cause);
   }
 
   public static InternalProvisionException errorInjectingConstructor(Throwable cause) {
-    return errorInUserCode(
-        ErrorId.ERROR_INJECTING_CONSTRUCTOR, cause, "Error injecting constructor, %s", cause);
+      return errorInUserCode(ErrorId.ERROR_INJECTING_CONSTRUCTOR, cause, "%s", cause);
   }
 
   public static InternalProvisionException errorInUserInjector(
@@ -175,7 +172,8 @@ public final class InternalProvisionException extends Exception {
                       + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
                       + " error.",
                   new Object[] {
-                    Messages.formatParameter(dependency), Messages.convert(dependency.getKey())
+                    SourceFormatter.getParameterName(dependency),
+                    Messages.convert(dependency.getKey())
                   });
             }
             return;
@@ -183,11 +181,14 @@ public final class InternalProvisionException extends Exception {
       }
     }
 
+    String parameterName =
+        (dependency.getParameterIndex() != -1) ? SourceFormatter.getParameterName(dependency) : "";
+    Object memberStackTraceElement =
+        StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
     Object formattedDependency =
-        (dependency.getParameterIndex() != -1)
-            ? Messages.formatParameter(dependency)
-            : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
-
+        parameterName.isEmpty()
+            ? memberStackTraceElement
+            : "the " + parameterName + " of " + memberStackTraceElement;
     throw InternalProvisionException.create(
             ErrorId.NULL_INJECTED_INTO_NON_NULLABLE,
             "null returned by binding at %s%n but %s is not @Nullable",
@@ -199,7 +200,7 @@ public final class InternalProvisionException extends Exception {
   private final List<Object> sourcesToPrepend = new ArrayList<>();
   private final ImmutableList<Message> errors;
 
-  private InternalProvisionException(Message error) {
+  InternalProvisionException(Message error) {
     this(ImmutableList.of(error));
   }
 
@@ -247,6 +248,7 @@ public final class InternalProvisionException extends Exception {
 
   /** Returns this exception convered to a ProvisionException. */
   public ProvisionException toProvisionException() {
-    return new ProvisionException(getErrors());
+    ProvisionException exception = new ProvisionException(getErrors());
+    return exception;
   }
 }

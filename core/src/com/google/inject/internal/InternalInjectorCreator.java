@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Stopwatch;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -25,7 +26,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.Stopwatch;
+import com.google.inject.internal.util.ContinuousStopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
@@ -59,11 +60,12 @@ import java.util.Set;
  */
 public final class InternalInjectorCreator {
 
-  private final Stopwatch stopwatch = new Stopwatch();
+  private final ContinuousStopwatch stopwatch =
+      new ContinuousStopwatch(Stopwatch.createUnstarted());
   private final Errors errors = new Errors();
 
   private final Initializer initializer = new Initializer();
-  private final ProcessedBindingData bindingData;
+  private final ProcessedBindingData processedBindingData;
   private final InjectionRequestProcessor injectionRequestProcessor;
 
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
@@ -71,7 +73,7 @@ public final class InternalInjectorCreator {
 
   public InternalInjectorCreator() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
-    bindingData = new ProcessedBindingData();
+    processedBindingData = new ProcessedBindingData();
   }
 
   public InternalInjectorCreator stage(Stage stage) {
@@ -99,10 +101,10 @@ public final class InternalInjectorCreator {
       throw new AssertionError("Already built, builders are not reusable.");
     }
 
-    // Synchronize while we're building up the bindings and other injector state. This ensures that
+    // Synchronize while we're building up the bindings and other injector data. This ensures that
     // the JIT bindings in the parent injector don't change while we're being built
     synchronized (shellBuilder.lock()) {
-      shells = shellBuilder.build(initializer, bindingData, stopwatch, errors);
+      shells = shellBuilder.build(initializer, processedBindingData, stopwatch, errors);
       stopwatch.resetAndLog("Injector construction");
 
       initializeStatically();
@@ -121,18 +123,18 @@ public final class InternalInjectorCreator {
 
   /** Initialize and validate everything. */
   private void initializeStatically() {
-    bindingData.initializeBindings();
+    processedBindingData.initializeBindings();
     stopwatch.resetAndLog("Binding initialization");
 
     for (InjectorShell shell : shells) {
-      shell.getInjector().index();
+      shell.getInjector().getBindingData().indexBindingsByType();
     }
     stopwatch.resetAndLog("Binding indexing");
 
     injectionRequestProcessor.process(shells);
     stopwatch.resetAndLog("Collecting injection requests");
 
-    bindingData.runCreationListeners(errors);
+    processedBindingData.runCreationListeners(errors);
     stopwatch.resetAndLog("Binding validation");
 
     injectionRequestProcessor.validate();
@@ -149,7 +151,7 @@ public final class InternalInjectorCreator {
 
     // This needs to come late since some user bindings rely on requireBinding calls to create
     // jit bindings during the LookupProcessor.
-    bindingData.initializeDelayedBindings();
+    processedBindingData.initializeDelayedBindings();
     stopwatch.resetAndLog("Delayed Binding initialization");
 
     for (InjectorShell shell : shells) {
@@ -196,26 +198,22 @@ public final class InternalInjectorCreator {
     List<BindingImpl<?>> candidateBindings = new ArrayList<>();
     @SuppressWarnings("unchecked") // casting Collection<Binding> to Collection<BindingImpl> is safe
     Collection<BindingImpl<?>> bindingsAtThisLevel =
-        (Collection) injector.state.getExplicitBindingsThisLevel().values();
+        (Collection) injector.getBindingData().getExplicitBindingsThisLevel().values();
     candidateBindings.addAll(bindingsAtThisLevel);
-    synchronized (injector.state.lock()) {
+    synchronized (injector.getJitBindingData().lock()) {
       // jit bindings must be accessed while holding the lock.
-      candidateBindings.addAll(injector.jitBindings.values());
+      candidateBindings.addAll(injector.getJitBindingData().getJitBindings().values());
     }
     InternalContext context = injector.enterContext();
     try {
       for (BindingImpl<?> binding : candidateBindings) {
         if (isEagerSingleton(injector, binding, stage)) {
           Dependency<?> dependency = Dependency.get(binding.getKey());
-          Dependency previous = context.pushDependency(dependency, binding.getSource());
-
           try {
             binding.getInternalFactory().get(context, dependency, false);
           } catch (InternalProvisionException e) {
             errors.withSource(dependency).merge(e);
-          } finally {
-              context.popStateAndSetDependency(previous);
-            }
+          }
         }
       }
     } finally {

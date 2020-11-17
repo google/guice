@@ -222,7 +222,7 @@ public final class Modules {
           PrivateElements privateElements = (PrivateElements) element;
           PrivateBinder privateBinder =
               baseBinder.newPrivateBinder().withSource(privateElements.getSource());
-          for (Key exposed : privateElements.getExposedKeys()) {
+          for (Key<?> exposed : privateElements.getExposedKeys()) {
             privateBinder.withSource(privateElements.getExposedSource(exposed)).expose(exposed);
           }
           baseBinder = privateBinder;

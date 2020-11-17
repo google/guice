@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,12 +76,7 @@ final class ConstructionContext<T> {
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).
-    ClassLoader classLoader = BytecodeGen.getClassLoader(expectedType);
-    return expectedType.cast(
-        Proxy.newProxyInstance(
-            classLoader,
-            new Class[] {expectedType, CircularDependencyProxy.class},
-            invocationHandler));
+    return BytecodeGen.newCircularProxy(expectedType, invocationHandler);
   }
 
   public void setProxyDelegates(T delegate) {

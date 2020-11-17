@@ -73,8 +73,8 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
         injector,
         Matchers.subclassesOf(Enum.class),
         new TypeConverter() {
+          @SuppressWarnings("rawtypes") // Unavoidable, only way to use Enum.valueOf
           @Override
-          @SuppressWarnings("unchecked")
           public Object convert(String value, TypeLiteral<?> toType) {
             return Enum.valueOf((Class) toType.getRawType(), value);
           }
@@ -100,7 +100,6 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
         },
         new TypeConverter() {
           @Override
-          @SuppressWarnings("unchecked")
           public Object convert(String value, TypeLiteral<?> toType) {
             try {
               return Class.forName(value);
@@ -125,7 +124,6 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
       TypeConverter typeConverter =
           new TypeConverter() {
             @Override
-            @SuppressWarnings("unchecked")
             public Object convert(String value, TypeLiteral<?> toType) {
               try {
                 return parser.invoke(null, value);
@@ -178,15 +176,19 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
 
   private static void internalConvertToTypes(
       InjectorImpl injector, Matcher<? super TypeLiteral<?>> typeMatcher, TypeConverter converter) {
-    injector.state.addConverter(
-        new TypeConverterBinding(SourceProvider.UNKNOWN_SOURCE, typeMatcher, converter));
+    injector
+        .getBindingData()
+        .addConverter(
+            new TypeConverterBinding(SourceProvider.UNKNOWN_SOURCE, typeMatcher, converter));
   }
 
   @Override
   public Boolean visit(TypeConverterBinding command) {
-    injector.state.addConverter(
-        new TypeConverterBinding(
-            command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
+    injector
+        .getBindingData()
+        .addConverter(
+            new TypeConverterBinding(
+                command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
     return true;
   }
 

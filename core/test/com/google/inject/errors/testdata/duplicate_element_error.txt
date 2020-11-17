@@ -1,0 +1,28 @@
+Unable to provision, see the following errors:
+
+1) [Guice/DuplicateElement]: Duplicate elements found in Multibinder Set<String>.
+
+Duplicates:
+1 : Element: element
+    Bound at:
+    1 : DuplicateElementErrorTest$DuplicateElementModule.configure(DuplicateElementErrorTest.java:37)
+    2 : DuplicateElementErrorTest$DuplicateElementModule.provideFirst(DuplicateElementErrorTest.java:27)
+    3 : DuplicateElementErrorTest$DuplicateElementModule.provideSecond(DuplicateElementErrorTest.java:32)
+
+Multibinder declared at:
+  DuplicateElementErrorTest$DuplicateElementModule.configure(DuplicateElementErrorTest.java:37)
+      \_ installed by: DuplicateElementErrorTest$DuplicateElementModule -> RealMultibinder
+
+Learn more:
+  https://github.com/google/guice/wiki/DUPLICATE_ELEMENT
+
+1 error
+
+======================
+Full classname legend:
+======================
+DuplicateElementErrorTest$DuplicateElementModule: "com.google.inject.errors.DuplicateElementErrorTest$DuplicateElementModule"
+RealMultibinder:                                  "com.google.inject.internal.RealMultibinder"
+========================
+End of classname legend:
+========================

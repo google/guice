@@ -18,13 +18,14 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
+import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
+import static com.google.inject.spi.Elements.withTrustedSource;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
-import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
@@ -39,6 +40,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 final class ConstructorBindingImpl<T> extends BindingImpl<T>
     implements ConstructorBinding<T>, DelayedInitialize {
@@ -87,15 +89,14 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       Scoping scoping,
       Errors errors,
       boolean failIfNotLinked,
-      boolean failIfNotExplicit)
+      boolean atInjectRequired)
       throws ErrorsException {
     int numErrors = errors.size();
 
-    @SuppressWarnings("unchecked") // constructorBinding guarantees type is consistent
-    Class<? super T> rawType =
+    Class<?> rawType =
         constructorInjector == null
             ? key.getTypeLiteral().getRawType()
-            : (Class) constructorInjector.getDeclaringType().getRawType();
+            : constructorInjector.getDeclaringType().getRawType();
 
     // We can't inject abstract classes.
     if (Modifier.isAbstract(rawType.getModifiers())) {
@@ -112,10 +113,8 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     // Find a constructor annotated @Inject
     if (constructorInjector == null) {
       try {
-        constructorInjector = InjectionPoint.forConstructorOf(key.getTypeLiteral());
-        if (failIfNotExplicit && !hasAtInject((Constructor) constructorInjector.getMember())) {
-          errors.atInjectRequired(rawType);
-        }
+        constructorInjector =
+            InjectionPoint.forConstructorOf(key.getTypeLiteral(), atInjectRequired);
       } catch (ConfigurationException e) {
         throw errors.merge(e.getErrorMessages()).toException();
       }
@@ -140,12 +139,6 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
     return new ConstructorBindingImpl<T>(
         injector, key, source, scopedFactory, scoping, factoryFactory, constructorInjector);
-  }
-
-  /** Returns true if the inject annotation is on the constructor. */
-  private static boolean hasAtInject(Constructor cxtor) {
-    return cxtor.isAnnotationPresent(Inject.class)
-        || cxtor.isAnnotationPresent(javax.inject.Inject.class);
   }
 
   @Override
@@ -175,13 +168,13 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
     if (factory.constructorInjector == null) {
       builder.add(constructorInjectionPoint);
-      // If the below throws, it's OK -- we just ignore those dependencies, because no one
-      // could have used them anyway.
       try {
         builder.addAll(
             InjectionPoint.forInstanceMethodsAndFields(
                 constructorInjectionPoint.getDeclaringType()));
       } catch (ConfigurationException ignored) {
+        // This is OK -- we just ignore those dependencies, because no one could have used them
+        // anyway.
       }
     } else {
       builder.add(getConstructor()).addAll(getInjectableMembers());
@@ -208,13 +201,11 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     return factory.constructorInjector.getInjectableMembers();
   }
 
-  /*if[AOP]*/
   @Override
-  public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors() {
+  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
     checkState(factory.constructorInjector != null, "Binding is not ready");
     return factory.constructorInjector.getConstructionProxy().getMethodInterceptors();
   }
-  /*end[AOP]*/
 
   @Override
   public Set<Dependency<?>> getDependencies() {
@@ -243,8 +234,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     InjectionPoint constructor = getConstructor();
     getScoping()
         .applyTo(
-            binder
-                .withSource(getSource())
+            withTrustedSource(GUICE_INTERNAL, binder, getSource())
                 .bind(getKey())
                 .toConstructor(
                     (Constructor) getConstructor().getMember(),

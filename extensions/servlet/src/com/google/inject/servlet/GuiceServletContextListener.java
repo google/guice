@@ -39,7 +39,7 @@ public abstract class GuiceServletContextListener implements ServletContextListe
     final ServletContext servletContext = servletContextEvent.getServletContext();
 
     // Set the Servletcontext early for those people who are using this class.
-    // NOTE(dhanji): This use of the servletContext is deprecated.
+    // NOTE(user): This use of the servletContext is deprecated.
     GuiceFilter.servletContext = new WeakReference<>(servletContext);
 
     Injector injector = getInjector();

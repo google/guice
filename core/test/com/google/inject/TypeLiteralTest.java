@@ -70,6 +70,7 @@ public class TypeLiteralTest extends TestCase {
     assertNotSerializable(c);
   }
 
+  @SuppressWarnings("rawtypes") // Testing rawtypes.
   public void testMissingTypeParameter() {
     try {
       new TypeLiteral() {};
@@ -108,6 +109,7 @@ public class TypeLiteralTest extends TestCase {
    * Unlike Key, TypeLiteral retains full type information and differentiates between {@code
    * int.class} and {@code Integer.class}.
    */
+  @SuppressWarnings("rawtypes") // Class literal uses raw type.
   public void testDifferentiationBetweenWrappersAndPrimitives() {
     Class[] primitives =
         new Class[] {
@@ -152,6 +154,7 @@ public class TypeLiteralTest extends TestCase {
     assertNotSerializable(new TypeLiteral<List<String>>() {});
   }
 
+  @SuppressWarnings("rawtypes") // Testing raw types
   public void testTypeVariableWithNoBound() {
     TypeVariable<Class<HasTypeParameters>>[] typeVariables =
         HasTypeParameters.class.getTypeParameters();
@@ -168,6 +171,7 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testTypeVariablesWithSingleBound() {
+    @SuppressWarnings("rawtypes") // Class literal uses raw type.
     TypeVariable<Class<HasTypeParameters>>[] typeVariables =
         HasTypeParameters.class.getTypeParameters();
 
@@ -183,6 +187,7 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testTypeVariableWithMultipleBounds() {
+    @SuppressWarnings("rawtypes") // Class literal uses raw type.
     TypeVariable<Class<HasTypeParameters>>[] typeVariables =
         HasTypeParameters.class.getTypeParameters();
 
