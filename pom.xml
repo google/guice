@@ -391,10 +391,58 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.0</version>
-          <!--TODO(b/123646401): try out maven-javadoc-plugin 3.1.0 and see if source 8 can be removed then-->
+          <version>3.2.0</version>
           <configuration>
             <source>8</source>
+            <author>false</author>
+            <protected>true</protected>
+            <links>
+              <link>http://aopalliance.sourceforge.net/doc/</link>
+              <link>http://docs.oracle.com/javase/7/docs/api/</link>
+              <link>https://guava.dev/releases/snapshot-jre/api/docs/</link>
+              <link>https://tomcat.apache.org/tomcat-5.5-doc/servletapi/</link>
+            </links>
+            <groups>
+              <group>
+                <title>Guice Core</title>
+                <packages>com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings:com.google.inject.internal*</packages>
+              </group>
+              <group>
+                <title>Servlet Extension</title>
+                <packages>com.google.inject.servlet</packages>
+              </group>
+              <group>
+                <title>AssistedInject Extension</title>
+                <packages>com.google.inject.assistedinject</packages>
+              </group>
+              <group><title>Dagger Adapter</title>
+                <packages>com.google.inject.daggeradapter</packages>
+              </group>
+              <group><title>ThrowingProviders Extension</title>
+                <packages>com.google.inject.throwingproviders</packages>
+              </group>
+              <group><title>Test Libraries Extension</title>
+                <packages>com.google.inject.testing.*</packages>
+              </group>
+              <group><title>Grapher Extension</title>
+                <packages>com.google.inject.grapher:com.google.inject.grapher.*</packages>
+              </group>
+              <group><title>Persist Extension</title>
+                <packages>com.google.inject.persist:com.google.inject.persist.*</packages>
+              </group>
+              <group><title>Spring Extension</title>
+                <packages>com.google.inject.spring</packages>
+              </group>
+              <group><title>Struts2 Extension</title>
+                <packages>com.google.inject.struts2</packages>
+              </group>
+              <group><title>JNDI Extension</title>
+                <packages>com.google.inject.jndi</packages>
+              </group>
+              <group><title>JMX Extension</title>
+                <packages>com.google.inject.tools.jmx</packages>
+              </group>
+            </groups>
           </configuration>
           <executions>
             <execution>
