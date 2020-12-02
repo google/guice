@@ -43,10 +43,11 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 /**
- * Automatically creates Guice bindings for fields in an object annotated with {@link Bind}.
+ * A Guice module that automatically adds Guice bindings into the injector for all {@link Bind}
+ * annotated fields of a specified object.
  *
- * <p>This module is intended for use in tests to reduce the code needed to bind local fields
- * (usually mocks) for injection.
+ * <p>This module is intended for use in tests to reduce the amount of boilerplate code needed to
+ * bind local fields (usually mocks) for injection.
  *
  * <p>The following rules are followed in determining how fields are bound using this module:
  *
