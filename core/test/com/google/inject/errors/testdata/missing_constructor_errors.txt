@@ -15,7 +15,7 @@ Learn more:
 
 2) [Guice/MissingConstructor]: No injectable constructor for type MissingConstructorErrorTest$PrivateConstructor.
 
-class MissingConstructorErrorTest$PrivateConstructor has a private no-arg constructor but it's not private. Guice can only use private no-arg constructor if it is defined in a private class.
+class MissingConstructorErrorTest$PrivateConstructor has a private no-arg constructor but the class is not private. Guice can only use a private no-arg constructor if it is defined in a private class.
 
 Requested by:
 1  : MissingConstructorErrorTest$PrivateConstructor.class(MissingConstructorErrorTest.java:1)
