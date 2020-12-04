@@ -24,7 +24,7 @@ script:
   - ${CMD}
 
 after_success:
-  - util/generate-latest-docs.sh
+  - util/publish-latest-docs.sh
   - util/publish-snapshot-on-commit.sh
 
 branches:
