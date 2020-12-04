@@ -117,6 +117,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
      | Use "-Dguice.with.jarjar=false" to build without jarjar
     -->
     <guice.with.jarjar>true</guice.with.jarjar>
+    <!--
+     | The last stable release version id, used for generating API diffs between released versions
+    -->
+    <guice.lastStableRelease>4.2.3</guice.lastStableRelease>
     <gpg.skip>true</gpg.skip>
   </properties>
 
@@ -398,14 +402,14 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <protected>true</protected>
             <links>
               <link>http://aopalliance.sourceforge.net/doc/</link>
-              <link>http://docs.oracle.com/javase/7/docs/api/</link>
               <link>https://guava.dev/releases/snapshot-jre/api/docs/</link>
               <link>https://tomcat.apache.org/tomcat-5.5-doc/servletapi/</link>
             </links>
+            <excludePackageNames>com.google.inject.internal:com.google.inject.internal.*</excludePackageNames>
             <groups>
               <group>
                 <title>Guice Core</title>
-                <packages>com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings:com.google.inject.internal*</packages>
+                <packages>com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings</packages>
               </group>
               <group>
                 <title>Servlet Extension</title>
@@ -476,6 +480,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.spf4j</groupId>
+          <artifactId>spf4j-jdiff-maven-plugin</artifactId>
+          <version>8.8.5</version>
+          <configuration>
+            <destDir>${project.reporting.outputDirectory}/api-diffs/${project.artifactId}</destDir>
+            <versionRange>[${guice.lastStableRelease}],[${project.version}]</versionRange>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

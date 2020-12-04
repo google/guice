@@ -1,8 +1,7 @@
 # see https://coderwall.com/p/9b_lfq
 
 if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
-   [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" ] && \
-   [ "$LABEL" == "mvn" ] && \
+   [ "$TRAVIS_JDK_VERSION" == "openjdk11" ] && \
    [ "$TRAVIS_PULL_REQUEST" == "false" ] && \
    [ "$TRAVIS_BRANCH" == "master" ]; then
   echo -e "Publishing maven snapshot...\n"
