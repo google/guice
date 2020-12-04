@@ -1,4 +1,3 @@
-#!/bin/sh
 if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
    [ "$TRAVIS_JDK_VERSION" == "openjdk11" ] && \
    [ "$TRAVIS_PULL_REQUEST" == "false" ] && \
