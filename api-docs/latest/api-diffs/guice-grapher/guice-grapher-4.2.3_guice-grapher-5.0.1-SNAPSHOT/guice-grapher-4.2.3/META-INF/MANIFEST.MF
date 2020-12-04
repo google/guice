@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven 3.5.0
+Built-By: sameb
+Build-Jdk: 1.8.0_181-google-v7
+
