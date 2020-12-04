@@ -8,7 +8,7 @@ if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
   rm -r build/docs
   mkdir -p build/docs/{javadoc,api-diffs}
 
-  mvn clean
+  mvn clean install
   mvn javadoc:aggregate
   cp -r target/site/apidocs/* build/docs/javadoc
 
