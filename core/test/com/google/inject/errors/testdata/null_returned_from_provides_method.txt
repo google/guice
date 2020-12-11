@@ -1,0 +1,23 @@
+Unable to provision, see the following errors:
+
+1) [Guice/NullInjectedIntoNonNullable]: null returned by binding at NullInjectedIntoNonNullableTest$FromProvidesMethodModule.provideString()
+ but the 1st parameter string of NullInjectedIntoNonNullableTest$Foo.<init>(NullInjectedIntoNonNullableTest.java:30) is not @Nullable
+  at NullInjectedIntoNonNullableTest$FromProvidesMethodModule.provideString(NullInjectedIntoNonNullableTest.java:37)
+  at NullInjectedIntoNonNullableTest$FromProvidesMethodModule.provideString(NullInjectedIntoNonNullableTest.java:37)
+  at NullInjectedIntoNonNullableTest$Foo.<init>(NullInjectedIntoNonNullableTest.java:30)
+      \_ for 1st parameter string
+  while locating NullInjectedIntoNonNullableTest$Foo
+
+Learn more:
+  https://github.com/google/guice/wiki/NULL_INJECTED_INTO_NON_NULLABLE
+
+1 error
+
+======================
+Full classname legend:
+======================
+NullInjectedIntoNonNullableTest$Foo:                      "com.google.inject.errors.NullInjectedIntoNonNullableTest$Foo"
+NullInjectedIntoNonNullableTest$FromProvidesMethodModule: "com.google.inject.errors.NullInjectedIntoNonNullableTest$FromProvidesMethodModule"
+========================
+End of classname legend:
+========================

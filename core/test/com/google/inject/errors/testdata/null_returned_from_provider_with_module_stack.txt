@@ -1,0 +1,24 @@
+Unable to provision, see the following errors:
+
+1) [Guice/NullInjectedIntoNonNullable]: null returned by binding at NullInjectedIntoNonNullableTest$IntermediateModule.NULL (installed by: NullInjectedIntoNonNullableTest$IntermediateModule -> NullInjectedIntoNonNullableTest$IntermediateModule$1)
+ but the 1st parameter string of NullInjectedIntoNonNullableTest$Foo.<init>(NullInjectedIntoNonNullableTest.java:30) is not @Nullable
+  at NullInjectedIntoNonNullableTest$IntermediateModule.NULL(NullInjectedIntoNonNullableTest.java:48)
+      \_ installed by: NullInjectedIntoNonNullableTest$IntermediateModule -> NullInjectedIntoNonNullableTest$IntermediateModule$1
+  at NullInjectedIntoNonNullableTest$Foo.<init>(NullInjectedIntoNonNullableTest.java:30)
+      \_ for 1st parameter string
+  while locating NullInjectedIntoNonNullableTest$Foo
+
+Learn more:
+  https://github.com/google/guice/wiki/NULL_INJECTED_INTO_NON_NULLABLE
+
+1 error
+
+======================
+Full classname legend:
+======================
+NullInjectedIntoNonNullableTest$Foo:                  "com.google.inject.errors.NullInjectedIntoNonNullableTest$Foo"
+NullInjectedIntoNonNullableTest$IntermediateModule:   "com.google.inject.errors.NullInjectedIntoNonNullableTest$IntermediateModule"
+NullInjectedIntoNonNullableTest$IntermediateModule$1: "com.google.inject.errors.NullInjectedIntoNonNullableTest$IntermediateModule$1"
+========================
+End of classname legend:
+========================
