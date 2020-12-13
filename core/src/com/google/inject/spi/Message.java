@@ -31,7 +31,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * An error message and the context in which it occured. Messages are usually created internally by
+ * An error message and the context in which it occurred. Messages are usually created internally by
  * Guice and its extensions. Messages can be created explicitly in a module using {@link
  * com.google.inject.Binder#addError(Throwable) addError()} statements:
  *

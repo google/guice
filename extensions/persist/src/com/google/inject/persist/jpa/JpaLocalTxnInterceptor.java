@@ -117,7 +117,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   /**
    * Returns True if rollback DID NOT HAPPEN (i.e. if commit should continue).
    *
-   * @param transactional The metadata annotaiton of the method
+   * @param transactional The metadata annotation of the method
    * @param e The exception to test for rollback
    * @param txn A JPA Transaction to issue rollbacks on
    */

@@ -134,7 +134,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
   }
 
   /**
-   * Processor for visiting bindings. Each overriden method that wants to actually process the
+   * Processor for visiting bindings. Each overridden method that wants to actually process the
    * binding should call prepareBinding first.
    */
   abstract class Processor<T, V> extends DefaultBindingTargetVisitor<T, V> {
@@ -157,7 +157,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
 
     /**
      * Schedule initialization of this binding to occur immediately after all bindings have been
-     * initialially processed.
+     * initially processed.
      */
     protected void scheduleInitialization(BindingImpl<?> binding) {
       processedBindingData.addUninitializedBinding(() -> initializeBinding(binding));

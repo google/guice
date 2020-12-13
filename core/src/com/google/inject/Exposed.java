@@ -24,7 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Acccompanies a {@literal @}{@link com.google.inject.Provides Provides} method annotation in a
+ * Accompanies a {@literal @}{@link com.google.inject.Provides Provides} method annotation in a
  * private module to indicate that the provided binding is exposed.
  *
  * @author jessewilson@google.com (Jesse Wilson)

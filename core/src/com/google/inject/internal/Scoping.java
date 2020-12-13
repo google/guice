@@ -303,7 +303,7 @@ public abstract class Scoping {
   /**
    * Replaces annotation scopes with instance scopes using the Injector's annotation-to-instance
    * map. If the scope annotation has no corresponding instance, an error will be added and unscoped
-   * will be retuned.
+   * will be returned.
    */
   static Scoping makeInjectable(Scoping scoping, InjectorImpl injector, Errors errors) {
     Class<? extends Annotation> scopeAnnotation = scoping.getScopeAnnotation();
