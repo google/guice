@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.ObjectArrays;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -98,7 +99,7 @@ public final class InjectionPoint {
     this.declaringType = declaringType;
     this.optional = optional;
 
-    Annotation[] annotations = field.getAnnotations();
+    Annotation[] annotations = getAnnotations(field);
 
     Errors errors = new Errors(field);
     Key<?> key = null;
@@ -860,6 +861,20 @@ public final class InjectionPoint {
     }
     // b must be package-private
     return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
+  }
+
+  /**
+   * Returns all the annotations on a field. If Kotlin-support is enabled, the annotations will
+   * include annotations on the related Kotlin-property.
+   */
+  public static Annotation[] getAnnotations(Field field) {
+    Annotation[] javaAnnotations = field.getAnnotations();
+    Annotation[] kotlinAnnotations = KotlinAnnotationSupport.getInstance().getAnnotations(field);
+
+    if (kotlinAnnotations.length == 0) {
+      return javaAnnotations;
+    }
+    return ObjectArrays.concat(javaAnnotations, kotlinAnnotations, Annotation.class);
   }
 
   /** A method signature. Used to handle method overridding. */

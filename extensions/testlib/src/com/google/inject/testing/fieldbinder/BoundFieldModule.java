@@ -34,6 +34,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.Nullability;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
@@ -273,7 +274,7 @@ public final class BoundFieldModule implements Module {
 
     private Annotation computeBindingAnnotation() throws BoundFieldException {
       Annotation found = null;
-      for (Annotation annotation : field.getAnnotations()) {
+      for (Annotation annotation : InjectionPoint.getAnnotations(field)) {
         Class<? extends Annotation> annotationType = annotation.annotationType();
         if (Annotations.isBindingAnnotation(annotationType)) {
           if (found != null) {
