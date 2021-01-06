@@ -31,6 +31,7 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.DeclaredMembers;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.KotlinSupport;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.util.Classes;
 import java.lang.annotation.Annotation;
@@ -79,7 +80,7 @@ public final class InjectionPoint {
             method,
             declaringType,
             method.getParameterAnnotations(),
-            KotlinNullabilitySupport.getInstance().getParameterPredicate(method));
+            KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(method));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Constructor<?> constructor) {
@@ -91,7 +92,7 @@ public final class InjectionPoint {
             constructor,
             declaringType,
             constructor.getParameterAnnotations(),
-            KotlinNullabilitySupport.getInstance().getParameterPredicate(constructor));
+            KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(constructor));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
@@ -869,7 +870,7 @@ public final class InjectionPoint {
    */
   public static Annotation[] getAnnotations(Field field) {
     Annotation[] javaAnnotations = field.getAnnotations();
-    Annotation[] kotlinAnnotations = KotlinAnnotationSupport.getInstance().getAnnotations(field);
+    Annotation[] kotlinAnnotations = KotlinSupport.getInstance().getAnnotations(field);
 
     if (kotlinAnnotations.length == 0) {
       return javaAnnotations;
