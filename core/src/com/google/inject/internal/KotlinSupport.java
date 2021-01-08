@@ -46,6 +46,11 @@ public final class KotlinSupport {
     }
 
     @Override
+    public boolean isNullable(Field field) {
+      return false;
+    }
+
+    @Override
     public Predicate<Integer> getIsParameterKotlinNullablePredicate(Constructor<?> constructor) {
       return FALSE_PREDICATE;
     }

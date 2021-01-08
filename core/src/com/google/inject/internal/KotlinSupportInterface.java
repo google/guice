@@ -11,6 +11,9 @@ public interface KotlinSupportInterface {
   /** Returns an array of {@link Annotation}s on the field's Kotlin property (if applicable). */
   Annotation[] getAnnotations(Field field);
 
+  /** Returns true if the field is declared as kotlin nullable type. */
+  boolean isNullable(Field field);
+
   /**
    * Returns a {@link Predicate} that says whether the constructor's i-th parameter is
    * Kotlin-nullable.

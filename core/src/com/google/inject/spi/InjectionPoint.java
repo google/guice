@@ -113,9 +113,10 @@ public final class InjectionPoint {
     }
     errors.throwConfigurationExceptionIfErrorsExist();
 
-    this.dependencies =
-        ImmutableList.<Dependency<?>>of(
-            newDependency(key, Nullability.allowsNull(annotations), -1));
+    boolean allowsNull =
+        Nullability.hasNullableAnnotation(annotations)
+            || KotlinSupport.getInstance().isNullable(field);
+    this.dependencies = ImmutableList.<Dependency<?>>of(newDependency(key, allowsNull, -1));
   }
 
   private ImmutableList<Dependency<?>> forMember(
@@ -133,7 +134,8 @@ public final class InjectionPoint {
         Annotation[] parameterAnnotations = parameterAnnotationsPerParameter[index];
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         boolean isNullable =
-            Nullability.allowsNull(parameterAnnotations) || isParameterKotlinNullable.test(index);
+            Nullability.hasNullableAnnotation(parameterAnnotations)
+                || isParameterKotlinNullable.test(index);
         dependencies.add(newDependency(key, isNullable, index));
         index++;
       } catch (ConfigurationException e) {

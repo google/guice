@@ -32,6 +32,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.KotlinSupport;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.Nullability;
 import com.google.inject.spi.InjectionPoint;
@@ -346,7 +347,8 @@ public final class BoundFieldModule implements Module {
     /** Returns whether a binding supports null values. */
     private boolean allowsNull() {
       return !isTransparentProvider(fieldType.getRawType())
-          && Nullability.allowsNull(field.getAnnotations());
+          && (Nullability.hasNullableAnnotation(field.getAnnotations())
+              || KotlinSupport.getInstance().isNullable(field));
     }
   }
 
