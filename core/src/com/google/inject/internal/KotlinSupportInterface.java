@@ -24,4 +24,7 @@ public interface KotlinSupportInterface {
    * Returns a {@link Predicate} that says whether the method's i-th parameter is Kotlin-nullable.
    */
   Predicate<Integer> getIsParameterKotlinNullablePredicate(Method method);
+
+  /** Checks for any errors on the constructor's parameters's annotations. */
+  void checkConstructorParameterAnnotations(Constructor<?> constructor, Errors errors);
 }

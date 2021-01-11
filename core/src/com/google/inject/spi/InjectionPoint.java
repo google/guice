@@ -77,6 +77,7 @@ public final class InjectionPoint {
     this.optional = optional;
     this.dependencies =
         forMember(
+            new Errors(method),
             method,
             declaringType,
             method.getParameterAnnotations(),
@@ -87,8 +88,12 @@ public final class InjectionPoint {
     this.member = constructor;
     this.declaringType = declaringType;
     this.optional = false;
+    Errors errors = new Errors(constructor);
+    KotlinSupport.getInstance().checkConstructorParameterAnnotations(constructor, errors);
+
     this.dependencies =
         forMember(
+            errors,
             constructor,
             declaringType,
             constructor.getParameterAnnotations(),
@@ -120,12 +125,11 @@ public final class InjectionPoint {
   }
 
   private ImmutableList<Dependency<?>> forMember(
+      Errors errors,
       Member member,
       TypeLiteral<?> type,
       Annotation[][] parameterAnnotationsPerParameter,
       Predicate<Integer> isParameterKotlinNullable) {
-    Errors errors = new Errors(member);
-
     List<Dependency<?>> dependencies = Lists.newArrayList();
     int index = 0;
 

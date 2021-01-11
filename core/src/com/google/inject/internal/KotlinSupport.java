@@ -59,5 +59,10 @@ public final class KotlinSupport {
     public Predicate<Integer> getIsParameterKotlinNullablePredicate(Method method) {
       return FALSE_PREDICATE;
     }
+
+    @Override
+    public void checkConstructorParameterAnnotations(Constructor<?> constructor, Errors errors) {
+      // do nothing
+    }
   }
 }
