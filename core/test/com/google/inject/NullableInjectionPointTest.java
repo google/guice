@@ -1,6 +1,8 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.ElementType.TYPE_USE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Optional;
 import com.google.inject.multibindings.OptionalBinder;
@@ -89,6 +91,22 @@ public class NullableInjectionPointTest extends TestCase {
 
   public void testInjectNullIntoCustomNullableField() {
     CustomNullableFooField nff = createInjector().getInstance(CustomNullableFooField.class);
+    assertNull(nff.foo);
+  }
+
+  public void testInjectNullIntoTypeUseNullableConstructor() {
+    TypeUseNullableFooConstructor nff =
+        createInjector().getInstance(TypeUseNullableFooConstructor.class);
+    assertNull(nff.foo);
+  }
+
+  public void testInjectNullIntoTypeUseNullableMethod() {
+    TypeUseNullableFooMethod nfm = createInjector().getInstance(TypeUseNullableFooMethod.class);
+    assertNull(nfm.foo);
+  }
+
+  public void testInjectNullIntoTypeUseNullableField() {
+    TypeUseNullableFooField nff = createInjector().getInstance(TypeUseNullableFooField.class);
     assertNull(nff.foo);
   }
 
@@ -261,6 +279,34 @@ public class NullableInjectionPointTest extends TestCase {
 
     @Inject
     void setFoo(@Namespace.Nullable Foo foo) {
+      this.foo = foo;
+    }
+  }
+
+  private static class TypeUse {
+    @Retention(RUNTIME)
+    @Target(TYPE_USE)
+    private @interface Nullable {}
+  }
+
+  static class TypeUseNullableFooConstructor {
+    Foo foo;
+
+    @Inject
+    TypeUseNullableFooConstructor(@TypeUse.Nullable Foo foo) {
+      this.foo = foo;
+    }
+  }
+
+  static class TypeUseNullableFooField {
+    @Inject @TypeUse.Nullable Foo foo;
+  }
+
+  static class TypeUseNullableFooMethod {
+    Foo foo;
+
+    @Inject
+    void setFoo(@TypeUse.Nullable Foo foo) {
       this.foo = foo;
     }
   }

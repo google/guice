@@ -462,14 +462,22 @@ public class BoundFieldModuleTest extends TestCase {
   @Retention(RUNTIME)
   private @interface Nullable {}
 
+  private static class TypeUse {
+    @Retention(RUNTIME)
+    @Target(TYPE_USE)
+    private @interface Nullable {}
+  }
+
   public void testBindingNullableNullField() {
     Object instance =
         new Object() {
           @Bind @Nullable private Integer anInt = null;
+          @Bind @TypeUse.Nullable private Long aLong = null;
         };
 
     Injector injector = Guice.createInjector(BoundFieldModule.of(instance));
     assertNull(injector.getInstance(Integer.class));
+    assertNull(injector.getInstance(Long.class));
   }
 
   public void testBindingNullProvider() {
