@@ -33,12 +33,12 @@ public final class WeakKeySetUtils {
 
   private WeakKeySetUtils() {}
 
-  public static void assertBlacklisted(Injector injector, Key<?> key) {
-    assertBlacklistState(injector, key, true);
+  public static void assertBanned(Injector injector, Key<?> key) {
+    assertBannedState(injector, key, true);
   }
 
-  public static void assertNotBlacklisted(Injector injector, Key<?> key) {
-    assertBlacklistState(injector, key, false);
+  public static void assertNotBanned(Injector injector, Key<?> key) {
+    assertBannedState(injector, key, false);
   }
 
   public static void assertNotInSet(WeakKeySet set, Key<?> key) {
@@ -77,9 +77,9 @@ public final class WeakKeySetUtils {
     assertFalse(sources.contains(source));
   }
 
-  private static void assertBlacklistState(Injector injector, Key<?> key, boolean isBlacklisted) {
-    // if we're expecting it to not be blacklisted, loop around and wait for threads to run.
-    if (!isBlacklisted) {
+  private static void assertBannedState(Injector injector, Key<?> key, boolean isBanned) {
+    // if we're expecting it to not be banned, loop around and wait for threads to run.
+    if (!isBanned) {
       for (int i = 0; i < 10; i++) {
         if (!((InjectorImpl) injector).getJitBindingData().isBannedKey(key)) {
           break;
@@ -87,7 +87,7 @@ public final class WeakKeySetUtils {
         sleep();
       }
     }
-    assertEquals(isBlacklisted, ((InjectorImpl) injector).getJitBindingData().isBannedKey(key));
+    assertEquals(isBanned, ((InjectorImpl) injector).getJitBindingData().isBannedKey(key));
   }
 
   private static void sleep() {

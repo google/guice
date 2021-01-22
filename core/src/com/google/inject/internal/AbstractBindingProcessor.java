@@ -37,7 +37,7 @@ import com.google.inject.spi.DefaultBindingTargetVisitor;
  */
 abstract class AbstractBindingProcessor extends AbstractProcessor {
 
-  // It's unfortunate that we have to maintain a blacklist of specific
+  // It's unfortunate that we have to maintain a list of specific
   // classes, but we can't easily block the whole package because of
   // all our unit tests.
   private static final ImmutableSet<Class<?>> FORBIDDEN_TYPES =
@@ -81,8 +81,8 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       if (injector.getBindingData().getExplicitBinding(key) != null) {
         try {
           if (!isOkayDuplicate(original, binding, injector.getBindingData())) {
-              errors.bindingAlreadySet(binding, original);
-              return;
+            errors.bindingAlreadySet(binding, original);
+            return;
           }
         } catch (Throwable t) {
           errors.errorCheckingDuplicateBinding(key, original.getSource(), t);
