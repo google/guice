@@ -36,7 +36,6 @@ import com.google.inject.internal.Nullability;
 import com.google.inject.internal.util.Classes;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -81,7 +80,6 @@ public final class InjectionPoint {
             new Errors(method),
             method,
             declaringType,
-            method.getAnnotatedParameterTypes(),
             method.getParameterAnnotations(),
             KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(method));
   }
@@ -98,7 +96,6 @@ public final class InjectionPoint {
             errors,
             constructor,
             declaringType,
-            constructor.getAnnotatedParameterTypes(),
             constructor.getParameterAnnotations(),
             KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(constructor));
   }
@@ -109,7 +106,7 @@ public final class InjectionPoint {
     this.optional = optional;
 
     Annotation[] annotations = getAnnotations(field);
-    Annotation[] typeUseAnnotations = field.getAnnotatedType().getAnnotations();
+
     Errors errors = new Errors(field);
     Key<?> key = null;
     try {
@@ -123,7 +120,6 @@ public final class InjectionPoint {
 
     boolean allowsNull =
         Nullability.hasNullableAnnotation(annotations)
-            || Nullability.hasNullableAnnotation(typeUseAnnotations)
             || KotlinSupport.getInstance().isNullable(field);
     this.dependencies = ImmutableList.<Dependency<?>>of(newDependency(key, allowsNull, -1));
   }
@@ -132,7 +128,6 @@ public final class InjectionPoint {
       Errors errors,
       Member member,
       TypeLiteral<?> type,
-      AnnotatedType[] annotatedTypes,
       Annotation[][] parameterAnnotationsPerParameter,
       Predicate<Integer> isParameterKotlinNullable) {
     List<Dependency<?>> dependencies = Lists.newArrayList();
@@ -140,12 +135,10 @@ public final class InjectionPoint {
 
     for (TypeLiteral<?> parameterType : type.getParameterTypes(member)) {
       try {
-        Annotation[] typeAnnotations = annotatedTypes[index].getAnnotations();
         Annotation[] parameterAnnotations = parameterAnnotationsPerParameter[index];
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         boolean isNullable =
             Nullability.hasNullableAnnotation(parameterAnnotations)
-                || Nullability.hasNullableAnnotation(typeAnnotations)
                 || isParameterKotlinNullable.test(index);
         dependencies.add(newDependency(key, isNullable, index));
         index++;
