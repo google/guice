@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-          server-id: google-releases
+          server-id: google-snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish Javadoc
@@ -33,6 +33,7 @@ jobs:
           chmod +x publish-latest-docs.sh
           ./publish-latest-docs.sh
       - name: Publish Snapshot
+        with:
         run: mvn clean deploy -DskipTests=true -Dmaven.javadoc.skip=true
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
