@@ -1,0 +1,32 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+name: continuous-integration
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [8, 11]
+      fail-fast: false
+      max-parallel: 4
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Verify with Maven
+        run: mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
