@@ -33,7 +33,6 @@ jobs:
           chmod +x publish-latest-docs.sh
           ./publish-latest-docs.sh
       - name: Publish Snapshot
-        with:
         run: mvn clean deploy -DskipTests=true -Dmaven.javadoc.skip=true
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
