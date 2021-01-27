@@ -11,10 +11,31 @@ on:
       - master
 
 jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [8, 11, 15]
+      fail-fast: false
+      max-parallel: 4
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Verify with Maven
+        run: mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
+
   publish:
     runs-on: ubuntu-latest
+    needs: test
     if: ${{ github.event_name == 'push' }}
-    name: Publish Javadoc and snapshot
+    name: Publish Javadoc and Snapshot
 
     steps:
       - uses: actions/checkout@v2
