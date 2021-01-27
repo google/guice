@@ -29,9 +29,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          cd util
-          chmod +x publish-latest-docs.sh
-          ./publish-latest-docs.sh
+          chmod +x util/publish-latest-docs.sh
+          .util/publish-latest-docs.sh
       - name: Publish Snapshot
         run: mvn clean deploy -DskipTests=true -Dmaven.javadoc.skip=true
         env:

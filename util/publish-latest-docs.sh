@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bash -e generate-latest-docs.sh
+bash -e util/generate-latest-docs.sh
 echo -e "Publishing javadoc & JDiff...\n"
 mkdir -p $HOME/guice-docs/latest
 cp -R build/docs/* $HOME/guice-docs/latest/
