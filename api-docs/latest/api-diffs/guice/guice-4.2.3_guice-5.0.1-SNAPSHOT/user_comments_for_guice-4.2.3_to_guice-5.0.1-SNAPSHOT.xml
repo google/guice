@@ -189,6 +189,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.internal.Errors.atTargetIsMissingParameter_added(java.lang.annotation.Annotation, java.lang.String, java.lang.Class)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.internal.Errors.cannotInjectNonVoidMethod_removed(java.lang.reflect.Method)"/>
   <text>
     InsertCommentsHere
@@ -297,6 +303,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.internal.KotlinSupport"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.KotlinSupportInterface"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.internal.LinkedBindingImpl"/>
   <text>
     InsertCommentsHere
@@ -364,6 +382,24 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.internal.Messages.underline_added(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Nullability"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Nullability.allowsNull_removed(java.lang.annotation.Annotation[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Nullability.hasNullableAnnotation_added(java.lang.annotation.Annotation[])"/>
   <text>
     InsertCommentsHere
   </text>
@@ -466,6 +502,12 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.spi.InjectionPoint.forConstructorOf_added(com.google.inject.TypeLiteral, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InjectionPoint.getAnnotations_added(java.lang.reflect.Field)"/>
   <text>
     InsertCommentsHere
   </text>

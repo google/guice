@@ -92,6 +92,7 @@ $.widget("custom.catcomplete", $.ui.autocomplete, {
     _renderMenu: function(ul, items) {
         var rMenu = this,
                 currentCategory = "";
+        rMenu.menu.bindings = $();
         $.each(items, function(index, item) {
             var li;
             if (item.l !== noResult.l && item.category !== currentCategory) {
@@ -127,24 +128,19 @@ $.widget("custom.catcomplete", $.ui.autocomplete, {
         } else {
             label = item.l;
         }
-        $li = $("<li/>").appendTo(ul);
+        var li = $("<li/>").appendTo(ul);
+        var div = $("<div/>").appendTo(li);
         if (item.category === catSearchTags) {
             if (item.d) {
-                $("<a/>").attr("href", "#")
-                        .html(label + "<span class=\"searchTagHolderResult\"> (" + item.h + ")</span><br><span class=\"searchTagDescResult\">"
-                                + item.d + "</span><br>")
-                        .appendTo($li);
+                div.html(label + "<span class=\"searchTagHolderResult\"> (" + item.h + ")</span><br><span class=\"searchTagDescResult\">"
+                                + item.d + "</span><br>");
             } else {
-                $("<a/>").attr("href", "#")
-                        .html(label + "<span class=\"searchTagHolderResult\"> (" + item.h + ")</span>")
-                        .appendTo($li);
+                div.html(label + "<span class=\"searchTagHolderResult\"> (" + item.h + ")</span>");
             }
         } else {
-            $("<a/>").attr("href", "#")
-                    .html(label)
-                    .appendTo($li);
+            div.html(label);
         }
-        return $li;
+        return li;
     }
 });
 $(function() {
@@ -323,6 +319,7 @@ $(function() {
                 } else {
                     window.location.href = pathtoroot + url;
                 }
+                $("#search").focus();
             }
         }
     });

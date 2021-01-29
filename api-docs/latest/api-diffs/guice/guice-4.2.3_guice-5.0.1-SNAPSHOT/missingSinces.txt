@@ -7,6 +7,8 @@ MISSING @SINCE TAG: com.google.inject.internal.GenericErrorDetail Class
 MISSING @SINCE TAG: com.google.inject.internal.GuiceInternal Class
 MISSING @SINCE TAG: com.google.inject.internal.InternalFlags.BytecodeGenOption Class
 MISSING @SINCE TAG: com.google.inject.internal.InternalFlags.ColorizeOption Class
+MISSING @SINCE TAG: com.google.inject.internal.KotlinSupport Class
+MISSING @SINCE TAG: com.google.inject.internal.KotlinSupportInterface Interface
 MISSING @SINCE TAG: com.google.inject.RestrictedBindingSource Interface
 MISSING @SINCE TAG: com.google.inject.RestrictedBindingSource.Permit Interface
 MISSING @SINCE TAG: com.google.inject.RestrictedBindingSource.RestrictionLevel Class
@@ -14,6 +16,7 @@ OK: com.google.inject.spi.Message Constructor (com.google.inject.internal.ErrorI
 OK: com.google.inject.spi.Message Constructor (com.google.inject.internal.GuiceInternal, com.google.inject.internal.ErrorId, com.google.inject.spi.ErrorDetail)
 NO DOC BLOCK: com.google.inject.internal.Errors Method addMessage(com.google.inject.internal.ErrorId, java.lang.String, java.lang.Object[])
 NO DOC BLOCK: com.google.inject.internal.Errors Method aopDisabled(com.google.inject.spi.InterceptorBinding)
+NO DOC BLOCK: com.google.inject.internal.Errors Method atTargetIsMissingParameter(java.lang.annotation.Annotation, java.lang.String, java.lang.Class)
 NO DOC BLOCK: com.google.inject.internal.Messages Method bold(java.lang.String)
 MISSING @SINCE TAG: com.google.inject.internal.Messages Method create(com.google.inject.internal.ErrorId, java.lang.String, java.lang.Object[])
 MISSING @SINCE TAG: com.google.inject.internal.Messages Method create(com.google.inject.internal.ErrorId, java.lang.Throwable, java.lang.String, java.lang.Object[])
@@ -22,8 +25,10 @@ NO DOC BLOCK: com.google.inject.internal.Errors Method duplicateMapKey(com.googl
 NO DOC BLOCK: com.google.inject.internal.InternalFlags Method enableColorizeErrorMessages()
 NO DOC BLOCK: com.google.inject.internal.Messages Method faint(java.lang.String)
 MISSING @SINCE TAG: com.google.inject.spi.InjectionPoint Method forConstructorOf(com.google.inject.TypeLiteral, boolean)
+MISSING @SINCE TAG: com.google.inject.spi.InjectionPoint Method getAnnotations(java.lang.reflect.Field)
 OK: com.google.inject.spi.Message Method getErrorDetail()
 NO DOC BLOCK: com.google.inject.internal.ProviderMethodsModule Method getScanner()
+MISSING @SINCE TAG: com.google.inject.internal.Nullability Method hasNullableAnnotation(java.lang.annotation.Annotation[])
 NO DOC BLOCK: com.google.inject.internal.InternalFlags Method isBytecodeGenEnabled()
 MISSING @SINCE TAG: com.google.inject.internal.BytecodeGen Method isCircularProxy(java.lang.Object)
 MISSING @SINCE TAG: com.google.inject.internal.ProviderMethodsModule Method isScanningBuiltInProvidesMethods()
