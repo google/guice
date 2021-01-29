@@ -27,7 +27,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-
+      - name: 'Cache local Maven repository'
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Verify with Maven
         run: mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
 
@@ -46,6 +52,13 @@ jobs:
           server-id: google-snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
+      - name: 'Cache local Maven repository'
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Publish Javadoc
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
