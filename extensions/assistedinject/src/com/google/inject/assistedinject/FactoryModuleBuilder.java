@@ -22,6 +22,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
 
 /**
  * Provides a factory that combines the caller's arguments with injector-supplied values to
@@ -212,6 +213,7 @@ import java.lang.annotation.Annotation;
 public final class FactoryModuleBuilder {
 
   private final BindingCollector bindings = new BindingCollector();
+  private MethodHandles.Lookup lookups;
 
   /** See the factory configuration examples at {@link FactoryModuleBuilder}. */
   public <T> FactoryModuleBuilder implement(Class<T> source, Class<? extends T> target) {
@@ -299,6 +301,22 @@ public final class FactoryModuleBuilder {
     return this;
   }
 
+  /**
+   * Typically called via {@code withLookups(MethodHandles.lookup())}. Sets the MethodHandles.Lookup
+   * that the factory implementation will use to call default methods on the factory interface.
+   * While this is not always required, it is always OK to set it. It is required if the factory
+   * passed to {@link #build} is non-public and javac generated default methods while compiling it
+   * (which javac can sometimes do if the factory uses generic types).
+   *
+   * <p>Guice will try to work properly even if this method is not called (or called with a lookups
+   * that doesn't have access to the factory), but doing so requires reflection into the JDK, which
+   * may break at any time (and trigger unsafe access warnings).
+   */
+  public <T> FactoryModuleBuilder withLookups(MethodHandles.Lookup lookups) {
+    this.lookups = lookups;
+    return this;
+  }
+
   /** See the factory configuration examples at {@link FactoryModuleBuilder}. */
   public <F> Module build(Class<F> factoryInterface) {
     return build(TypeLiteral.get(factoryInterface));
@@ -313,7 +331,7 @@ public final class FactoryModuleBuilder {
     return new AbstractModule() {
       @Override
       protected void configure() {
-        Provider<F> provider = new FactoryProvider2<>(factoryInterface, bindings);
+        Provider<F> provider = new FactoryProvider2<>(factoryInterface, bindings, lookups);
         binder().skipSources(this.getClass()).bind(factoryInterface).toProvider(provider);
       }
     };

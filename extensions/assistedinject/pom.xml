@@ -28,4 +28,11 @@
     </plugins>
   </build>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+    </dependency>
+  </dependencies>
+
 </project>
