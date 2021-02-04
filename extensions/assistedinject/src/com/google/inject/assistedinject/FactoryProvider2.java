@@ -377,8 +377,9 @@ final class FactoryProvider2<F>
             && userLookups == null
             && !Modifier.isPublic(factory.getClass().getModifiers())) {
           warnedAboutUserLookups = true;
+          // TODO(b/179303203): Upgrade this back to WARNING level
           logger.log(
-              Level.WARNING,
+              Level.INFO,
               "AssistedInject factory {0} is non-public and has javac-generated default methods. "
                   + " Please pass a `MethodHandles.lookups()` with"
                   + " FactoryModuleBuilder.withLookups when using this factory so that Guice can"
