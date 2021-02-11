@@ -60,7 +60,6 @@ import java.util.Set;
  *
  * <ul>
  *   <li>Dagger provider methods have a "SET_VALUES" provision mode not supported by Guice.
- *   <li>MapBindings are not yet implemented (pending).
  *   <li>Be careful about stateful modules. In contrast to Dagger (where components are expected to
  *       be recreated on-demand with new Module instances), Guice typically has a single injector
  *       with a long lifetime, so your module instance will be used throughout the lifetime of the
