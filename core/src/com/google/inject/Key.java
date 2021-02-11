@@ -27,8 +27,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 /**
- * Binding key consisting of an injection type and an optional annotation. Matches the type and
- * annotation at a point of injection.
+ * Guice uses Key objects to identify a dependency that can be resolved by the Guice {@link
+ * Injector}. A Guice key consists of an injection type and an optional annotation.
  *
  * <p>For example, {@code Key.get(Service.class, Transactional.class)} will match:
  *
