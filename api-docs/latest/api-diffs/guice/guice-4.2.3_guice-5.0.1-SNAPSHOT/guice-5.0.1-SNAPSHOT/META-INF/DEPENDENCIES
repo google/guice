@@ -31,7 +31,7 @@ From: 'MojoHaus' (http://www.mojohaus.org)
     License: MIT license  (http://www.opensource.org/licenses/mit-license.php)
 
 From: 'OW2' (http://www.ow2.org/)
-  - asm (http://asm.ow2.io/) org.ow2.asm:asm:jar:9.0
+  - asm (http://asm.ow2.io/) org.ow2.asm:asm:jar:9.1
     License: BSD-3-Clause  (https://asm.ow2.io/license.html)
 
 
