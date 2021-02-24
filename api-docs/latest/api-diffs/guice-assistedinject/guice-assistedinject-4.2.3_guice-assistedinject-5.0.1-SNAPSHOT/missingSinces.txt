@@ -1,1 +1,1 @@
-MISSING @SINCE TAG: com.google.inject.assistedinject.FactoryModuleBuilder Method withLookups(java.lang.invoke.MethodHandles.Lookup)
+OK: com.google.inject.assistedinject.FactoryModuleBuilder Method withLookups(java.lang.invoke.MethodHandles.Lookup)

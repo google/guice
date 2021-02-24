@@ -1,2 +1,2 @@
-MISSING @SINCE TAG: com.google.inject.daggeradapter.DaggerAdapter.Builder Class
+OK: com.google.inject.daggeradapter.DaggerAdapter.Builder Class
 NO DOC BLOCK: com.google.inject.daggeradapter.DaggerAdapter Method builder()
