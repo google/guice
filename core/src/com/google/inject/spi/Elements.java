@@ -125,6 +125,8 @@ public final class Elements {
    *
    * <p>Using Binder.withSource is not trustworthy because it's a public API that external users can
    * use to spoof the original ElementSource of a binding by calling withSource(bogusElementSource).
+   *
+   * @since 5.0
    */
   public static Binder withTrustedSource(
       GuiceInternal guiceInternal, Binder binder, Object source) {

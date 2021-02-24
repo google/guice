@@ -13,6 +13,8 @@ import java.util.Optional;
  * errors.
  *
  * <p>WARNING: The class and its APIs are still experimental and subject to change.
+ *
+ * @since 5.0
  */
 public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements Serializable {
   private final String message;

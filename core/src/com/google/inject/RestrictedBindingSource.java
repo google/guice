@@ -62,6 +62,7 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * @author vzm@google.com (Vladimir Makaric)
+ * @since 5.0
  */
 @Inherited
 @Retention(RUNTIME)
@@ -78,6 +79,8 @@ public @interface RestrictedBindingSource {
    * Meta-annotation indicating that the target annotation is a permit for binding restricted
    * bindings. Annotating a binding source (defined in top-level javadoc) with a permit gives it
    * permission to bind the restricted bindings guarded by the permit (see {@link #permits}).
+   *
+   * @since 5.0
    */
   @Documented
   @Retention(RUNTIME)
@@ -103,7 +106,11 @@ public @interface RestrictedBindingSource {
    */
   String exemptModules() default "";
 
-  /** Level of restriction. Determines how violations are handled. */
+  /**
+   * Level of restriction. Determines how violations are handled.
+   *
+   * @since 5.0
+   */
   public static enum RestrictionLevel {
     WARNING,
     ERROR;

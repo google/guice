@@ -87,7 +87,11 @@ public final class DaggerAdapter {
     return new Builder();
   }
 
-  /** Builder for setting configuration options on DaggerAdapter. */
+  /**
+   * Builder for setting configuration options on DaggerAdapter.
+   *
+   * @since 5.0
+   */
   public static class Builder {
     private final ImmutableList.Builder<Object> modules = ImmutableList.builder();
     private Predicate<Method> predicate = Predicates.alwaysTrue();

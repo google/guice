@@ -13,6 +13,7 @@ import com.google.inject.RestrictedBindingSource;
 import com.google.inject.RestrictedBindingSource.RestrictionLevel;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.GuiceInternal;
+import java.util.regex.Pattern;
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -45,6 +45,7 @@ import java.util.stream.StreamSupport;
  * which happens on a single thread.
  *
  * @author vzm@google.com (Vladimir Makaric)
+ * @since 5.0
  */
 public final class BindingSourceRestriction {
   private BindingSourceRestriction() {}

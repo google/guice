@@ -282,6 +282,7 @@ public final class InjectionPoint {
    * @throws ConfigurationException if there is no injectable constructor, more than one injectable
    *     constructor, or if parameters of the injectable constructor are malformed, such as a
    *     parameter with multiple binding annotations.
+   * @since 5.0
    */
   public static InjectionPoint forConstructorOf(TypeLiteral<?> type, boolean atInjectRequired) {
     Class<?> rawType = getRawType(type.getType());
@@ -873,6 +874,8 @@ public final class InjectionPoint {
   /**
    * Returns all the annotations on a field. If Kotlin-support is enabled, the annotations will
    * include annotations on the related Kotlin-property.
+   *
+   * @since 5.0
    */
   public static Annotation[] getAnnotations(Field field) {
     Annotation[] javaAnnotations = field.getAnnotations();

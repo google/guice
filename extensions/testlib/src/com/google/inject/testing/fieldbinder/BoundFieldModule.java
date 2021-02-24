@@ -135,6 +135,8 @@ public final class BoundFieldModule implements Module {
    * bindings), create an instance of an anonymous class extending this one and annotate it with
    * those permits. For example: {@code new @Permit1 @Permit2 BoundFieldModule.WithPermits(instance)
    * {}}.
+   *
+   * @since 5.0
    */
   public static class WithPermits extends AbstractModule {
     private final Object instance;

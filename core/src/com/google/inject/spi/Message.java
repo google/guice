@@ -152,7 +152,11 @@ public final class Message implements Serializable, Element {
     binder.withSource(getSource()).addError(this);
   }
 
-  /** Returns a copy of this {@link Message} with its sources replaced. */
+  /**
+   * Returns a copy of this {@link Message} with its sources replaced.
+   *
+   * @since 5.0
+   */
   public Message withSource(List<Object> newSources) {
     return new Message(errorId, errorDetail.withSources(newSources));
   }

@@ -311,6 +311,8 @@ public final class FactoryModuleBuilder {
    * <p>Guice will try to work properly even if this method is not called (or called with a lookups
    * that doesn't have access to the factory), but doing so requires reflection into the JDK, which
    * may break at any time (and trigger unsafe access warnings).
+   *
+   * @since 5.0
    */
   public <T> FactoryModuleBuilder withLookups(MethodHandles.Lookup lookups) {
     this.lookups = lookups;
