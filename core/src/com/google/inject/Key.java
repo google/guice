@@ -296,7 +296,7 @@ public class Key<T> {
    * <p>This is equivalent to {@code Key.get(key.getTypeLiteral(), annotation)} but may be more
    * convenient to use in certain cases.
    *
-   * @since vNext
+   * @since 5.0
    */
   public Key<T> withAnnotation(Class<? extends Annotation> annotationType) {
     return new Key<T>(typeLiteral, strategyFor(annotationType));
@@ -308,7 +308,7 @@ public class Key<T> {
    * <p>This is equivalent to {@code Key.get(key.getTypeLiteral(), annotation)} but may be more
    * convenient to use in certain cases.
    *
-   * @since vNext
+   * @since 5.0
    */
   public Key<T> withAnnotation(Annotation annotation) {
     return new Key<T>(typeLiteral, strategyFor(annotation));
