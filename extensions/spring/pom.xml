@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.google.inject.extensions</groupId>
     <artifactId>extensions-parent</artifactId>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>5.0.0</version>
   </parent>
 
   <artifactId>guice-spring</artifactId>

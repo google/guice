@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>5.0.1-SNAPSHOT</version>
+  <version>5.0.0</version>
 
   <name>Google Guice</name>
 
