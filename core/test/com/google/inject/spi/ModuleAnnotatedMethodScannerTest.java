@@ -215,6 +215,31 @@ public class ModuleAnnotatedMethodScannerTest {
         .isEqualTo(source.toString());
   }
 
+  @Test
+  public void sannerFailureDoesNotPropagateDownstream() {
+    Module module =
+        new AbstractModule() {
+          @TestProvides
+          @Named("foo")
+          String provideFoo() {
+            return "FOO";
+          }
+
+          @Provides
+          @Named("bar")
+          String providesBar(@Named("foo") String foo) {
+            return "uses " + foo;
+          }
+        };
+
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () -> Guice.createInjector(module, scannerModule(new FailingScanner())));
+    // Verify that failure in binding @Named("foo") doesn't effect bindings that depends on it.
+    assertThat(exception.getErrorMessages()).hasSize(1);
+  }
+
   public static class FailingScanner extends ModuleAnnotatedMethodScanner {
     @Override
     public Set<? extends Class<? extends Annotation>> annotationClasses() {
