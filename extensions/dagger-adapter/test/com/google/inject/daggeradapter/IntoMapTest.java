@@ -17,8 +17,10 @@ package com.google.inject.daggeradapter;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertThrows;
 
 import com.google.inject.Binder;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -27,6 +29,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.util.Providers;
 import dagger.Binds;
+import dagger.MapKey;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 import java.lang.annotation.Retention;
@@ -197,5 +200,53 @@ public class IntoMapTest extends TestCase {
     Injector injector = Guice.createInjector(DaggerAdapter.from(BindsModule.class));
     Map<String, Object> map = injector.getInstance(new Key<Map<String, Object>>() {});
     assertThat(map).containsExactly("hello", "world");
+  }
+
+  @MapKey
+  @interface CustomMapKey {
+    String value() default "";
+  }
+
+  @dagger.Module
+  static class MissingRuntimeRetentionModule {
+    @dagger.Provides
+    @IntoMap
+    @CustomMapKey("hello")
+    String binds() {
+      return "world";
+    }
+  }
+
+  @dagger.Module
+  abstract static class MissingRuntimeRetentionBindsModule {
+    @dagger.Binds
+    @IntoMap
+    @CustomMapKey("hello")
+    abstract Object binds(String value);
+
+    @dagger.Provides
+    static String provideValue() {
+      return "world";
+    }
+  }
+
+  public void testMissingRuntimeRetention() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () -> Guice.createInjector(DaggerAdapter.from(new MissingRuntimeRetentionModule())));
+    assertThat(exception.getErrorMessages()).hasSize(1);
+    assertThat(exception).hasMessageThat().contains("Missing @MapKey annotation on method");
+  }
+
+  public void testMissingRuntimeRetentionUsingBinds() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () ->
+                Guice.createInjector(DaggerAdapter.from(MissingRuntimeRetentionBindsModule.class)));
+    exception.printStackTrace();
+    assertThat(exception.getErrorMessages()).hasSize(1);
+    assertThat(exception).hasMessageThat().contains("Missing @MapKey annotation on method");
   }
 }
