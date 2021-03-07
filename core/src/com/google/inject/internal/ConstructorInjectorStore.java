@@ -20,6 +20,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InterceptorBinding;
 import java.util.stream.Stream;
 
 /**
@@ -75,12 +76,11 @@ final class ConstructorInjectorStore {
             injector.membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);
     ConstructionProxyFactory<T> factory = null;
     if (InternalFlags.isBytecodeGenEnabled()) {
-      ImmutableList<MethodAspect> injectorAspects = injector.getBindingData().getMethodAspects();
+      ImmutableList<InterceptorBinding> injectorBindings = injector.getBindingData().getInterceptorBindings();
       ImmutableList<MethodAspect> methodAspects =
-          membersInjector.getAddedAspects().isEmpty()
-              ? injectorAspects
-              : Stream.concat(injectorAspects.stream(), membersInjector.getAddedAspects().stream())
-                  .collect(toImmutableList());
+          Stream.concat(injectorBindings.stream().map(MethodAspect::fromBinding),
+            membersInjector.getAddedAspects().stream())
+              .collect(toImmutableList());
       factory = new ProxyFactory<>(injectionPoint, methodAspects);
     } else {
       factory = new DefaultConstructionProxyFactory<>(injectionPoint);

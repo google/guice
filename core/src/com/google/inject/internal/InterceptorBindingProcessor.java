@@ -35,11 +35,7 @@ final class InterceptorBindingProcessor extends AbstractProcessor {
     if (InternalFlags.isBytecodeGenEnabled()) {
       injector
           .getBindingData()
-          .addMethodAspect(
-              new MethodAspect(
-                  command.getClassMatcher(),
-                  command.getMethodMatcher(),
-                  command.getInterceptors()));
+          .addInterceptorBinding(command);
     } else {
       errors.aopDisabled(command);
     }
