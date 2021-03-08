@@ -350,6 +350,7 @@ public final class BoundFieldModule implements Module {
     private boolean allowsNull() {
       return !isTransparentProvider(fieldType.getRawType())
           && (Nullability.hasNullableAnnotation(field.getAnnotations())
+              || Nullability.hasNullableAnnotation(field.getAnnotatedType().getAnnotations())
               || KotlinSupport.getInstance().isNullable(field));
     }
   }
