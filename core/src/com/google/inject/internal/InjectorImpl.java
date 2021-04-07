@@ -163,7 +163,6 @@ final class InjectorImpl implements Injector, Lookups {
       ConfigurationException exception =
           new ConfigurationException(errors.merge(e.getErrors()).getMessages());
 
-
       throw exception;
     }
   }
