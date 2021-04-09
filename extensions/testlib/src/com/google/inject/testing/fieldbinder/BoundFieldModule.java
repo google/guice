@@ -16,6 +16,8 @@
 
 package com.google.inject.testing.fieldbinder;
 
+import static java.util.Arrays.stream;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -42,7 +44,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 
 /**
  * A Guice module that automatically adds Guice bindings into the injector for all {@link Bind}
@@ -146,20 +147,26 @@ public final class BoundFieldModule implements Module {
       // TODO(user): Enforce this at compile-time (e.g. via ErrorProne).
       Preconditions.checkState(
           getClass().isAnonymousClass()
-              && Arrays.stream(getClass().getAnnotatedSuperclass().getAnnotations())
-                  .anyMatch(
-                      annotation ->
-                          annotation
-                              .annotationType()
-                              .isAnnotationPresent(RestrictedBindingSource.Permit.class)),
+              && (hasPermitAnnotation(getClass().getAnnotations())
+                  || hasPermitAnnotation(getClass().getAnnotatedSuperclass().getAnnotations())),
           "This class should only be used as a base class for an anonymous class with"
-              + " @RestrictedBindingSource.Permit annotations, for example: new @FooPermit"
-              + " BoundFieldModule.WithPermits(instance) {}.");
+              + " @RestrictedBindingSource.Permit annotations. For example in Java: `new "
+              + " BoundFieldModule.@FooPermit WithPermits(instance) {}` or in Kotlin: "
+              + " `@FooPermits object : BoundFiledModule.WithPermits(instance) {}`");
     }
 
     @Override
     protected void configure() {
       install(BoundFieldModule.of(instance));
+    }
+
+    private static boolean hasPermitAnnotation(Annotation[] annotations) {
+      return stream(annotations)
+          .anyMatch(
+              annotation ->
+                  annotation
+                      .annotationType()
+                      .isAnnotationPresent(RestrictedBindingSource.Permit.class));
     }
   }
 

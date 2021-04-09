@@ -1032,15 +1032,10 @@ public class BoundFieldModuleTest extends TestCase {
     assertTrue(info.getBindAnnotation().lazy());
   }
 
-  @RestrictedBindingSource.Permit
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(TYPE_USE)
-  @interface FooPermit {}
-
   @Qualifier
   @RestrictedBindingSource(
       explanation = "",
-      permits = {FooPermit.class})
+      permits = {TestPermit.class})
   @Retention(RetentionPolicy.RUNTIME)
   @interface Foo {}
 
@@ -1051,7 +1046,7 @@ public class BoundFieldModuleTest extends TestCase {
     Bindings bindings = new Bindings();
 
     Injector injector =
-        Guice.createInjector(new BoundFieldModule.@FooPermit WithPermits(bindings) {});
+        Guice.createInjector(new BoundFieldModule.@TestPermit WithPermits(bindings) {});
 
     assertEquals((Integer) bindings.foo, injector.getInstance(Key.get(Integer.class, Foo.class)));
   }
