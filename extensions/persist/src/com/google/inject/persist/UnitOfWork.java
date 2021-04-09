@@ -54,4 +54,11 @@ public interface UnitOfWork {
    * <p>Transaction semantics are not affected.
    */
   void end();
+
+  /**
+   * Restarting a Unit of Work in safe mode, which will not throw error.
+   * If Unit of Work is already started, will end and begin
+   * <p>Transaction semantics are not affected.
+   */
+  void restart();
 }
