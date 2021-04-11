@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -338,16 +339,34 @@ public final class BindingSourceRestriction {
   }
 
   private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
-    Stream<Annotation> annotations = Arrays.stream(clazz.getAnnotations());
-    // Pick up annotations on anonymous classes (e.g. new @Bar Foo() { ... }):
-    if (clazz.getAnnotatedSuperclass() != null) {
-      annotations =
-          Stream.concat(
-              annotations, Arrays.stream(clazz.getAnnotatedSuperclass().getAnnotations()));
-    }
-    
-    return annotations
-        .map(Annotation::annotationType);
+	    Stream<Annotation> annotations = Arrays.stream(clazz.getAnnotations());
+	    // Pick up annotations on anonymous classes (e.g. new @Bar Foo() { ... }):
+	    if (clazz.getAnnotatedSuperclass() != null) {
+	      annotations =
+	          Stream.concat(
+	              annotations, Arrays.stream(clazz.getAnnotatedSuperclass().getAnnotations()));
+	    }
+
+	    List<Class<? extends Annotation>> result = annotations
+	        .map(Annotation::annotationType)
+	        .filter(c -> c.isAnnotationPresent(RestrictedBindingSource.Permit.class))
+	        .collect(Collectors.toList());
+
+	    return result.stream();
+	  }
+  
+  
+//  private static Stream<Class<? extends Annotation>> getPermits(Class<?> clazz) {
+//    Stream<Annotation> annotations = Arrays.stream(clazz.getAnnotations());
+//    // Pick up annotations on anonymous classes (e.g. new @Bar Foo() { ... }):
+//    if (clazz.getAnnotatedSuperclass() != null) {
+//      annotations =
+//          Stream.concat(
+//              annotations, Arrays.stream(clazz.getAnnotatedSuperclass().getAnnotations()));
+//    }
+//    
+//    return annotations
+//        .map(Annotation::annotationType);
 //        .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
-  }
+//  }
 }

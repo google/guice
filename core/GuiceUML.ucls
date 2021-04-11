@@ -12,7 +12,7 @@
   </interface>  
   <class id="2" language="java" name="com.google.inject.TypeLiteral" project="guice" 
     file="/guice/src/com/google/inject/TypeLiteral.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="575" y="430"/>    
+    <position height="-1" width="-1" x="513" y="314"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="false" protected="false" private="false" static="true"/>      
@@ -48,7 +48,7 @@
   </interface>  
   <interface id="6" language="java" name="com.google.inject.Module" project="guice" 
     file="/guice/src/com/google/inject/Module.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1199" y="1117"/>    
+    <position height="-1" width="-1" x="1417" y="290"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="false" protected="false" private="false" static="true"/>      
@@ -66,7 +66,7 @@
   </interface>  
   <interface id="8" language="java" name="com.google.inject.Scope" project="guice" 
     file="/guice/src/com/google/inject/Scope.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="599" y="775"/>    
+    <position height="-1" width="-1" x="343" y="627"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="false" protected="false" private="false" static="true"/>      
@@ -102,7 +102,7 @@
   </class>  
   <interface id="12" language="java" name="com.google.inject.Key.AnnotationStrategy" project="guice" 
     file="/guice/src/com/google/inject/Key.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="135" width="268" x="963" y="1686"/>    
+    <position height="-1" width="-1" x="1101" y="1750"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="false" protected="false" private="false" static="true"/>      
@@ -362,10 +362,10 @@
   <association id="48">    
     <end type="SOURCE" refId="13" navigable="false">      
       <attribute id="49" name="annotationStrategy">        
-        <position height="0" width="0" x="0" y="0"/>      
+        <position height="0" width="0" x="4" y="-3"/>      
       </attribute>      
       <multiplicity id="50" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
+        <position height="0" width="0" x="4" y="-3"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="12" navigable="true"/>    
@@ -499,10 +499,10 @@
   <association id="82">    
     <end type="SOURCE" refId="13" navigable="false">      
       <attribute id="83" name="typeLiteral">        
-        <position height="0" width="0" x="0" y="0"/>      
+        <position height="0" width="0" x="-62" y="-116"/>      
       </attribute>      
       <multiplicity id="84" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
+        <position height="0" width="0" x="-62" y="-116"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="2" navigable="true"/>    
