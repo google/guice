@@ -139,6 +139,9 @@
             <Bundle-Name>${project.artifactId}</Bundle-Name>
             <Import-Package>!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
             <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
+
+            <!-- keep these headers separate between the main build and the 'no_aop' munged build -->
+            <Merge-Headers>!Bundle-Name,!Import-Package</Merge-Headers>
           </instructions>
         </configuration>
       </plugin>

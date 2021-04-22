@@ -351,14 +351,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
               <Import-Package>!com.google.inject.*,*</Import-Package>
               <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
-              <_versionpolicy>$(version;==;$(@))</_versionpolicy>
+              <_consumer-policy>$(version;==;$(@))</_consumer-policy>
               <_nouses>true</_nouses>
               <_removeheaders>
                 Embed-Dependency,Embed-Transitive,
                 Built-By,Tool,Created-By,Build-Jdk,
                 Originally-Created-By,Archiver-Version,
                 Include-Resource,Private-Package,
-                Ignore-Package,Bnd-LastModified
+                Ignore-Package,Bnd-LastModified,
+                Merge-Headers
               </_removeheaders>
             </instructions>
           </configuration>
