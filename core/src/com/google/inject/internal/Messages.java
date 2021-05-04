@@ -182,7 +182,7 @@ public final class Messages {
     if (modules.length() == 0) {
       return source;
     } else {
-      return source + modules;
+      return source + " (installed by: " + modules + ")";
     }
   }
 

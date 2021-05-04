@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.ObjectArrays;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -30,10 +31,12 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.DeclaredMembers;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.KotlinSupport;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.util.Classes;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -75,22 +78,29 @@ public final class InjectionPoint {
     this.optional = optional;
     this.dependencies =
         forMember(
+            new Errors(method),
             method,
             declaringType,
+            method.getAnnotatedParameterTypes(),
             method.getParameterAnnotations(),
-            KotlinNullabilitySupport.getInstance().getParameterPredicate(method));
+            KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(method));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Constructor<?> constructor) {
     this.member = constructor;
     this.declaringType = declaringType;
     this.optional = false;
+    Errors errors = new Errors(constructor);
+    KotlinSupport.getInstance().checkConstructorParameterAnnotations(constructor, errors);
+
     this.dependencies =
         forMember(
+            errors,
             constructor,
             declaringType,
+            constructor.getAnnotatedParameterTypes(),
             constructor.getParameterAnnotations(),
-            KotlinNullabilitySupport.getInstance().getParameterPredicate(constructor));
+            KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(constructor));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
@@ -98,8 +108,8 @@ public final class InjectionPoint {
     this.declaringType = declaringType;
     this.optional = optional;
 
-    Annotation[] annotations = field.getAnnotations();
-
+    Annotation[] annotations = getAnnotations(field);
+    Annotation[] typeUseAnnotations = field.getAnnotatedType().getAnnotations();
     Errors errors = new Errors(field);
     Key<?> key = null;
     try {
@@ -111,27 +121,32 @@ public final class InjectionPoint {
     }
     errors.throwConfigurationExceptionIfErrorsExist();
 
-    this.dependencies =
-        ImmutableList.<Dependency<?>>of(
-            newDependency(key, Nullability.allowsNull(annotations), -1));
+    boolean allowsNull =
+        Nullability.hasNullableAnnotation(annotations)
+            || Nullability.hasNullableAnnotation(typeUseAnnotations)
+            || KotlinSupport.getInstance().isNullable(field);
+    this.dependencies = ImmutableList.<Dependency<?>>of(newDependency(key, allowsNull, -1));
   }
 
   private ImmutableList<Dependency<?>> forMember(
+      Errors errors,
       Member member,
       TypeLiteral<?> type,
+      AnnotatedType[] annotatedTypes,
       Annotation[][] parameterAnnotationsPerParameter,
       Predicate<Integer> isParameterKotlinNullable) {
-    Errors errors = new Errors(member);
-
     List<Dependency<?>> dependencies = Lists.newArrayList();
     int index = 0;
 
     for (TypeLiteral<?> parameterType : type.getParameterTypes(member)) {
       try {
+        Annotation[] typeAnnotations = annotatedTypes[index].getAnnotations();
         Annotation[] parameterAnnotations = parameterAnnotationsPerParameter[index];
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         boolean isNullable =
-            Nullability.allowsNull(parameterAnnotations) || isParameterKotlinNullable.test(index);
+            Nullability.hasNullableAnnotation(parameterAnnotations)
+                || Nullability.hasNullableAnnotation(typeAnnotations)
+                || isParameterKotlinNullable.test(index);
         dependencies.add(newDependency(key, isNullable, index));
         index++;
       } catch (ConfigurationException e) {
@@ -274,6 +289,7 @@ public final class InjectionPoint {
    * @throws ConfigurationException if there is no injectable constructor, more than one injectable
    *     constructor, or if parameters of the injectable constructor are malformed, such as a
    *     parameter with multiple binding annotations.
+   * @since 5.0
    */
   public static InjectionPoint forConstructorOf(TypeLiteral<?> type, boolean atInjectRequired) {
     Class<?> rawType = getRawType(type.getType());
@@ -860,6 +876,22 @@ public final class InjectionPoint {
     }
     // b must be package-private
     return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
+  }
+
+  /**
+   * Returns all the annotations on a field. If Kotlin-support is enabled, the annotations will
+   * include annotations on the related Kotlin-property.
+   *
+   * @since 5.0
+   */
+  public static Annotation[] getAnnotations(Field field) {
+    Annotation[] javaAnnotations = field.getAnnotations();
+    Annotation[] kotlinAnnotations = KotlinSupport.getInstance().getAnnotations(field);
+
+    if (kotlinAnnotations.length == 0) {
+      return javaAnnotations;
+    }
+    return ObjectArrays.concat(javaAnnotations, kotlinAnnotations, Annotation.class);
   }
 
   /** A method signature. Used to handle method overridding. */

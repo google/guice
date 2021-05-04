@@ -27,8 +27,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 /**
- * Binding key consisting of an injection type and an optional annotation. Matches the type and
- * annotation at a point of injection.
+ * Guice uses Key objects to identify a dependency that can be resolved by the Guice {@link
+ * Injector}. A Guice key consists of an injection type and an optional annotation.
  *
  * <p>For example, {@code Key.get(Service.class, Transactional.class)} will match:
  *
@@ -296,7 +296,7 @@ public class Key<T> {
    * <p>This is equivalent to {@code Key.get(key.getTypeLiteral(), annotation)} but may be more
    * convenient to use in certain cases.
    *
-   * @since vNext
+   * @since 5.0
    */
   public Key<T> withAnnotation(Class<? extends Annotation> annotationType) {
     return new Key<T>(typeLiteral, strategyFor(annotationType));
@@ -308,7 +308,7 @@ public class Key<T> {
    * <p>This is equivalent to {@code Key.get(key.getTypeLiteral(), annotation)} but may be more
    * convenient to use in certain cases.
    *
-   * @since vNext
+   * @since 5.0
    */
   public Key<T> withAnnotation(Annotation annotation) {
     return new Key<T>(typeLiteral, strategyFor(annotation));

@@ -125,6 +125,8 @@ public final class Elements {
    *
    * <p>Using Binder.withSource is not trustworthy because it's a public API that external users can
    * use to spoof the original ElementSource of a binding by calling withSource(bogusElementSource).
+   *
+   * @since 5.0
    */
   public static Binder withTrustedSource(
       GuiceInternal guiceInternal, Binder binder, Object source) {
@@ -669,7 +671,17 @@ public final class Elements {
         if (stackTraceOption == IncludeStackTraceOption.COMPLETE
             || stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
           // With the above conditions and assignments 'callStack' is non-null
-          declaringSource = sourceProvider.get(callStack);
+          StackTraceElement callingSource = sourceProvider.get(callStack);
+          // If we've traversed past all reasonable sources and into our internal code, then we
+          // don't know the source.
+          if (callingSource
+                  .getClassName()
+                  .equals("com.google.inject.internal.InjectorShell$Builder")
+              && callingSource.getMethodName().equals("build")) {
+            declaringSource = SourceProvider.UNKNOWN_SOURCE;
+          } else {
+            declaringSource = callingSource;
+          }
         } else { // or if (stackTraceOption == IncludeStackTraceOptions.OFF)
           // As neither 'declaring source' nor 'call stack' is available use 'module source'
           declaringSource = sourceProvider.getFromClassNames(moduleSource.getModuleClassNames());

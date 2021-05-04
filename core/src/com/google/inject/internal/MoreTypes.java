@@ -99,7 +99,7 @@ public class MoreTypes {
       @SuppressWarnings("unchecked")
       TypeLiteral<T> guiceProviderType =
           (TypeLiteral<T>)
-              TypeLiteral.get(Types.providerOf(parameterizedType.getActualTypeArguments()[0]));
+              TypeLiteral.get(Types.providerOf(getSharedTypeArguments(parameterizedType)[0]));
       return guiceProviderType;
     }
 
@@ -151,8 +151,7 @@ public class MoreTypes {
 
     } else if (type instanceof ParameterizedType) {
       ParameterizedType p = (ParameterizedType) type;
-      return new ParameterizedTypeImpl(
-          p.getOwnerType(), p.getRawType(), p.getActualTypeArguments());
+      return new ParameterizedTypeImpl(p.getOwnerType(), p.getRawType(), getSharedTypeArguments(p));
 
     } else if (type instanceof GenericArrayType) {
       GenericArrayType g = (GenericArrayType) type;
@@ -221,12 +220,11 @@ public class MoreTypes {
         return false;
       }
 
-      // TODO: save a .clone() call
       ParameterizedType pa = (ParameterizedType) a;
       ParameterizedType pb = (ParameterizedType) b;
       return Objects.equal(pa.getOwnerType(), pb.getOwnerType())
           && pa.getRawType().equals(pb.getRawType())
-          && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
+          && Arrays.equals(getSharedTypeArguments(pa), getSharedTypeArguments(pb));
 
     } else if (a instanceof GenericArrayType) {
       if (!(b instanceof GenericArrayType)) {
@@ -320,7 +318,7 @@ public class MoreTypes {
     Type declaredBy = getGenericSupertype(type, rawType, declaredByRaw);
     if (declaredBy instanceof ParameterizedType) {
       int index = indexOf(declaredByRaw.getTypeParameters(), unknown);
-      return ((ParameterizedType) declaredBy).getActualTypeArguments()[index];
+      return getSharedTypeArguments((ParameterizedType) declaredBy)[index];
     }
 
     return unknown;
@@ -336,6 +334,17 @@ public class MoreTypes {
   }
 
   /**
+   * This method is used as a performance optimization to prevent unnecessary clones of
+   * typeArguments from being made by ParameterizedTypeImpl.
+   */
+  private static Type[] getSharedTypeArguments(ParameterizedType p) {
+    if (p instanceof ParameterizedTypeImpl) {
+      return ((ParameterizedTypeImpl) p).typeArguments;
+    }
+    return p.getActualTypeArguments();
+  }
+
+  /**
    * Returns the declaring class of {@code typeVariable}, or {@code null} if it was not declared by
    * a class.
    */
@@ -348,7 +357,7 @@ public class MoreTypes {
       implements ParameterizedType, Serializable, CompositeType {
     private final Type ownerType;
     private final Type rawType;
-    private final Type[] typeArguments;
+    final Type[] typeArguments;
 
     public ParameterizedTypeImpl(Type ownerType, Type rawType, Type... typeArguments) {
       // require an owner type if the raw type needs it

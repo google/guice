@@ -1346,7 +1346,7 @@ public class MapBinderTest extends TestCase {
                 bind(String.class).toInstance("hi");
               }
             });
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
+    WeakKeySetUtils.assertNotBanned(parentInjector, mapKey);
 
     Injector childInjector =
         parentInjector.createChildInjector(
@@ -1359,13 +1359,13 @@ public class MapBinderTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef = new WeakReference<>(childInjector);
-    WeakKeySetUtils.assertBlacklisted(parentInjector, mapKey);
+    WeakKeySetUtils.assertBanned(parentInjector, mapKey);
 
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
+    // Clear the ref, GC, and ensure that we are no longer banning.
     childInjector = null;
 
     Asserts.awaitClear(weakRef);
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
+    WeakKeySetUtils.assertNotBanned(parentInjector, mapKey);
   }
 
   @SuppressWarnings("rawtypes")

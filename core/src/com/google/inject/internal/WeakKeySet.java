@@ -47,7 +47,7 @@ final class WeakKeySet {
   private final Object lock;
 
   /**
-   * Tracks child injector lifetimes and evicts blacklisted keys/sources after the child injector is
+   * Tracks child injector lifetimes and evicts banned keys/sources after the child injector is
    * garbage collected.
    */
   private final Cache<InjectorBindingData, Set<KeyAndSource>> evictionCache =
@@ -57,7 +57,7 @@ final class WeakKeySet {
       RemovalNotification<InjectorBindingData, Set<KeyAndSource>> notification) {
     Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
 
-    // There may be multiple child injectors blacklisting a certain key so only remove the source
+    // There may be multiple child injectors banning a certain key so only remove the source
     // that's relevant.
     synchronized (lock) {
       for (KeyAndSource keyAndSource : notification.getValue()) {

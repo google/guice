@@ -1403,7 +1403,7 @@ public class OptionalBinderTest extends TestCase {
                 bind(String.class).toInstance("hi");
               }
             });
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, Key.get(Integer.class));
+    WeakKeySetUtils.assertNotBanned(parentInjector, Key.get(Integer.class));
 
     Injector childInjector =
         parentInjector.createChildInjector(
@@ -1416,13 +1416,13 @@ public class OptionalBinderTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef = new WeakReference<>(childInjector);
-    WeakKeySetUtils.assertBlacklisted(parentInjector, Key.get(Integer.class));
+    WeakKeySetUtils.assertBanned(parentInjector, Key.get(Integer.class));
 
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
+    // Clear the ref, GC, and ensure that we are no longer banning.
     childInjector = null;
 
     Asserts.awaitClear(weakRef);
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, Key.get(Integer.class));
+    WeakKeySetUtils.assertNotBanned(parentInjector, Key.get(Integer.class));
   }
 
   public void testCompareEqualsAgainstOtherAnnotation() {

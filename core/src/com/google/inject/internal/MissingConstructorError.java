@@ -57,8 +57,8 @@ final class MissingConstructorError extends InternalErrorDetail<MissingConstruct
       } else if (Modifier.isPrivate(noArgConstructor.getModifiers())
           && !Modifier.isPrivate(rawType.getModifiers())) {
         formatter.format(
-            "%s has a private no-arg constructor but it's not private. Guice can only use private"
-                + " no-arg constructor if it is defined in a private class.%n",
+            "%s has a private no-arg constructor but the class is not private. Guice can only use"
+                + " a private no-arg constructor if it is defined in a private class.%n",
             rawType);
       }
     }

@@ -35,7 +35,8 @@ import java.lang.annotation.Annotation;
 public class Nullability {
   private Nullability() {}
 
-  public static boolean allowsNull(Annotation[] annotations) {
+  /** Returns true if the given annotation array contains an annotation named {@code Nullable}. */
+  public static boolean hasNullableAnnotation(Annotation[] annotations) {
     for (Annotation a : annotations) {
       Class<? extends Annotation> type = a.annotationType();
       if ("Nullable".equals(type.getSimpleName())) {

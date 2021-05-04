@@ -91,7 +91,7 @@ public final class ElementSource {
   /**
    * Creates a new {@ElementSource} from the given parameters.
    *
-   * @param originalElementSource The source of element that this element created from (if there is
+   * @param originalSource The source of element that this element was created from (if there is
    *     any), otherwise {@code null}.
    * @param declaringSource the source (in)directly declared the element.
    * @param moduleSource the moduleSource when the element is bound

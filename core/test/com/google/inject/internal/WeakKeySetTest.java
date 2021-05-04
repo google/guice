@@ -18,9 +18,9 @@ package com.google.inject.internal;
 
 import static com.google.inject.Asserts.awaitClear;
 import static com.google.inject.Asserts.awaitFullGc;
-import static com.google.inject.internal.WeakKeySetUtils.assertBlacklisted;
+import static com.google.inject.internal.WeakKeySetUtils.assertBanned;
 import static com.google.inject.internal.WeakKeySetUtils.assertInSet;
-import static com.google.inject.internal.WeakKeySetUtils.assertNotBlacklisted;
+import static com.google.inject.internal.WeakKeySetUtils.assertNotBanned;
 import static com.google.inject.internal.WeakKeySetUtils.assertNotInSet;
 import static com.google.inject.internal.WeakKeySetUtils.assertSourceNotInSet;
 
@@ -347,7 +347,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(Integer.class).toInstance(4);
               }
             });
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
 
     Injector childInjector =
         parentInjector.createChildInjector(
@@ -358,12 +358,12 @@ public class WeakKeySetTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef = new WeakReference<>(childInjector);
-    assertBlacklisted(parentInjector, Key.get(String.class));
+    assertBanned(parentInjector, Key.get(String.class));
 
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
+    // Clear the ref, GC, and ensure that we are no longer banning.
     childInjector = null;
     awaitClear(weakRef);
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
   }
 
   public void testWeakKeySet_integration_multipleChildren() {
@@ -375,8 +375,8 @@ public class WeakKeySetTest extends TestCase {
                 bind(Integer.class).toInstance(4);
               }
             });
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
-    assertNotBlacklisted(parentInjector, Key.get(Long.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(Long.class));
 
     Injector childInjector1 =
         parentInjector.createChildInjector(
@@ -387,8 +387,8 @@ public class WeakKeySetTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef1 = new WeakReference<>(childInjector1);
-    assertBlacklisted(parentInjector, Key.get(String.class));
-    assertNotBlacklisted(parentInjector, Key.get(Long.class));
+    assertBanned(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(Long.class));
 
     Injector childInjector2 =
         parentInjector.createChildInjector(
@@ -399,20 +399,20 @@ public class WeakKeySetTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef2 = new WeakReference<>(childInjector2);
-    assertBlacklisted(parentInjector, Key.get(String.class));
-    assertBlacklisted(parentInjector, Key.get(Long.class));
+    assertBanned(parentInjector, Key.get(String.class));
+    assertBanned(parentInjector, Key.get(Long.class));
 
-    // Clear ref1, GC, and ensure that we still blacklist.
+    // Clear ref1, GC, and ensure that we still ban.
     childInjector1 = null;
     awaitClear(weakRef1);
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
-    assertBlacklisted(parentInjector, Key.get(Long.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
+    assertBanned(parentInjector, Key.get(Long.class));
 
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
+    // Clear the ref, GC, and ensure that we are no longer banning.
     childInjector2 = null;
     awaitClear(weakRef2);
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
-    assertNotBlacklisted(parentInjector, Key.get(Long.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(Long.class));
   }
 
   public void testWeakKeySet_integration_multipleChildren_overlappingKeys() {
@@ -424,7 +424,7 @@ public class WeakKeySetTest extends TestCase {
                 bind(Integer.class).toInstance(4);
               }
             });
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
 
     Injector childInjector1 =
         parentInjector.createChildInjector(
@@ -435,7 +435,7 @@ public class WeakKeySetTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef1 = new WeakReference<>(childInjector1);
-    assertBlacklisted(parentInjector, Key.get(String.class));
+    assertBanned(parentInjector, Key.get(String.class));
 
     Injector childInjector2 =
         parentInjector.createChildInjector(
@@ -446,17 +446,17 @@ public class WeakKeySetTest extends TestCase {
               }
             });
     WeakReference<Injector> weakRef2 = new WeakReference<>(childInjector2);
-    assertBlacklisted(parentInjector, Key.get(String.class));
+    assertBanned(parentInjector, Key.get(String.class));
 
-    // Clear ref1, GC, and ensure that we still blacklist.
+    // Clear ref1, GC, and ensure that we still ban.
     childInjector1 = null;
     awaitClear(weakRef1);
-    assertBlacklisted(parentInjector, Key.get(String.class));
+    assertBanned(parentInjector, Key.get(String.class));
 
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
+    // Clear the ref, GC, and ensure that we are no longer banning.
     childInjector2 = null;
     awaitClear(weakRef2);
-    assertNotBlacklisted(parentInjector, Key.get(String.class));
+    assertNotBanned(parentInjector, Key.get(String.class));
   }
 
   private static class TestInjectorBindingData extends InjectorBindingData {

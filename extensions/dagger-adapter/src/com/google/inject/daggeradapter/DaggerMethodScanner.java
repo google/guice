@@ -15,6 +15,7 @@
  */
 package com.google.inject.daggeradapter;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.daggeradapter.Annotations.getAnnotatedAnnotation;
@@ -37,6 +38,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import dagger.Binds;
 import dagger.BindsOptionalOf;
+import dagger.MapKey;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.IntoSet;
@@ -46,6 +48,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Scope;
 
@@ -139,8 +142,13 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
   }
 
   private static <K> MapKeyData<K> mapKeyData(Method method) {
-    Annotation mapKey = getAnnotatedAnnotation(method, dagger.MapKey.class).get();
-    dagger.MapKey mapKeyDefinition = mapKey.annotationType().getAnnotation(dagger.MapKey.class);
+    Optional<Annotation> mapKeyOpt = getAnnotatedAnnotation(method, MapKey.class);
+    checkState(
+        mapKeyOpt.isPresent(),
+        "Missing @MapKey annotation on method %s (make sure the annotation has RUNTIME rentention)",
+        method);
+    Annotation mapKey = mapKeyOpt.get();
+    MapKey mapKeyDefinition = mapKey.annotationType().getAnnotation(MapKey.class);
     if (!mapKeyDefinition.unwrapValue()) {
       return MapKeyData.create(TypeLiteral.get(mapKey.annotationType()), mapKey);
     }

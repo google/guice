@@ -58,6 +58,7 @@ import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -70,6 +71,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,6 +95,12 @@ final class FactoryProvider2<F>
 
   // use the logger under a well-known name, not FactoryProvider2
   static final Logger logger = Logger.getLogger(AssistedInject.class.getName());
+
+  /**
+   * A constant that determines if we allow fallback to reflection. Typically always true, but
+   * reflectively set to false in tests.
+   */
+  private static boolean allowLookupReflection = true;
 
   /** if a factory method parameter isn't annotated, it gets this annotation. */
   static final Assisted DEFAULT_ANNOTATION =
@@ -226,8 +234,10 @@ final class FactoryProvider2<F>
   /**
    * @param factoryKey a key for a Java interface that defines one or more create methods.
    * @param collector binding configuration that maps method return types to implementation types.
+   * @param userLookups user provided lookups, optional.
    */
-  FactoryProvider2(Key<F> factoryKey, BindingCollector collector) {
+  FactoryProvider2(
+      Key<F> factoryKey, BindingCollector collector, MethodHandles.Lookup userLookups) {
     this.factoryKey = factoryKey;
     this.collector = collector;
 
@@ -361,12 +371,45 @@ final class FactoryProvider2<F>
       // signatures.
       Map<Method, AssistData> dataSoFar = assistDataBuilder.build();
       ImmutableMap.Builder<Method, MethodHandle> methodHandleBuilder = ImmutableMap.builder();
+      boolean warnedAboutUserLookups = false;
       for (Map.Entry<String, Method> entry : defaultMethods.entries()) {
+        if (!warnedAboutUserLookups
+            && userLookups == null
+            && !Modifier.isPublic(factory.getClass().getModifiers())) {
+          warnedAboutUserLookups = true;
+          logger.log(
+              Level.WARNING,
+              "AssistedInject factory {0} is non-public and has javac-generated default methods. "
+                  + " Please pass a `MethodHandles.lookups()` with"
+                  + " FactoryModuleBuilder.withLookups when using this factory so that Guice can"
+                  + " properly call the default methods. Guice will try to work around the"
+                  + " problem, but doing so requires reflection into the JDK and may break at any"
+                  + " time.",
+              new Object[] {factoryType});
+        }
+
         Method defaultMethod = entry.getValue();
-        MethodHandle handle = createMethodHandle(defaultMethod, factory);
+        MethodHandle handle = null;
+        try {
+          // Note: this can return null if we fallback to reflecting the private lookup cxtor and it
+          // fails. In that case, we try the super hacky workaround below (w/ 'foundMatch').
+          // It can throw an exception if we're not doing private reflection, or if unreflectSpecial
+          // _still_ fails.
+          handle = superMethodHandle(defaultMethod, factory, userLookups);
+        } catch (ReflectiveOperationException roe) {
+          errors.addMessage(
+              new Message(
+                  "Unable to use factory "
+                      + factoryRawType.getName()
+                      + ". Did you call FactoryModuleBuilder.withLookups(MethodHandles.lookups())"
+                      + " (with a lookups that has access to the factory)?"));
+          continue;
+        }
+
         if (handle != null) {
           methodHandleBuilder.put(defaultMethod, handle);
         } else {
+          // TODO: remove this workaround when Java8 support is dropped
           boolean foundMatch = false;
           for (Method otherMethod : otherMethods.get(defaultMethod.getName())) {
             if (dataSoFar.containsKey(otherMethod) && isCompatible(defaultMethod, otherMethod)) {
@@ -894,54 +937,106 @@ final class FactoryProvider2<F>
     }
   }
 
-  // Note: this isn't a public API, but we need to use it in order to call default methods on (or
-  // with) non-public types.  If it doesn't exist, the code falls back to a less precise check.
-  private static final Constructor<MethodHandles.Lookup> methodHandlesLookupCxtor =
-      findMethodHandlesLookupCxtor();
-
-  private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor() {
-    // Different JDK implementations have different constructors so look for a constructor that
-    // takes a class and an int first (openjdk-8, openjdk-11) and fallback to a constructor that
-    // takes two classes and an int (openjdk-15).
-    // TODO(b/171738889): Figure out a better way to handle this.
-    Constructor<MethodHandles.Lookup> cxtor = findMethodHandlesLookupCxtor(Class.class, int.class);
-    if (cxtor == null) {
-      cxtor = findMethodHandlesLookupCxtor(Class.class, Class.class, int.class);
-    }
-    if (cxtor != null) {
-      cxtor.setAccessible(true);
-    }
-    return cxtor;
+  private static MethodHandle superMethodHandle(
+      Method method, Object proxy, MethodHandles.Lookup userLookups)
+      throws ReflectiveOperationException {
+    MethodHandles.Lookup lookup = userLookups == null ? MethodHandles.lookup() : userLookups;
+    MethodHandle handle = SUPER_METHOD_LOOKUP.get().superMethodHandle(method, lookup);
+    return handle != null ? handle.bindTo(proxy) : null;
   }
 
-  private static Constructor<MethodHandles.Lookup> findMethodHandlesLookupCxtor(
-      Class<?>... parameterTypes) {
-    try {
-      return MethodHandles.Lookup.class.getDeclaredConstructor(parameterTypes);
-    } catch (NoSuchMethodException e) {
-      // Ignored if the constructor doesn't exist.
-      return null;
-    }
-  }
+  // begin by trying unreflectSpecial to find super method handles; this should work on Java14+
+  private static final AtomicReference<SuperMethodLookup> SUPER_METHOD_LOOKUP =
+      new AtomicReference<>(SuperMethodLookup.UNREFLECT_SPECIAL);
 
-  private static MethodHandle createMethodHandle(Method method, Object proxy) {
-    if (methodHandlesLookupCxtor == null) {
-      return null;
-    }
-    Class<?> declaringClass = method.getDeclaringClass();
-    int allModes =
-        Modifier.PRIVATE | Modifier.STATIC /* package */ | Modifier.PUBLIC | Modifier.PROTECTED;
-    try {
-      MethodHandles.Lookup lookup;
-      if (methodHandlesLookupCxtor.getParameterCount() == 2) {
-        lookup = methodHandlesLookupCxtor.newInstance(declaringClass, allModes);
-      } else {
-        lookup = methodHandlesLookupCxtor.newInstance(declaringClass, null, allModes);
+  private static enum SuperMethodLookup {
+    UNREFLECT_SPECIAL {
+      @Override
+      MethodHandle superMethodHandle(Method method, MethodHandles.Lookup lookup)
+          throws ReflectiveOperationException {
+        try {
+          return lookup.unreflectSpecial(method, method.getDeclaringClass());
+        } catch (ReflectiveOperationException e) {
+          // fall back to findSpecial which should work on Java9+; use that for future lookups
+          SUPER_METHOD_LOOKUP.compareAndSet(this, FIND_SPECIAL);
+          return SUPER_METHOD_LOOKUP.get().superMethodHandle(method, lookup);
+        }
       }
-      method.setAccessible(true);
-      return lookup.unreflectSpecial(method, declaringClass).bindTo(proxy);
-    } catch (ReflectiveOperationException roe) {
-      throw new RuntimeException("Unable to access method: " + method, roe);
+    },
+    FIND_SPECIAL {
+      @Override
+      MethodHandle superMethodHandle(Method method, MethodHandles.Lookup lookup)
+          throws ReflectiveOperationException {
+        try {
+          Class<?> declaringClass = method.getDeclaringClass();
+          // use findSpecial to workaround https://bugs.openjdk.java.net/browse/JDK-8209005
+          return lookup.findSpecial(
+              declaringClass,
+              method.getName(),
+              MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+              declaringClass);
+        } catch (ReflectiveOperationException e) {
+          if (!allowLookupReflection) {
+            throw e;
+          }
+          // fall back to private Lookup which should work on Java8; use that for future lookups
+          SUPER_METHOD_LOOKUP.compareAndSet(this, PRIVATE_LOOKUP);
+          return SUPER_METHOD_LOOKUP.get().superMethodHandle(method, lookup);
+        }
+      }
+    },
+    PRIVATE_LOOKUP {
+      @Override
+      MethodHandle superMethodHandle(Method method, MethodHandles.Lookup unused)
+          throws ReflectiveOperationException {
+        return PrivateLookup.superMethodHandle(method);
+      }
+    };
+
+    abstract MethodHandle superMethodHandle(Method method, MethodHandles.Lookup lookup)
+        throws ReflectiveOperationException;
+  };
+
+  // Note: this isn't a public API, but we need to use it in order to call default methods on (or
+  // with) non-public types. If it doesn't exist, the code falls back to a less precise check.
+  static class PrivateLookup {
+    PrivateLookup() {}
+
+    private static final int ALL_MODES =
+        Modifier.PRIVATE | Modifier.STATIC /* package */ | Modifier.PUBLIC | Modifier.PROTECTED;
+
+    private static final Constructor<MethodHandles.Lookup> privateLookupCxtor =
+        findPrivateLookupCxtor();
+
+    private static Constructor<MethodHandles.Lookup> findPrivateLookupCxtor() {
+      try {
+        Constructor<MethodHandles.Lookup> cxtor;
+        try {
+          cxtor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+        } catch (NoSuchMethodException ignored) {
+          cxtor =
+              MethodHandles.Lookup.class.getDeclaredConstructor(
+                  Class.class, Class.class, int.class);
+        }
+        cxtor.setAccessible(true);
+        return cxtor;
+      } catch (ReflectiveOperationException | SecurityException e) {
+        return null;
+      }
+    }
+
+    static MethodHandle superMethodHandle(Method method) throws ReflectiveOperationException {
+      if (privateLookupCxtor == null) {
+        return null; // fall back to assistDataBuilder workaround
+      }
+      Class<?> declaringClass = method.getDeclaringClass();
+      MethodHandles.Lookup lookup;
+      if (privateLookupCxtor.getParameterCount() == 2) {
+        lookup = privateLookupCxtor.newInstance(declaringClass, ALL_MODES);
+      } else {
+        lookup = privateLookupCxtor.newInstance(declaringClass, null, ALL_MODES);
+      }
+      return lookup.unreflectSpecial(method, declaringClass);
     }
   }
 }

@@ -414,6 +414,17 @@ public final class Errors implements Serializable {
     return addMessage(ErrorId.INJECT_FINAL_FIELD, "Injected field %s cannot be final.", field);
   }
 
+  public Errors atTargetIsMissingParameter(
+      Annotation bindingAnnotation, String parameterName, Class<?> clazz) {
+    return addMessage(
+        ErrorId.AT_TARGET_IS_MISSING_PARAMETER,
+        "Binding annotation %s must have PARAMETER listed in its @Targets. It was used on"
+            + " constructor parameter %s in %s.",
+        bindingAnnotation,
+        parameterName,
+        clazz);
+  }
+
   public Errors cannotInjectAbstractMethod(Method method) {
     return addMessage(
         ErrorId.INJECT_ABSTRACT_METHOD, "Injected method %s cannot be abstract.", method);

@@ -76,9 +76,9 @@ public class FilterDefinitionTest extends TestCase {
     assertEquals(contextName, filterConfig.getServletContext().getServletContextName());
     assertEquals(filterConfig.getFilterName(), Key.get(Filter.class).toString());
 
-    final Enumeration<?> names = filterConfig.getInitParameterNames();
+    final Enumeration<String> names = filterConfig.getInitParameterNames();
     while (names.hasMoreElements()) {
-      String name = (String) names.nextElement();
+      String name = names.nextElement();
 
       assertTrue(initParams.containsKey(name));
       assertEquals(filterConfig.getInitParameter(name), initParams.get(name));

@@ -88,9 +88,9 @@ public class ServletDefinitionTest extends TestCase {
     assertEquals(Key.get(HttpServlet.class).toString(), mockServlet.getServletName());
 
     final ServletConfig servletConfig = mockServlet.getServletConfig();
-    final Enumeration<?> names = servletConfig.getInitParameterNames();
+    final Enumeration<String> names = servletConfig.getInitParameterNames();
     while (names.hasMoreElements()) {
-      String name = (String) names.nextElement();
+      String name = names.nextElement();
 
       assertTrue(initParams.containsKey(name));
       assertEquals(initParams.get(name), servletConfig.getInitParameter(name));

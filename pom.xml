@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>4.2.4-SNAPSHOT</version>
+  <version>5.0.2-SNAPSHOT</version>
 
   <name>Google Guice</name>
 
@@ -118,9 +118,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
     -->
     <guice.with.jarjar>true</guice.with.jarjar>
     <!--
-     | Use "-Dguice.with.no_aop=false" to skip the no-AOP variant
+     | The last stable release version id, used for generating API diffs between released versions
     -->
-    <guice.with.no_aop>true</guice.with.no_aop>
+    <guice.lastStableRelease>4.2.3</guice.lastStableRelease>
     <gpg.skip>true</gpg.skip>
   </properties>
 
@@ -144,17 +144,17 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>27.1-jre</version>
+        <version>30.1-jre</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>27.1-jre</version>
+        <version>30.1-jre</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>9.0</version>
+        <version>9.1</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -395,10 +395,58 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.0</version>
-          <!--TODO(b/123646401): try out maven-javadoc-plugin 3.1.0 and see if source 8 can be removed then-->
+          <version>3.2.0</version>
           <configuration>
             <source>8</source>
+            <author>false</author>
+            <protected>true</protected>
+            <links>
+              <link>http://aopalliance.sourceforge.net/doc/</link>
+              <link>https://guava.dev/releases/snapshot-jre/api/docs/</link>
+              <link>https://tomcat.apache.org/tomcat-5.5-doc/servletapi/</link>
+            </links>
+            <excludePackageNames>com.google.inject.internal:com.google.inject.internal.*</excludePackageNames>
+            <groups>
+              <group>
+                <title>Guice Core</title>
+                <packages>com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings</packages>
+              </group>
+              <group>
+                <title>Servlet Extension</title>
+                <packages>com.google.inject.servlet</packages>
+              </group>
+              <group>
+                <title>AssistedInject Extension</title>
+                <packages>com.google.inject.assistedinject</packages>
+              </group>
+              <group><title>Dagger Adapter</title>
+                <packages>com.google.inject.daggeradapter</packages>
+              </group>
+              <group><title>ThrowingProviders Extension</title>
+                <packages>com.google.inject.throwingproviders</packages>
+              </group>
+              <group><title>Test Libraries Extension</title>
+                <packages>com.google.inject.testing.*</packages>
+              </group>
+              <group><title>Grapher Extension</title>
+                <packages>com.google.inject.grapher:com.google.inject.grapher.*</packages>
+              </group>
+              <group><title>Persist Extension</title>
+                <packages>com.google.inject.persist:com.google.inject.persist.*</packages>
+              </group>
+              <group><title>Spring Extension</title>
+                <packages>com.google.inject.spring</packages>
+              </group>
+              <group><title>Struts2 Extension</title>
+                <packages>com.google.inject.struts2</packages>
+              </group>
+              <group><title>JNDI Extension</title>
+                <packages>com.google.inject.jndi</packages>
+              </group>
+              <group><title>JMX Extension</title>
+                <packages>com.google.inject.tools.jmx</packages>
+              </group>
+            </groups>
           </configuration>
           <executions>
             <execution>
@@ -432,6 +480,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.spf4j</groupId>
+          <artifactId>spf4j-jdiff-maven-plugin</artifactId>
+          <version>8.8.5</version>
+          <configuration>
+            <destDir>${project.reporting.outputDirectory}/api-diffs/${project.artifactId}</destDir>
+            <versionRange>[${guice.lastStableRelease}],[${project.version}]</versionRange>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

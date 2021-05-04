@@ -298,7 +298,7 @@ public final class RealMapBinder<K, V> implements Module {
 
     // Binds a Map<K, Provider<V>>
     RealProviderMapProvider<K, V> providerMapProvider =
-        new RealProviderMapProvider<K, V>(bindingSelection);
+        new RealProviderMapProvider<>(bindingSelection);
     binder.bind(bindingSelection.getProviderMapKey()).toProvider(providerMapProvider);
 
     // The map this exposes is internally an ImmutableMap, so it's OK to massage
@@ -310,7 +310,12 @@ public final class RealMapBinder<K, V> implements Module {
     binder.bind(bindingSelection.getJavaxProviderMapKey()).toProvider(javaxProviderMapProvider);
 
     RealMapProvider<K, V> mapProvider = new RealMapProvider<>(bindingSelection);
-    binder.bind(bindingSelection.getMapKey()).toProvider(mapProvider);
+    // Bind Map<K, V> to the provider w/ extension support.
+    binder
+        .bind(bindingSelection.getMapKey())
+        .toProvider(new ExtensionRealMapProvider<>(mapProvider));
+    // Bind Map<K, ? extends V> to the provider w/o the extension support.
+    binder.bind(bindingSelection.getMapOfKeyExtendsValueKey()).toProvider(mapProvider);
 
     // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
     // safe to massage the return type like this
@@ -318,9 +323,6 @@ public final class RealMapBinder<K, V> implements Module {
     Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> massagedEntrySetProviderKey =
         (Key) bindingSelection.getEntrySetBinder().getSetKey();
     binder.bind(bindingSelection.getEntrySetJavaxProviderKey()).to(massagedEntrySetProviderKey);
-
-    // Alias Map<K, ? extends V> to Map<K, V>
-    binder.bind(bindingSelection.getMapOfKeyExtendsValueKey()).to(bindingSelection.getMapKey());
   }
 
   @Override
@@ -516,7 +518,7 @@ public final class RealMapBinder<K, V> implements Module {
     private static <K, V> void reportDuplicateKeysError(
         Key<Map<K, V>> mapKey, Multimap<K, Binding<V>> duplicates, Errors errors) {
       errors.duplicateMapKey(mapKey, duplicates);
-        return;
+      return;
     }
 
     private boolean containsElement(Element element) {
@@ -729,24 +731,23 @@ public final class RealMapBinder<K, V> implements Module {
   }
 
   private static final class RealMapProvider<K, V>
-      extends RealMapBinderProviderWithDependencies<K, V, Map<K, V>>
-      implements ProviderWithExtensionVisitor<Map<K, V>>, MapBinderBinding<Map<K, V>> {
-    private Set<Dependency<?>> dependencies = RealMapBinder.MODULE_DEPENDENCIES;
+      extends RealMapBinderProviderWithDependencies<K, V, Map<K, V>> {
+    Set<Dependency<?>> dependencies = RealMapBinder.MODULE_DEPENDENCIES;
 
     /**
      * An array of all the injectors.
      *
      * <p>This is parallel to array of keys below
      */
-    private SingleParameterInjector<V>[] injectors;
+    SingleParameterInjector<V>[] injectors;
 
-    private K[] keys;
+    K[] keys;
 
-    private RealMapProvider(BindingSelection<K, V> bindingSelection) {
+    RealMapProvider(BindingSelection<K, V> bindingSelection) {
       super(bindingSelection);
     }
 
-    private BindingSelection<K, V> getBindingSelection() {
+    BindingSelection<K, V> getBindingSelection() {
       return bindingSelection;
     }
 
@@ -806,6 +807,42 @@ public final class RealMapBinder<K, V> implements Module {
     @Override
     public Set<Dependency<?>> getDependencies() {
       return dependencies;
+    }
+  }
+
+  /**
+   * Implementation of a provider instance for the map that also exposes details about the MapBinder
+   * using the extension SPI, delegating to another provider instance for non-extension (e.g, the
+   * actual provider instance info) data.
+   */
+  private static final class ExtensionRealMapProvider<K, V>
+      extends RealMapBinderProviderWithDependencies<K, V, Map<K, V>>
+      implements ProviderWithExtensionVisitor<Map<K, V>>, MapBinderBinding<Map<K, V>> {
+    final RealMapProvider<K, V> delegate;
+
+    ExtensionRealMapProvider(RealMapProvider<K, V> delegate) {
+      super(delegate.bindingSelection);
+      this.delegate = delegate;
+    }
+
+    BindingSelection<K, V> getBindingSelection() {
+      return bindingSelection;
+    }
+
+    @Override
+    protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+      delegate.doInitialize(injector, errors);
+    }
+
+    @Override
+    protected Map<K, V> doProvision(InternalContext context, Dependency<?> dependency)
+        throws InternalProvisionException {
+      return delegate.doProvision(context, dependency);
+    }
+
+    @Override
+    public Set<Dependency<?>> getDependencies() {
+      return delegate.getDependencies();
     }
 
     @Override
@@ -1317,8 +1354,8 @@ public final class RealMapBinder<K, V> implements Module {
       ProviderInstanceBinding<Map<K, V>> providerInstanceBinding =
           (ProviderInstanceBinding<Map<K, V>>) mapBinding;
       @SuppressWarnings("unchecked")
-      RealMapProvider<K, V> mapProvider =
-          (RealMapProvider<K, V>) providerInstanceBinding.getUserSuppliedProvider();
+      ExtensionRealMapProvider<K, V> mapProvider =
+          (ExtensionRealMapProvider<K, V>) providerInstanceBinding.getUserSuppliedProvider();
 
       this.bindingSelection = mapProvider.getBindingSelection();
 

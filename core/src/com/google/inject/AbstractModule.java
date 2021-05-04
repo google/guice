@@ -32,9 +32,11 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * A support class for {@link Module}s which reduces repetition and results in a more readable
- * configuration. Simply extend this class, implement {@link #configure()}, and call the inherited
- * methods which mirror those found in {@link Binder}. For example:
+ * AbstractModule is a helper class used to add bindings to the Guice injector.
+ *
+ * <p>Simply extend this class, then you can add bindings by either defining @Provides methods (see
+ * https://github.com/google/guice/wiki/ProvidesMethods) or implementing {@link #configure()}, and
+ * calling the inherited methods which mirror those found in {@link Binder}. For example:
  *
  * <pre>
  * public class MyModule extends AbstractModule {

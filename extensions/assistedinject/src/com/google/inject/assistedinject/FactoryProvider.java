@@ -205,7 +205,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
         throw new ConfigurationException(e.getErrors().getMessages());
       }
 
-      return new FactoryProvider2<F>(Key.get(factoryType), collector);
+      return new FactoryProvider2<F>(Key.get(factoryType), collector, /* userLookups= */ null);
     }
   }
 

@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Element;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -48,14 +47,11 @@ abstract class AbstractProcessor extends DefaultElementVisitor<Boolean> {
     Errors errorsAnyElement = this.errors;
     this.injector = injector;
     try {
-      for (Iterator<Element> i = elements.iterator(); i.hasNext(); ) {
-        Element element = i.next();
-        this.errors = errorsAnyElement.withSource(element.getSource());
-        Boolean allDone = element.acceptVisitor(this);
-        if (allDone) {
-          i.remove();
-        }
-      }
+      elements.removeIf(
+          e -> {
+            this.errors = errorsAnyElement.withSource(e.getSource());
+            return e.acceptVisitor(this);
+          });
     } finally {
       this.errors = errorsAnyElement;
       this.injector = null;

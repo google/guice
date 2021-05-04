@@ -295,15 +295,17 @@ public final class ProviderMethodsModule implements Module {
     @SuppressWarnings("unchecked") // Define T as the method's return type.
     TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
+    boolean prepareMethodError = false;
     try {
       key = scanner.prepareMethod(binder, annotation, key, point);
     } catch (Throwable t) {
+      prepareMethodError = true;
       binder.addError(t);
     }
 
     if (Modifier.isAbstract(method.getModifiers())) {
       checkState(
-          key == null,
+          prepareMethodError || key == null,
           "%s returned a non-null key (%s) for %s. prepareMethod() must return null for abstract"
               + " methods",
           scanner,

@@ -462,14 +462,22 @@ public class BoundFieldModuleTest extends TestCase {
   @Retention(RUNTIME)
   private @interface Nullable {}
 
+  private static class TypeUse {
+    @Retention(RUNTIME)
+    @Target(TYPE_USE)
+    private @interface Nullable {}
+  }
+
   public void testBindingNullableNullField() {
     Object instance =
         new Object() {
           @Bind @Nullable private Integer anInt = null;
+          @Bind @TypeUse.Nullable private Long aLong = null;
         };
 
     Injector injector = Guice.createInjector(BoundFieldModule.of(instance));
     assertNull(injector.getInstance(Integer.class));
+    assertNull(injector.getInstance(Long.class));
   }
 
   public void testBindingNullProvider() {
@@ -1024,15 +1032,10 @@ public class BoundFieldModuleTest extends TestCase {
     assertTrue(info.getBindAnnotation().lazy());
   }
 
-  @RestrictedBindingSource.Permit
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(TYPE_USE)
-  @interface FooPermit {}
-
   @Qualifier
   @RestrictedBindingSource(
       explanation = "",
-      permits = {FooPermit.class})
+      permits = {TestPermit.class})
   @Retention(RetentionPolicy.RUNTIME)
   @interface Foo {}
 
@@ -1043,7 +1046,7 @@ public class BoundFieldModuleTest extends TestCase {
     Bindings bindings = new Bindings();
 
     Injector injector =
-        Guice.createInjector(new BoundFieldModule.@FooPermit WithPermits(bindings) {});
+        Guice.createInjector(new BoundFieldModule.@TestPermit WithPermits(bindings) {});
 
     assertEquals((Integer) bindings.foo, injector.getInstance(Key.get(Integer.class, Foo.class)));
   }
