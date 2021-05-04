@@ -25,7 +25,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <packaging>pom</packaging>
 
-  <groupId>com.google.inject</groupId>
+  <groupId>io.github.qsy7.java</groupId>
   <artifactId>guice-parent</artifactId>
   <version>5.0.2-SNAPSHOT</version>
 

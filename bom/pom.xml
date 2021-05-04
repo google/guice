@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.google.inject</groupId>
+    <groupId>io.github.qsy7.java</groupId>
     <artifactId>guice-parent</artifactId>
     <version>5.0.2-SNAPSHOT</version>
   </parent>
@@ -18,68 +18,68 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.google.inject</groupId>
+        <groupId>io.github.qsy7.java</groupId>
         <artifactId>guice</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject</groupId>
+        <groupId>io.github.qsy7.java</groupId>
         <artifactId>guice</artifactId>
         <version>${project.version}</version>
         <classifier>classes</classifier>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-assistedinject</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-dagger-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-grapher</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-jndi</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-persist</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-servlet</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-spring</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-struts2</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-testlib</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-throwingproviders</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -87,12 +87,12 @@
  |  not yet promoted...
 - -
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-mini</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.inject.extensions</groupId>
+        <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
         <artifactId>guice-service</artifactId>
         <version>${project.version}</version>
       </dependency>
