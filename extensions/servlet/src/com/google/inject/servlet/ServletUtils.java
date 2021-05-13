@@ -141,7 +141,10 @@ final class ServletUtils {
       if (c < 0x80) { // ASCII
         boolean processed = false;
 
-        if (c == '%' && string.length() >= srcPos + 3) {
+        if (c == '%'
+            && string.length() >= srcPos + 3
+            && string.charAt(srcPos + 1) != '+'
+            && string.charAt(srcPos + 1) != '-') {
           String hex = string.substring(srcPos + 1, srcPos + 3);
 
           try {
