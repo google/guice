@@ -96,7 +96,5 @@ public final class WeakKeySetUtils {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    // TODO(b/160912368): fix the ThreadPriorityCheck errorprone warning on this line.
-    Thread.yield();
   }
 }
