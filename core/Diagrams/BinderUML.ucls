@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <interface id="1" language="java" name="com.google.inject.binder.AnnotatedBindingBuilder" project="guice" 
+    file="/guice/src/com/google/inject/binder/AnnotatedBindingBuilder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="314" x="526" y="937"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="2" language="java" name="com.google.inject.binder.AnnotatedConstantBindingBuilder" project="guice" 
+    file="/guice/src/com/google/inject/binder/AnnotatedConstantBindingBuilder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="308" x="178" y="335"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="3" language="java" name="com.google.inject.binder.AnnotatedElementBuilder" project="guice" 
+    file="/guice/src/com/google/inject/binder/AnnotatedElementBuilder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="217" x="722" y="335"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="4" language="java" name="com.google.inject.binder.ScopedBindingBuilder" project="guice" 
+    file="/guice/src/com/google/inject/binder/ScopedBindingBuilder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="156" x="526" y="335"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="5" language="java" name="com.google.inject.binder.ConstantBindingBuilder" project="guice" 
+    file="/guice/src/com/google/inject/binder/ConstantBindingBuilder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="261" width="157" x="979" y="335"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="6" language="java" name="com.google.inject.binder.LinkedBindingBuilder" project="guice" 
+    file="/guice/src/com/google/inject/binder/LinkedBindingBuilder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="261" width="409" x="526" y="636"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <generalization id="7">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="4"/>  
+  </generalization>  
+  <generalization id="8">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
