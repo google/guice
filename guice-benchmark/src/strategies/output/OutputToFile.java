@@ -8,5 +8,4 @@ public class OutputToFile implements OutputStrategy {
 	public OutputStream getOutputStream(Config config) {
 		return null;
 	}
-
 }

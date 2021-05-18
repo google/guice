@@ -30,7 +30,7 @@ public class OutputGenerator {
 		//pick appropriate according to config
 		OutputStrategy outputStrategy = new OutputToScreen();
 		outputStrategy = new OutputToFile();
-		OutputStream ostream = outputStrategy.getOutputStream();
+		OutputStream ostream = outputStrategy.getOutputStream(config);
 		
 		//pick appropriate according to config
 		ReportFormatStrategy report = new CSVFormatter();
