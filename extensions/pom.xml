@@ -48,6 +48,7 @@
     <!--
      | Some extension tests depend on the core tests
     -->
+    <!--
     <dependency>
       <groupId>io.github.qsy7.java</groupId>
       <artifactId>guice</artifactId>
@@ -55,6 +56,7 @@
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
+    -->
     <!--
      | Some extension tests depend on guava test libs which are not inherited
      | from test scope.
