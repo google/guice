@@ -49,6 +49,15 @@ public class ServletUtilsTest extends TestCase {
     assertNull(getContextRelativePath("", ""));
   }
 
+  public void testNormalizePath() {
+    assertEquals("foobar", ServletUtils.normalizePath("foobar"));
+    assertEquals("foo+bar", ServletUtils.normalizePath("foo+bar"));
+    assertEquals("foo%20bar", ServletUtils.normalizePath("foo bar"));
+    assertEquals("foo%25-bar", ServletUtils.normalizePath("foo%-bar"));
+    assertEquals("foo%25+bar", ServletUtils.normalizePath("foo%+bar"));
+    assertEquals("foo%25-0bar", ServletUtils.normalizePath("foo%-0bar"));
+  }
+
   private String getContextRelativePath(String contextPath, String requestPath) {
     HttpServletRequest mock = createMock(HttpServletRequest.class);
     expect(mock.getContextPath()).andReturn(contextPath);
