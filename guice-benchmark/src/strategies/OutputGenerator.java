@@ -20,11 +20,20 @@ import strategies.output.OutputToScreen;
 
 
 /**
+ * Implemented as singleton
  * @author polga
  *
  */
 public class OutputGenerator {
-	Map <String, ReportFormatStrategy> formatLookup;
+	private Map <String, ReportFormatStrategy> formatLookup;
+	private static OutputGenerator outputGen = null;
+	
+	public static OutputGenerator getInstance () {
+		if (outputGen == null) {
+			outputGen = new OutputGenerator();
+		}
+		return outputGen;
+	}
 	
 	public void benchmarkOutput (Config config, List<StatsObject> data) {
 		//pick appropriate according to config
