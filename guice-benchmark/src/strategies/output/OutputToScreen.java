@@ -8,7 +8,8 @@ import benchmark.Config;
 public class OutputToScreen implements OutputStrategy{
 	
 	public OutputStream getOutputStream(Config config) {
-		return null;
+		OutputStream outputStream = System.out;
+		return outputStream;
 	}
 
 }
