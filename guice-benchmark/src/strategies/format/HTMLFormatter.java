@@ -5,6 +5,11 @@ import java.util.List;
 
 import benchmark.StatsObject;
 
+/**
+ * 
+ * @author Meghna
+ *
+ */
 public class HTMLFormatter implements ReportFormatStrategy {
 
 	@Override

@@ -5,6 +5,11 @@ import java.util.List;
 
 import benchmark.StatsObject;
 
+/**
+ * 
+ * @author Dat
+ *
+ */
 public class JSONFormatter implements ReportFormatStrategy {
 
 	@Override

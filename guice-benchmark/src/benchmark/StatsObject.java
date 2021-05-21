@@ -1,69 +1,57 @@
 package benchmark;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
  */
 
 /**
- * @author polga
+ * @author Luyao
  *
  */
 public class StatsObject {
 
-	private int startTime;
-	private int stopTime;
-	private int average;
+	private List<Long> timings; // needs to be sorted at some point before stats is given
 	private String className;
 
-	public StatsObject(int startTime, int stopTime, int average, String className) {
-		this.startTime = startTime;
-		this.stopTime = stopTime;   //not needed at start
-		this.average = average;     //not needed at start
+	/**
+	 * 
+	 * @param className
+	 */
+	public StatsObject(String className) {
+		this.timings = new ArrayList<>();
 		this.className = className;
 	}
 
-	/**
-	 * @return the startTime
+		/**
+	 * 
+	 * @return
 	 */
-	public int getStartTime() {
-		return startTime;
+	public String getClassName() {
+		return className;
 	}
 
 	/**
-	 * @param startTime the startTime to set
+	 * 
+	 * @param time
 	 */
-	public void setStartTime(int startTime) {
-		this.startTime = startTime;
-	}
-
-	/**
-	 * @return the stopTime
-	 */
-	public int getStopTime() {
-		return stopTime;
-	}
-
-	/**
-	 * @param stopTime the stopTime to set
-	 */
-	public void setStopTime(int stopTime) {
-		this.stopTime = stopTime;
+	public void addTiming(long time) {
+		// add time
+		// sort list
 	}
 
 	/**
 	 * @return the average
 	 */
-	public int getAverage() {
-		return average;
+	public long getAverage() {
+		return 0;
 	}
 
-	/**
-	 * @param average the average to set
-	 */
-	public void setAverage(int average) {
-		this.average = average;
-	}
+	// give worst time
 
-	public void stopTiming() {
+	// give best time
 
-	}
+	// give other stats?
 }

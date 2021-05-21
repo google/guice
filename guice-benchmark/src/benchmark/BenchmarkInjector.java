@@ -25,7 +25,6 @@ import com.google.inject.spi.TypeConverterBinding;
 import strategies.OutputGenerator;
 
 /**
- * @author polly
  *
  */
 public class BenchmarkInjector implements Injector {
@@ -36,39 +35,39 @@ public class BenchmarkInjector implements Injector {
 	 * 
 	 * @param injector
 	 */
-	private BenchmarkInjector (Injector injector) {
+	private BenchmarkInjector(Injector injector) {
 		this.injector = injector;
 		sm = new StatsManager();
 	}
-	
+
 	/**
 	 * 
 	 * @param modules
 	 * @return
 	 */
-	public static BenchmarkInjector createInjector(Module... modules ) {
+	public static BenchmarkInjector createInjector(Module... modules) {
 		BenchmarkInjector tempInj = new BenchmarkInjector(Guice.createInjector(modules));
-		return tempInj;		
+		return tempInj;
 	}
-	
+
 	/**
 	 * 
 	 * @param config
 	 */
-	public void generateReport (Config config) { 
-		sm.getData();
+	public void generateReport(Config config) {
 		OutputGenerator genOutput = OutputGenerator.getInstance();
-		List<StatsObject> data = new ArrayList<>();
-		genOutput.benchmarkOutput (config, data);
+		genOutput.benchmarkOutput(config, sm.getData());
 	}
+
 	/**
-	 * 
+	 * Starts and stops timing for object
 	 */
 	@Override
 	public <T> T getInstance(Class<T> type) {
 		TimingObj timingObj = sm.startTiming(type);
-		T instanceT =  this.injector.getInstance(type);
+		T instanceT = this.injector.getInstance(type);
 		timingObj.stopTiming();
+		sm.updateData(timingObj);
 		return instanceT;
 	}
 
@@ -97,8 +96,6 @@ public class BenchmarkInjector implements Injector {
 		return this.injector.getAllBindings();
 	}
 
-
-
 	@Override
 	public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
 		return this.injector.findBindingsByType(type);
@@ -108,8 +105,6 @@ public class BenchmarkInjector implements Injector {
 	public Injector getParent() {
 		return this.injector.getParent();
 	}
-
-
 
 	@Override
 	public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
@@ -130,7 +125,7 @@ public class BenchmarkInjector implements Injector {
 	public Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints() {
 		return this.injector.getAllMembersInjectorInjectionPoints();
 	}
-	
+
 	@Override
 	public <T> Binding<T> getBinding(Key<T> key) {
 		return this.injector.getBinding(key);
@@ -160,7 +155,6 @@ public class BenchmarkInjector implements Injector {
 	public <T> T getInstance(Key<T> key) {
 		return this.injector.getInstance(key);
 	}
-
 
 	@Override
 	public Injector createChildInjector(com.google.inject.Module... modules) {
