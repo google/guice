@@ -20,32 +20,58 @@ import strategies.output.OutputToScreen;
 
 
 /**
- * @author polga
+ * Implemented as singleton
  *
  */
 public class OutputGenerator {
-	Map <String, ReportFormatStrategy> formatLookup;
+	private Map <String, ReportFormatStrategy> formatLookup;
+	//Map for outputstream
+	private static OutputGenerator outputGen = null;
 	
-	public void benchmarkOutput (Config config, List<StatsObject> data) {
-		//pick appropriate according to config
-		OutputStrategy outputStrategy = new OutputToScreen();
-		outputStrategy = new OutputToFile();
-		OutputStream ostream = outputStrategy.getOutputStream(config);
-		
-		//pick appropriate according to config
-		ReportFormatStrategy report = new CSVFormatter();
-		report = new JSONFormatter();
-		report = new HTMLFormatter();
-		
+	/**
+	 * 
+	 */
+	private OutputGenerator() {
 		formatLookup = new HashMap<>();
 		formatLookup.put ("json", new JSONFormatter());
 		formatLookup.put ("html", new HTMLFormatter());
 		formatLookup.put ("csv", new CSVFormatter());
 		
-		report = formatLookup.get(config.getOutputFormat());
-		report.formatOutputStream(ostream, data);
-		
-		
+		//create similar for output stream
 	}
+	
+	/**
+	 * Returns instance of OutputGenerator
+	 * @return
+	 */
+	public static OutputGenerator getInstance () {
+		if (outputGen == null) {
+			outputGen = new OutputGenerator();
+		}
+		return outputGen;
+	}
+	
+	/**
+	 * Outputs the benchmark data
+	 * 
+	 * @param config
+	 * @param data
+	 */
+	public void benchmarkOutput (Config config, List<StatsObject> data) {
 
+		//pick appropriate according to config
+		//OutputStrategy outputStrategy;
+		//OutputStream ostream = outputStrategy.getOutputStream(config);
+		
+		//pick appropriate according to config
+		//ReportFormatStrategy report ;	
+		//report = formatLookup.get(config.getOutputFormat());
+		//report.formatOutputStream(ostream, data);
+		
+		//TODO
+		//delete above
+		//get the correct stream (screen or file)
+		//format the stream
+		//output the stream
+	}
 }

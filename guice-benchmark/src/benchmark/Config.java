@@ -1,18 +1,22 @@
 package benchmark;
 
+/**
+ * Configuration
+ *
+ */
 public class Config {
 	private String outputFormat;
 	private String location;
 	
 	public Config() {
 		//assigns everything
-		this.outputFormat = "default";
-		this.location = "default";
+		this.outputFormat = "csv";
+		this.location = "screen";
 	}
 	
 	public Config (String outputFormat) {
 		this.outputFormat = outputFormat;
-		this.location = "default";
+		this.location = "screen";
 	}
 	
 	public Config (String outputFormat, String location) {

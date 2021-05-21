@@ -25,151 +25,144 @@ import com.google.inject.spi.TypeConverterBinding;
 import strategies.OutputGenerator;
 
 /**
- * @author polga
  *
  */
 public class BenchmarkInjector implements Injector {
 	private Injector injector;
-	
+	private StatsManager sm;
 
-	private BenchmarkInjector (Injector injector) {
+	/**
+	 * 
+	 * @param injector
+	 */
+	private BenchmarkInjector(Injector injector) {
 		this.injector = injector;
+		sm = new StatsManager();
 	}
-	
-	public static BenchmarkInjector createInjector(Module... modules ) {
+
+	/**
+	 * 
+	 * @param modules
+	 * @return
+	 */
+	public static BenchmarkInjector createInjector(Module... modules) {
 		BenchmarkInjector tempInj = new BenchmarkInjector(Guice.createInjector(modules));
-		return tempInj;		
+		return tempInj;
 	}
-	
+
+	/**
+	 * 
+	 * @param config
+	 */
+	public void generateReport(Config config) {
+		OutputGenerator genOutput = OutputGenerator.getInstance();
+		genOutput.benchmarkOutput(config, sm.getData());
+	}
+
+	/**
+	 * Starts and stops timing for object
+	 */
 	@Override
 	public <T> T getInstance(Class<T> type) {
-		return this.injector.getInstance(type);
+		TimingObj timingObj = sm.startTiming(type);
+		T instanceT = this.injector.getInstance(type);
+		timingObj.stopTiming();
+		sm.updateData(timingObj);
+		return instanceT;
 	}
 
 	@Override
 	public void injectMembers(Object instance) {
-		// TODO Auto-generated method stub
-		
+		this.injectMembers(instance);
 	}
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getMembersInjector(typeLiteral);
 	}
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getMembersInjector(type);
 	}
 
 	@Override
 	public Map<Key<?>, Binding<?>> getBindings() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getBindings();
 	}
 
 	@Override
 	public Map<Key<?>, Binding<?>> getAllBindings() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getAllBindings();
 	}
-
-
 
 	@Override
 	public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.findBindingsByType(type);
 	}
 
 	@Override
 	public Injector getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getParent();
 	}
-
-
 
 	@Override
 	public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getScopeBindings();
 	}
 
 	@Override
 	public Set<TypeConverterBinding> getTypeConverterBindings() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getTypeConverterBindings();
 	}
 
 	@Override
 	public List<Element> getElements() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getElements();
 	}
 
 	@Override
 	public Map<TypeLiteral<?>, List<InjectionPoint>> getAllMembersInjectorInjectionPoints() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public void generateOutput (Config config) {
-		StatsManager sm = new StatsManager();
-		sm.getData();
-		OutputGenerator genOutput = new OutputGenerator();
-		List<StatsObject> data = new ArrayList<>();
-		genOutput.benchmarkOutput (config, data);
+		return this.injector.getAllMembersInjectorInjectionPoints();
 	}
 
 	@Override
 	public <T> Binding<T> getBinding(Key<T> key) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getBinding(key);
 	}
 
 	@Override
 	public <T> Binding<T> getBinding(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getBinding(type);
 	}
 
 	@Override
 	public <T> Binding<T> getExistingBinding(Key<T> key) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getExistingBinding(key);
 	}
 
 	@Override
 	public <T> Provider<T> getProvider(Key<T> key) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getProvider(key);
 	}
 
 	@Override
 	public <T> Provider<T> getProvider(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getProvider(type);
 	}
 
 	@Override
 	public <T> T getInstance(Key<T> key) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.getInstance(key);
 	}
-
 
 	@Override
 	public Injector createChildInjector(com.google.inject.Module... modules) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.createChildInjector(modules);
 	}
 
 	@Override
 	public Injector createChildInjector(Iterable<? extends com.google.inject.Module> modules) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.injector.createChildInjector(modules);
 	}
 }
