@@ -8,7 +8,9 @@ import java.util.List;
  */
 
 /**
- * @author Luyao
+ * Developed as class project for CSS553 at University of Washington (Bothell)
+ * 
+ * @author Gucci Team
  *
  */
 public class StatsObject {
@@ -25,7 +27,7 @@ public class StatsObject {
 		this.className = className;
 	}
 
-		/**
+	/**
 	 * 
 	 * @return
 	 */

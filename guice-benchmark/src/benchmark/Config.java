@@ -1,27 +1,30 @@
 package benchmark;
 
 /**
- * Configuration
- *
+ * Configuration Developed as class project for CSS553 at University of
+ * Washington (Bothell)
+ * 
+ * @author Gucci Team *
  */
 public class Config {
 	private String outputFormat;
-	private String location;
-	
+	private String outputType; // change name to outputType
+	private String filename;
+
 	public Config() {
-		//assigns everything
+		// assigns everything
 		this.outputFormat = "csv";
-		this.location = "screen";
+		this.outputType = "screen";
 	}
-	
-	public Config (String outputFormat) {
+
+	public Config(String outputFormat) {
 		this.outputFormat = outputFormat;
-		this.location = "screen";
+		this.outputType = "screen";
 	}
-	
-	public Config (String outputFormat, String location) {
+
+	public Config(String outputFormat, String location) {
 		this.outputFormat = outputFormat;
-		this.location = location;
+		this.outputType = location;
 	}
 
 	/**
@@ -39,16 +42,51 @@ public class Config {
 	}
 
 	/**
+	 * Name change to outputType
+	 * 
 	 * @return the location
 	 */
+	@Deprecated
 	public String getLocation() {
-		return location;
+		return outputType;
 	}
 
 	/**
+	 * Name change to outputType
+	 * 
 	 * @param location the location to set
 	 */
+	@Deprecated
 	public void setLocation(String location) {
-		this.location = location;
+		this.outputType = location;
 	}
+
+	/**
+	 * @return the filename
+	 */
+	public String getFilename() {
+		return filename;
+	}
+
+	/**
+	 * @param filename the filename to set
+	 */
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	/**
+	 * @return the outputType
+	 */
+	public String getOutputType() {
+		return outputType;
+	}
+
+	/**
+	 * @param outputType the outputType to set
+	 */
+	public void setOutputType(String outputType) {
+		this.outputType = outputType;
+	}
+
 }
