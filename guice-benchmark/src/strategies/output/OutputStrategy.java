@@ -4,5 +4,5 @@ import java.io.OutputStream;
 import benchmark.Config;
 
 public interface OutputStrategy {
-	public OutputStream getOutputStream(Config config) throws Exception ;
+	public OutputStream getOutputStream(Config config) ;
 }
