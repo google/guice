@@ -1,6 +1,7 @@
 package benchmark;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -82,5 +83,51 @@ public class StatsObject {
 		return min;
 	}
 
-	// give other stats?
+	/**
+	 * Gives the 50 percentile - median
+	 * @return the p50 duration in the timing list
+	 */
+	public long getP50() {
+		long result = 0L;
+		
+		if(!timings.isEmpty())
+		{
+			timings.sort(Comparator.naturalOrder());
+			int index = (int) (timings.size() * 0.5);
+			result = timings.get(index);
+		}
+		return result;
+	}
+	
+	/**
+	 * Gives the 90 percentile - median
+	 * @return the p90 duration in the timing list
+	 */
+	public long getP90() {
+		long result = 0L;
+		
+		if(!timings.isEmpty())
+		{
+			timings.sort(Comparator.naturalOrder());
+			int index = (int) (timings.size() * 0.9);
+			result = timings.get(index);
+		}
+		return result;
+	}
+	
+	/**
+	 * Gives the 99 percentile - median
+	 * @return the p99 duration in the timing list
+	 */
+	public long getP99() {
+		long result = 0L;
+		
+		if(!timings.isEmpty())
+		{
+			timings.sort(Comparator.naturalOrder());
+			int index = (int) (timings.size() * 0.99);
+			result = timings.get(index);
+		}
+		return result;
+	}
 }
