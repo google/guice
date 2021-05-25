@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 import benchmark.Config;
 
 public class OutputToFile implements OutputStrategy {
-	public OutputStream getOutputStream(Config config) {
+	public OutputStream getOutputStream(Config config) throws Exception {
 		String file_full_path = config.getLocation();
-		OutputStream outputStream = null;
+//		OutputStream outputStream = null;
 		// checking if file exists
 		File tempFile = new File(file_full_path);
 		
@@ -28,12 +28,7 @@ public class OutputToFile implements OutputStrategy {
 		
 		
 		// create output stream
-		try {
-			outputStream = new FileOutputStream(file_full_path);
-		} catch (FileNotFoundException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
-		}
+		OutputStream outputStream = new FileOutputStream(file_full_path);
 		return outputStream;
 	}
 }
