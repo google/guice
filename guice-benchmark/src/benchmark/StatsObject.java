@@ -9,7 +9,9 @@ import java.util.List;
  */
 
 /**
- * @author Luyao
+ * Developed as class project for CSS553 at University of Washington (Bothell)
+ * 
+ * @author Gucci Team
  *
  */
 public class StatsObject {
@@ -28,7 +30,7 @@ public class StatsObject {
 		this.timings = new ArrayList<Long>();
 		this.className = className;
 	}
-	
+
 	/**
 	 * 
 	 * @return className of the class whose injected durations are managed by this StatsObject

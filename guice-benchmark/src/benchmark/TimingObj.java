@@ -4,7 +4,9 @@
 package benchmark;
 
 /**
- *
+ * Developed as class project for CSS553 at University of Washington (Bothell)
+ * 
+ * @author Gucci Team *
  */
 public class TimingObj {
 	private long startTime;
