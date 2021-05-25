@@ -26,6 +26,12 @@ public class Config {
 		this.outputFormat = outputFormat;
 		this.outputType = location;
 	}
+	
+	public Config(String outputFormat, String outputType, String filename) {
+		this.outputFormat = outputFormat;
+		this.outputType = outputType;
+		this.filename = filename;
+	}
 
 	/**
 	 * @return the outputFormat
