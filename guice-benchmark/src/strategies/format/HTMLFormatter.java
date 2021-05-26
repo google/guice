@@ -18,6 +18,7 @@ public class HTMLFormatter implements ReportFormatStrategy {
 	public void formatOutputStream(OutputStream stream, List<StatsObject> data) {
 		// TODO Auto-generated method stub
 
+
 	}
 
 }
