@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import benchmark.Config;
 
 public class OutputToFile implements OutputStrategy {
-	public OutputStream getOutputStream(Config config) {
+	public OutputStream getOutputStream(Config config) throws Exception {
 		String file_full_path = config.getLocation();
 		OutputStream outputStream = null;
 		// checking if file exists
@@ -33,6 +33,7 @@ public class OutputToFile implements OutputStrategy {
 		} catch (FileNotFoundException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
+			throw new Exception("Error creating FileOutputStream");
 		}
 		return outputStream;
 	}

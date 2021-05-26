@@ -30,7 +30,13 @@ public class OutputGenerator {
 		//pick appropriate according to config
 		OutputStrategy outputStrategy = new OutputToScreen();
 		outputStrategy = new OutputToFile();
-		OutputStream ostream = outputStrategy.getOutputStream(config);
+		OutputStream ostream = null;
+		try {
+			ostream = outputStrategy.getOutputStream(config);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//pick appropriate according to config
 		ReportFormatStrategy report = new CSVFormatter();
