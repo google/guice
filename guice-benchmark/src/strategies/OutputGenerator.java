@@ -94,5 +94,4 @@ public class OutputGenerator {
 			throw new RuntimeException("Outputstream error", e);
 		}
 	}
-
 }
