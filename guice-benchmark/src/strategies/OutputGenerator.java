@@ -3,6 +3,7 @@
  */
 package strategies;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -18,40 +19,79 @@ import strategies.output.OutputStrategy;
 import strategies.output.OutputToFile;
 import strategies.output.OutputToScreen;
 
-
 /**
- * @author polga
- *
+ * Implemented as singleton
+ * 
+ * Developed as class project for CSS553 at University of Washington (Bothell)
+ * 
+ * @author Gucci Team
  */
 public class OutputGenerator {
-	Map <String, ReportFormatStrategy> formatLookup;
-	
-	public void benchmarkOutput (Config config, List<StatsObject> data) {
-		//pick appropriate according to config
-		OutputStrategy outputStrategy = new OutputToScreen();
-		outputStrategy = new OutputToFile();
-		OutputStream ostream = null;
-		try {
-			ostream = outputStrategy.getOutputStream(config);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		//pick appropriate according to config
-		ReportFormatStrategy report = new CSVFormatter();
-		report = new JSONFormatter();
-		report = new HTMLFormatter();
-		
+	private Map<String, ReportFormatStrategy> formatLookup;
+	private Map<String, OutputStrategy> outputLookup;
+	private static OutputGenerator outputGen = null;
+
+	/**
+	 * Constructor loads formats for lookup tables
+	 */
+	private OutputGenerator() {
 		formatLookup = new HashMap<>();
-		formatLookup.put ("json", new JSONFormatter());
-		formatLookup.put ("html", new HTMLFormatter());
-		formatLookup.put ("csv", new CSVFormatter());
-		
-		report = formatLookup.get(config.getOutputFormat());
-		report.formatOutputStream(ostream, data);
-		
-		
+		formatLookup.put("json", new JSONFormatter());
+		formatLookup.put("html", new HTMLFormatter());
+		formatLookup.put("csv", new CSVFormatter());
+
+		outputLookup = new HashMap<>();
+		outputLookup.put("screen", new OutputToScreen());
+		outputLookup.put("file", new OutputToFile());
 	}
 
+	/**
+	 * Returns instance of OutputGenerator
+	 * 
+	 * @return
+	 */
+	public static synchronized OutputGenerator getInstance() {
+		if (outputGen == null) {
+			outputGen = new OutputGenerator();
+		}
+		return outputGen;
+	}
+
+	/**
+	 * Outputs the benchmark data
+	 * 
+	 * @param config
+	 * @param data
+	 */
+	public void benchmarkOutput(Config config, List<StatsObject> data) {
+		// TODO add error checking
+		if (config == null){
+			throw new RuntimeException("Output error: Configuration is null");
+		}
+		
+		if (config.getOutputType() == null ) {
+			throw new RuntimeException("Output error: no output type set");
+		}
+
+		if (data == null || data.size()== 0) {
+			throw new RuntimeException("Output error: No data to output");
+		}
+
+		OutputStrategy outputStrategy = outputLookup.get(config.getOutputFormat());
+		if (outputStrategy == null) {
+			throw new RuntimeException("Output error: outputstream strategy not created");
+		}
+		
+		ReportFormatStrategy report = formatLookup.get(config.getOutputFormat());
+		if (report == null) {
+			throw new RuntimeException("Output error: report strategy not created");
+		}
+		
+		try (OutputStream ostream = outputStrategy.getOutputStream(config)){
+			report.formatOutputStream(ostream, data);
+			ostream.flush();
+		} catch (IOException e) {
+			throw new RuntimeException("Outputstream error", e);
+		}
+	}
 }
