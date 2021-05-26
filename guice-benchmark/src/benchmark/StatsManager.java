@@ -21,7 +21,7 @@ public class StatsManager {
 	 * @return
 	 */
 	public <T> TimingObj startTiming(Class<T> type) {
-		timer = new TimingObj(System.currentTimeMillis(),type.getTypeName());
+		TimingObj timer = new TimingObj(System.currentTimeMillis(),type.getTypeName());
 		return timer;
 	}
 
