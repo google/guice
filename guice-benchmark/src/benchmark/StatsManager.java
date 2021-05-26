@@ -31,6 +31,15 @@ public class StatsManager {
 	 * @return
 	 */
 	public List<StatsObject> getData (){
+				
+	}
+
+	/**
+	 * Update data with new object info
+	 * 
+	 * @param timingObj
+	 */
+	public void updateData(TimingObj timingObj) {
 		List<StatsObject> stats = new List<StatsObject>();
 		StatsObject statsObj = data.get(timingObj.getClassName());
 		
@@ -42,17 +51,6 @@ public class StatsManager {
 		}
 		
 		stats.add(statsObj);
-		return stats;		
-	}
-
-	/**
-	 * Update data with new object info
-	 * 
-	 * @param timingObj
-	 */
-	public void updateData(TimingObj timingObj) {
-		timer.className = timingObj.className;
-		timer.startTime = timingObj.startTime;
-		timer.endTime = timingObj.endTime;
+		return stats;
 	}
 }
