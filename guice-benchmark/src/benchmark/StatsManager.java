@@ -31,7 +31,8 @@ public class StatsManager {
 	 * @return
 	 */
 	public List<StatsObject> getData (){
-				
+		List<StatsObject> stats = new ArrayList<StatsObject>(data.values);
+		return stats;
 	}
 
 	/**
@@ -40,7 +41,7 @@ public class StatsManager {
 	 * @param timingObj
 	 */
 	public void updateData(TimingObj timingObj) {
-		List<StatsObject> stats = new List<StatsObject>();
+		
 		StatsObject statsObj = data.get(timingObj.getClassName());
 		
 		if(statsObj == null) {
@@ -50,7 +51,6 @@ public class StatsManager {
 			statsObj.addTiming(timingObj.duration());
 		}
 		
-		stats.add(statsObj);
-		return stats;
+		stats.add(statsObj);	
 	}
 }
