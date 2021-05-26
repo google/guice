@@ -25,7 +25,9 @@ import com.google.inject.spi.TypeConverterBinding;
 import strategies.OutputGenerator;
 
 /**
- *
+ * Developed as class project for CSS553 at University of Washington (Bothell)
+ * 
+ * @author Gucci Team
  */
 public class BenchmarkInjector implements Injector {
 	private Injector injector;
