@@ -12,9 +12,10 @@ import java.util.Map;
  */
 public class StatsManager {
 
-	// key should be reference to instantiated / injected object: Name of object
-	// (class)
-	private Map<String, StatsObject> data;
+	//key should be reference to instantiated / injected object: Name of object (class)
+	private Map<String,StatsObject> data;
+	private TimingObj timer;
+	
 
 	/**
 	 * Starts timing
@@ -24,8 +25,8 @@ public class StatsManager {
 	 * @return
 	 */
 	public <T> TimingObj startTiming(Class<T> type) {
-		TimingObj timingObj = new TimingObj(System.currentTimeMillis(), type.getTypeName());
-		return timingObj;
+		TimingObj timer = new TimingObj(System.currentTimeMillis(),type.getTypeName());
+		return timer;
 	}
 
 	/**
@@ -35,10 +36,11 @@ public class StatsManager {
 	 * 
 	 * @return
 	 */
-	public List<StatsObject> getData() {
-		// convert map to list
-		// return list
-		return null;
+
+	public List<StatsObject> getData (){
+		List<StatsObject> stats = new ArrayList<StatsObject>(data.values);
+		return stats;
+
 	}
 
 	/**
@@ -49,8 +51,14 @@ public class StatsManager {
 	 * @param timingObj
 	 */
 	public void updateData(TimingObj timingObj) {
-		// TODO
-		// find the statsobj in the data map with the key from the timingObj
-		// send the new time to the statsobj
+
+		
+		StatsObject statsObj = data.get(timingObj.getClassName());
+		
+		if(statsObj == null) {
+			statsObj = new StatsObject(timingObj.getClassName());
+      stats.add(statsObj);	
+		}		
+		statsObj.addTiming(timingObj.duration());
 	}
 }
