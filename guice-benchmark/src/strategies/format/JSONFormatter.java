@@ -13,6 +13,13 @@ import benchmark.StatsObject;
 //import java.lang.Object
 //import com.oracle.json.Json;
 
+/**
+ * Developed as class project for CSS553 at University of Washington (Bothell)
+ * 
+ * @author Gucci Team*
+ * @author Dat
+ *
+ */
 public class JSONFormatter implements ReportFormatStrategy {
 
 	@Override
