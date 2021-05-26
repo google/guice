@@ -12,6 +12,7 @@ public class StatsManager {
 	
 	//key should be reference to instantiated / injected object: Name of object (class)
 	private Map<String,StatsObject> data;
+	private TimingObj timer;
 	
 	/**
 	 * Starts timing 
@@ -20,8 +21,8 @@ public class StatsManager {
 	 * @return
 	 */
 	public <T> TimingObj startTiming(Class<T> type) {
-		TimingObj timingObj = new TimingObj(System.currentTimeMillis(),type.getTypeName());
-		return timingObj;
+		timer = new TimingObj(System.currentTimeMillis(),type.getTypeName());
+		return timer;
 	}
 
 	/**
@@ -30,9 +31,8 @@ public class StatsManager {
 	 * @return
 	 */
 	public List<StatsObject> getData (){
-		//convert map to list
-		//return list
-		return null;		
+		List<String> list = new ArrayList<String>(data.values());
+		return list;		
 	}
 
 	/**
@@ -41,8 +41,8 @@ public class StatsManager {
 	 * @param timingObj
 	 */
 	public void updateData(TimingObj timingObj) {
-		// TODO 
-		//find the statsobj in the data map with the key from the timingObj
-		//send the new time to the statsobj
+		timer.className = timingObj.className;
+		timer.startTime = timingObj.startTime;
+		timer.endTime = timingObj.endTime;
 	}
 }
