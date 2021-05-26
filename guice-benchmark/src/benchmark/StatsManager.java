@@ -31,8 +31,18 @@ public class StatsManager {
 	 * @return
 	 */
 	public List<StatsObject> getData (){
-		List<String> list = new ArrayList<String>(data.values());
-		return list;		
+		List<StatsObject> stats = new List<StatsObject>();
+		StatsObject statsObj = data.get(timingObj.getClassName());
+		
+		if(statsObj == null) {
+			statsObj = new StatsObject(timingObj.getClassName());
+			statsObj.addTiming(timingObj.duration());		
+		} else {			
+			statsObj.addTiming(timingObj.duration());
+		}
+		
+		stats.add(statsObj);
+		return stats;		
 	}
 
 	/**
