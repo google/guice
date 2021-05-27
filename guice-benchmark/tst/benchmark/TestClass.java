@@ -18,6 +18,11 @@ public class TestClass {
 		System.out.println("=====================================");
 		config.setOutputFormat("json");
 		injector.generateReport(config);
+		
+		System.out.println("=====================================");
+		config.setFilename("test.json");
+		config.setOutputType("file");
+		injector.generateReport(config);
 	}
 
 }
