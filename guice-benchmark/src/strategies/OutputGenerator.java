@@ -77,21 +77,26 @@ public class OutputGenerator {
 			throw new RuntimeException("Output error: No data to output");
 		}
 
-		OutputStrategy outputStrategy = outputLookup.get(config.getOutputFormat());
+		OutputStrategy outputStrategy = outputLookup.get(config.getOutputType());
 		if (outputStrategy == null) {
-			throw new RuntimeException("Output error: outputstream strategy not created");
+			throw new RuntimeException("Output error: outputstream strategy not created: '" + config.getOutputType() + "'");
 		}
 		
 		ReportFormatStrategy report = formatLookup.get(config.getOutputFormat());
 		if (report == null) {
-			throw new RuntimeException("Output error: report strategy not created");
+			throw new RuntimeException("Output error: report strategy not created: '" + config.getOutputFormat() + "'");
 		}
 		
-		try (OutputStream ostream = outputStrategy.getOutputStream(config)){
+		try {
+			OutputStream ostream = outputStrategy.getOutputStream(config);
 			report.formatOutputStream(ostream, data);
 			ostream.flush();
 		} catch (IOException e) {
 			throw new RuntimeException("Outputstream error", e);
+		}
+		finally
+		{
+			outputStrategy.close();
 		}
 	}
 

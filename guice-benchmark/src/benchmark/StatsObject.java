@@ -18,8 +18,8 @@ public class StatsObject {
 
 	private List<Long> timings; // needs to be sorted at some point before stats is given
 	private String className;
-	private long max;
-	private long min;
+	private long max = Long.MIN_VALUE;
+	private long min = Long.MAX_VALUE;
 	private long sum;
 
 	/**

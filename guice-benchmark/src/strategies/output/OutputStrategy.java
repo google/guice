@@ -12,6 +12,6 @@ import benchmark.Config;
  */
 public interface OutputStrategy {
 
-	public OutputStream getOutputStream(Config config) throws Exception;
-
+	public OutputStream getOutputStream(Config config);
+	public void close();
 }

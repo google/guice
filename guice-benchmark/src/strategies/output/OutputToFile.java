@@ -1,40 +1,37 @@
 package strategies.output;
-import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.stream.Stream;
 
 import benchmark.Config;
 
 public class OutputToFile implements OutputStrategy {
-	public OutputStream getOutputStream(Config config) throws Exception {
-		String file_full_path = config.getLocation();
-		OutputStream outputStream = null;
-		// checking if file exists
-		File tempFile = new File(file_full_path);
-		
-		// source: https://www.w3schools.com/java/java_files_create.asp
-		try {
-			if (tempFile.createNewFile()) {
-			    System.out.println("created file  " + tempFile.getName());
-			} else {
-			      System.out.println(tempFile.getName()+" already exists...");
-			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
-		
+	private OutputStream outputStream;
+	
+	public OutputStream getOutputStream(Config config) {
+		String fileFullPath = config.getFilename();
 		// create output stream
 		try {
-			outputStream = new FileOutputStream(file_full_path);
+			outputStream = new FileOutputStream(fileFullPath);
 		} catch (FileNotFoundException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
-			throw new Exception("Error creating FileOutputStream");
+			throw new RuntimeException("Error creating FileOutputStream", e);
 		}
 		return outputStream;
+	}
+	
+	public void close()
+	{
+		if (outputStream != null)
+		{
+			try {
+				outputStream.close();
+			} catch (IOException e) {
+				throw new RuntimeException("Error closing stream", e);
+			}
+		}
 	}
 }
