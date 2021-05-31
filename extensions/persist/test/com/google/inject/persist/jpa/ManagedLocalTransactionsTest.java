@@ -22,14 +22,18 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
+
 import java.io.IOException;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
+
 import junit.framework.TestCase;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
 public class ManagedLocalTransactionsTest extends TestCase {
   private Injector injector;
@@ -146,6 +150,53 @@ public class ManagedLocalTransactionsTest extends TestCase {
     }
   }
 
+  public void testSimpleTransactionRollbackPerformedManuallyWithoutException() {
+    try {
+      injector.getInstance(TransactionalObject.class).runOperationInTxnWithManualRollback();
+    } catch (RuntimeException re) {
+      fail("finishing the transactional resulted in an exception");
+    }
+
+    EntityManager em = injector.getInstance(EntityManager.class);
+    assertFalse(
+        "Session was not closed by transactional service (rollback didnt happen?)",
+        em.getTransaction().isActive());
+
+    try {
+      Object result =
+          em.createQuery("from JpaTestEntity where text = :text")
+              .setParameter("text", TRANSIENT_UNIQUE_TEXT)
+              .getSingleResult();
+      injector.getInstance(UnitOfWork.class).end();
+      fail("a result was returned! rollback sure didnt happen!!!");
+    } catch (NoResultException e) {
+    }
+  }
+
+  public void testSimpleTransactionRollbackOnlySetWithoutException() {
+    try {
+      injector.getInstance(TransactionalObject.class).runOperationInTxnWithRollbackOnlySet();
+    } catch (RuntimeException re) {
+      fail("finishing the transactional resulted in an exception");
+    }
+
+    EntityManager em = injector.getInstance(EntityManager.class);
+    assertFalse(
+        "Session was not closed by transactional service (rollback didnt happen?)",
+        em.getTransaction().isActive());
+
+    try {
+      Object result =
+          em.createQuery("from JpaTestEntity where text = :text")
+              .setParameter("text", TRANSIENT_UNIQUE_TEXT)
+              .getSingleResult();
+      injector.getInstance(UnitOfWork.class).end();
+      fail("a result was returned! rollback sure didnt happen!!!");
+    } catch (NoResultException e) {
+    }
+  }
+
+
   public static class TransactionalObject {
     private final EntityManager em;
 
@@ -184,6 +235,24 @@ public class ManagedLocalTransactionsTest extends TestCase {
       em.persist(entity);
 
       throw new IllegalStateException();
+    }
+
+    @Transactional
+    public void runOperationInTxnWithManualRollback() {
+      JpaTestEntity entity = new JpaTestEntity();
+      entity.setText(TRANSIENT_UNIQUE_TEXT);
+      em.persist(entity);
+
+      em.getTransaction().rollback();
+    }
+
+    @Transactional
+    public void runOperationInTxnWithRollbackOnlySet() {
+      JpaTestEntity entity = new JpaTestEntity();
+      entity.setText(TRANSIENT_UNIQUE_TEXT);
+      em.persist(entity);
+
+      em.getTransaction().setRollbackOnly();
     }
   }
 }

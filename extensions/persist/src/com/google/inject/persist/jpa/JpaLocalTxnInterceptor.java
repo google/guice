@@ -82,7 +82,13 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     //everything was normal so commit the txn (do not move into try block above as it
     //  interferes with the advised method's throwing semantics)
     try {
-      txn.commit();
+      if (txn.isActive()) {
+        if (txn.getRollbackOnly()) {
+          txn.rollback();
+        } else {
+          txn.commit();
+        }
+      }
     } finally {
       //close the em if necessary
       if (null != didWeStartWork.get()) {
