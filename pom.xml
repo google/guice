@@ -159,7 +159,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.13</version>
+        <version>4.13.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>
