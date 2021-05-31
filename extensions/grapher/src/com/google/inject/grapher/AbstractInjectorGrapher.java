@@ -25,10 +25,7 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Abstract injector grapher that builds the dependency graph but doesn't render it.
@@ -207,12 +204,18 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   }
 
   /** Returns the bindings for the root keys and their transitive dependencies. */
+
+  /**
+   * called this function when parent injector happens
+   * make full graph on parent injector
+   */
   private Iterable<Binding<?>> getBindings(Injector injector, Set<Key<?>> root) {
     Set<Key<?>> keys = Sets.newHashSet(root);
     Set<Key<?>> visitedKeys = Sets.newHashSet();
     List<Binding<?>> bindings = Lists.newArrayList();
     TransitiveDependencyVisitor keyVisitor = new TransitiveDependencyVisitor();
 
+    Injector parentInjector = null;
     while (!keys.isEmpty()) {
       Iterator<Key<?>> iterator = keys.iterator();
       Key<?> key = iterator.next();
@@ -221,9 +224,18 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
       if (!visitedKeys.contains(key)) {
         Binding<?> binding = injector.getBinding(key);
         bindings.add(binding);
+        parentInjector = injector.getParent();
         visitedKeys.add(key);
         keys.addAll(binding.acceptTargetVisitor(keyVisitor));
       }
+    }
+    if(parentInjector != null) {
+      DefaultRootKeySetCreator keySetCreator = new DefaultRootKeySetCreator();
+      Set<Key<?>> keyPs = keySetCreator.getRootKeys(parentInjector);
+      List<Binding<?>> parentBindings = (List<Binding<?>>) getBindings(parentInjector, keyPs);
+      bindings.add(parentBindings.get(0));
+      bindings.add(parentBindings.get(1));
+      visitedKeys.add(keyPs.iterator().next());
     }
     return bindings;
   }
