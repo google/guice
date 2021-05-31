@@ -79,7 +79,7 @@ final class InjectorShell {
   }
 
   static class Builder {
-    private final List<Element> elements = Lists.newArrayList();
+    private final List<Element> elements = Lists.newLinkedList();
     private final List<Module> modules = Lists.newArrayList();
 
     // lazily constructed fields
