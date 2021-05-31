@@ -79,7 +79,7 @@ public class XmlBeanModule implements Module {
       try {
         type.getConstructor();
       } catch (NoSuchMethodException e) {
-        sourced.addError("%s doesn't have a no-arg constructor.");
+        sourced.addError("%s doesn't have a no-arg constructor.", typeString);
         return;
       }
 
