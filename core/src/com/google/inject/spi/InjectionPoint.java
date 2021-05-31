@@ -714,7 +714,7 @@ public final class InjectionPoint {
 
       TypeLiteral<?> current = hierarchy.get(i);
 
-      for (Field field : getDeclaredFields(current)) {
+      for (Field field : getDeclaredFields(current, errors)) {
         if (Modifier.isStatic(field.getModifiers()) == statics) {
           Annotation atInject = getAtInject(field);
           if (atInject != null) {
@@ -727,7 +727,7 @@ public final class InjectionPoint {
         }
       }
 
-      for (Method method : getDeclaredMethods(current)) {
+      for (Method method : getDeclaredMethods(current, errors)) {
         if (isEligibleForInjection(method, statics)) {
           Annotation atInject = getAtInject(method);
           if (atInject != null) {
@@ -803,12 +803,22 @@ public final class InjectionPoint {
     return builder.build();
   }
 
-  private static Field[] getDeclaredFields(TypeLiteral<?> type) {
-    return DeclaredMembers.getDeclaredFields(type.getRawType());
+  private static Field[] getDeclaredFields(TypeLiteral<?> type, Errors errors) {
+    try {
+      return DeclaredMembers.getDeclaredFields(type.getRawType());
+    } catch (Throwable x) {
+      errors.errorInUserCode(x, "Failed to inspect fields in %s", type);
+      return new Field[0];
+    }
   }
 
-  private static Method[] getDeclaredMethods(TypeLiteral<?> type) {
-    return DeclaredMembers.getDeclaredMethods(type.getRawType());
+  private static Method[] getDeclaredMethods(TypeLiteral<?> type, Errors errors) {
+    try {
+      return DeclaredMembers.getDeclaredMethods(type.getRawType());
+    } catch (Throwable x) {
+      errors.errorInUserCode(x, "Failed to inspect methods in %s", type);
+      return new Method[0];
+    }
   }
 
   /**
