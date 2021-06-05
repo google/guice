@@ -117,6 +117,12 @@ public class BytecodeGenTest {
             .startsWith(PublicUserOfPackagePrivate.class.getName() + "$$EnhancerByGuice$$"));
   }
 
+  public void testIsEnhancedJudge() {
+    Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
+    PublicUserOfPackagePrivate pupp = injector.getInstance(PublicUserOfPackagePrivate.class);
+    assertTrue(Guice.isGuiceEnhanced(pupp));
+  }
+
   // TODO(sameb): Figure out how to test FastClass naming tests.
 
   /** Custom URL classloader with basic visibility rules */

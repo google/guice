@@ -86,4 +86,14 @@ public final class Guice {
   public static Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
     return new InternalInjectorCreator().stage(stage).addModules(modules).build();
   }
+
+  /**
+   * A static helper that returns whether a given instance has been enhanced
+   *
+   * @param obj the given instance wanted to be checked
+   * @return {@code true} if the given instance has been enhanced
+   */
+  public static boolean isGuiceEnhanced(Object obj){
+    return obj.getClass().getName().contains("EnhancerByGuice");
+  }
 }
