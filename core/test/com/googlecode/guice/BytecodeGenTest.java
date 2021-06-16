@@ -364,6 +364,12 @@ public class BytecodeGenTest {
     if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
       return;
     }
+
+    // Test relies on FastClass appearing in stack traces which isn't true for Java17 hidden classes
+    if (Double.parseDouble(System.getProperty("java.specification.version")) >= 17) {
+      assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.ANONYMOUS);
+    }
+
     Injector injector = Guice.createInjector();
     // These classes are all in the same classloader as guice itself, so other than the private one
     // they can all be fast class invoked

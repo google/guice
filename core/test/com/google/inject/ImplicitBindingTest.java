@@ -437,6 +437,8 @@ public class ImplicitBindingTest extends TestCase {
     // String has a public nullary constructor, so Guice will call it.
     assertEquals("", injector.getInstance(String.class));
     // InetAddress has a package private constructor.  We probably shouldn't be calling it :(
-    assertNotNull(injector.getInstance(java.net.InetAddress.class));
+    if (Double.parseDouble(System.getProperty("java.specification.version")) < 17) {
+      assertNotNull(injector.getInstance(java.net.InetAddress.class));
+    }
   }
 }

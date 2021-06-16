@@ -17,15 +17,17 @@
 package com.google.inject.internal.aop;
 
 import static java.lang.reflect.Modifier.PUBLIC;
-import static java.lang.reflect.Modifier.STATIC;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ARRAYLENGTH;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_8;
 
 import com.google.common.cache.CacheBuilder;
@@ -33,14 +35,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 
 /**
  * {@link ClassDefiner} that defines classes using {@code sun.misc.Unsafe}.
@@ -51,84 +53,76 @@ final class UnsafeClassDefiner implements ClassDefiner {
 
   private static final Logger logger = Logger.getLogger(UnsafeClassDefiner.class.getName());
 
-  private static final Object THE_UNSAFE =
-      tryPrivileged(UnsafeClassDefiner::bindTheUnsafe, "Cannot bind the Unsafe instance");
+  private static final ClassDefiner UNSAFE_DEFINER;
 
-  private static final Method ANONYMOUS_DEFINE_METHOD =
-      tryPrivileged(
-          UnsafeClassDefiner::bindAnonymousDefineMethod, "Cannot bind Unsafe.defineAnonymousClass");
+  static {
+    ClassDefiner unsafeDefiner =
+        tryPrivileged(AnonymousClassDefiner::new, "Cannot bind Unsafe.defineAnonymousClass");
+    if (unsafeDefiner == null) {
+      unsafeDefiner =
+          tryPrivileged(
+              HiddenClassDefiner::new, "Cannot bind MethodHandles.Lookup.defineHiddenClass");
+    }
+    UNSAFE_DEFINER = unsafeDefiner;
+  }
 
   private static final boolean ALWAYS_DEFINE_ANONYMOUSLY =
       InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.ANONYMOUS;
 
   private static final String DEFINEACCESS_BY_GUICE_MARKER = "$$DefineAccessByGuice$$";
 
+  private static final String[] DEFINEACCESS_API = {"java/util/function/BiFunction"};
+
+  private static final String CLASS_LOADER_TYPE = Type.getInternalName(ClassLoader.class);
+
+  private static final String BYTE_ARRAY_TYPE = Type.getInternalName(byte[].class);
+
   // initialization-on-demand...
-  private static class ClassLoaderDefineMethodHolder {
-    static final Method CLASS_LOADER_DEFINE_METHOD =
+  private static class ClassLoaderDefineClassHolder {
+    static final ClassDefiner CLASS_LOADER_DEFINE_CLASS =
         tryPrivileged(
-            () -> accessDefineMethod(ClassLoader.class), "Cannot access ClassLoader.defineClass");
+            () -> accessDefineClass(ClassLoader.class), "Cannot access ClassLoader.defineClass");
   }
 
   // initialization-on-demand...
-  private static class DefineMethodCacheHolder {
-    static final LoadingCache<Class<?>, Method> DEFINE_METHOD_CACHE =
+  private static class DefineClassCacheHolder {
+    static final LoadingCache<Class<?>, ClassDefiner> DEFINE_CLASS_CACHE =
         CacheBuilder.newBuilder()
             .weakKeys()
-            .weakValues()
-            .build(CacheLoader.from(UnsafeClassDefiner::tryAccessDefineMethod));
+            .build(CacheLoader.from(UnsafeClassDefiner::tryAccessDefineClass));
   }
 
   /** Do we have access to {@code sun.misc.Unsafe}? */
   public static boolean isAccessible() {
-    return ANONYMOUS_DEFINE_METHOD != null;
+    return UNSAFE_DEFINER != null;
   }
 
-  /** Does the given class host new types anonymously, ie. by using defineAnonymousClass? */
-  @SuppressWarnings("ReferenceEquality") // intentional
-  public static boolean isAnonymousHost(Class<?> hostClass) {
-    return findDefineMethod(hostClass.getClassLoader()) == ANONYMOUS_DEFINE_METHOD;
+  /** Returns true if it's possible to load by name proxies defined from the given host. */
+  public static boolean canLoadProxyByName(Class<?> hostClass) {
+    return findClassDefiner(hostClass.getClassLoader()) != UNSAFE_DEFINER;
   }
 
-  @SuppressWarnings("ReferenceEquality") // intentional
+  /** Returns true if it's possible to downcast to proxies defined from the given host. */
+  public static boolean canDowncastToProxy(Class<?> hostClass) {
+    return !(findClassDefiner(hostClass.getClassLoader()) instanceof AnonymousClassDefiner);
+  }
+
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
-    ClassLoader hostLoader = hostClass.getClassLoader();
-    Method defineMethod = findDefineMethod(hostLoader);
-    if (defineMethod == ANONYMOUS_DEFINE_METHOD) {
-      return defineAnonymously(hostClass, bytecode);
-    }
-    return (Class<?>) defineMethod.invoke(null, hostLoader, bytecode);
+    return findClassDefiner(hostClass.getClassLoader()).define(hostClass, bytecode);
   }
 
-  /** Finds the appropriate class defining method for the given class loader. */
-  private static Method findDefineMethod(ClassLoader hostLoader) {
+  /** Finds the appropriate class definer for the given class loader. */
+  private static ClassDefiner findClassDefiner(ClassLoader hostLoader) {
     if (hostLoader == null || ALWAYS_DEFINE_ANONYMOUSLY) {
-      return ANONYMOUS_DEFINE_METHOD;
-    } else if (ClassLoaderDefineMethodHolder.CLASS_LOADER_DEFINE_METHOD != null) {
+      return UNSAFE_DEFINER;
+    } else if (ClassLoaderDefineClassHolder.CLASS_LOADER_DEFINE_CLASS != null) {
       // we have access to the defineClass method of anything extending ClassLoader
-      return ClassLoaderDefineMethodHolder.CLASS_LOADER_DEFINE_METHOD;
+      return ClassLoaderDefineClassHolder.CLASS_LOADER_DEFINE_CLASS;
     } else {
       // can't access ClassLoader, try accessing the specific sub-class instead
-      return DefineMethodCacheHolder.DEFINE_METHOD_CACHE.getUnchecked(hostLoader.getClass());
+      return DefineClassCacheHolder.DEFINE_CLASS_CACHE.getUnchecked(hostLoader.getClass());
     }
-  }
-
-  private static Class<?> defineAnonymously(Class<?> hostClass, byte[] bytecode) throws Exception {
-    return (Class<?>) ANONYMOUS_DEFINE_METHOD.invoke(THE_UNSAFE, hostClass, bytecode, null);
-  }
-
-  private static Object bindTheUnsafe() throws Exception {
-    Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
-    Field theUnsafeField = unsafeType.getDeclaredField("theUnsafe");
-    theUnsafeField.setAccessible(true);
-    return theUnsafeField.get(null);
-  }
-
-  private static Method bindAnonymousDefineMethod() throws Exception {
-    Class<?> unsafeType = THE_UNSAFE.getClass();
-    // defineAnonymousClass has all the functionality we need and is available in Java 7 onwards
-    return unsafeType.getMethod("defineAnonymousClass", Class.class, byte[].class, Object[].class);
   }
 
   static <T> T tryPrivileged(PrivilegedExceptionAction<T> action, String errorMessage) {
@@ -140,22 +134,24 @@ final class UnsafeClassDefiner implements ClassDefiner {
     }
   }
 
-  static Method tryAccessDefineMethod(Class<?> loaderClass) {
+  static ClassDefiner tryAccessDefineClass(Class<?> loaderClass) {
     try {
       logger.log(Level.FINE, "Accessing defineClass method in %s", loaderClass);
       return AccessController.doPrivileged(
-          (PrivilegedExceptionAction<Method>) () -> accessDefineMethod(loaderClass));
+          (PrivilegedExceptionAction<ClassDefiner>) () -> accessDefineClass(loaderClass));
     } catch (Throwable e) {
       logger.log(Level.FINE, "Cannot access defineClass method in " + loaderClass, e);
-      return ANONYMOUS_DEFINE_METHOD;
+      return UNSAFE_DEFINER;
     }
   }
 
   /** Generates helper in same package as the {@link ClassLoader} so it can access defineClass */
-  static Method accessDefineMethod(Class<?> loaderClass) throws Exception {
+  @SuppressWarnings("unchecked")
+  static ClassDefiner accessDefineClass(Class<?> loaderClass) throws Exception {
     byte[] bytecode = buildDefineClassAccess(loaderClass);
-    Class<?> accessClass = defineAnonymously(loaderClass, bytecode);
-    return accessClass.getMethod("defineClass", ClassLoader.class, byte[].class);
+    Class<?> accessClass = UNSAFE_DEFINER.define(loaderClass, bytecode);
+    return new GeneratedClassDefiner(
+        (BiFunction<ClassLoader, byte[], Class<?>>) accessClass.newInstance());
   }
 
   /** {@link ClassLoader} helper that sits in the same package and passes on defineClass requests */
@@ -169,23 +165,36 @@ final class UnsafeClassDefiner implements ClassDefiner {
         loaderClass.getName().replace('.', '/') + DEFINEACCESS_BY_GUICE_MARKER,
         null,
         "java/lang/Object",
-        null);
+        DEFINEACCESS_API);
 
-    MethodVisitor mv =
+    MethodVisitor mv;
+
+    mv = cw.visitMethod(PUBLIC, "<init>", "()V", null, null);
+    mv.visitCode();
+    mv.visitVarInsn(ALOAD, 0);
+    mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+    mv.visitInsn(RETURN);
+    mv.visitMaxs(0, 0);
+    mv.visitEnd();
+
+    mv =
         cw.visitMethod(
-            PUBLIC | STATIC,
-            "defineClass",
-            "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;",
+            PUBLIC,
+            "apply",
+            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
             null,
             null);
 
     mv.visitCode();
 
-    mv.visitVarInsn(ALOAD, 0);
+    mv.visitVarInsn(ALOAD, 1);
+    mv.visitTypeInsn(CHECKCAST, CLASS_LOADER_TYPE);
     mv.visitInsn(ACONST_NULL);
-    mv.visitVarInsn(ALOAD, 1);
+    mv.visitVarInsn(ALOAD, 2);
+    mv.visitTypeInsn(CHECKCAST, BYTE_ARRAY_TYPE);
     mv.visitInsn(ICONST_0);
-    mv.visitVarInsn(ALOAD, 1);
+    mv.visitVarInsn(ALOAD, 2);
+    mv.visitTypeInsn(CHECKCAST, BYTE_ARRAY_TYPE);
     mv.visitInsn(ARRAYLENGTH);
 
     mv.visitMethodInsn(
