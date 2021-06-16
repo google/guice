@@ -27,6 +27,8 @@ import com.google.inject.persist.jpa.ManagedLocalTransactionsAcrossRequestTest;
 import com.google.inject.persist.jpa.ManagedLocalTransactionsTest;
 import com.google.inject.persist.jpa.ManualLocalTransactionsTest;
 import com.google.inject.persist.jpa.ManualLocalTransactionsWithCustomMatcherTest;
+import com.google.inject.persist.jpa.PersistFilterManualServiceStartTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -48,6 +50,7 @@ public class AllTests {
     suite.addTestSuite(ManagedLocalTransactionsTest.class);
     suite.addTestSuite(ManualLocalTransactionsTest.class);
     suite.addTestSuite(ManualLocalTransactionsWithCustomMatcherTest.class);
+    suite.addTestSuite(PersistFilterManualServiceStartTest.class);
 
     return suite;
   }
