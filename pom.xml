@@ -131,6 +131,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <artifactId>javax.inject</artifactId>
         <version>1</version>
       </dependency>
+
+      <dependency>
+        <groupId>com.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>5.3</version>
+      </dependency>
+
       <dependency>
         <groupId>javax.inject</groupId>
         <artifactId>javax.inject-tck</artifactId>

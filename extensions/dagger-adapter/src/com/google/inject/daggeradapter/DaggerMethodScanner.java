@@ -209,7 +209,10 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     if (rawReturnType.equals(Set.class)) {
       newSetBinder(binder, typeParameters.get(0), key.getAnnotation());
     } else if (rawReturnType.equals(Map.class)) {
-      newMapBinder(binder, typeParameters.get(0), typeParameters.get(1), key.getAnnotation());
+    	TypeLiteral <?> tp1 = typeParameters.get(0);
+    	TypeLiteral <?> tp2 = typeParameters.get(1);
+    	
+      newMapBinder(binder, tp1, tp2, key.getAnnotation());
     } else {
       throw new AssertionError(
           "@dagger.Multibinds can only be used with Sets or Map, found: "

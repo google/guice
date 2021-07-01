@@ -1,0 +1,1049 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <class id="1" language="java" name="com.google.inject.spi.DefaultBindingTargetVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/DefaultBindingTargetVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="261" width="250" x="2935" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="2" language="java" name="com.google.inject.spi.Elements" project="guice" 
+    file="/guice/src/com/google/inject/spi/Elements.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="207" width="291" x="3456" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="3" language="java" name="com.google.inject.spi.InjectionPoint.OverrideIndex" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="343" x="9199" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="4" language="java" name="com.google.inject.spi.ProvidesMethodBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProvidesMethodBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="179" x="3966" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="5" language="java" name="com.google.inject.spi.ProvisionListenerBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProvisionListenerBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="207" width="382" x="6255" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="6" language="java" name="com.google.inject.spi.Dependency" project="guice" 
+    file="/guice/src/com/google/inject/spi/Dependency.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="297" width="316" x="5899" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="7" language="java" name="com.google.inject.spi.InjectionPoint.InjectableMembers" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="176" x="6966" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="8" language="java" name="com.google.inject.spi.ProviderInstanceBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProviderInstanceBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="265" x="4185" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="9" language="java" name="com.google.inject.spi.ConstructorBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ConstructorBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="331" x="4490" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="10" language="java" name="com.google.inject.spi.TypeConverter" project="guice" 
+    file="/guice/src/com/google/inject/spi/TypeConverter.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="206" x="10640" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="11" language="java" name="com.google.inject.spi.TypeEncounter" project="guice" 
+    file="/guice/src/com/google/inject/spi/TypeEncounter.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="243" width="311" x="297" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="12" language="java" name="com.google.inject.spi.InstanceBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/InstanceBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="210" x="4861" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="13" language="java" name="com.google.inject.spi.DefaultElementVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/DefaultElementVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="405" width="248" x="2380" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="14" language="java" name="com.google.inject.spi.DefaultBindingScopingVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/DefaultBindingScopingVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="171" width="227" x="2668" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="15" language="java" name="com.google.inject.spi.BindingSourceRestriction.PermitMapConstruction" 
+    project="guice" file="/guice/src/com/google/inject/spi/BindingSourceRestriction.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="243" width="421" x="2551" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="16" language="java" name="com.google.inject.spi.InjectionPoint" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="729" width="629" x="7163" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="17" language="java" name="com.google.inject.spi.InjectionPoint.InjectableMethod" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="277" x="6658" y="2729"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="18" language="java" name="com.google.inject.spi.HasDependencies" project="guice" 
+    file="/guice/src/com/google/inject/spi/HasDependencies.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="228" x="4861" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="19" language="java" name="com.google.inject.spi.ProvisionListener" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProvisionListener.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="224" x="6255" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="20" language="java" name="com.google.inject.spi.Element" project="guice" 
+    file="/guice/src/com/google/inject/spi/Element.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="184" x="8620" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="21" language="java" name="com.google.inject.spi.ProvisionListener.ProvisionInvocation" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProvisionListener.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="158" x="6255" y="2364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="22" language="java" name="com.google.inject.spi.TypeListenerBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/TypeListenerBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="207" width="350" x="11049" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="23" language="java" name="com.google.inject.spi.UntargettedBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/UntargettedBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="154" x="648" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="24" language="java" name="com.google.inject.spi.TypeConverterBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/TypeConverterBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="225" width="369" x="10640" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="25" language="java" name="com.google.inject.spi.LinkedKeyBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/LinkedKeyBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="190" x="842" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="26" language="java" name="com.google.inject.spi.Elements.ElementsAsModule" project="guice" 
+    file="/guice/src/com/google/inject/spi/Elements.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="210" x="3225" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <annotation id="27" language="java" name="com.google.inject.spi.Toolable" project="guice" 
+    file="/guice/src/com/google/inject/spi/Toolable.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="111" x="1072" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <interface id="28" language="java" name="com.google.inject.spi.ExposedBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ExposedBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="204" x="5111" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="29" language="java" name="com.google.inject.spi.ProviderLookup" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProviderLookup.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="333" width="222" x="9584" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="30" language="java" name="com.google.inject.spi.RequireAtInjectOnConstructorsOption" project="guice" 
+    file="/guice/src/com/google/inject/spi/RequireAtInjectOnConstructorsOption.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="153" width="246" x="7523" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="31" language="java" name="com.google.inject.spi.ElementSource" project="guice" 
+    file="/guice/src/com/google/inject/spi/ElementSource.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="243" width="589" x="2029" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="32" language="java" name="com.google.inject.spi.BindingTargetVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/BindingTargetVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="225" width="250" x="2935" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="33" language="java" name="com.google.inject.spi.ScopeBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ScopeBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="243" width="268" x="7809" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="34" language="java" name="com.google.inject.spi.Message" project="guice" 
+    file="/guice/src/com/google/inject/spi/Message.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="441" width="259" x="7224" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="35" language="java" name="com.google.inject.spi.ModuleSource" project="guice" 
+    file="/guice/src/com/google/inject/spi/ModuleSource.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="315" width="373" x="3012" y="2364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="36" language="java" name="com.google.inject.spi.InjectionPoint.Position" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="119" x="9563" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <class id="37" language="java" name="com.google.inject.spi.ModuleAnnotatedMethodScannerBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="189" width="423" x="6698" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="38" language="java" name="com.google.inject.spi.PrivateElements" project="guice" 
+    file="/guice/src/com/google/inject/spi/PrivateElements.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="197" x="8620" y="2364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="39" language="java" name="com.google.inject.spi.DisableCircularProxiesOption" project="guice" 
+    file="/guice/src/com/google/inject/spi/DisableCircularProxiesOption.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="204" x="8117" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="40" language="java" name="com.google.inject.spi.StaticInjectionRequest" project="guice" 
+    file="/guice/src/com/google/inject/spi/StaticInjectionRequest.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="243" width="219" x="8361" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="41" language="java" name="com.google.inject.spi.InjectionPoint.InjectableField" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="251" x="7184" y="2729"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="42" language="java" name="com.google.inject.spi.MembersInjectorLookup" project="guice" 
+    file="/guice/src/com/google/inject/spi/MembersInjectorLookup.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="315" width="252" x="8620" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="43" language="java" name="com.google.inject.spi.InjectionRequest" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionRequest.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="279" width="226" x="8912" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="44" language="java" name="com.google.inject.spi.ProvidesMethodTargetVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProvidesMethodTargetVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="234" x="2277" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="45" language="java" name="com.google.inject.spi.RequireExplicitBindingsOption" project="guice" 
+    file="/guice/src/com/google/inject/spi/RequireExplicitBindingsOption.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="207" x="9624" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="46" language="java" name="com.google.inject.spi.BindingSourceRestriction" project="guice" 
+    file="/guice/src/com/google/inject/spi/BindingSourceRestriction.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="333" width="443" x="1258" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="47" language="java" name="com.google.inject.spi.Elements.ModuleInfo" project="guice" 
+    file="/guice/src/com/google/inject/spi/Elements.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="196" x="3239" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="48" language="java" name="com.google.inject.spi.RequireExactBindingAnnotationsOption" project="guice" 
+    file="/guice/src/com/google/inject/spi/RequireExactBindingAnnotationsOption.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="153" width="253" x="9871" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="49" language="java" name="com.google.inject.spi.ProviderBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProviderBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="150" x="1223" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="50" language="java" name="com.google.inject.spi.BindingScopingVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/BindingScopingVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="227" x="2668" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="51" language="java" name="com.google.inject.spi.InjectionPoint.InjectableMember" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="242" x="6901" y="2364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="52" language="java" name="com.google.inject.spi.TypeListener" project="guice" 
+    file="/guice/src/com/google/inject/spi/TypeListener.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="234" x="11049" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="53" language="java" name="com.google.inject.spi.BindingSourceRestriction.PermitMap" project="guice" 
+    file="/guice/src/com/google/inject/spi/BindingSourceRestriction.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="375" x="2275" y="2729"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="54" language="java" name="com.google.inject.spi.ProviderWithDependencies" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProviderWithDependencies.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="200" x="5355" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="55" language="java" name="com.google.inject.spi.ElementVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/ElementVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="369" width="248" x="1741" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="56" language="java" 
+    name="com.google.inject.spi.BindingSourceRestriction.PermitMapConstruction.PermitMapImpl" project="guice" 
+    file="/guice/src/com/google/inject/spi/BindingSourceRestriction.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="421" x="2551" y="2364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="57" language="java" name="com.google.inject.spi.InjectionPoint.Signature" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionPoint.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="171" width="155" x="9159" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="58" language="java" name="com.google.inject.spi.InterceptorBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/InterceptorBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="261" width="436" x="10164" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="59" language="java" name="com.google.inject.spi.ProviderKeyBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProviderKeyBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="251" x="1413" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="60" language="java" name="com.google.inject.spi.ConvertedConstantBinding" project="guice" 
+    file="/guice/src/com/google/inject/spi/ConvertedConstantBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="264" x="5595" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="61" language="java" name="com.google.inject.spi.Elements.RecordingBinder" project="guice" 
+    file="/guice/src/com/google/inject/spi/Elements.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="981" width="410" x="3496" y="950"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="62" language="java" name="com.google.inject.spi.InjectionListener" project="guice" 
+    file="/guice/src/com/google/inject/spi/InjectionListener.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="136" x="1704" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="63" language="java" name="com.google.inject.spi.ModuleAnnotatedMethodScanner" project="guice" 
+    file="/guice/src/com/google/inject/spi/ModuleAnnotatedMethodScanner.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="352" x="3496" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="64" language="java" name="com.google.inject.spi.ProviderWithExtensionVisitor" project="guice" 
+    file="/guice/src/com/google/inject/spi/ProviderWithExtensionVisitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="460" x="1880" y="181"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="65" language="java" name="com.google.inject.spi.ErrorDetail" project="guice" 
+    file="/guice/src/com/google/inject/spi/ErrorDetail.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="333" width="270" x="7224" y="1991"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <generalization id="66">    
+    <end type="SOURCE" refId="38"/>    
+    <end type="TARGET" refId="20"/>  
+  </generalization>  
+  <realization id="67">    
+    <end type="SOURCE" refId="40"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <realization id="68">    
+    <end type="SOURCE" refId="42"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="69">    
+    <end type="SOURCE" refId="35" navigable="false">      
+      <attribute id="70" name="permitMap"/>      
+      <multiplicity id="71" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="53" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="72">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="73" name="elements"/>      
+      <multiplicity id="74" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="20" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="75">    
+    <bendpoint x="7151" y="950"/>    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="7"/>  
+  </nesting>  
+  <realization id="76">    
+    <end type="SOURCE" refId="45"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="77">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="78" name="permitMapConstruction"/>      
+      <multiplicity id="79" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="15" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="80">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <nesting id="81">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="56"/>  
+  </nesting>  
+  <association id="82">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="83" name="scanners"/>      
+      <multiplicity id="84" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="63" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="85">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="86" name="parent"/>      
+      <multiplicity id="87" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="61" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="88">    
+    <bendpoint x="9168" y="950"/>    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="57"/>  
+  </nesting>  
+  <association id="89">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="90" name="modules"/>      
+      <multiplicity id="91" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="47" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="92">    
+    <end type="SOURCE" refId="24" navigable="false">      
+      <attribute id="93" name="typeConverter"/>      
+      <multiplicity id="94" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="95">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="96" name="head"/>      
+      <multiplicity id="97" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="51" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="98">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <generalization id="99">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <realization id="100">    
+    <end type="SOURCE" refId="43"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="101">    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="102" name="listeners"/>      
+      <multiplicity id="103" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="19" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="104">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <association id="105">    
+    <end type="SOURCE" refId="47" navigable="false">      
+      <attribute id="106" name="moduleSource"/>      
+      <multiplicity id="107" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="35" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="108">    
+    <end type="SOURCE" refId="54"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <realization id="109">    
+    <end type="SOURCE" refId="37"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <nesting id="110">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="3"/>  
+  </nesting>  
+  <nesting id="111">    
+    <bendpoint x="7193" y="950"/>    
+    <bendpoint x="7193" y="1991"/>    
+    <bendpoint x="7193" y="2364"/>    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="41"/>  
+  </nesting>  
+  <association id="112">    
+    <end type="SOURCE" refId="34" navigable="false">      
+      <attribute id="113" name="errorDetail"/>      
+      <multiplicity id="114" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="65" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="115">    
+    <end type="SOURCE" refId="44"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <nesting id="116">    
+    <bendpoint x="3465" y="950"/>    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="47"/>  
+  </nesting>  
+  <realization id="117">    
+    <end type="SOURCE" refId="24"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <realization id="118">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <generalization id="119">    
+    <end type="SOURCE" refId="28"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <generalization id="120">    
+    <end type="SOURCE" refId="60"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <association id="121">    
+    <end type="SOURCE" refId="51" navigable="false">      
+      <attribute id="122" name="previous"/>      
+      <multiplicity id="123" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="51" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="124">    
+    <end type="SOURCE" refId="41"/>    
+    <end type="TARGET" refId="51"/>  
+  </generalization>  
+  <association id="125">    
+    <end type="SOURCE" refId="16" navigable="false">      
+      <attribute id="126" name="dependencies"/>      
+      <multiplicity id="127" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="128">    
+    <end type="SOURCE" refId="39"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="129">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="130" name="lastSignature"/>      
+      <multiplicity id="131" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="57" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="132">    
+    <end type="SOURCE" refId="15" navigable="false">      
+      <attribute id="133" name="permitMap"/>      
+      <multiplicity id="134" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="56" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="135">    
+    <end type="SOURCE" refId="17"/>    
+    <end type="TARGET" refId="51"/>  
+  </generalization>  
+  <realization id="136">    
+    <end type="SOURCE" refId="58"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="137">    
+    <end type="SOURCE" refId="22" navigable="false">      
+      <attribute id="138" name="listener"/>      
+      <multiplicity id="139" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="52" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="140">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="141" name="currentScanner"/>      
+      <multiplicity id="142" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="63" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="143">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <realization id="144">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="32"/>  
+  </realization>  
+  <nesting id="145">    
+    <bendpoint x="6667" y="950"/>    
+    <bendpoint x="6667" y="1991"/>    
+    <bendpoint x="6667" y="2364"/>    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="17"/>  
+  </nesting>  
+  <realization id="146">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="55"/>  
+  </realization>  
+  <realization id="147">    
+    <end type="SOURCE" refId="48"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="148">    
+    <end type="SOURCE" refId="29" navigable="false">      
+      <attribute id="149" name="dependency"/>      
+      <multiplicity id="150" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="151">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="152">    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="153" name="scanner"/>      
+      <multiplicity id="154" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="63" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="155">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="156" name="GET_INSTANCE_VISITOR"/>      
+      <multiplicity id="157" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="32" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="158">    
+    <end type="SOURCE" refId="46"/>    
+    <end type="TARGET" refId="15"/>  
+  </nesting>  
+  <association id="159">    
+    <end type="SOURCE" refId="6" navigable="false">      
+      <attribute id="160" name="injectionPoint"/>      
+      <multiplicity id="161" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="16" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="162">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="163" name="tail"/>      
+      <multiplicity id="164" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="51" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="165">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="166" name="position"/>      
+      <multiplicity id="167" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="36" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="168">    
+    <bendpoint x="7172" y="950"/>    
+    <bendpoint x="7172" y="1991"/>    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="51"/>  
+  </nesting>  
+  <nesting id="169">    
+    <bendpoint x="9572" y="950"/>    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="36"/>  
+  </nesting>  
+  <generalization id="170">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="18"/>  
+  </generalization>  
+  <association id="171">    
+    <end type="SOURCE" refId="37" navigable="false">      
+      <attribute id="172" name="scanner"/>      
+      <multiplicity id="173" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="63" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="174">    
+    <bendpoint x="3465" y="1991"/>    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="175" name="moduleSource"/>      
+      <multiplicity id="176" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="35" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="177">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="50"/>  
+  </realization>  
+  <realization id="178">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <association id="179">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="180" name="scannerSource"/>      
+      <multiplicity id="181" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="63" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="182">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="61"/>  
+  </nesting>  
+  <association id="183">    
+    <bendpoint x="2246" y="1991"/>    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="184" name="moduleSource"/>      
+      <multiplicity id="185" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="35" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="186">    
+    <end type="SOURCE" refId="61" navigable="false">      
+      <attribute id="187" name="privateBindersForScanning"/>      
+      <multiplicity id="188" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="61" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="189">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="190" name="injectableMembers"/>      
+      <multiplicity id="191" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="192">    
+    <bendpoint x="9593" y="950"/>    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="20"/>  
+  </realization>  
+  <nesting id="193">    
+    <bendpoint x="1776" y="1991"/>    
+    <bendpoint x="1776" y="2364"/>    
+    <end type="SOURCE" refId="46"/>    
+    <end type="TARGET" refId="53"/>  
+  </nesting>  
+  <realization id="194">    
+    <end type="SOURCE" refId="56"/>    
+    <end type="TARGET" refId="53"/>  
+  </realization>  
+  <nesting id="195">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="21"/>  
+  </nesting>  
+  <association id="196">    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="197" name="originalElementSource"/>      
+      <multiplicity id="198" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="31" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="199">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="26"/>  
+  </nesting>  
+  <association id="200">    
+    <end type="SOURCE" refId="35" navigable="false">      
+      <attribute id="201" name="parent"/>      
+      <multiplicity id="202" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="35" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="203">    
+    <end type="SOURCE" refId="51" navigable="false">      
+      <attribute id="204" name="next"/>      
+      <multiplicity id="205" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="51" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

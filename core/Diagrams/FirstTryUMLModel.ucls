@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" automaticImage="PNG" always-add-relationships="true" generalizations="true" 
+  realizations="true" associations="true" dependencies="true" nesting-relationships="true" router="FAN">  
+  <interface id="1" language="java" name="com.google.inject.Binding" project="guice" 
+    file="/guice/src/com/google/inject/Binding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="213" y="525"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <annotation id="2" language="java" name="com.google.inject.ImplementedBy" project="guice" 
+    file="/guice/src/com/google/inject/ImplementedBy.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="112" x="668" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <class id="3" language="java" name="com.google.inject.Scopes" project="guice" 
+    file="/guice/src/com/google/inject/Scopes.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="171" width="306" x="3538" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="com.google.inject.Key.AnnotationInstanceStrategy" project="guice" 
+    file="/guice/src/com/google/inject/Key.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="225" width="268" x="3611" y="2300"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="5" language="java" name="com.google.inject.RestrictedBindingSource.RestrictionLevel" project="guice" 
+    file="/guice/src/com/google/inject/RestrictedBindingSource.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="158" x="3785" y="677"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <annotation id="6" language="java" name="com.google.inject.ScopeAnnotation" project="guice" 
+    file="/guice/src/com/google/inject/ScopeAnnotation.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="121" x="820" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <class id="7" language="java" name="com.google.inject.CreationException" project="guice" 
+    file="/guice/src/com/google/inject/CreationException.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="228" x="981" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <annotation id="8" language="java" name="com.google.inject.Provides" project="guice" 
+    file="/guice/src/com/google/inject/Provides.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="111" x="1249" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <enumeration id="9" language="java" name="com.google.inject.Stage" project="guice" 
+    file="/guice/src/com/google/inject/Stage.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="133" x="2303" y="1302"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <interface id="10" language="java" name="com.google.inject.Injector" project="guice" 
+    file="/guice/src/com/google/inject/Injector.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="423" width="407" x="2938" y="677"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="11" language="java" name="com.google.inject.Provider" project="guice" 
+    file="/guice/src/com/google/inject/Provider.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="103" x="3221" y="2817"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <annotation id="12" language="java" name="com.google.inject.Singleton" project="guice" 
+    file="/guice/src/com/google/inject/Singleton.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="111" x="3385" y="677"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <annotation id="13" language="java" name="com.google.inject.BindingAnnotation" project="guice" 
+    file="/guice/src/com/google/inject/BindingAnnotation.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="127" x="1400" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <interface id="14" language="java" name="com.google.inject.MembersInjector" project="guice" 
+    file="/guice/src/com/google/inject/MembersInjector.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="142" x="2842" y="1302"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="15" language="java" name="com.google.inject.Guice" project="guice" 
+    file="/guice/src/com/google/inject/Guice.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="250" x="2898" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="16" language="java" name="com.google.inject.ConfigurationException" project="guice" 
+    file="/guice/src/com/google/inject/ConfigurationException.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="207" width="256" x="1567" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="17" language="java" name="com.google.inject.Module" project="guice" 
+    file="/guice/src/com/google/inject/Module.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="134" x="3024" y="1302"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <annotation id="18" language="java" name="com.google.inject.RestrictedBindingSource" project="guice" 
+    file="/guice/src/com/google/inject/RestrictedBindingSource.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="213" x="3884" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <class id="19" language="java" name="com.google.inject.TypeLiteral" project="guice" 
+    file="/guice/src/com/google/inject/TypeLiteral.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="477" width="301" x="2878" y="2300"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="20" language="java" name="com.google.inject.PrivateModule" project="guice" 
+    file="/guice/src/com/google/inject/PrivateModule.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="585" width="410" x="2467" y="677"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="21" language="java" name="com.google.inject.Key" project="guice" 
+    file="/guice/src/com/google/inject/Key.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="765" width="277" x="3282" y="1495"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="22" language="java" name="com.google.inject.ProvisionException" project="guice" 
+    file="/guice/src/com/google/inject/ProvisionException.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="189" width="228" x="1863" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <annotation id="23" language="java" name="com.google.inject.ProvidedBy" project="guice" 
+    file="/guice/src/com/google/inject/ProvidedBy.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="160" x="2131" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <annotation id="24" language="java" name="com.google.inject.Inject" project="guice" 
+    file="/guice/src/com/google/inject/Inject.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="112" x="2331" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <interface id="25" language="java" name="com.google.inject.Scope" project="guice" 
+    file="/guice/src/com/google/inject/Scope.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="223" x="3282" y="1302"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <annotation id="26" language="java" name="com.google.inject.RestrictedBindingSource.Permit" project="guice" 
+    file="/guice/src/com/google/inject/RestrictedBindingSource.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="111" x="3983" y="677"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <class id="27" language="java" name="com.google.inject.OutOfScopeException" project="guice" 
+    file="/guice/src/com/google/inject/OutOfScopeException.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="224" x="2483" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="28" language="java" name="com.google.inject.Key.NullAnnotationStrategy" project="guice" 
+    file="/guice/src/com/google/inject/Key.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="189" width="268" x="3282" y="2300"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <class id="29" language="java" name="com.google.inject.Key.AnnotationTypeStrategy" project="guice" 
+    file="/guice/src/com/google/inject/Key.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="243" width="296" x="3604" y="2817"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="30" language="java" name="com.google.inject.PrivateBinder" project="guice" 
+    file="/guice/src/com/google/inject/PrivateBinder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="263" x="2518" y="1302"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <annotation id="31" language="java" name="com.google.inject.Exposed" project="guice" 
+    file="/guice/src/com/google/inject/Exposed.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="111" x="2747" y="430"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <interface id="32" language="java" name="com.google.inject.Key.AnnotationStrategy" project="guice" 
+    file="/guice/src/com/google/inject/Key.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="268" x="3604" y="3100"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="33" language="java" name="com.google.inject.Binder" project="guice" 
+    file="/guice/src/com/google/inject/Binder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="603" width="410" x="-10" y="412"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="34" language="java" name="com.google.inject.AbstractModule" project="guice" 
+    file="/guice/src/com/google/inject/AbstractModule.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="531" width="410" x="-10" y="-159"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <dependency id="35">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="30"/>  
+  </dependency>  
+  <association id="36">    
+    <bendpoint x="3547" y="677"/>    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="37" name="NO_SCOPE">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="38" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="25" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="39">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <nesting id="40">    
+    <bendpoint x="3951" y="2300"/>    
+    <bendpoint x="3951" y="2817"/>    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="32"/>  
+  </nesting>  
+  <dependency id="41">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="29"/>  
+  </dependency>  
+  <dependency id="42">    
+    <bendpoint x="2436" y="677"/>    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <dependency id="43">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <dependency id="44">    
+    <bendpoint x="3589" y="677"/>    
+    <bendpoint x="3589" y="1302"/>    
+    <bendpoint x="3589" y="1495"/>    
+    <bendpoint x="3580" y="2300"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="45">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <association id="46">    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="47" name="typeLiteral">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="48" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="19" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="49">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <association id="50">    
+    <end type="SOURCE" refId="34" navigable="false">      
+      <attribute id="51" name="binder">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="52" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="33" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="53">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="54">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <realization id="55">    
+    <bendpoint x="3452" y="2817"/>    
+    <end type="SOURCE" refId="28"/>    
+    <end type="TARGET" refId="32"/>  
+  </realization>  
+  <realization id="56">    
+    <bendpoint x="3573" y="2817"/>    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="32"/>  
+  </realization>  
+  <nesting id="57">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="4"/>  
+  </nesting>  
+  <dependency id="58">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <dependency id="59">    
+    <bendpoint x="3188" y="1302"/>    
+    <bendpoint x="3188" y="1495"/>    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <dependency id="60">    
+    <end type="SOURCE" refId="17"/>    
+    <end type="TARGET" refId="33"/>  
+  </dependency>  
+  <dependency id="61">    
+    <bendpoint x="3209" y="1302"/>    
+    <bendpoint x="3209" y="1495"/>    
+    <bendpoint x="3209" y="2300"/>    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="62">    
+    <bendpoint x="2811" y="1302"/>    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="63">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="64">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <dependency id="65">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="66">    
+    <bendpoint x="3230" y="1302"/>    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="67">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="12"/>  
+  </dependency>  
+  <association id="68">    
+    <end type="SOURCE" refId="20" navigable="false">      
+      <attribute id="69" name="binder">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="70" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="30" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="71">    
+    <bendpoint x="3230" y="1495"/>    
+    <bendpoint x="3230" y="2300"/>    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <realization id="72">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="17"/>  
+  </realization>  
+  <dependency id="73">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="74">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <dependency id="75">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <nesting id="76">    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="28"/>  
+  </nesting>  
+  <nesting id="77">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="26"/>  
+  </nesting>  
+  <dependency id="78">    
+    <bendpoint x="2466" y="1302"/>    
+    <bendpoint x="2466" y="1495"/>    
+    <bendpoint x="2466" y="2300"/>    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <association id="79">    
+    <bendpoint x="3930" y="2300"/>    
+    <bendpoint x="3930" y="2817"/>    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="80" name="annotationStrategy">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="81" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="32" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="82">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="83">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="33"/>  
+  </dependency>  
+  <dependency id="84">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <dependency id="85">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="86">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <realization id="87">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="17"/>  
+  </realization>  
+  <dependency id="88">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="89">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <dependency id="90">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="10"/>  
+  </dependency>  
+  <nesting id="91">    
+    <end type="SOURCE" refId="18"/>    
+    <end type="TARGET" refId="5"/>  
+  </nesting>  
+  <dependency id="92">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="9"/>  
+  </dependency>  
+  <dependency id="93">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="94">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="95">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="10"/>  
+  </dependency>  
+  <realization id="96">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="32"/>  
+  </realization>  
+  <dependency id="97">    
+    <end type="SOURCE" refId="25"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <dependency id="98">    
+    <bendpoint x="2707" y="1495"/>    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <dependency id="99">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="100">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="101">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <generalization id="102">    
+    <end type="SOURCE" refId="30"/>    
+    <end type="TARGET" refId="33"/>  
+  </generalization>  
+  <dependency id="103">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <dependency id="104">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="105">    
+    <bendpoint x="3568" y="677"/>    
+    <bendpoint x="3568" y="1302"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="21"/>  
+  </dependency>  
+  <association id="106">    
+    <bendpoint x="3526" y="677"/>    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="107" name="SINGLETON">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="108" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="25" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="109">    
+    <bendpoint x="2487" y="1302"/>    
+    <bendpoint x="2487" y="1495"/>    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="19"/>  
+  </dependency>  
+  <nesting id="110">    
+    <bendpoint x="3909" y="2300"/>    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="29"/>  
+  </nesting>  
+  <dependency id="111">    
+    <bendpoint x="2907" y="677"/>    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="17"/>  
+  </dependency>  
+  <dependency id="112">    
+    <end type="SOURCE" refId="34"/>    
+    <end type="TARGET" refId="25"/>  
+  </dependency>  
+  <dependency id="113">    
+    <bendpoint x="3251" y="2300"/>    
+    <end type="SOURCE" refId="21"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

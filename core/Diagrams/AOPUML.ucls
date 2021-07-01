@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <class id="1" language="java" name="com.google.inject.internal.aop.ImmutableStringTrie" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ImmutableStringTrie.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="279" width="305" x="3427" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="2" language="java" name="com.google.inject.internal.aop.FastClass" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/FastClass.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="297" width="335" x="430" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="3" language="java" name="com.google.inject.internal.aop.MethodPartition" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/MethodPartition.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="171" width="468" x="109" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="com.google.inject.internal.aop.ClassDefining" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ClassDefining.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="189" width="226" x="2730" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="5" language="java" name="com.google.inject.internal.aop.UnsafeClassDefiner" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/UnsafeClassDefiner.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="369" width="266" x="2302" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="6" language="java" name="com.google.inject.internal.aop.AbstractGlueGenerator" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/AbstractGlueGenerator.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="369" width="586" x="617" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="7" language="java" name="com.google.inject.internal.aop.ChildClassDefiner" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ChildClassDefiner.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="211" x="2996" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="8" language="java" name="com.google.inject.internal.aop.ChildClassDefiner.ChildLoaderCacheHolder" 
+    project="guice" file="/guice/src/com/google/inject/internal/aop/ChildClassDefiner.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="351" x="3036" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="9" language="java" name="com.google.inject.internal.aop.UnsafeClassDefiner.DefineMethodCacheHolder" 
+    project="guice" file="/guice/src/com/google/inject/internal/aop/UnsafeClassDefiner.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="319" x="2023" y="1362"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="10" language="java" name="com.google.inject.internal.aop.ImmutableStringTrie.Overflow" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ImmutableStringTrie.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="135" width="245" x="3427" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="11" language="java" name="com.google.inject.internal.aop.BytecodeTasks" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/BytecodeTasks.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="189" width="264" x="1243" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="12" language="java" name="com.google.inject.internal.aop.Enhancer" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/Enhancer.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="477" width="335" x="805" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="13" language="java" name="com.google.inject.internal.aop.UnsafeClassDefiner.ClassLoaderDefineMethodHolder" 
+    project="guice" file="/guice/src/com/google/inject/internal/aop/UnsafeClassDefiner.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="99" width="238" x="2382" y="1362"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="14" language="java" name="com.google.inject.internal.aop.GlueException" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/GlueException.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="186" x="1547" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="15" language="java" name="com.google.inject.internal.aop.ClassDefiner" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ClassDefiner.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="187" x="2660" y="1362"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="16" language="java" name="com.google.inject.internal.aop.ClassDefining.ClassDefinerHolder" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ClassDefining.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="134" x="2608" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="17" language="java" name="com.google.inject.internal.aop.EnhancerBuilderImpl" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/EnhancerBuilderImpl.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="207" width="474" x="1773" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="18" language="java" name="com.google.inject.internal.aop.ChildClassDefiner.SystemChildLoaderHolder" 
+    project="guice" file="/guice/src/com/google/inject/internal/aop/ChildClassDefiner.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="81" width="172" x="2803" y="845"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="19" language="java" name="com.google.inject.internal.aop.ClassBuilding" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ClassBuilding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="441" width="403" x="2287" y="364"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="20" language="java" name="com.google.inject.internal.aop.ChildClassDefiner.ChildLoader" project="guice" 
+    file="/guice/src/com/google/inject/internal/aop/ChildClassDefiner.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="170" x="2996" y="1362"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <nesting id="21">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="9"/>  
+  </nesting>  
+  <nesting id="22">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="16"/>  
+  </nesting>  
+  <realization id="23">    
+    <bendpoint x="2772" y="845"/>    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="15"/>  
+  </realization>  
+  <association id="24">    
+    <end type="SOURCE" refId="16" navigable="false">      
+      <attribute id="25" name="INSTANCE"/>      
+      <multiplicity id="26" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="15" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="27">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="13"/>  
+  </nesting>  
+  <nesting id="28">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="10"/>  
+  </nesting>  
+  <association id="29">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="30" name="trie"/>      
+      <multiplicity id="31" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="1" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="32">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="15"/>  
+  </realization>  
+  <generalization id="33">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <nesting id="34">    
+    <bendpoint x="3005" y="845"/>    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="20"/>  
+  </nesting>  
+  <nesting id="35">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="8"/>  
+  </nesting>  
+  <generalization id="36">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <association id="37">    
+    <end type="SOURCE" refId="18" navigable="false">      
+      <attribute id="38" name="SYSTEM_CHILD_LOADER"/>      
+      <multiplicity id="39" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="20" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="40">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="18"/>  
+  </nesting>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

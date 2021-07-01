@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.4" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <annotation id="1" language="java" name="com.google.inject.multibindings.ProvidesIntoSet" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/ProvidesIntoSet.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="140" x="541" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <annotation id="2" language="java" name="com.google.inject.multibindings.ProvidesIntoOptional" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/ProvidesIntoOptional.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="142" x="1491" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <interface id="3" language="java" name="com.google.inject.multibindings.OptionalBinderBinding" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/OptionalBinderBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="153" width="190" x="721" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <enumeration id="4" language="java" name="com.google.inject.multibindings.ProvidesIntoOptional.Type" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/ProvidesIntoOptional.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="140" x="1491" y="652"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <class id="5" language="java" name="com.google.inject.multibindings.OptionalBinder" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/OptionalBinder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="225" width="320" x="951" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <annotation id="6" language="java" name="com.google.inject.multibindings.ProvidesIntoMap" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/ProvidesIntoMap.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="63" width="140" x="1311" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <annotation id="7" language="java" name="com.google.inject.multibindings.ClassMapKey" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/ClassMapKey.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="140" x="1673" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <annotation id="8" language="java" name="com.google.inject.multibindings.StringMapKey" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/StringMapKey.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="140" x="1853" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <annotation id="9" language="java" name="com.google.inject.multibindings.MapKey" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/MapKey.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="81" width="140" x="2033" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </annotation>  
+  <interface id="10" language="java" name="com.google.inject.multibindings.MapBinderBinding" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/MapBinderBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="207" width="297" x="2213" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <class id="11" language="java" name="com.google.inject.multibindings.MultibindingsScanner" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/MultibindingsScanner.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="117" width="237" x="2550" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="12" language="java" name="com.google.inject.multibindings.MapBinder" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/MapBinder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="279" width="464" x="2827" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="13" language="java" name="com.google.inject.multibindings.Multibinder" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/Multibinder.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="297" width="372" x="3331" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="14" language="java" name="com.google.inject.multibindings.MultibinderBinding" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/MultibinderBinding.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="171" width="211" x="3743" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <interface id="15" language="java" name="com.google.inject.multibindings.MultibindingsTargetVisitor" project="guice" 
+    file="/guice/src/com/google/inject/multibindings/MultibindingsTargetVisitor.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="117" width="227" x="3994" y="315"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </interface>  
+  <nesting id="16">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </nesting>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
