@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.InterceptorBinding;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,10 @@ final class MethodAspect {
   private final Matcher<? super Class<?>> classMatcher;
   private final Matcher<? super Method> methodMatcher;
   private final List<MethodInterceptor> interceptors;
+
+  static MethodAspect fromBinding(InterceptorBinding binding) {
+    return new MethodAspect(binding.getClassMatcher(), binding.getMethodMatcher(), binding.getInterceptors());
+  }
 
   /**
    * @param classMatcher matches classes the interceptor should apply to. For example: {@code

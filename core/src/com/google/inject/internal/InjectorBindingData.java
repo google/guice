@@ -28,6 +28,7 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionRequest;
+import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProviderLookup;
@@ -65,7 +66,7 @@ class InjectorBindingData {
   private final Set<MembersInjectorLookup<?>> membersInjectorLookups = Sets.newLinkedHashSet();
   private final Set<InjectionRequest<?>> injectionRequests = Sets.newLinkedHashSet();
   private final List<TypeConverterBinding> converters = Lists.newArrayList();
-  private final List<MethodAspect> methodAspects = Lists.newArrayList();
+  private final List<InterceptorBinding> interceptorBindings = Lists.newArrayList();
   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
   private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList();
   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
@@ -172,18 +173,22 @@ class InjectorBindingData {
     return matchingConverter;
   }
 
-  public void addMethodAspect(MethodAspect methodAspect) {
-    methodAspects.add(methodAspect);
+  public void addInterceptorBinding(InterceptorBinding interceptorBinding) {
+    interceptorBindings.add(interceptorBinding);
   }
 
-  public ImmutableList<MethodAspect> getMethodAspects() {
+  public ImmutableList<InterceptorBinding> getInterceptorBindings() {
     if (parent.isPresent()) {
-      return new ImmutableList.Builder<MethodAspect>()
-          .addAll(parent.get().getMethodAspects())
-          .addAll(methodAspects)
+      return new ImmutableList.Builder<InterceptorBinding>()
+          .addAll(parent.get().getInterceptorBindings())
+          .addAll(interceptorBindings)
           .build();
     }
-    return ImmutableList.copyOf(methodAspects);
+    return ImmutableList.copyOf(interceptorBindings);
+  }
+
+  public ImmutableList<InterceptorBinding> getInterceptorBindingsThisLevel() {
+    return ImmutableList.copyOf(interceptorBindings);
   }
 
   public void addTypeListener(TypeListenerBinding listenerBinding) {
