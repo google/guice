@@ -17,12 +17,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.google</groupId>
-    <artifactId>google</artifactId>
-    <version>5</version>
-  </parent>
-
   <packaging>pom</packaging>
 
   <groupId>com.google.inject</groupId>
