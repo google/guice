@@ -16,11 +16,16 @@
 
 package com.google.inject.binder;
 
+import java.util.Optional;
+
 /** Binds to a constant value. */
 public interface ConstantBindingBuilder {
 
   /** Binds constant to the given value. */
   void to(String value);
+
+  /** Binds constant to the given optional value */
+  void to(Optional optionalValue);
 
   /** Binds constant to the given value. */
   void to(int value);

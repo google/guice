@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.google.inject.extensions</groupId>
+    <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
     <artifactId>extensions-parent</artifactId>
     <version>5.0.2-SNAPSHOT</version>
   </parent>
@@ -15,7 +15,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.inject.extensions</groupId>
+      <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
       <artifactId>guice-assistedinject</artifactId>
       <version>${project.version}</version>
     </dependency>

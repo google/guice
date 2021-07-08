@@ -4,14 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.google.inject</groupId>
+    <groupId>io.github.qsy7.java</groupId>
     <artifactId>guice-parent</artifactId>
     <version>5.0.2-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
 
-  <groupId>com.google.inject.extensions</groupId>
+  <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
   <artifactId>extensions-parent</artifactId>
 
   <name>Google Guice - Extensions</name>
@@ -41,20 +41,22 @@
      | All extensions depend on the core
     -->
     <dependency>
-      <groupId>com.google.inject</groupId>
+      <groupId>io.github.qsy7.java</groupId>
       <artifactId>guice</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!--
      | Some extension tests depend on the core tests
     -->
+    <!--
     <dependency>
-      <groupId>com.google.inject</groupId>
+      <groupId>io.github.qsy7.java</groupId>
       <artifactId>guice</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
+    -->
     <!--
      | Some extension tests depend on guava test libs which are not inherited
      | from test scope.

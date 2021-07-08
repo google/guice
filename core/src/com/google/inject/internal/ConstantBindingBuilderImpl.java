@@ -25,6 +25,7 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Bind a constant.
@@ -54,6 +55,11 @@ public final class ConstantBindingBuilderImpl<T> extends AbstractBindingBuilder<
   @Override
   public void to(final String value) {
     toConstant(String.class, value);
+  }
+
+  @Override
+  public void to(final Optional value) {
+    toConstant(Optional.class, value);
   }
 
   @Override

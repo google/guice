@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.google.inject</groupId>
+    <groupId>io.github.qsy7.java</groupId>
     <artifactId>guice-parent</artifactId>
     <version>5.0.2-SNAPSHOT</version>
   </parent>

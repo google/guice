@@ -18,7 +18,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>guice-parent</artifactId>
-    <groupId>com.google.inject</groupId>
+    <groupId>io.github.qsy7.java</groupId>
     <version>5.0.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -29,13 +29,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <dependencies>
     <dependency>
-      <groupId>com.google.inject</groupId>
+      <groupId>io.github.qsy7.java</groupId>
       <artifactId>guice</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.inject.extensions</groupId>
+      <groupId>io.github.qsy7.java.com.google.inject.extensions</groupId>
       <artifactId>guice-assistedinject</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
