@@ -1429,4 +1429,15 @@ public class FactoryProvider2Test {
     AbstractAssisted.Factory<ConcreteAssisted, String> factory5 = injector.getInstance(concreteKey);
     factory5.create("foo");
   }
+
+  interface BeetleDefaultFactory {
+    Beetle create(@Assisted Color color);
+    default String id() { return "Beetle"; }
+  }
+
+  public void testConcreteDefaultMethodsAreCalled() {
+    Injector injector = Guice.createInjector(binder -> binder.install(new FactoryModuleBuilder().build(BeetleDefaultFactory.class)));
+    BeetleDefaultFactory beetleFactory = injector.getInstance(BeetleDefaultFactory.class);
+    assertEquals("Beetle", beetleFactory.id());
+  }
 }
