@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.InternalFlags;
+import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
@@ -269,6 +270,11 @@ public class MethodInterceptionTest {
 
   @Test
   public void testNotInterceptedMethodsInInterceptedClassDontAddFrames() {
+    // Test relies on Enhancer appearing in stack traces which isn't true for Java17 hidden classes
+    if (Double.parseDouble(System.getProperty("java.specification.version")) >= 17) {
+      assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.ANONYMOUS);
+    }
+
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {

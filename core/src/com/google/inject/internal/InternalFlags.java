@@ -58,13 +58,13 @@ public final class InternalFlags {
   public enum CustomClassLoadingOption {
     /**
      * Define fast/enhanced types in the same class loader as their original type, never creates
-     * class loaders. Uses Unsafe.defineAnonymousClass to gain access to existing class loaders.
+     * class loaders. Uses {@link sun.misc.Unsafe} to gain access to existing class loaders.
      */
     OFF,
 
     /**
-     * Define fast/enhanced types with Unsafe.defineAnonymousClass, never creates class loaders.
-     * This is faster than regular class loading and anonymous classes are easier to unload.
+     * Define fast/enhanced types anonymously as hidden nest-mates, never creates class loaders.
+     * This is faster than regular class loading and the resulting classes are easier to unload.
      *
      * <p>Note: with this option you cannot look up fast/enhanced types by name or mock/spy them.
      */
