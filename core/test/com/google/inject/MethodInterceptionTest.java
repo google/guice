@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.InternalFlags;
-import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
@@ -260,21 +259,20 @@ public class MethodInterceptionTest {
       // validate all causes.
       for (Throwable t = e; t != null; t = t.getCause()) {
         StackTraceElement[] stackTraceElement = t.getStackTrace();
-        assertEquals("explode", stackTraceElement[0].getMethodName());
-        assertEquals("invoke", stackTraceElement[1].getMethodName());
-        assertEquals("invoke", stackTraceElement[2].getMethodName());
-        assertEquals("testInterceptedMethodThrows", stackTraceElement[3].getMethodName());
+        int frame = 0;
+        assertEquals("explode", stackTraceElement[frame++].getMethodName());
+        while (stackTraceElement[frame].getClassName().startsWith("java.lang.invoke.LambdaForm")) {
+          frame++; // ignore lambda frames when running tests with ShowHiddenFrames
+        }
+        assertEquals("invoke", stackTraceElement[frame++].getMethodName());
+        assertEquals("invoke", stackTraceElement[frame++].getMethodName());
+        assertEquals("testInterceptedMethodThrows", stackTraceElement[frame++].getMethodName());
       }
     }
   }
 
   @Test
   public void testNotInterceptedMethodsInInterceptedClassDontAddFrames() {
-    // Test relies on Enhancer appearing in stack traces which isn't true for Java17 hidden classes
-    if (Double.parseDouble(System.getProperty("java.specification.version")) >= 17) {
-      assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.ANONYMOUS);
-    }
-
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {

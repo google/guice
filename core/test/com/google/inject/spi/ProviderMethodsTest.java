@@ -640,11 +640,6 @@ public class ProviderMethodsTest implements Module {
         InternalFlags.isBytecodeGenEnabled()
             && InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
 
-    // Test relies on FastClass appearing in stack traces which isn't true for Java17 hidden classes
-    if (Double.parseDouble(System.getProperty("java.specification.version")) >= 17) {
-      assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.ANONYMOUS);
-    }
-
     CallerInspecterModule module = new CallerInspecterModule();
     Guice.createInjector(Stage.PRODUCTION, module);
     assertEquals(module.fooCallerClass, module.barCallerClass);
@@ -678,11 +673,6 @@ public class ProviderMethodsTest implements Module {
     assumeTrue(
         InternalFlags.isBytecodeGenEnabled()
             && InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.CHILD);
-
-    // Test relies on FastClass appearing in stack traces which isn't true for Java17 hidden classes
-    if (Double.parseDouble(System.getProperty("java.specification.version")) >= 17) {
-      assumeTrue(InternalFlags.getCustomClassLoadingOption() != CustomClassLoadingOption.ANONYMOUS);
-    }
 
     CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
     Guice.createInjector(Stage.PRODUCTION, module);
