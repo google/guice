@@ -64,5 +64,10 @@ public final class KotlinSupport {
     public void checkConstructorParameterAnnotations(Constructor<?> constructor, Errors errors) {
       // do nothing
     }
+
+    @Override
+    public boolean isLocalClass(Class<?> clazz) {
+      return false;
+    }
   }
 }

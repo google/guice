@@ -27,4 +27,7 @@ public interface KotlinSupportInterface {
 
   /** Checks for any errors on the constructor's parameters's annotations. */
   void checkConstructorParameterAnnotations(Constructor<?> constructor, Errors errors);
+
+  /** Returns whether the {@code clazz} is a local Kotlin class. */
+  boolean isLocalClass(Class<?> clazz);
 }

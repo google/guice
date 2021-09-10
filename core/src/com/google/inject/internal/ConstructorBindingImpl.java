@@ -108,6 +108,10 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       errors.cannotInjectInnerClass(rawType);
     }
 
+    if (KotlinSupport.getInstance().isLocalClass(rawType)) {
+      errors.cannotInjectLocalClass(rawType);
+    }
+
     errors.throwIfNewErrors(numErrors);
 
     // Find a constructor annotated @Inject

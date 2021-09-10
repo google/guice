@@ -393,6 +393,14 @@ public final class Errors implements Serializable {
         type);
   }
 
+  public Errors cannotInjectLocalClass(Class<?> type) {
+    return addMessage(
+        ErrorId.INJECT_LOCAL_CLASS,
+        "Injecting into local classes is not supported.  "
+            + "Please use a non-local class instead of %s.",
+        type);
+  }
+
   public Errors duplicateBindingAnnotations(
       Member member, Class<? extends Annotation> a, Class<? extends Annotation> b) {
     return addMessage(
