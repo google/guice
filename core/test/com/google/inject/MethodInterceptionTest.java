@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.matcher.Matchers.only;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.junit.Assert.assertEquals;
@@ -33,11 +34,16 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
+import com.google.inject.spi.DefaultElementVisitor;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.InterceptorBinding;
 import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
@@ -237,6 +243,44 @@ public class MethodInterceptionTest {
 
     injector.getInstance(Interceptable.class).foo();
     assertEquals("expected counting interceptor to be invoked first", 1, count.get());
+  }
+
+  @Test
+  public void testGetElements_interceptorBindings() throws Exception {
+    @SuppressWarnings("rawtypes")
+    Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
+    Matcher<Method> methodMatcher = Matchers.returns(Matchers.identicalTo(int.class));
+    MethodInterceptor interceptor =
+        new MethodInterceptor() {
+          @Override
+          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            return null;
+          }
+        };
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindInterceptor(classMatcher, methodMatcher, interceptor);
+              }
+            });
+    final List<InterceptorBinding> interceptorBindings = new ArrayList<>();
+    for (Element element : injector.getElements()) {
+      element.acceptVisitor(
+          new DefaultElementVisitor<Void>() {
+            @Override
+            public Void visit(InterceptorBinding interceptorBinding) {
+              interceptorBindings.add(interceptorBinding);
+              return null;
+            }
+          });
+    }
+    assertThat(interceptorBindings).hasSize(1);
+    InterceptorBinding extractedBinding = interceptorBindings.get(0);
+    assertSame(classMatcher, extractedBinding.getClassMatcher());
+    assertSame(methodMatcher, extractedBinding.getMethodMatcher());
+    assertSame(interceptor, extractedBinding.getInterceptors().get(0));
   }
 
   @Test
