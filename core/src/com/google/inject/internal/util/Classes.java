@@ -44,9 +44,9 @@ public final class Classes {
     Class<? extends Member> memberType = Classes.memberType(member);
 
     if (memberType == Method.class) {
-      return member.getDeclaringClass().getName() + "." + member.getName() + "()";
+      return member.getDeclaringClass().getName() + '.' + member.getName() + "()";
     } else if (memberType == Field.class) {
-      return member.getDeclaringClass().getName() + "." + member.getName();
+      return member.getDeclaringClass().getName() + '.' + member.getName();
     } else if (memberType == Constructor.class) {
       return member.getDeclaringClass().getName() + ".<init>()";
     } else {

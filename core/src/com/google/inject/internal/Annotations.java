@@ -158,7 +158,7 @@ public class Annotations {
   /** Implements {@link Annotation#toString}. */
   private static String annotationToString(
       Class<? extends Annotation> type, Map<String, Object> members) throws Exception {
-    StringBuilder sb = new StringBuilder().append("@").append(type.getName()).append("(");
+    StringBuilder sb = new StringBuilder().append('@').append(type.getName()).append('(');
     JOINER.appendTo(
         sb,
         Maps.transformValues(
@@ -167,7 +167,7 @@ public class Annotations {
               String s = Arrays.deepToString(new Object[] {arg});
               return s.substring(1, s.length() - 1); // cut off brackets
             }));
-    return sb.append(")").toString();
+    return sb.append(')').toString();
   }
 
   /** Returns true if the given annotation is retained at runtime. */
@@ -413,7 +413,7 @@ public class Annotations {
     if (annotation != null && !isMarker(annotationType)) {
       return key.getAnnotation().toString();
     } else if (key.getAnnotationType() != null) {
-      return "@" + key.getAnnotationType().getName();
+      return '@' + key.getAnnotationType().getName();
     } else {
       return "";
     }

@@ -53,7 +53,7 @@ class NamedImpl implements Named, Serializable {
 
   @Override
   public String toString() {
-    return "@" + Named.class.getName() + "(" + Annotations.memberValueString("value", value) + ")";
+    return '@' + Named.class.getName() + '(' + Annotations.memberValueString("value", value) + ')';
   }
 
   @Override

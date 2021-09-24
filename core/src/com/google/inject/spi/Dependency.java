@@ -115,9 +115,9 @@ public final class Dependency<T> {
     StringBuilder builder = new StringBuilder();
     builder.append(key);
     if (injectionPoint != null) {
-      builder.append("@").append(injectionPoint);
+      builder.append('@').append(injectionPoint);
       if (parameterIndex != -1) {
-        builder.append("[").append(parameterIndex).append("]");
+        builder.append('[').append(parameterIndex).append(']');
       }
     }
     return builder.toString();

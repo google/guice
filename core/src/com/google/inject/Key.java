@@ -208,7 +208,7 @@ public class Key<T> {
     // method.
     String local = toString;
     if (local == null) {
-      local = "Key[type=" + typeLiteral + ", annotation=" + annotationStrategy + "]";
+      local = "Key[type=" + typeLiteral + ", annotation=" + annotationStrategy + ']';
       toString = local;
     }
     return local;
@@ -513,7 +513,7 @@ public class Key<T> {
 
     @Override
     public String toString() {
-      return "@" + annotationType.getName();
+      return '@' + annotationType.getName();
     }
   }
 }

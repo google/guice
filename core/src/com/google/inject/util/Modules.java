@@ -41,7 +41,6 @@ import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ScopeBinding;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -231,7 +230,7 @@ public final class Modules {
       }
 
       final Binder binder = baseBinder.skipSources(this.getClass());
-      final LinkedHashSet<Element> elements = new LinkedHashSet<>(baseElements);
+      final ImmutableSet<Element> elements = ImmutableSet.copyOf(baseElements);
       final Module scannersModule = extractScanners(elements);
       final List<Element> overrideElements =
           Elements.getElements(

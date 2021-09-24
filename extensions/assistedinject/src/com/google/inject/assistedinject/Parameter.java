@@ -64,7 +64,7 @@ class Parameter {
       result.append("@Assisted ");
     }
     if (bindingAnnotation != null) {
-      result.append(bindingAnnotation).append(" ");
+      result.append(bindingAnnotation).append(' ');
     }
     return result.append(type).toString();
   }

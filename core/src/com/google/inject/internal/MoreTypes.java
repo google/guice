@@ -448,11 +448,11 @@ public class MoreTypes {
         return stringBuilder.toString();
       }
 
-      stringBuilder.append("<").append(typeToString(typeArguments[0]));
+      stringBuilder.append('<').append(typeToString(typeArguments[0]));
       for (int i = 1; i < typeArguments.length; i++) {
         stringBuilder.append(", ").append(typeToString(typeArguments[i]));
       }
-      return stringBuilder.append(">").toString();
+      return stringBuilder.append('>').toString();
     }
 
     private static void ensureOwnerType(Type ownerType, Type rawType) {
