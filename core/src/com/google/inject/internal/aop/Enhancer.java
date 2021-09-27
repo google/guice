@@ -167,8 +167,8 @@ final class Enhancer extends AbstractGlueGenerator {
     super(hostClass, ENHANCER_BY_GUICE_MARKER);
     this.bridgeDelegates = bridgeDelegates;
 
-    // CHECKCAST(proxyName) fails when hosted anonymously; hostName works in that scenario
-    this.checkcastToProxy = ClassDefining.isAnonymousHost(hostClass) ? hostName : proxyName;
+    // with defineAnonymousClass we can't downcast to the proxy and must use host instead
+    this.checkcastToProxy = ClassDefining.canDowncastToProxy(hostClass) ? proxyName : hostName;
   }
 
   @Override
@@ -222,11 +222,8 @@ final class Enhancer extends AbstractGlueGenerator {
     Handle trampolineHandle =
         new Handle(H_INVOKESTATIC, proxyName, TRAMPOLINE_NAME, TRAMPOLINE_DESCRIPTOR, false);
 
-    if (ClassDefining.isAnonymousHost(hostClass)) {
-      // proxy class is anonymous we can't create our lambda glue, store raw trampoline instead
-      mv.visitLdcInsn(trampolineHandle);
-    } else {
-      // otherwise generate lambda glue to make the raw trampoline look like an invoker table
+    if (ClassDefining.canLoadProxyByName(hostClass)) {
+      // generate lambda glue to make the raw trampoline look like an invoker table
 
       mv.visitMethodInsn(
           INVOKESTATIC,
@@ -254,6 +251,10 @@ final class Enhancer extends AbstractGlueGenerator {
           "getTarget",
           "()Ljava/lang/invoke/MethodHandle;",
           false);
+
+    } else {
+      // proxy class is hidden so we can't create our lambda glue, store raw trampoline instead
+      mv.visitLdcInsn(trampolineHandle);
     }
 
     mv.visitFieldInsn(PUTSTATIC, proxyName, INVOKERS_NAME, INVOKERS_DESCRIPTOR);

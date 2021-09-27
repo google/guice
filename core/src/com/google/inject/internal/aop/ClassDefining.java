@@ -44,14 +44,19 @@ public final class ClassDefining {
     return ClassDefinerHolder.INSTANCE.define(hostClass, bytecode);
   }
 
-  /** Returns true if the ClassDefiner has access to package-private members. */
+  /** Returns true if the current class definer allows access to package-private members. */
   public static boolean hasPackageAccess() {
     return ClassDefinerHolder.IS_UNSAFE;
   }
 
-  /** Does the given class host new types anonymously, meaning they are not visible by name? */
-  public static boolean isAnonymousHost(Class<?> hostClass) {
-    return ClassDefinerHolder.IS_UNSAFE && UnsafeClassDefiner.isAnonymousHost(hostClass);
+  /** Returns true if it's possible to load by name proxies defined from the given host. */
+  public static boolean canLoadProxyByName(Class<?> hostClass) {
+    return !ClassDefinerHolder.IS_UNSAFE || UnsafeClassDefiner.canLoadProxyByName(hostClass);
+  }
+
+  /** Returns true if it's possible to downcast to proxies defined from the given host. */
+  public static boolean canDowncastToProxy(Class<?> hostClass) {
+    return !ClassDefinerHolder.IS_UNSAFE || UnsafeClassDefiner.canDowncastToProxy(hostClass);
   }
 
   /** Binds the preferred {@link ClassDefiner} instance. */

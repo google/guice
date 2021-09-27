@@ -303,10 +303,14 @@ public class MethodInterceptionTest {
       // validate all causes.
       for (Throwable t = e; t != null; t = t.getCause()) {
         StackTraceElement[] stackTraceElement = t.getStackTrace();
-        assertEquals("explode", stackTraceElement[0].getMethodName());
-        assertEquals("invoke", stackTraceElement[1].getMethodName());
-        assertEquals("invoke", stackTraceElement[2].getMethodName());
-        assertEquals("testInterceptedMethodThrows", stackTraceElement[3].getMethodName());
+        int frame = 0;
+        assertEquals("explode", stackTraceElement[frame++].getMethodName());
+        while (stackTraceElement[frame].getClassName().startsWith("java.lang.invoke.LambdaForm")) {
+          frame++; // ignore lambda frames when running tests with ShowHiddenFrames
+        }
+        assertEquals("invoke", stackTraceElement[frame++].getMethodName());
+        assertEquals("invoke", stackTraceElement[frame++].getMethodName());
+        assertEquals("testInterceptedMethodThrows", stackTraceElement[frame++].getMethodName());
       }
     }
   }

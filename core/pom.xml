@@ -107,7 +107,8 @@
             <phase>test</phase>
             <goals><goal>test</goal></goals>
             <configuration>
-              <argLine>-Dguice_custom_class_loading=ANONYMOUS</argLine>
+              <!-- enable ShowHiddenFrames to help tests find AOP frames on Java17 -->
+              <argLine>-Dguice_custom_class_loading=ANONYMOUS -XX:+UnlockDiagnosticVMOptions -XX:+ShowHiddenFrames</argLine>
             </configuration>
           </execution>
           <execution>
