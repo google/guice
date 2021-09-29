@@ -16,9 +16,9 @@
 
 package com.google.inject.persist.jpa;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 @Entity

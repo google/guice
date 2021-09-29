@@ -26,9 +26,9 @@ import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.Finder;
 import java.io.IOException;
 import java.util.Date;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import junit.framework.TestCase;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */

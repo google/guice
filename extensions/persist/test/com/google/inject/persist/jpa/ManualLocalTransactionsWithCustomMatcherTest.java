@@ -23,8 +23,8 @@ import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import java.util.Date;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
 
 /**
