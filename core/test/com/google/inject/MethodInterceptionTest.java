@@ -607,4 +607,116 @@ public class MethodInterceptionTest {
     Setter setter = injector.getInstance(Setter.class);
     assertEquals(">>Hello, world<<", setter.text);
   }
+
+  @Retention(RUNTIME)
+  @interface Intercept {}
+
+  interface RawReturn {
+    String testReturn();
+  }
+
+  abstract static class GenericReturn<R> {
+    @Intercept
+    public R testReturn() {
+      return null;
+    }
+  }
+
+  public static class MixedReturn extends GenericReturn<String> implements RawReturn {}
+
+  @Test
+  public void testInterceptionWithMixedReturnTypes() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(RawReturn.class).to(MixedReturn.class);
+                bindInterceptor(
+                    Matchers.any(),
+                    Matchers.annotatedWith(Intercept.class),
+                    mi -> {
+                      Object result = mi.proceed();
+                      return result != null ? result : "NULL_RETURN";
+                    });
+              }
+            });
+
+    RawReturn ret = injector.getInstance(RawReturn.class);
+    assertEquals("NULL_RETURN", ret.testReturn());
+  }
+
+  interface ShardedStringProvider extends Provider<String> {
+    String get(int shard);
+  }
+
+  public static class ShardedStringProviderImpl implements ShardedStringProvider {
+    @Override
+    public String get() {
+      return get(3);
+    }
+
+    @Override
+    @Intercept
+    public String get(int i) {
+      return "" + i;
+    }
+  }
+
+  @Test
+  public void testProviderInterception() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ShardedStringProvider.class).to(ShardedStringProviderImpl.class);
+                bindInterceptor(
+                    Matchers.any(),
+                    Matchers.annotatedWith(Intercept.class),
+                    mi -> ">>" + mi.proceed() + "<<");
+              }
+            });
+
+    ShardedStringProvider provider = injector.getInstance(ShardedStringProvider.class);
+
+    assertEquals(">>3<<", provider.get());
+    assertEquals(">>8<<", provider.get(8));
+  }
+
+  @Test
+  public void testInterceptionWithSimilarlyNamedMethodThatAffectsOrdering() {
+    CountingInterceptor interceptor = new CountingInterceptor();
+    BarGetter getter =
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    bindInterceptor(Matchers.any(), new InterceptChecker(), interceptor);
+                  }
+                })
+            .getInstance(BarGetter.class);
+    assertThat(count.get()).isEqualTo(0);
+    getter.get();
+    assertThat(count.get()).isEqualTo(1);
+  }
+
+  private static class InterceptChecker extends AbstractMatcher<Method> {
+    @Override
+    public boolean matches(Method m) {
+      return !m.isSynthetic() && !m.isBridge() && m.isAnnotationPresent(Intercept.class);
+    }
+  }
+
+  public static class BarGetter implements Provider<Bar> {
+    @Override
+    @Intercept
+    public Bar get() {
+      return null;
+    }
+
+    public Bar get(Foo foo) {
+      return null;
+    }
+  }
 }

@@ -79,9 +79,23 @@ final class MethodPartition {
           // Record that we've started looking for the bridge's delegate
           bridgeTargets.put(parametersKey, null);
         }
-      } else if (existingLeafMethod.isBridge() && !candidate.isBridge()) {
-        // Found potential bridge delegate with identical parameters
-        bridgeTargets.putIfAbsent(parametersKey, candidate);
+      } else if (existingLeafMethod.isBridge()) {
+        // Are we looking at another method with identical parameters in the leaf class?
+        if (existingLeafMethod.getDeclaringClass() == candidate.getDeclaringClass()) {
+          if (!candidate.isBridge()) {
+            // Leaf has a matching non-bridge method; choose that as the method to enhance
+            leafMethods.put(parametersKey, candidate);
+            bridgeTargets.remove(parametersKey);
+          } else if (existingLeafMethod
+              .getReturnType()
+              .isAssignableFrom(candidate.getReturnType())) {
+            // Leaf has multiple matching bridge methods; choose the more specific return type
+            leafMethods.put(parametersKey, candidate);
+          }
+        } else if (!candidate.isBridge()) {
+          // Found potential bridge delegate in superclass with identical parameters
+          bridgeTargets.putIfAbsent(parametersKey, candidate);
+        }
       }
     }
 
@@ -115,10 +129,12 @@ final class MethodPartition {
           boolean sameMethod = candidate == superTarget;
           if (sameMethod) {
 
-            // some AOP matchers skip all synthetic methods, so if bridge delegation is not involved
-            // and we have a non-bridge super-method with identical parameters and it is not from an
-            // interface then use that as the enhanceable method instead of the original bridge
-            if (!superTarget.getDeclaringClass().isInterface()) {
+            // if we haven't matched our bridge by generic type and our non-bridge super-method has
+            // identical parameters and return type to the original (and isn't from an interface)
+            // then ignore the original bridge method and enhance the super-method instead - this
+            // helps improve interception behaviour when AOP matchers skip all synthetic methods
+            if (originalBridge.getReturnType() == superTarget.getReturnType()
+                && !superTarget.getDeclaringClass().isInterface()) {
               enhanceableMethod = superTarget;
             }
 
@@ -130,15 +146,15 @@ final class MethodPartition {
                   // compare candidate against resolved super-method
                   && resolvedParametersMatch(candidate, hostType, superTarget))) {
 
-            // found a target that differs by raw parameter types but matches the bridge after
-            // generic resolution; record this delegation so we can call it with invokevirtual
+            // found a bridge target that differs by raw types but matches after generic resolution;
+            // record this delegation so we can call it from our enhanced method with invokevirtual
             bridgeDelegates.put(originalBridge, candidate);
             break;
           }
         }
       }
 
-      // sanity check: only report method if we can enhance it
+      // bridge methods aren't typically final, but just in case...
       if ((enhanceableMethod.getModifiers() & FINAL) == 0) {
         methodVisitor.accept(enhanceableMethod);
       }
