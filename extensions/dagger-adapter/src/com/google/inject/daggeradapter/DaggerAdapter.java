@@ -28,14 +28,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimaps;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.ProviderMethodsModule;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -141,10 +146,55 @@ public final class DaggerAdapter {
       for (Object module : deduplicateModules(binder, transitiveModules())) {
         checkIsDaggerModule(module, binder);
         validateNoSubcomponents(binder, module);
-        checkUnsupportedDaggerAnnotations(module, binder);
-
+        ImmutableList<Method> declaredMethods = allDeclaredMethods(moduleClass(module));
+        checkUnsupportedDaggerAnnotations(declaredMethods, binder);
+        module = instantiateIfNecessary(module, declaredMethods, binder);
         binder.install(ProviderMethodsModule.forModule(module, scanner));
       }
+    }
+
+    /**
+     * Returns an instance of the module if instantiation is necessary and succeeds. Otherwise,
+     * return the original module (which could already be an instance or a class) and allow things
+     * to proceed.
+     */
+    private static Object instantiateIfNecessary(
+        Object module, List<Method> declaredMethods, Binder binder) {
+      // If the module is already an object, no need to instantiate.
+      if (!(module instanceof Class)) {
+        return module;
+      }
+
+      // If none of the methods require instances, no need to instantiate.
+      if (declaredMethods.stream().noneMatch(DaggerCompatibilityModule::methodRequiresInstance)) {
+        return module;
+      }
+
+      try {
+        Constructor<?> cxtor = ((Class<?>) module).getDeclaredConstructor();
+        cxtor.setAccessible(true);
+        return cxtor.newInstance();
+      } catch (NoSuchMethodException nsee) {
+        // If no no-args cxtor exists, just return the class. We'll fail with a better error
+        // message later on.
+        return module;
+      } catch (ReflectiveOperationException roe) {
+        // If instantiation failed, record the error and proceed. We'll add additional good
+        // error message later on.
+        binder.addError(
+            new Message(
+                Errors.format("Unable to create an instance of %s for DaggerAdapter", module),
+                roe));
+        return module;
+      }
+    }
+
+    private static boolean methodRequiresInstance(Method m) {
+      return !m.isBridge()
+          && !m.isSynthetic()
+          && !Modifier.isStatic(m.getModifiers())
+          && !Modifier.isAbstract(m.getModifiers())
+          && SupportedAnnotations.BINDING_ANNOTATIONS.stream().anyMatch(m::isAnnotationPresent);
     }
 
     private void checkIsDaggerModule(Object module, Binder binder) {
@@ -156,8 +206,9 @@ public final class DaggerAdapter {
       }
     }
 
-    private static void checkUnsupportedDaggerAnnotations(Object module, Binder binder) {
-      for (Method method : allDeclaredMethods(moduleClass(module))) {
+    private static void checkUnsupportedDaggerAnnotations(
+        Iterable<Method> declaredMethods, Binder binder) {
+      for (Method method : declaredMethods) {
         for (Annotation annotation : method.getAnnotations()) {
           Class<? extends Annotation> annotationClass = annotation.annotationType();
           if (annotationClass.getName().startsWith("dagger.")
@@ -172,7 +223,9 @@ public final class DaggerAdapter {
 
     private static ImmutableList<Method> allDeclaredMethods(Class<?> clazz) {
       ImmutableList.Builder<Method> methods = ImmutableList.builder();
-      for (Class<?> current = clazz; current != null; current = current.getSuperclass()) {
+      for (Class<?> current = clazz;
+          current != Object.class && current != null;
+          current = current.getSuperclass()) {
         methods.add(current.getDeclaredMethods());
       }
       return methods.build();

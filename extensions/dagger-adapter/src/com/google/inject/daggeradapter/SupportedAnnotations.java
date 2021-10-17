@@ -12,7 +12,7 @@ import java.lang.annotation.Annotation;
 
 /** Collections of annotations that are supported by {@link DaggerAdapter}. */
 final class SupportedAnnotations {
-  private static final ImmutableSet<Class<? extends Annotation>> BINDING_ANNOTATIONS =
+  static final ImmutableSet<Class<? extends Annotation>> BINDING_ANNOTATIONS =
       ImmutableSet.of(Provides.class, Binds.class, Multibinds.class, BindsOptionalOf.class);
 
   private static final ImmutableSet<Class<? extends Annotation>> ALL_SUPPORTED_ANNOTATIONS =

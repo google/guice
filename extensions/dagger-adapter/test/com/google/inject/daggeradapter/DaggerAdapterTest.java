@@ -231,22 +231,69 @@ public class DaggerAdapterTest extends TestCase {
 
   @dagger.Module
   static class ModuleWithInstanceMethods {
+    private int i = 0;
+
+    @dagger.Provides
+    int i() {
+      return i++;
+    }
+  }
+
+  public void testClassLiteralWithInstanceProvidesMethod() {
+    Injector injector = Guice.createInjector(DaggerAdapter.from(ModuleWithInstanceMethods.class));
+    assertThat(injector.getInstance(Integer.class)).isEqualTo(0);
+    assertThat(injector.getInstance(Integer.class)).isEqualTo(1);
+  }
+
+  @dagger.Module
+  abstract static class ModuleWithUnrelatedInstanceMethods {
+    ModuleWithUnrelatedInstanceMethods(int i) {
+      throw new RuntimeException("nothing should ever instantiate this");
+    }
+
+    @dagger.Provides
+    static int i() {
+      return 0;
+    }
+
+    @Binds
+    abstract Number bindNumber(int i);
+
+    Object object() {
+      return null;
+    }
+  }
+
+  public void testUnrelatedInstanceMethodsDontRequireInstantiation() {
+    Injector injector =
+        Guice.createInjector(DaggerAdapter.from(ModuleWithUnrelatedInstanceMethods.class));
+    assertThat(injector.getInstance(Integer.class)).isEqualTo(0);
+    assertThat(injector.getInstance(Number.class)).isEqualTo(0);
+  }
+
+  @dagger.Module
+  static class ModuleWithNonInstantiableInstanceMethods {
+    ModuleWithNonInstantiableInstanceMethods(int i) {
+      throw new RuntimeException("nothing should ever instantiate this");
+    }
+
     @dagger.Provides
     int i() {
       return 0;
     }
   }
 
-  public void testClassLiteralWithInstanceProvidesMethod() {
+  public void testClassLiteralWithNonInstantiableInstanceProvidesMethod() {
     try {
-      Guice.createInjector(DaggerAdapter.from(ModuleWithInstanceMethods.class));
+      Guice.createInjector(DaggerAdapter.from(ModuleWithNonInstantiableInstanceMethods.class));
       fail();
     } catch (CreationException expected) {
       assertThat(expected)
           .hasMessageThat()
           .contains(
-              "ModuleWithInstanceMethods.i() is an instance method, but a class literal was"
-                  + " passed. Make this method static or pass an instance of the module instead.");
+              "ModuleWithNonInstantiableInstanceMethods.i() is an instance method, but a class"
+                  + " literal was passed. Make this method static or pass an instance of the module"
+                  + " instead.");
     }
   }
 
