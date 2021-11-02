@@ -79,7 +79,7 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     }
     Class<? extends Annotation> annotationType = annotation.annotationType();
     if (annotationType.equals(Provides.class)) {
-      return prepareProvidesKey(binder, method, key);
+      return processMultibindingAnnotations(binder, method, key);
     } else if (annotationType.equals(Binds.class)) {
       configureBindsKey(binder, method, key);
       return null;
@@ -92,12 +92,6 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
     }
 
     throw new UnsupportedOperationException(annotation.toString());
-  }
-
-  private <T> Key<T> prepareProvidesKey(Binder binder, Method method, Key<T> key) {
-    key = processMultibindingAnnotations(binder, method, key);
-
-    return key;
   }
 
   private <T> void configureBindsKey(Binder binder, Method method, Key<T> key) {
