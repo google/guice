@@ -18,7 +18,6 @@ package com.google.inject.spi;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
-import static com.google.inject.Asserts.isIncludeStackTraceComplete;
 import static java.util.Comparator.comparing;
 
 import com.google.common.collect.ImmutableSet;
@@ -456,11 +455,6 @@ public class SpiBindingsTest extends TestCase {
     assertContains(binding.getSource().toString(), getDeclaringSourcePart(getClass()));
     ElementSource source = (ElementSource) binding.getSource();
     assertFalse(source.getModuleClassNames().isEmpty());
-    if (isIncludeStackTraceComplete()) {
-      assertTrue(source.getStackTrace().length > 0);
-    } else {
-      assertEquals(0, source.getStackTrace().length);
-    }
   }
 
   public void checkInjector(Module module, ElementVisitor<?>... visitors) {

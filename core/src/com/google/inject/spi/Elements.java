@@ -632,23 +632,13 @@ public final class Elements {
     }
 
     private ModuleSource getModuleSource(Class<?> module) {
-      StackTraceElement[] partialCallStack;
-      if (getIncludeStackTraceOption() == IncludeStackTraceOption.COMPLETE) {
-        partialCallStack = getPartialCallStack(new Throwable().getStackTrace());
-      } else {
-        partialCallStack = new StackTraceElement[0];
-      }
       if (moduleSource == null) {
-        return new ModuleSource(module, partialCallStack, permitMapConstruction.getPermitMap());
+        return new ModuleSource(module, permitMapConstruction.getPermitMap());
       }
-      return moduleSource.createChild(module, partialCallStack);
+      return moduleSource.createChild(module);
     }
 
     private ElementSource getElementSource() {
-      // Full call stack
-      StackTraceElement[] callStack = null;
-      // The call stack starts from current top module configure and ends at this method caller
-      StackTraceElement[] partialCallStack = new StackTraceElement[0];
       // The element original source
       ElementSource originalSource = null;
       // The element declaring source
@@ -657,21 +647,10 @@ public final class Elements {
         originalSource = (ElementSource) declaringSource;
         declaringSource = originalSource.getDeclaringSource();
       }
-      IncludeStackTraceOption stackTraceOption = getIncludeStackTraceOption();
-      if (stackTraceOption == IncludeStackTraceOption.COMPLETE
-          || (stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE
-              && declaringSource == null)) {
-        callStack = new Throwable().getStackTrace();
-      }
-      if (stackTraceOption == IncludeStackTraceOption.COMPLETE) {
-        partialCallStack = getPartialCallStack(callStack);
-      }
       if (declaringSource == null) {
-        // So 'source' and 'originalSource' are null otherwise declaringSource has some value
-        if (stackTraceOption == IncludeStackTraceOption.COMPLETE
-            || stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
-          // With the above conditions and assignments 'callStack' is non-null
-          StackTraceElement callingSource = sourceProvider.get(callStack);
+        IncludeStackTraceOption stackTraceOption = getIncludeStackTraceOption();
+        if (stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
+          StackTraceElement callingSource = sourceProvider.get(new Throwable().getStackTrace());
           // If we've traversed past all reasonable sources and into our internal code, then we
           // don't know the source.
           if (callingSource
@@ -682,37 +661,14 @@ public final class Elements {
           } else {
             declaringSource = callingSource;
           }
-        } else { // or if (stackTraceOption == IncludeStackTraceOptions.OFF)
+        } else {
           // As neither 'declaring source' nor 'call stack' is available use 'module source'
           declaringSource = sourceProvider.getFromClassNames(moduleSource.getModuleClassNames());
         }
       }
       // Build the binding call stack
       return new ElementSource(
-          originalSource,
-          trustedSource,
-          declaringSource,
-          moduleSource,
-          partialCallStack,
-          scannerSource);
-    }
-
-    /**
-     * Removes the {@link #moduleSource} call stack from the beginning of current call stack. It
-     * also removes the last two elements in order to make {@link #install(Module)} the last call in
-     * the call stack.
-     */
-    private StackTraceElement[] getPartialCallStack(StackTraceElement[] callStack) {
-      int toSkip = 0;
-      if (moduleSource != null) {
-        toSkip = moduleSource.getStackTraceSize();
-      }
-      // -1 for skipping 'getModuleSource' and 'getElementSource' calls
-      int chunkSize = callStack.length - toSkip - 1;
-
-      StackTraceElement[] partialCallStack = new StackTraceElement[chunkSize];
-      System.arraycopy(callStack, 1, partialCallStack, 0, chunkSize);
-      return partialCallStack;
+          originalSource, trustedSource, declaringSource, moduleSource, scannerSource);
     }
 
     /** Returns if the binder is in the module scanning phase. */

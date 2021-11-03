@@ -316,14 +316,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
               </configuration>
             </execution>
             <execution>
-              <id>stack-traces-complete</id>
-              <phase>test</phase>
-              <goals><goal>test</goal></goals>
-              <configuration>
-                <argLine>-Dguice_include_stack_traces=COMPLETE</argLine>
-              </configuration>
-            </execution>
-            <execution>
               <id>default-test</id>
               <phase>test</phase>
               <goals><goal>test</goal></goals>

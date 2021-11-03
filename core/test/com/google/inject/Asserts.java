@@ -82,14 +82,6 @@ public class Asserts {
   }
 
   /**
-   * Returns true if {@link #getIncludeStackTraceOption()} returns {@link
-   * IncludeStackTraceOption#COMPLETE}.
-   */
-  public static boolean isIncludeStackTraceComplete() {
-    return getIncludeStackTraceOption() == IncludeStackTraceOption.COMPLETE;
-  }
-
-  /**
    * Fails unless {@code expected.equals(actual)}, {@code actual.equals(expected)} and their hash
    * codes are equal. This is useful for testing the equals method itself.
    */

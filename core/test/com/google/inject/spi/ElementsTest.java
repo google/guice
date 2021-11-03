@@ -19,7 +19,6 @@ package com.google.inject.spi;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
-import static com.google.inject.Asserts.isIncludeStackTraceComplete;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableMap;
@@ -1364,11 +1363,6 @@ public class ElementsTest extends TestCase {
       if (!(element instanceof Message)) {
         ElementSource source = (ElementSource) element.getSource();
         assertFalse(source.getModuleClassNames().isEmpty());
-        if (isIncludeStackTraceComplete()) {
-          assertTrue(source.getStackTrace().length > 0);
-        } else {
-          assertEquals(0, source.getStackTrace().length);
-        }
       }
       if (!(visitor instanceof ExternalFailureVisitor)) {
         assertContains(element.getSource().toString(), getDeclaringSourcePart(ElementsTest.class));

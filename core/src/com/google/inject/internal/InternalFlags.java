@@ -50,8 +50,6 @@ public final class InternalFlags {
     OFF,
     /**  Minimum stack trace collection (Default) */
     ONLY_FOR_DECLARING_SOURCE,
-    /** Full stack trace for everything */
-    COMPLETE
   }
 
   /** The options for Guice custom class loading. */
@@ -176,15 +174,14 @@ public final class InternalFlags {
 
   /**
    * Gets the system option indicated by the specified key; runs as a privileged action.
-   * 
+   *
    * @param name of the system option
    * @param defaultValue if the option is not set
    * @param secureValue if the security manager disallows access to the option
-   * 
    * @return value of the option, defaultValue if not set, secureValue if no access
    */
-  private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue,
-      T secureValue) {
+  private static <T extends Enum<T>> T getSystemOption(
+      final String name, T defaultValue, T secureValue) {
     Class<T> enumType = defaultValue.getDeclaringClass();
     String value = null;
     try {
