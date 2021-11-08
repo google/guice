@@ -39,7 +39,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class ServletScopes {
+public final class ServletScopes {
 
   private ServletScopes() {}
 
