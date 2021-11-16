@@ -29,7 +29,7 @@ public class ContinuingHttpServletRequestTest extends TestCase {
 
   private static final String TEST_VALUE_1 = "testValue1";
   private static final String TEST_VALUE_2 = "testValue2";
-  private static final int DEFAULT_MAX_AGE = new Cookie("", "").getMaxAge();
+  private static final int DEFAULT_MAX_AGE = new Cookie("dummy", "").getMaxAge();
 
   public void testReturnNullCookiesIfDelegateHasNoNull() {
     HttpServletRequest delegate = createMock(HttpServletRequest.class);
