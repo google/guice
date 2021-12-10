@@ -178,7 +178,7 @@
         <executions>
           <execution>
             <!--
-             | Create guice-X.Y.Z-shaded.jar that includes shaded asm and guava
+             | Create guice-X.Y.Z-shadedasmguava.jar that includes shaded asm and guava
             -->
             <id>asmguava</id>
             <phase>package</phase>
