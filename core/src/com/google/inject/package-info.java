@@ -16,7 +16,7 @@
 
 /**
  * <i>Google Guice</i> (pronounced "juice") is an ultra-lightweight dependency injection framework.
- * Please refer to the Guice <a href="http://docs.google.com/Doc?id=dd2fhx4z_5df5hw8">User's
+ * Please refer to the Guice <a href="https://github.com/google/guice/wiki/Motivation">User's
  * Guide</a> for a gentle introduction.
  *
  * <p>The principal public APIs in this package are:
