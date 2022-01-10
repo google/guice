@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  * thus receive none of the benefits.
  *
  * <p>Constructor parameters must be either supplied by the factory interface and marked with <code>
- * @Assisted</code>, or they must be injectable.
+ * {@literal @}Assisted</code>, or they must be injectable.
  *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
