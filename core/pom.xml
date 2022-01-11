@@ -48,12 +48,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>3.0.5.RELEASE</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
       <version>0.0.384</version>
@@ -95,7 +89,6 @@
           -->
           <excludes>
             <exclude>**/*$*</exclude>
-            <exclude>**/ErrorHandlingTest*</exclude>
             <exclude>**/OSGiContainerTest*</exclude>
             <exclude>**/ScopesTest*</exclude>
             <exclude>**/TypeConversionTest*</exclude>
