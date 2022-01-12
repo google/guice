@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-package com.google.inject.jdk8;
+package com.google.inject;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.concurrent.atomic.AtomicInteger;
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for interception of default methods.
  *
  * @author cgdecker@google.com (Colin Decker)
  */
-public class DefaultMethodInterceptionTest extends TestCase {
+@RunWith(JUnit4.class)
+public class DefaultMethodInterceptionTest {
 
   private static final AtomicInteger callCount = new AtomicInteger(0);
   private static final AtomicInteger interceptedCallCount = new AtomicInteger(0);
@@ -47,8 +51,13 @@ public class DefaultMethodInterceptionTest extends TestCase {
         return invocation.proceed();
       };
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void checkBytecodeGenIsEnabled() {
+    assumeTrue(InternalFlags.isBytecodeGenEnabled());
+  }
+
+  @Before
+  public void setUp() throws Exception {
     callCount.set(0);
     interceptedCallCount.set(0);
   }
@@ -73,6 +82,7 @@ public class DefaultMethodInterceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInterceptedDefaultMethod() {
     Injector injector =
         Guice.createInjector(
@@ -91,6 +101,7 @@ public class DefaultMethodInterceptionTest extends TestCase {
     assertEquals(1, interceptedCallCount.get());
   }
 
+  @Test
   public void testInterceptedDefaultMethod_calledByAnotherMethod() {
     Injector injector =
         Guice.createInjector(
@@ -120,6 +131,7 @@ public class DefaultMethodInterceptionTest extends TestCase {
   /** Foo implementation that should use superclass method rather than default method. */
   public static class InheritingFoo extends BaseClass implements Foo {}
 
+  @Test
   public void testInterceptedDefaultMethod_whenParentClassDefinesNonInterceptedMethod() {
     Injector injector =
         Guice.createInjector(
@@ -156,6 +168,7 @@ public class DefaultMethodInterceptionTest extends TestCase {
    */
   public static class InheritingFoo2 extends BaseClass2 implements Foo {}
 
+  @Test
   public void testInterceptedDefaultMethod_whenParentClassDefinesInterceptedMethod() {
     Injector injector =
         Guice.createInjector(
@@ -191,6 +204,7 @@ public class DefaultMethodInterceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInterception_ofAllMethodsOnType() {
     Injector injector =
         Guice.createInjector(
@@ -210,6 +224,7 @@ public class DefaultMethodInterceptionTest extends TestCase {
     assertEquals(2, interceptedCallCount.get());
   }
 
+  @Test
   public void testInterception_ofAllMethodsOnType_interceptsInheritedDefaultMethod() {
     Injector injector =
         Guice.createInjector(

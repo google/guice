@@ -100,7 +100,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <module>bom</module>
     <module>core</module>
     <module>extensions</module>
-    <!-- jdk8-tests module activated only when running under JDK8, below -->
   </modules>
 
   <prerequisites>
@@ -502,44 +501,5 @@ See the Apache License Version 2.0 for the specific language governing permissio
     </plugins>
   </build>
 
-  <profiles>
-    <profile>
-      <id>jdk8</id>
-      <activation>
-        <jdk>[1.8,)</jdk>
-      </activation>
-      <!-- Activate jdk8-tests module only under JDK 8 -->
-      <modules>
-        <module>jdk8-tests</module>
-      </modules>
-      <!-- Disable doclint under JDK 8 -->
-      <reporting>
-      <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-              <additionalOptions>
-                <additionalOption>-Xdoclint:none</additionalOption>
-              </additionalOptions>
-            </configuration>
-          </plugin>
-        </plugins>
-      </reporting>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-              <additionalOptions>
-                <additionalOption>-Xdoclint:none</additionalOption>
-              </additionalOptions>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
   <!-- TODO(user): Update the google parent pom or migrate to sonatype's -->
 </project>

@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.inject.jdk8;
+package com.google.inject;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.google.inject.ProvisionException;
-import com.google.inject.TypeLiteral;
+import static org.junit.Assert.assertThrows;
+
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -88,12 +80,11 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
               }
             });
 
-    try {
-      injector.getInstance(new Key<Callable<String>>() {});
-    } catch (ProvisionException expected) {
-      assertTrue(expected.getCause() instanceof RuntimeException);
-      assertEquals("foo", expected.getCause().getMessage());
-    }
+    ProvisionException expected =
+        assertThrows(
+            ProvisionException.class, () -> injector.getInstance(new Key<Callable<String>>() {}));
+    assertTrue(expected.getCause() instanceof RuntimeException);
+    assertEquals("foo", expected.getCause().getMessage());
   }
 
   public void testProvider_usingJdk8Features() {

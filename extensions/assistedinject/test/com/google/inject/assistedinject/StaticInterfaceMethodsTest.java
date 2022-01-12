@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.inject.jdk8;
+package com.google.inject.assistedinject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import junit.framework.TestCase;
 
 /**
