@@ -53,7 +53,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v2
         with:
-          java-version: ${{ matrix.java }}
+          java-version: 11
           distribution: 'zulu'
           server-id: google-snapshots
           server-username: MAVEN_USERNAME
