@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.io.Resources;
 import java.io.IOException;
+import java.net.URL;
 
 final class ErrorMessageTestUtils {
   private static final String LINE_NUMBER_REGEX = ":\\d+";
@@ -38,7 +39,14 @@ final class ErrorMessageTestUtils {
   }
 
   private static String getExpectedError(String fileName) throws IOException {
-    return Resources.toString(
-        ErrorMessageTestUtils.class.getResource("testdata/" + fileName), UTF_8);
+    URL resource = ErrorMessageTestUtils.class.getResource("testdata/" + fileName);
+    // The location of the resource depends on if we are using maven or bazel.
+    // TODO: remove this once we no longer use maven.
+    if (resource == null) {
+      resource =
+          ErrorMessageTestUtils.class.getResource(
+              "/core/test/com/google/inject/errors/testdata/" + fileName);
+    }
+    return Resources.toString(resource, UTF_8);
   }
 }

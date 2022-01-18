@@ -19,19 +19,15 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
-
-import org.hibernate.cfg.Environment;
-import org.hibernate.ejb.connection.InjectedDataSourceConnectionProvider;
-import org.hsqldb.jdbc.JDBCDataSource;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
+import junit.framework.TestCase;
+import org.hibernate.cfg.Environment;
+import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
+import org.hsqldb.jdbc.JDBCDataSource;
 
 public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
 
@@ -50,8 +46,7 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
     @Override
     protected void configure() {
       Map<String, Object> p = new HashMap<>();
-
-      p.put(Environment.CONNECTION_PROVIDER, InjectedDataSourceConnectionProvider.class.getName());
+      p.put(Environment.CONNECTION_PROVIDER, DatasourceConnectionProviderImpl.class.getName());
       if (passDataSource) {
         p.put(Environment.DATASOURCE, ds);
       }
