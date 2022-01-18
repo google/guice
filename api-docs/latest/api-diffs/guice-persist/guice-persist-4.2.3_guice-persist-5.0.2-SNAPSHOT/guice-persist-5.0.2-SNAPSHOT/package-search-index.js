@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.google.inject.persist"},{"l":"com.google.inject.persist.finder"},{"l":"com.google.inject.persist.jpa"}]

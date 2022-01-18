@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"com.google.inject.daggeradapter","l":"DaggerAdapter.Builder"},{"p":"com.google.inject.daggeradapter","l":"DaggerAdapter"}]

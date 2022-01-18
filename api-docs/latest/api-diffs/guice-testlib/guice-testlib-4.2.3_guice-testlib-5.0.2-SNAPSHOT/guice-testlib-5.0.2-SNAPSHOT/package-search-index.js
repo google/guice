@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.google.inject.testing.fieldbinder"},{"l":"com.google.inject.testing.throwingproviders"}]

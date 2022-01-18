@@ -1,1 +1,0 @@
-memberSearchIndex = [{"p":"com.google.inject.jndi","c":"JndiIntegration","l":"fromJndi(Class<T>, String)","url":"fromJndi(java.lang.Class,java.lang.String)"}]

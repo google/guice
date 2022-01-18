@@ -1,1 +1,0 @@
-memberSearchIndex = [{"p":"com.google.inject.spring","c":"SpringIntegration","l":"bindAll(Binder, ListableBeanFactory)","url":"bindAll(com.google.inject.Binder,org.springframework.beans.factory.ListableBeanFactory)"},{"p":"com.google.inject.spring","c":"SpringIntegration","l":"fromSpring(Class<T>, String)","url":"fromSpring(java.lang.Class,java.lang.String)"}]
