@@ -1,4 +1,5 @@
 /build/
+bazel-*
 target/
 bin/
 .project

@@ -1,6 +1,8 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 name: continuous-integration
+env:
+  USE_BAZEL_VERSION: '4.2.2'
 
 on:
   push:
@@ -42,10 +44,41 @@ jobs:
       - name: Verify with Maven
         run: mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
 
+  bazel-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [8, 11, 15]
+      fail-fast: false
+      max-parallel: 4
+    name: Bazel Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+      - name: 'Cache bazel external dependencies'
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/bazel/*/*/external
+          key: ${{ runner.os }}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-test-
+      - name: Bazel test
+        run: bazel test //... --test_output=errors
+
   publish:
     runs-on: ubuntu-latest
-    needs: test
-    if: ${{ github.event_name == 'push' }}
+    needs: [test, bazel-test]
+    if: github.event_name == 'push' && github.repository == 'google/guice' && github.ref == 'refs/heads/master'
     name: Publish Javadoc and Snapshot
 
     steps:
