@@ -8,7 +8,7 @@ package(
 
 java_library(
     name = "daggeradapter",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(["*.java"]),
     plugins = [
     ],
     deps = [
@@ -18,4 +18,9 @@ java_library(
         "//third_party/java/guava/collect",
         "//third_party/java/jsr330_inject",
     ],
+)
+
+filegroup(
+    name = "javadoc-srcs",
+    srcs = glob(["*.java"]),
 )

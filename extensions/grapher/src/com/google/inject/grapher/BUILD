@@ -17,3 +17,8 @@ java_library(
         "//third_party/java/guava/collect",
     ],
 )
+
+filegroup(
+    name = "javadoc-srcs",
+    srcs = glob(["**/*.java"]),
+)

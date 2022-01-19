@@ -1,5 +1,7 @@
 # Copyright 2014 Google Inc.  All rights reserved.
 # Author: eatnumber1@google.com (Russ Harmon)
+load("@rules_java//java:defs.bzl", "java_library")
+
 package(
     default_testonly = 1,
     default_visibility = ["//:src"],
@@ -7,7 +9,7 @@ package(
 
 java_library(
     name = "fieldbinder",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(["*.java"]),
     plugins = [
     ],
     deps = [
@@ -17,4 +19,9 @@ java_library(
         "//third_party/java/guava/collect",
         "//third_party/java/jsr330_inject",
     ],
+)
+
+filegroup(
+    name = "javadoc-srcs",
+    srcs = glob(["*.java"]),
 )

@@ -71,3 +71,8 @@ java_library(
         "//third_party/java/jsr330_inject",
     ],
 )
+
+filegroup(
+    name = "javadoc-srcs",
+    srcs = glob(["**/*.java"]),
+)

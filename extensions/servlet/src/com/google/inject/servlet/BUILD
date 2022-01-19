@@ -1,5 +1,7 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
+load("@rules_java//java:defs.bzl", "java_library")
+
 package(
     default_visibility = ["//:src"],
 )
@@ -17,7 +19,7 @@ java_library(
 java_library(
     name = "servlet",
     srcs = glob(
-        ["**/*.java"],
+        ["*.java"],
         exclude = ["RequestScoped.java"],
     ),
     plugins = [
@@ -33,4 +35,9 @@ java_library(
         "//third_party/java/jsr330_inject",
         "//third_party/java/servlet/servlet_api",
     ],
+)
+
+filegroup(
+    name = "javadoc-srcs",
+    srcs = glob(["*.java"]),
 )

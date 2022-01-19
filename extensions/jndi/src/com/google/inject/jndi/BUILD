@@ -8,8 +8,13 @@ package(
 
 java_library(
     name = "jndi",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(["*.java"]),
     deps = [
         "//core/src/com/google/inject",
     ],
+)
+
+filegroup(
+    name = "javadoc-srcs",
+    srcs = glob(["*.java"]),
 )
