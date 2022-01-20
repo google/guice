@@ -14,6 +14,36 @@
 
 """starlark marcors to generate test suites."""
 
+_TEMPLATE = """package {VAR_PACKAGE};
+import org.junit.runners.Suite;
+import org.junit.runner.RunWith;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({{{VAR_CLASSES}}})
+public class {VAR_NAME} {{}}
+"""
+
+def _impl(ctx):
+    classes = ",".join(sorted(ctx.attr.test_classes))
+
+    ctx.actions.write(
+        output = ctx.outputs.out,
+        content = _TEMPLATE.format(
+            VAR_PACKAGE = ctx.attr.package_name,
+            VAR_CLASSES = classes,
+            VAR_NAME = ctx.attr.name,
+        ),
+    )
+
+_gen_suite = rule(
+    attrs = {
+        "test_classes": attr.string_list(),
+        "package_name": attr.string(),
+    },
+    outputs = {"out": "%{name}.java"},
+    implementation = _impl,
+)
+
 def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = None):
     """
     Generates tests for test file in srcs ending in "Test.java"
@@ -26,7 +56,6 @@ def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = N
       suffix: suffix to apend to the generated test name
       sizes: not used, exists only so that the opensource guice_test_suites mirror exactly the internal one
     """
-    test_files = srcs or native.glob(["**/*Test.java"])
     jvm_flags = []
 
     # transform flags to JVM options used externally
@@ -44,21 +73,25 @@ def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = N
     if package_name.startswith("core/test/") or package_name.startswith("extensions/"):
         package_name = package_name.rpartition("/test/")[2]
 
-    test_names = []
-    for test_file in test_files:
-        name = test_file.replace(".java", "")
-        test_name = name + suffix
-        test_names.append(test_name)
-        test_class = (package_name + "/" + name).replace("/", ".")
+    test_files = srcs or native.glob(["**/*Test.java"])
+    test_classes = []
+    for src in test_files:
+        test_name = src.replace(".java", "")
+        test_classes.append((package_name + "/" + test_name + ".class").replace("/", "."))
 
-        native.java_test(
-            name = test_name,
-            test_class = test_class,
-            runtime_deps = deps,
-            jvm_flags = jvm_flags,
-        )
+    suite_name = name + suffix
+    _gen_suite(
+        name = suite_name,
+        test_classes = test_classes,
+        package_name = package_name.replace("/", "."),
+    )
 
-    native.test_suite(
-        name = name + suffix + "_suite",
-        tests = test_names,
+    native.java_test(
+        name = "AllTestsSuite" + suffix,
+        test_class = (package_name + "/" + suite_name).replace("/", "."),
+        jvm_flags = jvm_flags,
+        srcs = [":" + suite_name],
+        deps = deps + [
+            "//third_party/java/junit",
+        ],
     )
