@@ -72,7 +72,7 @@ jobs:
           key: ${{ runner.os }}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
           restore-keys: |
             ${{ runner.os }}-bazel-test-
-      - name: Bazel Test
+      - name: Bazel test
         run: bazel test //... --test_output=errors --build_tests_only
 
   publish:
