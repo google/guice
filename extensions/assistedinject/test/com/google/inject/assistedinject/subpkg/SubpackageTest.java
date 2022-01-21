@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
+import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
@@ -36,7 +37,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public final class SubpackageTest {
-
+  private static final double JAVA_VERSION =
+      Double.parseDouble(StandardSystemProperty.JAVA_SPECIFICATION_VERSION.value());
   private final Logger loggerToWatch = Logger.getLogger(AssistedInject.class.getName());
 
   private final List<LogRecord> logRecords = Lists.newArrayList();
@@ -144,6 +146,7 @@ public final class SubpackageTest {
 
   @Test
   public void testReflectionFallbackWorks() throws Exception {
+    assumeTrue(JAVA_VERSION < 17);
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
@@ -167,7 +170,7 @@ public final class SubpackageTest {
   public void testGeneratedDefaultMethodsForwardCorrectly() throws Exception {
     // This test requires above java 1.8.
     // 1.8's reflection capability is tested via "testReflectionFallbackWorks".
-    assumeTrue(Double.parseDouble(System.getProperty("java.specification.version")) > 1.8);
+    assumeTrue(JAVA_VERSION > 1.8);
 
     setLookupReflection(false);
     final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =

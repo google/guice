@@ -15,6 +15,7 @@ java_library(
         "//core/test/com/google/inject:testsupport",
         "//extensions/assistedinject/src/com/google/inject/assistedinject",
         "//third_party/java/aopalliance",
+        "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
         "//third_party/java/jsr330_inject",
         "//third_party/java/junit",

@@ -76,7 +76,7 @@ maven_install(
           "org.hsqldb", "hsqldb-j5", "2.0.0", testonly = True
         ),
         maven.artifact(
-          "org.mockito", "mockito-core", "1.9.5", testonly = True
+          "org.mockito", "mockito-core", "4.2.0", testonly = True
         ),
     ],
     repositories = [

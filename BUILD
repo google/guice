@@ -34,6 +34,7 @@ javadoc_library(
         "https://tomcat.apache.org/tomcat-5.5-doc/servletapi/",
         "http://aopalliance.sourceforge.net/doc/",
     ],
+    tags = ["manual"],  # Only do this when explicitly requested, not on test //...
     deps = [
         "//core/src/com/google/inject",
         "//extensions/assistedinject/src/com/google/inject/assistedinject",
