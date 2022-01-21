@@ -61,7 +61,7 @@ maven_install(
           "org.apache.felix", "org.apache.felix.framework", "3.0.5", testonly = True
         ),
         maven.artifact(
-          "org.easymock", "easymock", "3.1", testonly = True
+          "org.easymock", "easymock", "4.3", testonly = True
         ),
         maven.artifact(
           "org.hamcrest", "hamcrest", "2.2", testonly = True
