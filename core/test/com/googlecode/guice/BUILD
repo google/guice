@@ -28,6 +28,11 @@ java_library(
 
 guice_test_suites(
     name = "gen_tests",
+    jvm_flags = [
+        # those 2 options are required for some tests that checks stack traces
+        "-XX:+UnlockDiagnosticVMOptions",
+        "-XX:+ShowHiddenFrames",
+    ],
     sizes = [
         "small",
         "medium",
@@ -39,6 +44,11 @@ guice_test_suites(
     name = "gen_tests_class_loading_%s" % custom_class_loading_option,
     args = [
         "--guice_custom_class_loading=%s" % custom_class_loading_option,
+    ],
+    jvm_flags = [
+        # those 2 options are required for some tests that checks stack traces
+        "-XX:+UnlockDiagnosticVMOptions",
+        "-XX:+ShowHiddenFrames",
     ],
     sizes = [
         "small",

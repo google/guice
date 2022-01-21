@@ -44,7 +44,7 @@ _gen_suite = rule(
     implementation = _impl,
 )
 
-def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = None):
+def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = None, jvm_flags = []):
     """
     Generates tests for test file in srcs ending in "Test.java"
 
@@ -53,17 +53,20 @@ def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = N
       srcs: list of test source files, uses 'glob(["**/*Test.java"])' if not specified
       deps: list of runtime dependencies requried to run the test
       args: list of flags to pass to the test
+      jvm_flags: list of JVM flags to pass to the test
       suffix: suffix to apend to the generated test name
       sizes: not used, exists only so that the opensource guice_test_suites mirror exactly the internal one
     """
-    jvm_flags = []
+
+    flags = []
+    flags.extend(jvm_flags)
 
     # transform flags to JVM options used externally
     for arg in args:
         if arg.startswith("--"):
-            jvm_flags.append(arg.replace("--", "-D"))
+            flags.append(arg.replace("--", "-D"))
         else:
-            jvm_flags.append(arg)
+            flags.append(arg)
 
     package_name = native.package_name()
 
@@ -89,7 +92,7 @@ def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = N
     native.java_test(
         name = "AllTestsSuite" + suffix,
         test_class = (package_name + "/" + suite_name).replace("/", "."),
-        jvm_flags = jvm_flags,
+        jvm_flags = flags,
         srcs = [":" + suite_name],
         deps = deps + [
             "//third_party/java/junit",
