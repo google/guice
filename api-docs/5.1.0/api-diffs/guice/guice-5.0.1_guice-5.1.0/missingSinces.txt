@@ -1,0 +1,5 @@
+MISSING @SINCE TAG: com.google.inject.internal.aop.ClassDefining Method canDowncastToProxy(java.lang.Class)
+MISSING @SINCE TAG: com.google.inject.internal.aop.ClassDefining Method canLoadProxyByName(java.lang.Class)
+NO DOC BLOCK: com.google.inject.internal.Errors Method cannotInjectLocalClass(java.lang.Class)
+MISSING @SINCE TAG: com.google.inject.internal.KotlinSupportInterface Method isLocalClass(java.lang.Class)
+NO DOC BLOCK: com.google.inject.internal.ErrorId Field INJECT_LOCAL_CLASS
