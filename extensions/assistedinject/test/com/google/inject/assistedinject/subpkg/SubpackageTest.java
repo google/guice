@@ -18,7 +18,6 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -39,6 +38,9 @@ import org.junit.runners.JUnit4;
 public final class SubpackageTest {
   private static final double JAVA_VERSION =
       Double.parseDouble(StandardSystemProperty.JAVA_SPECIFICATION_VERSION.value());
+
+  private static final MethodHandles.Lookup LOOKUPS = MethodHandles.lookup();
+
   private final Logger loggerToWatch = Logger.getLogger(AssistedInject.class.getName());
 
   private final List<LogRecord> logRecords = Lists.newArrayList();
@@ -59,15 +61,15 @@ public final class SubpackageTest {
   @Before
   public void setUp() throws Exception {
     loggerToWatch.addHandler(fakeHandler);
-    setLookupReflection(true);
-    resetSuperMethodLookup();
+    setAllowPrivateLookupFallback(true);
+    setAllowMethodHandleWorkaround(true);
   }
 
   @After
   public void tearDown() throws Exception {
     loggerToWatch.removeHandler(fakeHandler);
-    setLookupReflection(true);
-    resetSuperMethodLookup();
+    setAllowPrivateLookupFallback(true);
+    setAllowMethodHandleWorkaround(true);
   }
 
   public abstract static class AbstractAssisted {
@@ -124,29 +126,57 @@ public final class SubpackageTest {
   }
 
   @Test
-  public void testFailsWithoutLookupsIfNoReflection() throws Exception {
-    setLookupReflection(false);
+  public void testNoPrivateFallbackOrWorkaround() throws Exception {
+    setAllowMethodHandleWorkaround(false);
+    setAllowPrivateLookupFallback(false);
 
-    try {
-      Guice.createInjector(
-          new AbstractModule() {
-            @Override
-            protected void configure() {
-              install(new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
-            }
-          });
-      fail("Expected CreationException");
-    } catch (CreationException ce) {
-      assertThat(Iterables.getOnlyElement(ce.getErrorMessages()).getMessage())
-          .contains("Did you call FactoryModuleBuilder.withLookups");
+    if (JAVA_VERSION > 1.8) {
+      // Above 1.8 will fail, because they can't access private details w/o the workarounds.
+      try {
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(
+                    new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
+              }
+            });
+        fail("Expected CreationException");
+      } catch (CreationException ce) {
+        assertThat(Iterables.getOnlyElement(ce.getErrorMessages()).getMessage())
+            .contains("Please call FactoryModuleBuilder.withLookups");
+      }
+      LogRecord record = Iterables.getOnlyElement(logRecords);
+      assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookup()`");
+    } else {
+      // 1.8 & below will succeed, because that's the only way they can work.
+      Injector injector =
+          Guice.createInjector(
+              new AbstractModule() {
+                @Override
+                protected void configure() {
+                  install(
+                      new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
+                }
+              });
+      LogRecord record = Iterables.getOnlyElement(logRecords);
+      assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookup()`");
+
+      ConcreteAssistedWithOverride.Factory factory =
+          injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
+      factory.create("foo");
+      AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factoryAbstract = factory;
+      factoryAbstract.create("foo");
     }
-    LogRecord record = Iterables.getOnlyElement(logRecords);
-    assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookups()`");
   }
 
   @Test
-  public void testReflectionFallbackWorks() throws Exception {
+  public void testPrivateFallbackOnly() throws Exception {
+    // Private fallback only works on JDKs below 17. On 17+ it's disabled.
     assumeTrue(JAVA_VERSION < 17);
+
+    setAllowMethodHandleWorkaround(false);
+
     Injector injector =
         Guice.createInjector(
             new AbstractModule() {
@@ -157,7 +187,30 @@ public final class SubpackageTest {
               }
             });
     LogRecord record = Iterables.getOnlyElement(logRecords);
-    assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookups()`");
+    assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookup()`");
+
+    ConcreteAssistedWithOverride.Factory factory =
+        injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
+    factory.create("foo");
+    AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factoryAbstract = factory;
+    factoryAbstract.create("foo");
+  }
+
+  @Test
+  public void testHandleWorkaroundOnly() throws Exception {
+    setAllowPrivateLookupFallback(false);
+
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                install(
+                    new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
+              }
+            });
+    LogRecord record = Iterables.getOnlyElement(logRecords);
+    assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookup()`");
 
     ConcreteAssistedWithOverride.Factory factory =
         injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
@@ -172,7 +225,6 @@ public final class SubpackageTest {
     // 1.8's reflection capability is tested via "testReflectionFallbackWorks".
     assumeTrue(JAVA_VERSION > 1.8);
 
-    setLookupReflection(false);
     final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =
         new Key<AbstractAssisted.Factory<ConcreteAssisted, String>>() {};
     Injector injector =
@@ -182,11 +234,11 @@ public final class SubpackageTest {
               protected void configure() {
                 install(
                     new FactoryModuleBuilder()
-                        .withLookups(MethodHandles.lookup())
+                        .withLookups(LOOKUPS)
                         .build(ConcreteAssistedWithOverride.Factory.class));
                 install(
                     new FactoryModuleBuilder()
-                        .withLookups(MethodHandles.lookup())
+                        .withLookups(LOOKUPS)
                         .build(ConcreteAssistedWithOverride.Factory2.class));
                 install(
                     new FactoryModuleBuilder()
@@ -226,23 +278,17 @@ public final class SubpackageTest {
     factory5.create("foo");
   }
 
-  private static void setLookupReflection(boolean allowed) throws Exception {
+  private static void setAllowPrivateLookupFallback(boolean allowed) throws Exception {
     Class<?> factoryProvider2 = Class.forName("com.google.inject.assistedinject.FactoryProvider2");
-    Field field = factoryProvider2.getDeclaredField("allowLookupReflection");
+    Field field = factoryProvider2.getDeclaredField("allowPrivateLookupFallback");
     field.setAccessible(true);
     field.setBoolean(null, allowed);
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private static void resetSuperMethodLookup() throws Exception {
+  private static void setAllowMethodHandleWorkaround(boolean allowed) throws Exception {
     Class<?> factoryProvider2 = Class.forName("com.google.inject.assistedinject.FactoryProvider2");
-    Field field = factoryProvider2.getDeclaredField("SUPER_METHOD_LOOKUP");
+    Field field = factoryProvider2.getDeclaredField("allowMethodHandleWorkaround");
     field.setAccessible(true);
-    AtomicReference ref = (AtomicReference) field.get(null);
-
-    Class superMethodLookup =
-        Class.forName("com.google.inject.assistedinject.FactoryProvider2$SuperMethodLookup");
-    Object unreflectSpecial = Enum.valueOf(superMethodLookup, "UNREFLECT_SPECIAL");
-    ref.set(unreflectSpecial);
+    field.setBoolean(null, allowed);
   }
 }

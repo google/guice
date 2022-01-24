@@ -60,6 +60,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -71,7 +72,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -97,10 +98,18 @@ final class FactoryProvider2<F>
   static final Logger logger = Logger.getLogger(AssistedInject.class.getName());
 
   /**
-   * A constant that determines if we allow fallback to reflection. Typically always true, but
-   * reflectively set to false in tests.
+   * A constant that determines if we allow fallback to using the JDK internals to make a "private
+   * lookup". Typically always true, but reflectively set to false in tests.
    */
-  private static boolean allowLookupReflection = true;
+  @SuppressWarnings("FieldCanBeFinal") // non-final for testing
+  private static boolean allowPrivateLookupFallback = true;
+
+  /**
+   * A constant that determines if we allow fallback to using method handle workarounds (if
+   * required). Typically always true, but reflectively set to false in tests.
+   */
+  @SuppressWarnings("FieldCanBeFinal") // non-final for testing
+  private static boolean allowMethodHandleWorkaround = true;
 
   /** if a factory method parameter isn't annotated, it gets this annotation. */
   static final Assisted DEFAULT_ANNOTATION =
@@ -380,52 +389,71 @@ final class FactoryProvider2<F>
           logger.log(
               Level.WARNING,
               "AssistedInject factory {0} is non-public and has javac-generated default methods. "
-                  + " Please pass a `MethodHandles.lookups()` with"
+                  + " Please pass a `MethodHandles.lookup()` with"
                   + " FactoryModuleBuilder.withLookups when using this factory so that Guice can"
-                  + " properly call the default methods. Guice will try to work around the"
-                  + " problem, but doing so requires reflection into the JDK and may break at any"
-                  + " time.",
+                  + " properly call the default methods. Guice will try to workaround this, but "
+                  + "it does not always work (depending on the method signatures of the factory).",
               new Object[] {factoryType});
         }
+
+        // Note: If the user didn't supply a valid lookup, we always try to fallback to the hacky
+        // signature comparing workaround below.
+        // This is because all these shenanigans are only necessary because we're implementing
+        // AssistedInject through a Proxy. If we were to generate a subclass (which we theoretically
+        // _could_ do), then we wouldn't inadvertantly proxy the javac-generated default methods
+        // too (and end up with a stack overflow from infinite recursion).
+        // As such, we try our hardest to "make things work" requiring requiring extra effort from
+        // the user.
 
         Method defaultMethod = entry.getValue();
         MethodHandle handle = null;
         try {
-          // Note: this can return null if we fallback to reflecting the private lookup cxtor and it
-          // fails. In that case, we try the super hacky workaround below (w/ 'foundMatch').
-          // It can throw an exception if we're not doing private reflection, or if unreflectSpecial
-          // _still_ fails.
-          handle = superMethodHandle(defaultMethod, factory, userLookups);
-        } catch (ReflectiveOperationException roe) {
-          errors.addMessage(
-              new Message(
-                  "Unable to use factory "
-                      + factoryRawType.getName()
-                      + ". Did you call FactoryModuleBuilder.withLookups(MethodHandles.lookups())"
-                      + " (with a lookups that has access to the factory)?"));
-          continue;
+          handle =
+              superMethodHandle(
+                  SuperMethodSupport.METHOD_LOOKUP, defaultMethod, factory, userLookups);
+        } catch (ReflectiveOperationException e1) {
+          // If the user-specified lookup failed, try again w/ the private lookup hack.
+          // If _that_ doesn't work, try the below workaround.
+          if (allowPrivateLookupFallback
+              && SuperMethodSupport.METHOD_LOOKUP != SuperMethodLookup.PRIVATE_LOOKUP) {
+            try {
+              handle =
+                  superMethodHandle(
+                      SuperMethodLookup.PRIVATE_LOOKUP, defaultMethod, factory, userLookups);
+            } catch (ReflectiveOperationException e2) {
+              // ignored, use below workaround.
+            }
+          }
         }
 
+        Supplier<String> failureMsg =
+            () ->
+                "Unable to use non-public factory "
+                    + factoryRawType.getName()
+                    + ". Please call"
+                    + " FactoryModuleBuilder.withLookups(MethodHandles.lookup()) (with a"
+                    + " lookups that has access to the factory), or make the factory"
+                    + " public.";
         if (handle != null) {
           methodHandleBuilder.put(defaultMethod, handle);
+        } else if (!allowMethodHandleWorkaround) {
+          errors.addMessage(failureMsg.get());
         } else {
-          // TODO: remove this workaround when Java8 support is dropped
           boolean foundMatch = false;
           for (Method otherMethod : otherMethods.get(defaultMethod.getName())) {
             if (dataSoFar.containsKey(otherMethod) && isCompatible(defaultMethod, otherMethod)) {
               if (foundMatch) {
-                errors.addMessage(
-                    "Generated default method %s with parameters %s is"
-                        + " signature-compatible with more than one non-default method."
-                        + " Unable to create factory. As a workaround, remove the override"
-                        + " so javac stops generating a default method.",
-                    defaultMethod, Arrays.asList(defaultMethod.getParameterTypes()));
+                errors.addMessage(failureMsg.get());
+                break;
               } else {
                 assistDataBuilder.put(defaultMethod, dataSoFar.get(otherMethod));
                 foundMatch = true;
               }
             }
           }
+          // We always expect to find at least one match, because we only deal with javac-generated
+          // default methods. If we ever allow user-specified default methods, this will need to
+          // change.
           if (!foundMatch) {
             throw new IllegalStateException("Can't find method compatible with: " + defaultMethod);
           }
@@ -937,58 +965,82 @@ final class FactoryProvider2<F>
     }
   }
 
-  private static MethodHandle superMethodHandle(
-      Method method, Object proxy, MethodHandles.Lookup userLookups)
-      throws ReflectiveOperationException {
-    MethodHandles.Lookup lookup = userLookups == null ? MethodHandles.lookup() : userLookups;
-    MethodHandle handle = SUPER_METHOD_LOOKUP.get().superMethodHandle(method, lookup);
-    return handle != null ? handle.bindTo(proxy) : null;
+  /**
+   * Holder for the appropriate kind of method lookup to use. Due to bugs in Java releases, we have
+   * to evaluate what approach to take at runtime. We do this by emulating the buggy scenarios: can
+   * a lookup access private details that it should be able to see? If not, we fail down to using
+   * full private access. Unfortunately, private access doesn't work in the JDK17+.... but it
+   * shouldn't be necessary there either, because the buggy lookup checks should be fixed.
+   */
+  private static class SuperMethodSupport {
+    private static final SuperMethodLookup METHOD_LOOKUP;
+
+    static {
+      SuperMethodLookup workingLookup = null;
+      try {
+        Class<?> hidden =
+            Class.forName("com.google.inject.assistedinject.internal.LookupTester$Hidden");
+        Method method = hidden.getMethod("method");
+        Field lookupsField = hidden.getEnclosingClass().getDeclaredField("LOOKUP");
+        lookupsField.setAccessible(true);
+        MethodHandles.Lookup lookups = (MethodHandles.Lookup) lookupsField.get(null);
+        for (SuperMethodLookup attempt : SuperMethodLookup.values()) {
+          try {
+            attempt.superMethodHandle(method, lookups);
+            workingLookup = attempt;
+            break;
+          } catch (ReflectiveOperationException ignored) {
+            // Keep looping to find a working lookup
+          }
+        }
+      } catch (ReflectiveOperationException ignored) {
+        // Bail if our internal tests don't exist.
+      }
+      // If everything failed, use the worst option.
+      if (workingLookup == null) {
+        workingLookup = SuperMethodLookup.PRIVATE_LOOKUP;
+      }
+      METHOD_LOOKUP = workingLookup;
+    }
   }
 
-  // begin by trying unreflectSpecial to find super method handles; this should work on Java14+
-  private static final AtomicReference<SuperMethodLookup> SUPER_METHOD_LOOKUP =
-      new AtomicReference<>(SuperMethodLookup.UNREFLECT_SPECIAL);
+  private static MethodHandle superMethodHandle(
+      SuperMethodLookup strategy, Method method, Object proxy, MethodHandles.Lookup userLookups)
+      throws ReflectiveOperationException {
+    MethodHandles.Lookup lookup = userLookups == null ? MethodHandles.lookup() : userLookups;
+    MethodHandle handle = strategy.superMethodHandle(method, lookup);
+    return handle != null ? handle.bindTo(proxy) : null;
+  }
 
   private static enum SuperMethodLookup {
     UNREFLECT_SPECIAL {
       @Override
       MethodHandle superMethodHandle(Method method, MethodHandles.Lookup lookup)
           throws ReflectiveOperationException {
-        try {
-          return lookup.unreflectSpecial(method, method.getDeclaringClass());
-        } catch (ReflectiveOperationException e) {
-          // fall back to findSpecial which should work on Java9+; use that for future lookups
-          SUPER_METHOD_LOOKUP.compareAndSet(this, FIND_SPECIAL);
-          return SUPER_METHOD_LOOKUP.get().superMethodHandle(method, lookup);
-        }
+        return lookup.unreflectSpecial(method, method.getDeclaringClass());
       }
     },
     FIND_SPECIAL {
       @Override
       MethodHandle superMethodHandle(Method method, MethodHandles.Lookup lookup)
           throws ReflectiveOperationException {
-        try {
-          Class<?> declaringClass = method.getDeclaringClass();
-          // use findSpecial to workaround https://bugs.openjdk.java.net/browse/JDK-8209005
-          return lookup.findSpecial(
-              declaringClass,
-              method.getName(),
-              MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-              declaringClass);
-        } catch (ReflectiveOperationException e) {
-          if (!allowLookupReflection) {
-            throw e;
-          }
-          // fall back to private Lookup which should work on Java8; use that for future lookups
-          SUPER_METHOD_LOOKUP.compareAndSet(this, PRIVATE_LOOKUP);
-          return SUPER_METHOD_LOOKUP.get().superMethodHandle(method, lookup);
-        }
+        Class<?> declaringClass = method.getDeclaringClass();
+        // Before JDK14, unreflectSpecial didn't work in some scenarios.
+        // So we workaround using findSpecial. See: https://bugs.openjdk.java.net/browse/JDK-8209005
+        return lookup.findSpecial(
+            declaringClass,
+            method.getName(),
+            MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+            declaringClass);
       }
     },
     PRIVATE_LOOKUP {
       @Override
       MethodHandle superMethodHandle(Method method, MethodHandles.Lookup unused)
           throws ReflectiveOperationException {
+        // Even findSpecial fails on JDK8, so we need to manually reflect on private details.
+        // But note that this will fail 100% of the time on JDK17+, which doesn't allow reflection
+        // into the JDK internals.
         return PrivateLookup.superMethodHandle(method);
       }
     };
@@ -1020,7 +1072,10 @@ final class FactoryProvider2<F>
         }
         cxtor.setAccessible(true);
         return cxtor;
-      } catch (ReflectiveOperationException | SecurityException e) {
+      } catch (Exception e) {
+        // Note: we catch Exception because we want to handle InaccessibleObjectException too,
+        // but we target JDK8.
+        // TODO(sameb): When we drop JDK8 support, catch ReflectiveOperation|Security|Inaccessible
         return null;
       }
     }
