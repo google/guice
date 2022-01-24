@@ -1,0 +1,45 @@
+// ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// maven pom organized by organization.
+// ------------------------------------------------------------------
+
+Google Guice - Extensions - TestLib
+
+
+From: 'an unknown organization'
+  - AOP alliance (http://aopalliance.sourceforge.net) aopalliance:aopalliance:jar:1.0
+    License: Public Domain 
+  - FindBugs-jsr305 (http://findbugs.sourceforge.net/) com.google.code.findbugs:jsr305:jar:3.0.1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - error-prone annotations (http://nexus.sonatype.org/oss-repository-hosting.html/error_prone_parent/error_prone_annotations) com.google.errorprone:error_prone_annotations:jar:2.3.1
+    License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Guava InternalFutureFailureAccess and InternalFutures (https://github.com/google/guava/failureaccess) com.google.guava:failureaccess:bundle:1.0.1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Guava: Google Core Libraries for Java (https://github.com/google/guava/guava) com.google.guava:guava:bundle:30.1-jre
+    License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Guava ListenableFuture only (https://github.com/google/guava/listenablefuture) com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - J2ObjC Annotations (https://github.com/google/j2objc/) com.google.j2objc:j2objc-annotations:jar:1.3
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Truth Core (http://github.com/google/truth/truth) com.google.truth:truth:jar:0.45
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - java-diff-utils (http://code.google.com/p/java-diff-utils/) com.googlecode.java-diff-utils:diffutils:jar:1.3.0
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - javax.inject (http://code.google.com/p/atinject/) javax.inject:javax.inject:jar:1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Checker Qual (https://checkerframework.org) org.checkerframework:checker-compat-qual:jar:2.5.5
+    License: GNU General Public License, version 2 (GPL2), with the classpath exception  (http://www.gnu.org/software/classpath/license.html)    License: The MIT License  (http://opensource.org/licenses/MIT)
+  - Checker Qual (https://checkerframework.org) org.checkerframework:checker-qual:jar:3.5.0
+    License: The MIT License  (http://opensource.org/licenses/MIT)
+
+From: 'Google, Inc.' (http://www.google.com)
+  - AutoValue Annotations (https://github.com/google/auto/auto-value-parent/auto-value-annotations) com.google.auto.value:auto-value-annotations:jar:1.6.3
+    License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Google Guice - Core Library (https://github.com/google/guice/guice) com.google.inject:guice:jar:5.0.2-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Google Guice - Extensions - ThrowingProviders (https://github.com/google/guice/extensions-parent/guice-throwingproviders) com.google.inject.extensions:guice-throwingproviders:jar:5.0.2-SNAPSHOT
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+
+
+

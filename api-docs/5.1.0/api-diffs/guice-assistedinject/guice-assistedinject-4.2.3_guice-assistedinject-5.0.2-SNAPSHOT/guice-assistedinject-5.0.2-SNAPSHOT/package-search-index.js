@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.google.inject.assistedinject"},{"l":"com.google.inject.assistedinject.internal"}]
