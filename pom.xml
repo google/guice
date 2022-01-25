@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>5.0.2-SNAPSHOT</version>
+  <version>5.1.1-SNAPSHOT</version>
 
   <name>Google Guice</name>
 
@@ -119,7 +119,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <!--
      | The last stable release version id, used for generating API diffs between released versions
     -->
-    <guice.lastStableRelease>4.2.3</guice.lastStableRelease>
+    <guice.lastStableRelease>5.1.0</guice.lastStableRelease>
     <gpg.skip>true</gpg.skip>
   </properties>
 
