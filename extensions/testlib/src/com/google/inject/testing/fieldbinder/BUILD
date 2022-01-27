@@ -1,6 +1,10 @@
 # Copyright 2014 Google Inc.  All rights reserved.
 # Author: eatnumber1@google.com (Russ Harmon)
 load("@rules_java//java:defs.bzl", "java_library")
+load(
+    "//:build_defs.bzl",
+    "JAVAC_OPTS",
+)
 
 package(
     default_testonly = 1,
@@ -10,6 +14,7 @@ package(
 java_library(
     name = "fieldbinder",
     srcs = glob(["*.java"]),
+    javacopts = JAVAC_OPTS,
     plugins = [
     ],
     deps = [

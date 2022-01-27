@@ -1,6 +1,10 @@
 # Copyright 2015 Google Inc.  All rights reserved.
 # Author: cgruber@google.com (Christian Gruber)
 load("@rules_java//java:defs.bzl", "java_library")
+load(
+    "//:build_defs.bzl",
+    "JAVAC_OPTS",
+)
 
 package(
     default_visibility = ["//:src"],
@@ -9,6 +13,7 @@ package(
 java_library(
     name = "daggeradapter",
     srcs = glob(["*.java"]),
+    javacopts = JAVAC_OPTS,
     plugins = [
     ],
     deps = [
