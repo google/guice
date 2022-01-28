@@ -15,9 +15,9 @@ load("@rules_jvm_external//:specs.bzl", "maven")
 
 http_archive(
     name = "google_bazel_common",
-    sha256 = "61cd7c2a24a1b066848a68c56deca799dd9d0329cb9032d1686859cdd2c05be2",
-    strip_prefix = "bazel-common-2e42988b7a3d1e3b11ab4db2d7c28f794500a672",
-    urls = ["https://github.com/google/bazel-common/archive/2e42988b7a3d1e3b11ab4db2d7c28f794500a672.zip"],
+    sha256 = "a8168646fbec5fe020b73ee6f2c0cd7480efb101f4d4c18d4cd703a56e4748ae",
+    strip_prefix = "bazel-common-bf8e5ef95b118d1716b0cb4982cf15b6ed1c896f",
+    urls = ["https://github.com/google/bazel-common/archive/bf8e5ef95b118d1716b0cb4982cf15b6ed1c896f.zip"],
 )
 
 load("@google_bazel_common//:workspace_defs.bzl", "google_common_workspace_rules")

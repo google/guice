@@ -81,5 +81,8 @@ java_library(
 
 filegroup(
     name = "javadoc-srcs",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(
+        ["**/*.java"],
+        exclude = ["internal/**/*.java"],
+    ),
 )
