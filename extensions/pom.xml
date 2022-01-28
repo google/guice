@@ -28,12 +28,6 @@
     <module>struts2</module>
     <module>testlib</module>
     <module>throwingproviders</module>
-<!--
- |  not yet promoted...
-- -
-    <module>mini</module>
-    <module>service</module>
--->
   </modules>
 
   <dependencies>
