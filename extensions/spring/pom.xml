@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
-      <version>3.0.5.RELEASE</version>
+      <version>5.3.14</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
