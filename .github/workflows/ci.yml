@@ -12,6 +12,13 @@ on:
     branches:
       - master
 
+concurrency:
+  # On main branch, we don't want any jobs cancelled so the sha is used to name the group
+  # On PR branches, we cancel the job if new commits are pushed
+  # More info: https://stackoverflow.com/a/68422069/253468
+  group: ${{ (github.ref == 'refs/heads/master') && format('ci-main-{0}', github.sha) || format('ci-main-{0}', github.ref) }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -24,10 +31,6 @@ jobs:
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.8.0
-        with:
-          access_token: ${{ github.token }}
       - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v2
@@ -55,10 +58,6 @@ jobs:
     name: Bazel Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.8.0
-        with:
-          access_token: ${{ github.token }}
       - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v2
