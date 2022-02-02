@@ -1,9 +1,11 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
+load("//:mvn.bzl", "gen_maven_artifact")
 load(
     "//:build_defs.bzl",
     "JAVAC_OPTS",
+    "POM_VERSION",
 )
 
 package(
@@ -30,6 +32,7 @@ java_library(
     javacopts = JAVAC_OPTS,
     plugins = [
     ],
+    tags = ["maven_coordinates=com.google.inject.extensions:guice-servlet:" + POM_VERSION],
     exports = [":request-scoped-annotation"],
     deps = [
         ":request-scoped-annotation",
@@ -46,4 +49,13 @@ java_library(
 filegroup(
     name = "javadoc-srcs",
     srcs = glob(["*.java"]),
+)
+
+gen_maven_artifact(
+    name = "artifact",
+    artifact_id = "guice-servlet",
+    artifact_name = "Google Guice - Extensions - Servlet",
+    artifact_target = ":servlet",
+    is_extension = True,
+    javadoc_srcs = [":javadoc-srcs"],
 )

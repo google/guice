@@ -19,3 +19,5 @@ JAVAC_OPTS = [
     "-target",
     "1.8",
 ]
+
+POM_VERSION = "${project.version}"

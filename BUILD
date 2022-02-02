@@ -7,6 +7,10 @@ package_group(
     packages = ["//..."],
 )
 
+exports_files([
+    "pom-template.xml",
+])
+
 javadoc_library(
     name = "javadoc",
     testonly = 1,  # some dependencies are testonly,
