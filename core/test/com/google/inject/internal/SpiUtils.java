@@ -1217,7 +1217,7 @@ public class SpiUtils {
         builder.put(((Binding) element).getKey(), (Binding) element);
       }
     }
-    return builder.build();
+    return builder.buildOrThrow();
   }
 
   static <K, V> MapResult<K, V> instance(K k, V v) {

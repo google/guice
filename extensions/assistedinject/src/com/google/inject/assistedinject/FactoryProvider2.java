@@ -378,7 +378,7 @@ final class FactoryProvider2<F>
       // Now go back through default methods. Try to use MethodHandles to make things
       // work.  If that doesn't work, fallback to trying to find compatible method
       // signatures.
-      Map<Method, AssistData> dataSoFar = assistDataBuilder.build();
+      Map<Method, AssistData> dataSoFar = assistDataBuilder.buildOrThrow();
       ImmutableMap.Builder<Method, MethodHandle> methodHandleBuilder = ImmutableMap.builder();
       boolean warnedAboutUserLookups = false;
       for (Map.Entry<String, Method> entry : defaultMethods.entries()) {
@@ -466,8 +466,8 @@ final class FactoryProvider2<F>
         throw errors.toException();
       }
 
-      assistDataByMethod = assistDataBuilder.build();
-      methodHandleByMethod = methodHandleBuilder.build();
+      assistDataByMethod = assistDataBuilder.buildOrThrow();
+      methodHandleByMethod = methodHandleBuilder.buildOrThrow();
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }

@@ -59,13 +59,13 @@ public class ServletDefinitionTest extends TestCase {
 
     replay(injector, binding);
 
-    //some init params
+    // some init params
     //noinspection SSBasedInspection
     final Map<String, String> initParams =
         new ImmutableMap.Builder<String, String>()
             .put("ahsd", "asdas24dok")
             .put("ahssd", "asdasd124ok")
-            .build();
+            .buildOrThrow();
 
     String pattern = "/*";
     final ServletDefinition servletDefinition =
@@ -101,12 +101,12 @@ public class ServletDefinitionTest extends TestCase {
 
   public void testServiceWithContextPath() throws IOException, ServletException {
     String pattern = "/*";
-    //some init params
+    // some init params
     Map<String, String> initParams =
         new ImmutableMap.Builder<String, String>()
             .put("ahsd", "asdas24dok")
             .put("ahssd", "asdasd124ok")
-            .build();
+            .buildOrThrow();
 
     final ServletDefinition servletDefinition =
         new ServletDefinition(

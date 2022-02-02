@@ -960,7 +960,7 @@ final class InjectorImpl implements Injector, Lookups {
       return new ImmutableMap.Builder<Key<?>, Binding<?>>()
           .putAll(bindingData.getExplicitBindingsThisLevel())
           .putAll(jitBindingData.getJitBindings())
-          .build();
+          .buildOrThrow();
     }
   }
 

@@ -131,7 +131,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       callbacks[callbackIndex++] = new InterceptorStackCallback(method, deDuplicated, superInvoker);
     }
 
-    interceptors = interceptorsMapBuilder.build();
+    interceptors = interceptorsMapBuilder.buildOrThrow();
   }
 
   /** Returns the interceptors that apply to the constructed type. */

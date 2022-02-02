@@ -47,13 +47,13 @@ public class FilterDefinitionTest extends TestCase {
 
     replay(binding, injector);
 
-    //some init params
+    // some init params
     //noinspection SSBasedInspection
     final Map<String, String> initParams =
         new ImmutableMap.Builder<String, String>()
             .put("ahsd", "asdas24dok")
             .put("ahssd", "asdasd124ok")
-            .build();
+            .buildOrThrow();
 
     ServletContext servletContext = createMock(ServletContext.class);
     final String contextName = "thing__!@@44";

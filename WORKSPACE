@@ -32,7 +32,7 @@ maven_install(
         "com.google.dagger:dagger:2.22.1",
         "com.google.dagger:dagger-producers:2.22.1",
         "com.google.errorprone:error_prone_annotations:2.0.18",
-        "com.google.guava:guava:30.1-jre",
+        "com.google.guava:guava:31.0.1-jre",
         "commons-logging:commons-logging:1.2",
         "javax.inject:javax.inject:1",
         "javax.persistence:javax.persistence-api:2.2",
@@ -46,7 +46,7 @@ maven_install(
           "biz.aQute", "bnd", "0.0.384", testonly = True
         ),
         maven.artifact(
-          "com.google.guava", "guava-testlib", "30.1-jre", testonly = True
+          "com.google.guava", "guava-testlib", "31.0.1-jre", testonly = True
         ),
         maven.artifact(
           "com.google.truth", "truth", "0.45", testonly = True
