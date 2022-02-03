@@ -860,7 +860,7 @@ public class ScopesTest extends TestCase {
         }
       }
     }
-    return builder.build();
+    return builder.buildOrThrow();
   }
 
   @Singleton

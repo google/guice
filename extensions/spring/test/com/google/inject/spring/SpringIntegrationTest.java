@@ -26,6 +26,7 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -38,7 +39,8 @@ public class SpringIntegrationTest extends TestCase {
     RootBeanDefinition singleton = new RootBeanDefinition(Singleton.class);
     beanFactory.registerBeanDefinition("singleton", singleton);
 
-    RootBeanDefinition prototype = new RootBeanDefinition(Prototype.class, false);
+    RootBeanDefinition prototype = new RootBeanDefinition(Prototype.class);
+    prototype.setScope(BeanDefinition.SCOPE_PROTOTYPE);
     beanFactory.registerBeanDefinition("prototype", prototype);
 
     Injector injector =
@@ -65,7 +67,8 @@ public class SpringIntegrationTest extends TestCase {
     RootBeanDefinition singleton = new RootBeanDefinition(Singleton.class);
     beanFactory.registerBeanDefinition("singleton", singleton);
 
-    RootBeanDefinition prototype = new RootBeanDefinition(Prototype.class, false);
+    RootBeanDefinition prototype = new RootBeanDefinition(Prototype.class);
+    prototype.setScope(BeanDefinition.SCOPE_PROTOTYPE);
     beanFactory.registerBeanDefinition("prototype", prototype);
 
     Injector injector =

@@ -506,7 +506,7 @@ public final class RealMapBinder<K, V> implements Module {
         bindingsMultimapBuilder.put(entry.getKey(), entry.getValue().build());
       }
       mapBindings = ImmutableMap.copyOf(bindingMapMutable);
-      multimapBindings = bindingsMultimapBuilder.build();
+      multimapBindings = bindingsMultimapBuilder.buildOrThrow();
 
       entries = entriesBuilder.build();
 
@@ -720,7 +720,7 @@ public final class RealMapBinder<K, V> implements Module {
         dependenciesBuilder.add(Dependency.get(getKeyOfProvider(entry.getValue().getKey())));
       }
 
-      mapOfProviders = mapOfProvidersBuilder.build();
+      mapOfProviders = mapOfProvidersBuilder.buildOrThrow();
       dependencies = dependenciesBuilder.build();
     }
 
@@ -801,7 +801,7 @@ public final class RealMapBinder<K, V> implements Module {
         resultBuilder.put(key, value);
       }
 
-      return resultBuilder.build();
+      return resultBuilder.buildOrThrow();
     }
 
     @Override
@@ -945,10 +945,10 @@ public final class RealMapBinder<K, V> implements Module {
       }
 
       ImmutableMultimap<K, Key<V>> keyToValueKey = keyToValueKeyBuilder.build();
-      ImmutableMap<Key<V>, K> valueKeyToKey = valueKeyToKeyBuilder.build();
-      ImmutableMap<Key<V>, Binding<V>> valueKeyToBinding = valueKeyToBindingBuilder.build();
+      ImmutableMap<Key<V>, K> valueKeyToKey = valueKeyToKeyBuilder.buildOrThrow();
+      ImmutableMap<Key<V>, Binding<V>> valueKeyToBinding = valueKeyToBindingBuilder.buildOrThrow();
       ImmutableMap<Key<V>, Binding<Map.Entry<K, Provider<V>>>> valueKeyToEntryBinding =
-          valueKeyToEntryBindingBuilder.build();
+          valueKeyToEntryBindingBuilder.buildOrThrow();
 
       // Check that there is a 1:1 mapping from keys from the ProviderMapEntrys to the
       // keys from the Bindings.
@@ -1103,7 +1103,7 @@ public final class RealMapBinder<K, V> implements Module {
 
           multimapOfProvidersBuilder.put(entry.getKey(), providersBuilder.build());
         }
-        multimapOfProviders = multimapOfProvidersBuilder.build();
+        multimapOfProviders = multimapOfProvidersBuilder.buildOrThrow();
         dependencies = dependenciesBuilder.build();
       }
 
@@ -1210,7 +1210,7 @@ public final class RealMapBinder<K, V> implements Module {
           resultBuilder.put(perKeyData.key, bindingsBuilder.build());
         }
 
-        return resultBuilder.build();
+        return resultBuilder.buildOrThrow();
       }
     }
   }

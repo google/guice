@@ -121,7 +121,7 @@ public class Annotations {
     for (Method method : annotationType.getDeclaredMethods()) {
       result.put(method.getName(), method.getDefaultValue());
     }
-    return result.build();
+    return result.buildOrThrow();
   }
 
   /** Implements {@link Annotation#equals}. */

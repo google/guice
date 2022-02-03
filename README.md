@@ -1,14 +1,14 @@
 Guice
 ====
 
-
-
-**Latest release: [5.0.1](https://github.com/google/guice/wiki/Guice501)**
-
-**Documentation:** [User Guide](https://github.com/google/guice/wiki/Motivation), [5.0.1 javadocs](https://google.github.io/guice/api-docs/5.0.1/javadoc/index.html), [Latest javadocs](https://google.github.io/guice/api-docs/latest/javadoc/index.html) <br/>
-**Continuous Integration:** [![Build Status](https://github.com/google/guice/workflows/continuous-integration/badge.svg)](https://github.com/google/guice/actions) <br/>
-**Mailing Lists:** [User Mailing List](http://groups.google.com/group/google-guice) <br/>
-**License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+-   **Latest release: [5.1.0](https://github.com/google/guice/wiki/Guice510)**
+-   **Documentation:**
+    [User Guide](https://github.com/google/guice/wiki/Motivation),
+    [5.1.0 javadocs](https://google.github.io/guice/api-docs/5.1.0/javadoc/index.html)
+-   **Continuous Integration:**
+    [![Build Status](https://github.com/google/guice/workflows/continuous-integration/badge.svg)](https://github.com/google/guice/actions)
+-   **Mailing Lists:** [User Mailing List](http://groups.google.com/group/google-guice) <br/>
+-   **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Put simply, Guice alleviates the need for factories and the use of new in your Java code. Think of Guice's @Inject as the new new. You will still need to write factories in some cases, but your code will not depend directly on them. Your code will be easier to change, unit test and reuse in other contexts.
 

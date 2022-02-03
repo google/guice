@@ -58,7 +58,7 @@ public class MoreTypes {
           .put(TypeLiteral.get(double.class), TypeLiteral.get(Double.class))
           .put(TypeLiteral.get(char.class), TypeLiteral.get(Character.class))
           .put(TypeLiteral.get(void.class), TypeLiteral.get(Void.class))
-          .build();
+          .buildOrThrow();
 
   /**
    * Returns a key that doesn't hold any references to parent classes. This is necessary for

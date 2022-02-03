@@ -27,7 +27,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
-  <version>5.0.2-SNAPSHOT</version>
+  <version>5.1.1-SNAPSHOT</version>
 
   <name>Google Guice</name>
 
@@ -119,7 +119,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <!--
      | The last stable release version id, used for generating API diffs between released versions
     -->
-    <guice.lastStableRelease>4.2.3</guice.lastStableRelease>
+    <guice.lastStableRelease>5.1.0</guice.lastStableRelease>
     <gpg.skip>true</gpg.skip>
   </properties>
 
@@ -143,12 +143,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>30.1-jre</version>
+        <version>31.0.1-jre</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>30.1-jre</version>
+        <version>31.0.1-jre</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>

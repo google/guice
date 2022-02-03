@@ -250,7 +250,7 @@ class InjectorBindingData {
     for (Map.Entry<Class<? extends Annotation>, ScopeBinding> entry : scopes.entrySet()) {
       builder.put(entry.getKey(), entry.getValue().getScope());
     }
-    return builder.build();
+    return builder.buildOrThrow();
   }
 
   /**

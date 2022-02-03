@@ -1,6 +1,12 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
+load("//:mvn.bzl", "gen_maven_artifact")
+load(
+    "//:build_defs.bzl",
+    "JAVAC_OPTS",
+    "POM_VERSION",
+)
 
 package(
     default_visibility = ["//:src"],
@@ -23,6 +29,7 @@ IMPLEMENTED_BY_SRCS = [
 java_library(
     name = "implemented_by",
     srcs = IMPLEMENTED_BY_SRCS,
+    javacopts = JAVAC_OPTS,
 )
 
 # TODO(lukes,user): It'd be nice if this wasn't one big rule.
@@ -36,8 +43,10 @@ java_library(
         ["**/*.java"],
         exclude = IMPLEMENTED_BY_SRCS + ANNOTATION_SRCS,
     ),
+    javacopts = JAVAC_OPTS,
     plugins = [
     ],
+    tags = ["maven_coordinates=com.google.inject:guice:" + POM_VERSION],
     exports = [
         ":annotations",
         ":implemented_by",
@@ -64,6 +73,7 @@ java_library(
 java_library(
     name = "annotations",
     srcs = ANNOTATION_SRCS,
+    javacopts = JAVAC_OPTS,
     plugins = [
     ],
     deps = [
@@ -74,5 +84,16 @@ java_library(
 
 filegroup(
     name = "javadoc-srcs",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(
+        ["**/*.java"],
+        exclude = ["internal/**/*.java"],
+    ),
+)
+
+gen_maven_artifact(
+    name = "core",
+    artifact_id = "guice",
+    artifact_name = "Google Guice - Core Library",
+    artifact_target = ":inject",
+    javadoc_srcs = [":javadoc-srcs"],
 )

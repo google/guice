@@ -200,6 +200,6 @@ public class ServletScopesTest extends TestCase {
         }
       }
     }
-    return builder.build();
+    return builder.buildOrThrow();
   }
 }
