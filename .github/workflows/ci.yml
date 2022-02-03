@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: .github/actions/maven-test
+      - uses: ./.github/actions/maven-test
 
   bazel-test:
     runs-on: ${{ matrix.os }}
