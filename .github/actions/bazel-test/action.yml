@@ -1,0 +1,21 @@
+name: 'Bazel Tests'
+description: 'Runs all tests using bazel.'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'zulu'
+    - name: 'Cache bazel external dependencies'
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/bazel/*/*/external
+        key: ${{ runner.os }}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
+        restore-keys: |
+          ${{ runner.os }}-bazel-test-
+    - name: Bazel test
+      run: bazel test //... --test_output=errors
+      shell: bash

@@ -32,20 +32,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-      - name: 'Cache local Maven repository'
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Verify with Maven
-        run: mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
+      - uses: ./.github/actions/maven-test
 
   bazel-test:
     runs-on: ${{ matrix.os }}
@@ -59,20 +46,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-      - name: 'Cache bazel external dependencies'
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/bazel/*/*/external
-          key: ${{ runner.os }}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
-          restore-keys: |
-            ${{ runner.os }}-bazel-test-
-      - name: Bazel test
-        run: bazel test //... --test_output=errors
+      - uses: ./.github/actions/bazel-test
 
   publish:
     runs-on: ubuntu-latest
@@ -82,29 +56,4 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: 11
-          distribution: 'zulu'
-          server-id: google-snapshots
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-      - name: 'Cache local Maven repository'
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Publish Javadoc
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          chmod +x util/publish-latest-docs.sh
-          ./util/publish-latest-docs.sh
-      - name: Publish Snapshot
-        run: mvn clean deploy -DskipTests=true -Dmaven.javadoc.skip=true
-        env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      - uses: ./.github/actions/publish-snapshot
