@@ -13,14 +13,9 @@ runs:
       uses: actions/cache@v2
       with:
         path: ~/.cache/bazel
-        key: ${{ runner.os }}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
+        key: ${{ runner.os }}-java-${{matrix.java}}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
         restore-keys: |
-          ${{ runner.os }}-bazel-test-
+          ${{ runner.os }}-java-${{matrix.java}}-bazel-test-
     - name: Bazel test
       run: bazel test //... --test_output=errors
-      shell: bash
-    - name: 'Clean bazel cache'
-      run: |
-        rm -rf $(bazel info repository_cache)
-        rm -rf ~/.cache/bazel/*/*/external/
       shell: bash
