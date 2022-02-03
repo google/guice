@@ -18,3 +18,4 @@ runs:
             ${{ runner.os }}-maven-
       - name: Verify with Maven
         run: mvn -B -P!standard-with-extra-repos verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
+        shell: bash
