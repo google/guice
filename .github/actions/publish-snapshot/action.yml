@@ -3,6 +3,7 @@ description: 'Publish snapshot artifacts and latest API doc.'
 
 runs:
   using: "composite"
+  steps:
     - name: Setup JDK
       uses: actions/setup-java@v2
       with:
