@@ -57,3 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/publish-snapshot
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}

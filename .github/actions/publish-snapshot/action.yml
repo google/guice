@@ -20,8 +20,6 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Publish Javadoc
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         chmod +x util/publish-latest-docs.sh
         ./util/publish-latest-docs.sh
@@ -29,6 +27,3 @@ runs:
     - name: Publish Snapshot
       run: mvn clean deploy -DskipTests=true -Dmaven.javadoc.skip=true
       shell: bash
-      env:
-        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
