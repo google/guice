@@ -24,6 +24,7 @@ def gen_maven_artifact(
         artifact_id,
         artifact_target,
         javadoc_srcs,
+        packaging = "jar",
         is_extension = False):
     """Generates files required for a maven artifact.
 
@@ -33,6 +34,7 @@ def gen_maven_artifact(
         artifact_id: The id of the generated artifact in maven, e.g. "guice".
         artifact_target: The target containing the actual maven target.
         javadoc_srcs: Source files used to generate the Javadoc maven artifact.
+        packaging: The packaging used for the artifact, default is "jar".
         is_extension: Whether the maven artifact is a Guice extension or not.
 
     """
@@ -55,25 +57,28 @@ def gen_maven_artifact(
             "{artifact_name}": artifact_name,
             "{artifact_id}": artifact_id,
             "{artifact_group_id}": group_id,
+            "{packaging}": packaging,
         },
     )
 
-    jarjar_library(
-        name = artifact_id,
-        jars = artifact_targets,
-    )
+    if packaging == "jar":
+        jarjar_library(
+            name = artifact_id,
+            jars = artifact_targets,
+        )
 
-    jarjar_library(
-        name = artifact_id + "-src",
-        jars = [_src_jar(dep) for dep in artifact_targets],
-    )
+        jarjar_library(
+            name = artifact_id + "-src",
+            jars = [_src_jar(dep) for dep in artifact_targets],
+        )
 
-    javadoc_library(
-        name = artifact_id + "-javadoc",
-        srcs = javadoc_srcs,
-        testonly = 1,
-        deps = artifact_targets,
-    )
+    if javadoc_srcs:
+        javadoc_library(
+            name = artifact_id + "-javadoc",
+            srcs = javadoc_srcs,
+            testonly = 1,
+            deps = artifact_targets,
+        )
 
 def _src_jar(target):
     if target.startswith(":"):

@@ -26,7 +26,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <groupId>{artifact_group_id}</groupId>
   <artifactId>{artifact_id}</artifactId>
   <version>{pom_version}</version>
-  <packaging>jar</packaging>
+  <packaging>{packaging}</packaging>
 
 
   <description>

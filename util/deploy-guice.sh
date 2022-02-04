@@ -57,6 +57,12 @@ _deploy_extension() {
 }
 
 _deploy \
+  bom/libguice-bom.jar \
+  bom/pom.xml \
+  "" \
+  ""
+
+_deploy \
   core/src/com/google/inject/guice.jar \
   core/src/com/google/inject/pom.xml \
   core/src/com/google/inject/guice-src.jar \
