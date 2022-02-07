@@ -7,8 +7,8 @@ runs:
     - name: Setup JDK
       uses: actions/setup-java@v2
       with:
-        java-version: 11
-        distribution: 'zulu'
+        distribution: ${{ env.USE_JAVA_DISTRIBUTION }}
+        java-version: ${{ env.USE_JAVA_VERSION }}
         server-id: google-snapshots
         server-username: MAVEN_USERNAME
         server-password: MAVEN_PASSWORD
@@ -27,3 +27,4 @@ runs:
     - name: Publish Snapshot
       run: mvn clean deploy -DskipTests=true -Dmaven.javadoc.skip=true
       shell: bash
+

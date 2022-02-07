@@ -1,0 +1,32 @@
+name: 'Bazel Build'
+description: 'Builds artifacts and creates local snapshots maven artifacts.'
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Set up JDK'
+      uses: actions/setup-java@v2
+      with:
+        distribution: ${{ env.USE_JAVA_DISTRIBUTION }}
+        java-version: ${{ env.USE_JAVA_VERSION }}
+    - name: 'Check out repository'
+      uses: actions/checkout@v2
+    - name: 'Cache Bazel files'
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/bazel
+        key: ${{ runner.os }}-bazel-build-${{ hashFiles('**/WORKSPACE') }}
+        restore-keys: |
+          ${{ runner.os }}-bazel-build-
+    - name: 'Bazel build'
+      # Cross compile for Java 8, see http://openjdk.java.net/jeps/247
+      run: bazel build --javacopt="--release 8" //...
+      shell: bash
+    - name: 'Install local snapshot'
+      run: ./util/install-local-snapshot.sh
+      shell: bash
+    - name: 'Upload local snapshot for local mvn artifiact tests'
+      uses: actions/upload-artifact@v2
+      with:
+        name: local-snapshot
+        path: ~/.m2/repository/com/google/inject

@@ -25,6 +25,10 @@ gen_maven_artifact(
     artifact_id = "guice-testlib",
     artifact_name = "Google Guice - Extensions - TestLib",
     artifact_target = ":testlib",
+    artifact_target_libs = [
+        "//extensions/testlib/src/com/google/inject/testing/fieldbinder",
+        "//extensions/testlib/src/com/google/inject/testing/throwingproviders",
+    ],
     is_extension = True,
     javadoc_srcs = [
         "//extensions/testlib/src/com/google/inject/testing/fieldbinder:javadoc-srcs",

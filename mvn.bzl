@@ -25,6 +25,7 @@ def gen_maven_artifact(
         artifact_target,
         javadoc_srcs,
         packaging = "jar",
+        artifact_target_libs = [],
         is_extension = False):
     """Generates files required for a maven artifact.
 
@@ -33,6 +34,8 @@ def gen_maven_artifact(
         artifact_name: The name of the generated artifcat in maven, e.g. "Google Guice Core Library".
         artifact_id: The id of the generated artifact in maven, e.g. "guice".
         artifact_target: The target containing the actual maven target.
+        artifact_target_libs: The list of dependencies that should be packaged together with artifact_target,
+            corresponding to the list of targets exported by artifact_target.
         javadoc_srcs: Source files used to generate the Javadoc maven artifact.
         packaging: The packaging used for the artifact, default is "jar".
         is_extension: Whether the maven artifact is a Guice extension or not.
@@ -43,7 +46,8 @@ def gen_maven_artifact(
     if is_extension:
         group_id = "com.google.inject.extensions"
 
-    artifact_targets = [artifact_target]
+    # TODO: get artifact_target_libs from bazel and remove the need to pass this in explictly.
+    artifact_targets = [artifact_target] + artifact_target_libs
 
     pom_file(
         name = "pom",

@@ -95,5 +95,9 @@ gen_maven_artifact(
     artifact_id = "guice",
     artifact_name = "Google Guice - Core Library",
     artifact_target = ":inject",
+    artifact_target_libs = [
+        ":annotations",
+        ":implemented_by",
+    ],
     javadoc_srcs = [":javadoc-srcs"],
 )

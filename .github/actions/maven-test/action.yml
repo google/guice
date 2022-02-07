@@ -8,7 +8,7 @@ runs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'zulu'
+          distribution: ${{ env.USE_JAVA_DISTRIBUTION }}
       - name: 'Cache local Maven repository'
         uses: actions/cache@v2
         with:
