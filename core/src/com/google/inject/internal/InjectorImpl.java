@@ -108,7 +108,7 @@ final class InjectorImpl implements Injector, Lookups {
     NO_JIT,
     /** allows existing just in time bindings, but does not allow new ones */
     EXISTING_JIT,
-    /** allows existing just in time bindings & allows new ones to be created */
+    /** allows existing just in time bindings and allows new ones to be created */
     NEW_OR_EXISTING_JIT,
   }
 
@@ -368,7 +368,7 @@ final class InjectorImpl implements Injector, Lookups {
     return new SyntheticProviderBindingImpl<T>(this, key, delegate);
   }
 
-  /** A framework-created JIT Provider<T> binding. */
+  /** A framework-created JIT {@code Provider<T>} binding. */
   private static class SyntheticProviderBindingImpl<T> extends BindingImpl<Provider<T>>
       implements ProviderBinding<Provider<T>>, HasDependencies {
     final BindingImpl<T> providedBinding;
@@ -618,7 +618,7 @@ final class InjectorImpl implements Injector, Lookups {
 
   /**
    * Iterates through the binding's dependencies to clean up any stray bindings that were leftover
-   * from a failed JIT binding. This is required because the bindings are eagerly & optimistically
+   * from a failed JIT binding. This is required because the bindings are eagerly and optimistically
    * added to allow circular dependency support, so dependencies may pass where they should have
    * failed.
    */

@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 
 /**
- * Keeps track of creation listeners & uninitialized bindings, so they can be processed after
+ * Keeps track of creation listeners and uninitialized bindings, so they can be processed after
  * bindings are recorded.
  *
  * @author sameb@google.com (Sam Berlin)

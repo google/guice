@@ -122,7 +122,7 @@ public class ImplicitBindingTest extends TestCase {
    * dependencies. And so we can successfully create a binding for B. But later, when the binding
    * for A ultimately fails, we need to clean up the dependent binding for B.
    *
-   * <p>The test loops through linked bindings & bindings with constructor & member injections, to
+   * <p>The test loops through linked bindings & bindings with constructor and member injections, to
    * make sure that all are cleaned up and traversed. It also makes sure we don't touch explicit
    * bindings.
    */

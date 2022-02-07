@@ -24,8 +24,9 @@ import com.google.inject.matcher.Matcher;
  * Binds types (picked using a Matcher) to an type listener. Registrations are created explicitly in
  * a module using {@link com.google.inject.Binder#bindListener(Matcher, TypeListener)} statements:
  *
- * <pre>
- *     register(only(new TypeLiteral&lt;PaymentService&lt;CreditCard>>() {}), listener);</pre>
+ * <pre>{@code
+ * register(only(new TypeLiteral<PaymentService<CreditCard>>() {}), listener);
+ * }</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

@@ -139,9 +139,7 @@ public abstract class AbstractModule implements Module {
     binder().requestStaticInjection(types);
   }
 
-  /**
-   * @see {@link Binder#bindInterceptor(com.google.inject.matcher.Matcher, MethodInterceptor[])}.
-   */
+  /** @see Binder#bindInterceptor */
   protected void bindInterceptor(
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,

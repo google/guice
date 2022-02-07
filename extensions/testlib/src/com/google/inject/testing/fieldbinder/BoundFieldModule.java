@@ -76,10 +76,10 @@ import java.lang.reflect.Type;
  *
  * <p>Example use:
  *
- * <pre><code>
+ * <pre>{@code
  * public class TestFoo {
- *   // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
- *   {@literal @}Bind private List{@code <Object>} listOfObjects = Lists.of();
+ *   // bind(new TypeLiteral<List<Object>>() {}).toInstance(listOfObjects);
+ *   {@literal @}Bind private List<Object> listOfObjects = Lists.of();
  *
  *   // private String userName = "string_that_changes_over_time";
  *   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
@@ -94,13 +94,13 @@ import java.lang.reflect.Type;
  *   private String myString = "hello";
  *
  *   // bind(Object.class).toProvider(myProvider);
- *   {@literal @}Bind private Provider{@code <Object>} myProvider = getProvider();
+ *   {@literal @}Bind private Provider<Object> myProvider = getProvider();
  *
  *   {@literal @}Before public void setUp() {
  *     Guice.createInjector(BoundFieldModule.of(this)).injectMembers(this);
  *   }
  * }
- * </code></pre>
+ * }</pre>
  *
  * @see Bind
  * @author eatnumber1@google.com (Russ Harmon)
@@ -129,7 +129,7 @@ public final class BoundFieldModule implements Module {
   }
 
   /**
-   * Wrapper of BoundFieldModule which enables attaching {@link @RestrictedBindingSource} permits to
+   * Wrapper of BoundFieldModule which enables attaching {@code @RestrictedBindingSource} permits to
    * instances of it.
    *
    * <p>To create an instance of BoundFieldModule with permits (to enable it to bind restricted

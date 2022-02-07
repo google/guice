@@ -52,6 +52,7 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    *   <li>Details about the error such as the source of the error
    *   <li>Hints for fixing the error if available
    *   <li>Link to the documentation on this error in greater detail
+   * </ul>
    *
    * @param index index for this error
    * @param mergeableErrors list of errors that are mergeable with this error

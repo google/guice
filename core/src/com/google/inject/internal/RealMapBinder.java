@@ -207,15 +207,16 @@ public final class RealMapBinder<K, V> implements Module {
         TypeLiteral.get(Types.setOf(entryOfJavaxProviderOf(keyType, valueType).getType()));
   }
 
-  /** Given a Key<T> will return a Key<Provider<T>> */
+  /** Given a {@code Key<T>} will return a {@code Key<Provider<T>>}. */
   @SuppressWarnings("unchecked")
   private static <T> Key<Provider<T>> getKeyOfProvider(Key<T> valueKey) {
     return (Key<Provider<T>>)
         valueKey.ofType(Types.providerOf(valueKey.getTypeLiteral().getType()));
   }
 
-  // Note: We use valueTypeAndAnnotation effectively as a Pair<TypeLiteral, Annotation|Class>
-  // since it's an easy way to group a type and an optional annotation type or instance.
+  // Note: We use valueTypeAndAnnotation effectively as a {@code Pair<TypeLiteral,
+  // Annotation|Class>} since it's an easy way to group a type and an optional annotation type or
+  // instance.
   static <K, V> RealMapBinder<K, V> newRealMapBinder(
       Binder binder, TypeLiteral<K> keyType, Key<V> valueTypeAndAnnotation) {
     binder = binder.skipSources(RealMapBinder.class);

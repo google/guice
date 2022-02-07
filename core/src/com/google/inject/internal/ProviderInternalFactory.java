@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
-import javax.inject.Provider;
 import javax.annotation.Nullable;
+import javax.inject.Provider;
 
 /**
  * Base class for InternalFactories that are used by Providers, to handle circular dependencies.
@@ -75,7 +75,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
   }
 
   /**
-   * Provisions a new instance. Subclasses should override this to catch exceptions & rethrow as
+   * Provisions a new instance. Subclasses should override this to catch exceptions and rethrow as
    * ErrorsExceptions.
    */
   protected T provision(

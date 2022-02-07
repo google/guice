@@ -48,7 +48,7 @@ public @interface Transactional {
   Class<? extends Exception>[] rollbackOn() default RuntimeException.class;
 
   /**
-   * A list of exceptions to <b>not<b> rollback on. A caveat to the rollbackOn clause. The
+   * A list of exceptions to <b>not</b> rollback on. A caveat to the rollbackOn clause. The
    * disjunction of rollbackOn and ignore represents the list of exceptions that will trigger a
    * rollback. The complement of rollbackOn and the universal set plus any exceptions in the ignore
    * set represents the list of exceptions that will trigger a commit. Note that ignore exceptions

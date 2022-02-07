@@ -814,8 +814,8 @@ public final class InjectionPoint {
   /**
    * Returns true if the method is eligible to be injected. This is different than {@link
    * #isValidMethod}, because ineligibility will not drop a method from being injected if a
-   * superclass was eligible & valid. Bridge & synthetic methods are excluded from eligibility for
-   * two reasons:
+   * superclass was eligible and valid. Bridge and synthetic methods are excluded from eligibility
+   * for two reasons:
    *
    * <p>Prior to Java8, javac would generate these methods in subclasses without annotations, which
    * means this would accidentally stop injecting a method annotated with {@link

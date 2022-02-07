@@ -110,7 +110,7 @@ final class ProvisionListenerCallbackStore {
     return new ProvisionListenerStackCallback<T>(binding, listeners);
   }
 
-  /** A struct that holds key & binding but uses just key for equality/hashcode. */
+  /** A struct that holds key and binding but uses just key for equality/hashcode. */
   private static class KeyBinding {
     final Key<?> key;
     final Binding<?> binding;

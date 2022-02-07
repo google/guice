@@ -41,25 +41,26 @@ import java.lang.annotation.Target;
  *
  * <p>Example usage:
  *
- * <pre>{@code
- * @RestrictedBindingSource.Permit
- * @Retention(RetentionPolicy.RUNTIME)
- * @interface NetworkPermit {}
+ * <pre>
+ * {@literal @}RestrictedBindingSource.Permit
+ * {@literal @}Retention(RetentionPolicy.RUNTIME)
+ * {@literal @}interface NetworkPermit {}
  *
- * @RestrictedBindingSource(
+ * {@literal @}RestrictedBindingSource(
  *   explanation = "Only NetworkModule can create network bindings.",
  *   permits = {NetworkPermit.class})
- * @Qualifier
- * @Retention(RetentionPolicy.RUNTIME)
- * public @interface GatewayIpAdress {}
+ * {@literal @}Qualifier
+ * {@literal @}Retention(RetentionPolicy.RUNTIME)
+ * public {@literal @}interface GatewayIpAdress {}
  *
- * @NetworkPermit
+ * {@literal @}NetworkPermit
  * public final class NetworkModule extends AbstractModule {
- *   @Provides
- *   @GatewayIpAdress // Allowed because the module is annotated with @NetworkPermit.
+ *   // Allowed because the module is annotated with {@literal @}NetworkPermit.
+ *   {@literal @}Provides
+ *   {@literal @}GatewayIpAdress
  *   int provideGatewayIp() { ... }
  * }
- * }</pre>
+ * </pre>
  *
  * @author vzm@google.com (Vladimir Makaric)
  * @since 5.0

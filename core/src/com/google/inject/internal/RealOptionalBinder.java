@@ -236,7 +236,7 @@ public final class RealOptionalBinder<T> implements Module {
         .toProvider(new JavaOptionalProvider<>(bindingSelection, javaOptionalKey));
   }
 
-  /** Provides the binding for java.util.Optional<T>. */
+  /** Provides the binding for {@code java.util.Optional<T>}. */
   private static final class JavaOptionalProvider<T>
       extends RealOptionalBinderProviderWithDependencies<T, java.util.Optional<T>>
       implements ProviderWithExtensionVisitor<java.util.Optional<T>>,
@@ -328,7 +328,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
   }
 
-  /** Provides the binding for java.util.Optional<Provider<T>>. */
+  /** Provides the binding for {@code java.util.Optional<Provider<T>>}. */
   private static final class JavaOptionalProviderProvider<T>
       extends RealOptionalBinderProviderWithDependencies<T, java.util.Optional<Provider<T>>> {
     private java.util.Optional<Provider<T>> value;
@@ -394,7 +394,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
   }
 
-  /** Provides the binding for Optional<Provider<T>>. */
+  /** Provides the binding for {@code Optional<Provider<T>>}. */
   private static final class RealOptionalProviderProvider<T>
       extends RealOptionalBinderProviderWithDependencies<T, Optional<Provider<T>>> {
     private Optional<Provider<T>> value;
@@ -423,7 +423,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
   }
 
-  /** Provides the binding for Optional<T>. */
+  /** Provides the binding for {@code Optional<T>}. */
   private static final class RealOptionalKeyProvider<T>
       extends RealOptionalBinderProviderWithDependencies<T, Optional<T>>
       implements ProviderWithExtensionVisitor<Optional<T>>, OptionalBinderBinding<Optional<T>> {

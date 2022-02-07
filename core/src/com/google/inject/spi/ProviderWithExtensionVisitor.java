@@ -27,13 +27,16 @@ import com.google.inject.Provider;
  * custom visitor designed for that extension. A typical implementation within the extension would
  * look like
  *
- * <pre>
- * &lt;V, B> V acceptExtensionVisitor(BindingTargetVisitor&lt;B, V> visitor, ProviderInstanceBinding&lt;? extends B> binding) {
+ * <pre>{@code
+ * <V, B> V acceptExtensionVisitor(
+ *    BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
  *   if(visitor instanceof MyCustomExtensionVisitor) {
- *     return ((MyCustomExtensionVisitor&lt;B, V>)visitor).visitCustomExtension(customProperties, binding);
+ *     return ((MyCustomExtensionVisitor<B, V>)visitor)
+ *        .visitCustomExtension(customProperties, binding);
  *   } else {
  *     return visitor.visit(binding);
  *   }
+ * }
  * }</pre>
  *
  * 'MyCustomExtensionVisitor' in the example above would be an interface the extension provides that

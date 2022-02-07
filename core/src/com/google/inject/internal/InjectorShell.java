@@ -55,8 +55,8 @@ import java.util.logging.Logger;
  * similarly, but using {@link PrivateElements} instead of modules.
  *
  * <p>It is necessary to create the root and child injectors in a single batch because there can be
- * bidirectional parent <-> child injector dependencies that require the entire tree of injectors to
- * be initialized together in the {@link InternalInjectorCreator}.
+ * bidirectional parent &lt;-&gt; child injector dependencies that require the entire tree of
+ * injectors to be initialized together in the {@link InternalInjectorCreator}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

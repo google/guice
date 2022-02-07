@@ -120,6 +120,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
      | The last stable release version id, used for generating API diffs between released versions
     -->
     <guice.lastStableRelease>5.1.0</guice.lastStableRelease>
+    <guice.skipTests>false</guice.skipTests>
     <gpg.skip>true</gpg.skip>
   </properties>
 
@@ -302,6 +303,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.5</version>
           <configuration>
+            <skipTests>${guice.skipTests}</skipTests>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <!--<argLine>-Dguice_include_stack_traces=OFF</argLine>-->
           </configuration>
@@ -388,6 +390,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.2.0</version>
           <configuration>
+            <doclint>html,syntax</doclint>
             <source>8</source>
             <author>false</author>
             <protected>true</protected>

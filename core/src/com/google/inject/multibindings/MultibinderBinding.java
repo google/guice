@@ -57,8 +57,8 @@ public interface MultibinderBinding<T> {
    * Returns the TypeLiteral that describes the type of elements in the set.
    *
    * <p>The elements will always match the type Set's generic type. For example, if getSetKey
-   * returns a key of <code>Set&lt;String></code>, then this will always return a <code>
-   * TypeLiteral&lt;String></code>.
+   * returns a key of {@code Set<String>}, then this will always return a {@code
+   * TypeLiteral<String>}.
    */
   TypeLiteral<?> getElementTypeLiteral();
 
@@ -68,8 +68,8 @@ public interface MultibinderBinding<T> {
    * retrieved from {@link Elements#getElements}.
    *
    * <p>The elements will always match the type Set's generic type. For example, if getSetKey
-   * returns a key of <code>Set&lt;String></code>, then this will always return a list of type
-   * <code>List&lt;Binding&lt;String>></code>.
+   * returns a key of {@code Set<String>}, then this will always return a list of type {@code
+   * List<Binding<String>>}.
    */
   List<Binding<?>> getElements();
 

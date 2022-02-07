@@ -118,7 +118,7 @@ import java.lang.invoke.MethodHandles;
  *     // excluding .implement for Shipment means the implementation class
  *     // will be 'Shipment' itself, which is legal if it's not an interface.
  *     .implement(Receipt.class, RealReceipt.class)
- *     .build(OrderFactory.class));</pre>
+ *     .build(OrderFactory.class));
  *
  * </pre>
  *

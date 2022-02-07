@@ -214,8 +214,8 @@ public final class RealMultibinder<T> implements Module {
 
   /**
    * Provider instance implementation that provides the actual set of values. This is parameterized
-   * so it can be used to supply a Set<T> and Set<? extends T>, the latter being useful for Kotlin
-   * support.
+   * so it can be used to supply a {@code Set<T>} and {@code Set<? extends T>}, the latter being
+   * useful for Kotlin support.
    */
   private static final class RealMultibinderProvider<T> extends BaseFactory<T, Set<T>> {
     List<Binding<T>> bindings;

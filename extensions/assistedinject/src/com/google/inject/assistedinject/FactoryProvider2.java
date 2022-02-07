@@ -702,7 +702,7 @@ final class FactoryProvider2<F>
 
   /**
    * Returns true if all dependencies are suitable for the optimized version of AssistedInject. The
-   * optimized version caches the binding & uses a ThreadLocal Provider, so can only be applied if
+   * optimized version caches the binding and uses a ThreadLocal Provider, so can only be applied if
    * the assisted bindings are immediately provided. This looks for hints that the values may be
    * lazily retrieved, by looking for injections of Injector or a Provider for the assisted values.
    */

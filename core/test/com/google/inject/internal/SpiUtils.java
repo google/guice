@@ -82,7 +82,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Utilities for testing the Multibinder & MapBinder extension SPI.
+ * Utilities for testing the Multibinder and MapBinder extension SPI.
  *
  * @author sameb@google.com (Sam Berlin)
  */

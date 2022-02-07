@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Adapts classes annotated with {@link @dagger.Module} such that their {@link @dagger.Provides}
+ * Adapts classes annotated with {@code @dagger.Module} such that their {@code @dagger.Provides}
  * methods can be properly invoked by Guice to perform their provision operations.
  *
  * <p>Simple example:
@@ -57,7 +57,7 @@ import java.util.Set;
  * <p>For modules with no instance binding methods, prefer using a class literal. If there are
  * instance binding methods, an instance of the module must be passed.
  *
- * <p>Any class literals specified by {@code dagger.Module(includes = ...)} transitively will be
+ * <p>Any class literals specified by {@code @dagger.Module(includes = ...)} transitively will be
  * included. Modules are de-duplicated, though multiple module instances of the same type is an
  * error. Specifying a module instance and a class literal is also an error.
  *
@@ -69,7 +69,7 @@ import java.util.Set;
  *       be recreated on-demand with new Module instances), Guice typically has a single injector
  *       with a long lifetime, so your module instance will be used throughout the lifetime of the
  *       entire app.
- *   <li>Dagger 1.x uses {@link @Singleton} for all scopes, including shorter-lived scopes like
+ *   <li>Dagger 1.x uses {@code @Singleton} for all scopes, including shorter-lived scopes like
  *       per-request or per-activity. Using modules written with Dagger 1.x usage in mind may result
  *       in mis-scoped objects.
  *   <li>Dagger 2.x supports custom scope annotations, but for use in Guice, a custom scope
@@ -101,13 +101,13 @@ public final class DaggerAdapter {
     private final ImmutableList.Builder<Object> modules = ImmutableList.builder();
     private Predicate<Method> predicate = Predicates.alwaysTrue();
 
-    /** Returns a module that will configure bindings based on the modules & scanners. */
+    /** Returns a module that will configure bindings based on the modules and scanners. */
     public Module build() {
       return new DaggerCompatibilityModule(this);
     }
 
     /**
-     * Adds modules (which can be classes annotated with {@link dagger.Module}, or instances of
+     * Adds modules (which can be classes annotated with {@code @dagger.Module}, or instances of
      * those classes) which will be scanned for bindings.
      */
     public Builder addModules(Iterable<Object> daggerModuleObjects) {
@@ -116,7 +116,7 @@ public final class DaggerAdapter {
     }
 
     /**
-     * Limit the adapter to a subset of {@code methods} from {@link @dagger.Module} annotated
+     * Limit the adapter to a subset of {@code methods} from {@code @dagger.Module} annotated
      * classes which satisfy the {@code predicate}. Defaults to allowing all.
      */
     public Builder filter(Predicate<Method> predicate) {

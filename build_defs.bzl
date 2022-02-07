@@ -14,6 +14,7 @@
 # limitations under the License.
 
 JAVAC_OPTS = [
+    "-Xdoclint:html,syntax",
     "-source",
     "1.8",
     "-target",
