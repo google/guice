@@ -4,6 +4,7 @@ Guice
 -   **Latest release: [5.1.0](https://github.com/google/guice/wiki/Guice510)**
 -   **Documentation:**
     [User Guide](https://github.com/google/guice/wiki/Motivation),
+    [Latest javadocs](https://google.github.io/guice/api-docs/latest/javadoc/index.html)
     [5.1.0 javadocs](https://google.github.io/guice/api-docs/5.1.0/javadoc/index.html)
 -   **Continuous Integration:**
     [![Build Status](https://github.com/google/guice/workflows/continuous-integration/badge.svg)](https://github.com/google/guice/actions)
