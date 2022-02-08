@@ -75,7 +75,6 @@ javadoc_library(
         "//extensions/jmx/src/com/google/inject/tools/jmx",
         "//extensions/jndi/src/com/google/inject/jndi",
         "//extensions/persist/src/com/google/inject/persist",
-        "//extensions/service/src/com/google/inject/service",
         "//extensions/servlet/src/com/google/inject/servlet",
         "//extensions/spring/src/com/google/inject/spring",
         "//extensions/struts2/src/com/google/inject/struts2",
