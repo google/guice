@@ -14,7 +14,9 @@ git config --global user.name "guice-dev+github"
 git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/google/guice gh-pages > /dev/null
 
 cd gh-pages
-git rm -rf api-docs/latest
+if [[ -d api-docs/latest ]]; then
+    git rm -rf api-docs/latest
+fi
 mkdir -p api-docs/latest
 cp -rf $HOME/guice-docs/latest/* api-docs/latest/
 git add -f .
