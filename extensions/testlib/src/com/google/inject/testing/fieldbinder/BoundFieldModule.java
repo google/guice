@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
@@ -124,6 +125,7 @@ public final class BoundFieldModule implements Module {
    * @param instance the instance whose fields will be bound.
    * @return a module which will bind the {@link Bind} annotated fields of {@code instance}.
    */
+  @CheckReturnValue
   public static BoundFieldModule of(Object instance) {
     return new BoundFieldModule(instance);
   }
