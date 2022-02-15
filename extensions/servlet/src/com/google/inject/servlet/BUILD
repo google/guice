@@ -56,6 +56,9 @@ gen_maven_artifact(
     artifact_id = "guice-servlet",
     artifact_name = "Google Guice - Extensions - Servlet",
     artifact_target = ":servlet",
+    artifact_target_libs = [
+        ":request-scoped-annotation",
+    ],
     is_extension = True,
     javadoc_srcs = [":javadoc-srcs"],
 )
