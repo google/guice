@@ -650,7 +650,7 @@ public final class Elements {
       if (declaringSource == null) {
         IncludeStackTraceOption stackTraceOption = getIncludeStackTraceOption();
         if (stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
-          StackTraceElement callingSource = sourceProvider.get(new Throwable().getStackTrace());
+          StackTraceElement callingSource = sourceProvider.getCaller();
           // If we've traversed past all reasonable sources and into our internal code, then we
           // don't know the source.
           if (callingSource

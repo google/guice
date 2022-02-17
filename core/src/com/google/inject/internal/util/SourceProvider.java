@@ -28,6 +28,8 @@ import java.util.List;
  */
 public final class SourceProvider {
 
+  private static final CallerFinder FINDER = loadCallerFinder();
+
   /** Indicates that the source is unknown. */
   public static final Object UNKNOWN_SOURCE = "[unknown source]";
 
@@ -35,7 +37,8 @@ public final class SourceProvider {
   private final ImmutableSet<String> classNamesToSkip;
 
   public static final SourceProvider DEFAULT_INSTANCE =
-      new SourceProvider(ImmutableSet.of(SourceProvider.class.getName()));
+      new SourceProvider(
+          ImmutableSet.of(SourceProvider.class.getName(), NewThrowableFinder.class.getName()));
 
   private SourceProvider(Iterable<String> classesToSkip) {
     this(null, classesToSkip);
@@ -77,16 +80,8 @@ public final class SourceProvider {
    * Returns the calling line of code. The selected line is the nearest to the top of the stack that
    * is not skipped.
    */
-  public StackTraceElement get(StackTraceElement[] stackTraceElements) {
-    Preconditions.checkNotNull(stackTraceElements, "The stack trace elements cannot be null.");
-    for (final StackTraceElement element : stackTraceElements) {
-      String className = element.getClassName();
-
-      if (!shouldBeSkipped(className)) {
-        return element;
-      }
-    }
-    throw new AssertionError();
+  public StackTraceElement getCaller() {
+    return FINDER.findCaller(this::shouldBeSkipped);
   }
 
   /** Returns the non-skipped module class name. */
@@ -98,5 +93,9 @@ public final class SourceProvider {
       }
     }
     return UNKNOWN_SOURCE;
+  }
+
+  private static CallerFinder loadCallerFinder() {
+    return new NewThrowableFinder();
   }
 }
