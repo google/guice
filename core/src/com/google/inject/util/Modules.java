@@ -166,6 +166,7 @@ public final class Modules {
   public interface OverriddenModuleBuilder {
 
     /** See the EDSL example at {@link Modules#override(Module[]) override()}. */
+    @CheckReturnValue
     Module with(Module... overrides);
 
     /** @deprecated there's no reason to use {@code .with()} without any arguments. */
@@ -339,6 +340,7 @@ public final class Modules {
           } else {
             List<Object> usedSources = scopeInstancesInUse.get(scopeBinding.getScope());
             if (usedSources != null) {
+              @SuppressWarnings("OrphanedFormatString") // passed to format method addError below
               StringBuilder sb =
                   new StringBuilder(
                       "The scope for @%s is bound directly and cannot be overridden.");
