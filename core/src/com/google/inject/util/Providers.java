@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -35,6 +36,7 @@ import java.util.Set;
  * @author Kevin Bourrillion (kevinb9n@gmail.com)
  * @since 2.0
  */
+@CheckReturnValue
 public final class Providers {
 
   private Providers() {}
