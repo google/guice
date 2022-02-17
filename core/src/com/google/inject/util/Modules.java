@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -116,6 +117,7 @@ public final class Modules {
    * arguments or (like {@code install()}) can be called repeatedly. Where possible, external APIs
    * that require a single module should similarly be adapted to permit multiple modules.
    */
+  @CheckReturnValue
   public static Module combine(Module... modules) {
     return combine(ImmutableSet.copyOf(modules));
   }
