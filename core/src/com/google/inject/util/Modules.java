@@ -79,6 +79,7 @@ public final class Modules {
    *
    * @param modules the modules whose bindings are open to be overridden
    */
+  @CheckReturnValue
   public static OverriddenModuleBuilder override(Module... modules) {
     return override(Arrays.asList(modules));
   }
