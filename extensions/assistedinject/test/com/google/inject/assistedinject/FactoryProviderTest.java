@@ -601,7 +601,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
-  @SuppressWarnings("SelfEquals")
+  @SuppressWarnings({"SelfEquals", "ReturnValueIgnored"})
   public void testMethodsDeclaredInObject() {
     Injector injector =
         Guice.createInjector(

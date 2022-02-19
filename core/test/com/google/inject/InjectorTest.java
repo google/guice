@@ -47,8 +47,8 @@ public class InjectorTest extends TestCase {
 
   public void testToStringDoesNotInfinitelyRecurse() {
     Injector injector = Guice.createInjector(Stage.TOOL);
-    injector.toString();
-    injector.getBinding(Injector.class).toString();
+    String unused = injector.toString();
+    String unused2 = injector.getBinding(Injector.class).toString();
   }
 
   public void testProviderMethods() throws CreationException {
