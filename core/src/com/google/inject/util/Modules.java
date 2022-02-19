@@ -52,6 +52,7 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
+@CheckReturnValue
 public final class Modules {
   private Modules() {}
 
@@ -166,7 +167,6 @@ public final class Modules {
   public interface OverriddenModuleBuilder {
 
     /** See the EDSL example at {@link Modules#override(Module[]) override()}. */
-    @CheckReturnValue
     Module with(Module... overrides);
 
     /** @deprecated there's no reason to use {@code .with()} without any arguments. */
