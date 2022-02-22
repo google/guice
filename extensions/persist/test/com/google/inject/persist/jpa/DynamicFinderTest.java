@@ -16,94 +16,71 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-import com.google.inject.persist.PersistService;
-import com.google.inject.persist.Transactional;
+import static com.google.inject.persist.utils.PersistenceUtils.withinTransaction;
+import static org.junit.Assert.assertEquals;
+
+import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
+import com.google.inject.persist.utils.PersistenceInjectorResource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.EntityManager;
-import junit.framework.TestCase;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
- * A test around providing sessions (starting, closing etc.)
+ * A test for dynamic finders
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class DynamicFinderTest extends TestCase {
-  private Injector injector;
+public class DynamicFinderTest {
 
-  @Override
-  public void setUp() {
-    injector = Guice.createInjector(new JpaPersistModule("testUnit").addFinder(JpaFinder.class));
+  @Rule
+  @ClassRule
+  public static PersistenceInjectorResource persistenceInjector =
+      new PersistenceInjectorResource("testUnit",
+          module -> module.addFinder(JpaFinder.class));
 
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
-  }
-
-  @Override
-  public final void tearDown() {
-    injector.getInstance(PersistService.class).stop();
-  }
-
+  @Test
   public void testDynamicFinderListAll() {
-    //obtain em
-    JpaDao dao = injector.getInstance(JpaDao.class);
+    withinTransaction(persistenceInjector, entityManager -> {
+      JpaTestEntity te = new JpaTestEntity();
+      te.setText("HIAjsOKAOSD" + new Date() + UUID.randomUUID());
+      entityManager.persist(te);
+      entityManager.flush();
 
-    //obtain same em again (bound to txn)
-    JpaTestEntity te = new JpaTestEntity();
-    te.setText("HIAjsOKAOSD" + new Date() + UUID.randomUUID());
-
-    dao.persist(te);
-
-    //im not sure this hack works...
-    assertFalse(
-        "Duplicate entity managers crossing-scope",
-        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
-
-    List<JpaTestEntity> list = injector.getInstance(JpaFinder.class).listAll();
-    assertNotNull(list);
-    assertFalse(list.isEmpty());
-    assertEquals(1, list.size());
-    assertEquals(te, list.get(0));
+      List<JpaTestEntity> list = persistenceInjector.getInstance(JpaFinder.class).listAll();
+      assertEquals(te, list.get(0));
+    });
   }
 
-  public static interface JpaFinder {
-    @Finder(query = "from JpaTestEntity", returnAs = ArrayList.class)
-    public List<JpaTestEntity> listAll();
+  @Test
+  public void testDynamicFinderListWithParam() {
+    withinTransaction(persistenceInjector, entityManager -> {
+      JpaTestEntity te = new JpaTestEntity();
+      te.setText("customName");
+      entityManager.persist(te);
+
+      JpaTestEntity te2 = new JpaTestEntity();
+      te2.setText("anotherName");
+      entityManager.persist(te2);
+
+      entityManager.flush();
+
+      List<JpaTestEntity> list = persistenceInjector.getInstance(JpaFinder.class).listByName("customName");
+      assertEquals(list.size(), 1);
+      assertEquals(te, list.get(0));
+    });
   }
 
-  public static class JpaDao {
-    private final Provider<EntityManager> em;
-    EntityManager lastEm;
+  public interface JpaFinder {
+    @Finder(query = "SELECT e FROM JpaTestEntity e", returnAs = ArrayList.class)
+    List<JpaTestEntity> listAll();
 
-    @Inject
-    public JpaDao(Provider<EntityManager> em) {
-      this.em = em;
-    }
-
-    @Transactional
-    public <T> void persist(T t) {
-      lastEm = em.get();
-      assertTrue("em is not open!", lastEm.isOpen());
-      assertTrue("no active txn!", lastEm.getTransaction().isActive());
-      lastEm.persist(t);
-
-      assertTrue("Persisting object failed", lastEm.contains(t));
-    }
-
-    @Transactional
-    public <T> boolean contains(T t) {
-      if (null == lastEm) {
-        lastEm = em.get();
-      }
-      return lastEm.contains(t);
-    }
+    @Finder(query = "SELECT e FROM JpaTestEntity e WHERE e.text = :text", returnAs = ArrayList.class)
+    List<JpaTestEntity> listByName(@Named("text") String textParam);
   }
 }

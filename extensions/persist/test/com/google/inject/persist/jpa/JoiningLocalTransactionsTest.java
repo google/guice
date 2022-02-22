@@ -16,166 +16,137 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.Guice;
+import static com.google.inject.persist.utils.PersistenceUtils.successfulTransactionCount;
+import static org.junit.Assert.assertEquals;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import junit.framework.TestCase;
+import javax.persistence.EntityTransaction;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class JoiningLocalTransactionsTest extends TestCase {
-  private Injector injector;
-  private static final String UNIQUE_TEXT =
-      JoiningLocalTransactionsTest.class + "some unique text" + new Date();
-  private static final String TRANSIENT_UNIQUE_TEXT =
-      JoiningLocalTransactionsTest.class + "some other unique text" + new Date();
+public class JoiningLocalTransactionsTest
+    extends BaseManagedLocalTransactionsTest<JoiningLocalTransactionsTest.DelegatingTransactionalObjectImpl> {
 
   @Override
-  public void setUp() {
-    injector = Guice.createInjector(new JpaPersistModule("testUnit"));
-
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
+  protected Class<DelegatingTransactionalObjectImpl> getTransactionalObjectType() {
+    return DelegatingTransactionalObjectImpl.class;
   }
 
-  //cleanup entitymanager in case some of the rollback tests left it in an open state
-  @Override
-  public final void tearDown() {
-    injector.getInstance(UnitOfWork.class).end();
-    injector.getInstance(EntityManagerFactory.class).close();
+  @Test
+  public void testTransactionSpanningMultipleServiceCalls() {
+    long initialTransactions = successfulTransactionCount(injector);
+    getTransactionalObject().runOperationTwiceInTxn();
+
+    assertEquals("Transaction not reused for multiple service calls", successfulTransactionCount(injector), initialTransactions + 1);
   }
 
-  public void testSimpleTransaction() {
-    injector
-        .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
-        .runOperationInTxn();
+  @Test
+  public void testMixingManualAndDeclarativeTransactions() {
+    long initialTransactions = successfulTransactionCount(injector);
+    getTransactionalObject().runOperationTwiceInManualTxn();
 
-    EntityManager em = injector.getInstance(EntityManager.class);
-    assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
-
-    //test that the data has been stored
-    Object result =
-        em.createQuery("from JpaTestEntity where text = :text")
-            .setParameter("text", UNIQUE_TEXT)
-            .getSingleResult();
-    injector.getInstance(UnitOfWork.class).end();
-
-    assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
-
-    assertEquals(
-        "queried entity did not match--did automatic txn fail?",
-        UNIQUE_TEXT,
-        ((JpaTestEntity) result).getText());
+    assertEquals("Transaction not reused for multiple service calls", successfulTransactionCount(injector), initialTransactions + 1);
   }
 
-  public void testSimpleTransactionRollbackOnChecked() {
-    try {
-      injector
-          .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
-          .runOperationInTxnThrowingChecked();
-    } catch (IOException e) {
-      //ignore
-      injector.getInstance(UnitOfWork.class).end();
-    }
-
-    EntityManager em = injector.getInstance(EntityManager.class);
-
-    assertFalse(
-        "EM was not closed by transactional service (rollback didnt happen?)",
-        em.getTransaction().isActive());
-
-    //test that the data has been stored
-    try {
-      Object result =
-          em.createQuery("from JpaTestEntity where text = :text")
-              .setParameter("text", TRANSIENT_UNIQUE_TEXT)
-              .getSingleResult();
-      injector.getInstance(UnitOfWork.class).end();
-      fail("a result was returned! rollback sure didnt happen!!!");
-    } catch (NoResultException e) {
-    }
-  }
-
-  public void testSimpleTransactionRollbackOnUnchecked() {
-    try {
-      injector
-          .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
-          .runOperationInTxnThrowingUnchecked();
-    } catch (RuntimeException re) {
-      //ignore
-      injector.getInstance(UnitOfWork.class).end();
-    }
-
-    EntityManager em = injector.getInstance(EntityManager.class);
-    assertFalse(
-        "Session was not closed by transactional service (rollback didnt happen?)",
-        em.getTransaction().isActive());
-
-    try {
-      Object result =
-          em.createQuery("from JpaTestEntity where text = :text")
-              .setParameter("text", TRANSIENT_UNIQUE_TEXT)
-              .getSingleResult();
-      injector.getInstance(UnitOfWork.class).end();
-      fail("a result was returned! rollback sure didnt happen!!!");
-    } catch (NoResultException e) {
-    }
-  }
-
-  public static class TransactionalObject {
-    private final EntityManager em;
+  public static class DelegatingTransactionalObjectImpl implements TransactionalObject {
+    private final MethodLevelTransactionalObjectImpl delegate;
+    private final EntityManager entityManager;
+    private final UnitOfWork unitOfWork;
 
     @Inject
-    public TransactionalObject(EntityManager em) {
-      this.em = em;
+    public DelegatingTransactionalObjectImpl(MethodLevelTransactionalObjectImpl delegate, EntityManager entityManager, UnitOfWork unitOfWork) {
+      this.delegate = delegate;
+      this.entityManager = entityManager;
+      this.unitOfWork = unitOfWork;
+    }
+
+    @Override
+    public EntityTransaction getLastTransaction() {
+      return delegate.getLastTransaction();
     }
 
     @Transactional
+    @Override
     public void runOperationInTxn() {
-      runOperationInTxnInternal();
-    }
-
-    @Transactional(rollbackOn = IOException.class)
-    public void runOperationInTxnInternal() {
-      JpaTestEntity entity = new JpaTestEntity();
-      entity.setText(UNIQUE_TEXT);
-      em.persist(entity);
-    }
-
-    @Transactional(rollbackOn = IOException.class)
-    public void runOperationInTxnThrowingChecked() throws IOException {
-      runOperationInTxnThrowingCheckedInternal();
+      delegate.runOperationInTxn();
     }
 
     @Transactional
-    private void runOperationInTxnThrowingCheckedInternal() throws IOException {
-      JpaTestEntity entity = new JpaTestEntity();
-      entity.setText(TRANSIENT_UNIQUE_TEXT);
-      em.persist(entity);
+    public void runOperationTwiceInTxn() {
+      delegate.runOperationInTxn();
+      delegate.runOperationInTxn();
+    }
 
-      throw new IOException();
+    public void runOperationTwiceInManualTxn() {
+      unitOfWork.begin();
+      entityManager.getTransaction().begin();
+      delegate.runOperationInTxn();
+      delegate.runOperationInTxn();
+      entityManager.getTransaction().commit();
+      unitOfWork.end();
     }
 
     @Transactional
+    @Override
     public void runOperationInTxnThrowingUnchecked() {
-      runOperationInTxnThrowingUncheckedInternal();
+      delegate.runOperationInTxnThrowingUnchecked();
+    }
+
+    @Transactional(rollbackOn = IOException.class, ignore = FileNotFoundException.class)
+    @Override
+    public void runOperationInTxnThrowingCheckedException() throws IOException {
+      delegate.runOperationInTxnThrowingCheckedException();
     }
 
     @Transactional(rollbackOn = IOException.class)
-    public void runOperationInTxnThrowingUncheckedInternal() {
-      JpaTestEntity entity = new JpaTestEntity();
-      entity.setText(TRANSIENT_UNIQUE_TEXT);
-      em.persist(entity);
+    @Override
+    public void runOperationInTxnThrowingChecked() throws IOException {
+      delegate.runOperationInTxnThrowingChecked();
+    }
+  }
 
-      throw new IllegalStateException();
+  public static class MethodLevelTransactionalObjectImpl extends TransactionalObjectImpl {
+    private final EntityManager session;
+
+    @Inject
+    public MethodLevelTransactionalObjectImpl(EntityManager em) {
+      this.session = em;
+    }
+
+    @Override
+    protected EntityManager getSession() {
+      return session;
+    }
+
+    @Transactional
+    @Override
+    public void runOperationInTxn() {
+      super.runOperationInTxn();
+    }
+
+    @Transactional(rollbackOn = IOException.class)
+    @Override
+    public void runOperationInTxnThrowingChecked() throws IOException {
+      super.runOperationInTxnThrowingChecked();
+    }
+
+    @Transactional
+    @Override
+    public void runOperationInTxnThrowingUnchecked() {
+      super.runOperationInTxnThrowingUnchecked();
+    }
+
+    @Transactional(rollbackOn = IOException.class, ignore = FileNotFoundException.class)
+    @Override
+    public void runOperationInTxnThrowingCheckedException() throws IOException {
+      super.runOperationInTxnThrowingCheckedException();
     }
   }
 }

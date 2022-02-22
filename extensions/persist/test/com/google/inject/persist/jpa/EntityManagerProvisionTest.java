@@ -16,15 +16,19 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.Guice;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
-import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.utils.PersistenceInjectorResource;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -32,22 +36,12 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class EntityManagerProvisionTest extends TestCase {
-  private Injector injector;
+public class EntityManagerProvisionTest {
+  @ClassRule
+  @Rule
+  public static PersistenceInjectorResource injector = new PersistenceInjectorResource("testUnit");
 
-  @Override
-  public void setUp() {
-    injector = Guice.createInjector(new JpaPersistModule("testUnit"));
-
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
-  }
-
-  @Override
-  public final void tearDown() {
-    injector.getInstance(EntityManagerFactory.class).close();
-  }
-
+  @Test
   public void testEntityManagerLifecyclePerTxn() {
     //obtain em
     JpaDao dao = injector.getInstance(JpaDao.class);
@@ -58,32 +52,9 @@ public class EntityManagerProvisionTest extends TestCase {
     dao.persist(te);
 
     //im not sure this hack works...
-    assertFalse(
+    assertNotSame(
         "Duplicate entity managers crossing-scope",
-        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
-
-    //try to start a new em in a new txn
-    dao = injector.getInstance(JpaDao.class);
-
-    assertFalse(
-        "EntityManager wasnt closed and reopened properly around txn"
-            + " (persistent object persists)",
-        dao.contains(te));
-  }
-
-  public void testEntityManagerLifecyclePerTxn2() {
-    //obtain em
-    JpaDao dao = injector.getInstance(JpaDao.class);
-
-    //obtain same em again (bound to txn)
-    JpaTestEntity te = new JpaTestEntity();
-
-    dao.persist(te);
-
-    //im not sure this hack works...
-    assertFalse(
-        "Duplicate entity managers crossing-scope",
-        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
+        dao.lastEm, injector.getInstance(EntityManager.class));
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);

@@ -17,38 +17,36 @@
 package com.google.inject.persist;
 
 import com.google.inject.persist.jpa.ClassLevelManagedLocalTransactionsTest;
+import com.google.inject.persist.jpa.BaseEntityManagerFactoryProvisionTest;
 import com.google.inject.persist.jpa.CustomPropsEntityManagerFactoryProvisionTest;
-import com.google.inject.persist.jpa.EntityManagerFactoryProvisionTest;
+import com.google.inject.persist.jpa.DefaultPropsEntityManagerFactoryProvisionTest;
 import com.google.inject.persist.jpa.EntityManagerPerRequestProvisionTest;
 import com.google.inject.persist.jpa.EntityManagerProvisionTest;
 import com.google.inject.persist.jpa.JoiningLocalTransactionsTest;
 import com.google.inject.persist.jpa.JpaWorkManagerTest;
-import com.google.inject.persist.jpa.ManagedLocalTransactionsAcrossRequestTest;
-import com.google.inject.persist.jpa.ManagedLocalTransactionsTest;
+import com.google.inject.persist.jpa.MethodLevelManagedLocalTransactionsTest;
 import com.google.inject.persist.jpa.ManualLocalTransactionsTest;
 import com.google.inject.persist.jpa.ManualLocalTransactionsWithCustomMatcherTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /** @author dhanji@gmail.com (Dhanji R. Prasanna) */
+@RunWith(Suite.class)
+@SuiteClasses({
+    EdslTest.class,
+	ClassLevelManagedLocalTransactionsTest.class,
+	MethodLevelManagedLocalTransactionsTest.class,
+    DefaultPropsEntityManagerFactoryProvisionTest.class,
+	CustomPropsEntityManagerFactoryProvisionTest.class,
+    EntityManagerPerRequestProvisionTest.class,
+    EntityManagerProvisionTest.class,
+    JoiningLocalTransactionsTest.class,
+    JpaWorkManagerTest.class,
+    MethodLevelManagedLocalTransactionsTest.class,
+    ManualLocalTransactionsTest.class,
+    ManualLocalTransactionsWithCustomMatcherTest.class
+})
 public class AllTests {
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite();
-
-    suite.addTestSuite(EdslTest.class);
-    suite.addTestSuite(ClassLevelManagedLocalTransactionsTest.class);
-    suite.addTestSuite(CustomPropsEntityManagerFactoryProvisionTest.class);
-    suite.addTestSuite(EntityManagerFactoryProvisionTest.class);
-    suite.addTestSuite(EntityManagerPerRequestProvisionTest.class);
-    suite.addTestSuite(EntityManagerProvisionTest.class);
-    suite.addTestSuite(JoiningLocalTransactionsTest.class);
-    suite.addTestSuite(JpaWorkManagerTest.class);
-    suite.addTestSuite(ManagedLocalTransactionsAcrossRequestTest.class);
-    suite.addTestSuite(ManagedLocalTransactionsTest.class);
-    suite.addTestSuite(ManualLocalTransactionsTest.class);
-    suite.addTestSuite(ManualLocalTransactionsWithCustomMatcherTest.class);
-
-    return suite;
-  }
 }

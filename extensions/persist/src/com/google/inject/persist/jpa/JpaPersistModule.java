@@ -47,12 +47,11 @@ public final class JpaPersistModule extends PersistModule {
 
   public JpaPersistModule(String jpaUnit) {
     Preconditions.checkArgument(
-        null != jpaUnit && jpaUnit.length() > 0, "JPA unit name must be a non-empty string.");
+        null != jpaUnit && !jpaUnit.trim().isEmpty(), "JPA unit name must be a non-empty string.");
     this.jpaUnit = jpaUnit;
   }
 
   private Map<?, ?> properties;
-  private MethodInterceptor transactionInterceptor;
 
   @Override
   protected void configurePersistence() {
@@ -61,13 +60,11 @@ public final class JpaPersistModule extends PersistModule {
     bind(JpaPersistService.class).in(Singleton.class);
 
     bind(PersistService.class).to(JpaPersistService.class);
-    bind(UnitOfWork.class).to(JpaPersistService.class);
-    bind(EntityManager.class).toProvider(JpaPersistService.class);
+    bind(UnitOfWork.class).to(ReentrantUnitOfWork.class);
+    bind(LocalTransaction.class);
+    bind(EntityManager.class).toProvider(ReentrantUnitOfWork.class);
     bind(EntityManagerFactory.class)
-        .toProvider(JpaPersistService.EntityManagerFactoryProvider.class);
-
-    transactionInterceptor = new JpaLocalTxnInterceptor();
-    requestInjection(transactionInterceptor);
+        .toProvider(JpaPersistService.class);
 
     // Bind dynamic finders.
     for (Class<?> finder : dynamicFinders) {
@@ -77,7 +74,7 @@ public final class JpaPersistModule extends PersistModule {
 
   @Override
   protected MethodInterceptor getTransactionInterceptor() {
-    return transactionInterceptor;
+    return new JpaTransactionInterceptor(getProvider(LocalTransaction.class));
   }
 
   @Provides

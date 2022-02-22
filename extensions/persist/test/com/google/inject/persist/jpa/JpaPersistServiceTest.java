@@ -16,49 +16,141 @@
 
 package com.google.inject.persist.jpa;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doThrow;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
-import junit.framework.TestCase;
+import javax.persistence.spi.PersistenceProviderResolver;
+import javax.persistence.spi.PersistenceProviderResolverHolder;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-public class JpaPersistServiceTest extends TestCase {
+@RunWith(JUnit4.class)
+public class JpaPersistServiceTest {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
 
-  private final JpaPersistService sut =
+  private final JpaPersistService service =
       new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
+
+  private static PersistenceProviderResolver defaultResolver;
+  private static final PersistenceProviderResolver resolver = mock(PersistenceProviderResolver.class);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);
   private final EntityManagerFactory factory = mock(EntityManagerFactory.class);
   private final EntityManager entityManager = mock(EntityManager.class);
 
-  @Override
+  private boolean factoryOpen = true;
+
+  @BeforeClass
+  public static void setupClass() {
+    defaultResolver = PersistenceProviderResolverHolder.getPersistenceProviderResolver();
+    PersistenceProviderResolverHolder.setPersistenceProviderResolver(resolver);
+  }
+
+  @Before
   public void setUp() throws Exception {
-    when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES))
-        .thenReturn(factory);
+    when(resolver.getPersistenceProviders()).thenReturn(Collections.singletonList(provider));
+    when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES)).thenReturn(factory);
     when(factory.createEntityManager()).thenReturn(entityManager);
+    when(factory.isOpen()).thenAnswer(invocation -> factoryOpen);
+    doAnswer(invocationOnMock -> { factoryOpen = false; return null; }).when(factory).close();
   }
 
-  public void test_givenErrorOnEntityManagerClose_whenEndIsCalled_thenEntityManagerIsRemoved() {
-    sut.start(factory);
-    sut.begin();
+  @Test
+  public void givenNotYetStarted_whenCallToStop_thenError() {
+    // when
+    ThrowingRunnable action = service::stop;
 
-    // arrange an exception on sut.end(), which invokes entityManager.close()
-    doThrow(SimulatedException.class).when(entityManager).close();
-    try {
-      sut.end();
-      fail("Exception expected");
-    } catch (SimulatedException expected) {
-      assertThat(sut.isWorking(), is(false));
-    }
+    // then
+    assertThrows("Persistence service never started.", IllegalStateException.class, action);
   }
 
-  private static class SimulatedException extends RuntimeException {}
+  @Test
+  public void givenAlreadyStopped_whenCallToStop_thenError() {
+    // given
+    service.start();
+    service.stop();
+
+    // when
+    ThrowingRunnable action = service::stop;
+
+    // then
+    assertThrows("Persistence service never started.", IllegalStateException.class, action);
+  }
+
+  @Test
+  public void givenFactoryAlreadyClosed_whenCallToStop_thenError() {
+    // given
+    factory.close(); // todo(krsi) perhaps a non-closeable EMF proxy should be returned from provider to prevent this?
+
+    // when
+    ThrowingRunnable action = service::stop;
+
+    // then
+    assertThrows("Persistence service was already shut down.", IllegalStateException.class, action);
+  }
+
+  @Test
+  public void givenAlreadyStarted_whenAnotherCallToStart_thenError() {
+    // given
+    service.start();
+
+    // when
+    ThrowingRunnable action = service::start;
+
+    // then
+    assertThrows("Persistence service was already initialized.", IllegalStateException.class, action);
+  }
+
+  @Test
+  public void givenStarted_whenFactoryRequested_thenProvidesNonNullFactory() {
+    // given
+    service.start();
+
+    // when
+    EntityManagerFactory actual = service.get();
+
+    // then
+    assertEquals(actual, factory);
+  }
+
+  @Test
+  public void givenNotYetStarted_whenFactoryRequested_thenError() {
+    // when
+    ThrowingRunnable action = service::get;
+
+    // then
+    assertThrows("Persistence service not initialized.", IllegalStateException.class, action);
+  }
+
+  @Test
+  public void givenStarted_whenStopped_thenFactoryIsClosed() {
+    // given
+    service.start();
+
+    // when
+    service.stop();
+
+    // then
+    assertFalse(factory.isOpen());
+  }
+
+  @AfterClass
+  public static void tearDownClass() {
+    PersistenceProviderResolverHolder.setPersistenceProviderResolver(defaultResolver);
+  }
 }
