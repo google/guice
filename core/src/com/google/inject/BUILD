@@ -12,6 +12,11 @@ package(
     default_visibility = ["//:src"],
 )
 
+CALLER_FINDER_COMMON_SRCS = [
+    "internal/util/CallerFinder.java",
+    "internal/util/NewThrowableFinder.java",
+]
+
 ANNOTATION_SRCS = [
     "BindingAnnotation.java",
     "Exposed.java",
@@ -25,6 +30,12 @@ ANNOTATION_SRCS = [
 IMPLEMENTED_BY_SRCS = [
     "ImplementedBy.java",
 ]
+
+java_library(
+    name = "caller_finder_common",
+    srcs = CALLER_FINDER_COMMON_SRCS,
+    javacopts = JAVAC_OPTS,
+)
 
 java_library(
     name = "implemented_by",
@@ -41,7 +52,7 @@ java_library(
     name = "inject",
     srcs = glob(
         ["**/*.java"],
-        exclude = IMPLEMENTED_BY_SRCS + ANNOTATION_SRCS,
+        exclude = IMPLEMENTED_BY_SRCS + ANNOTATION_SRCS + CALLER_FINDER_COMMON_SRCS,
     ),
     javacopts = JAVAC_OPTS,
     plugins = [
@@ -50,12 +61,16 @@ java_library(
     exports = [
         ":annotations",
         ":implemented_by",
+        # TODO(user): caller_finder_common shouldn't be exported, but validation requires
+        # it be exported right now.
+        ":caller_finder_common",
     ],
     deps = [
         # Warning: Be very careful adding new dependencies,
         # These all have to mirrored in the open-source
         # build (and jarjar'd up).
         ":annotations",
+        ":caller_finder_common",
         ":implemented_by",
         "//third_party/java/guava/annotations",
         "//third_party/java/guava/base",
@@ -98,6 +113,7 @@ gen_maven_artifact(
     artifact_target_libs = [
         ":annotations",
         ":implemented_by",
+        ":caller_finder_common",
     ],
     javadoc_srcs = [":javadoc-srcs"],
 )
