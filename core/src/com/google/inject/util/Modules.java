@@ -80,7 +80,6 @@ public final class Modules {
    *
    * @param modules the modules whose bindings are open to be overridden
    */
-  @CheckReturnValue
   public static OverriddenModuleBuilder override(Module... modules) {
     return override(Arrays.asList(modules));
   }
@@ -119,7 +118,6 @@ public final class Modules {
    * arguments or (like {@code install()}) can be called repeatedly. Where possible, external APIs
    * that require a single module should similarly be adapted to permit multiple modules.
    */
-  @CheckReturnValue
   public static Module combine(Module... modules) {
     return combine(ImmutableSet.copyOf(modules));
   }
