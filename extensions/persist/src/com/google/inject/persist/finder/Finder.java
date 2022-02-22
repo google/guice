@@ -37,7 +37,9 @@ public @interface Finder {
    */
   String namedQuery() default "";
 
-  /** Returns the configured query string. Directly specify a JPAQL query here. */
+  /**
+   * Returns the configured query string. Directly specify a JPAQL query here.
+   */
   String query() default "";
 
   /**
@@ -46,5 +48,5 @@ public @interface Finder {
    * subclass of {@code java.util.Collection}.
    */
   @SuppressWarnings({"rawtypes"}) // Unavoidable because class literal uses raw types.
-  Class<? extends Collection> returnAs() default Collection.class;
+      Class<?> returnAs() default Collection.class;
 }

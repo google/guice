@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-/** Dynamic Finder API for Guice Persist. */
+/**
+ * Dynamic Finder API for Guice Persist.
+ */
+
 package com.google.inject.persist.finder;

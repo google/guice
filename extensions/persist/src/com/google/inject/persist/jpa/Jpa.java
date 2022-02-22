@@ -27,4 +27,5 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @BindingAnnotation
-@interface Jpa {}
+@interface Jpa {
+}

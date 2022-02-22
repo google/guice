@@ -24,6 +24,7 @@ import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.jpa.JpaDynamicFinderFactory.FinderCreationResult;
+import com.google.inject.persist.jpa.ReentrantUnitOfWork.UnitOfWorkConfig;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.List;
@@ -76,11 +77,30 @@ public final class JpaPersistModule extends PersistModule {
    * Configures the JPA persistence provider with a set of properties.
    *
    * @param properties A set of name value pairs that configure a JPA persistence provider as per
-   *     the specification.
+   *                   the specification.
    * @since 4.0 (since 3.0 with a parameter type of {@code java.util.Properties})
    */
   public JpaPersistModule properties(Map<?, ?> properties) {
     this.properties = properties;
+    return this;
+  }
+
+  private UnitOfWorkConfig unitOfWorkConfig = new UnitOfWorkConfig(true);
+
+  @Provides
+  public UnitOfWorkConfig getUnitOfWorkConfig() {
+    return unitOfWorkConfig;
+  }
+
+
+  /**
+   * Determines whether to start a unit of work upon first request for an entity manager
+   *
+   * @param implicitUnitOfWork whether or not to start a unit of work implictly
+   *                           ({@code true} by default to maintain backward compatibility)
+   */
+  public JpaPersistModule implicitUnitsOfWork(boolean implicitUnitOfWork) {
+    unitOfWorkConfig = new UnitOfWorkConfig(implicitUnitOfWork);
     return this;
   }
 
@@ -97,23 +117,23 @@ public final class JpaPersistModule extends PersistModule {
   }
 
   private void bindFinders() {
-      JpaDynamicFinderFactory finderFactory = new JpaDynamicFinderFactory();
-      for (Class<?> finder : dynamicFinders) {
-          FinderCreationResult result = finderFactory.createFinder(finder);
-          if (result.hasErrors()) {
-              result.getErrors().forEach(this::addError);
-          } else {
-              bindFinder(finder, result.getHandler());
-          }
+    JpaDynamicFinderFactory finderFactory = new JpaDynamicFinderFactory();
+    for (Class<?> finder : dynamicFinders) {
+      FinderCreationResult result = finderFactory.createFinder(finder);
+      if (result.hasErrors()) {
+        result.getErrors().forEach(this::addError);
+      } else {
+        bindFinder(finder, result.getHandler());
       }
+    }
   }
 
-    @SuppressWarnings("unchecked")
-    private <T> void bindFinder(Class<T> finder, InvocationHandler handler) {
-        requestInjection(handler);
-        bind(finder).toInstance((T) Proxy.newProxyInstance(
-            Thread.currentThread().getContextClassLoader(),
-            new Class<?>[] {finder},
-            handler));
-    }
+  @SuppressWarnings("unchecked")
+  private <T> void bindFinder(Class<T> finder, InvocationHandler handler) {
+    requestInjection(handler);
+    bind(finder).toInstance((T) Proxy.newProxyInstance(
+        Thread.currentThread().getContextClassLoader(),
+        new Class<?>[] {finder},
+        handler));
+  }
 }

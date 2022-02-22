@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.providers;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.inject.Injector;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.utils.PersistenceInjectorResource;
 import com.google.inject.persist.utils.SuiteAndTestResource;
@@ -26,7 +25,9 @@ import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
 public abstract class BaseEntityManagerFactoryProvisionTest {
 

@@ -7,7 +7,9 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
 
-/** @author dhanji@google.com (Dhanji R. Prasanna) */
+/**
+ * @author dhanji@google.com (Dhanji R. Prasanna)
+ */
 public class EdslTest extends TestCase {
 
   public void testModuleConfigUsingJpa() throws Exception {

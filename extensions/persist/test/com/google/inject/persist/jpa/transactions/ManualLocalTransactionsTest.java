@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.transactions;
 
 import static com.google.inject.persist.utils.PersistenceUtils.query;
 import static com.google.inject.persist.utils.PersistenceUtils.withinUnitOfWork;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
+import com.google.inject.persist.jpa.entities.JpaTestEntity;
 import com.google.inject.persist.utils.PersistenceInjectorResource;
-import com.google.inject.persist.utils.PersistenceUtils;
 import java.util.Collections;
 import java.util.Date;
 import javax.persistence.EntityManager;
@@ -51,36 +48,55 @@ public class ManualLocalTransactionsTest {
   private static final String UNIQUE_TEXT_2 = "some other unique text" + new Date();
 
   @Test
-  public void testSimpleCrossTxnWork() {
-    withinUnitOfWork(injector, em -> {
-      JpaTestEntity entity = injector.getInstance(TransactionalObject.class).runOperationInTxn();
-      injector.getInstance(TransactionalObject.class).runOperationInTxn2();
-
-      //persisted entity should remain in the same em (which should still be open)
-      assertTrue(
-          "EntityManager appears to have been closed across txns!",
-          injector.getInstance(EntityManager.class).contains(entity));
-      assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
-      assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
-    });
+  public void testSimpleCrossTxnWorkWithExplicitUnitOfWork() {
+    withinUnitOfWork(injector, this::runAndVerifyTransactions);
 
     //try to query them back out
-    withinUnitOfWork(injector, em -> {
-      assertFalse(query(em).forList(
-              JpaTestEntity.class,
-              "SELECT e FROM JpaTestEntity e WHERE e.text = :text",
-              Collections.singletonMap("text", UNIQUE_TEXT))
-          .isEmpty());
-      assertFalse(query(em).forList(
-              JpaTestEntity.class,
-              "SELECT e FROM JpaTestEntity e WHERE e.text = :text",
-              Collections.singletonMap("text", UNIQUE_TEXT_2))
-          .isEmpty());
-    });
+    withinUnitOfWork(injector, this::ensurePersistedObjects);
+  }
+
+  @Test
+  public void testSimpleCrossTxnWorkWithImplicitUnitOfWork() {
+    EntityManager em = injector.getInstance(EntityManager.class);
+    em.isOpen(); // needed because entity manager is lazy
+    try {
+      runAndVerifyTransactions(em);
+
+      //try to query them back out
+      ensurePersistedObjects(em);
+    } finally {
+      em.close();
+    }
+  }
+
+  private void ensurePersistedObjects(EntityManager em) {
+    assertFalse(query(em).forList(
+            JpaTestEntity.class,
+            "SELECT e FROM JpaTestEntity e WHERE e.text = :text",
+            Collections.singletonMap("text", UNIQUE_TEXT))
+        .isEmpty());
+    assertFalse(query(em).forList(
+            JpaTestEntity.class,
+            "SELECT e FROM JpaTestEntity e WHERE e.text = :text",
+            Collections.singletonMap("text", UNIQUE_TEXT_2))
+        .isEmpty());
+  }
+
+  private void runAndVerifyTransactions(EntityManager em) {
+    JpaTestEntity entity = injector.getInstance(TransactionalObject.class).runOperationInTxn();
+    injector.getInstance(TransactionalObject.class).runOperationInTxn2();
+
+    //persisted entity should remain in the same em (which should still be open)
+    assertTrue(
+        "EntityManager appears to have been closed across txns!",
+        injector.getInstance(EntityManager.class).contains(entity));
+    assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
+    assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
   }
 
   public static class TransactionalObject {
-    @Inject EntityManager em;
+    @Inject
+    EntityManager em;
 
     @Transactional
     public JpaTestEntity runOperationInTxn() {

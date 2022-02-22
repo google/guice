@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.providers;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.jpa.entities.JpaTestEntity;
 import com.google.inject.persist.utils.PersistenceInjectorResource;
 import javax.persistence.EntityManager;
 import org.junit.ClassRule;
