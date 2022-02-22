@@ -18,24 +18,19 @@ package com.google.inject.persist.jpa;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
-import com.google.inject.persist.finder.DynamicFinder;
-import com.google.inject.persist.finder.Finder;
-import java.lang.reflect.AccessibleObject;
+import com.google.inject.persist.jpa.JpaDynamicFinderFactory.FinderCreationResult;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * JPA provider for guice persist.
@@ -56,20 +51,14 @@ public final class JpaPersistModule extends PersistModule {
   @Override
   protected void configurePersistence() {
     bindConstant().annotatedWith(Jpa.class).to(jpaUnit);
-
     bind(JpaPersistService.class).in(Singleton.class);
 
     bind(PersistService.class).to(JpaPersistService.class);
     bind(UnitOfWork.class).to(ReentrantUnitOfWork.class);
     bind(LocalTransaction.class);
     bind(EntityManager.class).toProvider(ReentrantUnitOfWork.class);
-    bind(EntityManagerFactory.class)
-        .toProvider(JpaPersistService.class);
-
-    // Bind dynamic finders.
-    for (Class<?> finder : dynamicFinders) {
-      bindFinder(finder);
-    }
+    bind(EntityManagerFactory.class).toProvider(JpaPersistService.class);
+    bindFinders();
   }
 
   @Override
@@ -107,88 +96,24 @@ public final class JpaPersistModule extends PersistModule {
     return this;
   }
 
-  private <T> void bindFinder(Class<T> iface) {
-    if (!isDynamicFinderValid(iface)) {
-      return;
-    }
-
-    InvocationHandler finderInvoker =
-        new InvocationHandler() {
-          @Inject JpaFinderProxy finderProxy;
-
-          @Override
-          public Object invoke(final Object thisObject, final Method method, final Object[] args)
-              throws Throwable {
-
-            // Don't intercept non-finder methods like equals and hashcode.
-            if (!method.isAnnotationPresent(Finder.class)) {
-              // NOTE(user): This is not ideal, we are using the invocation handler's equals
-              // and hashcode as a proxy (!) for the proxy's equals and hashcode.
-              return method.invoke(this, args);
-            }
-
-            return finderProxy.invoke(
-                new MethodInvocation() {
-                  @Override
-                  public Method getMethod() {
-                    return method;
-                  }
-
-                  @Override
-                  public Object[] getArguments() {
-                    return null == args ? new Object[0] : args;
-                  }
-
-                  @Override
-                  public Object proceed() throws Throwable {
-                    return method.invoke(thisObject, args);
-                  }
-
-                  @Override
-                  public Object getThis() {
-                    throw new UnsupportedOperationException(
-                        "Bottomless proxies don't expose a this.");
-                  }
-
-                  @Override
-                  public AccessibleObject getStaticPart() {
-                    throw new UnsupportedOperationException();
-                  }
-                });
+  private void bindFinders() {
+      JpaDynamicFinderFactory finderFactory = new JpaDynamicFinderFactory();
+      for (Class<?> finder : dynamicFinders) {
+          FinderCreationResult result = finderFactory.createFinder(finder);
+          if (result.hasErrors()) {
+              result.getErrors().forEach(this::addError);
+          } else {
+              bindFinder(finder, result.getHandler());
           }
-        };
-    requestInjection(finderInvoker);
-
-    @SuppressWarnings("unchecked") // Proxy must produce instance of type given.
-    T proxy =
-        (T)
-            Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                new Class<?>[] {iface},
-                finderInvoker);
-
-    bind(iface).toInstance(proxy);
-  }
-
-  private boolean isDynamicFinderValid(Class<?> iface) {
-    boolean valid = true;
-    if (!iface.isInterface()) {
-      addError(iface + " is not an interface. Dynamic Finders must be interfaces.");
-      valid = false;
-    }
-
-    for (Method method : iface.getMethods()) {
-      DynamicFinder finder = DynamicFinder.from(method);
-      if (null == finder) {
-        addError(
-            "Dynamic Finder methods must be annotated with @Finder, but "
-                + iface
-                + "."
-                + method.getName()
-                + " was not");
-        valid = false;
       }
-    }
-    return valid;
   }
+
+    @SuppressWarnings("unchecked")
+    private <T> void bindFinder(Class<T> finder, InvocationHandler handler) {
+        requestInjection(handler);
+        bind(finder).toInstance((T) Proxy.newProxyInstance(
+            Thread.currentThread().getContextClassLoader(),
+            new Class<?>[] {finder},
+            handler));
+    }
 }
