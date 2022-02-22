@@ -14,7 +14,8 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.Injector;
+import static com.google.inject.persist.utils.PersistenceUtils.withinUnitOfWork;
+
 import com.google.inject.persist.utils.PersistenceInjectorResource;
 import com.google.inject.persist.utils.SuiteAndTestResource;
 import java.util.Arrays;
@@ -25,26 +26,15 @@ import javax.sql.DataSource;
 import org.hibernate.cfg.Environment;
 import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class EnsureJpaCanTakeObjectsInPropertiesTest {
-
-  @Rule
-  public PersistenceInjectorResource injector = new PersistenceInjectorResource(
-      SuiteAndTestResource.Lifecycle.TEST,
-      "testUnit",
-      this::configureModule);
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Parameters(name = "to datasource passed as param: {0} resulting in exception: {1}")
   public static Iterable<Object[]> parameters() {
@@ -53,18 +43,23 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest {
         new Object[] {false, PersistenceException.class});
   }
 
-  @Parameter(0)
-  public boolean passDataSource;
+  private final boolean passDataSource;
 
-  @Parameter(1)
-  public Class<? extends Exception> expectedExceptionType;
+  @Rule(order = -2)
+  public ExpectedException expectedException = ExpectedException.none();
 
-  @Before
-  public void setup() {
+  public EnsureJpaCanTakeObjectsInPropertiesTest(boolean passDataSource, Class<? extends Exception> expectedExceptionType) {
+    this.passDataSource = passDataSource;
     if (expectedExceptionType != null) {
       expectedException.expect(expectedExceptionType);
     }
   }
+
+  @Rule(order = -1)
+  public PersistenceInjectorResource injector = new PersistenceInjectorResource(
+      SuiteAndTestResource.Lifecycle.TEST,
+      "testProperties",
+      this::configureModule);
 
   private JpaPersistModule configureModule(JpaPersistModule jpaPersistModule) {
     Map<String, Object> properties = new HashMap<>();
@@ -72,7 +67,7 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest {
     if (passDataSource) {
       properties.put(Environment.DATASOURCE, getDataSource());
     }
-    return jpaPersistModule;
+    return jpaPersistModule.properties(properties);
   }
 
   private static DataSource getDataSource() {
@@ -85,7 +80,7 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest {
 
   @Test
   public void testShouldReact() {
-    // body intentionally left empty
+    withinUnitOfWork(injector, em -> {});
   }
 
 }
