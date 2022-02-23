@@ -16,33 +16,34 @@
 
 package com.google.inject.persist;
 
-import com.google.inject.persist.jpa.ClassLevelManagedLocalTransactionsTest;
-import com.google.inject.persist.jpa.CustomPropsEntityManagerFactoryProvisionTest;
-import com.google.inject.persist.jpa.DefaultPropsEntityManagerFactoryProvisionTest;
-import com.google.inject.persist.jpa.EntityManagerPerRequestProvisionTest;
-import com.google.inject.persist.jpa.EntityManagerProvisionTest;
-import com.google.inject.persist.jpa.JoiningLocalTransactionsTest;
-import com.google.inject.persist.jpa.JpaWorkManagerTest;
-import com.google.inject.persist.jpa.MethodLevelManagedLocalTransactionsTest;
-import com.google.inject.persist.jpa.ManualLocalTransactionsTest;
+import com.google.inject.persist.jpa.providers.CustomPropsEntityManagerFactoryProvisionTest;
+import com.google.inject.persist.jpa.providers.DefaultPropsEntityManagerFactoryProvisionTest;
+import com.google.inject.persist.jpa.providers.EntityManagerPerRequestProvisionTest;
+import com.google.inject.persist.jpa.providers.EntityManagerProvisionTest;
+import com.google.inject.persist.jpa.transactions.ClassLevelManagedLocalTransactionsTest;
+import com.google.inject.persist.jpa.transactions.JoiningManagedLocalTransactionsTest;
+import com.google.inject.persist.jpa.transactions.ManualLocalTransactionsTest;
+import com.google.inject.persist.jpa.transactions.MethodLevelManagedLocalTransactionsTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-/** @author dhanji@gmail.com (Dhanji R. Prasanna) */
+/**
+ * @author dhanji@gmail.com (Dhanji R. Prasanna)
+ */
 @RunWith(Suite.class)
 @SuiteClasses({
     EdslTest.class,
-	ClassLevelManagedLocalTransactionsTest.class,
-	MethodLevelManagedLocalTransactionsTest.class,
+    ClassLevelManagedLocalTransactionsTest.class,
+    MethodLevelManagedLocalTransactionsTest.class,
     DefaultPropsEntityManagerFactoryProvisionTest.class,
-	CustomPropsEntityManagerFactoryProvisionTest.class,
+    CustomPropsEntityManagerFactoryProvisionTest.class,
     EntityManagerPerRequestProvisionTest.class,
     EntityManagerProvisionTest.class,
-    JoiningLocalTransactionsTest.class,
-    JpaWorkManagerTest.class,
+    JoiningManagedLocalTransactionsTest.class,
     MethodLevelManagedLocalTransactionsTest.class,
-    ManualLocalTransactionsTest.class
+    ManualLocalTransactionsTest.class,
+    PersistFilterTest.class
 })
 public class AllTests {
 

@@ -26,7 +26,9 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 @Singleton
 class JpaPersistService implements PersistService, Provider<EntityManagerFactory> {
 
@@ -45,7 +47,8 @@ class JpaPersistService implements PersistService, Provider<EntityManagerFactory
   @Override
   public synchronized void start() {
     Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
-    this.emFactory = Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
+    this.emFactory =
+        Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
   }
 
   @Override

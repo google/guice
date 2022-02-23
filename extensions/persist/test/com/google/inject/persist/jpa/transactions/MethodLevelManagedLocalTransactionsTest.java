@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.transactions;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.finder.Finder;
+import com.google.inject.persist.jpa.entities.JpaTestEntity;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.persistence.EntityManager;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
 public class MethodLevelManagedLocalTransactionsTest
-    extends BaseManagedLocalTransactionsTest<MethodLevelManagedLocalTransactionsTest.MethodLevelTransactionalObjectImpl> {
+    extends
+    BaseManagedLocalTransactionsTest<MethodLevelManagedLocalTransactionsTest.MethodLevelTransactionalObjectImpl> {
 
   @Override
   protected Class<MethodLevelTransactionalObjectImpl> getTransactionalObjectType() {

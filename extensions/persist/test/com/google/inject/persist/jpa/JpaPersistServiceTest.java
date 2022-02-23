@@ -48,7 +48,8 @@ public class JpaPersistServiceTest {
       new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
 
   private static PersistenceProviderResolver defaultResolver;
-  private static final PersistenceProviderResolver resolver = mock(PersistenceProviderResolver.class);
+  private static final PersistenceProviderResolver resolver =
+      mock(PersistenceProviderResolver.class);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);
   private final EntityManagerFactory factory = mock(EntityManagerFactory.class);
   private final EntityManager entityManager = mock(EntityManager.class);
@@ -64,10 +65,14 @@ public class JpaPersistServiceTest {
   @Before
   public void setUp() throws Exception {
     when(resolver.getPersistenceProviders()).thenReturn(Collections.singletonList(provider));
-    when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES)).thenReturn(factory);
+    when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME,
+        PERSISTENCE_PROPERTIES)).thenReturn(factory);
     when(factory.createEntityManager()).thenReturn(entityManager);
     when(factory.isOpen()).thenAnswer(invocation -> factoryOpen);
-    doAnswer(invocationOnMock -> { factoryOpen = false; return null; }).when(factory).close();
+    doAnswer(invocationOnMock -> {
+      factoryOpen = false;
+      return null;
+    }).when(factory).close();
   }
 
   @Test
@@ -113,7 +118,8 @@ public class JpaPersistServiceTest {
     ThrowingRunnable action = service::start;
 
     // then
-    assertThrows("Persistence service was already initialized.", IllegalStateException.class, action);
+    assertThrows("Persistence service was already initialized.", IllegalStateException.class,
+        action);
   }
 
   @Test

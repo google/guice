@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,10 +12,11 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.providers;
 
 import static com.google.inject.persist.utils.PersistenceUtils.withinUnitOfWork;
 
+import com.google.inject.persist.jpa.JpaPersistModule;
 import com.google.inject.persist.utils.PersistenceInjectorResource;
 import com.google.inject.persist.utils.SuiteAndTestResource;
 import java.util.Arrays;
@@ -48,7 +49,8 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest {
   @Rule(order = -2)
   public ExpectedException expectedException = ExpectedException.none();
 
-  public EnsureJpaCanTakeObjectsInPropertiesTest(boolean passDataSource, Class<? extends Exception> expectedExceptionType) {
+  public EnsureJpaCanTakeObjectsInPropertiesTest(boolean passDataSource,
+                                                 Class<? extends Exception> expectedExceptionType) {
     this.passDataSource = passDataSource;
     if (expectedExceptionType != null) {
       expectedException.expect(expectedExceptionType);
@@ -63,7 +65,8 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest {
 
   private JpaPersistModule configureModule(JpaPersistModule jpaPersistModule) {
     Map<String, Object> properties = new HashMap<>();
-    properties.put(Environment.CONNECTION_PROVIDER, DatasourceConnectionProviderImpl.class.getName());
+    properties.put(Environment.CONNECTION_PROVIDER,
+        DatasourceConnectionProviderImpl.class.getName());
     if (passDataSource) {
       properties.put(Environment.DATASOURCE, getDataSource());
     }
@@ -80,7 +83,8 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest {
 
   @Test
   public void testShouldReact() {
-    withinUnitOfWork(injector, em -> {});
+    withinUnitOfWork(injector, em -> {
+    });
   }
 
 }
