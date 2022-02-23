@@ -18,6 +18,13 @@ class LocalTransaction extends ReentrantUnitOfWork {
 	 */
 	private static final ThreadLocal<Integer> transactionReentrancyDepth = ThreadLocal.withInitial(() -> 0);
 
+	/**
+	 * Whether the first-level call was done with a transaction already started from outside.
+	 *
+	 * <p>In such a scenario, we will just flip this switch on and off instead of actually starting/committing the transaction.</p>
+	 */
+	private static final ThreadLocal<Boolean> externalTransaction = ThreadLocal.withInitial(() -> false);
+
 	@Inject
 	LocalTransaction(Provider<EntityManagerFactory> entityManagerFactory) {
 		super(entityManagerFactory);
@@ -30,8 +37,8 @@ class LocalTransaction extends ReentrantUnitOfWork {
 			EntityTransaction currentTransaction = getEntityTransaction();
 			if (!currentTransaction.isActive()) {
 				currentTransaction.begin();
-			} else { // transaction started manually
-				incrementTransactionDepth();
+			} else { // transaction started externally, presumably by the user calling em.getTransaction().begin() directly
+				externalTransaction.set(true);
 			}
 		}
 		incrementTransactionDepth();
@@ -42,7 +49,11 @@ class LocalTransaction extends ReentrantUnitOfWork {
 		try {
 			decrementTransactionDepth();
 			if (isReentrantCall()) return;
-			finalizeTransaction();
+			if (externalTransaction.get()) {
+				externalTransaction.set(false);
+			} else {
+				finalizeTransaction();
+			}
 		} finally {
 			super.end();
 		}

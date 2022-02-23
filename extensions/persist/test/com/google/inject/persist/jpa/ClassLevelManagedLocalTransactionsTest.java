@@ -30,6 +30,7 @@ public class ClassLevelManagedLocalTransactionsTest
 			super.runOperationInTxnThrowingChecked();
 		}
 
+		@Transactional // needed to override class-level settings
 		@Override
 		public void runOperationInTxnThrowingUnchecked() {
 			super.runOperationInTxnThrowingUnchecked();
