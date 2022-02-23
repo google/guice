@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.providers;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
-public class DefaultPropsEntityManagerFactoryProvisionTest extends BaseEntityManagerFactoryProvisionTest {
+public class DefaultPropsEntityManagerFactoryProvisionTest
+    extends BaseEntityManagerFactoryProvisionTest {
 
 }

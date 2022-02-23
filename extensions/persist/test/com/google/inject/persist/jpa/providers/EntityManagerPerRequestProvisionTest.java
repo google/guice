@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.providers;
 
 import static com.google.inject.persist.utils.PersistenceUtils.sessionOpenCount;
 import static org.junit.Assert.assertEquals;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.jpa.entities.JpaTestEntity;
 import com.google.inject.persist.utils.PersistenceInjectorResource;
 import com.google.inject.persist.utils.PersistenceUtils;
 import java.util.Arrays;
@@ -85,7 +86,7 @@ public class EntityManagerPerRequestProvisionTest {
   }
 
   public static class JpaDao {
-    private EntityManager em;
+    private final EntityManager em;
 
     @Inject
     public JpaDao(EntityManager em) {

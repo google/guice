@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.providers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,9 +27,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
-public class CustomPropsEntityManagerFactoryProvisionTest extends BaseEntityManagerFactoryProvisionTest {
+public class CustomPropsEntityManagerFactoryProvisionTest
+    extends BaseEntityManagerFactoryProvisionTest {
 
   private static final String HIBERNATE_CONNECTION_URL = "hibernate.connection.url";
   private static final String CUSTOM_PERSISTENCE_URL = "jdbc:hsqldb:mem:customPersistence";
@@ -46,14 +49,15 @@ public class CustomPropsEntityManagerFactoryProvisionTest extends BaseEntityMana
     //obtain em
     assertTrue(injector.getInstance(EntityManagerFactory.class).isOpen());
     assertTrue(injector.getInstance(EntityManager.class).isOpen());
-    assertEquals(injector.getInstance(EntityManagerFactory.class).getProperties().get(HIBERNATE_CONNECTION_URL), CUSTOM_PERSISTENCE_URL);
+    assertEquals(injector.getInstance(EntityManagerFactory.class).getProperties()
+        .get(HIBERNATE_CONNECTION_URL), CUSTOM_PERSISTENCE_URL);
 
 
   }
-  
+
   @Before
   public void setUp() {
-	  injector.getInstance(UnitOfWork.class).begin();
+    injector.getInstance(UnitOfWork.class).begin();
   }
 
   @After

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.transactions;
 
 import static com.google.inject.persist.utils.PersistenceUtils.successfulTransactionCount;
 import static org.junit.Assert.assertEquals;
@@ -28,10 +28,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import org.junit.Test;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
-public class JoiningLocalTransactionsTest
-    extends BaseManagedLocalTransactionsTest<JoiningLocalTransactionsTest.DelegatingTransactionalObjectImpl> {
+public class JoiningManagedLocalTransactionsTest
+    extends
+    BaseManagedLocalTransactionsTest<JoiningManagedLocalTransactionsTest.DelegatingTransactionalObjectImpl> {
 
   @Override
   protected Class<DelegatingTransactionalObjectImpl> getTransactionalObjectType() {
@@ -43,7 +46,8 @@ public class JoiningLocalTransactionsTest
     long initialTransactions = successfulTransactionCount(injector);
     getTransactionalObject().runOperationTwiceInTxn();
 
-    assertEquals("Transaction not reused for multiple service calls", successfulTransactionCount(injector), initialTransactions + 1);
+    assertEquals("Transaction not reused for multiple service calls",
+        successfulTransactionCount(injector), initialTransactions + 1);
   }
 
   @Test
@@ -51,7 +55,8 @@ public class JoiningLocalTransactionsTest
     long initialTransactions = successfulTransactionCount(injector);
     getTransactionalObject().runOperationTwiceInManualTxn();
 
-    assertEquals("Transaction not reused for multiple service calls", successfulTransactionCount(injector), initialTransactions + 1);
+    assertEquals("Transaction not reused for multiple service calls",
+        successfulTransactionCount(injector), initialTransactions + 1);
   }
 
   public static class DelegatingTransactionalObjectImpl implements TransactionalObject {
@@ -60,7 +65,8 @@ public class JoiningLocalTransactionsTest
     private final UnitOfWork unitOfWork;
 
     @Inject
-    public DelegatingTransactionalObjectImpl(MethodLevelTransactionalObjectImpl delegate, EntityManager entityManager, UnitOfWork unitOfWork) {
+    public DelegatingTransactionalObjectImpl(MethodLevelTransactionalObjectImpl delegate,
+                                             EntityManager entityManager, UnitOfWork unitOfWork) {
       this.delegate = delegate;
       this.entityManager = entityManager;
       this.unitOfWork = unitOfWork;

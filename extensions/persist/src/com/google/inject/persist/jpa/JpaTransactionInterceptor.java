@@ -23,10 +23,12 @@ import java.util.Arrays;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 class JpaTransactionInterceptor implements MethodInterceptor {
 
-  private Provider<LocalTransaction> transactionProvider;
+  private final Provider<LocalTransaction> transactionProvider;
 
   public JpaTransactionInterceptor(Provider<LocalTransaction> transactionProvider) {
     this.transactionProvider = transactionProvider;
@@ -54,9 +56,11 @@ class JpaTransactionInterceptor implements MethodInterceptor {
     private final Class<? extends Exception>[] ignore;
 
     @Transactional
-    private static class DefaultTransactionConfigHolder {}
+    private static class DefaultTransactionConfigHolder {
+    }
 
-    private TransactionConfig(Class<? extends Exception>[] rollbackOn, Class<? extends Exception>[] ignore) {
+    private TransactionConfig(Class<? extends Exception>[] rollbackOn,
+                              Class<? extends Exception>[] ignore) {
       this.rollbackOn = rollbackOn;
       this.ignore = ignore;
     }

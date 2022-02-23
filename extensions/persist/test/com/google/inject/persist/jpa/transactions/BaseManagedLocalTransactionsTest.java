@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.persist.jpa;
+package com.google.inject.persist.jpa.transactions;
 
 import static com.google.inject.persist.utils.PersistenceUtils.query;
 import static com.google.inject.persist.utils.PersistenceUtils.successfulTransactionCount;
@@ -24,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.inject.persist.jpa.entities.JpaTestEntity;
 import com.google.inject.persist.utils.PersistenceInjectorResource;
 import com.google.inject.persist.utils.PersistenceUnitResource;
 import java.io.FileNotFoundException;
@@ -66,10 +67,13 @@ public abstract class BaseManagedLocalTransactionsTest<T extends BaseManagedLoca
     transactionalObject.runOperationInTxn();
 
 
-    assertEquals("EntityManager was not closed by transactional service", successfulTransactionCount(injector), initialTransactions + 1);
+    assertEquals("EntityManager was not closed by transactional service",
+        successfulTransactionCount(injector), initialTransactions + 1);
     //test that the data has been stored
     List<JpaTestEntity> result =
-        query(persistenceUnit).forList(JpaTestEntity.class, "SELECT e from JpaTestEntity e where e.text = :text", singletonMap("text", UNIQUE_TEXT));
+        query(persistenceUnit).forList(JpaTestEntity.class,
+            "SELECT e from JpaTestEntity e where e.text = :text",
+            singletonMap("text", UNIQUE_TEXT));
 
     assertFalse(transactionalObject.getLastTransaction().isActive());
 
@@ -90,13 +94,16 @@ public abstract class BaseManagedLocalTransactionsTest<T extends BaseManagedLoca
     }
 
     assertEquals(
-        "EntityManager was not closed by transactional service (rollback didnt happen?)", successfulTransactionCount(injector), initialTransactions);
+        "EntityManager was not closed by transactional service (rollback didnt happen?)",
+        successfulTransactionCount(injector), initialTransactions);
 
     assertFalse(transactionalObject.getLastTransaction().isActive());
 
     //test that the data has been stored
     List<?> result =
-        query(persistenceUnit).forList(JpaTestEntity.class, "SELECT e from JpaTestEntity e where e.text = :text", singletonMap("text", TRANSIENT_UNIQUE_TEXT));
+        query(persistenceUnit).forList(JpaTestEntity.class,
+            "SELECT e from JpaTestEntity e where e.text = :text",
+            singletonMap("text", TRANSIENT_UNIQUE_TEXT));
 
     assertTrue("a result was returned! rollback sure didnt happen!!!", result.isEmpty());
   }
@@ -113,15 +120,19 @@ public abstract class BaseManagedLocalTransactionsTest<T extends BaseManagedLoca
     }
 
     assertEquals(
-        "Txn was not closed by transactional service (commit didnt happen?)", successfulTransactionCount(injector), initialTransactions + 1);
+        "Txn was not closed by transactional service (commit didnt happen?)",
+        successfulTransactionCount(injector), initialTransactions + 1);
 
     assertFalse(transactionalObject.getLastTransaction().isActive());
 
     //test that the data has been stored
     List<?> result =
-        query(persistenceUnit).forList(JpaTestEntity.class, "SELECT e from JpaTestEntity e where e.text = :text", singletonMap("text", UNIQUE_TEXT_2));
+        query(persistenceUnit).forList(JpaTestEntity.class,
+            "SELECT e from JpaTestEntity e where e.text = :text",
+            singletonMap("text", UNIQUE_TEXT_2));
 
-    assertFalse("a result was not returned! rollback happened anyway (ignore failed)!!!", result.isEmpty());
+    assertFalse("a result was not returned! rollback happened anyway (ignore failed)!!!",
+        result.isEmpty());
   }
 
   @Test
@@ -135,13 +146,16 @@ public abstract class BaseManagedLocalTransactionsTest<T extends BaseManagedLoca
     }
 
     assertEquals(
-        "EntityManager was not closed by transactional service (rollback didnt happen?)", successfulTransactionCount(injector), initialTransactions);
+        "EntityManager was not closed by transactional service (rollback didnt happen?)",
+        successfulTransactionCount(injector), initialTransactions);
 
     assertFalse(transactionalObject.getLastTransaction().isActive());
 
     //test that the data has been stored
     List<?> result =
-        query(persistenceUnit).forList(JpaTestEntity.class, "SELECT e from JpaTestEntity e where e.text = :text", singletonMap("text", TRANSIENT_UNIQUE_TEXT));
+        query(persistenceUnit).forList(JpaTestEntity.class,
+            "SELECT e from JpaTestEntity e where e.text = :text",
+            singletonMap("text", TRANSIENT_UNIQUE_TEXT));
 
     assertTrue("a result was returned! rollback sure didnt happen!!!", result.isEmpty());
   }
@@ -154,9 +168,13 @@ public abstract class BaseManagedLocalTransactionsTest<T extends BaseManagedLoca
 
   interface TransactionalObject {
     EntityTransaction getLastTransaction();
+
     void runOperationInTxn();
+
     void runOperationInTxnThrowingUnchecked();
+
     void runOperationInTxnThrowingCheckedException() throws IOException;
+
     void runOperationInTxnThrowingChecked() throws IOException;
   }
 
