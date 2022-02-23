@@ -27,6 +27,11 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 
+/**
+ *
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ * @author Krzysztof Sierszeń (krzysztof.sierszen@digitalnewagency.com)
+ */
 class JpaDynamicFinderFactory {
 
   public FinderCreationResult createFinder(Class<?> iface) {
