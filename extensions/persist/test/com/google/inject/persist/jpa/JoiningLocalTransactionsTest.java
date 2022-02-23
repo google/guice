@@ -26,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */

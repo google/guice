@@ -264,14 +264,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
         -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>3.1</version>
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
-            <compilerArguments>
+            <compilerArgs>
               <arg>-parameters</arg>
-            </compilerArguments>
-            <testCompilerArgument>-parameters</testCompilerArgument>
+            </compilerArgs>
           </configuration>
         </plugin>
         <plugin>
