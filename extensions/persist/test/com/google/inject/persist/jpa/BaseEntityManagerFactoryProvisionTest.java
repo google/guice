@@ -16,41 +16,35 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.Guice;
+import static org.junit.Assert.assertEquals;
+
 import com.google.inject.Injector;
-import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import com.google.inject.persist.utils.PersistenceInjectorResource;
+import com.google.inject.persist.utils.SuiteAndTestResource;
+import java.util.Properties;
+import org.junit.Rule;
+import org.junit.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class EntityManagerFactoryProvisionTest extends TestCase {
-  private Injector injector;
+public abstract class BaseEntityManagerFactoryProvisionTest {
 
-  @Override
-  public void setUp() {
-    injector = Guice.createInjector(new JpaPersistModule("testUnit"));
+  @Rule
+  public PersistenceInjectorResource injector = new PersistenceInjectorResource(
+      SuiteAndTestResource.Lifecycle.TEST,
+      "testUnit",
+      module -> module.properties(getCustomProps()));
+
+  protected Properties getCustomProps() {
+    return null;
   }
 
-  @Override
-  public final void tearDown() {
-    injector.getInstance(UnitOfWork.class).end();
-    injector.getInstance(EntityManagerFactory.class).close();
-  }
-
-  public void testSessionCreateOnInjection() {
-
+  @Test
+  public void testServiceCreatesUnitOfWorkAsSingleton() {
     assertEquals(
         "SINGLETON VIOLATION " + UnitOfWork.class.getName(),
         injector.getInstance(UnitOfWork.class),
         injector.getInstance(UnitOfWork.class));
-
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
-
-    //obtain em
-    assertTrue(injector.getInstance(EntityManager.class).isOpen());
   }
 }

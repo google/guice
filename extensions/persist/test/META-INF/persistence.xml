@@ -20,6 +20,7 @@
             <property name="hibernate.connection.pool_size" value="2"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
             <property name="hiberante.cache_provider" value="org.hibernate.cache.NoCacheProvider"/>
+            <property name="hibernate.generate_statistics" value="true"/>
 
             <property name="hibernate.hbm2ddl.auto" value="create"/>
         </properties>

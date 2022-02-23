@@ -16,26 +16,8 @@
 
 package com.google.inject.persist.jpa;
 
-import static org.junit.Assert.assertThrows;
-
-import com.google.inject.Injector;
-import com.google.inject.persist.PersistService;
-import com.google.inject.persist.utils.PersistenceInjectorResource;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class JpaWorkManagerTest {
-  @ClassRule
-  @Rule
-  public static PersistenceInjectorResource injector = new PersistenceInjectorResource("testUnit");
+public class DefaultPropsEntityManagerFactoryProvisionTest extends BaseEntityManagerFactoryProvisionTest {
 
-  @Test
-  public void testCloseMoreThanOnce() {
-    injector.getInstance(PersistService.class).stop();
-
-    assertThrows(IllegalStateException.class, () -> injector.getInstance(PersistService.class).stop());
-  }
 }
