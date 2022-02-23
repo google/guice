@@ -16,45 +16,48 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.persist.PersistService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.google.inject.persist.UnitOfWork;
 import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class CustomPropsEntityManagerFactoryProvisionTest extends TestCase {
-  private Injector injector;
+public class CustomPropsEntityManagerFactoryProvisionTest extends BaseEntityManagerFactoryProvisionTest {
+
+  private static final String HIBERNATE_CONNECTION_URL = "hibernate.connection.url";
+  private static final String CUSTOM_PERSISTENCE_URL = "jdbc:hsqldb:mem:customPersistence";
 
   @Override
-  public void setUp() {
+  protected Properties getCustomProps() {
     Properties props = new Properties();
-    props.put("blah", "blah");
-
-    injector = Guice.createInjector(new JpaPersistModule("testUnit").properties(props));
+    props.put(HIBERNATE_CONNECTION_URL, CUSTOM_PERSISTENCE_URL);
+    return props;
   }
 
-  @Override
-  public final void tearDown() {
-    injector.getInstance(UnitOfWork.class).end();
-    injector.getInstance(EntityManagerFactory.class).close();
-  }
-
-  public void testSessionCreateOnInjection() {
-
-    assertEquals(
-        "SINGLETON VIOLATION " + UnitOfWork.class.getName(),
-        injector.getInstance(UnitOfWork.class),
-        injector.getInstance(UnitOfWork.class));
-
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
-
+  @Test
+  public void testFactoryReceivesCustomProps() {
     //obtain em
+    assertTrue(injector.getInstance(EntityManagerFactory.class).isOpen());
     assertTrue(injector.getInstance(EntityManager.class).isOpen());
+    assertEquals(injector.getInstance(EntityManagerFactory.class).getProperties().get(HIBERNATE_CONNECTION_URL), CUSTOM_PERSISTENCE_URL);
+
+
+  }
+  
+  @Before
+  public void setUp() {
+	  injector.getInstance(UnitOfWork.class).begin();
+  }
+
+  @After
+  public void tearDown() {
+    injector.getInstance(UnitOfWork.class).end();
   }
 }

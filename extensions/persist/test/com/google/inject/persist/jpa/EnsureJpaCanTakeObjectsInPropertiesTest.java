@@ -14,62 +14,65 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.persist.PersistService;
-import com.google.inject.persist.UnitOfWork;
+import com.google.inject.persist.utils.PersistenceInjectorResource;
+import com.google.inject.persist.utils.SuiteAndTestResource;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
-import junit.framework.TestCase;
 import org.hibernate.cfg.Environment;
 import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
 import org.hsqldb.jdbc.JDBCDataSource;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
-public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
+@RunWith(Parameterized.class)
+public class EnsureJpaCanTakeObjectsInPropertiesTest {
 
-  private Injector injector;
+  @Rule
+  public PersistenceInjectorResource injector = new PersistenceInjectorResource(
+      SuiteAndTestResource.Lifecycle.TEST,
+      "testUnit",
+      this::configureModule);
 
-  public static class DBModule extends AbstractModule {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
-    final DataSource ds;
-    final boolean passDataSource;
+  @Parameters(name = "to datasource passed as param: {0} resulting in exception: {1}")
+  public static Iterable<Object[]> parameters() {
+    return Arrays.asList(
+        new Object[] {true, null},
+        new Object[] {false, PersistenceException.class});
+  }
 
-    DBModule(DataSource ds, boolean passDataSource) {
-      this.ds = ds;
-      this.passDataSource = passDataSource;
-    }
+  @Parameter(0)
+  public boolean passDataSource;
 
-    @Override
-    protected void configure() {
-      Map<String, Object> p = new HashMap<>();
-      p.put(Environment.CONNECTION_PROVIDER, DatasourceConnectionProviderImpl.class.getName());
-      if (passDataSource) {
-        p.put(Environment.DATASOURCE, ds);
-      }
+  @Parameter(1)
+  public Class<? extends Exception> expectedExceptionType;
 
-      JpaPersistModule jpaPersistModule = new JpaPersistModule("testProperties").properties(p);
-
-      install(jpaPersistModule);
+  @Before
+  public void setup() {
+    if (expectedExceptionType != null) {
+      expectedException.expect(expectedExceptionType);
     }
   }
 
-  @Override
-  public void setUp() {
-    injector = null;
-  }
-
-  @Override
-  public final void tearDown() {
-    if (injector == null) {
-      return;
+  private JpaPersistModule configureModule(JpaPersistModule jpaPersistModule) {
+    Map<String, Object> properties = new HashMap<>();
+    properties.put(Environment.CONNECTION_PROVIDER, DatasourceConnectionProviderImpl.class.getName());
+    if (passDataSource) {
+      properties.put(Environment.DATASOURCE, getDataSource());
     }
-
-    injector.getInstance(UnitOfWork.class).end();
-    injector.getInstance(EntityManagerFactory.class).close();
+    return jpaPersistModule;
   }
 
   private static DataSource getDataSource() {
@@ -80,27 +83,9 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
     return dataSource;
   }
 
-  private void startPersistService(boolean passDataSource) {
-    final DataSource dataSource = getDataSource();
-
-    injector = Guice.createInjector(new DBModule(dataSource, passDataSource));
-
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
-  }
-
-  public void testWorksIfPassDataSource() {
-    startPersistService(true);
-  }
-
-  public void testFailsIfNoDataSource() {
-    try {
-      startPersistService(false);
-      fail();
-    } catch (PersistenceException ex) {
-      // Expected
-      injector = null;
-    }
+  @Test
+  public void testShouldReact() {
+    // body intentionally left empty
   }
 
 }

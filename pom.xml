@@ -268,9 +268,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
-            <compilerArgs>
+            <compilerArguments>
               <arg>-parameters</arg>
-            </compilerArgs>
+            </compilerArguments>
             <testCompilerArgument>-parameters</testCompilerArgument>
           </configuration>
         </plugin>
@@ -393,7 +393,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <doclint>html,syntax</doclint>
             <source>8</source>
             <author>false</author>
-            <protected>true</protected>
+            <show>protected</show>
             <links>
               <link>http://aopalliance.sourceforge.net/doc/</link>
               <link>https://guava.dev/releases/snapshot-jre/api/docs/</link>
