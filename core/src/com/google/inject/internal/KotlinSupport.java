@@ -27,7 +27,7 @@ public final class KotlinSupport {
       @SuppressWarnings("unchecked")
       Class<? extends KotlinSupportInterface> kotlinSupportClass =
           (Class<? extends KotlinSupportInterface>)
-              Class.forName("com.google.inject.kotlin.KotlinSupportImpl");
+              Class.forName("com.google.inject.KotlinSupportImpl");
       Field instance = kotlinSupportClass.getField("INSTANCE");
       instance.setAccessible(true);
       return (KotlinSupportInterface) instance.get(null);
