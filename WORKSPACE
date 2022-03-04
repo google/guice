@@ -1,12 +1,13 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
+
 RULES_JVM_EXTERNAL_SHA = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca"
 
 http_archive(
     name = "rules_jvm_external",
-    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     sha256 = RULES_JVM_EXTERNAL_SHA,
+    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
 )
 
@@ -42,41 +43,79 @@ maven_install(
         "org.ow2.asm:asm:9.2",
         "org.springframework:spring-core:5.3.14",
         "org.springframework:spring-beans:5.3.14",
+        "biz.aQute.bnd:bndlib:2.4.0",
+        "info.picocli:picocli:4.6.3",
         maven.artifact(
-          "biz.aQute", "bnd", "0.0.384", testonly = True
+            "biz.aQute",
+            "bnd",
+            "0.0.384",
+            testonly = True,
         ),
         maven.artifact(
-          "com.google.guava", "guava-testlib", "31.0.1-jre", testonly = True
+            "com.google.guava",
+            "guava-testlib",
+            "31.0.1-jre",
+            testonly = True,
         ),
         maven.artifact(
-          "com.google.truth", "truth", "0.45", testonly = True
+            "com.google.truth",
+            "truth",
+            "0.45",
+            testonly = True,
         ),
         maven.artifact(
-          "javax.inject", "javax.inject-tck", "1", testonly = True
+            "javax.inject",
+            "javax.inject-tck",
+            "1",
+            testonly = True,
         ),
         maven.artifact(
-          "junit", "junit", "4.13.2", testonly = True
+            "junit",
+            "junit",
+            "4.13.2",
+            testonly = True,
         ),
         maven.artifact(
-          "org.apache.felix", "org.apache.felix.framework", "3.0.5", testonly = True
+            "org.apache.felix",
+            "org.apache.felix.framework",
+            "3.0.5",
+            testonly = True,
         ),
         maven.artifact(
-          "org.easymock", "easymock", "3.1", testonly = True
+            "org.easymock",
+            "easymock",
+            "3.1",
+            testonly = True,
         ),
         maven.artifact(
-          "org.hamcrest", "hamcrest", "2.2", testonly = True
+            "org.hamcrest",
+            "hamcrest",
+            "2.2",
+            testonly = True,
         ),
         maven.artifact(
-          "org.hibernate.javax.persistence", "hibernate-jpa-2.0-api", "1.0.0.Final", testonly = True
+            "org.hibernate.javax.persistence",
+            "hibernate-jpa-2.0-api",
+            "1.0.0.Final",
+            testonly = True,
         ),
         maven.artifact(
-          "org.hibernate", "hibernate-core", "5.6.3.Final", testonly = True
+            "org.hibernate",
+            "hibernate-core",
+            "5.6.3.Final",
+            testonly = True,
         ),
         maven.artifact(
-          "org.hsqldb", "hsqldb-j5", "2.0.0", testonly = True
+            "org.hsqldb",
+            "hsqldb-j5",
+            "2.0.0",
+            testonly = True,
         ),
         maven.artifact(
-          "org.mockito", "mockito-core", "4.2.0", testonly = True
+            "org.mockito",
+            "mockito-core",
+            "4.2.0",
+            testonly = True,
         ),
     ],
     repositories = [
