@@ -55,8 +55,6 @@ public abstract class AbstractModule implements Module {
 
   Binder binder;
 
-  public AbstractModule() {}
-
   @Override
   public final synchronized void configure(Binder builder) {
     checkState(this.binder == null, "Re-entry is not allowed.");
@@ -88,12 +86,12 @@ public abstract class AbstractModule implements Module {
     return binder().bind(key);
   }
 
-  /** @see Binder#bind(TypeLiteral) */
+  /** See {@link Binder#bind(TypeLiteral)}. */
   protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return binder().bind(typeLiteral);
   }
 
-  /** @see Binder#bind(Class) */
+  /** See {@link Binder#bind(Class)}. */
   protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
     return binder().bind(clazz);
   }
