@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 /**
  * Class to conditionally load support for Kotlin features. These features are enabled based on
- * whether {@code com.google.inject.kotlin.KotlinSupportImpl} is in the class path.
+ * whether {@code com.google.inject.KotlinSupportImpl} is in the class path.
  */
 public final class KotlinSupport {
 
