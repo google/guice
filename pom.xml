@@ -504,5 +504,5 @@ See the Apache License Version 2.0 for the specific language governing permissio
     </plugins>
   </build>
 
-  <!-- TODO(user): Update the google parent pom or migrate to sonatype's -->
+  <!-- TODO(cgruber): Update the google parent pom or migrate to sonatype's -->
 </project>
