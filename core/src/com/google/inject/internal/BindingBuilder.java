@@ -64,6 +64,9 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
   }
 
   @Override
+  public BindingBuilder<T> convertTo(Class<? extends T> implementation) { return to(Key.get(implementation)); }
+
+  @Override
   public BindingBuilder<T> to(TypeLiteral<? extends T> implementation) {
     return to(Key.get(implementation));
   }

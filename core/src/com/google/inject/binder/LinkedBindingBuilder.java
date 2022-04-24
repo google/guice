@@ -31,6 +31,9 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder to(Class<? extends T> implementation);
 
+  /**See the EDSL examples at {@link com.google.inject.Binder}.*/
+  ScopedBindingBuilder convertTo(Class<? extends T> implementation);
+
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder to(TypeLiteral<? extends T> implementation);
 
