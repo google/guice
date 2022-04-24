@@ -29,6 +29,8 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -94,6 +96,19 @@ public abstract class AbstractModule implements Module {
   /** See {@link Binder#bind(Class)}. */
   protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
     return binder().bind(clazz);
+  }
+
+  /**CS304 Issue link:https://github.com/google/guice/issues/1082 bind two class,check the realation between two class and inherit the method**/
+  protected <T> AnnotatedBindingBuilder<T> convertBind(Class<T> clazz,Class<? extends T> clazz2) {
+    if(clazz==null||clazz2==null){
+      return null;
+    }else if(!(clazz.isAssignableFrom(clazz2))){
+      System.out.println("incorrect extends realations");
+      return null;
+    }
+    else{
+      return binder().bind(clazz);
+    }
   }
 
   /** @see Binder#bindConstant() */
