@@ -98,7 +98,8 @@ public abstract class AbstractModule implements Module {
     return binder().bind(clazz);
   }
 
-  /** See {@link Binder#bind(Class)}. */
+  /*CS304 Issue link:https://github.com/google/guice/issues/1082*/
+  /*bind two class,check the realation between two class and inherit the method*/
   protected <T> AnnotatedBindingBuilder<T> convertBind(Class<T> clazz,Class<? extends T> clazz2) {
     if(clazz==null||clazz2==null){
       return null;

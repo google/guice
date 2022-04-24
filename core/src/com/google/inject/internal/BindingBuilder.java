@@ -63,6 +63,8 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return to(Key.get(implementation));
   }
 
+  /*CS304 Issue link:https://github.com/google/guice/issues/1082*/
+  /*new to method after bind*/
   @Override
   public BindingBuilder<T> convertTo(Class<? extends T> implementation) { return to(Key.get(implementation)); }
 
