@@ -22,10 +22,13 @@ ANNOTATION_SRCS = [
     "BindingAnnotation.java",
     "Exposed.java",
     "Inject.java",
-    "ProvidedBy.java",
     "Provides.java",
     "ScopeAnnotation.java",
     "Singleton.java",
+]
+
+PROVIDED_BY_SRCS = [
+    "ProvidedBy.java",
 ]
 
 IMPLEMENTED_BY_SRCS = [
@@ -44,6 +47,15 @@ java_library(
     javacopts = JAVAC_OPTS,
 )
 
+java_library(
+    name = "provided_by",
+    srcs = PROVIDED_BY_SRCS,
+    javacopts = JAVAC_OPTS,
+    deps = [
+        "//third_party/java/jsr330_inject",
+    ],
+)
+
 # TODO(lukes,user): It'd be nice if this wasn't one big rule.
 # Unfortunately, splitting it apart would not be easy. We looked into
 # it and the main issues appear to be:
@@ -53,7 +65,7 @@ java_library(
     name = "inject",
     srcs = glob(
         ["**/*.java"],
-        exclude = IMPLEMENTED_BY_SRCS + ANNOTATION_SRCS + CALLER_FINDER_COMMON_SRCS,
+        exclude = IMPLEMENTED_BY_SRCS + PROVIDED_BY_SRCS + ANNOTATION_SRCS + CALLER_FINDER_COMMON_SRCS,
     ),
     javacopts = JAVAC_OPTS,
     plugins = [
@@ -62,6 +74,7 @@ java_library(
     exports = [
         ":annotations",
         ":implemented_by",
+        ":provided_by",
         # TODO(user): caller_finder_common shouldn't be exported, but validation requires
         # it be exported right now.
         ":caller_finder_common",
@@ -73,6 +86,7 @@ java_library(
         ":annotations",
         ":caller_finder_common",
         ":implemented_by",
+        ":provided_by",
         "//third_party/java/guava/annotations",
         "//third_party/java/guava/base",
         "//third_party/java/guava/cache",
@@ -115,6 +129,7 @@ gen_maven_artifact(
         ":annotations",
         ":implemented_by",
         ":caller_finder_common",
+        ":provided_by",
     ],
     javadoc_srcs = [":javadoc-srcs"],
 )
