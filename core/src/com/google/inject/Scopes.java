@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.SingletonScope;
@@ -68,8 +69,7 @@ public class Scopes {
 
         @Override
         public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-          return scopeAnnotation == Singleton.class
-              || scopeAnnotation == javax.inject.Singleton.class;
+            return Annotations.isSingletonAnnotation(scopeAnnotation);
         }
 
         @Override

@@ -26,9 +26,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
 import com.google.inject.name.Named;
@@ -36,6 +39,7 @@ import com.google.inject.name.Names;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -43,7 +47,8 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import javax.inject.Qualifier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Annotation utilities.
@@ -51,6 +56,11 @@ import javax.inject.Qualifier;
  * @author crazybob@google.com (Bob Lee)
  */
 public class Annotations {
+
+  private static final AnnotationProvider[] ANNOTATION_PROVIDERS = new AnnotationProvider[]{
+          new JavaxAnnotations(),
+          new JakartaAnnotations()
+  };
 
   /** Returns {@code true} if the given annotation type has no attributes. */
   public static boolean isMarker(Class<? extends Annotation> annotationType) {
@@ -312,7 +322,9 @@ public class Annotations {
   }
 
   private static final AnnotationChecker scopeChecker =
-      new AnnotationChecker(Arrays.asList(ScopeAnnotation.class, javax.inject.Scope.class));
+      new AnnotationChecker(Streams.concat(Stream.of(ScopeAnnotation.class),
+                      Arrays.stream(ANNOTATION_PROVIDERS).map(AnnotationProvider::getScopeAnnotationType))
+              .collect(Collectors.toList()));
 
   public static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
     return scopeChecker.hasAnnotations(annotationType);
@@ -369,7 +381,10 @@ public class Annotations {
   }
 
   private static final AnnotationChecker bindingAnnotationChecker =
-      new AnnotationChecker(Arrays.asList(BindingAnnotation.class, Qualifier.class));
+      new AnnotationChecker(Streams.concat(Stream.of(BindingAnnotation.class),
+              Arrays.stream(ANNOTATION_PROVIDERS).map(AnnotationProvider::getQualifierAnnotationType))
+          .collect(Collectors.toList()));
+
 
   /** Returns true if annotations of the specified type are binding annotations. */
   public static boolean isBindingAnnotation(Class<? extends Annotation> annotationType) {
@@ -377,28 +392,32 @@ public class Annotations {
   }
 
   /**
-   * If the annotation is an instance of {@code javax.inject.Named}, canonicalizes to
+   * If the annotation is a supported Named annotation, canonicalize to
    * com.google.guice.name.Named. Returns the given annotation otherwise.
    */
   public static Annotation canonicalizeIfNamed(Annotation annotation) {
-    if (annotation instanceof javax.inject.Named) {
-      return Names.named(((javax.inject.Named) annotation).value());
-    } else {
-      return annotation;
+    for (AnnotationProvider annotationProvider : ANNOTATION_PROVIDERS) {
+      if (annotationProvider.acceptAnnotation(annotation)) {
+        return annotationProvider.canonicalizeNamed(annotation);
+      }
     }
+    return annotation;
   }
 
   /**
-   * If the annotation is the class {@code javax.inject.Named}, canonicalizes to
+   * If the annotation is a supported Named annotation, canonicalize to
    * com.google.guice.name.Named. Returns the given annotation class otherwise.
    */
   public static Class<? extends Annotation> canonicalizeIfNamed(
       Class<? extends Annotation> annotationType) {
-    if (annotationType == javax.inject.Named.class) {
-      return Named.class;
-    } else {
-      return annotationType;
+
+    for (AnnotationProvider annotationProvider : ANNOTATION_PROVIDERS) {
+      if (annotationProvider.acceptAnnotation(annotationType)) {
+        return Named.class;
+      }
     }
+
+    return annotationType;
   }
 
   /**
@@ -416,6 +435,177 @@ public class Annotations {
       return '@' + key.getAnnotationType().getName();
     } else {
       return "";
+    }
+  }
+
+  public static Annotation getAtInject(AnnotatedElement member) {
+
+    for (AnnotationProvider annotationProvider : ANNOTATION_PROVIDERS) {
+      Annotation a = annotationProvider.getInjectAnnotation(member);
+      if (a != null) {
+        return a;
+      }
+    }
+
+    return member.getAnnotation(Inject.class);
+  }
+
+  public static boolean hasAtInject(AnnotatedElement member) {
+
+    for (AnnotationProvider annotationProvider : ANNOTATION_PROVIDERS) {
+      if (annotationProvider.hasInjectAnnotation(member)) {
+        return true;
+      }
+    }
+
+    return member.isAnnotationPresent(Inject.class);
+  }
+
+  public static boolean isSingletonAnnotation(Class<? extends Annotation> annotationType) {
+
+    for (AnnotationProvider annotationProvider : ANNOTATION_PROVIDERS) {
+      if (annotationProvider.getSingletonAnnotationType() == annotationType) {
+        return true;
+      }
+    }
+
+    return annotationType == Singleton.class;
+  }
+
+  private interface AnnotationProvider {
+
+    // general annotation usage
+    boolean acceptAnnotation(Annotation annotation);
+
+    boolean acceptAnnotation(Class<? extends Annotation> annotationType);
+
+    // inject
+    Annotation getInjectAnnotation(AnnotatedElement member);
+
+    boolean hasInjectAnnotation(AnnotatedElement member);
+
+    // named
+    Annotation canonicalizeNamed(Annotation annotation);
+
+    // scope
+    Class<? extends Annotation> getScopeAnnotationType();
+
+    Class<? extends Annotation> getQualifierAnnotationType();
+
+    Class<? extends Annotation> getSingletonAnnotationType();
+  }
+
+  private static class JavaxAnnotations implements AnnotationProvider {
+
+    @Override
+    public boolean acceptAnnotation(Annotation annotation) {
+      return annotation instanceof javax.inject.Inject
+          || annotation instanceof javax.inject.Named
+          || annotation instanceof javax.inject.Qualifier
+          || annotation instanceof javax.inject.Scope
+          || annotation instanceof javax.inject.Singleton;
+    }
+
+    @Override
+    public boolean acceptAnnotation(Class<? extends Annotation> annotationType) {
+      return (annotationType == javax.inject.Inject.class
+          || annotationType == javax.inject.Named.class
+          || annotationType == javax.inject.Qualifier.class
+          || annotationType == javax.inject.Scope.class
+          || annotationType == javax.inject.Singleton.class);
+    }
+
+    @Override
+    public Annotation getInjectAnnotation(AnnotatedElement member) {
+      if (member != null) {
+        return member.getAnnotation(javax.inject.Inject.class);
+      }
+      return null;
+    }
+
+    @Override
+    public boolean hasInjectAnnotation(AnnotatedElement member) {
+      if (member != null) {
+        return member.isAnnotationPresent(javax.inject.Inject.class);
+      }
+      return false;
+    }
+
+    @Override
+    public Annotation canonicalizeNamed(Annotation annotation) {
+      return Names.named(((javax.inject.Named) annotation).value());
+    }
+
+    @Override
+    public Class<? extends Annotation> getScopeAnnotationType() {
+      return javax.inject.Scope.class;
+    }
+
+    @Override
+    public Class<? extends Annotation> getQualifierAnnotationType() {
+      return javax.inject.Qualifier.class;
+    }
+
+    @Override
+    public Class<? extends Annotation> getSingletonAnnotationType() {
+      return javax.inject.Singleton.class;
+    }
+  }
+
+  private static class JakartaAnnotations implements AnnotationProvider {
+
+    @Override
+    public boolean acceptAnnotation(Annotation annotation) {
+      return annotation instanceof jakarta.inject.Inject
+          || annotation instanceof jakarta.inject.Named
+          || annotation instanceof jakarta.inject.Qualifier
+          || annotation instanceof jakarta.inject.Scope
+          || annotation instanceof jakarta.inject.Singleton;
+    }
+
+    @Override
+    public boolean acceptAnnotation(Class<? extends Annotation> annotationType) {
+      return (annotationType == jakarta.inject.Inject.class
+          || annotationType == jakarta.inject.Named.class
+          || annotationType == jakarta.inject.Qualifier.class
+          || annotationType == jakarta.inject.Scope.class
+          || annotationType == jakarta.inject.Singleton.class);
+    }
+
+    @Override
+    public Annotation getInjectAnnotation(AnnotatedElement member) {
+      if (member != null) {
+        return member.getAnnotation(jakarta.inject.Inject.class);
+      }
+      return null;
+    }
+
+    @Override
+    public boolean hasInjectAnnotation(AnnotatedElement member) {
+      if (member != null) {
+        return member.isAnnotationPresent(jakarta.inject.Inject.class);
+      }
+      return false;
+    }
+
+    @Override
+    public Annotation canonicalizeNamed(Annotation annotation) {
+      return Names.named(((jakarta.inject.Named) annotation).value());
+    }
+
+    @Override
+    public Class<? extends Annotation> getScopeAnnotationType() {
+      return jakarta.inject.Scope.class;
+    }
+
+    @Override
+    public Class<? extends Annotation> getQualifierAnnotationType() {
+      return jakarta.inject.Qualifier.class;
+    }
+
+    @Override
+    public Class<? extends Annotation> getSingletonAnnotationType() {
+      return jakarta.inject.Singleton.class;
     }
   }
 }

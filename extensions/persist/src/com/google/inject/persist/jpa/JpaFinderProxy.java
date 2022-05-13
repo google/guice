@@ -20,6 +20,7 @@ import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.internal.Annotations;
 import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
 import com.google.inject.persist.finder.FirstResult;
@@ -118,16 +119,15 @@ class JpaFinderProxy implements MethodInterceptor {
       //noinspection UnnecessaryContinue
       {
         continue; //skip param as it's not bindable
-      } else if (annotation instanceof Named) {
-        Named named = (Named) annotation;
-        jpaQuery.setParameter(named.value(), argument);
-      } else if (annotation instanceof javax.inject.Named) {
-        javax.inject.Named named = (javax.inject.Named) annotation;
-        jpaQuery.setParameter(named.value(), argument);
-      } else if (annotation instanceof FirstResult) {
-        jpaQuery.setFirstResult((Integer) argument);
-      } else if (annotation instanceof MaxResults) {
-        jpaQuery.setMaxResults((Integer) argument);
+      } else if (annotation instanceof Annotation) {
+        Annotation namedAnnotation = Annotations.canonicalizeIfNamed((Annotation) annotation);
+        if (namedAnnotation instanceof Named) {
+          jpaQuery.setParameter(((Named)namedAnnotation).value(), argument);
+        } else if (annotation instanceof FirstResult) {
+          jpaQuery.setFirstResult((Integer) argument);
+        } else if (annotation instanceof MaxResults) {
+          jpaQuery.setMaxResults((Integer) argument);
+        }
       }
     }
   }
@@ -182,7 +182,7 @@ class JpaFinderProxy implements MethodInterceptor {
       for (Annotation annotation : annotations) {
         //discover the named, first or max annotations then break out
         Class<? extends Annotation> annotationType = annotation.annotationType();
-        if (Named.class.equals(annotationType) || javax.inject.Named.class.equals(annotationType)) {
+        if (Annotations.canonicalizeIfNamed(annotationType) == Named.class) {
           discoveredAnnotations[i] = annotation;
           finderDescriptor.isBindAsRawParameters = false;
           break;

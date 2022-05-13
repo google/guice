@@ -297,10 +297,7 @@ public final class InjectionPoint {
 
     List<Constructor<?>> atInjectConstructors =
         Arrays.stream(rawType.getDeclaredConstructors())
-            .filter(
-                constructor ->
-                    constructor.isAnnotationPresent(Inject.class)
-                        || constructor.isAnnotationPresent(javax.inject.Inject.class))
+            .filter(constructor -> Annotations.hasAtInject(constructor))
             .collect(Collectors.toList());
 
     Constructor<?> injectableConstructor = null;
@@ -484,14 +481,13 @@ public final class InjectionPoint {
     InjectableMember(TypeLiteral<?> declaringType, Annotation atInject) {
       this.declaringType = declaringType;
 
-      if (atInject.annotationType() == javax.inject.Inject.class) {
+      if (atInject.annotationType() == Inject.class) {
+        jsr330 = false;
+        optional = ((Inject) atInject).optional();
+      } else {
         optional = false;
         jsr330 = true;
-        return;
       }
-
-      jsr330 = false;
-      optional = ((Inject) atInject).optional();
     }
 
     abstract InjectionPoint toInjectionPoint();
@@ -532,11 +528,6 @@ public final class InjectionPoint {
     public boolean isFinal() {
       return Modifier.isFinal(method.getModifiers());
     }
-  }
-
-  static Annotation getAtInject(AnnotatedElement member) {
-    Annotation a = member.getAnnotation(javax.inject.Inject.class);
-    return a == null ? member.getAnnotation(Inject.class) : a;
   }
 
   /** Linked list of injectable members. */
@@ -716,7 +707,7 @@ public final class InjectionPoint {
 
       for (Field field : getDeclaredFields(current)) {
         if (Modifier.isStatic(field.getModifiers()) == statics) {
-          Annotation atInject = getAtInject(field);
+          Annotation atInject = Annotations.getAtInject(field);
           if (atInject != null) {
             InjectableField injectableField = new InjectableField(current, field, atInject);
             if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
@@ -729,7 +720,7 @@ public final class InjectionPoint {
 
       for (Method method : getDeclaredMethods(current)) {
         if (isEligibleForInjection(method, statics)) {
-          Annotation atInject = getAtInject(method);
+          Annotation atInject = Annotations.getAtInject(method);
           if (atInject != null) {
             InjectableMethod injectableMethod = new InjectableMethod(current, method, atInject);
             if (checkForMisplacedBindingAnnotations(method, errors)

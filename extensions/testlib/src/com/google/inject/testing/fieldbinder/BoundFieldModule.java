@@ -414,7 +414,7 @@ public final class BoundFieldModule implements Module {
     if (bindAnnotation == null) {
       return Optional.absent();
     }
-    if (hasInject(field)) {
+    if (Annotations.hasAtInject(field)) {
       deferredErrors.add(
           new Message(field, "Fields annotated with both @Bind and @Inject are illegal."));
       return Optional.absent();
@@ -430,11 +430,6 @@ public final class BoundFieldModule implements Module {
       deferredErrors.add(e.message);
       return Optional.absent();
     }
-  }
-
-  private static boolean hasInject(Field field) {
-    return field.isAnnotationPresent(javax.inject.Inject.class)
-        || field.isAnnotationPresent(com.google.inject.Inject.class);
   }
 
   /**
