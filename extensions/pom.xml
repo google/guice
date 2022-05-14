@@ -20,6 +20,7 @@
     <module>assistedinject</module>
     <module>dagger-adapter</module>
     <module>grapher</module>
+    <module>jakarta-servlet</module>
     <module>jmx</module>
     <module>jndi</module>
     <module>persist</module>
