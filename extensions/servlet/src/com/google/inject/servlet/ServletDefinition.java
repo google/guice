@@ -22,6 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scopes;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import java.io.IOException;
@@ -78,6 +79,22 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
   @Override
   public <B, V> V acceptExtensionVisitor(
       BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
+    if (visitor instanceof ServletModuleTargetVisitor) {
+      if (servletInstance != null) {
+        return ((ServletModuleTargetVisitor<B, V>) visitor)
+            .visit(new InstanceServletBindingImpl(initParams, servletInstance, patternMatcher));
+      } else {
+        return ((ServletModuleTargetVisitor<B, V>) visitor)
+            .visit(new LinkedServletBindingImpl(initParams, servletKey, patternMatcher));
+      }
+    } else {
+      return visitor.visit(binding);
+    }
+  }
+
+  @Override
+  public <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, JeeProviderInstanceBinding<? extends B> binding) {
     if (visitor instanceof ServletModuleTargetVisitor) {
       if (servletInstance != null) {
         return ((ServletModuleTargetVisitor<B, V>) visitor)

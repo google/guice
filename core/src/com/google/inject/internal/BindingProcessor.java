@@ -25,6 +25,8 @@ import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.JeeProviderInstanceBinding;
+import com.google.inject.spi.JeeProviderKeyBinding;
 import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProviderBinding;
@@ -53,9 +55,12 @@ final class BindingProcessor extends AbstractBindingProcessor {
   public <T> Boolean visit(Binding<T> command) {
     Class<?> rawType = command.getKey().getTypeLiteral().getRawType();
     if (Void.class.equals(rawType)) {
-      if (command instanceof ProviderInstanceBinding
-          && ((ProviderInstanceBinding) command).getUserSuppliedProvider()
-              instanceof ProviderMethod) {
+      if ((command instanceof ProviderInstanceBinding
+              && ((ProviderInstanceBinding) command).getUserSuppliedProvider()
+                  instanceof ProviderMethod)
+          || (command instanceof JeeProviderInstanceBinding
+              && ((JeeProviderInstanceBinding) command).getUserSuppliedProvider()
+                  instanceof ProviderMethod)) {
         errors.voidProviderMethod();
       } else {
         errors.missingConstantValues();
@@ -142,6 +147,35 @@ final class BindingProcessor extends AbstractBindingProcessor {
           }
 
           @Override
+          public Boolean visit(JeeProviderInstanceBinding<? extends T> binding) {
+            prepareBinding();
+            jakarta.inject.Provider<? extends T> provider = binding.getUserSuppliedProvider();
+            if (provider instanceof InternalProviderInstanceBindingImpl.Factory) {
+              @SuppressWarnings("unchecked")
+              InternalProviderInstanceBindingImpl.Factory<T> asProviderMethod =
+                  (InternalProviderInstanceBindingImpl.Factory<T>) provider;
+              return visitInternalProviderInstanceBindingFactory(asProviderMethod);
+            }
+            Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
+            Initializable<? extends jakarta.inject.Provider<? extends T>> initializable =
+                initializer.<jakarta.inject.Provider<? extends T>>requestInjection(
+                    injector, provider, null, source, injectionPoints);
+            // always visited with Binding<T>
+            @SuppressWarnings("unchecked")
+            InternalFactory<T> factory =
+                new InternalFactoryToJeeInitializableAdapter<T>(
+                    initializable,
+                    source,
+                    injector.provisionListenerStore.get((JeeProviderInstanceBinding<T>) binding));
+            InternalFactory<? extends T> scopedFactory =
+                Scoping.scope(key, injector, factory, source, scoping);
+            putBinding(
+                new JeeProviderInstanceBindingImpl<T>(
+                    injector, key, source, scopedFactory, scoping, provider, injectionPoints));
+            return true;
+          }
+
+          @Override
           public Boolean visit(ProviderKeyBinding<? extends T> binding) {
             prepareBinding();
             Key<? extends javax.inject.Provider<? extends T>> providerKey =
@@ -169,6 +203,33 @@ final class BindingProcessor extends AbstractBindingProcessor {
           }
 
           @Override
+          public Boolean visit(JeeProviderKeyBinding<? extends T> binding) {
+            prepareBinding();
+            Key<? extends jakarta.inject.Provider<? extends T>> providerKey =
+                binding.getProviderKey();
+            // always visited with Binding<T>
+            @SuppressWarnings("unchecked")
+            BoundJeeProviderFactory<T> boundProviderFactory =
+                new BoundJeeProviderFactory<>(
+                    injector,
+                    providerKey,
+                    source,
+                    injector.provisionListenerStore.get((JeeProviderKeyBinding<T>) binding));
+            processedBindingData.addCreationListener(boundProviderFactory);
+            InternalFactory<? extends T> scopedFactory =
+                Scoping.scope(
+                    key,
+                    injector,
+                    boundProviderFactory,
+                    source,
+                    scoping);
+            putBinding(
+                new LinkedJeeProviderBindingImpl<>(
+                    injector, key, source, scopedFactory, scoping, providerKey));
+            return true;
+          }
+
+            @Override
           public Boolean visit(LinkedKeyBinding<? extends T> binding) {
             prepareBinding();
             Key<? extends T> linkedKey = binding.getLinkedKey();

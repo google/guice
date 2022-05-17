@@ -69,6 +69,27 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder toProvider(Key<? extends javax.inject.Provider<? extends T>> providerKey);
 
+  /** See the EDSL examples at {@link com.google.inject.Binder}. This method is called <code>toJeeProvider</code> to avoid clashes with {@link #toProvider(Provider)}. */
+  default ScopedBindingBuilder toJeeProvider(jakarta.inject.Provider<? extends T> provider) {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /** See the EDSL examples at {@link com.google.inject.Binder}. This method is called <code>toJeeProvider</code> to avoid clashes with {@link #toProvider(Class)}. */
+  default ScopedBindingBuilder toJeeProvider(Class<? extends jakarta.inject.Provider<? extends T>> providerType) {
+      return toJeeProvider(Key.get(providerType));
+  }
+
+  /** See the EDSL examples at {@link com.google.inject.Binder}. This method is called <code>toJeeProvider</code> to avoid clashes with {@link #toProvider(TypeLiteral)}. */
+  default ScopedBindingBuilder toJeeProvider(
+          TypeLiteral<? extends jakarta.inject.Provider<? extends T>> providerType) {
+    return toJeeProvider(Key.get(providerType));
+  }
+
+  /** See the EDSL examples at {@link com.google.inject.Binder}. This method is called <code>toJeeProvider</code> to avoid clashes with {@link #toProvider(Key)}. */
+  default ScopedBindingBuilder toJeeProvider(Key<? extends jakarta.inject.Provider<? extends T>> providerKey) {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
    *

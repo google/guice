@@ -34,6 +34,7 @@ import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
@@ -850,6 +851,17 @@ public final class RealMapBinder<K, V> implements Module {
     @SuppressWarnings("unchecked")
     public <B, W> W acceptExtensionVisitor(
         BindingTargetVisitor<B, W> visitor, ProviderInstanceBinding<? extends B> binding) {
+      if (visitor instanceof MultibindingsTargetVisitor) {
+        return ((MultibindingsTargetVisitor<Map<K, V>, W>) visitor).visit(this);
+      } else {
+        return visitor.visit(binding);
+      }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <B, W> W acceptExtensionVisitor(
+        BindingTargetVisitor<B, W> visitor, JeeProviderInstanceBinding<? extends B> binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
         return ((MultibindingsTargetVisitor<Map<K, V>, W>) visitor).visit(this);
       } else {

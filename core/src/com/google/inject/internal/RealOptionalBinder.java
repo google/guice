@@ -38,6 +38,7 @@ import com.google.inject.multibindings.OptionalBinderBinding;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
@@ -299,6 +300,16 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
+    public <B, R> R acceptExtensionVisitor(
+        BindingTargetVisitor<B, R> visitor, JeeProviderInstanceBinding<? extends B> binding) {
+      if (visitor instanceof MultibindingsTargetVisitor) {
+        return ((MultibindingsTargetVisitor<java.util.Optional<T>, R>) visitor).visit(this);
+      } else {
+        return visitor.visit(binding);
+      }
+    }
+
+    @Override
     public boolean containsElement(Element element) {
       return bindingSelection.containsElement(element);
     }
@@ -478,6 +489,17 @@ public final class RealOptionalBinder<T> implements Module {
     @Override
     public <B, R> R acceptExtensionVisitor(
         BindingTargetVisitor<B, R> visitor, ProviderInstanceBinding<? extends B> binding) {
+      if (visitor instanceof MultibindingsTargetVisitor) {
+        return ((MultibindingsTargetVisitor<Optional<T>, R>) visitor).visit(this);
+      } else {
+        return visitor.visit(binding);
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <B, R> R acceptExtensionVisitor(
+        BindingTargetVisitor<B, R> visitor, JeeProviderInstanceBinding<? extends B> binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
         return ((MultibindingsTargetVisitor<Optional<T>, R>) visitor).visit(this);
       } else {

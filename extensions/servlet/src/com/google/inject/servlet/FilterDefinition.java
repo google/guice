@@ -20,6 +20,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scopes;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import java.util.Collections;
@@ -68,6 +69,22 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
   @Override
   public <B, V> V acceptExtensionVisitor(
       BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
+    if (visitor instanceof ServletModuleTargetVisitor) {
+      if (filterInstance != null) {
+        return ((ServletModuleTargetVisitor<B, V>) visitor)
+            .visit(new InstanceFilterBindingImpl(initParams, filterInstance, patternMatcher));
+      } else {
+        return ((ServletModuleTargetVisitor<B, V>) visitor)
+            .visit(new LinkedFilterBindingImpl(initParams, filterKey, patternMatcher));
+      }
+    } else {
+      return visitor.visit(binding);
+    }
+  }
+
+  @Override
+  public <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, JeeProviderInstanceBinding<? extends B> binding) {
     if (visitor instanceof ServletModuleTargetVisitor) {
       if (filterInstance != null) {
         return ((ServletModuleTargetVisitor<B, V>) visitor)

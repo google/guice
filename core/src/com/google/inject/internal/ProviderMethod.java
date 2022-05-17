@@ -28,6 +28,7 @@ import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.ProvidesMethodBinding;
@@ -194,6 +195,16 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   @SuppressWarnings("unchecked")
   public <B, V> V acceptExtensionVisitor(
       BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
+    if (visitor instanceof ProvidesMethodTargetVisitor) {
+      return ((ProvidesMethodTargetVisitor<T, V>) visitor).visit(this);
+    }
+    return visitor.visit(binding);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, JeeProviderInstanceBinding<? extends B> binding) {
     if (visitor instanceof ProvidesMethodTargetVisitor) {
       return ((ProvidesMethodTargetVisitor<T, V>) visitor).visit(this);
     }

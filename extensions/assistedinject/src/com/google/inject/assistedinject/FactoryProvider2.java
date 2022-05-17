@@ -50,6 +50,7 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
@@ -529,6 +530,16 @@ final class FactoryProvider2<F>
   @SuppressWarnings("unchecked")
   public <T, V> V acceptExtensionVisitor(
       BindingTargetVisitor<T, V> visitor, ProviderInstanceBinding<? extends T> binding) {
+    if (visitor instanceof AssistedInjectTargetVisitor) {
+      return ((AssistedInjectTargetVisitor<T, V>) visitor).visit((AssistedInjectBinding<T>) this);
+    }
+    return visitor.visit(binding);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<T, V> visitor, JeeProviderInstanceBinding<? extends T> binding) {
     if (visitor instanceof AssistedInjectTargetVisitor) {
       return ((AssistedInjectTargetVisitor<T, V>) visitor).visit((AssistedInjectBinding<T>) this);
     }

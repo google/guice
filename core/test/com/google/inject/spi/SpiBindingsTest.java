@@ -29,7 +29,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
@@ -42,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
@@ -129,6 +129,35 @@ public class SpiBindingsTest extends TestCase {
         });
   }
 
+  public void testToJeeProviderBinding() {
+    final jakarta.inject.Provider<String> stringProvider = new JeeStringProvider();
+
+    checkInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toJeeProvider(stringProvider);
+          }
+        },
+        new FailingElementVisitor() {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
+            assertTrue(binding instanceof JeeProviderInstanceBinding);
+            checkBindingSource(binding);
+            assertEquals(Key.get(String.class), binding.getKey());
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(JeeProviderInstanceBinding<? extends T> binding) {
+                    assertSame(stringProvider, binding.getUserSuppliedProvider());
+                    return null;
+                  }
+                });
+            return null;
+          }
+        });
+  }
+
   public void testToProviderKeyBinding() {
     checkInjector(
         new AbstractModule() {
@@ -148,6 +177,33 @@ public class SpiBindingsTest extends TestCase {
                   @Override
                   public Void visit(ProviderKeyBinding<? extends T> binding) {
                     assertEquals(Key.get(StringProvider.class), binding.getProviderKey());
+                    return null;
+                  }
+                });
+            return null;
+          }
+        });
+  }
+
+  public void testToJeeProviderKeyBinding() {
+    checkInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toJeeProvider(JeeStringProvider.class);
+          }
+        },
+        new FailingElementVisitor() {
+          @Override
+          public <T> Void visit(Binding<T> binding) {
+            assertTrue(binding instanceof JeeProviderKeyBinding);
+            checkBindingSource(binding);
+            assertEquals(Key.get(String.class), binding.getKey());
+            binding.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(JeeProviderKeyBinding<? extends T> binding) {
+                    assertEquals(Key.get(JeeStringProvider.class), binding.getProviderKey());
                     return null;
                   }
                 });
@@ -300,6 +356,31 @@ public class SpiBindingsTest extends TestCase {
         });
   }
 
+  public void testJeeProviderBinding() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class).toInstance("A");
+              }
+            });
+
+    Key<jakarta.inject.Provider<String>> providerOfStringKey = new Key<jakarta.inject.Provider<String>>() {};
+    Binding<jakarta.inject.Provider<String>> binding = injector.getBinding(providerOfStringKey);
+    assertEquals(providerOfStringKey, binding.getKey());
+    checkBindingSource(binding);
+    assertTrue(binding instanceof ProviderBinding);
+    binding.acceptTargetVisitor(
+        new FailingTargetVisitor<jakarta.inject.Provider<String>>() {
+          @Override
+          public Void visit(ProviderBinding<? extends jakarta.inject.Provider<String>> binding) {
+            assertEquals(Key.get(String.class), binding.getProvidedKey());
+            return null;
+          }
+        });
+  }
+
   public void testScopes() {
     checkInjector(
         new AbstractModule() {
@@ -411,6 +492,15 @@ public class SpiBindingsTest extends TestCase {
                             }
                           }
 
+                          @SuppressWarnings("unchecked") // Safe because V is fixed to String
+                          @Override
+                          public <B, V> V acceptExtensionVisitor(
+                              BindingTargetVisitor<B, V> visitor,
+                              JeeProviderInstanceBinding<? extends B> binding) {
+                            fail();
+                            return null;
+                          }
+
                           @Override
                           public String get() {
                             return "FooBar";
@@ -441,6 +531,78 @@ public class SpiBindingsTest extends TestCase {
     assertEquals(Key.get(String.class), binding.getKey());
     checkBindingSource(binding);
     assertTrue(binding instanceof ProviderInstanceBinding);
+    assertEquals("visited", binding.acceptTargetVisitor(new FailingSpiTargetVisitor<String>()));
+  }
+
+  public void testJeeExtensionSpi() {
+    final AtomicBoolean visiting = new AtomicBoolean(false);
+
+    final Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class)
+                    .toJeeProvider(
+                        new ProviderWithExtensionVisitor<String>() {
+                          @SuppressWarnings("unchecked") // Safe because V is fixed to String
+                          @Override
+                          public <B, V> V acceptExtensionVisitor(
+                              BindingTargetVisitor<B, V> visitor,
+                              JeeProviderInstanceBinding<? extends B> binding) {
+                            assertSame(this, binding.getUserSuppliedProvider());
+                            // We can't always check for FailingSpiTargetVisitor,
+                            // because constructing the injector visits here, and we need
+                            // to process the binding as normal
+                            if (visiting.get()) {
+                              assertTrue(
+                                  "visitor: " + visitor,
+                                  visitor instanceof FailingSpiTargetVisitor);
+                              return (V) "visited";
+                            } else {
+                              return visitor.visit(binding);
+                            }
+                          }
+
+                          @SuppressWarnings("unchecked") // Safe because V is fixed to String
+                          @Override
+                          public <B, V> V acceptExtensionVisitor(
+                              BindingTargetVisitor<B, V> visitor,
+                              ProviderInstanceBinding<? extends B> binding) {
+                            fail();
+                            return null;
+                          }
+
+                          @Override
+                          public String get() {
+                            return "FooBar";
+                          }
+                        });
+              }
+            });
+
+    visiting.set(true);
+
+    // Check for Provider<String> binding -- that is still a ProviderBinding.
+    Key<jakarta.inject.Provider<String>> providerOfStringKey = new Key<jakarta.inject.Provider<String>>() {};
+    Binding<jakarta.inject.Provider<String>> providerBinding = injector.getBinding(providerOfStringKey);
+    assertEquals(providerOfStringKey, providerBinding.getKey());
+    checkBindingSource(providerBinding);
+    assertTrue("binding: " + providerBinding, providerBinding instanceof ProviderBinding);
+    providerBinding.acceptTargetVisitor(
+        new FailingTargetVisitor<jakarta.inject.Provider<String>>() {
+          @Override
+          public Void visit(ProviderBinding<? extends jakarta.inject.Provider<String>> binding) {
+            assertEquals(Key.get(String.class), binding.getProvidedKey());
+            return null;
+          }
+        });
+
+    // Check for String binding -- that one is ProviderInstanceBinding, and gets hooked
+    Binding<String> binding = injector.getBinding(String.class);
+    assertEquals(Key.get(String.class), binding.getKey());
+    checkBindingSource(binding);
+    assertTrue(binding instanceof JeeProviderInstanceBinding);
     assertEquals("visited", binding.acceptTargetVisitor(new FailingSpiTargetVisitor<String>()));
   }
 
@@ -487,6 +649,13 @@ public class SpiBindingsTest extends TestCase {
     @Override
     public String get() {
       return "A";
+    }
+  }
+
+  private static class JeeStringProvider implements jakarta.inject.Provider<String> {
+    @Override
+    public String get() {
+      return "J";
     }
   }
 

@@ -91,11 +91,12 @@ public class MoreTypes {
       throw new ConfigurationException(errors.getMessages());
     }
 
-    if (typeLiteral.getRawType() == javax.inject.Provider.class) {
+    if (typeLiteral.getRawType() == javax.inject.Provider.class
+        || typeLiteral.getRawType() == jakarta.inject.Provider.class) {
       ParameterizedType parameterizedType = (ParameterizedType) type;
 
       // the following casts are generally unsafe, but com.google.inject.Provider extends
-      // javax.inject.Provider and is covariant
+      // javax.inject.Provider and jakarta.inject.provider and is covariant
       @SuppressWarnings("unchecked")
       TypeLiteral<T> guiceProviderType =
           (TypeLiteral<T>)

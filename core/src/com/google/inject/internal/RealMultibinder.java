@@ -23,6 +23,7 @@ import com.google.inject.multibindings.MultibinderBinding;
 import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.JeeProviderInstanceBinding;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
@@ -311,6 +312,17 @@ public final class RealMultibinder<T> implements Module {
     @Override
     public <B, V> V acceptExtensionVisitor(
         BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
+      if (visitor instanceof MultibindingsTargetVisitor) {
+        return ((MultibindingsTargetVisitor<Set<T>, V>) visitor).visit(this);
+      } else {
+        return visitor.visit(binding);
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <B, V> V acceptExtensionVisitor(
+        BindingTargetVisitor<B, V> visitor, JeeProviderInstanceBinding<? extends B> binding) {
       if (visitor instanceof MultibindingsTargetVisitor) {
         return ((MultibindingsTargetVisitor<Set<T>, V>) visitor).visit(this);
       } else {

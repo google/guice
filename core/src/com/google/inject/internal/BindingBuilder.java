@@ -154,6 +154,40 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
   }
 
   @Override
+  public BindingBuilder<T> toJeeProvider(jakarta.inject.Provider<? extends T> provider) {
+    checkNotNull(provider, "provider");
+    checkNotTargetted();
+
+    // lookup the injection points, adding any errors to the binder's errors list
+    Set<InjectionPoint> injectionPoints;
+    try {
+      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
+    } catch (ConfigurationException e) {
+      copyErrorsToBinder(e);
+      injectionPoints = e.getPartialValue();
+    }
+
+    BindingImpl<T> base = getBinding();
+    setBinding(
+        new JeeProviderInstanceBindingImpl<T>(
+            base.getSource(), base.getKey(), base.getScoping(), injectionPoints, provider));
+    return this;
+  }
+
+  @Override
+  public BindingBuilder<T> toJeeProvider(
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey) {
+    checkNotNull(providerKey, "providerKey");
+    checkNotTargetted();
+
+    BindingImpl<T> base = getBinding();
+    setBinding(
+        new LinkedJeeProviderBindingImpl<T>(
+            base.getSource(), base.getKey(), base.getScoping(), providerKey));
+    return this;
+  }
+
+  @Override
   public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor) {
     return toConstructor(constructor, TypeLiteral.get(constructor.getDeclaringClass()));
   }

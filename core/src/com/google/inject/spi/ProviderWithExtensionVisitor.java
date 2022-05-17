@@ -58,4 +58,7 @@ public interface ProviderWithExtensionVisitor<T> extends Provider<T> {
    */
   <B, V> V acceptExtensionVisitor(
       BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding);
+
+  <B, V> V acceptExtensionVisitor(
+      BindingTargetVisitor<B, V> visitor, JeeProviderInstanceBinding<? extends B> binding);
 }
