@@ -1,5 +1,4 @@
 # Copyright 2022 Google Inc.  All rights reserved.
-# Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
 load("//:test_defs.bzl", "guice_test_suites")
 
@@ -14,12 +13,12 @@ java_library(
     deps = [
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",
-        "//extensions/servlet/src/com/google/inject/servlet",
+        "//extensions/jakarta-servlet/src/com/google/inject/servlet",
         "//third_party/java/easymock",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
         "//third_party/java/junit",
-        "//third_party/java/servlet/servlet_api",
+        "//third_party/java/jakarta_servlet/servlet_api",
     ],
 )
 

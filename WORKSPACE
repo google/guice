@@ -35,6 +35,8 @@ maven_install(
         "com.google.errorprone:error_prone_annotations:2.0.18",
         "com.google.guava:guava:31.0.1-jre",
         "commons-logging:commons-logging:1.2",
+        "jakarta.inject:jakarta.inject-api:2.0.1",
+        "jakarta.servlet:jakarta.servlet-api:5.0.0",
         "javax.inject:javax.inject:1",
         "javax.persistence:javax.persistence-api:2.2",
         "javax.servlet:servlet-api:2.5",

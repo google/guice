@@ -1,5 +1,4 @@
 # Copyright 2022 Google Inc.  All rights reserved.
-# Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
 load("//:mvn.bzl", "gen_maven_artifact")
 load(
@@ -13,18 +12,18 @@ package(
 )
 
 java_library(
-    name = "request-scoped-annotation",
+    name = "jakarta-request-scoped-annotation",
     srcs = ["RequestScoped.java"],
     javacopts = JAVAC_OPTS,
     plugins = [
     ],
     deps = [
-        "//third_party/java/jsr330_inject",
+        "//third_party/java/jakarta_inject",
     ],
 )
 
 java_library(
-    name = "servlet",
+    name = "jee",
     srcs = glob(
         ["*.java"],
         exclude = ["RequestScoped.java"],
@@ -32,17 +31,17 @@ java_library(
     javacopts = JAVAC_OPTS,
     plugins = [
     ],
-    tags = ["maven_coordinates=com.google.inject.extensions:guice-servlet:" + POM_VERSION],
-    exports = [":request-scoped-annotation"],
+    tags = ["maven_coordinates=com.google.inject.extensions:guice-jakarta-servlet:" + POM_VERSION],
+    exports = [":jakarta-request-scoped-annotation"],
     deps = [
-        ":request-scoped-annotation",
+        ":jakarta-request-scoped-annotation",
         "//core/src/com/google/inject",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
         "//third_party/java/guava/escape",
         "//third_party/java/guava/net",
-        "//third_party/java/jsr330_inject",
-        "//third_party/java/servlet/servlet_api",
+        "//third_party/java/jakarta_inject",
+        "//third_party/java/servlet/jakarta_servlet_api",
     ],
 )
 
@@ -53,11 +52,11 @@ filegroup(
 
 gen_maven_artifact(
     name = "artifact",
-    artifact_id = "guice-servlet",
-    artifact_name = "Google Guice - Extensions - Servlet",
-    artifact_target = ":servlet",
+    artifact_id = "guice-jakarta-servlet",
+    artifact_name = "Google Guice - Extensions - JEE Servlet",
+    artifact_target = ":jee",
     artifact_target_libs = [
-        ":request-scoped-annotation",
+        ":jakarta-request-scoped-annotation",
     ],
     is_extension = True,
     javadoc_srcs = [":javadoc-srcs"],

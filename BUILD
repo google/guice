@@ -19,6 +19,7 @@ javadoc_library(
         "//extensions/assistedinject/src/com/google/inject/assistedinject:javadoc-srcs",
         "//extensions/dagger-adapter/src/com/google/inject/daggeradapter:javadoc-srcs",
         "//extensions/grapher/src/com/google/inject/grapher:javadoc-srcs",
+        "//extensions/jakarta-servlet/src/com/google/inject/servlet/jee:javadoc-srcs",
         "//extensions/jmx/src/com/google/inject/tools/jmx:javadoc-srcs",
         "//extensions/jndi/src/com/google/inject/jndi:javadoc-srcs",
         "//extensions/persist/src/com/google/inject/persist:javadoc-srcs",
@@ -37,6 +38,7 @@ javadoc_library(
         "http://errorprone.info/api/latest/",
         "https://tomcat.apache.org/tomcat-5.5-doc/servletapi/",
         "http://aopalliance.sourceforge.net/doc/",
+        "https://docs.oracle.com/javaee/7/api/",
     ],
     groups = {
         "Guice Core": [
@@ -61,6 +63,7 @@ javadoc_library(
             "com.google.inject.persist.*",
         ],
         "Servlet Extension": ["com.google.inject.servlet"],
+        "JEE Servlet Extension": ["com.google.inject.servlet.jee"],
         "Spring Extension": ["com.google.inject.spring"],
         "Struts2 Extension": ["com.google.inject.struts2"],
         "Test Libraries Extension": ["com.google.inject.testing.*"],
@@ -72,6 +75,7 @@ javadoc_library(
         "//extensions/assistedinject/src/com/google/inject/assistedinject",
         "//extensions/dagger-adapter/src/com/google/inject/daggeradapter",
         "//extensions/grapher/src/com/google/inject/grapher",
+        "//extensions/jakarta-servlet/src/com/google/inject/servlet/jee",
         "//extensions/jmx/src/com/google/inject/tools/jmx",
         "//extensions/jndi/src/com/google/inject/jndi",
         "//extensions/persist/src/com/google/inject/persist",

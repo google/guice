@@ -102,10 +102,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <module>extensions</module>
   </modules>
 
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-
   <properties>
     <!--
      | The spec version of the public Guice API
@@ -510,6 +506,18 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <goals><goal>sign</goal></goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.0.0</version>
+          <configuration>
+              <rules>
+                  <requireMavenVersion>
+                      <version>[3.0,)</version>
+                  </requireMavenVersion>
+              </rules>
+          </configuration>
       </plugin>
     </plugins>
   </build>
