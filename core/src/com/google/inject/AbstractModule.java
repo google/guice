@@ -139,6 +139,11 @@ public abstract class AbstractModule implements Module {
     binder().addError(message);
   }
 
+  /** CS304 Issue link:https://github.com/google/guice/issues/427 this method is trying to bind two thing */
+  protected AnnotatedConstantBindingBuilder bindConst() {
+    return binder().bindConstant();
+  }
+
   /**
    * @see Binder#requestInjection(Object)
    * @since 2.0

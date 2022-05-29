@@ -30,4 +30,7 @@ public interface AnnotatedConstantBindingBuilder {
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ConstantBindingBuilder annotatedWith(Annotation annotation);
+
+  /** CS304 Issue link:https://github.com/google/guice/issues/427 this method transports two annotations,the first one is the main annotation */
+  ConstantBindingBuilder annotated(Annotation annotation,Annotation temp);
 }

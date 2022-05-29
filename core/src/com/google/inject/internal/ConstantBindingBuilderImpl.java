@@ -138,4 +138,16 @@ public final class ConstantBindingBuilderImpl<T> extends AbstractBindingBuilder<
   public String toString() {
     return "ConstantBindingBuilder";
   }
+  /** CS304 Issue link:https://github.com/google/guice/issues/427 this method implements annotated method,judge whether two annotations are legal */
+  @Override
+  public ConstantBindingBuilder annotated(Annotation annotation,Annotation temp) {
+    if(annotation==null||temp==null){
+      return null;
+    }else if(annotation==temp){
+      return null;
+    }else{
+      annotatedWithInternal(annotation);
+      return this;
+    }
+  }
 }
