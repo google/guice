@@ -259,6 +259,11 @@ interface CycleDetectingLock<ID> {
             // owner thread depends on current thread, cycle detected
             return potentialLocksCycle;
           }
+          // Its possible the lock owner thread has not removed itself yet from the waiting-on-lock list.
+          // So we remove it here, to prevent an endless loop. See #1510.
+          if (lockOwnerWaitingOn == this) {
+            lockThreadIsWaitingOn.remove(this.lockOwnerThread);
+          }
         }
         // no dependency path from an owner thread to a current thread
         return ImmutableListMultimap.of();
