@@ -22,6 +22,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Lazily creates (and caches) values for keys. If creating the value fails (with errors), an
@@ -31,6 +33,8 @@ import java.util.Map;
  */
 public abstract class FailableCache<K, V> {
 
+  private final Set<K> loading = ConcurrentHashMap.newKeySet();
+
   private final LoadingCache<K, Object> delegate =
       CacheBuilder.newBuilder()
           .build(
@@ -39,11 +43,13 @@ public abstract class FailableCache<K, V> {
                 public Object load(K key) {
                   Errors errors = new Errors();
                   V result = null;
+                  loading.add(key);
                   try {
                     result = FailableCache.this.create(key, errors);
                   } catch (ErrorsException e) {
                     errors.merge(e.getErrors());
                   }
+                  loading.remove(key);
                   return errors.hasErrors() ? errors : result;
                 }
               });
@@ -51,6 +57,10 @@ public abstract class FailableCache<K, V> {
   protected abstract V create(K key, Errors errors) throws ErrorsException;
 
   public V get(K key, Errors errors) throws ErrorsException {
+    if (loading.contains(key)) {
+      errors.errorCacheAlreadyLoading(key);
+      throw errors.toException();
+    }
     Object resultOrError = delegate.getUnchecked(key);
     if (resultOrError instanceof Errors) {
       errors.merge((Errors) resultOrError);

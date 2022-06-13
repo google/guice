@@ -499,6 +499,10 @@ public final class Errors implements Serializable {
         t);
   }
 
+  public Errors errorCacheAlreadyLoading(Object key) {
+    return addMessage(ErrorId.OTHER, "%s was already loading.", key);
+  }
+
   public Errors errorNotifyingTypeListener(
       TypeListenerBinding listener, TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(
