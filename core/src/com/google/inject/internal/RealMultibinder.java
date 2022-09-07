@@ -74,12 +74,12 @@ public final class RealMultibinder<T> implements Module {
   }
 
   @SuppressWarnings("unchecked")
-  static <T> TypeLiteral<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersOf(
+  static <T> TypeLiteral<Collection<jakarta.inject.Provider<T>>> collectionOfJavaxProvidersOf(
       TypeLiteral<T> elementType) {
     Type providerType =
-        Types.newParameterizedType(javax.inject.Provider.class, elementType.getType());
+        Types.newParameterizedType(jakarta.inject.Provider.class, elementType.getType());
     Type type = Types.collectionOf(providerType);
-    return (TypeLiteral<Collection<javax.inject.Provider<T>>>) TypeLiteral.get(type);
+    return (TypeLiteral<Collection<jakarta.inject.Provider<T>>>) TypeLiteral.get(type);
   }
 
   @SuppressWarnings("unchecked")
@@ -121,7 +121,7 @@ public final class RealMultibinder<T> implements Module {
     // the guice Provider to javax Provider in the value (since the guice Provider implements
     // javax Provider).
     @SuppressWarnings("unchecked")
-    Provider<Collection<javax.inject.Provider<T>>> javaxProvider =
+    Provider<Collection<jakarta.inject.Provider<T>>> javaxProvider =
         (Provider) collectionOfProvidersProvider;
     binder.bind(bindingSelection.getCollectionOfJavaxProvidersKey()).toProvider(javaxProvider);
   }
@@ -391,7 +391,7 @@ public final class RealMultibinder<T> implements Module {
     // these are all lazily allocated
     private String setName;
     private Key<Collection<Provider<T>>> collectionOfProvidersKey;
-    private Key<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersKey;
+    private Key<Collection<jakarta.inject.Provider<T>>> collectionOfJavaxProvidersKey;
     private Key<Set<? extends T>> setOfExtendsKey;
     private Key<Boolean> permitDuplicatesKey;
 
@@ -508,8 +508,8 @@ public final class RealMultibinder<T> implements Module {
       return local;
     }
 
-    Key<Collection<javax.inject.Provider<T>>> getCollectionOfJavaxProvidersKey() {
-      Key<Collection<javax.inject.Provider<T>>> local = collectionOfJavaxProvidersKey;
+    Key<Collection<jakarta.inject.Provider<T>>> getCollectionOfJavaxProvidersKey() {
+      Key<Collection<jakarta.inject.Provider<T>>> local = collectionOfJavaxProvidersKey;
       if (local == null) {
         local =
             collectionOfJavaxProvidersKey =

@@ -115,7 +115,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
           @Override
           public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
             prepareBinding();
-            javax.inject.Provider<? extends T> provider = binding.getUserSuppliedProvider();
+            jakarta.inject.Provider<? extends T> provider = binding.getUserSuppliedProvider();
             if (provider instanceof InternalProviderInstanceBindingImpl.Factory) {
               @SuppressWarnings("unchecked")
               InternalProviderInstanceBindingImpl.Factory<T> asProviderMethod =
@@ -123,8 +123,8 @@ final class BindingProcessor extends AbstractBindingProcessor {
               return visitInternalProviderInstanceBindingFactory(asProviderMethod);
             }
             Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
-            Initializable<? extends javax.inject.Provider<? extends T>> initializable =
-                initializer.<javax.inject.Provider<? extends T>>requestInjection(
+            Initializable<? extends jakarta.inject.Provider<? extends T>> initializable =
+                initializer.<jakarta.inject.Provider<? extends T>>requestInjection(
                     injector, provider, null, source, injectionPoints);
             // always visited with Binding<T>
             @SuppressWarnings("unchecked")
@@ -144,7 +144,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
           @Override
           public Boolean visit(ProviderKeyBinding<? extends T> binding) {
             prepareBinding();
-            Key<? extends javax.inject.Provider<? extends T>> providerKey =
+            Key<? extends jakarta.inject.Provider<? extends T>> providerKey =
                 binding.getProviderKey();
             // always visited with Binding<T>
             @SuppressWarnings("unchecked")

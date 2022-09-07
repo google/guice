@@ -1,7 +1,7 @@
 package com.google.inject.errors;
 
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableSet;

@@ -39,8 +39,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 import junit.framework.TestCase;
 
 /**

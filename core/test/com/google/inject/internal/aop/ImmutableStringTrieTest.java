@@ -16,14 +16,10 @@
 
 package com.google.inject.internal.aop;
 
-import static java.util.Arrays.stream;
-import static java.util.Collections.sort;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
+import junit.framework.TestCase;
+
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -32,7 +28,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.ToIntFunction;
-import junit.framework.TestCase;
+
+import static java.util.Arrays.stream;
+import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Tests for {@link ImmutableStringTrie}.
@@ -41,56 +40,56 @@ import junit.framework.TestCase;
  */
 public class ImmutableStringTrieTest extends TestCase {
 
-  public void testSingletonTrie() {
-    ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(ImmutableSet.of("testKey"));
-    assertThat(trie.applyAsInt("testKey"), is(0));
-  }
-
-  public void testMethodStrings() {
-    List<String> table =
-        stream(Binder.class.getDeclaredMethods()).map(Method::toString).collect(toList());
-
-    sort(table);
-
-    ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
-
-    for (int i = 0; i < table.size(); i++) {
-      assertThat(trie.applyAsInt(table.get(i)), is(i));
-    }
-  }
-
-  private static final int NUM_TEST_STRINGS = 65536;
-
-  private static final int MAX_STRING_LENGTH = 100;
-
-  public void testRandomStrings() {
-
-    Random random = new SecureRandom();
-    StringBuilder buf = new StringBuilder();
-    Set<String> strings = new TreeSet<>();
-
-    while (strings.size() < NUM_TEST_STRINGS) {
-      randomize(random, buf);
-      strings.add(buf.toString());
-      buf.setLength(0);
+    public void testSingletonTrie() {
+        ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(ImmutableSet.of("testKey"));
+        assertEquals(0, trie.applyAsInt("testKey"));
     }
 
-    List<String> table = new ArrayList<>(strings); // already sorted
+    public void testMethodStrings() {
+        List<String> table =
+                stream(Binder.class.getDeclaredMethods()).map(Method::toString).collect(toList());
 
-    ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
+        sort(table);
 
-    for (int i = 0; i < table.size(); i++) {
-      assertThat(trie.applyAsInt(table.get(i)), is(i));
+        ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
+
+        for (int i = 0; i < table.size(); i++) {
+            assertEquals(i, trie.applyAsInt(table.get(i)));
+        }
     }
-  }
 
-  private static void randomize(Random random, StringBuilder buf) {
-    int length = random.nextInt(MAX_STRING_LENGTH) + 1;
-    while (buf.length() < length) {
-      char c = (char) random.nextInt(Character.MAX_VALUE + 1);
-      if (!Character.isSurrogate(c)) {
-        buf.append(c);
-      }
+    private static final int NUM_TEST_STRINGS = 65536;
+
+    private static final int MAX_STRING_LENGTH = 100;
+
+    public void testRandomStrings() {
+
+        Random random = new SecureRandom();
+        StringBuilder buf = new StringBuilder();
+        Set<String> strings = new TreeSet<>();
+
+        while (strings.size() < NUM_TEST_STRINGS) {
+            randomize(random, buf);
+            strings.add(buf.toString());
+            buf.setLength(0);
+        }
+
+        List<String> table = new ArrayList<>(strings); // already sorted
+
+        ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
+
+        for (int i = 0; i < table.size(); i++) {
+            assertEquals(i, trie.applyAsInt(table.get(i)));
+        }
     }
-  }
+
+    private static void randomize(Random random, StringBuilder buf) {
+        int length = random.nextInt(MAX_STRING_LENGTH) + 1;
+        while (buf.length() < length) {
+            char c = (char) random.nextInt(Character.MAX_VALUE + 1);
+            if (!Character.isSurrogate(c)) {
+                buf.append(c);
+            }
+        }
+    }
 }

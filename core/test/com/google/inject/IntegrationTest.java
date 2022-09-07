@@ -18,9 +18,9 @@ package com.google.inject;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.matcher.Matchers.any;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.inject.internal.InternalFlags;
 import org.aopalliance.intercept.MethodInterceptor;

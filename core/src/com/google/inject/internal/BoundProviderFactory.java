@@ -19,19 +19,19 @@ package com.google.inject.internal;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /** Delegates to a custom factory which is also bound in the injector. */
 final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implements CreationListener {
 
   private final ProvisionListenerStackCallback<T> provisionCallback;
   private final InjectorImpl injector;
-  final Key<? extends javax.inject.Provider<? extends T>> providerKey;
-  private InternalFactory<? extends javax.inject.Provider<? extends T>> providerFactory;
+  final Key<? extends jakarta.inject.Provider<? extends T>> providerKey;
+  private InternalFactory<? extends jakarta.inject.Provider<? extends T>> providerFactory;
 
   BoundProviderFactory(
       InjectorImpl injector,
-      Key<? extends javax.inject.Provider<? extends T>> providerKey,
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
@@ -55,7 +55,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
     try {
-      javax.inject.Provider<? extends T> provider = providerFactory.get(context, dependency, true);
+      jakarta.inject.Provider<? extends T> provider = providerFactory.get(context, dependency, true);
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(providerKey);

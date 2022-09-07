@@ -10,7 +10,7 @@ import com.google.inject.RestrictedBindingSource;
 import com.google.inject.util.Modules;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import javax.inject.Named;
+import jakarta.inject.Named;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

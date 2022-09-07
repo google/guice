@@ -104,11 +104,11 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
   @Override
   public BindingBuilder<T> toProvider(Provider<? extends T> provider) {
-    return toProvider((javax.inject.Provider<? extends T>) provider);
+    return toProvider((jakarta.inject.Provider<? extends T>) provider);
   }
 
   @Override
-  public BindingBuilder<T> toProvider(javax.inject.Provider<? extends T> provider) {
+  public BindingBuilder<T> toProvider(jakarta.inject.Provider<? extends T> provider) {
     checkNotNull(provider, "provider");
     checkNotTargetted();
 
@@ -130,19 +130,19 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
   @Override
   public BindingBuilder<T> toProvider(
-      Class<? extends javax.inject.Provider<? extends T>> providerType) {
+      Class<? extends jakarta.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
   @Override
   public BindingBuilder<T> toProvider(
-      TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType) {
+      TypeLiteral<? extends jakarta.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
   @Override
   public BindingBuilder<T> toProvider(
-      Key<? extends javax.inject.Provider<? extends T>> providerKey) {
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey) {
     checkNotNull(providerKey, "providerKey");
     checkNotTargetted();
 

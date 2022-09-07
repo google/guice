@@ -38,7 +38,7 @@ package com.google.inject;
  * @param <T> the type of object this provides
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Provider<T> extends javax.inject.Provider<T> {
+public interface Provider<T> extends jakarta.inject.Provider<T> {
 
   /**
    * Provides an instance of {@code T}.

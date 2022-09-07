@@ -22,7 +22,7 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.name.Names.named;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -406,7 +406,7 @@ public class InjectionPointTest extends TestCase {
     // Superclass still has all the injection points it did before..
     assertPoints(points, Super.class, "privateAtAndPublicG", "privateGAndPublicAt", "gInject");
     // Subclass is missing the privateGAndPublicAt because it first became public with
-    // javax.inject.Inject and was overrode without an annotation, which means it
+    // jakarta.inject.Inject and was overrode without an annotation, which means it
     // disappears.  (It was guice @Inject in Super, but it was private there, so it doesn't
     // effect the annotations of the subclasses.)
     assertPoints(points, Sub.class, "privateAtAndPublicG", "atFirstThenG", "gFirstThenAt");
@@ -414,7 +414,7 @@ public class InjectionPointTest extends TestCase {
 
   /**
    * This test serves two purposes: 1) It makes sure that the bridge methods javax generates don't
-   * stop us from injecting superclass methods in the case of javax.inject.Inject. This would happen
+   * stop us from injecting superclass methods in the case of jakarta.inject.Inject. This would happen
    * prior to java8 (where javac didn't copy annotations from the superclass into the subclass
    * method when it generated the bridge methods).
    *
@@ -460,19 +460,19 @@ public class InjectionPointTest extends TestCase {
   }
 
   static class Super {
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     public void atInject() {}
 
     @com.google.inject.Inject
     public void gInject() {}
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     private void privateAtAndPublicG() {}
 
     @com.google.inject.Inject
     private void privateGAndPublicAt() {}
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     public void atFirstThenG() {}
 
     @com.google.inject.Inject
@@ -491,14 +491,14 @@ public class InjectionPointTest extends TestCase {
     @com.google.inject.Inject
     public void privateAtAndPublicG() {}
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     public void privateGAndPublicAt() {}
 
     @com.google.inject.Inject
     @Override
     public void atFirstThenG() {}
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     @Override
     public void gFirstThenAt() {}
   }
@@ -525,7 +525,7 @@ public class InjectionPointTest extends TestCase {
     @com.google.inject.Inject
     public void gInject(Provider<String> p) {}
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     public void jInject(Provider<String> p) {}
   }
 

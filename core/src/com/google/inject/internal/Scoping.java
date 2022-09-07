@@ -160,7 +160,7 @@ public abstract class Scoping {
       };
 
   public static Scoping forAnnotation(final Class<? extends Annotation> scopingAnnotation) {
-    if (scopingAnnotation == Singleton.class || scopingAnnotation == javax.inject.Singleton.class) {
+    if (scopingAnnotation == Singleton.class || scopingAnnotation == jakarta.inject.Singleton.class) {
       return SINGLETON_ANNOTATION;
     }
 

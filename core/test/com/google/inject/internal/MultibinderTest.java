@@ -1417,7 +1417,7 @@ public class MultibinderTest extends TestCase {
         injector.getInstance(Key.get(collectionOfProvidersOfStrings));
     assertEquals(expectedValues, collectValues(providers));
 
-    Collection<javax.inject.Provider<String>> javaxProviders =
+    Collection<jakarta.inject.Provider<String>> javaxProviders =
         injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType)));
     assertEquals(expectedValues, collectValues(javaxProviders));
   }
@@ -1444,7 +1444,7 @@ public class MultibinderTest extends TestCase {
     Collection<String> values = collectValues(providers);
     assertEquals(expectedValues, values);
 
-    Collection<javax.inject.Provider<String>> javaxProviders =
+    Collection<jakarta.inject.Provider<String>> javaxProviders =
         injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType), ann));
     assertEquals(expectedValues, collectValues(javaxProviders));
   }
@@ -1611,9 +1611,9 @@ public class MultibinderTest extends TestCase {
   }
 
   private <T> Collection<T> collectValues(
-      Collection<? extends javax.inject.Provider<T>> providers) {
+      Collection<? extends jakarta.inject.Provider<T>> providers) {
     Collection<T> values = Lists.newArrayList();
-    for (javax.inject.Provider<T> provider : providers) {
+    for (jakarta.inject.Provider<T> provider : providers) {
       values.add(provider.get());
     }
     return values;

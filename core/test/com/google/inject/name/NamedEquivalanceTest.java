@@ -34,7 +34,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 /**
- * Tests that {@code javax.inject.Named} and {@code com.google.inject.name.Named} are completely
+ * Tests that {@code jakarta.inject.Named} and {@code com.google.inject.name.Named} are completely
  * interchangeable: bindings for one can be used to inject the other.
  *
  * @author cgdecker@gmail.com (Colin Decker)
@@ -54,7 +54,7 @@ public class NamedEquivalanceTest extends TestCase {
 
     assertEquals(
         keyForAnnotationType(com.google.inject.name.Named.class),
-        keyForAnnotationType(javax.inject.Named.class));
+        keyForAnnotationType(jakarta.inject.Named.class));
   }
 
   private static Key<String> keyForAnnotation(Annotation annotation) {
@@ -175,7 +175,7 @@ public class NamedEquivalanceTest extends TestCase {
 
       @SuppressWarnings("unused")
       @Provides
-      @javax.inject.Named("foo")
+      @jakarta.inject.Named("foo")
       String provideFoo() {
         return "bar";
       }
@@ -202,11 +202,11 @@ public class NamedEquivalanceTest extends TestCase {
 
   private static class Jsr330NamedClient {
     @Inject
-    @javax.inject.Named("foo")
+    @jakarta.inject.Named("foo")
     String foo;
   }
 
-  private static class JsrNamed implements javax.inject.Named, Serializable {
+  private static class JsrNamed implements jakarta.inject.Named, Serializable {
     private final String value;
 
     public JsrNamed(String value) {
@@ -226,18 +226,18 @@ public class NamedEquivalanceTest extends TestCase {
 
     @Override
     public boolean equals(Object o) {
-      if (!(o instanceof javax.inject.Named)) {
+      if (!(o instanceof jakarta.inject.Named)) {
         return false;
       }
 
-      javax.inject.Named other = (javax.inject.Named) o;
+      jakarta.inject.Named other = (jakarta.inject.Named) o;
       return value.equals(other.value());
     }
 
     @Override
     public String toString() {
       return "@"
-          + javax.inject.Named.class.getName()
+          + jakarta.inject.Named.class.getName()
           + "(value="
           + Annotations.memberValueString("value", value)
           + ")";
@@ -245,7 +245,7 @@ public class NamedEquivalanceTest extends TestCase {
 
     @Override
     public Class<? extends Annotation> annotationType() {
-      return javax.inject.Named.class;
+      return jakarta.inject.Named.class;
     }
 
     private static final long serialVersionUID = 0;

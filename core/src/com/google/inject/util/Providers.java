@@ -84,17 +84,17 @@ public final class Providers {
 
   /**
    * Returns a Guice-friendly {@code com.google.inject.Provider} for the given JSR-330 {@code
-   * javax.inject.Provider}. The converse method is unnecessary, since Guice providers directly
+   * jakarta.inject.Provider}. The converse method is unnecessary, since Guice providers directly
    * implement the JSR-330 interface.
    *
    * @since 3.0
    */
-  public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
+  public static <T> Provider<T> guicify(jakarta.inject.Provider<T> provider) {
     if (provider instanceof Provider) {
       return (Provider<T>) provider;
     }
 
-    final javax.inject.Provider<T> delegate = checkNotNull(provider, "provider");
+    final jakarta.inject.Provider<T> delegate = checkNotNull(provider, "provider");
 
     // Ensure that we inject all injection points from the delegate provider.
     Set<InjectionPoint> injectionPoints =
@@ -112,9 +112,9 @@ public final class Providers {
   }
 
   private static class GuicifiedProvider<T> implements Provider<T> {
-    protected final javax.inject.Provider<T> delegate;
+    protected final jakarta.inject.Provider<T> delegate;
 
-    private GuicifiedProvider(javax.inject.Provider<T> delegate) {
+    private GuicifiedProvider(jakarta.inject.Provider<T> delegate) {
       this.delegate = delegate;
     }
 
@@ -145,7 +145,7 @@ public final class Providers {
     private final Set<Dependency<?>> dependencies;
 
     private GuicifiedProviderWithDependencies(
-        Set<Dependency<?>> dependencies, javax.inject.Provider<T> delegate) {
+        Set<Dependency<?>> dependencies, jakarta.inject.Provider<T> delegate) {
       super(delegate);
       this.dependencies = dependencies;
     }

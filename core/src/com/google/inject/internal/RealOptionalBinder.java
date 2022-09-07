@@ -46,7 +46,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.reflect.Type;
 import java.util.Set;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 /**
  * The actual OptionalBinder plays several roles. It implements Module to hide that fact from the
@@ -73,22 +73,22 @@ public final class RealOptionalBinder<T> implements Module {
   }
 
   @SuppressWarnings("unchecked")
-  static <T> TypeLiteral<Optional<javax.inject.Provider<T>>> optionalOfJavaxProvider(
+  static <T> TypeLiteral<Optional<jakarta.inject.Provider<T>>> optionalOfJavaxProvider(
       TypeLiteral<T> type) {
-    return (TypeLiteral<Optional<javax.inject.Provider<T>>>)
+    return (TypeLiteral<Optional<jakarta.inject.Provider<T>>>)
         TypeLiteral.get(
             Types.newParameterizedType(
-                Optional.class, newParameterizedType(javax.inject.Provider.class, type.getType())));
+                Optional.class, newParameterizedType(jakarta.inject.Provider.class, type.getType())));
   }
 
   @SuppressWarnings("unchecked")
-  static <T> TypeLiteral<java.util.Optional<javax.inject.Provider<T>>> javaOptionalOfJavaxProvider(
+  static <T> TypeLiteral<java.util.Optional<jakarta.inject.Provider<T>>> javaOptionalOfJavaxProvider(
       TypeLiteral<T> type) {
-    return (TypeLiteral<java.util.Optional<javax.inject.Provider<T>>>)
+    return (TypeLiteral<java.util.Optional<jakarta.inject.Provider<T>>>)
         TypeLiteral.get(
             Types.newParameterizedType(
                 java.util.Optional.class,
-                newParameterizedType(javax.inject.Provider.class, type.getType())));
+                newParameterizedType(jakarta.inject.Provider.class, type.getType())));
   }
 
   @SuppressWarnings("unchecked")
@@ -188,7 +188,7 @@ public final class RealOptionalBinder<T> implements Module {
     TypeLiteral<T> typeLiteral = key.getTypeLiteral();
     // Every OptionalBinder gets the following types bound
     // * {cgcb,ju}.Optional<Provider<T>>
-    // * {cgcb,ju}.Optional<javax.inject.Provider<T>>
+    // * {cgcb,ju}.Optional<jakarta.inject.Provider<T>>
     // * {cgcb,ju}.Optional<T>
     // If setDefault() or setBinding() is called then also
     // * T is bound
@@ -204,12 +204,12 @@ public final class RealOptionalBinder<T> implements Module {
         .bind(key.ofType(javaOptionalOfProvider(typeLiteral)))
         .toProvider(javaOptionalProviderFactory);
 
-    // Provider is assignable to javax.inject.Provider and the provider that the factory contains
+    // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
 
     // cgcb.Optional<ji.Provider<T>>
     @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<Optional<javax.inject.Provider<T>>>
+    InternalProviderInstanceBindingImpl.Factory<Optional<jakarta.inject.Provider<T>>>
         optionalJavaxProviderFactory =
             (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
     binder
@@ -217,7 +217,7 @@ public final class RealOptionalBinder<T> implements Module {
         .toProvider(optionalJavaxProviderFactory);
     // ju.Optional<ji.Provider<T>>
     @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<javax.inject.Provider<T>>>
+    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<jakarta.inject.Provider<T>>>
         javaOptionalJavaxProviderFactory =
             (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
     binder
@@ -663,7 +663,7 @@ public final class RealOptionalBinder<T> implements Module {
       // All of our bindings are ProviderInstanceBindings whose providers extend
       // RealOptionalBinderProviderWithDependencies and have 'this' as its binding selection.
       if (element instanceof ProviderInstanceBinding) {
-        javax.inject.Provider<?> providerInstance =
+        jakarta.inject.Provider<?> providerInstance =
             ((ProviderInstanceBinding<?>) element).getUserSuppliedProvider();
         if (providerInstance instanceof RealOptionalBinderProviderWithDependencies) {
           return ((RealOptionalBinderProviderWithDependencies<?, ?>) providerInstance)

@@ -77,7 +77,7 @@ public class MoreTypes {
   /**
    * Returns an type that's appropriate for use in a key.
    *
-   * <p>If the raw type of {@code typeLiteral} is a {@code javax.inject.Provider}, this returns a
+   * <p>If the raw type of {@code typeLiteral} is a {@code jakarta.inject.Provider}, this returns a
    * {@code com.google.inject.Provider} with the same type parameters.
    *
    * <p>If the type is a primitive, the corresponding wrapper type will be returned.
@@ -91,11 +91,11 @@ public class MoreTypes {
       throw new ConfigurationException(errors.getMessages());
     }
 
-    if (typeLiteral.getRawType() == javax.inject.Provider.class) {
+    if (typeLiteral.getRawType() == jakarta.inject.Provider.class) {
       ParameterizedType parameterizedType = (ParameterizedType) type;
 
       // the following casts are generally unsafe, but com.google.inject.Provider extends
-      // javax.inject.Provider and is covariant
+      // jakarta.inject.Provider and is covariant
       @SuppressWarnings("unchecked")
       TypeLiteral<T> guiceProviderType =
           (TypeLiteral<T>)

@@ -41,7 +41,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import junit.framework.TestCase;
 
 /** Unit tests for {@link BoundFieldModule}. */
@@ -426,8 +426,8 @@ public class BoundFieldModuleTest extends TestCase {
     Object instance =
         new Object() {
           @Bind
-          private javax.inject.Provider<Integer> anInt =
-              new javax.inject.Provider<Integer>() {
+          private jakarta.inject.Provider<Integer> anInt =
+              new jakarta.inject.Provider<Integer>() {
                 @Override
                 public Integer get() {
                   return testValue;

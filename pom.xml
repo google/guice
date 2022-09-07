@@ -13,496 +13,527 @@ software distributed under the Apache License Version 2.0 is distributed on an
 See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.google</groupId>
-    <artifactId>google</artifactId>
-    <version>5</version>
-  </parent>
+    <parent>
+        <groupId>com.google</groupId>
+        <artifactId>google</artifactId>
+        <version>5</version>
+    </parent>
 
-  <packaging>pom</packaging>
+    <packaging>pom</packaging>
 
-  <groupId>com.google.inject</groupId>
-  <artifactId>guice-parent</artifactId>
-  <version>6.0.0-SNAPSHOT</version>
+    <groupId>com.google.inject</groupId>
+    <artifactId>guice-parent</artifactId>
+    <version>6.0.0-SNAPSHOT</version>
 
-  <name>Google Guice</name>
+    <name>Google Guice</name>
 
-  <description>
-    Guice is a lightweight dependency injection framework for Java 6 and above
-  </description>
+    <description>
+        Guice is a lightweight dependency injection framework for Java 6 and above
+    </description>
 
-  <url>https://github.com/google/guice</url>
-  <inceptionYear>2006</inceptionYear>
-
-  <organization>
-    <name>Google, Inc.</name>
-    <url>http://www.google.com</url>
-  </organization>
-
-  <mailingLists>
-    <mailingList>
-      <name>Guice Users List</name>
-      <archive>http://groups.google.com/group/google-guice/topics</archive>
-      <subscribe>http://groups.google.com/group/google-guice/subscribe</subscribe>
-      <unsubscribe>http://groups.google.com/group/google-guice/subscribe</unsubscribe>
-      <post>http://groups.google.com/group/google-guice/post</post>
-    </mailingList>
-    <mailingList>
-      <name>Guice Developers List</name>
-      <archive>http://groups.google.com/group/google-guice-dev/topics</archive>
-      <subscribe>http://groups.google.com/group/google-guice-dev/subscribe</subscribe>
-      <unsubscribe>http://groups.google.com/group/google-guice-dev/subscribe</unsubscribe>
-      <post>http://groups.google.com/group/google-guice-dev/post</post>
-    </mailingList>
-  </mailingLists>
-
-  <scm>
-    <connection>scm:git:git://github.com/google/guice.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/google/guice.git</developerConnection>
     <url>https://github.com/google/guice</url>
-  </scm>
+    <inceptionYear>2006</inceptionYear>
 
-  <issueManagement>
-    <system>Github</system>
-    <url>https://github.com/google/guice/issues/</url>
-  </issueManagement>
+    <organization>
+        <name>Google, Inc.</name>
+        <url>http://www.google.com</url>
+    </organization>
 
-  <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/google/guice</url>
-  </ciManagement>
+    <mailingLists>
+        <mailingList>
+            <name>Guice Users List</name>
+            <archive>http://groups.google.com/group/google-guice/topics</archive>
+            <subscribe>http://groups.google.com/group/google-guice/subscribe</subscribe>
+            <unsubscribe>http://groups.google.com/group/google-guice/subscribe</unsubscribe>
+            <post>http://groups.google.com/group/google-guice/post</post>
+        </mailingList>
+        <mailingList>
+            <name>Guice Developers List</name>
+            <archive>http://groups.google.com/group/google-guice-dev/topics</archive>
+            <subscribe>http://groups.google.com/group/google-guice-dev/subscribe</subscribe>
+            <unsubscribe>http://groups.google.com/group/google-guice-dev/subscribe</unsubscribe>
+            <post>http://groups.google.com/group/google-guice-dev/post</post>
+        </mailingList>
+    </mailingLists>
 
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/google/guice.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/google/guice.git</developerConnection>
+        <url>https://github.com/google/guice</url>
+    </scm>
 
-  <distributionManagement>
-    <!-- override the parent's directory to point to the canonical place, and use https. -->
-    <repository>
-      <id>google-releases</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>google-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/google/guice/issues/</url>
+    </issueManagement>
 
-  <modules>
-    <module>bom</module>
-    <module>core</module>
-    <module>extensions</module>
-  </modules>
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.org/google/guice</url>
+    </ciManagement>
 
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-  <properties>
-    <!--
-     | The spec version of the public Guice API
-    -->
-    <guice.api.version>1.4</guice.api.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!--
-     | Use "-Dguice.with.jarjar=false" to build without jarjar
-    -->
-    <guice.with.jarjar>true</guice.with.jarjar>
-    <!--
-     | The last stable release version id, used for generating API diffs between released versions
-    -->
-    <guice.lastStableRelease>5.1.0</guice.lastStableRelease>
-    <guice.skipTests>false</guice.skipTests>
-    <gpg.skip>true</gpg.skip>
-  </properties>
+    <distributionManagement>
+        <!-- override the parent's directory to point to the canonical place, and use https. -->
+        <repository>
+            <id>google-releases</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>google-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject-tck</artifactId>
-        <version>1</version>
-      </dependency>
-      <dependency>
-        <groupId>aopalliance</groupId>
-        <artifactId>aopalliance</artifactId>
-        <version>1.0</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>31.0.1-jre</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava-testlib</artifactId>
-        <version>31.0.1-jre</version>
-      </dependency>
-      <dependency>
-        <groupId>org.ow2.asm</groupId>
-        <artifactId>asm</artifactId>
-        <version>9.2</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.13</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.truth</groupId>
-        <artifactId>truth</artifactId>
-        <version>0.45</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>3.0.1</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+    <modules>
+        <module>bom</module>
+        <module>core</module>
+        <module>extensions</module>
+    </modules>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  </dependencies>
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
 
-  <build>
-    <!--
-     | Ant-style directories
-    -->
-    <sourceDirectory>${project.basedir}/src</sourceDirectory>
-    <resources>
-      <resource>
-        <filtering>false</filtering>
-        <directory>${project.basedir}/src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
-    <testResources>
-      <testResource>
-        <filtering>false</filtering>
-        <directory>${project.basedir}/test</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </testResource>
-    </testResources>
-    <pluginManagement>
-      <plugins>
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <!--
-         | Use 'mvn license:format -N' at top of project to add missing headers
+         | The spec version of the public Guice API
         -->
-        <plugin>
-          <groupId>com.mycila</groupId>
-          <artifactId>license-maven-plugin</artifactId>
-          <version>2.6</version>
-          <configuration>
-            <encoding>UTF-8</encoding>
-            <header>${project.basedir}/lib/build/header.txt</header>
-            <headerDefinitions>
-              <headerDefinition>${project.basedir}/lib/build/header-definitions.xml</headerDefinition>
-            </headerDefinitions>
-            <skipExistingHeaders>true</skipExistingHeaders>
-            <aggregate>true</aggregate>
-            <includes>
-              <include>**/*.java</include>
-            </includes>
-            <excludes>
-              <!-- avoid touching munged/lib/test/example code -->
-              <exclude>**/build/**</exclude>
-              <exclude>**/target/**</exclude>
-              <exclude>**/lib/**</exclude>
-              <exclude>**/test/**</exclude>
-              <exclude>**/example*/**</exclude>
-            </excludes>
-            <mapping>
-              <java>JAVADOC_STYLE</java>
-            </mapping>
-          </configuration>
-        </plugin>
+        <guice.api.version>1.4</guice.api.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--
-         | Standard LICENSE and NOTICE files
+         | Use "-Dguice.with.jarjar=false" to build without jarjar
         -->
-        <plugin>
-          <artifactId>maven-remote-resources-plugin</artifactId>
-          <version>1.1</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>process</goal>
-              </goals>
-              <configuration>
-                <resourceBundles>
-                  <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                </resourceBundles>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
+        <guice.with.jarjar>true</guice.with.jarjar>
         <!--
-         | Make sure we only use Java8 methods
+         | The last stable release version id, used for generating API diffs between released versions
         -->
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
-          <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-            <compilerArgs>
-              <arg>-parameters</arg>
-            </compilerArgs>
-            <testCompilerArgument>-parameters</testCompilerArgument>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>1.16</version>
-          <configuration>
-            <signature>
-              <groupId>org.codehaus.mojo.signature</groupId>
-              <artifactId>java18</artifactId>
-              <version>1.0</version>
-            </signature>
-            <ignores>
-              <!-- workaround https://github.com/mojohaus/animal-sniffer/issues/18 -->
-              <ignore>java.lang.invoke.MethodHandle</ignore>
-            </ignores>
-          </configuration>
-          <executions>
-            <execution>
-              <id>check-java-1.8-compat</id>
-              <phase>process-classes</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.5</version>
-          <configuration>
-            <skipTests>${guice.skipTests}</skipTests>
-            <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <!--<argLine>-Dguice_include_stack_traces=OFF</argLine>-->
-          </configuration>
-          <executions>
-            <execution>
-              <id>stack-traces-off</id>
-              <phase>test</phase>
-              <goals><goal>test</goal></goals>
-              <configuration>
-                <argLine>-Dguice_include_stack_traces=OFF</argLine>
-              </configuration>
-            </execution>
-            <execution>
-              <id>default-test</id>
-              <phase>test</phase>
-              <goals><goal>test</goal></goals>
-              <configuration>
-                <argLine>-Dguice_include_stack_traces=ONLY_FOR_DECLARING_SOURCE</argLine>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <!--
-         | Shared OSGi manifest configuration
-        -->
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <version>3.5.0</version>
-          <configuration>
-            <instructions>
-              <module>com.google.inject</module>
-              <_include>-${project.basedir}/build.properties</_include>
-              <Bundle-Copyright>Copyright (C) 2006 Google Inc.</Bundle-Copyright>
-              <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
-              <Bundle-Name>${project.artifactId}</Bundle-Name>
-              <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
-              <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
-              <Import-Package>!com.google.inject.*,*</Import-Package>
-              <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
-              <_versionpolicy>$(version;==;$(@))</_versionpolicy>
-              <_nouses>true</_nouses>
-              <_removeheaders>
-                Embed-Dependency,Embed-Transitive,
-                Built-By,Tool,Created-By,Build-Jdk,
-                Originally-Created-By,Archiver-Version,
-                Include-Resource,Private-Package,
-                Ignore-Package,Bnd-LastModified
-              </_removeheaders>
-            </instructions>
-          </configuration>
-          <executions>
-            <execution>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>manifest</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <!--
-         | Package OSGi manifest in final JAR, also create a JAR of the test classes
-        -->
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3.1</version>
-          <configuration>
-            <archive>
-              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-              <!--  Exclude to mirror ant build -->
-          <addMavenDescriptor>false</addMavenDescriptor>
-            </archive>
-          </configuration>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                <goal>test-jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.2.0</version>
-          <configuration>
-            <doclint>html,syntax</doclint>
-            <source>8</source>
-            <author>false</author>
-            <protected>true</protected>
-            <links>
-              <link>http://aopalliance.sourceforge.net/doc/</link>
-              <link>https://guava.dev/releases/snapshot-jre/api/docs/</link>
-              <link>https://tomcat.apache.org/tomcat-5.5-doc/servletapi/</link>
-            </links>
-            <excludePackageNames>com.google.inject.internal:com.google.inject.internal.*</excludePackageNames>
-            <groups>
-              <group>
-                <title>Guice Core</title>
-                <packages>com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings</packages>
-              </group>
-              <group>
-                <title>Servlet Extension</title>
-                <packages>com.google.inject.servlet</packages>
-              </group>
-              <group>
-                <title>AssistedInject Extension</title>
-                <packages>com.google.inject.assistedinject</packages>
-              </group>
-              <group><title>Dagger Adapter</title>
-                <packages>com.google.inject.daggeradapter</packages>
-              </group>
-              <group><title>ThrowingProviders Extension</title>
-                <packages>com.google.inject.throwingproviders</packages>
-              </group>
-              <group><title>Test Libraries Extension</title>
-                <packages>com.google.inject.testing.*</packages>
-              </group>
-              <group><title>Grapher Extension</title>
-                <packages>com.google.inject.grapher:com.google.inject.grapher.*</packages>
-              </group>
-              <group><title>Persist Extension</title>
-                <packages>com.google.inject.persist:com.google.inject.persist.*</packages>
-              </group>
-              <group><title>Spring Extension</title>
-                <packages>com.google.inject.spring</packages>
-              </group>
-              <group><title>Struts2 Extension</title>
-                <packages>com.google.inject.struts2</packages>
-              </group>
-              <group><title>JNDI Extension</title>
-                <packages>com.google.inject.jndi</packages>
-              </group>
-              <group><title>JMX Extension</title>
-                <packages>com.google.inject.tools.jmx</packages>
-              </group>
-            </groups>
-          </configuration>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>2.1.2</version>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                <goal>jar</goal>
-                <goal>test-jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>2.1</version>
-          <configuration>
-            <autoVersionSubmodules>true</autoVersionSubmodules>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.5</version>
-        </plugin>
-        <plugin>
-          <groupId>org.spf4j</groupId>
-          <artifactId>spf4j-jdiff-maven-plugin</artifactId>
-          <version>8.8.5</version>
-          <configuration>
-            <destDir>${project.reporting.outputDirectory}/api-diffs/${project.artifactId}</destDir>
-            <versionRange>[${guice.lastStableRelease}],[${project.version}]</versionRange>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <!--
-       | Sign artifacts.
-      -->
-      <plugin>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals><goal>sign</goal></goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+        <guice.lastStableRelease>5.1.0</guice.lastStableRelease>
+        <guice.skipTests>false</guice.skipTests>
+        <gpg.skip>true</gpg.skip>
 
-  <!-- TODO(cgruber): Update the google parent pom or migrate to sonatype's -->
+        <junit.jupiter.version>5.9.0</junit.jupiter.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-tck</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>aopalliance</groupId>
+                <artifactId>aopalliance</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>31.0.1-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava-testlib</artifactId>
+                <version>31.0.1-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>9.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.vintage</groupId>
+                <artifactId>junit-vintage-engine</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.truth</groupId>
+                <artifactId>truth</artifactId>
+                <version>0.45</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <!--
+         | Ant-style directories
+        -->
+        <sourceDirectory>${project.basedir}/src</sourceDirectory>
+        <resources>
+            <resource>
+                <filtering>false</filtering>
+                <directory>${project.basedir}/src</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <filtering>false</filtering>
+                <directory>${project.basedir}/test</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+        <pluginManagement>
+            <plugins>
+                <!--
+                 | Use 'mvn license:format -N' at top of project to add missing headers
+                -->
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <header>${project.basedir}/lib/build/header.txt</header>
+                        <headerDefinitions>
+                            <headerDefinition>${project.basedir}/lib/build/header-definitions.xml</headerDefinition>
+                        </headerDefinitions>
+                        <skipExistingHeaders>true</skipExistingHeaders>
+                        <aggregate>true</aggregate>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                        <excludes>
+                            <!-- avoid touching munged/lib/test/example code -->
+                            <exclude>**/build/**</exclude>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/lib/**</exclude>
+                            <exclude>**/test/**</exclude>
+                            <exclude>**/example*/**</exclude>
+                        </excludes>
+                        <mapping>
+                            <java>JAVADOC_STYLE</java>
+                        </mapping>
+                    </configuration>
+                </plugin>
+                <!--
+                 | Standard LICENSE and NOTICE files
+                -->
+                <plugin>
+                    <artifactId>maven-remote-resources-plugin</artifactId>
+                    <version>1.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>process</goal>
+                            </goals>
+                            <configuration>
+                                <resourceBundles>
+                                    <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                                </resourceBundles>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!--
+                 | Make sure we only use Java8 methods
+                -->
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+                        <testCompilerArgument>-parameters</testCompilerArgument>
+                    </configuration>
+                </plugin>
+<!--                <plugin>-->
+<!--                    <groupId>org.codehaus.mojo</groupId>-->
+<!--                    <artifactId>animal-sniffer-maven-plugin</artifactId>-->
+<!--                    <version>1.22</version>-->
+<!--                    <configuration>-->
+<!--                        <signature>-->
+<!--                            <groupId>org.codehaus.mojo.signature</groupId>-->
+<!--                            <artifactId>java17</artifactId>-->
+<!--                            <version>1.0</version>-->
+<!--                        </signature>-->
+<!--                        <failOnError>false</failOnError>-->
+<!--                        <ignores>-->
+<!--                            &lt;!&ndash; workaround https://github.com/mojohaus/animal-sniffer/issues/18 &ndash;&gt;-->
+<!--                            <ignore>java.lang.invoke.MethodHandle</ignore>-->
+<!--                        </ignores>-->
+<!--                    </configuration>-->
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <id>check-java-1.8-compat</id>-->
+<!--                            <phase>process-classes</phase>-->
+<!--                            <goals>-->
+<!--                                <goal>check</goal>-->
+<!--                            </goals>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+<!--                </plugin>-->
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <skipTests>${guice.skipTests}</skipTests>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <!--<argLine>-Dguice_include_stack_traces=OFF</argLine>-->
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>stack-traces-off</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <configuration>
+                                <argLine>-Dguice_include_stack_traces=OFF</argLine>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>default-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <configuration>
+                                <argLine>-Dguice_include_stack_traces=ONLY_FOR_DECLARING_SOURCE</argLine>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!--
+                 | Shared OSGi manifest configuration
+                -->
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>3.5.0</version>
+                    <configuration>
+                        <instructions>
+                            <module>com.google.inject</module>
+                            <_include>-${project.basedir}/build.properties</_include>
+                            <Bundle-Copyright>Copyright (C) 2006 Google Inc.</Bundle-Copyright>
+                            <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
+                            <Bundle-Name>${project.artifactId}</Bundle-Name>
+                            <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
+                            <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+                            <Import-Package>!com.google.inject.*,*</Import-Package>
+                            <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
+                            <_versionpolicy>$(version;==;$(@))</_versionpolicy>
+                            <_nouses>true</_nouses>
+                            <_removeheaders>
+                                Embed-Dependency,Embed-Transitive,
+                                Built-By,Tool,Created-By,Build-Jdk,
+                                Originally-Created-By,Archiver-Version,
+                                Include-Resource,Private-Package,
+                                Ignore-Package,Bnd-LastModified
+                            </_removeheaders>
+                        </instructions>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>manifest</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!--
+                 | Package OSGi manifest in final JAR, also create a JAR of the test classes
+                -->
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3.1</version>
+                    <configuration>
+                        <archive>
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                            <!--  Exclude to mirror ant build -->
+                            <addMavenDescriptor>false</addMavenDescriptor>
+                        </archive>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <doclint>html,syntax</doclint>
+                        <source>8</source>
+                        <author>false</author>
+                        <protected>true</protected>
+                        <links>
+                            <link>http://aopalliance.sourceforge.net/doc/</link>
+                            <link>https://guava.dev/releases/snapshot-jre/api/docs/</link>
+                            <link>https://tomcat.apache.org/tomcat-5.5-doc/servletapi/</link>
+                        </links>
+                        <excludePackageNames>com.google.inject.internal:com.google.inject.internal.*</excludePackageNames>
+                        <groups>
+                            <group>
+                                <title>Guice Core</title>
+                                <packages>
+                                    com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings
+                                </packages>
+                            </group>
+                            <group>
+                                <title>Servlet Extension</title>
+                                <packages>com.google.inject.servlet</packages>
+                            </group>
+                            <group>
+                                <title>AssistedInject Extension</title>
+                                <packages>com.google.inject.assistedinject</packages>
+                            </group>
+                            <group>
+                                <title>Dagger Adapter</title>
+                                <packages>com.google.inject.daggeradapter</packages>
+                            </group>
+                            <group>
+                                <title>ThrowingProviders Extension</title>
+                                <packages>com.google.inject.throwingproviders</packages>
+                            </group>
+                            <group>
+                                <title>Test Libraries Extension</title>
+                                <packages>com.google.inject.testing.*</packages>
+                            </group>
+                            <group>
+                                <title>Grapher Extension</title>
+                                <packages>com.google.inject.grapher:com.google.inject.grapher.*</packages>
+                            </group>
+                            <group>
+                                <title>Persist Extension</title>
+                                <packages>com.google.inject.persist:com.google.inject.persist.*</packages>
+                            </group>
+                            <group>
+                                <title>Spring Extension</title>
+                                <packages>com.google.inject.spring</packages>
+                            </group>
+                            <group>
+                                <title>Struts2 Extension</title>
+                                <packages>com.google.inject.struts2</packages>
+                            </group>
+                            <group>
+                                <title>JNDI Extension</title>
+                                <packages>com.google.inject.jndi</packages>
+                            </group>
+                            <group>
+                                <title>JMX Extension</title>
+                                <packages>com.google.inject.tools.jmx</packages>
+                            </group>
+                        </groups>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.2</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.1</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.spf4j</groupId>
+                    <artifactId>spf4j-jdiff-maven-plugin</artifactId>
+                    <version>8.8.5</version>
+                    <configuration>
+                        <destDir>${project.reporting.outputDirectory}/api-diffs/${project.artifactId}</destDir>
+                        <versionRange>[${guice.lastStableRelease}],[${project.version}]</versionRange>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <!--
+             | Sign artifacts.
+            -->
+            <plugin>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- TODO(cgruber): Update the google parent pom or migrate to sonatype's -->
 </project>

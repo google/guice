@@ -69,7 +69,7 @@ public class Scopes {
         @Override
         public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
           return scopeAnnotation == Singleton.class
-              || scopeAnnotation == javax.inject.Singleton.class;
+              || scopeAnnotation == jakarta.inject.Singleton.class;
         }
 
         @Override

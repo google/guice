@@ -31,7 +31,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import junit.framework.TestCase;
 
 /** Tests of {@link Multibinds} support in {@link DaggerAdapter}. */

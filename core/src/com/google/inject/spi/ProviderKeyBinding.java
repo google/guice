@@ -33,5 +33,5 @@ public interface ProviderKeyBinding<T> extends Binding<T> {
    * injector using {@link com.google.inject.Injector#getBinding(Key)
    * Injector.getBinding(providerKey)}
    */
-  Key<? extends javax.inject.Provider<? extends T>> getProviderKey();
+  Key<? extends jakarta.inject.Provider<? extends T>> getProviderKey();
 }

@@ -709,9 +709,9 @@ public class FactoryProvider2Test {
 
   interface JavaxProviderBasedColoredCarFactory {
     Car createCar(
-        javax.inject.Provider<Color> colorProvider, javax.inject.Provider<String> stringProvider);
+        jakarta.inject.Provider<Color> colorProvider, jakarta.inject.Provider<String> stringProvider);
 
-    Mustang createMustang(@Assisted("color") javax.inject.Provider<Color> colorProvider);
+    Mustang createMustang(@Assisted("color") jakarta.inject.Provider<Color> colorProvider);
   }
 
   @Test

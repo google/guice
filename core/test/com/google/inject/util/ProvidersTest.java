@@ -19,7 +19,7 @@ package com.google.inject.util;
 import com.google.common.base.Objects;
 import com.google.common.testing.EqualsTester;
 import com.google.inject.Provider;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import junit.framework.TestCase;
 
 /**
@@ -60,7 +60,7 @@ public class ProvidersTest extends TestCase {
         .testEquals();
   }
 
-  private static class JavaxProvider implements javax.inject.Provider<Integer> {
+  private static class JavaxProvider implements jakarta.inject.Provider<Integer> {
     private final int value;
 
     public JavaxProvider(int value) {
@@ -83,7 +83,7 @@ public class ProvidersTest extends TestCase {
     }
   }
 
-  private static class JavaxProviderWithDependencies implements javax.inject.Provider<Integer> {
+  private static class JavaxProviderWithDependencies implements jakarta.inject.Provider<Integer> {
     private int value;
 
     @Inject

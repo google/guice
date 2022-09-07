@@ -949,7 +949,7 @@ public class SpiUtils {
           matches(javaOptionalBinder.getActualBinding(), expectedUserLinkedActual));
     }
 
-    Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
+    Key<Optional<jakarta.inject.Provider<T>>> optionalJavaxProviderKey =
         keyType.ofType(RealOptionalBinder.optionalOfJavaxProvider(keyType.getTypeLiteral()));
     Key<?> javaOptionalJavaxProviderKey =
         keyType.ofType(RealOptionalBinder.javaOptionalOfJavaxProvider(keyType.getTypeLiteral()));
@@ -1089,7 +1089,7 @@ public class SpiUtils {
     assertEquals(expectedDefault == null, defaultKey == null);
     assertEquals(expectedActual == null, actualKey == null);
 
-    Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
+    Key<Optional<jakarta.inject.Provider<T>>> optionalJavaxProviderKey =
         keyType.ofType(RealOptionalBinder.optionalOfJavaxProvider(keyType.getTypeLiteral()));
     Key<?> javaOptionalJavaxProviderKey =
         keyType.ofType(RealOptionalBinder.javaOptionalOfJavaxProvider(keyType.getTypeLiteral()));

@@ -88,8 +88,8 @@ public class MapBinderTest extends TestCase {
       ImmutableSet.of(
           Key.get(java.util.logging.Logger.class), Key.get(Stage.class), Key.get(Injector.class));
 
-  final TypeLiteral<Map<String, javax.inject.Provider<String>>> mapOfStringJavaxProvider =
-      new TypeLiteral<Map<String, javax.inject.Provider<String>>>() {};
+  final TypeLiteral<Map<String, jakarta.inject.Provider<String>>> mapOfStringJavaxProvider =
+      new TypeLiteral<Map<String, jakarta.inject.Provider<String>>>() {};
   final TypeLiteral<Map<String, Provider<String>>> mapOfStringProvider =
       new TypeLiteral<Map<String, Provider<String>>>() {};
   final TypeLiteral<Map<String, String>> mapOfString = new TypeLiteral<Map<String, String>>() {};
@@ -134,32 +134,32 @@ public class MapBinderTest extends TestCase {
                 Key.get(Types.mapOf(String.class, String.class)),
                 // Map<K, Provider<V>>
                 Key.get(Types.mapOf(String.class, Types.providerOf(String.class))),
-                // Map<K, javax.inject.Provider<V>>
+                // Map<K, jakarta.inject.Provider<V>>
                 Key.get(Types.mapOf(String.class, javaxProviderOf(String.class))),
                 // Map<K, Set<V>>
                 Key.get(Types.mapOf(String.class, Types.setOf(String.class))),
                 // Map<K, Set<Provider<V>>
                 Key.get(Types.mapOf(String.class, Types.setOf(Types.providerOf(String.class)))),
-                // Map<K, Set<javax.inject.Provider<V>>
+                // Map<K, Set<jakarta.inject.Provider<V>>
                 Key.get(
                     Types.mapOf(String.class, Types.setOf(Types.javaxProviderOf(String.class)))),
                 // Map<K, Collection<Provider<V>>
                 Key.get(
                     Types.mapOf(String.class, Types.collectionOf(Types.providerOf(String.class)))),
-                // Map<K, Collection<javax.inject.Provider<V>>
+                // Map<K, Collection<jakarta.inject.Provider<V>>
                 Key.get(
                     Types.mapOf(
                         String.class, Types.collectionOf(Types.javaxProviderOf(String.class)))),
                 // Set<Map.Entry<K, Provider<V>>>
                 Key.get(Types.setOf(mapEntryOf(String.class, Types.providerOf(String.class)))),
-                // Set<Map.Entry<K, javax.inject.Provider<V>>>
+                // Set<Map.Entry<K, jakarta.inject.Provider<V>>>
                 Key.get(Types.setOf(mapEntryOf(String.class, Types.javaxProviderOf(String.class)))),
                 // Collection<Provider<Map.Entry<K, Provider<V>>>>
                 Key.get(
                     collectionOf(
                         Types.providerOf(
                             mapEntryOf(String.class, Types.providerOf(String.class))))),
-                // Collection<javax.inject.Provider<Map.Entry<K, Provider<V>>>>
+                // Collection<jakarta.inject.Provider<Map.Entry<K, Provider<V>>>>
                 Key.get(
                     collectionOf(
                         Types.javaxProviderOf(
@@ -1496,7 +1496,7 @@ public class MapBinderTest extends TestCase {
       Object kToFind, Iterable<com.google.inject.spi.Element> elements) {
     for (com.google.inject.spi.Element element : elements) {
       if (element instanceof ProviderInstanceBinding) {
-        javax.inject.Provider<?> usp =
+        jakarta.inject.Provider<?> usp =
             ((ProviderInstanceBinding<?>) element).getUserSuppliedProvider();
         if (usp instanceof ProviderMapEntry) {
           ProviderMapEntry<?, ?> pme = (ProviderMapEntry<?, ?>) usp;

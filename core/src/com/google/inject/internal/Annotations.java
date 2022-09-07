@@ -43,7 +43,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 /**
  * Annotation utilities.
@@ -312,7 +312,7 @@ public class Annotations {
   }
 
   private static final AnnotationChecker scopeChecker =
-      new AnnotationChecker(Arrays.asList(ScopeAnnotation.class, javax.inject.Scope.class));
+      new AnnotationChecker(Arrays.asList(ScopeAnnotation.class, jakarta.inject.Scope.class));
 
   public static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
     return scopeChecker.hasAnnotations(annotationType);
@@ -377,24 +377,24 @@ public class Annotations {
   }
 
   /**
-   * If the annotation is an instance of {@code javax.inject.Named}, canonicalizes to
+   * If the annotation is an instance of {@code jakarta.inject.Named}, canonicalizes to
    * com.google.guice.name.Named. Returns the given annotation otherwise.
    */
   public static Annotation canonicalizeIfNamed(Annotation annotation) {
-    if (annotation instanceof javax.inject.Named) {
-      return Names.named(((javax.inject.Named) annotation).value());
+    if (annotation instanceof jakarta.inject.Named) {
+      return Names.named(((jakarta.inject.Named) annotation).value());
     } else {
       return annotation;
     }
   }
 
   /**
-   * If the annotation is the class {@code javax.inject.Named}, canonicalizes to
+   * If the annotation is the class {@code jakarta.inject.Named}, canonicalizes to
    * com.google.guice.name.Named. Returns the given annotation class otherwise.
    */
   public static Class<? extends Annotation> canonicalizeIfNamed(
       Class<? extends Annotation> annotationType) {
-    if (annotationType == javax.inject.Named.class) {
+    if (annotationType == jakarta.inject.Named.class) {
       return Named.class;
     } else {
       return annotationType;

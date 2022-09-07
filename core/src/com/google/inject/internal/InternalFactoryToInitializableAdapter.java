@@ -30,10 +30,10 @@ import com.google.inject.spi.ProviderInstanceBinding;
 final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
 
   private final ProvisionListenerStackCallback<T> provisionCallback;
-  private final Initializable<? extends javax.inject.Provider<? extends T>> initializable;
+  private final Initializable<? extends jakarta.inject.Provider<? extends T>> initializable;
 
   public InternalFactoryToInitializableAdapter(
-      Initializable<? extends javax.inject.Provider<? extends T>> initializable,
+      Initializable<? extends jakarta.inject.Provider<? extends T>> initializable,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
@@ -49,7 +49,7 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
 
   @Override
   protected T provision(
-      javax.inject.Provider<? extends T> provider,
+      jakarta.inject.Provider<? extends T> provider,
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
       throws InternalProvisionException {

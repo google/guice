@@ -2,7 +2,7 @@ package com.google.inject;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

@@ -20,11 +20,11 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.only;
 import static com.google.inject.name.Names.named;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;

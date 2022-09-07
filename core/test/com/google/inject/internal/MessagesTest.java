@@ -7,12 +7,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.ErrorDetail;
 import com.google.inject.spi.Message;
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public final class MessagesTest {

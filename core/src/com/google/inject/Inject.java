@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  *       The Injector then proceeds to perform field and method injections.
  *   <li>Pre-constructed instances passed to {@link Injector#injectMembers}, {@link
  *       com.google.inject.binder.LinkedBindingBuilder#toInstance(Object)} and {@link
- *       com.google.inject.binder.LinkedBindingBuilder#toProvider(javax.inject.Provider)}. In this
+ *       com.google.inject.binder.LinkedBindingBuilder#toProvider(jakarta.inject.Provider)}. In this
  *       case all constructors are, of course, ignored.
  *   <li>Static fields and methods of classes which any {@link Module} has specifically requested
  *       static injection for, using {@link Binder#requestStaticInjection}.

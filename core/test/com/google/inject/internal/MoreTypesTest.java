@@ -17,17 +17,20 @@
 package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertContains;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.MoreTypes.ParameterizedTypeImpl;
+import junit.framework.TestCase;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+
 
 /** @author schmitt@google.com (Peter Schmitt) */
 public class MoreTypesTest extends TestCase {

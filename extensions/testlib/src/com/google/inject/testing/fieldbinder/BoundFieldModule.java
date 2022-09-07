@@ -64,11 +64,11 @@ import java.lang.reflect.Type;
  *   <li>If {@link Bind#lazy} is true, this module will delay reading the value from the field until
  *       injection time, allowing the field's value to be reassigned during the course of a test's
  *       execution.
- *   <li>If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
+ *   <li>If a {@link BindingAnnotation} or {@link jakarta.inject.Qualifier} is present on the field,
  *       that field will be bound using that annotation via {@link
  *       AnnotatedBindingBuilder#annotatedWith}. For example, {@code
  *       bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error to
- *       supply more than one {@link BindingAnnotation} or {@link javax.inject.Qualifier}.
+ *       supply more than one {@link BindingAnnotation} or {@link jakarta.inject.Qualifier}.
  *   <li>If the field is of type {@link Provider}, the field's value will be bound as a {@link
  *       Provider} using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized
  *       type. For example, {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a
@@ -433,7 +433,7 @@ public final class BoundFieldModule implements Module {
   }
 
   private static boolean hasInject(Field field) {
-    return field.isAnnotationPresent(javax.inject.Inject.class)
+    return field.isAnnotationPresent(jakarta.inject.Inject.class)
         || field.isAnnotationPresent(com.google.inject.Inject.class);
   }
 
@@ -445,7 +445,7 @@ public final class BoundFieldModule implements Module {
    * instead.
    *
    * <p>A transparent provider is a {@link com.google.inject.Provider} or {@link
-   * javax.inject.Provider} which binds to it's parameterized type when used as the argument to
+   * jakarta.inject.Provider} which binds to it's parameterized type when used as the argument to
    * {@link Binder#bind}.
    *
    * <p>A {@link Provider} is transparent if the base class of that object is {@link Provider}. In
@@ -457,7 +457,7 @@ public final class BoundFieldModule implements Module {
    * bind those subclasses directly, enabling them to inject the providers themselves.
    */
   private static boolean isTransparentProvider(Class<?> clazz) {
-    return com.google.inject.Provider.class == clazz || javax.inject.Provider.class == clazz;
+    return com.google.inject.Provider.class == clazz || jakarta.inject.Provider.class == clazz;
   }
 
   private static void bindField(Binder binder, final BoundFieldInfo fieldInfo) {
@@ -480,14 +480,14 @@ public final class BoundFieldModule implements Module {
               @Override
               // @Nullable
               public Object get() {
-                javax.inject.Provider<?> provider =
-                    (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+                jakarta.inject.Provider<?> provider =
+                    (jakarta.inject.Provider<?>) getFieldValue(fieldInfo);
                 return provider.get();
               }
             });
       } else {
-        javax.inject.Provider<?> fieldValueUnsafe =
-            (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+        jakarta.inject.Provider<?> fieldValueUnsafe =
+            (jakarta.inject.Provider<?>) getFieldValue(fieldInfo);
         binderUnsafe.toProvider(fieldValueUnsafe);
       }
     } else if (fieldInfo.bindAnnotation.lazy()) {

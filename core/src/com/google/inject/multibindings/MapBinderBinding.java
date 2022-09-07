@@ -49,10 +49,10 @@ public interface MapBinderBinding<T> {
 
   /**
    * Returns the keys of other bindings that represent this map. This will return an entry for
-   * {@code Map<K, com.google.inject.Provider<V>>}, {@code Map<K, javax.inject.Provider<V>>}, {@code
-   * Map<K, Set<com.google.inject.Provider<V>>>}, {@code Map<K, Set<javax.inject.Provider<V>>>},
+   * {@code Map<K, com.google.inject.Provider<V>>}, {@code Map<K, jakarta.inject.Provider<V>>}, {@code
+   * Map<K, Set<com.google.inject.Provider<V>>>}, {@code Map<K, Set<jakarta.inject.Provider<V>>>},
    * {@code Map<K, Collection<com.google.inject.Provider<V>>>}, {@code Map<K,
-   * Collection<javax.inject.Provider<V>>>}, {@code Map<K, Set<V>}, and {@code Map<K, ? extends V>}.
+   * Collection<jakarta.inject.Provider<V>>>}, {@code Map<K, Set<V>}, and {@code Map<K, ? extends V>}.
    *
    * @since 4.2.3
    */

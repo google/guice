@@ -45,7 +45,7 @@ public interface OptionalBinderBinding<T> {
   /**
    * Returns the keys of other bindings that represent this OptionalBinder. This will return an
    * entry for {@code Optional<com.google.inject.Provider<V>>} and {@code
-   * Optional<javax.inject.Provider<V>>}.
+   * Optional<jakarta.inject.Provider<V>>}.
    *
    * @since 4.2.3
    */

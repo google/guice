@@ -20,7 +20,7 @@ import com.google.inject.Key;
 import com.google.inject.ProvidedBy;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * An {@link InternalFactory} for {@literal @}{@link ProvidedBy} bindings.
@@ -74,7 +74,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
 
   @Override
   protected T provision(
-      javax.inject.Provider<? extends T> provider,
+      jakarta.inject.Provider<? extends T> provider,
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
       throws InternalProvisionException {

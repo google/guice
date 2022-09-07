@@ -36,11 +36,11 @@ import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
 import junit.framework.TestCase;
 
 public class Jsr330Test extends TestCase {
@@ -260,8 +260,8 @@ public class Jsr330Test extends TestCase {
 
   /**
    * This test verifies that we can compile bindings to provider instances whose compile-time type
-   * implements javax.inject.Provider but not com.google.inject.Provider. For binary compatibility,
-   * we don't (and won't) support binding to instances of javax.inject.Provider.
+   * implements jakarta.inject.Provider but not com.google.inject.Provider. For binary compatibility,
+   * we don't (and won't) support binding to instances of jakarta.inject.Provider.
    */
   public void testBindProviderClass() {
     Injector injector =
@@ -452,7 +452,7 @@ public class Jsr330Test extends TestCase {
     }
   }
 
-  @javax.inject.Scope
+  @jakarta.inject.Scope
   @Retention(RUNTIME)
   @interface TestScoped {}
 

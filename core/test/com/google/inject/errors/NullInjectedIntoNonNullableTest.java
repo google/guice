@@ -1,7 +1,7 @@
 package com.google.inject.errors;
 
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.inject.AbstractModule;
@@ -15,8 +15,8 @@ import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

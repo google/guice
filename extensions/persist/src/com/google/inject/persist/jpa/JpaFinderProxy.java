@@ -121,8 +121,8 @@ class JpaFinderProxy implements MethodInterceptor {
       } else if (annotation instanceof Named) {
         Named named = (Named) annotation;
         jpaQuery.setParameter(named.value(), argument);
-      } else if (annotation instanceof javax.inject.Named) {
-        javax.inject.Named named = (javax.inject.Named) annotation;
+      } else if (annotation instanceof jakarta.inject.Named) {
+        jakarta.inject.Named named = (jakarta.inject.Named) annotation;
         jpaQuery.setParameter(named.value(), argument);
       } else if (annotation instanceof FirstResult) {
         jpaQuery.setFirstResult((Integer) argument);
@@ -182,7 +182,7 @@ class JpaFinderProxy implements MethodInterceptor {
       for (Annotation annotation : annotations) {
         //discover the named, first or max annotations then break out
         Class<? extends Annotation> annotationType = annotation.annotationType();
-        if (Named.class.equals(annotationType) || javax.inject.Named.class.equals(annotationType)) {
+        if (Named.class.equals(annotationType) || jakarta.inject.Named.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           finderDescriptor.isBindAsRawParameters = false;
           break;

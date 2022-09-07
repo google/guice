@@ -50,7 +50,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 
 /**
  * A scanner to process provider methods on Dagger modules.

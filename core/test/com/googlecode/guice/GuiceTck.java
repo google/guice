@@ -19,7 +19,7 @@ package com.googlecode.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Provides;
-import javax.inject.Named;
+import jakarta.inject.Named;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import org.atinject.tck.Tck;

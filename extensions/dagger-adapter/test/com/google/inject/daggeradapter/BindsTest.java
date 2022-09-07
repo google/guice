@@ -29,8 +29,8 @@ import dagger.multibindings.IntoSet;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
 import junit.framework.TestCase;
 
 /** Tests of {@link Binds} support in {@link DaggerAdapter}. */

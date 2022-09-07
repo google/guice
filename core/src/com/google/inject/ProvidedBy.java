@@ -32,5 +32,5 @@ import java.lang.annotation.Target;
 public @interface ProvidedBy {
 
   /** The implementation type. */
-  Class<? extends javax.inject.Provider<?>> value();
+  Class<? extends jakarta.inject.Provider<?>> value();
 }

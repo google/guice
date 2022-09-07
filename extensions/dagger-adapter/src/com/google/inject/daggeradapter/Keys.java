@@ -23,7 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Optional;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 /** Utility methods for creating {@link Key}s. */
 final class Keys {
