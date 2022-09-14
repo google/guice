@@ -114,6 +114,7 @@ guice_test_suites(
         # those 2 options are required for some tests that checks stack traces
         "-XX:+UnlockDiagnosticVMOptions",
         "-XX:+ShowHiddenFrames",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
     ],
     sizes = [
         "small",
