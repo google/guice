@@ -15,10 +15,6 @@ package(
 java_library(
     name = "assistedinject",
     srcs = glob(["**/*.java"]),
-    add_opens = [
-        # TODO(b/246946662): remove this
-        "java.base/java.lang.invoke",
-    ],
     javacopts = JAVAC_OPTS,
     plugins = [
     ],
