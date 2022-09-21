@@ -1,21 +1,17 @@
 package com.google.inject.assistedinject.subpkg;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.logging.Handler;
@@ -35,11 +31,9 @@ import org.junit.runners.JUnit4;
  * <p>See https://github.com/google/guice/issues/904
  */
 @RunWith(JUnit4.class)
-public final class SubpackageTest {
+public final class SubpackageTestPrivateFallbackOnly {
   private static final double JAVA_VERSION =
       Double.parseDouble(StandardSystemProperty.JAVA_SPECIFICATION_VERSION.value());
-
-  private static final MethodHandles.Lookup LOOKUPS = MethodHandles.lookup();
 
   private final Logger loggerToWatch = Logger.getLogger(AssistedInject.class.getName());
 
@@ -126,53 +120,11 @@ public final class SubpackageTest {
   }
 
   @Test
-  public void testNoPrivateFallbackOrWorkaround() throws Exception {
+  public void testPrivateFallbackOnly() throws Exception {
+    // Private fallback only works on JDKs below 17. On 17+ it's disabled.
+    assumeTrue(JAVA_VERSION < 17);
+
     setAllowMethodHandleWorkaround(false);
-    setAllowPrivateLookupFallback(false);
-
-    if (JAVA_VERSION > 1.8) {
-      // Above 1.8 will fail, because they can't access private details w/o the workarounds.
-      try {
-        Guice.createInjector(
-            new AbstractModule() {
-              @Override
-              protected void configure() {
-                install(
-                    new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
-              }
-            });
-        fail("Expected CreationException");
-      } catch (CreationException ce) {
-        assertThat(Iterables.getOnlyElement(ce.getErrorMessages()).getMessage())
-            .contains("Please call FactoryModuleBuilder.withLookups");
-      }
-      LogRecord record = Iterables.getOnlyElement(logRecords);
-      assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookup()`");
-    } else {
-      // 1.8 & below will succeed, because that's the only way they can work.
-      Injector injector =
-          Guice.createInjector(
-              new AbstractModule() {
-                @Override
-                protected void configure() {
-                  install(
-                      new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
-                }
-              });
-      LogRecord record = Iterables.getOnlyElement(logRecords);
-      assertThat(record.getMessage()).contains("Please pass a `MethodHandles.lookup()`");
-
-      ConcreteAssistedWithOverride.Factory factory =
-          injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
-      factory.create("foo");
-      AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factoryAbstract = factory;
-      factoryAbstract.create("foo");
-    }
-  }
-
-  @Test
-  public void testHandleWorkaroundOnly() throws Exception {
-    setAllowPrivateLookupFallback(false);
 
     Injector injector =
         Guice.createInjector(
@@ -188,68 +140,9 @@ public final class SubpackageTest {
 
     ConcreteAssistedWithOverride.Factory factory =
         injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
-    factory.create("foo");
+    ConcreteAssistedWithOverride unused = factory.create("foo");
     AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factoryAbstract = factory;
-    factoryAbstract.create("foo");
-  }
-
-  @Test
-  public void testGeneratedDefaultMethodsForwardCorrectly() throws Exception {
-    // This test requires above java 1.8.
-    // 1.8's reflection capability is tested via "testReflectionFallbackWorks".
-    assumeTrue(JAVA_VERSION > 1.8);
-
-    final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =
-        new Key<AbstractAssisted.Factory<ConcreteAssisted, String>>() {};
-    Injector injector =
-        Guice.createInjector(
-            new AbstractModule() {
-              @Override
-              protected void configure() {
-                install(
-                    new FactoryModuleBuilder()
-                        .withLookups(LOOKUPS)
-                        .build(ConcreteAssistedWithOverride.Factory.class));
-                install(
-                    new FactoryModuleBuilder()
-                        .withLookups(LOOKUPS)
-                        .build(ConcreteAssistedWithOverride.Factory2.class));
-                install(
-                    new FactoryModuleBuilder()
-                        .build(ConcreteAssistedWithoutOverride.Factory.class));
-                install(new FactoryModuleBuilder().build(Public.Factory.class));
-                install(new FactoryModuleBuilder().build(concreteKey));
-              }
-            });
-    assertThat(logRecords).isEmpty();
-
-    ConcreteAssistedWithOverride.Factory factory1 =
-        injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
-    factory1.create("foo");
-    AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factory1Abstract = factory1;
-    factory1Abstract.create("foo");
-
-    ConcreteAssistedWithOverride.Factory2 factory2 =
-        injector.getInstance(ConcreteAssistedWithOverride.Factory2.class);
-    factory2.create("foo");
-    factory2.create(new StringBuilder("foo"));
-    AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factory2Abstract = factory2;
-    factory2Abstract.create("foo");
-
-    ConcreteAssistedWithoutOverride.Factory factory3 =
-        injector.getInstance(ConcreteAssistedWithoutOverride.Factory.class);
-    factory3.create("foo");
-    AbstractAssisted.Factory<ConcreteAssistedWithoutOverride, String> factory3Abstract = factory3;
-    factory3Abstract.create("foo");
-
-    Public.Factory factory4 = injector.getInstance(Public.Factory.class);
-    factory4.create("foo");
-    factory4.create(new StringBuilder("foo"));
-    AbstractAssisted.Factory<Public, String> factory4Abstract = factory4;
-    factory4Abstract.create("foo");
-
-    AbstractAssisted.Factory<ConcreteAssisted, String> factory5 = injector.getInstance(concreteKey);
-    factory5.create("foo");
+    unused = factoryAbstract.create("foo");
   }
 
   private static void setAllowPrivateLookupFallback(boolean allowed) throws Exception {
