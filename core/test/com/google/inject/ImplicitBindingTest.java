@@ -16,18 +16,18 @@
 
 package com.google.inject;
 
-import static com.google.common.base.StandardSystemProperty.JAVA_SPECIFICATION_VERSION;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.internal.Annotations;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
-import java.net.InetAddress;
 import java.util.List;
 import junit.framework.TestCase;
 
-/** @author crazybob@google.com (Bob Lee) */
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
 public class ImplicitBindingTest extends TestCase {
 
   public void testCircularDependency() throws CreationException {
@@ -322,10 +322,10 @@ public class ImplicitBindingTest extends TestCase {
    * sequence of JIT bindings:
    *
    * <ol>
-   * <li> A-> B
-   * <li> B -> C, A
-   * <li> C -> A, D
-   * <li> D not JITable
+   *   <li>A-> B
+   *   <li>B -> C, A
+   *   <li>C -> A, D
+   *   <li>D not JITable
    * </ol>
    *
    * <p>The problem was that C cleaned up A's binding and then handed control back to B, which tried
@@ -434,13 +434,9 @@ public class ImplicitBindingTest extends TestCase {
 
   private static class EnumWithImplementedByEnum {}
 
-  public void testImplicitJdkBindings() {
+  public void testImplicitJdkBindings_publicCxtor() {
     Injector injector = Guice.createInjector();
     // String has a public nullary constructor, so Guice will call it.
     assertEquals("", injector.getInstance(String.class));
-    // InetAddress has a package private constructor.  We probably shouldn't be calling it :(
-    if (Double.parseDouble(JAVA_SPECIFICATION_VERSION.value()) < 17) {
-      assertNotNull(injector.getInstance(InetAddress.class));
-    }
   }
 }

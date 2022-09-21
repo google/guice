@@ -11,6 +11,10 @@ TEST_SUPPORT_SRCS = [
     "internal/WeakKeySetUtils.java",
 ]
 
+ADD_OPENS_SRCS = [
+    "ImplicitBindingJdkPackagePrivateTest.java",
+]
+
 # Files that are shared by extensions also.
 # Typically this would go in a java/../testing package,
 # but we need to work with the open-source code structure,
@@ -37,7 +41,7 @@ java_library(
     name = "tests",
     srcs = glob(
         ["**/*.java"],  # glob ignores subfolder that has its own BUILD files
-        exclude = TEST_SUPPORT_SRCS + [
+        exclude = TEST_SUPPORT_SRCS + ADD_OPENS_SRCS + [
             "AllTests.java",
         ],
     ),
@@ -59,12 +63,27 @@ java_library(
     ],
 )
 
+java_library(
+    name = "add_opens_tests",
+    srcs = ADD_OPENS_SRCS,
+    javacopts = ["-Xep:BetaApi:OFF"],
+    visibility = [
+        "//:src",
+    ],
+    deps = [
+        "//core/src/com/google/inject",
+        "//third_party/java/guava/base",
+        "//third_party/java/junit",
+    ],
+)
+
 # This target is unused, but exists so that we can more easily
 # ensure the opensource build maintains compiling code.
 java_library(
     name = "AllTests",
     srcs = ["AllTests.java"],
     deps = [
+        ":add_opens_tests",
         ":tests",
         "//core/test/com/googlecode/guice:tests",
         "//third_party/java/junit",
@@ -82,7 +101,10 @@ guice_test_suites(
         "small",
         "medium",
     ],
-    deps = [":tests"],
+    deps = [
+        ":add_opens_tests",
+        ":tests",
+    ],
 )
 
 [guice_test_suites(
@@ -100,7 +122,10 @@ guice_test_suites(
         "medium",
     ],
     suffix = "_stack_trace_%s" % include_stack_trace_option,
-    deps = [":tests"],
+    deps = [
+        ":add_opens_tests",
+        ":tests",
+    ],
 ) for include_stack_trace_option in [
     "OFF",
 ]]
@@ -120,9 +145,12 @@ guice_test_suites(
         "medium",
     ],
     suffix = "_custom_class_loading_%s" % custom_class_loading_option,
-    deps = [":tests"],
+    deps = [
+        ":add_opens_tests",
+        ":tests",
+    ],
 ) for custom_class_loading_option in [
     "OFF",
-    "CHILD",
     "ANONYMOUS",
+    "CHILD",
 ]]
