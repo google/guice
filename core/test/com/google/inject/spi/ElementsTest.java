@@ -1292,7 +1292,7 @@ public class ElementsTest extends TestCase {
           @Override
           public <T> Void visit(Binding<T> binding) {
             assertEquals(Key.get(C.class), binding.getKey());
-            assertTrue(binding instanceof UntargettedBinding);
+            assertTrue(binding instanceof UntargetedBinding);
             return null;
           }
         },

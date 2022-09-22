@@ -209,11 +209,11 @@ final class InjectorShell {
       bindInjector(injector);
       bindLogger(injector);
 
-      // Process all normal bindings, then UntargettedBindings.
-      // This is necessary because UntargettedBindings can create JIT bindings
+      // Process all normal bindings, then UntargetedBindings.
+      // This is necessary because UntargetedBindings can create JIT bindings
       // and need all their other dependencies set up ahead of time.
       new BindingProcessor(errors, initializer, processedBindingData).process(injector, elements);
-      new UntargettedBindingProcessor(errors, processedBindingData).process(injector, elements);
+      new UntargetedBindingProcessor(errors, processedBindingData).process(injector, elements);
       stopwatch.resetAndLog("Binding creation");
 
       new ModuleAnnotatedMethodScannerProcessor(errors).process(injector, elements);

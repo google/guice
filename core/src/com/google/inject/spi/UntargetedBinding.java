@@ -19,10 +19,10 @@ package com.google.inject.spi;
 import com.google.inject.Binding;
 
 /**
- * An untargetted binding. This binding indicates that the injector should use its implicit binding
+ * An untargeted binding. This binding indicates that the injector should use its implicit binding
  * strategies to resolve injections.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-public interface UntargettedBinding<T> extends Binding<T> {}
+public interface UntargetedBinding<T> extends Binding<T> {}

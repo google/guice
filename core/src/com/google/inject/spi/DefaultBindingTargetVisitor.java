@@ -60,8 +60,8 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
   }
 
   @Override
-  public V visit(UntargettedBinding<? extends T> untargettedBinding) {
-    return visitOther(untargettedBinding);
+  public V visit(UntargetedBinding<? extends T> untargetedBinding) {
+    return visitOther(untargetedBinding);
   }
 
   @Override

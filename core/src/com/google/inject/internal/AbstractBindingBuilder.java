@@ -67,7 +67,7 @@ public abstract class AbstractBindingBuilder<T> {
     this.binder = binder;
     this.elements = elements;
     this.position = elements.size();
-    this.binding = new UntargettedBindingImpl<>(source, key, Scoping.UNSCOPED);
+    this.binding = new UntargetedBindingImpl<>(source, key, Scoping.UNSCOPED);
     elements.add(position, this.binding);
   }
 
@@ -117,7 +117,7 @@ public abstract class AbstractBindingBuilder<T> {
   }
 
   protected void checkNotTargetted() {
-    if (!(binding instanceof UntargettedBindingImpl)) {
+    if (!(binding instanceof UntargetedBindingImpl)) {
       binder.addError(IMPLEMENTATION_ALREADY_SET);
     }
   }

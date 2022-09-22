@@ -286,7 +286,7 @@ public class OverrideModuleTest extends TestCase {
     assertTrue(scope.used);
   }
 
-  public void testOverrideUntargettedBinding() {
+  public void testOverrideUntargetedBinding() {
     Module original =
         new AbstractModule() {
           @Override

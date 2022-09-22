@@ -17,16 +17,16 @@
 package com.google.inject.internal;
 
 import com.google.inject.Binding;
-import com.google.inject.spi.UntargettedBinding;
+import com.google.inject.spi.UntargetedBinding;
 
 /**
- * Processes just UntargettedBindings.
+ * Processes just UntargetedBindings.
  *
  * @author sameb@google.com (Sam Berlin)
  */
-class UntargettedBindingProcessor extends AbstractBindingProcessor {
+class UntargetedBindingProcessor extends AbstractBindingProcessor {
 
-  UntargettedBindingProcessor(Errors errors, ProcessedBindingData processedBindingData) {
+  UntargetedBindingProcessor(Errors errors, ProcessedBindingData processedBindingData) {
     super(errors, processedBindingData);
   }
 
@@ -35,7 +35,7 @@ class UntargettedBindingProcessor extends AbstractBindingProcessor {
     return binding.acceptTargetVisitor(
         new Processor<T, Boolean>((BindingImpl<T>) binding) {
           @Override
-          public Boolean visit(UntargettedBinding<? extends T> untargetted) {
+          public Boolean visit(UntargetedBinding<? extends T> untargeted) {
             prepareBinding();
 
             // Error: Missing implementation.

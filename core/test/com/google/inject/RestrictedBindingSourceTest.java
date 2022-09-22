@@ -87,7 +87,7 @@ public class RestrictedBindingSourceTest {
   @RestrictedBindingSource(
       explanation = USE_ROUTING_MODULE,
       permits = {NetworkLibrary.class})
-  @ImplementedBy(RoutingTableImpl.class) // For testing untargetted bindings.
+  @ImplementedBy(RoutingTableImpl.class) // For testing untargeted bindings.
   interface RoutingTable {
     int getNextHopIpAddress(int destinationIpAddress);
   }
@@ -205,7 +205,7 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
-  public void untargettedBindingAllowedWithPermit() {
+  public void untargetedBindingAllowedWithPermit() {
     @NetworkLibrary
     class PermittedNetworkModule extends AbstractModule {
       @Override
@@ -218,7 +218,7 @@ public class RestrictedBindingSourceTest {
   }
 
   @Test
-  public void untargettedBindingDisallowedWithoutPermit() {
+  public void untargetedBindingDisallowedWithoutPermit() {
     AbstractModule rogueModule =
         new AbstractModule() {
           @Override

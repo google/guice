@@ -490,7 +490,7 @@ public class DuplicateBindingsTest extends TestCase {
       // LinkedKeyBinding
       bind(Foo.class).annotatedWith(named("linkedKey")).to(clFoo);
 
-      // UntargettedBinding / ConstructorBinding
+      // UntargetedBinding / ConstructorBinding
       bind(FooImpl.class);
 
       // ConstructorBinding
@@ -528,7 +528,7 @@ public class DuplicateBindingsTest extends TestCase {
       // LinkedKeyBinding
       bind(Foo.class).annotatedWith(named("linkedKey")).to(clFoo).in(scope);
 
-      // UntargettedBinding / ConstructorBinding
+      // UntargetedBinding / ConstructorBinding
       bind(FooImpl.class).in(scope);
 
       // ConstructorBinding
@@ -561,7 +561,7 @@ public class DuplicateBindingsTest extends TestCase {
       // LinkedKeyBinding
       bind(Foo.class).annotatedWith(named("linkedKey")).to(clFoo).in(scope);
 
-      // UntargettedBinding / ConstructorBinding
+      // UntargetedBinding / ConstructorBinding
       bind(FooImpl.class).in(scope);
 
       // ConstructorBinding

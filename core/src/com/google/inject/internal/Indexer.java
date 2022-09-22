@@ -32,7 +32,7 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
-import com.google.inject.spi.UntargettedBinding;
+import com.google.inject.spi.UntargetedBinding;
 import java.lang.annotation.Annotation;
 
 /**
@@ -51,7 +51,7 @@ class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding
     PROVIDER_INSTANCE,
     PROVIDER_KEY,
     LINKED_KEY,
-    UNTARGETTED,
+    UNTARGETED,
     CONSTRUCTOR,
     CONSTANT,
     EXPOSED,
@@ -162,8 +162,8 @@ class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding
   }
 
   @Override
-  public Indexer.IndexedBinding visit(UntargettedBinding<? extends Object> binding) {
-    return new Indexer.IndexedBinding(binding, BindingType.UNTARGETTED, scope(binding), null);
+  public Indexer.IndexedBinding visit(UntargetedBinding<? extends Object> binding) {
+    return new Indexer.IndexedBinding(binding, BindingType.UNTARGETED, scope(binding), null);
   }
 
   private static final Object EAGER_SINGLETON = new Object();

@@ -61,9 +61,9 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     this.processedBindingData = processedBindingData;
   }
 
-  protected <T> UntargettedBindingImpl<T> invalidBinding(
+  protected <T> UntargetedBindingImpl<T> invalidBinding(
       InjectorImpl injector, Key<T> key, Object source) {
-    return new UntargettedBindingImpl<T>(injector, key, source);
+    return new UntargetedBindingImpl<T>(injector, key, source);
   }
 
   protected void putBinding(BindingImpl<?> binding) {

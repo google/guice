@@ -25,11 +25,11 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.UntargettedBinding;
+import com.google.inject.spi.UntargetedBinding;
 
-final class UntargettedBindingImpl<T> extends BindingImpl<T> implements UntargettedBinding<T> {
+final class UntargetedBindingImpl<T> extends BindingImpl<T> implements UntargetedBinding<T> {
 
-  UntargettedBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
+  UntargetedBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
     super(
         injector,
         key,
@@ -43,7 +43,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
         Scoping.UNSCOPED);
   }
 
-  public UntargettedBindingImpl(Object source, Key<T> key, Scoping scoping) {
+  public UntargetedBindingImpl(Object source, Key<T> key, Scoping scoping) {
     super(source, key, scoping);
   }
 
@@ -54,12 +54,12 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
 
   @Override
   public BindingImpl<T> withScoping(Scoping scoping) {
-    return new UntargettedBindingImpl<T>(getSource(), getKey(), scoping);
+    return new UntargetedBindingImpl<T>(getSource(), getKey(), scoping);
   }
 
   @Override
   public BindingImpl<T> withKey(Key<T> key) {
-    return new UntargettedBindingImpl<T>(getSource(), key, getScoping());
+    return new UntargetedBindingImpl<T>(getSource(), key, getScoping());
   }
 
   @Override
@@ -69,7 +69,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(UntargettedBinding.class)
+    return MoreObjects.toStringHelper(UntargetedBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .toString();
@@ -77,8 +77,8 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof UntargettedBindingImpl) {
-      UntargettedBindingImpl<?> o = (UntargettedBindingImpl<?>) obj;
+    if (obj instanceof UntargetedBindingImpl) {
+      UntargetedBindingImpl<?> o = (UntargetedBindingImpl<?>) obj;
       return getKey().equals(o.getKey()) && getScoping().equals(o.getScoping());
     } else {
       return false;

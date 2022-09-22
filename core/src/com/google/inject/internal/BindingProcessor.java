@@ -30,7 +30,7 @@ import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
-import com.google.inject.spi.UntargettedBinding;
+import com.google.inject.spi.UntargetedBinding;
 import java.util.Set;
 
 /**
@@ -212,7 +212,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
           }
 
           @Override
-          public Boolean visit(UntargettedBinding<? extends T> untargetted) {
+          public Boolean visit(UntargetedBinding<? extends T> untargeted) {
             return false;
           }
 
