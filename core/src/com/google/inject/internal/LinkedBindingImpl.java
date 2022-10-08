@@ -31,9 +31,10 @@ import com.google.inject.spi.LinkedKeyBinding;
 import java.util.Set;
 
 final class LinkedBindingImpl<T> extends BindingImpl<T>
-    implements LinkedKeyBinding<T>, HasDependencies {
+    implements LinkedKeyBinding<T>, HasDependencies, DelayedInitialize {
 
   final Key<? extends T> targetKey;
+  private DelayedInitialize delayedInitialize;
 
   LinkedBindingImpl(
       InjectorImpl injector,
@@ -42,13 +43,32 @@ final class LinkedBindingImpl<T> extends BindingImpl<T>
       InternalFactory<? extends T> internalFactory,
       Scoping scoping,
       Key<? extends T> targetKey) {
+    this(injector, key, source, internalFactory, scoping, targetKey, null);
+  }
+
+  LinkedBindingImpl(
+          InjectorImpl injector,
+          Key<T> key,
+          Object source,
+          InternalFactory<? extends T> internalFactory,
+          Scoping scoping,
+          Key<? extends T> targetKey,
+          DelayedInitialize delayedInitialize) {
     super(injector, key, source, internalFactory, scoping);
     this.targetKey = targetKey;
+    this.delayedInitialize = delayedInitialize;
   }
 
   LinkedBindingImpl(Object source, Key<T> key, Scoping scoping, Key<? extends T> targetKey) {
     super(source, key, scoping);
     this.targetKey = targetKey;
+  }
+
+  @Override
+  public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    if (this.delayedInitialize != null) {
+      this.delayedInitialize.initialize(injector, errors);
+    }
   }
 
   @Override

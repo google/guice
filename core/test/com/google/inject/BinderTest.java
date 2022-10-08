@@ -440,6 +440,27 @@ public class BinderTest extends TestCase {
   }
 
   /**
+   * Test bugfix of #700.<br />
+   * Test, that {@code JustAClass} is not bound with JIT binding
+   * when {@code bind(HasImplementedByThatWantsExplicitClass.class}} is called before {@code bind(JustAClass.class)}.
+   * <br /><br />
+   * The error before the fix was:
+   * <pre>
+   * 1) [Guice/JitBindingAlreadySet]: A just-in-time binding to BinderTest$JustAClass was already configured on a parent injector.
+   *   at BinderTest$25.configure(BinderTest.java:458)
+   * </pre>
+   */
+  public void testJitDependencyCanUseExplicitDependenciesInAnyOrder() {
+    Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasImplementedByThatWantsExplicitClass.class);
+          bind(JustAClass.class);
+        }
+    });
+  }
+
+  /**
    * Untargetted bindings should follow @ImplementedBy and @ProvidedBy annotations if they exist.
    * Otherwise the class should be constructed directly.
    */
@@ -515,20 +536,23 @@ public class BinderTest extends TestCase {
   }
 
   public void testBindingToProvider() {
+    String simpleName = null;
     try {
-      Guice.createInjector(
-          new AbstractModule() {
+      Module module = new AbstractModule() {
             @Override
             protected void configure() {
               bind(new TypeLiteral<Provider<String>>() {}).toInstance(Providers.of("A"));
             }
-          });
+        };
+      String className = module.getClass().getName();
+      simpleName = className.substring(className.lastIndexOf('.') + 1);
+      Guice.createInjector(module);
       fail();
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
           "Binding to Provider is not allowed.",
-          "at BinderTest$28.configure");
+          String.format("at %s.configure", simpleName));
     }
   }
 
@@ -660,6 +684,15 @@ public class BinderTest extends TestCase {
       implements HasImplementedByThatWantsExplicit {
     @Inject
     ImplementsHasImplementedByThatWantsExplicit(JustAnInterface jai) {}
+  }
+
+  @ImplementedBy(ImplementsHasImplementedByThatWantsExplicitClass.class)
+  static interface HasImplementedByThatWantsExplicitClass {}
+
+  static class ImplementsHasImplementedByThatWantsExplicitClass
+      implements HasImplementedByThatWantsExplicitClass {
+    @Inject
+    ImplementsHasImplementedByThatWantsExplicitClass(JustAClass jac) {}
   }
 
   static interface JustAnInterface {}

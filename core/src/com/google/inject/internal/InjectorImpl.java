@@ -56,7 +56,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -610,7 +610,7 @@ final class InjectorImpl implements Injector, Lookups {
           // so that cached exceptions while constructing it get stored.
           // See TypeListenerTest#testTypeListenerThrows
           removeFailedJitBinding(binding, null);
-          cleanup(binding, new HashSet<Key<?>>());
+          cleanup(binding, new HashMap<>());
         }
       }
     }
@@ -622,13 +622,15 @@ final class InjectorImpl implements Injector, Lookups {
    * added to allow circular dependency support, so dependencies may pass where they should have
    * failed.
    */
-  private boolean cleanup(BindingImpl<?> binding, Set<Key<?>> encountered) {
+  private boolean cleanup(BindingImpl<?> binding, Map<Key<?>, Boolean> encountered) {
     boolean bindingFailed = false;
     Set<Dependency<?>> deps = getInternalDependencies(binding);
     for (Dependency<?> dep : deps) {
       Key<?> depKey = dep.getKey();
       InjectionPoint ip = dep.getInjectionPoint();
-      if (encountered.add(depKey)) { // only check if we haven't looked at this key yet
+      Boolean failedBefore = encountered.get(depKey);
+      if (failedBefore == null) { // only check if we haven't looked at this key yet
+        encountered.put(depKey, false);
         BindingImpl<?> depBinding = jitBindingData.getJitBinding(depKey);
         if (depBinding != null) { // if the binding still exists, validate
           boolean failed = cleanup(depBinding, encountered); // if children fail, we fail
@@ -640,6 +642,7 @@ final class InjectorImpl implements Injector, Lookups {
             }
           }
           if (failed) {
+            encountered.put(depKey, true);
             removeFailedJitBinding(depBinding, ip);
             bindingFailed = true;
           }
@@ -648,6 +651,9 @@ final class InjectorImpl implements Injector, Lookups {
           // nor explicit, it's also invalid & should let parent know.
           bindingFailed = true;
         }
+      }
+      else if (Boolean.TRUE.equals(failedBefore)) {
+        bindingFailed = true;
       }
     }
     return bindingFailed;
@@ -812,14 +818,16 @@ final class InjectorImpl implements Injector, Lookups {
     final Key<? extends T> targetKey = Key.get(subclass);
     Object source = rawType;
     FactoryProxy<T> factory = new FactoryProxy<>(this, key, targetKey, source);
-    factory.notify(errors); // causes the factory to initialize itself internally
+    // factory.notify(...) causes the factory to initialize itself internally
+    DelayedInitialize initialize = (injector, errors1) -> factory.notify(errors1);
     return new LinkedBindingImpl<T>(
         this,
         key,
         source,
         Scoping.<T>scope(key, this, factory, source, scoping),
         scoping,
-        targetKey);
+        targetKey,
+        initialize);
   }
 
   /**
@@ -941,6 +949,7 @@ final class InjectorImpl implements Injector, Lookups {
         createUninitializedBinding(key, Scoping.UNSCOPED, source, errors, true);
     errors.throwIfNewErrors(numErrorsBefore);
     initializeJitBinding(binding, errors);
+    errors.throwIfNewErrors(numErrorsBefore);
     return binding;
   }
 
