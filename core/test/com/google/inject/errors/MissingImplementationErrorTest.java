@@ -24,6 +24,28 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class MissingImplementationErrorTest {
 
+  private static final String GOLDEN_SUFFIX;
+
+  static {
+    boolean nestedAnnotUsesDots;
+    try {
+      nestedAnnotUsesDots =
+          RequiresFooUsingMethod.class
+              .getDeclaredMethod("setMyString", String.class)
+              .getParameters()[0]
+              .getAnnotation(Foo.class)
+              .toString()
+              .equals("@" + MissingImplementationErrorTest.class.getName() + ".Foo()");
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+    if (nestedAnnotUsesDots) {
+      GOLDEN_SUFFIX = "_with_dot_annots.txt";
+    } else {
+      GOLDEN_SUFFIX = ".txt";
+    }
+  }
+
   @Before
   public void checkStackTraceIsIncluded() {
     // Only run the tests when the stack traces are included in the errors.
@@ -81,7 +103,7 @@ public final class MissingImplementationErrorTest {
     CreationException exception =
         assertThrows(CreationException.class, () -> Guice.createInjector(new TestModule()));
     assertGuiceErrorEqualsIgnoreLineNumber(
-        exception.getMessage(), "missing_implementation_errors.txt");
+        exception.getMessage(), "missing_implementation_errors" + GOLDEN_SUFFIX);
   }
 
   static class TestModule1 extends AbstractModule {
@@ -146,6 +168,6 @@ public final class MissingImplementationErrorTest {
     CreationException exception =
         assertThrows(CreationException.class, () -> Guice.createInjector(new HintsModule()));
     assertGuiceErrorEqualsIgnoreLineNumber(
-        exception.getMessage(), "missing_implementation_with_hints.txt");
+        exception.getMessage(), "missing_implementation_with_hints" + GOLDEN_SUFFIX);
   }
 }

@@ -60,7 +60,19 @@ public final class ErrorMessagesTest {
     CreationException exception =
         assertThrows(
             CreationException.class, () -> Guice.createInjector(new MissingBindingsModule()));
-    assertGuiceErrorEqualsIgnoreLineNumber(
-        exception.getMessage(), "class_names_are_compressed_in_error_message.txt");
+    // Newer JDKs print nested annotations with dots, whereas older JDKs use $.
+    // Check to see which kind of annotation output we expect, and use the appropriate golden
+    boolean nestedAnnotUsesDots =
+        MissingBindingsModule.class
+            .getDeclaredMethod("provideFoo", String.class)
+            .getParameters()[0]
+            .getAnnotation(UserId.class)
+            .toString()
+            .equals("@" + ErrorMessagesTest.class.getName() + ".UserId()");
+    String golden =
+        nestedAnnotUsesDots
+            ? "class_names_are_compressed_in_error_message_with_dot_annots.txt"
+            : "class_names_are_compressed_in_error_message.txt";
+    assertGuiceErrorEqualsIgnoreLineNumber(exception.getMessage(), golden);
   }
 }

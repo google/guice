@@ -54,11 +54,15 @@ public class ShortNameFactory implements NameFactory {
     if (annotation != null) {
       annotationType = annotation.annotationType();
 
+      // Earlier JDKs print nested annotations toString as OuterClass$MyAnn,
+      // whereas later JDks use OuterClass.MyAnn.
+      // But class' canonical name is still OuterClass$MyAnn.
+      // To support replacing the canonical name in the annotation string, we munge the canonical
+      // name into a regex where each $ is either a $ or a ., and then replace any variation of it.
       String annotationString = annotation.toString();
-      String canonicalName = annotationType.getName();
+      String canonicalName = annotationType.getName().replace("$", "[\\$\\.]");
       String simpleName = annotationType.getSimpleName();
-
-      return annotationString.replace(canonicalName, simpleName).replace("()", "");
+      return annotationString.replaceAll(canonicalName, simpleName).replace("()", "");
     } else if (annotationType != null) {
       return "@" + annotationType.getSimpleName();
     } else {
