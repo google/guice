@@ -513,7 +513,7 @@ public class Key<T> {
 
     @Override
     public String toString() {
-      return '@' + annotationType.getName();
+      return Annotations.annotationInstanceClassString(annotationType, /* includePackage= */ true);
     }
   }
 }

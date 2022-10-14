@@ -20,6 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.ElementSource;
@@ -54,15 +55,12 @@ public class ShortNameFactory implements NameFactory {
     if (annotation != null) {
       annotationType = annotation.annotationType();
 
-      // Earlier JDKs print nested annotations toString as OuterClass$MyAnn,
-      // whereas later JDks use OuterClass.MyAnn.
-      // But class' canonical name is still OuterClass$MyAnn.
-      // To support replacing the canonical name in the annotation string, we munge the canonical
-      // name into a regex where each $ is either a $ or a ., and then replace any variation of it.
       String annotationString = annotation.toString();
-      String canonicalName = annotationType.getName().replace("$", "[\\$\\.]");
+      String canonicalName =
+          Annotations.annotationInstanceClassString(annotationType, /* includePackage = */ true)
+              .substring(1);
       String simpleName = annotationType.getSimpleName();
-      return annotationString.replaceAll(canonicalName, simpleName).replace("()", "");
+      return annotationString.replace(canonicalName, simpleName).replace("()", "");
     } else if (annotationType != null) {
       return "@" + annotationType.getSimpleName();
     } else {

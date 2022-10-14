@@ -25,6 +25,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Throwables;
+import com.google.inject.internal.Annotations;
 import com.google.inject.spi.Message;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -252,8 +253,9 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "ProvisionExceptionTest$MethodWithBindingAnnotation.injectMe() is annotated "
-              + "with @ProvisionExceptionTest$Green(), but binding annotations should be "
+          "ProvisionExceptionTest$MethodWithBindingAnnotation.injectMe() is annotated with "
+              + Annotations.annotationInstanceClassString(Green.class, /* includePackage= */ false)
+              + "(), but binding annotations should be "
               + "applied to its parameters instead.",
           "while locating ProvisionExceptionTest$MethodWithBindingAnnotation");
     }
@@ -264,8 +266,9 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(
           expected.getMessage(),
-          "ProvisionExceptionTest$ConstructorWithBindingAnnotation.<init>() is annotated with"
-              + " @ProvisionExceptionTest$Green(), but binding annotations should be applied to"
+          "ProvisionExceptionTest$ConstructorWithBindingAnnotation.<init>() is annotated with "
+              + Annotations.annotationInstanceClassString(Green.class, /* includePackage= */ false)
+              + "(), but binding annotations should be applied to"
               + " its parameters instead.",
           "at ProvisionExceptionTest$ConstructorWithBindingAnnotation.class",
           "while locating ProvisionExceptionTest$ConstructorWithBindingAnnotation");

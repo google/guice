@@ -36,6 +36,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.name.Named;
@@ -159,8 +160,7 @@ public class ModuleAnnotatedMethodScannerTest {
 
   private String methodName(Class<? extends Annotation> annotation, String method, Object container)
       throws Exception {
-    return "@"
-        + annotation.getName()
+    return Annotations.annotationInstanceClassString(annotation, /* includePackage= */ true)
         + " "
         + StackTraceElements.forMember(container.getClass().getDeclaredMethod(method));
   }

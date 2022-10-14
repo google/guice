@@ -60,7 +60,10 @@ public class BindingAnnotationTest extends TestCase {
           expected.getMessage(),
           true,
           "No implementation for String annotated with",
-          "BindingAnnotationTest$Blue(" + Annotations.memberValueString("value", 5) + ") was bound",
+          Annotations.annotationInstanceClassString(Blue.class, /* includePackage= */ false)
+              + "("
+              + Annotations.memberValueString("value", 5)
+              + ") was bound",
           "at BindingAnnotationTest$2.configure");
     }
   }
@@ -117,7 +120,10 @@ public class BindingAnnotationTest extends TestCase {
           expected.getMessage(),
           true,
           "No implementation for String annotated with",
-          "BindingAnnotationTest$Blue(" + Annotations.memberValueString("value", 5) + ") was bound",
+          Annotations.annotationInstanceClassString(Blue.class, /* includePackage=*/ false)
+              + "("
+              + Annotations.memberValueString("value", 5)
+              + ") was bound",
           "at BindingAnnotationTest$5.configure");
     }
   }

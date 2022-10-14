@@ -29,6 +29,9 @@ public class UniqueAnnotations {
 
   private static final AtomicInteger nextUniqueValue = new AtomicInteger(1);
 
+  private static final String INTERNAL_INSTANCE_STRING =
+      Annotations.annotationInstanceClassString(Internal.class, /* includePackage= */ true);
+
   /**
    * Returns an annotation instance that is not equal to any other annotation instances, for use in
    * creating distinct {@link com.google.inject.Key}s.
@@ -51,11 +54,7 @@ public class UniqueAnnotations {
 
       @Override
       public String toString() {
-        return '@'
-            + Internal.class.getName()
-            + '('
-            + Annotations.memberValueString("value", value)
-            + ')';
+        return INTERNAL_INSTANCE_STRING + '(' + Annotations.memberValueString("value", value) + ')';
       }
 
       @Override

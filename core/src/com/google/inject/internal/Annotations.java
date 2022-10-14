@@ -215,10 +215,12 @@ public class Annotations {
   private static class AnnotationToStringConfig {
     final boolean quote;
     final boolean includeMemberName;
+    final boolean dollarSeparator;
 
-    AnnotationToStringConfig(boolean quote, boolean includeMemberName) {
+    AnnotationToStringConfig(boolean quote, boolean includeMemberName, boolean dollarSeparator) {
       this.quote = quote;
       this.includeMemberName = includeMemberName;
+      this.dollarSeparator = dollarSeparator;
     }
   }
 
@@ -258,6 +260,36 @@ public class Annotations {
     return sb.toString();
   }
 
+  /**
+   * Returns the string representation of the annotation class as it would appear in an annotation
+   * instance's toString() method.
+   *
+   * <p>In earlier JDKs, the string representation mirrored Class.getName() (which uses $ to
+   * separate outer and inner classes), but newer JDKs use . as the separator).
+   */
+  public static String annotationInstanceClassString(
+      Class<? extends Annotation> ann, boolean includePackage) {
+    if (ANNOTATION_TO_STRING_CONFIG.dollarSeparator) {
+      if (includePackage || ann.getPackage() == null) {
+        return "@" + ann.getName();
+      }
+      return "@" + ann.getName().substring(ann.getPackage().getName().length() + 1);
+    }
+    return "@" + dotSeparatedParentOrPackage(ann, includePackage);
+  }
+
+  private static String dotSeparatedParentOrPackage(Class<?> ann, boolean includePackage) {
+    if (ann.getDeclaringClass() == null) {
+      if (includePackage) {
+        return ann.getPackage().getName() + "." + ann.getSimpleName();
+      }
+      return ann.getSimpleName();
+    }
+    return dotSeparatedParentOrPackage(ann.getDeclaringClass(), includePackage)
+        + "."
+        + ann.getSimpleName();
+  }
+
   @Retention(RUNTIME)
   private @interface TestAnnotation {
     String value();
@@ -273,7 +305,8 @@ public class Annotations {
               .toString();
       boolean quote = annotation.contains("\"determineAnnotationToStringConfig\"");
       boolean includeMemberName = annotation.contains("value=");
-      return new AnnotationToStringConfig(quote, includeMemberName);
+      boolean dollarSeparator = annotation.contains("Annotations$TestAnnotation");
+      return new AnnotationToStringConfig(quote, includeMemberName, dollarSeparator);
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
