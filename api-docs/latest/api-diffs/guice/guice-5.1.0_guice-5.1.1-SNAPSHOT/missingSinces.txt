@@ -1,1 +1,2 @@
+MISSING @SINCE TAG: com.google.inject.internal.Annotations Method annotationInstanceClassString(java.lang.Class, boolean)
 MISSING @SINCE TAG: com.google.inject.internal.util.SourceProvider Method getCaller()

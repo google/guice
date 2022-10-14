@@ -15,6 +15,24 @@
 <!-- will be converted to separate comments when the comments file is used. -->
 <!-- HTML tags in the text field will appear in the report. -->
 <comment>
+  <identifier id="com.google.inject.internal"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Annotations"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Annotations.annotationInstanceClassString_added(java.lang.Class, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.internal.util"/>
   <text>
     InsertCommentsHere
