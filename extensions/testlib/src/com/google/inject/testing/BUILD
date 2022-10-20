@@ -6,10 +6,7 @@ load(
     "POM_VERSION",
 )
 
-package(
-    default_testonly = 1,
-    default_visibility = ["//:src"],
-)
+package(default_testonly = 1)
 
 java_library(
     name = "testlib",
