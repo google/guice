@@ -2,7 +2,10 @@
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
 
-package(default_testonly = 1)
+package(
+    default_applicable_licenses = ["//third_party/java_src/guice:license"],
+    default_testonly = 1,
+)
 
 java_library(
     name = "tests",

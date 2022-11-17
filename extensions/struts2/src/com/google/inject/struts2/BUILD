@@ -9,6 +9,7 @@ load(
 )
 
 package(
+    default_applicable_licenses = ["//third_party/java_src/guice:license"],
     default_visibility = ["//:src"],
 )
 
