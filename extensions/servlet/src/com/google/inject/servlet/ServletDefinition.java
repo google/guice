@@ -212,7 +212,9 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
               String servletPath = getServletPath();
               int servletPathLength = servletPath.length();
               String requestUri = getRequestURI();
-              pathInfo = requestUri.substring(getContextPath().length()).replaceAll("[/]{2,}", "/");
+              String contextPath = getContextPath();
+              int contextPathLength = contextPath != null ? contextPath.length() : 0;
+              pathInfo = requestUri.substring(contextPathLength).replaceAll("[/]{2,}", "/");
               // See: https://github.com/google/guice/issues/372
               if (pathInfo.startsWith(servletPath)) {
                 pathInfo = pathInfo.substring(servletPathLength);

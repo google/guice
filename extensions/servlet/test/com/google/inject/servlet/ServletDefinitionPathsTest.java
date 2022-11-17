@@ -113,6 +113,7 @@ public class ServletDefinitionPathsTest extends TestCase {
   // Data-driven test.
   public final void testPathInfoWithServletStyleMatching() throws IOException, ServletException {
     pathInfoWithServletStyleMatching("/path/index.html", "/path", "/*", "/index.html", "");
+    pathInfoWithServletStyleMatching("/index.html", null, "/*", "/index.html", "");
     pathInfoWithServletStyleMatching(
         "/path//hulaboo///index.html", "/path", "/*", "/hulaboo/index.html", "");
     pathInfoWithServletStyleMatching("/path/", "/path", "/*", "/", "");
