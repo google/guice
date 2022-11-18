@@ -154,7 +154,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>9.2</version>
+        <version>9.4</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
