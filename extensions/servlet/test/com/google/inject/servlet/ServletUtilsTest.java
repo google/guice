@@ -2,10 +2,8 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
@@ -59,12 +57,11 @@ public class ServletUtilsTest extends TestCase {
   }
 
   private String getContextRelativePath(String contextPath, String requestPath) {
-    HttpServletRequest mock = createMock(HttpServletRequest.class);
-    expect(mock.getContextPath()).andReturn(contextPath);
-    expect(mock.getRequestURI()).andReturn(requestPath);
-    replay(mock);
+    HttpServletRequest mock = mock(HttpServletRequest.class);
+    when(mock.getContextPath()).thenReturn(contextPath);
+    when(mock.getRequestURI()).thenReturn(requestPath);
+
     String contextRelativePath = ServletUtils.getContextRelativePath(mock);
-    verify(mock);
     return contextRelativePath;
   }
 }

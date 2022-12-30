@@ -15,10 +15,10 @@ java_library(
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",
         "//extensions/servlet/src/com/google/inject/servlet",
-        "//third_party/java/easymock",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
         "//third_party/java/junit",
+        "//third_party/java/mockito",
         "//third_party/java/servlet/servlet_api",
     ],
 )

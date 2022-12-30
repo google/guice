@@ -1,12 +1,10 @@
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.isNull;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Key;
@@ -58,34 +56,29 @@ public class FilterPipelineTest extends TestCase {
 
   public final void testDispatchThruGuiceFilter() throws ServletException, IOException {
 
-    //create mocks
-    FilterConfig filterConfig = createMock(FilterConfig.class);
-    ServletContext servletContext = createMock(ServletContext.class);
-    HttpServletRequest request = createMock(HttpServletRequest.class);
-    FilterChain proceedingFilterChain = createMock(FilterChain.class);
+    // create mocks
+    FilterConfig filterConfig = mock(FilterConfig.class);
+    ServletContext servletContext = mock(ServletContext.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    FilterChain proceedingFilterChain = mock(FilterChain.class);
 
-    //begin mock script ***
+    // begin mock script ***
 
-    expect(filterConfig.getServletContext()).andReturn(servletContext).once();
+    when(filterConfig.getServletContext()).thenReturn(servletContext);
 
-    expect(request.getRequestURI()).andReturn("/public/login.jsp").anyTimes();
-    expect(request.getContextPath()).andReturn("").anyTimes();
+    when(request.getRequestURI()).thenReturn("/public/login.jsp");
+    when(request.getContextPath()).thenReturn("");
 
-    //at the end, proceed down webapp's normal filter chain
-    proceedingFilterChain.doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
-    expectLastCall().once();
-
-    //run mock script ***
-    replay(filterConfig, servletContext, request, proceedingFilterChain);
-
+    // run mock script ***
     final GuiceFilter webFilter = new GuiceFilter();
 
     webFilter.init(filterConfig);
     webFilter.doFilter(request, null, proceedingFilterChain);
     webFilter.destroy();
 
-    //assert expectations
-    verify(filterConfig, servletContext, request, proceedingFilterChain);
+    // assert expectations
+    verify(proceedingFilterChain)
+        .doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
   }
 
   @Singleton

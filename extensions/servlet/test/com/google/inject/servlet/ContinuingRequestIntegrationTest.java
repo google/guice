@@ -16,10 +16,8 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -123,22 +121,20 @@ public class ContinuingRequestIntegrationTest extends TestCase {
               }
             });
 
-    FilterConfig filterConfig = createMock(FilterConfig.class);
-    expect(filterConfig.getServletContext()).andReturn(createMock(ServletContext.class));
+    FilterConfig filterConfig = mock(FilterConfig.class);
+    when(filterConfig.getServletContext()).thenReturn(mock(ServletContext.class));
 
     GuiceFilter guiceFilter = injector.getInstance(GuiceFilter.class);
 
-    HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
 
-    expect(request.getRequestURI()).andReturn("/");
-    expect(request.getContextPath()).andReturn("").anyTimes();
-    expect(request.getMethod()).andReturn("GET");
-    expect(request.getCookies()).andReturn(new Cookie[0]);
+    when(request.getRequestURI()).thenReturn("/");
+    when(request.getContextPath()).thenReturn("");
+    when(request.getMethod()).thenReturn("GET");
+    when(request.getCookies()).thenReturn(new Cookie[0]);
 
-    FilterChain filterChain = createMock(FilterChain.class);
-    expect(request.getParameter(PARAM_NAME)).andReturn(PARAM_VALUE);
-
-    replay(request, filterConfig, filterChain);
+    FilterChain filterChain = mock(FilterChain.class);
+    when(request.getParameter(PARAM_NAME)).thenReturn(PARAM_VALUE);
 
     guiceFilter.init(filterConfig);
     guiceFilter.doFilter(request, null, filterChain);
@@ -148,7 +144,6 @@ public class ContinuingRequestIntegrationTest extends TestCase {
     executor.awaitTermination(10, TimeUnit.SECONDS);
 
     assertEquals(PARAM_VALUE, injector.getInstance(OffRequestCallable.class).value);
-    verify(request, filterConfig, filterChain);
   }
 
   public final void testRequestContinuationDiesInHttpRequestThread()
@@ -167,21 +162,19 @@ public class ContinuingRequestIntegrationTest extends TestCase {
               }
             });
 
-    FilterConfig filterConfig = createMock(FilterConfig.class);
-    expect(filterConfig.getServletContext()).andReturn(createMock(ServletContext.class));
+    FilterConfig filterConfig = mock(FilterConfig.class);
+    when(filterConfig.getServletContext()).thenReturn(mock(ServletContext.class));
 
     GuiceFilter guiceFilter = injector.getInstance(GuiceFilter.class);
 
-    HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
 
-    expect(request.getRequestURI()).andReturn("/");
-    expect(request.getContextPath()).andReturn("").anyTimes();
+    when(request.getRequestURI()).thenReturn("/");
+    when(request.getContextPath()).thenReturn("");
 
-    expect(request.getMethod()).andReturn("GET");
-    expect(request.getCookies()).andReturn(new Cookie[0]);
-    FilterChain filterChain = createMock(FilterChain.class);
-
-    replay(request, filterConfig, filterChain);
+    when(request.getMethod()).thenReturn("GET");
+    when(request.getCookies()).thenReturn(new Cookie[0]);
+    FilterChain filterChain = mock(FilterChain.class);
 
     guiceFilter.init(filterConfig);
     guiceFilter.doFilter(request, null, filterChain);
@@ -192,8 +185,6 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     assertTrue(failed.get());
     assertFalse(PARAM_VALUE.equals(injector.getInstance(OffRequestCallable.class).value));
-
-    verify(request, filterConfig, filterChain);
   }
 
   @RequestScoped

@@ -16,11 +16,9 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -48,16 +46,13 @@ public class ServletDefinitionTest extends TestCase {
 
   @SuppressWarnings("unchecked") // Safe because mock will only ever return HttpServlet
   public final void testServletInitAndConfig() throws ServletException {
-    Injector injector = createMock(Injector.class);
-    Binding<HttpServlet> binding = createMock(Binding.class);
+    Injector injector = mock(Injector.class);
+    Binding<HttpServlet> binding = mock(Binding.class);
 
-    expect(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) anyObject()))
-        .andReturn(true);
-    expect(injector.getBinding(Key.get(HttpServlet.class))).andReturn(binding);
+    when(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) any())).thenReturn(true);
+    when(injector.getBinding(Key.get(HttpServlet.class))).thenReturn(binding);
     final HttpServlet mockServlet = new HttpServlet() {};
-    expect(injector.getInstance(Key.get(HttpServlet.class))).andReturn(mockServlet).anyTimes();
-
-    replay(injector, binding);
+    when(injector.getInstance(Key.get(HttpServlet.class))).thenReturn(mockServlet);
 
     // some init params
     //noinspection SSBasedInspection
@@ -75,11 +70,9 @@ public class ServletDefinitionTest extends TestCase {
             initParams,
             null);
 
-    ServletContext servletContext = createMock(ServletContext.class);
+    ServletContext servletContext = mock(ServletContext.class);
     final String contextName = "thing__!@@44__SRV" + getClass();
-    expect(servletContext.getServletContextName()).andReturn(contextName);
-
-    replay(servletContext);
+    when(servletContext.getServletContextName()).thenReturn(contextName);
 
     servletDefinition.init(servletContext, injector, Sets.<HttpServlet>newIdentityHashSet());
 
@@ -95,8 +88,6 @@ public class ServletDefinitionTest extends TestCase {
       assertTrue(initParams.containsKey(name));
       assertEquals(initParams.get(name), servletConfig.getInitParameter(name));
     }
-
-    verify(injector, binding, servletContext);
   }
 
   public void testServiceWithContextPath() throws IOException, ServletException {
@@ -114,13 +105,12 @@ public class ServletDefinitionTest extends TestCase {
             UriPatternType.get(UriPatternType.SERVLET, pattern),
             initParams,
             null);
-    HttpServletResponse servletResponse = createMock(HttpServletResponse.class);
-    HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
+    HttpServletResponse servletResponse = mock(HttpServletResponse.class);
+    HttpServletRequest servletRequest = mock(HttpServletRequest.class);
 
-    expect(servletRequest.getContextPath()).andReturn("/a_context_path");
-    expect(servletRequest.getRequestURI()).andReturn("/test.html");
-    replay(servletRequest, servletResponse);
+    when(servletRequest.getContextPath()).thenReturn("/a_context_path");
+    when(servletRequest.getRequestURI()).thenReturn("/test.html");
+
     servletDefinition.service(servletRequest, servletResponse);
-    verify(servletRequest, servletResponse);
   }
 }

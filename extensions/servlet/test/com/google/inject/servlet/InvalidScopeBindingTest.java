@@ -1,6 +1,6 @@
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
+import static org.mockito.Mockito.mock;
 
 import com.google.inject.Guice;
 import com.google.inject.Scopes;
@@ -36,7 +36,7 @@ public class InvalidScopeBindingTest extends TestCase {
 
     ServletException se = null;
     try {
-      guiceFilter.init(createMock(FilterConfig.class));
+      guiceFilter.init(mock(FilterConfig.class));
     } catch (ServletException e) {
       se = e;
     } finally {
@@ -57,7 +57,7 @@ public class InvalidScopeBindingTest extends TestCase {
 
     ServletException se = null;
     try {
-      guiceFilter.init(createMock(FilterConfig.class));
+      guiceFilter.init(mock(FilterConfig.class));
     } catch (ServletException e) {
       se = e;
     } finally {
@@ -83,7 +83,7 @@ public class InvalidScopeBindingTest extends TestCase {
 
     ServletException se = null;
     try {
-      guiceFilter.init(createMock(FilterConfig.class));
+      guiceFilter.init(mock(FilterConfig.class));
     } catch (ServletException e) {
       se = e;
     } finally {

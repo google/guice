@@ -16,8 +16,8 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createControl;
-import static org.easymock.EasyMock.expect;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
-import org.easymock.IMocksControl;
 
 /** Tests to make sure that servlets with a context path are handled right. */
 public class ContextPathTest extends TestCase {
@@ -50,7 +49,6 @@ public class ContextPathTest extends TestCase {
   @Named("bar")
   private TestServlet barServlet;
 
-  private IMocksControl globalControl;
   private Injector injector;
   private ServletContext servletContext;
   private FilterConfig filterConfig;
@@ -82,16 +80,12 @@ public class ContextPathTest extends TestCase {
     assertNotNull(barServlet);
     assertNotSame(fooServlet, barServlet);
 
-    globalControl = createControl();
-    servletContext = globalControl.createMock(ServletContext.class);
-    filterConfig = globalControl.createMock(FilterConfig.class);
+    servletContext = mock(ServletContext.class);
+    filterConfig = mock(FilterConfig.class);
 
-    expect(servletContext.getAttribute(GuiceServletContextListener.INJECTOR_NAME))
-        .andReturn(injector)
-        .anyTimes();
-    expect(filterConfig.getServletContext()).andReturn(servletContext).anyTimes();
-
-    globalControl.replay();
+    when(servletContext.getAttribute(GuiceServletContextListener.INJECTOR_NAME))
+        .thenReturn(injector);
+    when(filterConfig.getServletContext()).thenReturn(servletContext);
 
     guiceFilter = new GuiceFilter();
     guiceFilter.init(filterConfig);
@@ -102,40 +96,24 @@ public class ContextPathTest extends TestCase {
     assertNotNull(fooServlet);
     assertNotNull(barServlet);
 
-    fooServlet = null;
-    barServlet = null;
-
     guiceFilter.destroy();
-    guiceFilter = null;
-
-    injector = null;
-
-    filterConfig = null;
-    servletContext = null;
-
-    globalControl.verify();
   }
 
   public void testSimple() throws Exception {
-    IMocksControl testControl = createControl();
     TestFilterChain testFilterChain = new TestFilterChain();
-    HttpServletRequest req = testControl.createMock(HttpServletRequest.class);
-    HttpServletResponse res = testControl.createMock(HttpServletResponse.class);
+    HttpServletRequest req = mock(HttpServletRequest.class);
+    HttpServletResponse res = mock(HttpServletResponse.class);
 
-    expect(req.getMethod()).andReturn("GET").anyTimes();
-    expect(req.getRequestURI()).andReturn("/bar/foo").anyTimes();
-    expect(req.getServletPath()).andReturn("/bar/foo").anyTimes();
-    expect(req.getContextPath()).andReturn("").anyTimes();
-
-    testControl.replay();
+    when(req.getMethod()).thenReturn("GET");
+    when(req.getRequestURI()).thenReturn("/bar/foo");
+    when(req.getServletPath()).thenReturn("/bar/foo");
+    when(req.getContextPath()).thenReturn("");
 
     guiceFilter.doFilter(req, res, testFilterChain);
 
     assertFalse(testFilterChain.isTriggered());
     assertFalse(fooServlet.isTriggered());
     assertTrue(barServlet.isTriggered());
-
-    testControl.verify();
   }
 
   //
@@ -242,29 +220,23 @@ public class ContextPathTest extends TestCase {
       final boolean fooResult,
       final boolean barResult)
       throws Exception {
-    IMocksControl testControl = createControl();
-
     barServlet.clear();
     fooServlet.clear();
 
     TestFilterChain testFilterChain = new TestFilterChain();
-    HttpServletRequest req = testControl.createMock(HttpServletRequest.class);
-    HttpServletResponse res = testControl.createMock(HttpServletResponse.class);
+    HttpServletRequest req = mock(HttpServletRequest.class);
+    HttpServletResponse res = mock(HttpServletResponse.class);
 
-    expect(req.getMethod()).andReturn("GET").anyTimes();
-    expect(req.getRequestURI()).andReturn(requestURI).anyTimes();
-    expect(req.getServletPath()).andReturn(servletPath).anyTimes();
-    expect(req.getContextPath()).andReturn(contextPath).anyTimes();
-
-    testControl.replay();
+    when(req.getMethod()).thenReturn("GET");
+    when(req.getRequestURI()).thenReturn(requestURI);
+    when(req.getServletPath()).thenReturn(servletPath);
+    when(req.getContextPath()).thenReturn(contextPath);
 
     guiceFilter.doFilter(req, res, testFilterChain);
 
     assertEquals(filterResult, testFilterChain.isTriggered());
     assertEquals(fooResult, fooServlet.isTriggered());
     assertEquals(barResult, barServlet.isTriggered());
-
-    testControl.verify();
   }
 
   public static class TestServlet extends HttpServlet {

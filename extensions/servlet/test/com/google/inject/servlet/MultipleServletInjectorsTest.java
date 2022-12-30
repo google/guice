@@ -16,12 +16,10 @@
 package com.google.inject.servlet;
 
 import static com.google.inject.servlet.GuiceServletContextListener.INJECTOR_NAME;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -41,16 +39,8 @@ public class MultipleServletInjectorsTest extends TestCase {
   private Injector injectorTwo;
 
   public final void testTwoInjectors() {
-    ServletContext fakeContextOne = createMock(ServletContext.class);
-    ServletContext fakeContextTwo = createMock(ServletContext.class);
-
-    fakeContextOne.setAttribute(eq(INJECTOR_NAME), isA(Injector.class));
-    expectLastCall().once();
-
-    fakeContextTwo.setAttribute(eq(INJECTOR_NAME), isA(Injector.class));
-    expectLastCall().once();
-
-    replay(fakeContextOne);
+    ServletContext fakeContextOne = mock(ServletContext.class);
+    ServletContext fakeContextTwo = mock(ServletContext.class);
 
     // Simulate the start of a servlet container.
     new GuiceServletContextListener() {
@@ -75,7 +65,6 @@ public class MultipleServletInjectorsTest extends TestCase {
     assertNotNull(contextOne);
 
     // Now simulate a second injector with a slightly different config.
-    replay(fakeContextTwo);
     new GuiceServletContextListener() {
 
       @Override
@@ -109,6 +98,7 @@ public class MultipleServletInjectorsTest extends TestCase {
     assertSame(contextOne, injectorOne.getInstance(ServletContext.class));
     assertSame(contextTwo, injectorTwo.getInstance(ServletContext.class));
 
-    verify(fakeContextOne, fakeContextTwo);
+    verify(fakeContextOne).setAttribute(eq(INJECTOR_NAME), isA(Injector.class));
+    verify(fakeContextTwo).setAttribute(eq(INJECTOR_NAME), isA(Injector.class));
   }
 }

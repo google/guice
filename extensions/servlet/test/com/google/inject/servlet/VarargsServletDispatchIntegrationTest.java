@@ -16,10 +16,8 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -75,19 +73,16 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     pipeline.initPipeline(null);
 
-    //create ourselves a mock request with test URI
-    HttpServletRequest requestMock = createMock(HttpServletRequest.class);
+    // create ourselves a mock request with test URI
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI()).andReturn("/index.html").times(1);
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    when(requestMock.getRequestURI()).thenReturn("/index.html");
+    when(requestMock.getContextPath()).thenReturn("");
 
-    //dispatch request
-    replay(requestMock);
+    // dispatch request
 
-    pipeline.dispatch(requestMock, null, createMock(FilterChain.class));
+    pipeline.dispatch(requestMock, null, mock(FilterChain.class));
     pipeline.destroyPipeline();
-
-    verify(requestMock);
 
     assertTrue(
         "lifecycle states did not fire correct number of times-- inits: "
@@ -118,19 +113,16 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     pipeline.initPipeline(null);
 
-    //create ourselves a mock request with test URI
-    HttpServletRequest requestMock = createMock(HttpServletRequest.class);
+    // create ourselves a mock request with test URI
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI()).andReturn("/index.html").times(3);
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    when(requestMock.getRequestURI()).thenReturn("/index.html");
+    when(requestMock.getContextPath()).thenReturn("");
 
-    //dispatch request
-    replay(requestMock);
+    // dispatch request
 
-    pipeline.dispatch(requestMock, null, createMock(FilterChain.class));
+    pipeline.dispatch(requestMock, null, mock(FilterChain.class));
     pipeline.destroyPipeline();
-
-    verify(requestMock);
 
     assertTrue(
         "lifecycle states did not fire correct number of times-- inits: "
@@ -163,20 +155,17 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     pipeline.initPipeline(null);
 
-    //create ourselves a mock request with test URI
-    HttpServletRequest requestMock = createMock(HttpServletRequest.class);
+    // create ourselves a mock request with test URI
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI()).andReturn("/index.html").times(2);
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    when(requestMock.getRequestURI()).thenReturn("/index.html");
+    when(requestMock.getContextPath()).thenReturn("");
 
-    //dispatch request
-    replay(requestMock);
+    // dispatch request
 
-    pipeline.dispatch(requestMock, null, createMock(FilterChain.class));
+    pipeline.dispatch(requestMock, null, mock(FilterChain.class));
 
     pipeline.destroyPipeline();
-
-    verify(requestMock);
 
     assertTrue(
         "lifecycle states did not fire correct number of times-- inits: "

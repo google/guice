@@ -15,10 +15,8 @@
  */
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -32,23 +30,17 @@ public class ContinuingHttpServletRequestTest extends TestCase {
   private static final int DEFAULT_MAX_AGE = new Cookie("dummy", "").getMaxAge();
 
   public void testReturnNullCookiesIfDelegateHasNoNull() {
-    HttpServletRequest delegate = createMock(HttpServletRequest.class);
-    expect(delegate.getCookies()).andStubReturn(null);
-
-    replay(delegate);
+    HttpServletRequest delegate = mock(HttpServletRequest.class);
+    when(delegate.getCookies()).thenReturn(null);
 
     assertNull(new ContinuingHttpServletRequest(delegate).getCookies());
-
-    verify(delegate);
   }
 
   public void testReturnDelegateCookies() {
     Cookie[] cookies =
         new Cookie[] {new Cookie("testName1", TEST_VALUE_1), new Cookie("testName2", "testValue2")};
-    HttpServletRequest delegate = createMock(HttpServletRequest.class);
-    expect(delegate.getCookies()).andStubReturn(cookies);
-
-    replay(delegate);
+    HttpServletRequest delegate = mock(HttpServletRequest.class);
+    when(delegate.getCookies()).thenReturn(cookies);
 
     ContinuingHttpServletRequest continuingRequest = new ContinuingHttpServletRequest(delegate);
 
@@ -77,8 +69,6 @@ public class ContinuingHttpServletRequestTest extends TestCase {
 
     // The cookies should be fixed.
     assertCookieArraysEqual(continuingRequest.getCookies(), furtherContinuingRequest.getCookies());
-
-    verify(delegate);
   }
 
   private static void assertCookieArraysEqual(Cookie[] one, Cookie[] two) {

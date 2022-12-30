@@ -1,13 +1,10 @@
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.isNull;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -23,6 +20,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
+import org.mockito.Mockito;
 
 /**
  * Exactly the same as {@linkplain com.google.inject.servlet.FilterPipelineTest} except that we test
@@ -76,58 +74,47 @@ public class InjectedFilterPipelineTest extends TestCase {
 
   public final void testDispatchThruInjectedGuiceFilter() throws ServletException, IOException {
 
-    //create mocks
-    FilterConfig filterConfig = createMock(FilterConfig.class);
-    ServletContext servletContext = createMock(ServletContext.class);
-    HttpServletRequest request = createMock(HttpServletRequest.class);
-    FilterChain proceedingFilterChain = createMock(FilterChain.class);
+    // create mocks
+    FilterConfig filterConfig = mock(FilterConfig.class);
+    ServletContext servletContext = mock(ServletContext.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    FilterChain proceedingFilterChain = mock(FilterChain.class);
 
-    //begin mock script ***
+    // begin mock script ***
 
-    expect(filterConfig.getServletContext()).andReturn(servletContext).once();
+    when(filterConfig.getServletContext()).thenReturn(servletContext);
 
-    expect(request.getRequestURI())
-        .andReturn("/non-jsp/login.html") // use a path that will fail in injector2
-        .anyTimes();
-    expect(request.getContextPath()).andReturn("").anyTimes();
+    when(request.getRequestURI())
+        .thenReturn("/non-jsp/login.html"); // use a path that will fail in injector2
+    when(request.getContextPath()).thenReturn("");
 
-    //at the end, proceed down webapp's normal filter chain
-    proceedingFilterChain.doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
-    expectLastCall().once();
+    // at the end, proceed down webapp's normal filter chain
 
-    //run mock script ***
-    replay(filterConfig, servletContext, request, proceedingFilterChain);
-
+    // run mock script ***
     GuiceFilter webFilter = injector1.getInstance(GuiceFilter.class);
 
     webFilter.init(filterConfig);
     webFilter.doFilter(request, null, proceedingFilterChain);
     webFilter.destroy();
 
-    //assert expectations
-    verify(filterConfig, servletContext, request, proceedingFilterChain);
+    // assert expectations
+    verify(proceedingFilterChain)
+        .doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
 
     // reset mocks and run them against the other injector
-    reset(filterConfig, servletContext, request, proceedingFilterChain);
+    Mockito.reset(filterConfig, servletContext, request, proceedingFilterChain);
 
     // Create a second proceeding filter chain
-    FilterChain proceedingFilterChain2 = createMock(FilterChain.class);
+    FilterChain proceedingFilterChain2 = mock(FilterChain.class);
 
-    //begin mock script ***
+    // begin mock script ***
 
-    expect(filterConfig.getServletContext()).andReturn(servletContext).once();
-    expect(request.getRequestURI())
-        .andReturn("/public/login/login.jsp") // use a path that will fail in injector1
-        .anyTimes();
-    expect(request.getContextPath()).andReturn("").anyTimes();
-
-    //at the end, proceed down webapp's normal filter chain
-    proceedingFilterChain2.doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
-    expectLastCall().once();
+    when(filterConfig.getServletContext()).thenReturn(servletContext);
+    when(request.getRequestURI())
+        .thenReturn("/public/login/login.jsp"); // use a path that will fail in injector1
+    when(request.getContextPath()).thenReturn("");
 
     // Never fire on this pipeline
-    replay(filterConfig, servletContext, request, proceedingFilterChain2, proceedingFilterChain);
-
     webFilter = injector2.getInstance(GuiceFilter.class);
 
     webFilter.init(filterConfig);
@@ -135,7 +122,7 @@ public class InjectedFilterPipelineTest extends TestCase {
     webFilter.destroy();
 
     // Verify that we have not crossed the streams, Venkman!
-    verify(filterConfig, servletContext, request, proceedingFilterChain, proceedingFilterChain2);
+    verify(proceedingFilterChain2).doFilter(isA(HttpServletRequest.class), isNull());
   }
 
   @Singleton

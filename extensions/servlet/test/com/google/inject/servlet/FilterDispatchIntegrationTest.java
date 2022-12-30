@@ -19,8 +19,9 @@ package com.google.inject.servlet;
 import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
 import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletRequest;
 import static com.google.inject.servlet.ServletTestUtils.newNoOpFilterChain;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -40,8 +41,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
 
 /**
  * This tests that filter stage of the pipeline dispatches correctly to guice-managed filters.
@@ -53,14 +52,11 @@ import org.easymock.IMocksControl;
 public class FilterDispatchIntegrationTest extends TestCase {
   private static int inits, doFilters, destroys;
 
-  private IMocksControl control;
-
   @Override
   public final void setUp() {
     inits = 0;
     doFilters = 0;
     destroys = 0;
-    control = EasyMock.createControl();
     GuiceFilter.reset();
   }
 
@@ -88,26 +84,24 @@ public class FilterDispatchIntegrationTest extends TestCase {
     pipeline.initPipeline(null);
 
     // create ourselves a mock request with test URI
-    HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI()).andReturn("/index.html").anyTimes();
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    when(requestMock.getRequestURI()).thenReturn("/index.html");
+    when(requestMock.getContextPath()).thenReturn("");
 
-    requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
-    requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
+    HttpServletResponse responseMock = mock(HttpServletResponse.class);
+    when(responseMock.isCommitted()).thenReturn(false);
 
-    HttpServletResponse responseMock = control.createMock(HttpServletResponse.class);
-    expect(responseMock.isCommitted()).andReturn(false).anyTimes();
-    responseMock.resetBuffer();
-    expectLastCall().anyTimes();
+    FilterChain filterChain = mock(FilterChain.class);
 
-    FilterChain filterChain = control.createMock(FilterChain.class);
+    // dispatch request
 
-    //dispatch request
-    control.replay();
     pipeline.dispatch(requestMock, responseMock, filterChain);
     pipeline.destroyPipeline();
-    control.verify();
+
+    verify(requestMock).setAttribute(REQUEST_DISPATCHER_REQUEST, true);
+    verify(requestMock).removeAttribute(REQUEST_DISPATCHER_REQUEST);
+    verify(responseMock).resetBuffer();
 
     TestServlet servlet = injector.getInstance(TestServlet.class);
     assertEquals(2, servlet.processedUris.size());
@@ -145,19 +139,18 @@ public class FilterDispatchIntegrationTest extends TestCase {
     final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
     pipeline.initPipeline(null);
 
-    //create ourselves a mock request with test URI
-    HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
+    // create ourselves a mock request with test URI
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI()).andReturn("/index.xhtml").anyTimes();
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    when(requestMock.getRequestURI()).thenReturn("/index.xhtml");
+    when(requestMock.getContextPath()).thenReturn("");
 
-    //dispatch request
-    FilterChain filterChain = control.createMock(FilterChain.class);
+    // dispatch request
+    FilterChain filterChain = mock(FilterChain.class);
     filterChain.doFilter(requestMock, null);
-    control.replay();
+
     pipeline.dispatch(requestMock, null, filterChain);
     pipeline.destroyPipeline();
-    control.verify();
 
     assertTrue(
         "lifecycle states did not "
@@ -189,19 +182,18 @@ public class FilterDispatchIntegrationTest extends TestCase {
     final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
     pipeline.initPipeline(null);
 
-    //create ourselves a mock request with test URI
-    HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
+    // create ourselves a mock request with test URI
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
-    expect(requestMock.getRequestURI()).andReturn("/index").anyTimes();
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    when(requestMock.getRequestURI()).thenReturn("/index");
+    when(requestMock.getContextPath()).thenReturn("");
 
     // dispatch request
-    FilterChain filterChain = control.createMock(FilterChain.class);
+    FilterChain filterChain = mock(FilterChain.class);
     filterChain.doFilter(requestMock, null);
-    control.replay();
+
     pipeline.dispatch(requestMock, null, filterChain);
     pipeline.destroyPipeline();
-    control.verify();
 
     assertTrue(
         "lifecycle states did not fire "
@@ -262,17 +254,15 @@ public class FilterDispatchIntegrationTest extends TestCase {
   private void runRequestForPath(FilterPipeline pipeline, String value, boolean matches)
       throws IOException, ServletException {
     assertEquals(0, doFilters);
-    //create ourselves a mock request with test URI
-    HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
-    expect(requestMock.getRequestURI()).andReturn(value).anyTimes();
-    expect(requestMock.getContextPath()).andReturn("").anyTimes();
+    // create ourselves a mock request with test URI
+    HttpServletRequest requestMock = mock(HttpServletRequest.class);
+    when(requestMock.getRequestURI()).thenReturn(value);
+    when(requestMock.getContextPath()).thenReturn("");
     // dispatch request
-    FilterChain filterChain = control.createMock(FilterChain.class);
-    filterChain.doFilter(requestMock, null);
-    control.replay();
+    FilterChain filterChain = mock(FilterChain.class);
     pipeline.dispatch(requestMock, null, filterChain);
-    control.verify();
-    control.reset();
+    verify(filterChain).doFilter(requestMock, null);
+
     if (matches) {
       assertEquals("filter was not run", 1, doFilters);
       doFilters = 0;
