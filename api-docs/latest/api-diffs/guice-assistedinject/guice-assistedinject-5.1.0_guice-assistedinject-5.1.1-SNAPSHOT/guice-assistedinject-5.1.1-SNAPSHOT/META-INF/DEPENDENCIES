@@ -11,8 +11,6 @@ From: 'an unknown organization'
     License: Public Domain 
   - FindBugs-jsr305 (http://findbugs.sourceforge.net/) com.google.code.findbugs:jsr305:jar:3.0.1
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - error-prone annotations (http://nexus.sonatype.org/oss-repository-hosting.html/error_prone_parent/error_prone_annotations) com.google.errorprone:error_prone_annotations:jar:2.7.1
-    License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Guava InternalFutureFailureAccess and InternalFutures (https://github.com/google/guava/failureaccess) com.google.guava:failureaccess:bundle:1.0.1
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Guava: Google Core Libraries for Java (https://github.com/google/guava) com.google.guava:guava:bundle:31.0.1-jre
@@ -25,6 +23,10 @@ From: 'an unknown organization'
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Checker Qual (https://checkerframework.org) org.checkerframework:checker-qual:jar:3.12.0
     License: The MIT License  (http://opensource.org/licenses/MIT)
+
+From: 'Google LLC' (http://www.google.com)
+  - error-prone annotations (https://errorprone.info/error_prone_annotations) com.google.errorprone:error_prone_annotations:jar:2.18.0
+    License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'Google, Inc.' (http://www.google.com)
   - Google Guice - Core Library (https://github.com/google/guice/guice) com.google.inject:guice:jar:5.1.1-SNAPSHOT

@@ -11,8 +11,6 @@ From: 'an unknown organization'
     License: Public Domain 
   - FindBugs-jsr305 (http://findbugs.sourceforge.net/) com.google.code.findbugs:jsr305:jar:3.0.1
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - error-prone annotations (http://nexus.sonatype.org/oss-repository-hosting.html/error_prone_parent/error_prone_annotations) com.google.errorprone:error_prone_annotations:jar:2.3.1
-    License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Guava InternalFutureFailureAccess and InternalFutures (https://github.com/google/guava/failureaccess) com.google.guava:failureaccess:bundle:1.0.1
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Guava: Google Core Libraries for Java (https://github.com/google/guava) com.google.guava:guava:bundle:31.0.1-jre
@@ -31,6 +29,10 @@ From: 'an unknown organization'
     License: GNU General Public License, version 2 (GPL2), with the classpath exception  (http://www.gnu.org/software/classpath/license.html)    License: The MIT License  (http://opensource.org/licenses/MIT)
   - Checker Qual (https://checkerframework.org) org.checkerframework:checker-qual:jar:3.12.0
     License: The MIT License  (http://opensource.org/licenses/MIT)
+
+From: 'Google LLC' (http://www.google.com)
+  - error-prone annotations (https://errorprone.info/error_prone_annotations) com.google.errorprone:error_prone_annotations:jar:2.18.0
+    License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'Google, Inc.' (http://www.google.com)
   - AutoValue Annotations (https://github.com/google/auto/auto-value-parent/auto-value-annotations) com.google.auto.value:auto-value-annotations:jar:1.6.3
