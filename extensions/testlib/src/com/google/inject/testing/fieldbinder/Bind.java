@@ -19,6 +19,7 @@ package com.google.inject.testing.fieldbinder;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.errorprone.annotations.Keep;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -38,6 +39,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RUNTIME)
 @Target({FIELD})
+@Keep
 public @interface Bind {
   /**
    * If specified, {@link BoundFieldModule} will bind the annotated field's value to this type,

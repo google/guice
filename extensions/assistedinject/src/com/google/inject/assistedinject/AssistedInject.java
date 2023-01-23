@@ -19,6 +19,7 @@ package com.google.inject.assistedinject;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.errorprone.annotations.Keep;
 import com.google.inject.Inject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -47,4 +48,5 @@ import java.lang.annotation.Target;
  */
 @Target({CONSTRUCTOR})
 @Retention(RUNTIME)
+@Keep
 public @interface AssistedInject {}

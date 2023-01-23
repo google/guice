@@ -32,7 +32,7 @@ maven_install(
         "com.google.code.findbugs:jsr305:3.0.1",
         "com.google.dagger:dagger:2.22.1",
         "com.google.dagger:dagger-producers:2.22.1",
-        "com.google.errorprone:error_prone_annotations:2.0.18",
+        "com.google.errorprone:error_prone_annotations:2.18.0",
         "com.google.guava:guava:31.0.1-jre",
         "commons-logging:commons-logging:1.2",
         "javax.inject:javax.inject:1",
