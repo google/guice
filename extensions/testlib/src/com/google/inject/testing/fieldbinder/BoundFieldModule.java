@@ -1,49 +1,3 @@
-/*
- * Copyright (C) 2014 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-@Inject @Toolable void initialize(Injector injector) {if (this.injector != null) {throw new ConfigurationException( ImmutableList.of(new Message(FactoryProvider2.class,"Factories.create() factories may only be used in one Injector!")));
-
-}this.injector = injector;for (Map.Entry<Method, AssistData> entry : assistDataByMethod.entrySet()) { Method method = entry.getKey();  AssistData data = entry.getValue(); Object[] args;
-
-  if (!data.optimized) { args = new Object[method.getParameterTypes().length]; Arrays.fill(args, "dummy object for validating Factories"); } else {  args = null; // won't be used -- instead will bind to data.providers.
-
-  } getBindingFromNewInjector( method, args, data); // throws if the binding isn't properly configured}} public Binding<?> getBindingFromNewInjector(final Method method, final Object[] args, final AssistData data) { checkState(injector != null, "Factories.create() factories cannot be used until they're initialized by Guice.");
-
-final Key<?> returnType = data.returnType;// We ignore any pre-existing binding annotation.final Key<?> returnKey = Key.get(returnType.getTypeLiteral(), RETURN_ANNOTATION); Module assistedModule =
-
-new AbstractModule() { @Override @SuppressWarnings({ "unchecked","rawtypes"}) // raw keys are necessary for the args array and return value protected void configure() { Binder binder = binder().withSource(method);
-
-int p = 0;if (!data.optimized) {for (Key<?> paramKey : data.paramTypes) {// Wrap in a Provider to cover null, and to prevent Guice from injecting the // parameter binder.bind((Key) paramKey).toProvider(Providers.of(args[p++]));}} else {
-
-for (Key<?> paramKey : data.paramTypes) {// Bind to our ThreadLocalProviders.binder.bind((Key) paramKey).toProvider(data.providers.get(p++));}} Constructor constructor = data.constructor;
-
-// Constructor *should* always be non-null here,// but if it isn't, we'll end up throwing a fairly good error// message for the user. 
-
-if (constructor != null) {binder.bind(returnKey).toConstructor(constructor, (TypeLiteral) data.implementationType) .in(Scopes.NO_SCOPE); // make sure we erase any scope on the implementation type }}};
-
-Injector forCreate = injector.createChildInjector(assistedModule); Binding<?> binding = forCreate.getBinding(returnKey);if (data.optimized) {data.cachedBinding = binding;}return binding;}@Override public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable { if (methodHandleByMethod.containsKey(method)) {return methodHandleByMethod.get(method).invokeWithArguments(args);}if (method.getDeclaringClass().equals(Object.class)) {if ("equals".equals(method.getName())) {return proxy == args[0];} else if ("hashCode".equals(method.getName())) { return System.identityHashCode(proxy);} else {return method.invoke(this, args);}}
-
-AssistData data = assistDataByMethod.get(method);checkState(data != null, "No data for method: %s", method);Provider<?> provider; if (data.cachedBinding != null) {provider = data.cachedBinding.getProvider();
-
-} else {provider = getBindingFromNewInjector(method, args, data).getProvider();}try {int p = 0;for (ThreadLocalProvider tlp : data.providers) { tlp.set(args[p++]); }return provider.get();
-
-} catch (ProvisionException e) {if (e.getErrorMessages().size() == 1) {Message onlyError = getOnlyElement(e.getErrorMessages());Throwable cause = onlyError.getCause();if (cause != null && canRethrow(method, cause)) {
-
-      throw cause; }}throw e;} finally {for (ThreadLocalProvider tlp : data.providers) { tlp.remove(); } } }
-package com.google.inject.testing.fieldbinder;
-
 import static java.util.Arrays.stream;
 
 import com.google.common.base.Optional;
@@ -74,66 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-/**
- * A Guice module that automatically adds Guice bindings into the injector for all {@link Bind}
- * annotated fields of a specified object.
- *
- * <p>This module is intended for use in tests to reduce the amount of boilerplate code needed to
- * bind local fields (usually mocks) for injection.
- *
- * <p>The following rules are followed in determining how fields are bound using this module:
- *
- * <ul>
- *   <li>For each {@link Bind} annotated field of an object and its superclasses, this module will
- *       bind that field's type to that field's value at injector creation time. This includes both
- *       instance and static fields.
- *   <li>If {@link Bind#to} is specified, the field's value will be bound to the class specified by
- *       {@link Bind#to} instead of the field's actual type.
- *   <li>If {@link Bind#lazy} is true, this module will delay reading the value from the field until
- *       injection time, allowing the field's value to be reassigned during the course of a test's
- *       execution.
- *   <li>If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
- *       that field will be bound using that annotation via {@link
- *       AnnotatedBindingBuilder#annotatedWith}. For example, {@code
- *       bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error to
- *       supply more than one {@link BindingAnnotation} or {@link javax.inject.Qualifier}.
- *   <li>If the field is of type {@link Provider}, the field's value will be bound as a {@link
- *       Provider} using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized
- *       type. For example, {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a
- *       non-parameterized {@link Provider} without a {@link Bind#to} clause is an error.
- * </ul>
- *
- * <p>Example use:
- *
- * <pre>{@code
- * public class TestFoo {
- *   // bind(new TypeLiteral<List<Object>>() {}).toInstance(listOfObjects);
- *   {@literal @}Bind private List<Object> listOfObjects = Lists.of();
- *
- *   // private String userName = "string_that_changes_over_time";
- *   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
- *   {@literal @}Bind(lazy = true) private String userName;
- *
- *   // bind(SuperClass.class).toInstance(aSubClass);
- *   {@literal @}Bind(to = SuperClass.class) private SubClass aSubClass = new SubClass();
- *
- *   // bind(String.class).annotatedWith(MyBindingAnnotation.class).toInstance(myString);
- *   {@literal @}Bind
- *   {@literal @}MyBindingAnnotation
- *   private String myString = "hello";
- *
- *   // bind(Object.class).toProvider(myProvider);
- *   {@literal @}Bind private Provider<Object> myProvider = getProvider();
- *
- *   {@literal @}Before public void setUp() {
- *     Guice.createInjector(BoundFieldModule.of(this)).injectMembers(this);
- *   }
- * }
- * }</pre>
- *
- * @see Bind
- * @author eatnumber1@google.com (Russ Harmon)
- */
+
 public final class BoundFieldModule implements Module {
   private final Object instance;
   private final ImmutableList<Message> deferredBindingErrors;
