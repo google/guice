@@ -16,15 +16,15 @@
 
 package com.google.inject.matcher;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Matcher implementations. Supports matching classes and methods.
@@ -343,7 +343,7 @@ public class Matchers {
     private final String targetPackageName;
 
     public InSubpackage(String targetPackageName) {
-      this.targetPackageName = targetPackageName;
+      this.targetPackageName = checkNotNull(targetPackageName, "targetPackageName");
     }
 
     @Override
