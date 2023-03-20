@@ -72,8 +72,9 @@ import java.util.Set;
  * <p>Annotations are used to create different sets of the same element type. Each distinct
  * annotation gets its own independent collection of elements.
  *
- * <p><strong>Elements must be distinct.</strong> If multiple bound elements have the same value,
- * set injection will fail.
+ * <p><strong>Elements must be distinct</strong> unless {@code permitDuplicates()} is specified.
+ * Without {@code permitDuplicates()}, set injection will fail if multiple bound elements have the
+ * same value.
  *
  * <p><strong>Elements must be non-null.</strong> If any set element is null, set injection will
  * fail.
