@@ -29,7 +29,7 @@ From: 'Google LLC' (http://www.google.com)
     License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'OW2' (http://www.ow2.org/)
-  - asm (http://asm.ow2.io/) org.ow2.asm:asm:jar:9.2
+  - asm (http://asm.ow2.io/) org.ow2.asm:asm:jar:9.5
     License: BSD-3-Clause  (https://asm.ow2.io/license.html)
 
 
