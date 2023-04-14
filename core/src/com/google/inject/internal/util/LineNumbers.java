@@ -27,6 +27,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -41,6 +43,9 @@ import org.objectweb.asm.Opcodes;
  * @author Chris Nokleberg
  */
 final class LineNumbers {
+
+  private static final Logger logger = Logger.getLogger(LineNumbers.class.getName());
+  private static volatile boolean alreadyLoggedReadingFailure;
 
   private static final int ASM_API_LEVEL = Opcodes.ASM9;
 
@@ -67,10 +72,20 @@ final class LineNumbers {
       if (in != null) {
         try {
           new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
-        } catch (UnsupportedOperationException ignored) {
+        } catch (Exception ignored) {
           // We may be trying to inspect classes that were compiled with a more recent version
           // of javac than our ASM supports.  If that happens, just ignore the class and don't
-          // capture line numbers.
+          // capture line numbers. But log the failure so folks know something's off.
+          // (Only log it once, though, to avoid spam. It's OK if concurrent access makes this
+          //  happen more than once.)
+          if (!alreadyLoggedReadingFailure) {
+            alreadyLoggedReadingFailure = true;
+            logger.log(
+                Level.WARNING,
+                "Failed loading line numbers. ASM is probably out of date. Further failures won't"
+                    + " be logged.",
+                ignored);
+          }
         } finally {
           try {
             in.close();
