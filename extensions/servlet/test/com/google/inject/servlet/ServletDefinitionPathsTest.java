@@ -136,6 +136,9 @@ public class ServletDefinitionPathsTest extends TestCase {
         "/path", "/*", "/a file with spaces in name.html", "");
     pathInfoWithServletStyleMatching(
         "/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/*", "/Tamás nem más.html", "");
+
+    // see https://github.com/google/guice/issues/1655
+    pathInfoWithServletStyleMatching("/index.html", null, "/*", "/index.html", "");
   }
 
   private void pathInfoWithServletStyleMatching(
