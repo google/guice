@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.spi.InjectionPoint;
@@ -41,6 +40,11 @@ final class ConstructorInjectorStore {
 
   ConstructorInjectorStore(InjectorImpl injector) {
     this.injector = injector;
+  }
+
+  /** Returns true if the store is in the process of loading this injection point. */
+  boolean isLoading(InjectionPoint ip) {
+    return cache.isLoading(ip);
   }
 
   /** Returns a new complete constructor injector with injection listeners registered. */

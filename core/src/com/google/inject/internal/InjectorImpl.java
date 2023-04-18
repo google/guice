@@ -264,7 +264,7 @@ final class InjectorImpl implements Injector, Lookups {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
         @SuppressWarnings("unchecked") // we only store bindings that match their key
-        BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindingData.getJitBindings().get(key);
+        BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindingData.getJitBinding(key);
 
         if (binding != null) {
           // If we found a JIT binding and we don't allow them,
@@ -656,12 +656,26 @@ final class InjectorImpl implements Injector, Lookups {
   /** Cleans up any state that may have been cached when constructing the JIT binding. */
   private void removeFailedJitBinding(Binding<?> binding, InjectionPoint ip) {
     jitBindingData.addFailedJitBinding(binding.getKey());
-    jitBindingData.removeJitBinding(binding.getKey());
-    membersInjectorStore.remove(binding.getKey().getTypeLiteral());
-    provisionListenerStore.remove(binding);
-    if (ip != null) {
+    // Be careful cleaning up constructors & jitBindings -- we can't remove
+    // from `jitBindings` if we're still in the process of loading this constructor,
+    // otherwise we can re-enter the constructor's cache and attempt to load it
+    // while already loading it.  See issues:
+    // - https://github.com/google/guice/pull/1633
+    // - https://github.com/google/guice/issues/785
+    // - https://github.com/google/guice/pull/1389
+    // - https://github.com/google/guice/pull/1394
+    // (Note: there may be a better way to do this that avoids the need for the `isLoading`
+    //  conditional, but due to the recursive nature of JIT loading and the way we allow partially
+    //  initialized JIT bindings [to support circular dependencies], there's no other great way
+    //  that I could figure out.)
+    if (ip == null || !constructors.isLoading(ip)) {
+      jitBindingData.removeJitBinding(binding.getKey());
+    }
+    if (ip != null && !constructors.isLoading(ip)) {
       constructors.remove(ip);
     }
+    membersInjectorStore.remove(binding.getKey().getTypeLiteral());
+    provisionListenerStore.remove(binding);
   }
 
   /** Safely gets the dependencies of possibly not initialized bindings. */
