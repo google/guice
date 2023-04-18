@@ -16,7 +16,9 @@
 
 package com.google.inject.throwingproviders;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -1257,8 +1259,10 @@ public class CheckedProviderTest extends TestCase {
       fail();
     } catch (CreationException ce) {
       // The only two that should fail are Interrupted & TooManyListeners.. the rest are OK.
-      List<Message> errors = ImmutableList.copyOf(ce.getErrorMessages());
-      assertEquals(
+      // Allow the msgs to come in any order.
+      ImmutableList<String> errors =
+          ce.getErrorMessages().stream().map(Message::getMessage).collect(toImmutableList());
+      String msg1 =
           InterruptedException.class.getName()
               + " is not compatible with the exceptions (["
               + RemoteException.class
@@ -1266,9 +1270,8 @@ public class CheckedProviderTest extends TestCase {
               + BindException.class
               + "]) declared in the CheckedProvider interface ("
               + RemoteProvider.class.getName()
-              + ")",
-          errors.get(0).getMessage());
-      assertEquals(
+              + ")";
+      String msg2 =
           TooManyListenersException.class.getName()
               + " is not compatible with the exceptions (["
               + RemoteException.class
@@ -1276,9 +1279,8 @@ public class CheckedProviderTest extends TestCase {
               + BindException.class
               + "]) declared in the CheckedProvider interface ("
               + RemoteProvider.class.getName()
-              + ")",
-          errors.get(1).getMessage());
-      assertEquals(2, errors.size());
+              + ")";
+      assertThat(errors).containsExactly(msg1, msg2);
     }
   }
 
