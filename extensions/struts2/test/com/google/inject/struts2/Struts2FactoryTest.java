@@ -16,7 +16,6 @@
 
 package com.google.inject.struts2;
 
-import org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,7 +24,9 @@ import com.google.inject.Provides;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import java.util.Date;
+import javax.inject.Singleton;
 import junit.framework.TestCase;
+import org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter;
 
 /**
  * Test for Struts2Factory
@@ -52,8 +53,7 @@ public class Struts2FactoryTest extends TestCase {
             @Override
             protected void configureServlets() {
               // Struts 2 setup
-              bind(StrutsPrepareAndExecuteFilter.class)
-                  .in(com.google.inject.Singleton.class);
+              bind(StrutsPrepareAndExecuteFilter.class).in(Singleton.class);
               filter("/*").through(StrutsPrepareAndExecuteFilter.class);
             }
           },

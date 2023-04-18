@@ -38,7 +38,7 @@ maven_install(
         "javax.inject:javax.inject:1",
         "javax.persistence:javax.persistence-api:2.2",
         "javax.servlet:servlet-api:2.5",
-        "org.apache.struts:struts2-core:2.3.37",
+        "org.apache.struts:struts2-core:2.5.30",
         "org.apache.struts.xwork:xwork-core:2.3.37",
         "org.ow2.asm:asm:9.5",
         "org.springframework:spring-core:5.3.18",

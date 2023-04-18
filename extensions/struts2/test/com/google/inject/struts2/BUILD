@@ -12,6 +12,7 @@ java_library(
         "//core/src/com/google/inject",
         "//extensions/servlet/src/com/google/inject/servlet",
         "//extensions/struts2/src/com/google/inject/struts2",
+        "//third_party/java/jsr330_inject",
         "//third_party/java/junit",
         "//third_party/java/struts2",
     ],
