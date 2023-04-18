@@ -137,7 +137,7 @@ public abstract class PrivateModule implements Module {
   // everything below is copied from AbstractModule
 
   /** Returns the current binder. */
-  protected final PrivateBinder binder() {
+  protected PrivateBinder binder() {
     checkState(binder != null, "The binder can only be used inside configure()");
     return binder;
   }
