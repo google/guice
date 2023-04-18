@@ -144,14 +144,25 @@ interface CycleDetectingLock<ID> {
         final Thread currentThread = Thread.currentThread();
         synchronized (CycleDetectingLockFactory.class) {
           checkState();
-          // Add this lock to the waiting map to ensure it is included in any reported lock cycle.
-          lockThreadIsWaitingOn.put(currentThread, this);
-          ListMultimap<Thread, ID> locksInCycle = detectPotentialLocksCycle();
-          if (!locksInCycle.isEmpty()) {
-            // We aren't actually going to wait for this lock, so remove it from the map.
-            lockThreadIsWaitingOn.remove(currentThread);
-            // potential deadlock is found, we don't try to take this lock
-            return locksInCycle;
+          // Only do work if this thread doesn't already own the lock.
+          // If we're attempting to re-enter our own lock, then we're not going to wait to lock.
+          // Otherwise, if we add ourselves to `lockThreadIsWaitingOn`, another thread attempting to
+          // lock may end up looping forever while detecting cycles (which will OOM).  See
+          // https://github.com/google/guice/issues/1510 &
+          // https://github.com/google/guice/pull/1635.
+          // Note that it's not possible for the owner thread to concurrently relinquish the lock,
+          // because _this_ is the owner thread, and the next line of code this thread will execute
+          // is `lockImplementation.lock()`.
+          if (lockOwnerThread != currentThread) {
+            // Add this lock to the waiting map to ensure it is included in any reported lock cycle.
+            lockThreadIsWaitingOn.put(currentThread, this);
+            ListMultimap<Thread, ID> locksInCycle = detectPotentialLocksCycle();
+            if (!locksInCycle.isEmpty()) {
+              // We aren't actually going to wait for this lock, so remove it from the map.
+              lockThreadIsWaitingOn.remove(currentThread);
+              // potential deadlock is found, we don't try to take this lock
+              return locksInCycle;
+            }
           }
         }
 

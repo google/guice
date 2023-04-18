@@ -1,16 +1,21 @@
 package com.google.inject.internal;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory.ReentrantCycleDetectingLock;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import junit.framework.TestCase;
@@ -229,5 +234,37 @@ public class CycleDetectingLockTest extends TestCase {
     Thread thread = new Thread(future);
     thread.start();
     return future;
+  }
+
+  // Tests issues https://github.com/google/guice/pull/1635 &
+  // https://github.com/google/guice/issues/1510
+  // These were problems with the implementation that caused the impl to loop forever and OOM.
+  public void testConcurrentReentrance() throws Exception {
+    int numConcurrentLockers = 8;
+    ExecutorService service = Executors.newFixedThreadPool(numConcurrentLockers);
+    List<Future<?>> results = new ArrayList<>();
+    CycleDetectingLockFactory<String> factory = new CycleDetectingLockFactory<>();
+    CycleDetectingLock<String> lock = factory.create("circles");
+    // Use a phaser to increase the chances that the code runs concurrently, so we can hit
+    // the conditions that trigger the failure. (Even so, with the bug, this test had a failure rate
+    // of ~0.4%, so will need to be run many times to guarantee it's fixed.)
+    Phaser phaser = new Phaser(1);
+    for (int i = 0; i < numConcurrentLockers; ++i) {
+      phaser.register();
+      results.add(
+          service.submit(
+              () -> {
+                phaser.arriveAndAwaitAdvance();
+                assertThat(lock.lockOrDetectPotentialLocksCycle()).isEmpty();
+                assertThat(lock.lockOrDetectPotentialLocksCycle()).isEmpty();
+                lock.unlock();
+                lock.unlock();
+              }));
+    }
+    phaser.arriveAndDeregister();
+    for (Future<?> result : results) {
+      result.get();
+    }
+    service.shutdown();
   }
 }
