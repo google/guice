@@ -41,8 +41,8 @@ maven_install(
         "org.apache.struts:struts2-core:2.3.37",
         "org.apache.struts.xwork:xwork-core:2.3.37",
         "org.ow2.asm:asm:9.5",
-        "org.springframework:spring-core:5.3.14",
-        "org.springframework:spring-beans:5.3.14",
+        "org.springframework:spring-core:5.3.18",
+        "org.springframework:spring-beans:5.3.18",
         "biz.aQute.bnd:bndlib:2.4.0",
         "info.picocli:picocli:4.6.3",
         maven.artifact(
