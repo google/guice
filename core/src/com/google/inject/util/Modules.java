@@ -342,9 +342,9 @@ public final class Modules {
               StringBuilder sb =
                   new StringBuilder(
                       "The scope for @%s is bound directly and cannot be overridden.");
-              sb.append("%n     original binding at " + Errors.convert(scopeBinding.getSource()));
+              sb.append("\n     original binding at " + Errors.convert(scopeBinding.getSource()));
               for (Object usedSource : usedSources) {
-                sb.append("%n     bound directly at " + Errors.convert(usedSource) + "");
+                sb.append("\n     bound directly at " + Errors.convert(usedSource) + "");
               }
               binder
                   .withSource(overideBinding.getSource())

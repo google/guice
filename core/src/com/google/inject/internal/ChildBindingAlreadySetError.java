@@ -43,12 +43,12 @@ final class ChildBindingAlreadySetError extends InternalErrorDetail<ChildBinding
 
   @Override
   public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
-    formatter.format("%n%s%n", Messages.bold("Bound at:"));
+    formatter.format("\n%s\n", Messages.bold("Bound at:"));
     int index = 1;
     for (Object source : existingSources) {
       formatter.format("%-2s: ", index++);
       if (source.equals("")) {
-        formatter.format("as a just-in-time binding%n");
+        formatter.format("as a just-in-time binding\n");
       } else {
         new SourceFormatter(source, formatter, /* omitPreposition= */ true).format();
       }
@@ -63,7 +63,7 @@ final class ChildBindingAlreadySetError extends InternalErrorDetail<ChildBinding
             .filter(list -> !list.isEmpty())
             .collect(Collectors.toList());
     if (!filteredSources.isEmpty()) {
-      formatter.format("%n%s%n", Messages.bold("Requested by:"));
+      formatter.format("\n%s\n", Messages.bold("Requested by:"));
       for (int i = 0; i < sourcesList.size(); i++) {
         ErrorFormatter.formatSources(i + 1, sourcesList.get(i), formatter);
       }

@@ -27,11 +27,11 @@ final class DuplicateMapKeyError<K, V> extends InternalErrorDetail<DuplicateMapK
 
   @Override
   protected final void formatDetail(List<ErrorDetail<?>> others, Formatter formatter) {
-    formatter.format("%n%s%n", Messages.bold("Duplicates:"));
+    formatter.format("\n%s\n", Messages.bold("Duplicates:"));
 
     for (Map.Entry<K, Collection<Binding<V>>> entry : duplicates.asMap().entrySet()) {
-      formatter.format("  Key: \"%s\"%n", Messages.redBold(entry.getKey().toString()));
-      formatter.format("  Bound at:%n");
+      formatter.format("  Key: \"%s\"\n", Messages.redBold(entry.getKey().toString()));
+      formatter.format("  Bound at:\n");
       int index = 1;
       for (Binding<V> binding : entry.getValue()) {
         formatter.format("    %-2s: ", index++);
@@ -42,10 +42,10 @@ final class DuplicateMapKeyError<K, V> extends InternalErrorDetail<DuplicateMapK
                 true)
             .format();
       }
-      formatter.format("%n");
+      formatter.format("\n");
     }
 
-    formatter.format("%s%n", Messages.bold("MapBinder declared at:"));
+    formatter.format("%s\n", Messages.bold("MapBinder declared at:"));
     ErrorFormatter.formatSources(getSources(), formatter);
   }
 

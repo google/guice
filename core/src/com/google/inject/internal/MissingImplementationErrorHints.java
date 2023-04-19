@@ -49,20 +49,20 @@ final class MissingImplementationErrorHints {
     List<String> possibleMatches = new ArrayList<>();
     List<Binding<T>> sameTypes = injector.findBindingsByType(type);
     if (!sameTypes.isEmpty()) {
-      suggestions.add("%nDid you mean?");
+      suggestions.add("\nDid you mean?");
       int howMany = min(sameTypes.size(), MAX_MATCHING_TYPES_REPORTED);
       for (int i = 0; i < howMany; ++i) {
         // TODO: Look into a better way to prioritize suggestions. For example, possbily
         // use levenshtein distance of the given annotation vs actual annotation.
-        suggestions.add(Messages.format("%n    * %s", sameTypes.get(i).getKey()));
+        suggestions.add(Messages.format("\n    * %s", sameTypes.get(i).getKey()));
       }
       int remaining = sameTypes.size() - MAX_MATCHING_TYPES_REPORTED;
       if (remaining > 0) {
         String plural = (remaining == 1) ? "" : "s";
         suggestions.add(
-            Messages.format("%n    %d more binding%s with other annotations.", remaining, plural));
+            Messages.format("\n    %d more binding%s with other annotations.", remaining, plural));
       }
-      suggestions.add("%n");
+      suggestions.add("\n");
     } else {
       // For now, do a simple substring search for possibilities. This can help spot
       // issues when there are generics being used (such as a wrapper class) and the
@@ -91,9 +91,9 @@ final class MissingImplementationErrorHints {
       }
 
       if (!possibleMatches.isEmpty() && (possibleMatches.size() <= MAX_RELATED_TYPES_REPORTED)) {
-        suggestions.add("%nDid you mean?");
+        suggestions.add("\nDid you mean?");
         for (String possibleMatch : possibleMatches) {
-          suggestions.add(Messages.format("%n    %s", possibleMatch));
+          suggestions.add(Messages.format("\n    %s", possibleMatch));
         }
       }
     }
@@ -105,7 +105,7 @@ final class MissingImplementationErrorHints {
         && key.getAnnotationType() == null
         && COMMON_AMBIGUOUS_TYPES.contains(key.getTypeLiteral().getRawType())) {
       // We don't recommend using such simple types without annotations.
-      suggestions.add("%nThe key seems very generic, did you forget an annotation?");
+      suggestions.add("\nThe key seems very generic, did you forget an annotation?");
     }
 
     return suggestions.build();

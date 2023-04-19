@@ -48,22 +48,22 @@ final class SourceFormatter {
     } else if (source instanceof InjectionPoint) {
       formatInjectionPoint(null, (InjectionPoint) source);
     } else if (source instanceof Class) {
-      formatter.format("%s%s%n", preposition("at "), StackTraceElements.forType((Class<?>) source));
+      formatter.format("%s%s\n", preposition("at "), StackTraceElements.forType((Class<?>) source));
     } else if (source instanceof Member) {
       formatMember((Member) source);
     } else if (source instanceof TypeLiteral) {
-      formatter.format("%s%s%n", preposition("while locating "), source);
+      formatter.format("%s%s\n", preposition("while locating "), source);
     } else if (source instanceof Key) {
       formatKey((Key<?>) source);
     } else if (source instanceof Thread) {
       appendModuleSource = false;
-      formatter.format("%s%s%n", preposition("in thread "), source);
+      formatter.format("%s%s\n", preposition("in thread "), source);
     } else {
-      formatter.format("%s%s%n", preposition("at "), source);
+      formatter.format("%s%s\n", preposition("at "), source);
     }
 
     if (appendModuleSource) {
-      formatter.format("%s \\_ installed by: %s%n", INDENT, moduleStack);
+      formatter.format("%s \\_ installed by: %s\n", INDENT, moduleStack);
     }
   }
 
@@ -84,11 +84,11 @@ final class SourceFormatter {
   }
 
   private void formatKey(Key<?> key) {
-    formatter.format("%s%s%n", preposition("while locating "), Messages.convert(key));
+    formatter.format("%s%s\n", preposition("while locating "), Messages.convert(key));
   }
 
   private void formatMember(Member member) {
-    formatter.format("%s%s%n", preposition("at "), StackTraceElements.forMember(member));
+    formatter.format("%s%s\n", preposition("at "), StackTraceElements.forMember(member));
   }
 
   private void formatInjectionPoint(Dependency<?> dependency, InjectionPoint injectionPoint) {
@@ -96,10 +96,10 @@ final class SourceFormatter {
     Class<? extends Member> memberType = Classes.memberType(member);
     formatMember(injectionPoint.getMember());
     if (memberType == Field.class) {
-      formatter.format("%s \\_ for field %s%n", INDENT, Messages.redBold(member.getName()));
+      formatter.format("%s \\_ for field %s\n", INDENT, Messages.redBold(member.getName()));
     } else if (dependency != null) {
 
-      formatter.format("%s \\_ for %s%n", INDENT, getParameterName(dependency));
+      formatter.format("%s \\_ for %s\n", INDENT, getParameterName(dependency));
     }
   }
 

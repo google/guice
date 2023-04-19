@@ -281,15 +281,15 @@ public class SingletonScope implements Scope {
         if (proxyCreationError != null) {
           fmt.format(" %s", proxyCreationError.getMessage());
         }
-        fmt.format("%n");
+        fmt.format("\n");
         for (Thread lockedThread : locksCycle.keySet()) {
           List<Key<?>> lockedKeys = locksCycle.get(lockedThread);
-          fmt.format("%s is holding locks the following singletons in the cycle:%n", lockedThread);
+          fmt.format("%s is holding locks the following singletons in the cycle:\n", lockedThread);
           for (Key<?> lockedKey : lockedKeys) {
-            fmt.format("%s%n", Errors.convert(lockedKey));
+            fmt.format("%s\n", Errors.convert(lockedKey));
           }
           for (StackTraceElement traceElement : lockedThread.getStackTrace()) {
-            fmt.format("\tat %s%n", traceElement);
+            fmt.format("\tat %s\n", traceElement);
           }
         }
         fmt.close();

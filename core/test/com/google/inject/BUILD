@@ -104,6 +104,25 @@ guice_test_suites(
     ],
 )
 
+guice_test_suites(
+    name = "gen_tests_with_windows_separator",
+    jvm_flags = [
+        # those 2 options are required for some tests that checks stack traces
+        "-XX:+UnlockDiagnosticVMOptions",
+        "-XX:+ShowHiddenFrames",
+        "-Dline.separator='\r\n'",
+    ],
+    sizes = [
+        "small",
+        "medium",
+    ],
+    suffix = "_with_windows_separator",
+    deps = [
+        ":add_opens_tests",
+        ":tests",
+    ],
+)
+
 [guice_test_suites(
     name = "gen_tests_stack_trace_%s" % include_stack_trace_option,
     args = [

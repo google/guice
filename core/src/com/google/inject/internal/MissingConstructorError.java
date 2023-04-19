@@ -37,12 +37,12 @@ final class MissingConstructorError extends InternalErrorDetail<MissingConstruct
 
   @Override
   protected void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
-    formatter.format("%n");
+    formatter.format("\n");
     Class<?> rawType = type.getRawType();
     if (atInjectRequired) {
       formatter.format(
           "Injector is configured to require @Inject constructors but %s does not have a @Inject"
-              + " annotated constructor.%n",
+              + " annotated constructor.\n",
           rawType);
     } else {
       Constructor<?> noArgConstructor = null;
@@ -53,22 +53,22 @@ final class MissingConstructorError extends InternalErrorDetail<MissingConstruct
       }
       if (noArgConstructor == null) {
         formatter.format(
-            "%s does not have a @Inject annotated constructor or a no-arg constructor.%n", rawType);
+            "%s does not have a @Inject annotated constructor or a no-arg constructor.\n", rawType);
       } else if (Modifier.isPrivate(noArgConstructor.getModifiers())
           && !Modifier.isPrivate(rawType.getModifiers())) {
         formatter.format(
             "%s has a private no-arg constructor but the class is not private. Guice can only use"
-                + " a private no-arg constructor if it is defined in a private class.%n",
+                + " a private no-arg constructor if it is defined in a private class.\n",
             rawType);
       }
     }
-    formatter.format("%n");
+    formatter.format("\n");
 
     List<List<Object>> sourcesList = new ArrayList<>();
     sourcesList.add(getSources());
     mergeableErrors.forEach(error -> sourcesList.add(error.getSources()));
 
-    formatter.format("%s%n", Messages.bold("Requested by:"));
+    formatter.format("%s\n", Messages.bold("Requested by:"));
     int sourceListIndex = 1;
     for (List<Object> sources : sourcesList) {
       ErrorFormatter.formatSources(sourceListIndex++, Lists.reverse(sources), formatter);

@@ -69,7 +69,7 @@ public final class BindingSourceRestriction {
     }
     return Optional.of(
         String.format(
-            "%nHint: This key is restricted and cannot be bound directly. Restriction explanation:"
+            "\nHint: This key is restricted and cannot be bound directly. Restriction explanation:"
                 + " %s",
             restriction.explanation()));
   }

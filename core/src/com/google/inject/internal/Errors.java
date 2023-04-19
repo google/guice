@@ -133,7 +133,7 @@ public final class Errors implements Serializable {
   public Errors aopDisabled(InterceptorBinding binding) {
     return addMessage(
         ErrorId.AOP_DISABLED,
-        "Binding interceptor is not supported when bytecode generation is disabled. %nInterceptor"
+        "Binding interceptor is not supported when bytecode generation is disabled. \nInterceptor"
             + " bound at: %s",
         binding.getSource());
   }
@@ -177,7 +177,7 @@ public final class Errors implements Serializable {
   public Errors jitDisabledInParent(Key<?> key) {
     return addMessage(
         ErrorId.JIT_DISABLED_IN_PARENT,
-        "Explicit bindings are required and %s would be bound in a parent injector.%n"
+        "Explicit bindings are required and %s would be bound in a parent injector.\n"
             + "Please add an explicit binding for it, either in the child or the parent.",
         key);
   }
@@ -197,7 +197,7 @@ public final class Errors implements Serializable {
       TypeConverterBinding typeConverterBinding) {
     return addMessage(
         ErrorId.CONVERTER_RETURNED_NULL,
-        "Received null converting '%s' (bound at %s) to %s%n using %s.",
+        "Received null converting '%s' (bound at %s) to %s\n using %s.",
         stringValue,
         convert(source),
         type,
@@ -212,8 +212,8 @@ public final class Errors implements Serializable {
       Object converted) {
     return addMessage(
         ErrorId.CONVERSION_TYPE_ERROR,
-        "Type mismatch converting '%s' (bound at %s) to %s%n"
-            + " using %s.%n"
+        "Type mismatch converting '%s' (bound at %s) to %s\n"
+            + " using %s.\n"
             + " Converter returned %s.",
         stringValue,
         convert(source),
@@ -230,7 +230,7 @@ public final class Errors implements Serializable {
       RuntimeException cause) {
     return errorInUserCode(
         cause,
-        "Error converting '%s' (bound at %s) to %s%n using %s.%n Reason: %s",
+        "Error converting '%s' (bound at %s) to %s\n using %s.\n Reason: %s",
         stringValue,
         convert(source),
         type,
@@ -246,9 +246,9 @@ public final class Errors implements Serializable {
       TypeConverterBinding b) {
     return addMessage(
         ErrorId.AMBIGUOUS_TYPE_CONVERSION,
-        "Multiple converters can convert '%s' (bound at %s) to %s:%n"
-            + " %s and%n"
-            + " %s.%n"
+        "Multiple converters can convert '%s' (bound at %s) to %s:\n"
+            + " %s and\n"
+            + " %s.\n"
             + " Please adjust your type converter configuration to avoid overlapping matches.",
         stringValue,
         convert(source),
@@ -315,7 +315,7 @@ public final class Errors implements Serializable {
     return addMessage(
         ErrorId.SCOPE_ANNOTATION_ON_ABSTRACT_TYPE,
         "%s is annotated with %s, but scope annotations are not supported "
-            + "for abstract types.%n Bound at %s.",
+            + "for abstract types.\n Bound at %s.",
         type,
         scopeAnnotation,
         convert(source));
@@ -368,7 +368,7 @@ public final class Errors implements Serializable {
       ScopeBinding existing, Class<? extends Annotation> annotationType, Scope scope) {
     return addMessage(
         ErrorId.DUPLICATE_SCOPES,
-        "Scope %s is already bound to %s at %s.%n Cannot bind %s.",
+        "Scope %s is already bound to %s at %s.\n Cannot bind %s.",
         existing.getScope(),
         annotationType,
         existing.getSource(),
@@ -503,7 +503,7 @@ public final class Errors implements Serializable {
       TypeListenerBinding listener, TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(
         cause,
-        "Error notifying TypeListener %s (bound at %s) of %s.%n Reason: %s",
+        "Error notifying TypeListener %s (bound at %s) of %s.\n Reason: %s",
         listener.getListener(),
         convert(listener.getSource()),
         type,

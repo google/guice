@@ -38,7 +38,7 @@ final class DuplicateElementError<T> extends InternalErrorDetail<DuplicateElemen
 
   @Override
   protected void formatDetail(List<ErrorDetail<?>> others, Formatter formatter) {
-    formatter.format("%n%s%n", Messages.bold("Duplicates:"));
+    formatter.format("\n%s\n", Messages.bold("Duplicates:"));
     int duplicateIndex = 1;
     for (Map.Entry<T, Collection<Element<T>>> entry : elements.asMap().entrySet()) {
       formatter.format("%-2s: ", duplicateIndex++);
@@ -49,8 +49,8 @@ final class DuplicateElementError<T> extends InternalErrorDetail<DuplicateElemen
                 .collect(Collectors.toSet());
         if (valuesAsString.size() == 1) {
           // String representation of the duplicates elements are the same, so only print out one.
-          formatter.format("Element: %s%n", Messages.redBold(valuesAsString.iterator().next()));
-          formatter.format("    Bound at:%n");
+          formatter.format("Element: %s\n", Messages.redBold(valuesAsString.iterator().next()));
+          formatter.format("    Bound at:\n");
           int index = 1;
           for (Element<T> element : entry.getValue()) {
             formatter.format("    %-2s: ", index++);
@@ -69,14 +69,14 @@ final class DuplicateElementError<T> extends InternalErrorDetail<DuplicateElemen
             } else {
               indent = true;
             }
-            formatter.format("Element: %s%n", Messages.redBold(element.value.toString()));
+            formatter.format("Element: %s\n", Messages.redBold(element.value.toString()));
             formatter.format("    Bound at: ");
             formatElement(element, formatter);
           }
         }
       }
     }
-    formatter.format("%n%s%n", Messages.bold("Multibinder declared at:"));
+    formatter.format("\n%s\n", Messages.bold("Multibinder declared at:"));
     // Multibinder source includes the key of the set. Filter it out since it's not useful in the
     // printed error stack.
     List<Object> filteredSource =

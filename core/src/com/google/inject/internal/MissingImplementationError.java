@@ -55,7 +55,7 @@ final class MissingImplementationError<T>
             .collect(Collectors.toList());
 
     if (!filteredSourcesList.isEmpty()) {
-      formatter.format("%n%s%n", Messages.bold("Requested by:"));
+      formatter.format("\n%s\n", Messages.bold("Requested by:"));
       int sourceListIndex = 1;
       for (List<Object> sources : filteredSourcesList) {
         ErrorFormatter.formatSources(sourceListIndex++, Lists.reverse(sources), formatter);

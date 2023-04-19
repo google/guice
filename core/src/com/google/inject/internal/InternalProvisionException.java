@@ -124,7 +124,7 @@ public final class InternalProvisionException extends Exception {
     return errorInUserCode(
         ErrorId.ERROR_IN_USER_INJECTOR,
         cause,
-        "Error injecting %s using %s.%n Reason: %s",
+        "Error injecting %s using %s.\n Reason: %s",
         type,
         listener,
         cause);
@@ -142,7 +142,7 @@ public final class InternalProvisionException extends Exception {
     return errorInUserCode(
         ErrorId.OTHER,
         cause,
-        "Error notifying InjectionListener %s of %s.%n Reason: %s",
+        "Error notifying InjectionListener %s of %s.\n Reason: %s",
         listener,
         type,
         cause);
@@ -191,7 +191,7 @@ public final class InternalProvisionException extends Exception {
             : "the " + parameterName + " of " + memberStackTraceElement;
     throw InternalProvisionException.create(
             ErrorId.NULL_INJECTED_INTO_NON_NULLABLE,
-            "null returned by binding at %s%n but %s is not @Nullable",
+            "null returned by binding at %s\n but %s is not @Nullable",
             source,
             formattedDependency)
         .addSource(source);

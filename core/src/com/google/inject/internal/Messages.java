@@ -69,7 +69,7 @@ public final class Messages {
 
   /** Returns the formatted message for an exception with the specified messages. */
   public static String formatMessages(String heading, Collection<Message> errorMessages) {
-    Formatter fmt = new Formatter().format(heading).format(":%n%n");
+    Formatter fmt = new Formatter().format(heading).format(":\n\n");
     int index = 1;
     boolean displayCauses = getOnlyCause(errorMessages) == null;
 
@@ -102,7 +102,7 @@ public final class Messages {
               cause.getClass().getName(), causeIdx);
         }
       }
-      fmt.format("%n");
+      fmt.format("\n");
       index++;
     }
 

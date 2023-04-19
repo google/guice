@@ -60,13 +60,13 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
    */
   public final void format(int index, List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
     String id = getErrorIdentifier().map(s -> "[" + Messages.redBold(s) + "]: ").orElse("");
-    formatter.format("%s) %s%s%n", index, id, getMessage());
+    formatter.format("%s) %s%s\n", index, id, getMessage());
     formatDetail(mergeableErrors, formatter);
     // TODO(b/151482394): Output potiential fixes for the error
     Optional<String> learnMoreLink = getLearnMoreLink();
     if (learnMoreLink.isPresent()) {
-      formatter.format("%n%s%n", Messages.bold("Learn more:"));
-      formatter.format("  %s%n", Messages.underline(learnMoreLink.get()));
+      formatter.format("\n%s\n", Messages.bold("Learn more:"));
+      formatter.format("  %s\n", Messages.underline(learnMoreLink.get()));
     }
   }
 

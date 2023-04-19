@@ -76,7 +76,7 @@ final class ProvisionListenerStackCallback<T> {
       throw InternalProvisionException.errorInUserCode(
           ErrorId.OTHER,
           caught,
-          "Error notifying ProvisionListener %s of %s.%n Reason: %s",
+          "Error notifying ProvisionListener %s of %s.\n Reason: %s",
           listener,
           binding.getKey(),
           caught);

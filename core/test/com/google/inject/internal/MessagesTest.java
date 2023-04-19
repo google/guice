@@ -23,7 +23,7 @@ public final class MessagesTest {
 
     @Override
     public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
-      formatter.format("Duplicate count: %s%n", mergeableErrors.size() + 1);
+      formatter.format("Duplicate count: %s\n", mergeableErrors.size() + 1);
     }
 
     @Override

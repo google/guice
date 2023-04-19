@@ -966,19 +966,19 @@ public final class RealMapBinder<K, V> implements Module {
 
         if (!keysOnlyFromBindings.isEmpty()) {
           sb.append(
-              Errors.format("%nFound these Bindings that were missing an associated entry:%n"));
+              Errors.format("\nFound these Bindings that were missing an associated entry:\n"));
           for (Key<V> key : keysOnlyFromBindings) {
             sb.append(
-                Errors.format("  %s bound at: %s%n", key, valueKeyToBinding.get(key).getSource()));
+                Errors.format("  %s bound at: %s\n", key, valueKeyToBinding.get(key).getSource()));
           }
         }
 
         if (!keysOnlyFromProviderMapEntrys.isEmpty()) {
-          sb.append(Errors.format("%nFound these map keys without a corresponding value:%n"));
+          sb.append(Errors.format("\nFound these map keys without a corresponding value:\n"));
           for (Key<V> key : keysOnlyFromProviderMapEntrys) {
             sb.append(
                 Errors.format(
-                    "  '%s' bound at: %s%n",
+                    "  '%s' bound at: %s\n",
                     valueKeyToKey.get(key), valueKeyToEntryBinding.get(key).getSource()));
           }
         }

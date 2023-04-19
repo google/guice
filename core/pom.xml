@@ -129,6 +129,15 @@
               <argLine>-Dguice_bytecode_gen_option=DISABLED</argLine>
             </configuration>
           </execution>
+          <execution>
+            <id>with-windows-line-separators</id>
+            <phase>test</phase>
+            <goals><goal>test</goal></goals>
+            <configuration>
+              <!-- enable ShowHiddenFrames to help tests find AOP frames on Java17 -->
+              <argLine>-Dline.separator='\r\n' -XX:+UnlockDiagnosticVMOptions -XX:+ShowHiddenFrames</argLine>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <!--
