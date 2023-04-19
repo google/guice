@@ -60,7 +60,13 @@ maven_install(
         maven.artifact(
             "com.google.truth",
             "truth",
-            "0.45",
+            "1.1.3",
+            testonly = True,
+        ),
+        maven.artifact(
+            "com.google.truth.extensions",
+            "truth-java8-extension",
+            "1.1.3",
             testonly = True,
         ),
         maven.artifact(

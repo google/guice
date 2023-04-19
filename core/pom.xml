@@ -68,6 +68,11 @@
       <artifactId>truth</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.google.truth.extensions</groupId>
+      <artifactId>truth-java8-extension</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
