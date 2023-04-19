@@ -29,7 +29,9 @@ import javax.persistence.Query;
 import junit.framework.TestCase;
 import org.hibernate.HibernateException;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 
 public class JpaWorkManagerTest extends TestCase {
   private Injector injector;
@@ -41,9 +43,6 @@ public class JpaWorkManagerTest extends TestCase {
   @Override
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
-
-    //startup persistence
-    injector.getInstance(PersistService.class).start();
   }
 
   @Override
@@ -56,6 +55,7 @@ public class JpaWorkManagerTest extends TestCase {
   }
 
   public void testWorkManagerInSession() {
+    injector.getInstance(PersistService.class).start();
     injector.getInstance(UnitOfWork.class).begin();
     try {
       injector.getInstance(TransactionalObject.class).runOperationInTxn();
@@ -89,15 +89,24 @@ public class JpaWorkManagerTest extends TestCase {
     }
   }
 
-  public void testCloseMoreThanOnce() {
-    injector.getInstance(PersistService.class).stop();
+  public void testStartMoreThanOnce() {
+    injector.getInstance(PersistService.class).start();
+    // No exception is thrown on subsequent start.
+    injector.getInstance(PersistService.class).start();
+  }
 
-    try {
-      injector.getInstance(PersistService.class).stop();
-      fail();
-    } catch (IllegalStateException e) {
-      // Ignored.
-    }
+  public void testCloseMoreThanOnce() {
+    injector.getInstance(PersistService.class).start();
+    injector.getInstance(PersistService.class).stop();
+    // No exception is thrown on subsequent stop.
+    injector.getInstance(PersistService.class).stop();
+  }
+
+  public void testCloseWithoutStart() {
+    // No exception.
+    injector.getInstance(PersistService.class).stop();
+    // (but also start it so we can have one tearDown that unconditionally stops started things)
+    injector.getInstance(PersistService.class).start();
   }
 
   public static class TransactionalObject {
