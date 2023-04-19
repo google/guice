@@ -47,11 +47,13 @@ import org.aopalliance.intercept.MethodInterceptor;
  * <pre>
  *     bind(ServiceImpl.class);</pre>
  *
- * This statement does essentially nothing; it "binds the {@code ServiceImpl} class to itself" and
- * does not change Guice's default behavior. You may still want to use this if you prefer your
- * {@link Module} class to serve as an explicit <i>manifest</i> for the services it provides. Also,
- * in rare cases, Guice may be unable to validate a binding at injector creation time unless it is
- * given explicitly.
+ * This statement mostly does nothing; it "binds the {@code ServiceImpl} class to itself". You may
+ * still want to use this if you prefer your {@link Module} class to serve as an explicit
+ * <i>manifest</i> for the services it provides. In rare cases, Guice may be unable to validate a
+ * binding at injector creation time unless it is given explicitly. When using hierarchical
+ * injectors (via {@code Binder.newPrivateBinder}, {@code Binder.PrivateModule}, or {@code
+ * Injector.createChildInjector}), this guidance changes: see the note on hierarchical injectors in
+ * {@link Injector.createChildInjector}.
  *
  * <pre>
  *     bind(Service.class).to(ServiceImpl.class);</pre>

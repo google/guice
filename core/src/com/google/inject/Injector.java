@@ -221,6 +221,16 @@ public interface Injector {
    * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
    * injector to itself.
    *
+   * <p>When using hierarchical injectors (via {@link Binder#newPrivateBinder}, {@link
+   * Binder#PrivateModule}, or {@link Injector#createChildInjector}), extra care is required to
+   * ensure that bindings are associated with the correct injector. Statements that are otherwise
+   * unnecessary - such as {code bind(ServiceImpl.class);} - become critical to associate the
+   * binding with <i>this particular injector</i>, otherwise Guice may promote the binding to an
+   * ancestor injector. Linked bindings such as {@code bind(Service.class).to(ServiceImpl.class);}
+   * will only associate the {@code Service} binding with the current injector; {@code ServiceImpl}
+   * will still be promoted to an ancestor injector without an explicit {@code
+   * bind(ServiceImpl.class);} statement.
+   *
    * @since 2.0
    */
   Injector createChildInjector(Iterable<? extends Module> modules);
