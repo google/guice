@@ -25,7 +25,9 @@ import javax.persistence.EntityTransaction;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
   // TODO(gak): Move these args to the cxtor & make these final.
@@ -64,12 +66,12 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       result = methodInvocation.proceed();
 
     } catch (Exception e) {
-      //commit transaction only if rollback didnt occur
+      // commit transaction only if rollback didnt occur
       if (rollbackIfNecessary(transactional, e, txn)) {
         txn.commit();
       }
 
-      //propagate whatever exception is thrown anyway
+      // propagate whatever exception is thrown anyway
       throw e;
     } finally {
       // Close the em if necessary (guarded so this code doesn't run unless catch fired).
@@ -79,19 +81,25 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       }
     }
 
-    //everything was normal so commit the txn (do not move into try block above as it
+    // everything was normal so commit the txn (do not move into try block above as it
     //  interferes with the advised method's throwing semantics)
     try {
-      txn.commit();
+      if (txn.isActive()) {
+        if (txn.getRollbackOnly()) {
+          txn.rollback();
+        } else {
+          txn.commit();
+        }
+      }
     } finally {
-      //close the em if necessary
+      // close the em if necessary
       if (null != didWeStartWork.get()) {
         didWeStartWork.remove();
         unitOfWork.end();
       }
     }
 
-    //or return result
+    // or return result
     return result;
   }
 
@@ -125,16 +133,16 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       Transactional transactional, Exception e, EntityTransaction txn) {
     boolean commit = true;
 
-    //check rollback clauses
+    // check rollback clauses
     for (Class<? extends Exception> rollBackOn : transactional.rollbackOn()) {
 
-      //if one matched, try to perform a rollback
+      // if one matched, try to perform a rollback
       if (rollBackOn.isInstance(e)) {
         commit = false;
 
-        //check ignore clauses (supercedes rollback clause)
+        // check ignore clauses (supercedes rollback clause)
         for (Class<? extends Exception> exceptOn : transactional.ignore()) {
-          //An exception to the rollback clause was found, DON'T rollback
+          // An exception to the rollback clause was found, DON'T rollback
           // (i.e. commit and throw anyway)
           if (exceptOn.isInstance(e)) {
             commit = true;
@@ -142,11 +150,11 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
           }
         }
 
-        //rollback only if nothing matched the ignore check
+        // rollback only if nothing matched the ignore check
         if (!commit) {
           txn.rollback();
         }
-        //otherwise continue to commit
+        // otherwise continue to commit
 
         break;
       }
