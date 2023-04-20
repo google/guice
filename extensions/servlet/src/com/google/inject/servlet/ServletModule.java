@@ -151,9 +151,9 @@ public class ServletModule extends AbstractModule {
    * This will map any URI containing the text "ajax" in it to {@code MyAjaxServlet}. Such as:
    *
    * <ul>
-   * <li>http://www.google.com/ajax.html
-   * <li>http://www.google.com/content/ajax/index
-   * <li>http://www.google.com/it/is_totally_ajaxian
+   *   <li>http://www.google.com/ajax.html
+   *   <li>http://www.google.com/content/ajax/index
+   *   <li>http://www.google.com/it/is_totally_ajaxian
    * </ul>
    *
    * <h3>Initialization Parameters</h3>
@@ -178,7 +178,7 @@ public class ServletModule extends AbstractModule {
    * <h3>Binding Keys</h3>
    *
    * You can also bind keys rather than classes. This lets you hide implementations with
-   * package-local visbility and expose them using only a Guice module and an annotation:
+   * package-local visibility and expose them using only a Guice module and an annotation:
    *
    * <pre>
    *  ...

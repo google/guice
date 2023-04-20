@@ -34,7 +34,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 /**
- * A very basic test that servletmodule works with bindings.
+ * A very basic test that servlet module works with bindings.
  *
  * @author sameb@google.com (Sam Berlin)
  */

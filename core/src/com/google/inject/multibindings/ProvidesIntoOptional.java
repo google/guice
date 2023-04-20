@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * <pre>
  * {@literal @}ProvidesIntoOptional(DEFAULT)
  * {@literal @}Named("url")
- * String provideFooUrl(FooManager fm) { returm fm.getUrl(); }
+ * String provideFooUrl(FooManager fm) { return fm.getUrl(); }
  *
  * {@literal @}ProvidesIntoOptional(ACTUAL)
  * {@literal @}Named("url")
