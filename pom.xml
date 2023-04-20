@@ -344,9 +344,8 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>5.1.2</version>
+          <version>5.1.8</version>
           <configuration>
-            <excludeDependencies>jsr305</excludeDependencies>
             <instructions>
               <module>com.google.inject</module>
               <_include>-${project.basedir}/build.properties</_include>
@@ -355,7 +354,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <Bundle-Name>${project.artifactId}</Bundle-Name>
               <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
               <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
-              <Import-Package>!com.google.inject.*,*</Import-Package>
+              <Import-Package>!com.google.inject.*,!javax.annotation,*</Import-Package>
               <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
               <_consumer-policy>$(version;==;$(@))</_consumer-policy>
               <_nouses>true</_nouses>

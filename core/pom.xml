@@ -149,7 +149,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.artifactId}</Bundle-Name>
-            <Import-Package>!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
+            <Import-Package>!org.objectweb.asm.*,!com.google.inject.*,!javax.annotation,*</Import-Package>
             <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
           </instructions>
         </configuration>
