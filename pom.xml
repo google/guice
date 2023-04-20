@@ -183,6 +183,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
         <version>3.0.1</version>
+        <optional>true</optional>
       </dependency>
     </dependencies>
   </dependencyManagement>
