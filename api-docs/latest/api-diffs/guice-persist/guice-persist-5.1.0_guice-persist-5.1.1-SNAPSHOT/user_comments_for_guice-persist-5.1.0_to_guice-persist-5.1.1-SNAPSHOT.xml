@@ -14,5 +14,35 @@
 <!-- will cause the same text to appear at each place in the report, but -->
 <!-- will be converted to separate comments when the comments file is used. -->
 <!-- HTML tags in the text field will appear in the report. -->
+<comment>
+  <identifier id="com.google.inject.persist.jpa"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.jpa.JpaPersistModule"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.jpa.JpaPersistModule.ctor_added(java.lang.String, com.google.inject.persist.jpa.JpaPersistOptions)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.jpa.JpaPersistOptions"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.jpa.JpaPersistOptions.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
 
 </comments>
