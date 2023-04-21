@@ -21,6 +21,9 @@ import static com.google.inject.matcher.Matchers.any;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.internal.InternalFlags;
+import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.matcher.Matcher;
+import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -38,7 +41,8 @@ public abstract class PersistModule extends AbstractModule {
     requireBinding(UnitOfWork.class);
     if (InternalFlags.isBytecodeGenEnabled()) {
       // class-level @Transacational
-      bindInterceptor(annotatedWith(Transactional.class), any(), getTransactionInterceptor());
+      bindInterceptor(
+          annotatedWith(Transactional.class), NOT_OBJECT_METHOD, getTransactionInterceptor());
       // method-level @Transacational
       bindInterceptor(any(), annotatedWith(Transactional.class), getTransactionInterceptor());
     }
@@ -47,4 +51,12 @@ public abstract class PersistModule extends AbstractModule {
   protected abstract void configurePersistence();
 
   protected abstract MethodInterceptor getTransactionInterceptor();
+
+  private static final Matcher<Method> NOT_OBJECT_METHOD =
+      new AbstractMatcher<Method>() {
+        @Override
+        public boolean matches(Method m) {
+          return !Object.class.equals(m.getDeclaringClass());
+        }
+      };
 }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
 
 /**
@@ -48,7 +49,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
-    //startup persistence
+    // startup persistence
     injector.getInstance(PersistService.class).start();
   }
 
@@ -66,7 +67,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
         "EntityManager was not closed by transactional service",
         session.getTransaction().isActive());
 
-    //test that the data has been stored
+    // test that the data has been stored
     session.getTransaction().begin();
     Object result =
         session
@@ -88,7 +89,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     try {
       injector.getInstance(TransactionalObject2.class).runOperationInTxnThrowingChecked();
     } catch (IOException e) {
-      //ignore
+      // ignore
     }
 
     EntityManager session = injector.getInstance(EntityManager.class);
@@ -96,7 +97,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
         "EntityManager was not closed by transactional service (rollback didnt happen?)",
         session.getTransaction().isActive());
 
-    //test that the data has been stored
+    // test that the data has been stored
     session.getTransaction().begin();
     List<?> result =
         session
@@ -115,7 +116,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
       injector.getInstance(TransactionalObject3.class).runOperationInTxnThrowingCheckedExcepting();
       fail("Exception was not thrown by test txn-al method!");
     } catch (IOException e) {
-      //ignored
+      // ignored
     }
 
     EntityManager session = injector.getInstance(EntityManager.class);
@@ -123,7 +124,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
         "Txn was not closed by transactional service (commit didnt happen?)",
         session.getTransaction().isActive());
 
-    //test that the data has been stored
+    // test that the data has been stored
     session.getTransaction().begin();
     Object result =
         session
@@ -140,7 +141,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     try {
       injector.getInstance(TransactionalObject4.class).runOperationInTxnThrowingUnchecked();
     } catch (RuntimeException re) {
-      //ignore
+      // ignore
     }
 
     EntityManager session = injector.getInstance(EntityManager.class);
@@ -148,7 +149,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
         "EntityManager was not closed by transactional service (rollback didnt happen?)",
         session.getTransaction().isActive());
 
-    //test that the data has been stored
+    // test that the data has been stored
     session.getTransaction().begin();
     List<?> result =
         session
@@ -159,6 +160,26 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     session.getTransaction().commit();
 
     assertTrue("a result was returned! rollback sure didnt happen!!!", result.isEmpty());
+  }
+
+  public void testTransactionalDoesntAffectObjectMethods() {
+    // Given a persist service that tracks when it's called
+    JpaPersistService persistService = injector.getInstance(JpaPersistService.class);
+    EntityManagerFactory originalEMF = injector.getInstance(EntityManagerFactory.class);
+    TrackedEntityManagerFactory trackingEMF = new TrackedEntityManagerFactory(originalEMF);
+    persistService.start(trackingEMF);
+
+    FakeTransactionalObject txnObj = injector.getInstance(FakeTransactionalObject.class);
+
+    String unused = txnObj.toString();
+    assertFalse(
+        "Should not have created a transaction for toString method",
+        trackingEMF.hasCreatedSomeEntityManager());
+
+    txnObj.fakeTransactionalMethod();
+    assertTrue(
+        "Transaction should have been created for normal method",
+        trackingEMF.hasCreatedSomeEntityManager());
   }
 
   @Transactional
@@ -214,5 +235,10 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
       throw new IOException();
     }
+  }
+
+  @Transactional
+  public static class FakeTransactionalObject {
+    public void fakeTransactionalMethod() {}
   }
 }
