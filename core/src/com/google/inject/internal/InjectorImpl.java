@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.inject.internal.Annotations.findScopeAnnotation;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -781,6 +782,18 @@ final class InjectorImpl implements Injector, Lookups {
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
     if (providerType == rawType) {
       throw errors.recursiveProviderType().toException();
+    }
+
+    // if no scope is specified, look for a scoping annotation on the raw type
+    if (!scoping.isExplicitlyScoped()) {
+      int numErrorsBefore = errors.size();
+      Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, rawType);
+      if (scopeAnnotation != null) {
+        scoping =
+            Scoping.makeInjectable(
+                Scoping.forAnnotation(scopeAnnotation), this, errors.withSource(rawType));
+      }
+      errors.throwIfNewErrors(numErrorsBefore);
     }
 
     // Assume the provider provides an appropriate type. We double check at runtime.

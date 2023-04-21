@@ -69,6 +69,7 @@ public class ScopesTest extends TestCase {
           bind(NotASingleton.class);
           bind(ImplementedBySingleton.class).in(Scopes.SINGLETON);
           bind(ProvidedBySingleton.class).in(Scopes.SINGLETON);
+          bind(ProvidedByAnnotatedSingleton.class);
         }
       };
 
@@ -83,6 +84,7 @@ public class ScopesTest extends TestCase {
     Implementation.nextInstanceId = 0;
     ProvidedBySingleton.nextInstanceId = 0;
     ThrowingSingleton.nextInstanceId = 0;
+    ProvidedByAnnotatedSingleton.nextInstanceId = 0;
   }
 
   public void testSingletons() {
@@ -115,6 +117,10 @@ public class ScopesTest extends TestCase {
     assertSame(
         injector.getInstance(ProvidedBySingleton.class),
         injector.getInstance(ProvidedBySingleton.class));
+
+    assertSame(
+        injector.getInstance(ProvidedByAnnotatedSingleton.class),
+        injector.getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
   public void testJustInTimeAnnotatedSingleton() {
@@ -123,12 +129,19 @@ public class ScopesTest extends TestCase {
     assertSame(
         injector.getInstance(AnnotatedSingleton.class),
         injector.getInstance(AnnotatedSingleton.class));
+
+    assertSame(
+        injector.getInstance(ProvidedByAnnotatedSingleton.class),
+        injector.getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
   public void testSingletonIsPerInjector() {
     assertNotSame(
         Guice.createInjector().getInstance(AnnotatedSingleton.class),
         Guice.createInjector().getInstance(AnnotatedSingleton.class));
+    assertNotSame(
+        Guice.createInjector().getInstance(ProvidedByAnnotatedSingleton.class),
+        Guice.createInjector().getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
   public void testOverriddingAnnotation() {
@@ -138,12 +151,17 @@ public class ScopesTest extends TestCase {
               @Override
               protected void configure() {
                 bind(AnnotatedSingleton.class).in(Scopes.NO_SCOPE);
+                bind(ProvidedByAnnotatedSingleton.class).in(Scopes.NO_SCOPE);
               }
             });
 
     assertNotSame(
         injector.getInstance(AnnotatedSingleton.class),
         injector.getInstance(AnnotatedSingleton.class));
+
+    assertNotSame(
+        injector.getInstance(ProvidedByAnnotatedSingleton.class),
+        injector.getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
   public void testScopingAnnotationsOnAbstractTypeViaBind() {
@@ -554,8 +572,15 @@ public class ScopesTest extends TestCase {
   @ImplementedBy(Implementation.class)
   static interface ImplementedBySingleton {}
 
-  @ProvidedBy(ImplementationProvider.class)
+  @ProvidedBy(ProvidedByProvider.class)
   static class ProvidedBySingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  @Singleton
+  @ProvidedBy(ProvidedByAnnotatedSingletonProvider.class)
+  static class ProvidedByAnnotatedSingleton {
     static int nextInstanceId;
     final int instanceId = nextInstanceId++;
   }
@@ -565,10 +590,18 @@ public class ScopesTest extends TestCase {
     final int instanceId = nextInstanceId++;
   }
 
-  static class ImplementationProvider implements Provider<ProvidedBySingleton> {
+  static class ProvidedByProvider implements Provider<ProvidedBySingleton> {
     @Override
     public ProvidedBySingleton get() {
       return new ProvidedBySingleton();
+    }
+  }
+
+  static class ProvidedByAnnotatedSingletonProvider
+      implements Provider<ProvidedByAnnotatedSingleton> {
+    @Override
+    public ProvidedByAnnotatedSingleton get() {
+      return new ProvidedByAnnotatedSingleton();
     }
   }
 

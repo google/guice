@@ -464,6 +464,8 @@ public class BinderTest extends TestCase {
     assertNotNull(injector.getInstance(HasProvidedBy1.class));
     assertNotNull(injector.getInstance(HasImplementedBy1.class));
     assertNotSame(HasProvidedBy2.class, injector.getInstance(HasProvidedBy2.class).getClass());
+    assertNotSame(
+        injector.getInstance(HasProvidedBy2.class), injector.getInstance(HasProvidedBy2.class));
     assertSame(
         ExtendsHasImplementedBy2.class, injector.getInstance(HasImplementedBy2.class).getClass());
     assertSame(JustAClass.class, injector.getInstance(JustAClass.class).getClass());
