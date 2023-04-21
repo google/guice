@@ -21,6 +21,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.AbstractModule"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.AbstractModule.requestInjection_added(com.google.inject.TypeLiteral, java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.PrivateModule"/>
   <text>
     InsertCommentsHere
@@ -46,6 +58,30 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.internal.Annotations.annotationInstanceClassString_added(java.lang.Class, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.ErrorId"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.ErrorId.REQUEST_INJECTION_WITH_DIFFERENT_TYPES"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Errors"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.Errors.requestInjectionWithDifferentTypes_added(java.lang.Object, com.google.inject.TypeLiteral, java.lang.Object, com.google.inject.TypeLiteral)"/>
   <text>
     InsertCommentsHere
   </text>
