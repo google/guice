@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
@@ -37,7 +38,9 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
 
-/** @author crazybob@google.com (Bob Lee) */
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
 public class BinderTest extends TestCase {
 
   private final Logger loggerToWatch = Logger.getLogger(Guice.class.getName());
@@ -63,6 +66,7 @@ public class BinderTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     loggerToWatch.addHandler(fakeHandler);
+    TwoParts.injectedCount = 0;
   }
 
   @Override
@@ -688,5 +692,49 @@ public class BinderTest extends TestCase {
           "Cannot inject a Provider that has no type parameter",
           "while locating Provider");
     }
+  }
+
+  private static interface Part1 {
+    String getStr();
+  }
+
+  private static interface Part2 {}
+
+  private static class TwoParts implements Part1, Part2 {
+    String str;
+    static int injectedCount = 0;
+
+    @Inject
+    void inject(String str) {
+      injectedCount++;
+      this.str = str;
+    }
+
+    @Override
+    public String getStr() {
+      return str;
+    }
+  }
+
+  public void testToInstanceWithDifferentTypesWorksAndDoesntInjectInstanceTwice() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                TwoParts parts = new TwoParts();
+                bind(Part1.class).toInstance(parts);
+                bind(Part2.class).toInstance(parts);
+              }
+
+              @Provides
+              String provideStr() {
+                return "foo";
+              }
+            });
+    Part1 parts = injector.getInstance(Part1.class);
+    assertThat(parts).isSameInstanceAs(injector.getInstance(Part2.class));
+    assertThat(parts.getStr()).isEqualTo("foo");
+    assertThat(TwoParts.injectedCount).isEqualTo(1);
   }
 }

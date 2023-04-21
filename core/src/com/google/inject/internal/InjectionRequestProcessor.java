@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Stage;
-import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
@@ -61,21 +60,31 @@ final class InjectionRequestProcessor extends AbstractProcessor {
       injectionPoints = e.getPartialValue();
     }
 
-    initializer.requestInjection(
-        injector, request.getInstance(), null, request.getSource(), injectionPoints);
-    // When recreating the injection request, we revise the TypeLiteral to be the type
-    // of the instance.  This is because currently Guice ignores the user's TypeLiteral
-    // when determining the types for members injection.
-    // If/when this is fixed, we can report the exact type back to the user.
-    // (Otherwise the injection points exposed from the request may be wrong.)
+    requestInjection(request, injectionPoints, errors);
+
+    // Drop the actual instance from the binding data we store for the SPI.
+    // TODO(sameb): Why?
     injector
         .getBindingData()
         .putInjectionRequest(
-            new InjectionRequest<>(
-                request.getSource(),
-                TypeLiteral.get(request.getInstance().getClass()),
-                /* instance= */ null));
+            new InjectionRequest<>(request.getSource(), request.getType(), /* instance= */ null));
     return true;
+  }
+
+  // Note: This is extracted to a separate method just to help Java infer the generics correctly.
+  private <T> void requestInjection(
+      InjectionRequest<T> request, Set<InjectionPoint> injectionPoints, Errors errors) {
+    // We don't need to keep the return value, because we're not _using_ the injected value
+    // anyway... we're just injecting it.
+    Initializable<T> unused =
+        initializer.requestInjection(
+            injector,
+            request.getType(),
+            request.getInstance(),
+            null,
+            request.getSource(),
+            injectionPoints,
+            errors);
   }
 
   void validate() {

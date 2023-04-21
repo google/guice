@@ -132,6 +132,14 @@ public abstract class AbstractModule implements Module {
     binder().requestInjection(instance);
   }
 
+  /**
+   * @see Binder#requestInjection(TypeLiteral, Object)
+   * @since vNext
+   */
+  protected <T> void requestInjection(TypeLiteral<T> type, T instance) {
+    binder().requestInjection(type, instance);
+  }
+
   /** @see Binder#requestStaticInjection(Class[]) */
   protected void requestStaticInjection(Class<?>... types) {
     binder().requestStaticInjection(types);

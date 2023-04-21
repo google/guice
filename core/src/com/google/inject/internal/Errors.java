@@ -499,6 +499,19 @@ public final class Errors implements Serializable {
         t);
   }
 
+  public Errors requestInjectionWithDifferentTypes(
+      Object instance, TypeLiteral<?> type1, Object type1Source, TypeLiteral<?> type2) {
+    return addMessage(
+        ErrorId.REQUEST_INJECTION_WITH_DIFFERENT_TYPES,
+        "Cannot request injection on one instance with two different types. requestInjection was"
+            + " already called for instance %s at %s (with type %s), which is different than type"
+            + " %s.",
+        instance.getClass().getName() + "@" + System.identityHashCode(instance),
+        type1Source,
+        type1,
+        type2);
+  }
+
   public Errors errorNotifyingTypeListener(
       TypeListenerBinding listener, TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(

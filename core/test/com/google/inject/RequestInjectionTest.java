@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertThrows;
 
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeEncounter;
@@ -25,7 +26,9 @@ import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Retention;
 import junit.framework.TestCase;
 
-/** @author crazybob@google.com (Bob Lee) */
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
 public class RequestInjectionTest extends TestCase {
 
   @Retention(RUNTIME)
@@ -41,6 +44,7 @@ public class RequestInjectionTest extends TestCase {
     super.setUp();
     HasInjections.staticField = 0;
     HasInjections.staticMethod = null;
+    NeedsThing.injectedCount = 0;
   }
 
   public void testInjectMembers() {
@@ -256,5 +260,96 @@ public class RequestInjectionTest extends TestCase {
                     });
               }
             });
+  }
+
+  static class NeedsThing<T> {
+    static int injectedCount = 0;
+
+    T thing;
+
+    @Inject
+    void register(T thing) {
+      this.thing = thing;
+      injectedCount++;
+    }
+  }
+
+  private static class Type1Module extends AbstractModule {
+    final NeedsThing<Integer> needer;
+
+    Type1Module(NeedsThing<Integer> needer) {
+      this.needer = needer;
+    }
+
+    @Override
+    protected void configure() {
+      requestInjection(new TypeLiteral<NeedsThing<Integer>>() {}, needer);
+    }
+
+    @Provides
+    Integer provideInt() {
+      return 5;
+    }
+  }
+
+  private static class Type2Module extends AbstractModule {
+    final NeedsThing<Integer> needer;
+
+    Type2Module(NeedsThing<Integer> needer) {
+      this.needer = needer;
+    }
+
+    @Override
+    protected void configure() {
+      requestInjection(new TypeLiteral<NeedsThing<? extends Number>>() {}, needer);
+    }
+  }
+
+  public void testRequestInjectionWithParameterizedType() {
+    NeedsThing<String> thing = new NeedsThing<>();
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toInstance("hi");
+            requestInjection(new TypeLiteral<NeedsThing<String>>() {}, thing);
+          }
+        });
+
+    assertEquals("hi", thing.thing);
+    assertEquals(1, NeedsThing.injectedCount);
+  }
+
+  public void testMultipleInjectionRequestsWithDifferentTypes() {
+    NeedsThing<Integer> needer = new NeedsThing<>();
+    CreationException ex =
+        assertThrows(
+            CreationException.class,
+            () -> Guice.createInjector(new Type1Module(needer), new Type2Module(needer)));
+    assertContains(
+        ex.getMessage(),
+        "Cannot request injection on one instance with two different types. requestInjection was"
+            + " already called for instance RequestInjectionTest$NeedsThing@"
+            + System.identityHashCode(needer)
+            + " at RequestInjectionTest$Type1Module.configure(",
+        " (with type RequestInjectionTest$NeedsThing<Integer>),"
+            + " which is different than type RequestInjectionTest$NeedsThing<? extends Number>",
+        "at RequestInjectionTest$Type2Module.configure(");
+  }
+
+  public void testMultipleRequestInjectionsForSameTypeInjectsOnce() {
+    NeedsThing<String> thing = new NeedsThing<>();
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toInstance("hi");
+            requestInjection(new TypeLiteral<NeedsThing<String>>() {}, thing);
+            requestInjection(new TypeLiteral<NeedsThing<String>>() {}, thing);
+          }
+        });
+
+    assertEquals("hi", thing.thing);
+    assertEquals(1, NeedsThing.injectedCount);
   }
 }
