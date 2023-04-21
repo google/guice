@@ -26,6 +26,7 @@ import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.Finder;
 import java.io.IOException;
 import java.util.Date;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -57,6 +58,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
   public void testSimpleTransaction() {
     injector.getInstance(TransactionalObject.class).runOperationInTxn();
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse(em.getTransaction().isActive());
 
@@ -77,6 +79,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
   }
 
   public void testSimpleTransactionWithMerge() {
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager emOrig = injector.getInstance(EntityManager.class);
     JpaTestEntity entity =
         injector.getInstance(TransactionalObject.class).runOperationInTxnWithMerge();
@@ -107,6 +110,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
   }
 
   public void disabled_testSimpleTransactionWithMergeAndDF() {
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager emOrig = injector.getInstance(EntityManager.class);
     JpaTestEntity entity =
         injector.getInstance(TransactionalObject.class).runOperationInTxnWithMergeForDf();
@@ -140,6 +144,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
       injector.getInstance(UnitOfWork.class).end();
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
 
     assertFalse(
@@ -168,6 +173,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
       injector.getInstance(UnitOfWork.class).end();
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse(
         "Session was not closed by transactional service (rollback didnt happen?)",
@@ -187,39 +193,39 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
   }
 
   public static class TransactionalObject {
-    private final EntityManager em;
+    private final Provider<EntityManager> emProvider;
 
     @Inject
-    public TransactionalObject(EntityManager em) {
-      this.em = em;
+    public TransactionalObject(Provider<EntityManager> emProvider) {
+      this.emProvider = emProvider;
     }
 
     @Transactional
     public void runOperationInTxn() {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT);
-      em.persist(entity);
+      emProvider.get().persist(entity);
     }
 
     @Transactional
     public JpaTestEntity runOperationInTxnWithMerge() {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT_MERGE);
-      return em.merge(entity);
+      return emProvider.get().merge(entity);
     }
 
     @Transactional
     public JpaTestEntity runOperationInTxnWithMergeForDf() {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT_MERGE_FORDF);
-      return em.merge(entity);
+      return emProvider.get().merge(entity);
     }
 
     @Transactional(rollbackOn = IOException.class)
     public void runOperationInTxnThrowingChecked() throws IOException {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
-      em.persist(entity);
+      emProvider.get().persist(entity);
 
       throw new IOException();
     }
@@ -228,7 +234,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     public void runOperationInTxnThrowingUnchecked() {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
-      em.persist(entity);
+      emProvider.get().persist(entity);
 
       throw new IllegalStateException();
     }

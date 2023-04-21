@@ -34,7 +34,8 @@ public class JpaPersistServiceTest extends TestCase {
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
 
   private final JpaPersistService sut =
-      new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
+      new JpaPersistService(
+          JpaPersistOptions.builder().build(), PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);
   private final EntityManagerFactory factory = mock(EntityManagerFactory.class);
   private final EntityManager entityManager = mock(EntityManager.class);

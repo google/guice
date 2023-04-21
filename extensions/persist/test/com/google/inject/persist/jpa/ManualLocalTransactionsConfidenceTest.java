@@ -22,6 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import java.util.Date;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import junit.framework.TestCase;
@@ -71,10 +72,11 @@ public class ManualLocalTransactionsConfidenceTest extends TestCase {
   }
 
   public static class TransactionalObject {
-    @Inject EntityManager em;
+    @Inject Provider<EntityManager> emProvider;
 
     @Transactional
     public void runOperationInTxn() {
+      EntityManager em = emProvider.get();
       JpaParentTestEntity entity = new JpaParentTestEntity();
       JpaTestEntity child = new JpaTestEntity();
 

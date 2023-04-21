@@ -22,6 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.Finder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,11 +63,7 @@ public class DynamicFinderTest extends TestCase {
 
     dao.persist(te);
 
-    //im not sure this hack works...
-    assertFalse(
-        "Duplicate entity managers crossing-scope",
-        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
-
+    injector.getInstance(UnitOfWork.class).begin();
     List<JpaTestEntity> list = injector.getInstance(JpaFinder.class).listAll();
     assertNotNull(list);
     assertFalse(list.isEmpty());

@@ -54,6 +54,8 @@ public class CustomPropsEntityManagerFactoryProvisionTest extends TestCase {
     //startup persistence
     injector.getInstance(PersistService.class).start();
 
+    injector.getInstance(UnitOfWork.class).begin();
+
     //obtain em
     assertTrue(injector.getInstance(EntityManager.class).isOpen());
   }

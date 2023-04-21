@@ -57,11 +57,6 @@ public class EntityManagerProvisionTest extends TestCase {
 
     dao.persist(te);
 
-    //im not sure this hack works...
-    assertFalse(
-        "Duplicate entity managers crossing-scope",
-        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
-
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
@@ -79,11 +74,6 @@ public class EntityManagerProvisionTest extends TestCase {
     JpaTestEntity te = new JpaTestEntity();
 
     dao.persist(te);
-
-    //im not sure this hack works...
-    assertFalse(
-        "Duplicate entity managers crossing-scope",
-        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);

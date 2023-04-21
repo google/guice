@@ -56,7 +56,8 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
   }
 
   public void testSimpleCrossTxnWork() {
-    //pretend that the request was started here
+    // pretend that the request was started here
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
 
     JpaTestEntity entity =
@@ -76,7 +77,8 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
 
     injector.getInstance(UnitOfWork.class).end();
 
-    //try to query them back out
+    // try to query them back out
+    injector.getInstance(UnitOfWork.class).begin();
     em = injector.getInstance(EntityManager.class);
     assertNotNull(
         em.createQuery("from JpaTestEntity where text = :text")

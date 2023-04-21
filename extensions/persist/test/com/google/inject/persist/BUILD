@@ -27,6 +27,7 @@ java_library(
         "//third_party/java/hibernate:hibernate5",
         "//third_party/java/hsqldb:hsqldb2",
         "//third_party/java/javax_persistence",
+        "//third_party/java/jsr330_inject",
         "//third_party/java/junit",
         "//third_party/java/mockito",
     ],

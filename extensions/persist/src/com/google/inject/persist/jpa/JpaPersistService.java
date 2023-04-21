@@ -33,24 +33,30 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
 @Singleton
 class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistService {
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<>();
 
   private final String persistenceUnitName;
   private final Map<?, ?> persistenceProperties;
+  private final JpaPersistOptions options;
 
   @Inject
   public JpaPersistService(
-      @Jpa String persistenceUnitName, @Nullable @Jpa Map<?, ?> persistenceProperties) {
+      @Jpa JpaPersistOptions options,
+      @Jpa String persistenceUnitName,
+      @Nullable @Jpa Map<?, ?> persistenceProperties) {
+    this.options = options;
     this.persistenceUnitName = persistenceUnitName;
     this.persistenceProperties = persistenceProperties;
   }
 
   @Override
   public EntityManager get() {
-    if (!isWorking()) {
+    if (options.getAutoBeginWorkOnEntityManagerCreation() && !isWorking()) {
       begin();
     }
 

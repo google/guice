@@ -24,6 +24,7 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import java.io.IOException;
 import java.util.Date;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -58,6 +59,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
         .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
         .runOperationInTxn();
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
 
@@ -86,6 +88,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
       injector.getInstance(UnitOfWork.class).end();
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
 
     assertFalse(
@@ -114,6 +117,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
       injector.getInstance(UnitOfWork.class).end();
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse(
         "Session was not closed by transactional service (rollback didnt happen?)",
@@ -131,11 +135,11 @@ public class JoiningLocalTransactionsTest extends TestCase {
   }
 
   public static class TransactionalObject {
-    private final EntityManager em;
+    private final Provider<EntityManager> emProvider;
 
     @Inject
-    public TransactionalObject(EntityManager em) {
-      this.em = em;
+    public TransactionalObject(Provider<EntityManager> emProvider) {
+      this.emProvider = emProvider;
     }
 
     @Transactional
@@ -145,6 +149,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
 
     @Transactional(rollbackOn = IOException.class)
     public void runOperationInTxnInternal() {
+      EntityManager em = emProvider.get();
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT);
       em.persist(entity);
@@ -159,7 +164,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
     private void runOperationInTxnThrowingCheckedInternal() throws IOException {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
-      em.persist(entity);
+      emProvider.get().persist(entity);
 
       throw new IOException();
     }
@@ -173,7 +178,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
     public void runOperationInTxnThrowingUncheckedInternal() {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
-      em.persist(entity);
+      emProvider.get().persist(entity);
 
       throw new IllegalStateException();
     }

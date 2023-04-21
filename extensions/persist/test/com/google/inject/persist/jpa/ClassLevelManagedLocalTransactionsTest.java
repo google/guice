@@ -21,10 +21,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
@@ -62,6 +64,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
   public void testSimpleTransaction() {
     injector.getInstance(TransactionalObject.class).runOperationInTxn();
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager session = injector.getInstance(EntityManager.class);
     assertFalse(
         "EntityManager was not closed by transactional service",
@@ -92,6 +95,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
       // ignore
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager session = injector.getInstance(EntityManager.class);
     assertFalse(
         "EntityManager was not closed by transactional service (rollback didnt happen?)",
@@ -119,6 +123,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
       // ignored
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager session = injector.getInstance(EntityManager.class);
     assertFalse(
         "Txn was not closed by transactional service (commit didnt happen?)",
@@ -144,6 +149,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
       // ignore
     }
 
+    injector.getInstance(UnitOfWork.class).begin();
     EntityManager session = injector.getInstance(EntityManager.class);
     assertFalse(
         "EntityManager was not closed by transactional service (rollback didnt happen?)",
@@ -184,9 +190,10 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
   @Transactional
   public static class TransactionalObject {
-    @Inject EntityManager session;
+    @Inject Provider<EntityManager> sessionProvider;
 
     public void runOperationInTxn() {
+      EntityManager session = sessionProvider.get();
       assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT);
@@ -196,10 +203,11 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
   @Transactional
   public static class TransactionalObject4 {
-    @Inject EntityManager session;
+    @Inject Provider<EntityManager> sessionProvider;
 
     @Transactional
     public void runOperationInTxnThrowingUnchecked() {
+      EntityManager session = sessionProvider.get();
       assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
@@ -211,9 +219,10 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
   @Transactional(rollbackOn = IOException.class, ignore = FileNotFoundException.class)
   public static class TransactionalObject3 {
-    @Inject EntityManager session;
+    @Inject Provider<EntityManager> sessionProvider;
 
     public void runOperationInTxnThrowingCheckedExcepting() throws IOException {
+      EntityManager session = sessionProvider.get();
       assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT_2);
@@ -225,9 +234,10 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
   @Transactional(rollbackOn = IOException.class)
   public static class TransactionalObject2 {
-    @Inject EntityManager session;
+    @Inject Provider<EntityManager> sessionProvider;
 
     public void runOperationInTxnThrowingChecked() throws IOException {
+      EntityManager session = sessionProvider.get();
       assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
