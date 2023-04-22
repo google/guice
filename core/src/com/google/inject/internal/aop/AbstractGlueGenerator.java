@@ -102,8 +102,8 @@ abstract class AbstractGlueGenerator {
 
   /** Generates a unique name based on the original class name and marker. */
   private static String proxyName(String hostName, String marker, int hash) {
-    int id = ((hash & 0x000FFFFF) | (COUNTER.getAndIncrement() << 20));
-    String proxyName = hostName + marker + id;
+    long id = ((hash & 0x000FFFFF) | (COUNTER.getAndIncrement() << 20));
+    String proxyName = hostName + marker + Long.toHexString(id);
     if (proxyName.startsWith("java/") && !ClassDefining.hasPackageAccess()) {
       proxyName = '$' + proxyName; // can't define java.* glue in same package
     }
