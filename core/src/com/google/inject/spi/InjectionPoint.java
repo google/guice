@@ -167,7 +167,7 @@ public final class InjectionPoint {
 
   /** Returns the injected constructor, field, or method. */
   public Member getMember() {
-    // TODO: Don't expose the original member (which probably has setAccessible(true)).
+    // TODO -).
     return member;
   }
 

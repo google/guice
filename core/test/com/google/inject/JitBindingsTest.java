@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.FAIL_ALL;
@@ -683,6 +684,35 @@ public class JitBindingsTest extends TestCase {
       assertContains(expected.getMessage(), jitInParentFailed(ProvByProvider.class));
       assertEquals(1, expected.getErrorMessages().size());
     }
+  }
+
+  @ImplementedBy(AImpl.class)
+  static interface A {}
+
+  static class AImpl implements A {}
+
+  @ImplementedBy(BImpl.class)
+  static interface B {}
+
+  static class BImpl implements B {
+    @Inject
+    BImpl(A a) {}
+  }
+
+  // See https://github.com/google/guice/issues/700
+  public void testOutOfOrderImplementedByWorks() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder().requireExplicitBindings();
+
+                bind(B.class);
+                bind(A.class);
+              }
+            });
+    assertThat(injector.getInstance(B.class)).isNotNull();
   }
 
   private void ensureWorks(Injector injector, Class<?>... classes) {

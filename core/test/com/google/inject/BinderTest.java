@@ -739,4 +739,54 @@ public class BinderTest extends TestCase {
     assertThat(parts.getStr()).isEqualTo("foo");
     assertThat(TwoParts.injectedCount).isEqualTo(1);
   }
+
+  @ImplementedBy(ImplementsHasImplementedByThatWantsExplicitClass.class)
+  static interface HasImplementedByThatWantsExplicitClass {}
+
+  static class ImplementsHasImplementedByThatWantsExplicitClass
+      implements HasImplementedByThatWantsExplicitClass {
+    JustAClass jac;
+
+    @Inject
+    ImplementsHasImplementedByThatWantsExplicitClass(JustAClass jac) {
+      this.jac = jac;
+    }
+  }
+
+  /**
+   * See https://github.com/google/guice/pull/1650.
+   *
+   * <p>Test that {@code JustAClass} is not bound with JIT binding when {@code
+   * bind(HasImplementedByThatWantsExplicitClass.class}} is called before {@code
+   * bind(JustAClass.class)}.
+   */
+  public void testJitDependencyCanUseExplicitDependenciesInAnyOrder() {
+    // The test passes if injector creation doesn't throw.
+    Guice.createInjector(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(HasImplementedByThatWantsExplicitClass.class);
+            bind(JustAClass.class);
+          }
+        });
+  }
+
+  static class AnotherClass extends JustAClass {}
+
+  public void testJitDependencyCanUseExplicitDependenciesInAnyOrder_withSubclass() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(HasImplementedByThatWantsExplicitClass.class);
+                bind(JustAClass.class).to(AnotherClass.class);
+              }
+            });
+    ImplementsHasImplementedByThatWantsExplicitClass hasser =
+        (ImplementsHasImplementedByThatWantsExplicitClass)
+            injector.getInstance(HasImplementedByThatWantsExplicitClass.class);
+    assertThat(hasser.jac).isInstanceOf(AnotherClass.class);
+  }
 }

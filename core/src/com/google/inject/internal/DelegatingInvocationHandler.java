@@ -44,7 +44,7 @@ class DelegatingInvocationHandler<T> implements InvocationHandler {
               + " proxying is initialized to null."
               + " No methods can be called.");
 
-      // TODO: method.setAccessible(true); ?
+      // TODO: user -; ?
       // this would fix visibility errors when we proxy a
       // non-public interface.
       return method.invoke(delegate, args);

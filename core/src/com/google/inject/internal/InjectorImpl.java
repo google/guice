@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Default {@link Injector} implementation.
@@ -695,7 +696,12 @@ final class InjectorImpl implements Injector, Lookups {
    * none is specified.
    */
   <T> BindingImpl<T> createUninitializedBinding(
-      Key<T> key, Scoping scoping, Object source, Errors errors, boolean jitBinding)
+      Key<T> key,
+      Scoping scoping,
+      Object source,
+      Errors errors,
+      boolean jitBinding,
+      Consumer<CreationListener> creationListenerCallback)
       throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
 
@@ -717,7 +723,8 @@ final class InjectorImpl implements Injector, Lookups {
     // Handle @ImplementedBy
     if (implementedBy != null) {
       Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
-      return createImplementedByBinding(key, scoping, implementedBy, errors);
+      return createImplementedByBinding(
+          key, scoping, implementedBy, errors, creationListenerCallback);
     }
 
     // Handle @ProvidedBy.
@@ -817,7 +824,11 @@ final class InjectorImpl implements Injector, Lookups {
 
   /** Creates a binding for a type annotated with @ImplementedBy. */
   private <T> BindingImpl<T> createImplementedByBinding(
-      Key<T> key, Scoping scoping, ImplementedBy implementedBy, Errors errors)
+      Key<T> key,
+      Scoping scoping,
+      ImplementedBy implementedBy,
+      Errors errors,
+      Consumer<CreationListener> creationListenerCallback)
       throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
     Class<?> implementationType = implementedBy.value();
@@ -839,7 +850,8 @@ final class InjectorImpl implements Injector, Lookups {
     final Key<? extends T> targetKey = Key.get(subclass);
     Object source = rawType;
     FactoryProxy<T> factory = new FactoryProxy<>(this, key, targetKey, source);
-    factory.notify(errors); // causes the factory to initialize itself internally
+    // Notify any callbacks that we have a new CreationListener that needs to be notified.
+    creationListenerCallback.accept(factory);
     return new LinkedBindingImpl<T>(
         this,
         key,
@@ -964,8 +976,16 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     Object source = key.getTypeLiteral().getRawType();
+    // Notify the creationListener right away, because we're going to recursively create JIT
+    // bindings on-demand.
     BindingImpl<T> binding =
-        createUninitializedBinding(key, Scoping.UNSCOPED, source, errors, true);
+        createUninitializedBinding(
+            key,
+            Scoping.UNSCOPED,
+            source,
+            errors,
+            true,
+            creationListener -> creationListener.notify(errors));
     errors.throwIfNewErrors(numErrorsBefore);
     initializeJitBinding(binding, errors);
     return binding;

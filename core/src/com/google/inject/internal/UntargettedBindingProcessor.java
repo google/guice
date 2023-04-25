@@ -48,10 +48,16 @@ class UntargettedBindingProcessor extends AbstractBindingProcessor {
               return true;
             }
 
-            // This cast is safe after the preceeding check.
+            // Queue up the creationListener for notify until after bindings are processed.
             try {
               BindingImpl<T> binding =
-                  injector.createUninitializedBinding(key, scoping, source, errors, false);
+                  injector.createUninitializedBinding(
+                      key,
+                      scoping,
+                      source,
+                      errors,
+                      false,
+                      processedBindingData::addCreationListener);
               scheduleInitialization(binding);
               putBinding(binding);
             } catch (ErrorsException e) {
