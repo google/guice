@@ -10,24 +10,54 @@ package(
 
 java_library(
     name = "tests",
-    srcs = glob([
-        "**/*.java",
-    ]),
+    srcs = glob(
+        ["**/*.java"],
+        exclude = ["*Tck.java"],
+    ),
     deps = [
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",
         "//third_party/java/aopalliance",
         "//third_party/java/guava/testing",
+        "//third_party/java/jakarta_inject",
         "//third_party/java/jsr330_inject",
-        "//third_party/java/jsr330_inject:tck",
         "//third_party/java/junit",
         "@maven//:biz_aQute_bnd",
         "@maven//:org_apache_felix_org_apache_felix_framework",
     ],
 )
 
+# We split the TCK tests out from the normal libraries, because the jakarta.inject TCK uses the same
+# packages as the javax.inject TCK, so the two cannot be in the same classloader.
+
+java_library(
+    name = "jakarta_tck_test",
+    srcs = ["GuiceJakartaTck.java"],
+    deps = [
+        "//core/src/com/google/inject",
+        "//third_party/java/jakarta_inject",
+        "//third_party/java/jakarta_inject_tck",
+        "//third_party/java/junit",
+    ],
+)
+
+java_library(
+    name = "javax_inject_tck_test",
+    srcs = ["GuiceTck.java"],
+    deps = [
+        "//core/src/com/google/inject",
+        "//third_party/java/jsr330_inject",
+        "//third_party/java/jsr330_inject:tck",
+        "//third_party/java/junit",
+    ],
+)
+
 guice_test_suites(
     name = "gen_tests",
+    srcs = glob(
+        ["**/*Test.java"],
+        exclude = ["*Tck.java"],
+    ),
     jvm_flags = [
         # those 2 options are required for some tests that checks stack traces
         "-XX:+UnlockDiagnosticVMOptions",
@@ -42,6 +72,10 @@ guice_test_suites(
 
 [guice_test_suites(
     name = "gen_tests_class_loading_%s" % custom_class_loading_option,
+    srcs = glob(
+        ["**/*Test.java"],
+        exclude = ["*Tck.java"],
+    ),
     args = [
         "--guice_custom_class_loading=%s" % custom_class_loading_option,
     ],
@@ -61,3 +95,19 @@ guice_test_suites(
     "CHILD",
     "ANONYMOUS",
 ]]
+
+guice_test_suites(
+    name = "gen_jakarta_tck_tests",
+    srcs = ["GuiceJakartaTck.java"],
+    sizes = ["small"],
+    suffix = "_jakarta_tck",
+    deps = [":jakarta_tck_test"],
+)
+
+guice_test_suites(
+    name = "gen_javax_inject_tck_tests",
+    srcs = ["GuiceTck.java"],
+    sizes = ["small"],
+    suffix = "_javax_inject_tck",
+    deps = [":javax_inject_tck_test"],
+)

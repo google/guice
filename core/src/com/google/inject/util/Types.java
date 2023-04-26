@@ -144,4 +144,15 @@ public final class Types {
   public static Type javaxProviderOf(Type type) {
     return Types.newParameterizedType(javax.inject.Provider.class, type);
   }
+
+  /**
+   * Returns a type modelling a {@link jakarta.inject.Provider} that provides elements of type
+   * {@code elementType}.
+   *
+   * @return a {@link java.io.Serializable serializable} parameterized type.
+   * @since vNext
+   */
+  public static Type jakartaProviderOf(Type type) {
+    return Types.newParameterizedType(jakarta.inject.Provider.class, type);
+  }
 }

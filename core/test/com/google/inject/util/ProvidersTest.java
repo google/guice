@@ -53,10 +53,17 @@ public class ProvidersTest extends TestCase {
         .addEqualityGroup(
             Providers.guicify(new JavaxProvider(10)), Providers.guicify(new JavaxProvider(10)))
         .addEqualityGroup(
+            Providers.guicify(new JakartaProvider(10)), Providers.guicify(new JakartaProvider(10)))
+        .addEqualityGroup(
             Providers.guicify(new JavaxProvider(11)), Providers.guicify(new JavaxProvider(11)))
+        .addEqualityGroup(
+            Providers.guicify(new JakartaProvider(11)), Providers.guicify(new JakartaProvider(11)))
         .addEqualityGroup(
             Providers.guicify(new JavaxProviderWithDependencies()),
             Providers.guicify(new JavaxProviderWithDependencies()))
+        .addEqualityGroup(
+            Providers.guicify(new JakartaProviderWithDependencies()),
+            Providers.guicify(new JakartaProviderWithDependencies()))
         .testEquals();
   }
 
@@ -83,6 +90,29 @@ public class ProvidersTest extends TestCase {
     }
   }
 
+  private static class JakartaProvider implements jakarta.inject.Provider<Integer> {
+    private final int value;
+
+    public JakartaProvider(int value) {
+      this.value = value;
+    }
+
+    @Override
+    public Integer get() {
+      return value;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return (obj instanceof JakartaProvider) && (value == ((JakartaProvider) obj).value);
+    }
+  }
+
   private static class JavaxProviderWithDependencies implements javax.inject.Provider<Integer> {
     private int value;
 
@@ -104,6 +134,30 @@ public class ProvidersTest extends TestCase {
     @Override
     public boolean equals(Object obj) {
       return (obj instanceof JavaxProviderWithDependencies);
+    }
+  }
+
+  private static class JakartaProviderWithDependencies implements jakarta.inject.Provider<Integer> {
+    private int value;
+
+    @Inject
+    void setValue(int value) {
+      this.value = value;
+    }
+
+    @Override
+    public Integer get() {
+      return value;
+    }
+
+    @Override
+    public int hashCode() {
+      return 42;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return (obj instanceof JakartaProviderWithDependencies);
     }
   }
 }

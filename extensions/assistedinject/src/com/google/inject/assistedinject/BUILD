@@ -24,6 +24,7 @@ java_library(
         "//third_party/java/error_prone:annotations",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
+        "//third_party/java/jakarta_inject",
         "//third_party/java/jsr330_inject",
     ],
 )

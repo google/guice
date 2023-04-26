@@ -164,4 +164,43 @@ public class BindsTest extends TestCase {
     assertThat(qualifiedBinds).hasProvidedValueThat().isEqualTo("qualifiers");
     assertThat(qualifiedBinds).hasSource(QualifiedBinds.class, "bindsToProvides", String.class);
   }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @jakarta.inject.Qualifier
+  @interface JakartaProvidesQualifier {}
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @jakarta.inject.Qualifier
+  @interface JakartaBindsQualifier {}
+
+  @Module
+  interface JakartaQualifiedBinds {
+    @Provides
+    @JakartaProvidesQualifier
+    static String provides() {
+      return "jakarta qualified!";
+    }
+
+    @Binds
+    @JakartaBindsQualifier
+    String bindsToProvides(@JakartaProvidesQualifier String provides);
+
+    @Binds
+    String unqualifiedToBinds(@JakartaBindsQualifier String binds);
+  }
+
+  public void testJakartaQualifiers() {
+    Injector injector = Guice.createInjector(DaggerAdapter.from(JakartaQualifiedBinds.class));
+
+    Binding<String> stringBinding = injector.getBinding(String.class);
+    assertThat(stringBinding).hasProvidedValueThat().isEqualTo("jakarta qualified!");
+    assertThat(stringBinding)
+        .hasSource(JakartaQualifiedBinds.class, "unqualifiedToBinds", String.class);
+
+    Binding<String> qualifiedBinds =
+        injector.getBinding(Key.get(String.class, JakartaBindsQualifier.class));
+    assertThat(qualifiedBinds).hasProvidedValueThat().isEqualTo("jakarta qualified!");
+    assertThat(qualifiedBinds)
+        .hasSource(JakartaQualifiedBinds.class, "bindsToProvides", String.class);
+  }
 }

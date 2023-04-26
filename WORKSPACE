@@ -36,6 +36,7 @@ maven_install(
         "com.google.guava:guava:31.0.1-jre",
         "commons-logging:commons-logging:1.2",
         "javax.inject:javax.inject:1",
+        "jakarta.inject:jakarta.inject-api:2.0.1",
         "javax.persistence:javax.persistence-api:2.2",
         "javax.servlet:servlet-api:2.5",
         "org.apache.struts:struts2-core:2.5.30",
@@ -73,6 +74,12 @@ maven_install(
             "javax.inject",
             "javax.inject-tck",
             "1",
+            testonly = True,
+        ),
+        maven.artifact(
+            "jakarta.inject",
+            "jakarta.inject-tck",
+            "2.0.1",
             testonly = True,
         ),
         maven.artifact(

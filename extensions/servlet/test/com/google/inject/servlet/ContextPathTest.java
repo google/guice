@@ -71,7 +71,7 @@ public class ContextPathTest extends TestCase {
                     .in(Scopes.SINGLETON);
                 serve("/foo/*").with(Key.get(TestServlet.class, Names.named("foo")));
                 serve("/bar/*").with(Key.get(TestServlet.class, Names.named("bar")));
-                // TODO - call and validate it is correct
+                // TODO: add a filter(..) call and validate it is correct
               }
             });
     injector.injectMembers(this);

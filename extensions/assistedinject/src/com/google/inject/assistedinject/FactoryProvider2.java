@@ -304,7 +304,8 @@ final class FactoryProvider2<F>
           Key<?> paramKey = Annotations.getKey(param, method, paramAnnotations[p++], errors);
           Class<?> underlylingType = paramKey.getTypeLiteral().getRawType();
           if (underlylingType.equals(Provider.class)
-              || underlylingType.equals(javax.inject.Provider.class)) {
+              || underlylingType.equals(javax.inject.Provider.class)
+              || underlylingType.equals(jakarta.inject.Provider.class)) {
             errors.addMessage(
                 "A Provider may not be a type in a factory method of an AssistedInject."
                     + "\n  Offending instance is parameter [%s] with key [%s] on method [%s]",

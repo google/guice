@@ -258,6 +258,27 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue2, injector.getInstance(Key.get(Integer.class, SomeQualifier.class)));
   }
 
+  @jakarta.inject.Qualifier
+  @Retention(RUNTIME)
+  private static @interface SomeJakartaQualifier {}
+
+  public void testBindingWithJakartaQualifier() {
+    final Integer testValue1 = 1024, testValue2 = 2048;
+    Object instance =
+        new Object() {
+          @Bind private Integer anInt = testValue1;
+
+          @Bind @SomeJakartaQualifier private Integer anotherInt = testValue2;
+        };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertEquals(testValue1, injector.getInstance(Integer.class));
+    assertEquals(
+        testValue2, injector.getInstance(Key.get(Integer.class, SomeJakartaQualifier.class)));
+  }
+
   public void testCanReuseBindingAnnotationsWithDifferentValues() {
     final Integer testValue1 = 1024, testValue2 = 2048;
     final String name1 = "foo", name2 = "bar";
@@ -428,6 +449,26 @@ public class BoundFieldModuleTest extends TestCase {
           @Bind
           private javax.inject.Provider<Integer> anInt =
               new javax.inject.Provider<Integer>() {
+                @Override
+                public Integer get() {
+                  return testValue;
+                }
+              };
+        };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertEquals(testValue, injector.getInstance(Integer.class));
+  }
+
+  public void testBindingJakartaProvider() {
+    final Integer testValue = 1024;
+    Object instance =
+        new Object() {
+          @Bind
+          private jakarta.inject.Provider<Integer> anInt =
+              new jakarta.inject.Provider<Integer>() {
                 @Override
                 public Integer get() {
                   return testValue;

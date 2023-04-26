@@ -18,17 +18,20 @@ package com.google.inject.daggeradapter;
 
 import static com.google.inject.daggeradapter.Annotations.getAnnotatedAnnotation;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Optional;
-import javax.inject.Qualifier;
 
 /** Utility methods for creating {@link Key}s. */
 final class Keys {
+  private static final ImmutableSet<Class<? extends Annotation>> QUALIFIERS =
+      ImmutableSet.of(javax.inject.Qualifier.class, jakarta.inject.Qualifier.class);
+
   static Key<?> parameterKey(Parameter parameter) {
-    Optional<Annotation> qualifier = getAnnotatedAnnotation(parameter, Qualifier.class);
+    Optional<Annotation> qualifier = getAnnotatedAnnotation(parameter, QUALIFIERS);
     Type type = parameter.getParameterizedType();
     return qualifier.isPresent() ? Key.get(type, qualifier.get()) : Key.get(type);
   }

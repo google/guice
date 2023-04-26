@@ -22,9 +22,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 /** Extensions for {@link Annotation}. */
 final class Annotations {
+  static Optional<Annotation> getAnnotatedAnnotation(
+      AnnotatedElement element, Set<Class<? extends Annotation>> annotationClasses) {
+    return Arrays.stream(element.getAnnotations())
+        .filter(
+            annotation ->
+                annotationClasses.stream()
+                    .anyMatch(an -> annotation.annotationType().isAnnotationPresent(an)))
+        .collect(toOptional());
+  }
+
   static Optional<Annotation> getAnnotatedAnnotation(
       AnnotatedElement element, Class<? extends Annotation> annotationClass) {
     return Arrays.stream(element.getAnnotations())

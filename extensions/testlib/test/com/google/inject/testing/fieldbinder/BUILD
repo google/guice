@@ -15,6 +15,7 @@ java_library(
         "//core/test/com/google/inject:testsupport",
         "//extensions/testlib/src/com/google/inject/testing/fieldbinder",
         "//third_party/java/guava/collect",
+        "//third_party/java/jakarta_inject",
         "//third_party/java/jsr330_inject",
         "//third_party/java/junit",
     ],

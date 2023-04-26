@@ -18,6 +18,7 @@ java_library(
         "//third_party/java/dagger:producers",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
+        "//third_party/java/jakarta_inject",
         "//third_party/java/jsr330_inject",
         "//third_party/java/junit",
         "//third_party/java/truth",

@@ -167,7 +167,7 @@ public final class InjectionPoint {
 
   /** Returns the injected constructor, field, or method. */
   public Member getMember() {
-    // TODO -).
+    // TODO: Don't expose the original member (which probably has setAccessible(true)).
     return member;
   }
 
@@ -300,7 +300,8 @@ public final class InjectionPoint {
             .filter(
                 constructor ->
                     constructor.isAnnotationPresent(Inject.class)
-                        || constructor.isAnnotationPresent(javax.inject.Inject.class))
+                        || constructor.isAnnotationPresent(javax.inject.Inject.class)
+                        || constructor.isAnnotationPresent(jakarta.inject.Inject.class))
             .collect(Collectors.toList());
 
     Constructor<?> injectableConstructor = null;
@@ -477,20 +478,21 @@ public final class InjectionPoint {
   abstract static class InjectableMember {
     final TypeLiteral<?> declaringType;
     final boolean optional;
-    final boolean jsr330;
+    final boolean specInject;
     InjectableMember previous;
     InjectableMember next;
 
     InjectableMember(TypeLiteral<?> declaringType, Annotation atInject) {
       this.declaringType = declaringType;
 
-      if (atInject.annotationType() == javax.inject.Inject.class) {
+      if (atInject.annotationType() == javax.inject.Inject.class
+          || atInject.annotationType() == jakarta.inject.Inject.class) {
         optional = false;
-        jsr330 = true;
+        specInject = true;
         return;
       }
 
-      jsr330 = false;
+      specInject = false;
       optional = ((Inject) atInject).optional();
     }
 
@@ -536,6 +538,9 @@ public final class InjectionPoint {
 
   static Annotation getAtInject(AnnotatedElement member) {
     Annotation a = member.getAnnotation(javax.inject.Inject.class);
+    if (a == null) {
+      a = member.getAnnotation(jakarta.inject.Inject.class);
+    }
     return a == null ? member.getAnnotation(Inject.class) : a;
   }
 
@@ -646,7 +651,7 @@ public final class InjectionPoint {
           InjectableMethod possiblyOverridden = iterator.next();
           if (overrides(method, possiblyOverridden.method)) {
             boolean wasGuiceInject =
-                !possiblyOverridden.jsr330 || possiblyOverridden.overrodeGuiceInject;
+                !possiblyOverridden.specInject || possiblyOverridden.overrodeGuiceInject;
             if (injectableMethod != null) {
               injectableMethod.overrodeGuiceInject = wasGuiceInject;
             }
@@ -719,7 +724,7 @@ public final class InjectionPoint {
           Annotation atInject = getAtInject(field);
           if (atInject != null) {
             InjectableField injectableField = new InjectableField(current, field, atInject);
-            if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
+            if (injectableField.specInject && Modifier.isFinal(field.getModifiers())) {
               errors.cannotInjectFinalField(field);
             }
             injectableMembers.add(injectableField);
@@ -837,7 +842,7 @@ public final class InjectionPoint {
 
   private static boolean isValidMethod(InjectableMethod injectableMethod, Errors errors) {
     boolean result = true;
-    if (injectableMethod.jsr330) {
+    if (injectableMethod.specInject) {
       Method method = injectableMethod.method;
       if (Modifier.isAbstract(method.getModifiers())) {
         errors.cannotInjectAbstractMethod(method);

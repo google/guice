@@ -756,6 +756,56 @@ public class FactoryProvider2Test {
     }
   }
 
+  interface JakartaProviderBasedColoredCarFactory {
+    Car createCar(
+        jakarta.inject.Provider<Color> colorProvider,
+        jakarta.inject.Provider<String> stringProvider);
+
+    Mustang createMustang(@Assisted("color") jakarta.inject.Provider<Color> colorProvider);
+  }
+
+  @Test
+  public void testAssistedJakartaProviderIsDisallowed() {
+    try {
+      Guice.createInjector(
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              bind(JakartaProviderBasedColoredCarFactory.class)
+                  .toProvider(
+                      FactoryProvider.newFactory(
+                          JakartaProviderBasedColoredCarFactory.class, Subaru.class));
+            }
+          });
+      fail();
+    } catch (CreationException expected) {
+      assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
+      assertContains(
+          expected.getMessage(),
+          ") A Provider may not be a type in a factory method of an AssistedInject.\n"
+              + "  Offending instance is parameter [1] with key"
+              + " [Provider<FactoryProvider2Test$Color> annotated with @Assisted("
+              + Annotations.memberValueString("value", "color")
+              + ")]"
+              + " on method"
+              + " [FactoryProvider2Test$JakartaProviderBasedColoredCarFactory.createMustang()]");
+      assertContains(
+          expected.getMessage(),
+          ") A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [1] with key [Provider<FactoryProvider2Test$Color>] on"
+              + " method [FactoryProvider2Test$JakartaProviderBasedColoredCarFactory.createCar()]");
+      assertContains(
+          expected.getMessage(),
+          ") A Provider may not be a type in a factory method of an AssistedInject.",
+          "Offending instance is parameter [2] with key [Provider<String>] on method"
+              + " [FactoryProvider2Test$JakartaProviderBasedColoredCarFactory.createCar()]");
+      assertContains(
+          expected.getMessage(),
+          "No implementation for FactoryProvider2Test$JakartaProviderBasedColoredCarFactory was"
+              + " bound.");
+    }
+  }
+
   @Test
   public void testFactoryUseBeforeInitialization() {
     ColoredCarFactory carFactory =

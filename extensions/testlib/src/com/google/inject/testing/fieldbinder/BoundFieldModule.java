@@ -64,11 +64,12 @@ import java.lang.reflect.Type;
  *   <li>If {@link Bind#lazy} is true, this module will delay reading the value from the field until
  *       injection time, allowing the field's value to be reassigned during the course of a test's
  *       execution.
- *   <li>If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
- *       that field will be bound using that annotation via {@link
- *       AnnotatedBindingBuilder#annotatedWith}. For example, {@code
+ *   <li>If a {@link BindingAnnotation}, {@link javax.inject.Qualifier} or {@link
+ *       jakarta.inject.Qualifier} is present on the field, that field will be bound using that
+ *       annotation via {@link AnnotatedBindingBuilder#annotatedWith}. For example, {@code
  *       bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error to
- *       supply more than one {@link BindingAnnotation} or {@link javax.inject.Qualifier}.
+ *       supply more than one {@link BindingAnnotation}, {@link javax.inject.Qualifier} or {@link
+ *       jakarta.inject.Qualifier}.
  *   <li>If the field is of type {@link Provider}, the field's value will be bound as a {@link
  *       Provider} using {@link LinkedBindingBuilder#toProvider} to the provider's parameterized
  *       type. For example, {@code Provider<Integer>} binds to {@link Integer}. Attempting to bind a
@@ -434,7 +435,8 @@ public final class BoundFieldModule implements Module {
 
   private static boolean hasInject(Field field) {
     return field.isAnnotationPresent(javax.inject.Inject.class)
-        || field.isAnnotationPresent(com.google.inject.Inject.class);
+        || field.isAnnotationPresent(com.google.inject.Inject.class)
+        || field.isAnnotationPresent(jakarta.inject.Inject.class);
   }
 
   /**
@@ -457,7 +459,9 @@ public final class BoundFieldModule implements Module {
    * bind those subclasses directly, enabling them to inject the providers themselves.
    */
   private static boolean isTransparentProvider(Class<?> clazz) {
-    return com.google.inject.Provider.class == clazz || javax.inject.Provider.class == clazz;
+    return com.google.inject.Provider.class == clazz
+        || javax.inject.Provider.class == clazz
+        || jakarta.inject.Provider.class == clazz;
   }
 
   private static void bindField(Binder binder, final BoundFieldInfo fieldInfo) {
@@ -480,15 +484,28 @@ public final class BoundFieldModule implements Module {
               @Override
               // @Nullable
               public Object get() {
-                javax.inject.Provider<?> provider =
-                    (javax.inject.Provider<?>) getFieldValue(fieldInfo);
-                return provider.get();
+                Object val = getFieldValue(fieldInfo);
+                if (val instanceof javax.inject.Provider) {
+                  return ((javax.inject.Provider<?>) val).get();
+                } else if (val instanceof jakarta.inject.Provider) {
+                  return ((jakarta.inject.Provider<?>) val).get();
+                } else {
+                  throw new IllegalStateException(
+                      "unexpected field value: " + val + ", of type: " + val.getClass());
+                }
               }
             });
       } else {
-        javax.inject.Provider<?> fieldValueUnsafe =
-            (javax.inject.Provider<?>) getFieldValue(fieldInfo);
-        binderUnsafe.toProvider(fieldValueUnsafe);
+        Object val = getFieldValue(fieldInfo);
+        if (val instanceof javax.inject.Provider) {
+          binderUnsafe.toProvider((javax.inject.Provider<?>) val);
+        } else if (val instanceof jakarta.inject.Provider) {
+          // TODO(sameb): bind directly without using guicify when the API exists.
+          binderUnsafe.toProvider(Providers.guicify((jakarta.inject.Provider<?>) val));
+        } else {
+          throw new IllegalStateException(
+              "unexpected field value: " + val + ", of type: " + val.getClass());
+        }
       }
     } else if (fieldInfo.bindAnnotation.lazy()) {
       binderUnsafe.toProvider(

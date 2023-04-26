@@ -345,7 +345,9 @@ public class Annotations {
   }
 
   private static final AnnotationChecker scopeChecker =
-      new AnnotationChecker(Arrays.asList(ScopeAnnotation.class, javax.inject.Scope.class));
+      new AnnotationChecker(
+          Arrays.asList(
+              ScopeAnnotation.class, javax.inject.Scope.class, jakarta.inject.Scope.class));
 
   public static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
     return scopeChecker.hasAnnotations(annotationType);
@@ -402,7 +404,8 @@ public class Annotations {
   }
 
   private static final AnnotationChecker bindingAnnotationChecker =
-      new AnnotationChecker(Arrays.asList(BindingAnnotation.class, Qualifier.class));
+      new AnnotationChecker(
+          Arrays.asList(BindingAnnotation.class, Qualifier.class, jakarta.inject.Qualifier.class));
 
   /** Returns true if annotations of the specified type are binding annotations. */
   public static boolean isBindingAnnotation(Class<? extends Annotation> annotationType) {
@@ -416,6 +419,8 @@ public class Annotations {
   public static Annotation canonicalizeIfNamed(Annotation annotation) {
     if (annotation instanceof javax.inject.Named) {
       return Names.named(((javax.inject.Named) annotation).value());
+    } else if (annotation instanceof jakarta.inject.Named) {
+      return Names.named(((jakarta.inject.Named) annotation).value());
     } else {
       return annotation;
     }
@@ -427,7 +432,8 @@ public class Annotations {
    */
   public static Class<? extends Annotation> canonicalizeIfNamed(
       Class<? extends Annotation> annotationType) {
-    if (annotationType == javax.inject.Named.class) {
+    if (annotationType == javax.inject.Named.class
+        || annotationType == jakarta.inject.Named.class) {
       return Named.class;
     } else {
       return annotationType;

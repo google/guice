@@ -19,6 +19,10 @@
       <artifactId>javax.inject</artifactId>
     </dependency>
     <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
     </dependency>
@@ -89,6 +93,21 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <testExcludes>
+            <!--
+              Don't compile the jakarta TCK b/c it would clash w/ the javax.inject TCK.
+              We test it with the Bazel build for now, and basic jakarta functionality is tested
+              with the JakartaTest in the same package.
+            -->
+            <testExclude>**/GuiceJakartaTck.java</testExclude>
+          </testExcludes>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>

@@ -57,6 +57,7 @@ java_library(
         "//third_party/java/guava/collect",
         "//third_party/java/guava/testing",
         "//third_party/java/guava/util/concurrent",
+        "//third_party/java/jakarta_inject",
         "//third_party/java/jsr330_inject",
         "//third_party/java/junit",
         "//third_party/java/truth",
