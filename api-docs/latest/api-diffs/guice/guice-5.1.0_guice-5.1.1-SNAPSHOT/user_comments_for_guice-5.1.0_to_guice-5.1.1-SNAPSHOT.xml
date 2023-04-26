@@ -45,6 +45,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Provider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.internal"/>
   <text>
     InsertCommentsHere
@@ -118,6 +124,36 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.util.Enhanced"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Providers"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Providers.guicify_added(com.google.inject.Provider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Providers.guicify_added(jakarta.inject.Provider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Types"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Types.jakartaProviderOf_added(java.lang.reflect.Type)"/>
   <text>
     InsertCommentsHere
   </text>

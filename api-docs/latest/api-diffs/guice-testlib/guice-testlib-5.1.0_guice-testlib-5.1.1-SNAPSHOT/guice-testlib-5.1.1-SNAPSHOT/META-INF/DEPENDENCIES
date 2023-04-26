@@ -26,6 +26,10 @@ From: 'an unknown organization'
   - Checker Qual (https://checkerframework.org) org.checkerframework:checker-qual:jar:3.13.0
     License: The MIT License  (http://opensource.org/licenses/MIT)
 
+From: 'Eclipse Foundation' (https://www.eclipse.org)
+  - Jakarta Dependency Injection (https://github.com/eclipse-ee4j/injection-api) jakarta.inject:jakarta.inject-api:jar:2.0.1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 From: 'Google LLC' (http://www.google.com)
   - AutoValue Annotations (https://github.com/google/auto/tree/master/value) com.google.auto.value:auto-value-annotations:jar:1.8.1
     License: Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
