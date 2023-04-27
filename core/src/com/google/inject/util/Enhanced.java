@@ -19,7 +19,11 @@ package com.google.inject.util;
 import com.google.inject.internal.BytecodeGen;
 import java.util.Optional;
 
-/** Utilities for checking if classes are enhanced and/or getting the original un-enhanced class. */
+/**
+ * Utilities for checking if classes are enhanced and/or getting the original un-enhanced class.
+ *
+ * @since 6.0
+ */
 public final class Enhanced {
   private Enhanced() {}
 

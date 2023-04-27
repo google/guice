@@ -16,7 +16,11 @@
 
 package com.google.inject.persist.jpa;
 
-/** Options that configure how the JPA persist service will work. */
+/**
+ * Options that configure how the JPA persist service will work.
+ *
+ * @since 6.0
+ */
 public final class JpaPersistOptions {
 
   private final boolean autoBeginWorkOnEntityManagerCreation;
@@ -41,7 +45,11 @@ public final class JpaPersistOptions {
     return new Builder();
   }
 
-  /** A builder to create the options. */
+  /**
+   * A builder to create the options.
+   *
+   * @since 6.0
+   */
   public static final class Builder {
     private boolean autoBeginWorkOnEntityManagerCreation;
 
