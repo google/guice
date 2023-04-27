@@ -150,7 +150,7 @@ public final class Types {
    * {@code elementType}.
    *
    * @return a {@link java.io.Serializable serializable} parameterized type.
-   * @since vNext
+   * @since 6.0
    */
   public static Type jakartaProviderOf(Type type) {
     return Types.newParameterizedType(jakarta.inject.Provider.class, type);

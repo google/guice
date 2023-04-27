@@ -87,7 +87,7 @@ public final class Providers {
    * Returns itself. This exists primarily to avoid ambiguous method reference compile errors when
    * calling guicify with a Guice provider.
    *
-   * @since vNext
+   * @since 6.0
    * @deprecated Marked as deprecated as a hint to users that calling this is unnecessary, because
    *     the provider is already a guice Provider.
    */
@@ -130,7 +130,7 @@ public final class Providers {
    * jakarta.inject.Provider}. The converse method is unnecessary, since Guice providers directly
    * implement the jakarta.inject.Provider interface.
    *
-   * @since vNext
+   * @since 6.0
    */
   public static <T> Provider<T> guicify(jakarta.inject.Provider<T> provider) {
     if (provider instanceof Provider) {
