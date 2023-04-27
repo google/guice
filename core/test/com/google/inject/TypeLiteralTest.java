@@ -18,6 +18,9 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.util.Types;
@@ -25,17 +28,19 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class TypeLiteralTest extends TestCase {
+public class TypeLiteralTest {
 
+  @Test
   public void testWithParameterizedType() {
     TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {};
     TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(Types.listOf(String.class)) {};
     assertEqualsBothWays(a, b);
   }
 
+  @Test
   public void testEquality() {
     TypeLiteral<List<String>> t1 = new TypeLiteral<List<String>>() {};
     TypeLiteral<List<String>> t2 = new TypeLiteral<List<String>>() {};
@@ -56,6 +61,7 @@ public class TypeLiteralTest extends TestCase {
 
   public List<? extends CharSequence> wildcardExtends;
 
+  @Test
   public void testWithWildcardType() throws NoSuchFieldException, IOException {
     TypeLiteral<?> a = TypeLiteral.get(getClass().getField("wildcardExtends").getGenericType());
     TypeLiteral<?> b = TypeLiteral.get(Types.listOf(Types.subtypeOf(CharSequence.class)));
@@ -71,6 +77,7 @@ public class TypeLiteralTest extends TestCase {
   }
 
   @SuppressWarnings("rawtypes") // Testing rawtypes.
+  @Test
   public void testMissingTypeParameter() {
     try {
       new TypeLiteral() {};
@@ -80,6 +87,7 @@ public class TypeLiteralTest extends TestCase {
     }
   }
 
+  @Test
   public void testTypesInvolvingArraysForEquality() {
     TypeLiteral<String[]> stringArray = new TypeLiteral<String[]>() {};
     assertEquals(stringArray, new TypeLiteral<String[]>() {});
@@ -88,18 +96,21 @@ public class TypeLiteralTest extends TestCase {
     assertEquals(listOfStringArray, new TypeLiteral<List<String[]>>() {});
   }
 
+  @Test
   public void testEqualityOfGenericArrayAndClassArray() {
     TypeLiteral<String[]> arrayAsClass = TypeLiteral.get(String[].class);
     TypeLiteral<String[]> arrayAsType = new TypeLiteral<String[]>() {};
     assertEquals(arrayAsClass, arrayAsType);
   }
 
+  @Test
   public void testEqualityOfMultidimensionalGenericArrayAndClassArray() {
     TypeLiteral<String[][][]> arrayAsClass = TypeLiteral.get(String[][][].class);
     TypeLiteral<String[][][]> arrayAsType = new TypeLiteral<String[][][]>() {};
     assertEquals(arrayAsClass, arrayAsType);
   }
 
+  @Test
   public void testTypeLiteralsMustHaveRawTypes() {
     // kind of weird, but wildcards and type variables always go to Object
     assertEquals(Object.class, TypeLiteral.get(Types.subtypeOf(Runnable.class)).getRawType());
@@ -110,6 +121,7 @@ public class TypeLiteralTest extends TestCase {
    * int.class} and {@code Integer.class}.
    */
   @SuppressWarnings("rawtypes") // Class literal uses raw type.
+  @Test
   public void testDifferentiationBetweenWrappersAndPrimitives() {
     Class[] primitives =
         new Class[] {
@@ -150,11 +162,13 @@ public class TypeLiteralTest extends TestCase {
     }
   }
 
+  @Test
   public void testSerialization() throws IOException {
     assertNotSerializable(new TypeLiteral<List<String>>() {});
   }
 
   @SuppressWarnings("rawtypes") // Testing raw types
+  @Test
   public void testTypeVariableWithNoBound() {
     TypeVariable<Class<HasTypeParameters>>[] typeVariables =
         HasTypeParameters.class.getTypeParameters();
@@ -170,6 +184,7 @@ public class TypeLiteralTest extends TestCase {
     assertEqualsBothWays(aTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[0]));
   }
 
+  @Test
   public void testTypeVariablesWithSingleBound() {
     @SuppressWarnings("rawtypes") // Class literal uses raw type.
     TypeVariable<Class<HasTypeParameters>>[] typeVariables =
@@ -186,6 +201,7 @@ public class TypeLiteralTest extends TestCase {
     assertEqualsBothWays(cTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[2]));
   }
 
+  @Test
   public void testTypeVariableWithMultipleBounds() {
     @SuppressWarnings("rawtypes") // Class literal uses raw type.
     TypeVariable<Class<HasTypeParameters>>[] typeVariables =

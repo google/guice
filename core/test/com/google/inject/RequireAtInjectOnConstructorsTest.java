@@ -16,15 +16,19 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link Binder#requireAtInjectOnConstructors()}
  *
  * @author sameb@google.com (Sam Berlin)
  */
-public class RequireAtInjectOnConstructorsTest extends TestCase {
+public class RequireAtInjectOnConstructorsTest {
 
+  @Test
   public void testNoCxtors_explicitBinding() {
     try {
       Guice.createInjector(
@@ -45,6 +49,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoCxtors_jitBinding() {
     Injector injector =
         Guice.createInjector(
@@ -65,6 +70,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoCxtors_implicitBinding() {
     try {
       Guice.createInjector(
@@ -85,6 +91,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoCxtors_inheritedByPrivateModules() {
     try {
       Guice.createInjector(
@@ -111,6 +118,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoCxtors_accumulatesAllErrors() {
     try {
       Guice.createInjector(
@@ -134,6 +142,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoCxtors_separateOptionsForPrivateModules() {
     try {
       Guice.createInjector(
@@ -164,6 +173,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testManyConstructorsButNoneWithAtInject() {
     try {
       Guice.createInjector(
@@ -184,6 +194,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testRequireAtInjectStillAllowsToConstructorBindings() {
     Injector injector =
         Guice.createInjector(

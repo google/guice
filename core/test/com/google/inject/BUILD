@@ -41,9 +41,7 @@ java_library(
     name = "tests",
     srcs = glob(
         ["**/*.java"],  # glob ignores subfolder that has its own BUILD files
-        exclude = TEST_SUPPORT_SRCS + ADD_OPENS_SRCS + [
-            "AllTests.java",
-        ],
+        exclude = TEST_SUPPORT_SRCS + ADD_OPENS_SRCS,
     ),
     javacopts = ["-Xep:BetaApi:OFF"],
     plugins = [
@@ -71,19 +69,6 @@ java_library(
     deps = [
         "//core/src/com/google/inject",
         "//third_party/java/guava/base",
-        "//third_party/java/junit",
-    ],
-)
-
-# This target is unused, but exists so that we can more easily
-# ensure the opensource build maintains compiling code.
-java_library(
-    name = "AllTests",
-    srcs = ["AllTests.java"],
-    deps = [
-        ":add_opens_tests",
-        ":tests",
-        "//core/test/com/googlecode/guice:tests",
         "//third_party/java/junit",
     ],
 )

@@ -17,6 +17,9 @@
 package com.google.inject.servlet;
 
 import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -43,7 +46,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests forwarding and inclusion (RequestDispatcher actions from the servlet spec).
@@ -51,12 +54,13 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 @SuppressWarnings("unchecked") // Safe because mock will only ever return HttpServlet
-public class ServletPipelineRequestDispatcherTest extends TestCase {
+public class ServletPipelineRequestDispatcherTest {
   private static final Key<HttpServlet> HTTP_SERLVET_KEY = Key.get(HttpServlet.class);
   private static final String A_KEY = "thinglyDEgintly" + new Date() + UUID.randomUUID();
   private static final String A_VALUE =
       ServletPipelineRequestDispatcherTest.class.toString() + new Date() + UUID.randomUUID();
 
+  @Test
   public final void testIncludeManagedServlet() throws IOException, ServletException {
     String pattern = "blah.html";
     final ServletDefinition servletDefinition =
@@ -82,7 +86,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             run[0] = true;
 
             final Object o = request.getAttribute(A_KEY);
-            assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
+            assertEquals(A_VALUE, o, "Wrong attrib returned - " + o);
           }
         };
 
@@ -107,12 +111,13 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertNotNull(dispatcher);
     dispatcher.include(requestMock, mock(HttpServletResponse.class));
 
-    assertTrue("Include did not dispatch to our servlet!", run[0]);
+    assertTrue(run[0], "Include did not dispatch to our servlet!");
 
     verify(requestMock).setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     verify(requestMock).removeAttribute(REQUEST_DISPATCHER_REQUEST);
   }
 
+  @Test
   public final void testForwardToManagedServlet() throws IOException, ServletException {
     String pattern = "blah.html";
     final ServletDefinition servletDefinition =
@@ -141,7 +146,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             paths.add(request.getRequestURI());
 
             final Object o = request.getAttribute(A_KEY);
-            assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
+            assertEquals(A_VALUE, o, "Wrong attrib returned - " + o);
           }
         };
 
@@ -167,13 +172,14 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertNotNull(dispatcher);
     dispatcher.forward(requestMock, mockResponse);
 
-    assertTrue("Include did not dispatch to our servlet!", paths.contains(pattern));
+    assertTrue(paths.contains(pattern), "Include did not dispatch to our servlet!");
 
     verify(requestMock).setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     verify(requestMock).removeAttribute(REQUEST_DISPATCHER_REQUEST);
     verify(mockResponse).resetBuffer();
   }
 
+  @Test
   public final void testForwardToManagedServletFailureOnCommittedBuffer()
       throws IOException, ServletException {
     IllegalStateException expected = null;
@@ -182,7 +188,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     } catch (IllegalStateException ise) {
       expected = ise;
     } finally {
-      assertNotNull("Expected IllegalStateException was not thrown", expected);
+      assertNotNull(expected, "Expected IllegalStateException was not thrown");
     }
   }
 
@@ -211,7 +217,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
               throws ServletException, IOException {
 
             final Object o = request.getAttribute(A_KEY);
-            assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
+            assertEquals(A_VALUE, o, "Wrong attrib returned - " + o);
           }
         };
 
@@ -239,6 +245,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     dispatcher.forward(mockRequest, mockResponse);
   }
 
+  @Test
   public final void testWrappedRequestUriAndUrlConsistency() {
     final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
     when(mockRequest.getScheme()).thenReturn("http");
@@ -250,6 +257,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertEquals("http://the.server:12345/new-uri", wrappedRequest.getRequestURL().toString());
   }
 
+  @Test
   public final void testWrappedRequestUrlNegativePort() {
     final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
     when(mockRequest.getScheme()).thenReturn("http");
@@ -261,6 +269,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertEquals("http://the.server/new-uri", wrappedRequest.getRequestURL().toString());
   }
 
+  @Test
   public final void testWrappedRequestUrlDefaultPort() {
     final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
     when(mockRequest.getScheme()).thenReturn("http");
@@ -272,6 +281,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertEquals("http://the.server/new-uri", wrappedRequest.getRequestURL().toString());
   }
 
+  @Test
   public final void testWrappedRequestUrlDefaultHttpsPort() {
     final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
     when(mockRequest.getScheme()).thenReturn("https");

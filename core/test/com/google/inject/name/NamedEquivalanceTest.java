@@ -18,6 +18,8 @@ package com.google.inject.name;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.testing.EqualsTester;
 import com.google.inject.AbstractModule;
@@ -35,7 +37,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.Properties;
 import javax.inject.Qualifier;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests that {@code javax.inject.Named}, {@code jakarta.inject.Named} and {@code
@@ -44,7 +46,7 @@ import junit.framework.TestCase;
  *
  * @author cgdecker@gmail.com (Colin Decker)
  */
-public class NamedEquivalanceTest extends TestCase {
+public class NamedEquivalanceTest {
 
   private static final Module GUICE_BINDING_MODULE = moduleWithAnnotation(Names.named("foo"));
   private static final Module JSR330_BINDING_MODULE = moduleWithAnnotation(new JsrNamed("foo"));
@@ -60,6 +62,7 @@ public class NamedEquivalanceTest extends TestCase {
   @Retention(RUNTIME)
   @interface NotNamed {}
 
+  @Test
   public void testKeysCreatedWithDifferentTypesAreEqual() {
     new EqualsTester()
         .addEqualityGroup(
@@ -88,35 +91,43 @@ public class NamedEquivalanceTest extends TestCase {
     return Key.get(String.class, annotationType);
   }
 
+  @Test
   public void testBindingWithNamesCanInjectAllTypes() {
     assertInjectionsSucceed(GUICE_BINDING_MODULE);
   }
 
+  @Test
   public void testBindingWithJsr330AnnotationCanInjectAllTypes() {
     assertInjectionsSucceed(JSR330_BINDING_MODULE);
   }
 
+  @Test
   public void testBindingWithJakartannotationCanInjectAllTypes() {
     assertInjectionsSucceed(JAKARTA_BINDING_MODULE);
   }
 
+  @Test
   public void testBindingWithGuiceNamedAnnotatedProviderMethodCanInjectAllTypes() {
     assertInjectionsSucceed(GUICE_PROVIDER_METHOD_MODULE);
   }
 
+  @Test
   public void testBindingWithJsr330NamedAnnotatedProviderMethodCanInjectAllTypes() {
     assertInjectionsSucceed(JSR330_PROVIDER_METHOD_MODULE);
   }
 
+  @Test
   public void testBindingWithJakartaNamedAnnotatedProviderMethodCanInjectAllTypes() {
     assertInjectionsSucceed(JAKARTA_PROVIDER_METHOD_MODULE);
   }
 
+  @Test
   public void testBindingDifferentTypesWithSameValueIsIgnored() {
     assertDuplicateBinding(
         false, GUICE_BINDING_MODULE, JSR330_BINDING_MODULE, JAKARTA_BINDING_MODULE);
   }
 
+  @Test
   public void testBindingDifferentTypesWithSameValueIsAnErrorWithProviderMethods() {
     assertDuplicateBinding(true, GUICE_PROVIDER_METHOD_MODULE, JSR330_PROVIDER_METHOD_MODULE);
     assertDuplicateBinding(true, GUICE_PROVIDER_METHOD_MODULE, JAKARTA_PROVIDER_METHOD_MODULE);
@@ -126,6 +137,7 @@ public class NamedEquivalanceTest extends TestCase {
     assertDuplicateBinding(true, JAKARTA_PROVIDER_METHOD_MODULE, GUICE_PROVIDER_METHOD_MODULE);
   }
 
+  @Test
   public void testBindingDifferentTypesWithSameValueIsAnErrorMixed() {
     assertDuplicateBinding(true, GUICE_BINDING_MODULE, JSR330_PROVIDER_METHOD_MODULE);
     assertDuplicateBinding(true, GUICE_BINDING_MODULE, JAKARTA_PROVIDER_METHOD_MODULE);
@@ -134,18 +146,22 @@ public class NamedEquivalanceTest extends TestCase {
     assertDuplicateBinding(true, JAKARTA_BINDING_MODULE, GUICE_PROVIDER_METHOD_MODULE);
   }
 
+  @Test
   public void testMissingBindingForGuiceNamedUsesSameTypeInErrorMessage() {
     assertMissingBindingErrorMessageUsesType(GuiceNamedClient.class);
   }
 
+  @Test
   public void testMissingBindingForJsr330NamedUsesSameTypeInErrorMessage() {
     assertMissingBindingErrorMessageUsesType(Jsr330NamedClient.class);
   }
 
+  @Test
   public void testMissingBindingForJakartaamedUsesSameTypeInErrorMessage() {
     assertMissingBindingErrorMessageUsesType(Jsr330NamedClient.class);
   }
 
+  @Test
   public void testBindPropertiesWorksWithJsr330() {
     assertInjectionsSucceed(
         new AbstractModule() {

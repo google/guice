@@ -16,6 +16,9 @@
 
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Binding;
 import com.google.inject.CreationException;
@@ -24,15 +27,16 @@ import com.google.inject.Injector;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Elements;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for ServletModule, to ensure it captures bindings correctly.
  *
  * @author sameb@google.com (Sam Berlin)
  */
-public class ServletModuleTest extends TestCase {
+public class ServletModuleTest {
 
+  @Test
   public void testServletModuleCallOutsideConfigure() {
     try {
       new ServletModule() {
@@ -46,6 +50,7 @@ public class ServletModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testServletModuleReuse() {
     Module module = new Module();
     Elements.getElements(module); // use the module once (to, say, introspect bindings)
@@ -57,14 +62,15 @@ public class ServletModuleTest extends TestCase {
       binding.acceptTargetVisitor(visitor);
     }
     assertEquals(
-        "wrong linked servlets: " + visitor.linkedServlets, 0, visitor.linkedServlets.size());
-    assertEquals("wrong linked filters: " + visitor.linkedFilters, 0, visitor.linkedFilters.size());
+        0, visitor.linkedServlets.size(), "wrong linked servlets: " + visitor.linkedServlets);
+    assertEquals(0, visitor.linkedFilters.size(), "wrong linked filters: " + visitor.linkedFilters);
     assertEquals(
-        "wrong instance servlets: " + visitor.instanceServlets, 1, visitor.instanceServlets.size());
+        1, visitor.instanceServlets.size(), "wrong instance servlets: " + visitor.instanceServlets);
     assertEquals(
-        "wrong instance filters: " + visitor.instanceFilters, 1, visitor.instanceFilters.size());
+        1, visitor.instanceFilters.size(), "wrong instance filters: " + visitor.instanceFilters);
   }
 
+  @Test
   public void testServletModule_badPattern() {
     try {
       Guice.createInjector(

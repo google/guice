@@ -16,36 +16,42 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class EntityManagerFactoryProvisionTest extends TestCase {
+public class EntityManagerFactoryProvisionTest {
   private Injector injector;
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
+  @Test
   public void testSessionCreateOnInjection() {
 
     assertEquals(
-        "SINGLETON VIOLATION " + UnitOfWork.class.getName(),
         injector.getInstance(UnitOfWork.class),
-        injector.getInstance(UnitOfWork.class));
+        injector.getInstance(UnitOfWork.class),
+        "SINGLETON VIOLATION " + UnitOfWork.class.getName());
 
     //startup persistence
     injector.getInstance(PersistService.class).start();

@@ -16,6 +16,11 @@
 
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,10 +41,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** Tests to make sure that servlets with a context path are handled right. */
-public class ContextPathTest extends TestCase {
+public class ContextPathTest {
 
   @Inject
   @Named("foo")
@@ -54,7 +61,7 @@ public class ContextPathTest extends TestCase {
   private FilterConfig filterConfig;
   private GuiceFilter guiceFilter;
 
-  @Override
+  @BeforeEach
   public final void setUp() throws Exception {
     injector =
         Guice.createInjector(
@@ -91,7 +98,7 @@ public class ContextPathTest extends TestCase {
     guiceFilter.init(filterConfig);
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     assertNotNull(fooServlet);
     assertNotNull(barServlet);
@@ -99,6 +106,7 @@ public class ContextPathTest extends TestCase {
     guiceFilter.destroy();
   }
 
+  @Test
   public void testSimple() throws Exception {
     TestFilterChain testFilterChain = new TestFilterChain();
     HttpServletRequest req = mock(HttpServletRequest.class);
@@ -139,6 +147,7 @@ public class ContextPathTest extends TestCase {
   //
 
   // ROOT Web app, using Tomcat default servlet
+  @Test
   public void testRootDefault() throws Exception {
     // fetching /. Should go up the filter chain (only mappings on /foo/* and /bar/*).
     runTest("/", "/", "", true, false, false);
@@ -151,6 +160,7 @@ public class ContextPathTest extends TestCase {
   }
 
   // ROOT Web app, using explicit backing servlet mounted at /*
+  @Test
   public void testRootExplicit() throws Exception {
     // fetching /. Should go up the filter chain (only mappings on /foo/* and /bar/*).
     runTest("/", "", "", true, false, false);
@@ -163,6 +173,7 @@ public class ContextPathTest extends TestCase {
   }
 
   // ROOT Web app, using two backing servlets, mounted at /bar/* and /foo/*
+  @Test
   public void testRootSpecific() throws Exception {
     // fetching /. Should go up the filter chain (only mappings on /foo/* and /bar/*).
     runTest("/", "/", "", true, false, false);
@@ -175,6 +186,7 @@ public class ContextPathTest extends TestCase {
   }
 
   // Web app located at /webtest, using Tomcat default servlet
+  @Test
   public void testWebtestDefault() throws Exception {
     // fetching /. Should go up the filter chain (only mappings on /foo/* and /bar/*).
     runTest("/webtest/", "/", "/webtest", true, false, false);
@@ -187,6 +199,7 @@ public class ContextPathTest extends TestCase {
   }
 
   // Web app located at /webtest, using explicit backing servlet mounted at /*
+  @Test
   public void testWebtestExplicit() throws Exception {
     // fetching /. Should go up the filter chain (only mappings on /foo/* and /bar/*).
     runTest("/webtest/", "", "/webtest", true, false, false);
@@ -200,6 +213,7 @@ public class ContextPathTest extends TestCase {
 
   // Web app located at /webtest, using two backing servlets, mounted at /bar/*
   // and /foo/*
+  @Test
   public void testWebtestSpecific() throws Exception {
     // fetching /. Should go up the filter chain (only mappings on /foo/* and
     // /bar/*).

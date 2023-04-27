@@ -11,9 +11,7 @@ import com.google.inject.util.Modules;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import javax.inject.Named;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the cleanup of {@link BindingSourceRestriction} data after enforcement.
@@ -23,7 +21,6 @@ import org.junit.runners.JUnit4;
  *
  * @author vzm@google.com (Vladimir Makaric)
  */
-@RunWith(JUnit4.class)
 public final class BindingSourceRestrictionTest {
 
   @RestrictedBindingSource.Permit

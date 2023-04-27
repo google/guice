@@ -21,16 +21,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.FAIL_ALL;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Some tests for {@link Binder#requireExplicitBindings()}
  *
  * @author sberlin@gmail.com (Sam Berlin)
  */
-public class JitBindingsTest extends TestCase {
+public class JitBindingsTest {
 
   private String jitFailed(Class<?> clazz) {
     return jitFailed(TypeLiteral.get(clazz));
@@ -59,6 +61,7 @@ public class JitBindingsTest extends TestCase {
         + " because it was already configured on one or more child injectors or private modules";
   }
 
+  @Test
   public void testLinkedBindingWorks() {
     Injector injector =
         Guice.createInjector(
@@ -77,6 +80,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, FooImpl.class);
   }
 
+  @Test
   public void testMoreBasicsWork() {
     Injector injector =
         Guice.createInjector(
@@ -97,6 +101,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, FooImpl.class);
   }
 
+  @Test
   public void testLinkedEagerSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -115,6 +120,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, FooImpl.class);
   }
 
+  @Test
   public void testBasicsWithEagerSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -135,6 +141,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, FooImpl.class);
   }
 
+  @Test
   public void testLinkedToScoped() {
     Injector injector =
         Guice.createInjector(
@@ -153,6 +160,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, ScopedFooImpl.class);
   }
 
+  @Test
   public void testBasicsWithScoped() {
     Injector injector =
         Guice.createInjector(
@@ -173,6 +181,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, ScopedFooImpl.class);
   }
 
+  @Test
   public void testFailsIfInjectingScopedDirectlyWhenItIsntBound() {
     try {
       Guice.createInjector(
@@ -191,6 +200,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testLinkedProviderBindingWorks() {
     Injector injector =
         Guice.createInjector(
@@ -208,6 +218,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, FAIL_ALL, FooImpl.class);
   }
 
+  @Test
   public void testJitGetFails() {
     try {
       Guice.createInjector(
@@ -225,6 +236,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitInjectionFails() {
     try {
       Guice.createInjector(
@@ -243,6 +255,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitProviderGetFails() {
     try {
       Guice.createInjector(
@@ -260,6 +273,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitProviderInjectionFails() {
     try {
       Guice.createInjector(
@@ -278,6 +292,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testImplementedBy() {
     Injector injector =
         Guice.createInjector(
@@ -292,6 +307,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, ImplByImpl.class);
   }
 
+  @Test
   public void testImplementedBySomethingThatIsAnnotated() {
     Injector injector =
         Guice.createInjector(
@@ -306,6 +322,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, ImplByScopedImpl.class);
   }
 
+  @Test
   public void testProvidedBy() {
     Injector injector =
         Guice.createInjector(
@@ -320,6 +337,7 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, ALLOW_BINDING, ProvByProvider.class);
   }
 
+  @Test
   public void testProviderMethods() {
     Injector injector =
         Guice.createInjector(
@@ -338,6 +356,7 @@ public class JitBindingsTest extends TestCase {
     ensureWorks(injector, Foo.class);
   }
 
+  @Test
   public void testChildInjectorInheritsOption() {
     Injector parent =
         Guice.createInjector(
@@ -396,6 +415,7 @@ public class JitBindingsTest extends TestCase {
     ensureInChild(parent, FooImpl.class, FooBar.class, Foo.class);
   }
 
+  @Test
   public void testChildInjectorAddsOption() {
     Injector parent =
         Guice.createInjector(
@@ -453,6 +473,7 @@ public class JitBindingsTest extends TestCase {
     ensureWorks(child, FooImpl.class);
   }
 
+  @Test
   public void testPrivateModulesInheritOptions() {
     try {
       Guice.createInjector(
@@ -498,6 +519,7 @@ public class JitBindingsTest extends TestCase {
     ensureInChild(injector, FooImpl.class);
   }
 
+  @Test
   public void testPrivateModuleAddsOption() {
     try {
       Guice.createInjector(
@@ -526,6 +548,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testPrivateModuleSiblingsDontShareOption() {
     Guice.createInjector(
         new AbstractModule() {
@@ -556,6 +579,7 @@ public class JitBindingsTest extends TestCase {
         });
   }
 
+  @Test
   public void testTypeLiteralsCanBeInjected() {
     Injector injector =
         Guice.createInjector(
@@ -573,6 +597,7 @@ public class JitBindingsTest extends TestCase {
     assertEquals(of("bar"), foo.set);
   }
 
+  @Test
   public void testMembersInjectorsCanBeInjected() {
     Injector injector =
         Guice.createInjector(
@@ -594,6 +619,7 @@ public class JitBindingsTest extends TestCase {
     assertEquals("foo", data);
   }
 
+  @Test
   public void testJitLinkedBindingInParentFails() {
     try {
       Guice.createInjector(
@@ -617,6 +643,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitProviderBindingInParentFails() {
     try {
       Guice.createInjector(
@@ -640,6 +667,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitImplementedByBindingInParentFails() {
     try {
       Guice.createInjector(
@@ -663,6 +691,7 @@ public class JitBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitProvidedByBindingInParentFails() {
     try {
       Guice.createInjector(
@@ -700,6 +729,7 @@ public class JitBindingsTest extends TestCase {
   }
 
   // See https://github.com/google/guice/issues/700
+  @Test
   public void testOutOfOrderImplementedByWorks() {
     Injector injector =
         Guice.createInjector(

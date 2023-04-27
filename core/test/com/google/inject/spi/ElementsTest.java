@@ -20,6 +20,12 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -63,15 +69,16 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class ElementsTest extends TestCase {
+public class ElementsTest {
 
   // Binder fidelity tests
 
+  @Test
   public void testAddMessageErrorCommand() {
     checkModule(
         new AbstractModule() {
@@ -95,6 +102,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testAddThrowableErrorCommand() {
     checkModule(
         new AbstractModule() {
@@ -114,6 +122,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testErrorsAddedWhenExceptionsAreThrown() {
     checkModule(
         new AbstractModule() {
@@ -153,6 +162,7 @@ public class ElementsTest extends TestCase {
     return binding.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
   }
 
+  @Test
   public void testBindConstantAnnotations() {
     checkModule(
         new AbstractModule() {
@@ -182,6 +192,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindConstantTypes() {
     checkModule(
         new AbstractModule() {
@@ -301,6 +312,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindKeysNoAnnotations() {
     FailingElementVisitor keyChecker =
         new FailingElementVisitor() {
@@ -325,6 +337,7 @@ public class ElementsTest extends TestCase {
         keyChecker);
   }
 
+  @Test
   public void testBindKeysWithAnnotationType() {
     FailingElementVisitor annotationChecker =
         new FailingElementVisitor() {
@@ -349,6 +362,7 @@ public class ElementsTest extends TestCase {
         annotationChecker);
   }
 
+  @Test
   public void testBindKeysWithAnnotationInstance() {
     FailingElementVisitor annotationChecker =
         new FailingElementVisitor() {
@@ -371,6 +385,7 @@ public class ElementsTest extends TestCase {
         annotationChecker);
   }
 
+  @Test
   public void testBindToProvider() {
     final Provider<String> aProvider =
         new Provider<String>() {
@@ -521,6 +536,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindToLinkedBinding() {
     checkModule(
         new AbstractModule() {
@@ -584,6 +600,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindToInstance() {
     checkModule(
         new AbstractModule() {
@@ -603,6 +620,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindInScopes() {
     checkModule(
         new AbstractModule() {
@@ -674,6 +692,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindToInstanceInScope() {
     checkModule(
         new AbstractModule() {
@@ -703,6 +722,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindToInstanceScope() {
     checkModule(
         new AbstractModule() {
@@ -727,6 +747,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindIntercepor() {
     @SuppressWarnings("rawtypes") // Unavoidable since subclassesOf returns raw type
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
@@ -757,6 +778,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindScope() {
     checkModule(
         new AbstractModule() {
@@ -775,6 +797,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindListener() {
     final Matcher<Object> typeMatcher = Matchers.only(TypeLiteral.get(String.class));
     final TypeListener listener =
@@ -802,6 +825,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testConvertToTypes() {
     final TypeConverter typeConverter =
         new TypeConverter() {
@@ -828,6 +852,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testGetProvider() {
     checkModule(
         new AbstractModule() {
@@ -873,6 +898,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testElementInitialization() {
     final AtomicReference<Provider<String>> providerFromBinder =
         new AtomicReference<Provider<String>>();
@@ -921,6 +947,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testGetMembersInjector() {
     checkModule(
         new AbstractModule() {
@@ -966,6 +993,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testRequestInjection() {
     final Object firstObject = new Object();
     final Object secondObject = new Object();
@@ -994,6 +1022,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testRequestStaticInjection() {
     checkModule(
         new AbstractModule() {
@@ -1011,6 +1040,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testNewPrivateBinder() {
     final Key<Collection<Object>> collection =
         new Key<Collection<Object>>(SampleAnnotation.class) {};
@@ -1073,6 +1103,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindWithMultipleAnnotationsAddsError() {
     checkModule(
         new AbstractModule() {
@@ -1101,6 +1132,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindWithMultipleTargetsAddsError() {
     checkModule(
         new AbstractModule() {
@@ -1128,6 +1160,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindWithMultipleScopesAddsError() {
     checkModule(
         new AbstractModule() {
@@ -1155,6 +1188,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindConstantWithMultipleAnnotationsAddsError() {
     checkModule(
         new AbstractModule() {
@@ -1183,6 +1217,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindConstantWithMultipleTargetsAddsError() {
     checkModule(
         new AbstractModule() {
@@ -1211,6 +1246,7 @@ public class ElementsTest extends TestCase {
   }
 
   @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
+  @Test
   public void testBindToConstructor() throws NoSuchMethodException, NoSuchFieldException {
     final Constructor<A> aConstructor = A.class.getDeclaredConstructor();
     final Constructor<B> bConstructor = B.class.getDeclaredConstructor(Object.class);
@@ -1278,6 +1314,7 @@ public class ElementsTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindToMalformedConstructor() throws NoSuchMethodException, NoSuchFieldException {
     final Constructor<C> constructor = C.class.getDeclaredConstructor(Integer.class);
 
@@ -1322,6 +1359,7 @@ public class ElementsTest extends TestCase {
 
   // Business logic tests
 
+  @Test
   public void testModulesAreInstalledAtMostOnce() {
     final AtomicInteger aConfigureCount = new AtomicInteger(0);
     final Module a =

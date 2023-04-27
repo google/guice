@@ -18,19 +18,16 @@ package com.google.inject;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.matcher.Matchers.any;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.inject.internal.InternalFlags;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-@RunWith(JUnit4.class)
 public class IntegrationTest {
 
   @Test

@@ -21,6 +21,8 @@ import static com.google.inject.name.Names.named;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -30,18 +32,21 @@ import com.google.inject.name.Named;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class BinderTestSuite extends TestCase {
+public class BinderSuiteTest {
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite();
+  @TestFactory
+  public Collection<DynamicTest> tests() {
+    List<DynamicTest> suite = new ArrayList<>();
 
     new Builder()
         .name("bind A")
@@ -52,7 +57,7 @@ public class BinderTestSuite extends TestCase {
                 bind(A.class);
               }
             })
-        .creationException("No implementation for BinderTestSuite$A was bound.")
+        .creationException("No implementation for BinderSuiteTest$A was bound.")
         .addToSuite(suite);
 
     new Builder()
@@ -65,7 +70,7 @@ public class BinderTestSuite extends TestCase {
               }
             })
         .creationException(
-            "No implementation for BinderTestSuite$PlainA annotated with "
+            "No implementation for BinderSuiteTest$PlainA annotated with "
                 + shortNamed(named("apple"))
                 + " was bound")
         .addToSuite(suite);
@@ -103,7 +108,7 @@ public class BinderTestSuite extends TestCase {
         .name("no binding, AWithProvidedBy named apple")
         .key(Key.get(AWithProvidedBy.class, named("apple")), InjectsAWithProvidedByNamedApple.class)
         .configurationException(
-            "No implementation for BinderTestSuite$AWithProvidedBy annotated with "
+            "No implementation for BinderSuiteTest$AWithProvidedBy annotated with "
                 + shortNamed(named("apple"))
                 + " was bound")
         .addToSuite(suite);
@@ -114,7 +119,7 @@ public class BinderTestSuite extends TestCase {
             Key.get(AWithImplementedBy.class, named("apple")),
             InjectsAWithImplementedByNamedApple.class)
         .configurationException(
-            "No implementation for BinderTestSuite$AWithImplementedBy annotated with "
+            "No implementation for BinderSuiteTest$AWithImplementedBy annotated with "
                 + shortNamed(named("apple"))
                 + " was bound")
         .addToSuite(suite);
@@ -123,7 +128,7 @@ public class BinderTestSuite extends TestCase {
         .name("no binding, ScopedA named apple")
         .key(Key.get(ScopedA.class, named("apple")), InjectsScopedANamedApple.class)
         .configurationException(
-            "No implementation for BinderTestSuite$ScopedA annotated with "
+            "No implementation for BinderSuiteTest$ScopedA annotated with "
                 + shortNamed(named("apple"))
                 + " was bound")
         .addToSuite(suite);
@@ -235,7 +240,7 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for BinderTestSuite$AWithProvidedBy annotated with "
+              "No implementation for BinderSuiteTest$AWithProvidedBy annotated with "
                   + shortNamed(named("apple"))
                   + " was bound")
           .scoper(scoper)
@@ -251,7 +256,7 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for BinderTestSuite$AWithImplementedBy annotated with "
+              "No implementation for BinderSuiteTest$AWithImplementedBy annotated with "
                   + shortNamed(named("apple"))
                   + " was bound")
           .scoper(scoper)
@@ -267,7 +272,7 @@ public class BinderTestSuite extends TestCase {
                 }
               })
           .creationException(
-              "No implementation for BinderTestSuite$ScopedA annotated with "
+              "No implementation for BinderSuiteTest$ScopedA annotated with "
                   + shortNamed(named("apple"))
                   + " was bound")
           .scoper(scoper)
@@ -420,41 +425,33 @@ public class BinderTestSuite extends TestCase {
       return this;
     }
 
-    public void addToSuite(TestSuite suite) {
+    public void addToSuite(List<DynamicTest> suite) {
       if (creationException != null) {
-        suite.addTest(new CreationExceptionTest(this));
+        suite.add(DynamicTest.dynamicTest("creation errors:" + name, new CreationExceptionTest(this)));
 
       } else if (configurationException != null) {
-        suite.addTest(new ConfigurationExceptionTest(this));
+        suite.add(DynamicTest.dynamicTest("provision errors:" + name, new ConfigurationExceptionTest(this)));
 
       } else {
-        suite.addTest(new SuccessTest(this));
+        suite.add(DynamicTest.dynamicTest(name, new SuccessTest(this)));
         if (creationTime != CreationTime.NONE) {
-          suite.addTest(new UserExceptionsTest(this));
+          suite.add(DynamicTest.dynamicTest("provision errors:" + name, new UserExceptionsTest(this)));
         }
       }
     }
   }
 
-  public static class SuccessTest extends TestCase {
-    final String name;
+  public static class SuccessTest implements Executable {
     final Key<?> key;
     final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
     final ImmutableList<Object> expectedValues;
 
     public SuccessTest(Builder builder) {
-      super("test");
-      name = builder.name;
       key = builder.key;
       injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
       expectedValues = ImmutableList.copyOf(builder.expectedValues);
-    }
-
-    @Override
-    public String getName() {
-      return name;
     }
 
     Injector newInjector() {
@@ -462,7 +459,8 @@ public class BinderTestSuite extends TestCase {
       return Guice.createInjector(modules);
     }
 
-    public void test() throws IllegalAccessException, InstantiationException {
+    @Override
+    public void execute() throws IllegalAccessException, InstantiationException {
       Injector injector = newInjector();
       nextId.set(201);
       for (Object value : expectedValues) {
@@ -507,26 +505,19 @@ public class BinderTestSuite extends TestCase {
     }
   }
 
-  public static class CreationExceptionTest extends TestCase {
-    final String name;
+  public static class CreationExceptionTest implements Executable {
     final Key<?> key;
     final ImmutableList<Module> modules;
     final String creationException;
 
     public CreationExceptionTest(Builder builder) {
-      super("test");
-      name = builder.name;
       key = builder.key;
       modules = ImmutableList.copyOf(builder.modules);
       creationException = builder.creationException;
     }
 
     @Override
-    public String getName() {
-      return "creation errors:" + name;
-    }
-
-    public void test() {
+    public void execute() {
       try {
         Guice.createInjector(modules);
         fail();
@@ -536,32 +527,25 @@ public class BinderTestSuite extends TestCase {
     }
   }
 
-  public static class ConfigurationExceptionTest extends TestCase {
-    final String name;
+  public static class ConfigurationExceptionTest implements Executable {
     final Key<?> key;
     final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
     final String configurationException;
 
     public ConfigurationExceptionTest(Builder builder) {
-      super("test");
-      name = builder.name;
       key = builder.key;
       injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
       configurationException = builder.configurationException;
     }
 
-    @Override
-    public String getName() {
-      return "provision errors:" + name;
-    }
-
     Injector newInjector() {
       return Guice.createInjector(modules);
     }
 
-    public void test() throws IllegalAccessException, InstantiationException {
+    @Override
+    public void execute() throws IllegalAccessException, InstantiationException {
       try {
         newInjector().getProvider(key);
         fail();
@@ -610,8 +594,7 @@ public class BinderTestSuite extends TestCase {
     }
   }
 
-  public static class UserExceptionsTest extends TestCase {
-    final String name;
+  public static class UserExceptionsTest implements Executable {
     final Key<?> key;
     final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
@@ -619,8 +602,6 @@ public class BinderTestSuite extends TestCase {
     final CreationTime creationTime;
 
     public UserExceptionsTest(Builder builder) {
-      super("test");
-      name = builder.name;
       key = builder.key;
       injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
@@ -628,16 +609,12 @@ public class BinderTestSuite extends TestCase {
       creationTime = builder.creationTime;
     }
 
-    @Override
-    public String getName() {
-      return "provision errors:" + name;
-    }
-
     Injector newInjector() {
       return Guice.createInjector(modules);
     }
 
-    public void test() throws IllegalAccessException, InstantiationException {
+    @Override
+    public void execute() throws IllegalAccessException, InstantiationException {
       nextId.set(-1);
       try {
         newInjector();

@@ -16,15 +16,18 @@
 
 package com.google.inject.internal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.lang.annotation.Annotation;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class UniqueAnnotationsTest extends TestCase {
+public class UniqueAnnotationsTest {
 
   @UniqueAnnotations.Internal(31)
   public Void unused;
 
+  @Test
   public void testEqualsHashCodeToString() {
     Annotation actual = UniqueAnnotations.create(31);
 

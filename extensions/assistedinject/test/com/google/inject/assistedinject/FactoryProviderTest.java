@@ -17,6 +17,11 @@
 package com.google.inject.assistedinject;
 
 import static com.google.inject.Asserts.assertContains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -38,14 +43,14 @@ import com.google.inject.spi.HasDependencies;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
 @SuppressWarnings("deprecation")
-public class FactoryProviderTest extends TestCase {
+public class FactoryProviderTest {
 
   private enum Color {
     BLUE,
@@ -57,6 +62,7 @@ public class FactoryProviderTest extends TestCase {
     PINK
   }
 
+  @Test
   public void testAssistedFactory() {
     Injector injector =
         Guice.createInjector(
@@ -79,6 +85,7 @@ public class FactoryProviderTest extends TestCase {
     assertEquals(5.0d, redMustang.engineSize, 0.0);
   }
 
+  @Test
   public void testFactoryBindingDependencies() {
     Injector injector =
         Guice.createInjector(
@@ -98,6 +105,7 @@ public class FactoryProviderTest extends TestCase {
         hasDependencies.getDependencies());
   }
 
+  @Test
   public void testAssistedFactoryWithAnnotations() {
     Injector injector =
         Guice.createInjector(
@@ -163,6 +171,7 @@ public class FactoryProviderTest extends TestCase {
     Car createConvertible(Color color);
   }
 
+  @Test
   public void testFactoryWithMultipleMethods() {
     Injector injector =
         Guice.createInjector(
@@ -211,6 +220,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryMethodsMismatch() {
     try {
       FactoryProvider.newFactory(SummerCarFactory.class, Beetle.class);
@@ -240,6 +250,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testMethodsAndFieldsGetInjected() {
     Injector injector =
         Guice.createInjector(
@@ -280,6 +291,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testProviderInjection() {
     Injector injector =
         Guice.createInjector(
@@ -310,6 +322,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testTypeTokenInjection() {
     Injector injector =
         Guice.createInjector(
@@ -346,6 +359,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testTypeTokenProviderInjection() {
     Injector injector =
         Guice.createInjector(
@@ -385,6 +399,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testAssistInjectionInNonPublicConstructor() {
     Injector injector =
         Guice.createInjector(
@@ -405,6 +420,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionDuringConstruction() {
     Injector injector =
         Guice.createInjector(
@@ -443,6 +459,7 @@ public class FactoryProviderTest extends TestCase {
     Car createCar() throws FireException;
   }
 
+  @Test
   public void testFactoryMethodMustDeclareAllConstructorExceptions() {
     try {
       FactoryProvider.newFactory(DefectiveCarFactoryWithNoExceptions.class, DefectiveCar.class);
@@ -456,6 +473,7 @@ public class FactoryProviderTest extends TestCase {
     Car createCar() throws FireException, ExplosionException;
   }
 
+  @Test
   public void testConstructorExceptionsAreThrownByFactory() {
     Injector injector =
         Guice.createInjector(
@@ -496,6 +514,7 @@ public class FactoryProviderTest extends TestCase {
     Car createCar(Color r) throws FireException;
   }
 
+  @Test
   public void testMultipleConstructorExceptionMatching() {
     Injector injector =
         Guice.createInjector(
@@ -534,6 +553,7 @@ public class FactoryProviderTest extends TestCase {
     public WildcardCollection(@SuppressWarnings("unused") @Assisted Collection<?> items) {}
   }
 
+  @Test
   public void testWildcardGenerics() {
     Injector injector =
         Guice.createInjector(
@@ -566,6 +586,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryWithImplicitBindings() {
     Injector injector =
         Guice.createInjector(
@@ -583,6 +604,7 @@ public class FactoryProviderTest extends TestCase {
     assertNotNull(fiat.steeringWheel);
   }
 
+  @Test
   public void testFactoryFailsWithMissingBinding() {
     try {
       Guice.createInjector(
@@ -602,6 +624,7 @@ public class FactoryProviderTest extends TestCase {
   }
 
   @SuppressWarnings({"SelfEquals", "ReturnValueIgnored"})
+  @Test
   public void testMethodsDeclaredInObject() {
     Injector injector =
         Guice.createInjector(
@@ -621,6 +644,7 @@ public class FactoryProviderTest extends TestCase {
     carFactory.toString();
   }
 
+  @Test
   public void testAssistedInjectConstructorAndAssistedFactoryParameterMustNotMix() {
     try {
       Guice.createInjector(
@@ -651,6 +675,7 @@ public class FactoryProviderTest extends TestCase {
     T create(Color color);
   }
 
+  @Test
   public void testGenericAssistedFactory() {
     final TypeLiteral<GenericColoredCarFactory<Mustang>> mustangTypeLiteral =
         new TypeLiteral<GenericColoredCarFactory<Mustang>>() {};
@@ -738,6 +763,7 @@ public class FactoryProviderTest extends TestCase {
     public Insurance<Camaro> create(Camaro car, double premium);
   }
 
+  @Test
   public void testAssistedFactoryForConcreteType() {
 
     Injector injector =
@@ -779,6 +805,7 @@ public class FactoryProviderTest extends TestCase {
     public Insurance<T> create(T car, double premium);
   }
 
+  @Test
   public void testAssistedFactoryForParameterizedType() {
     final TypeLiteral<InsuranceFactory<Mustang>> mustangInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Mustang>>() {};
@@ -835,6 +862,7 @@ public class FactoryProviderTest extends TestCase {
     public void sell() {}
   }
 
+  @Test
   public void testAssistedFactoryForTypeVariableParameters() {
     final TypeLiteral<InsuranceFactory<Camaro>> camaroInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Camaro>>() {};
@@ -864,6 +892,7 @@ public class FactoryProviderTest extends TestCase {
     assertEquals(camaro, camaroPolicy.car);
   }
 
+  @Test
   public void testDuplicateAssistedFactoryBinding() {
     Injector injector =
         Guice.createInjector(
@@ -911,6 +940,7 @@ public class FactoryProviderTest extends TestCase {
     }
   }
 
+  @Test
   public void testFactoryMethodCalledEquals() {
     Injector injector =
         Guice.createInjector(

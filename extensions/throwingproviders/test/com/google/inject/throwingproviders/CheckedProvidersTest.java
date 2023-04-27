@@ -2,19 +2,21 @@ package com.google.inject.throwingproviders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.TypeLiteral;
 import java.util.Arrays;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link CheckedProviders}.
  *
  * @author eatnumber1@google.com (Russ Harmon)
  */
-public final class CheckedProvidersTest extends TestCase {
+public final class CheckedProvidersTest {
   private static interface StringCheckedProvider extends CheckedProvider<String> {}
 
+  @Test
   public void testCheckedProviderClass_get_returnsValidString() throws Exception {
     String expected = "rick";
 
@@ -22,6 +24,7 @@ public final class CheckedProvidersTest extends TestCase {
     assertThat(provider.get()).isEqualTo(expected);
   }
 
+  @Test
   public void testCheckedProviderTypeLiteral_get_returnsValidString() throws Exception {
     String expected = "morty";
 
@@ -30,11 +33,13 @@ public final class CheckedProvidersTest extends TestCase {
     assertThat(provider.get()).isEqualTo(expected);
   }
 
+  @Test
   public void testCheckedProviderClassNull_get_returnsNull() throws Exception {
     StringCheckedProvider provider = CheckedProviders.of(StringCheckedProvider.class, null);
     assertThat(provider.get()).isNull();
   }
 
+  @Test
   public void testCheckedProviderTypeLiteralNull_get_returnsNull() throws Exception {
     StringCheckedProvider provider =
         CheckedProviders.of(TypeLiteral.get(StringCheckedProvider.class), null);
@@ -48,6 +53,7 @@ public final class CheckedProvidersTest extends TestCase {
     Object get() throws FooException;
   }
 
+  @Test
   public void testThrowingCheckedProviderClass_get_throwsException() {
     FooCheckedProvider provider =
         CheckedProviders.throwing(FooCheckedProvider.class, FooException.class);
@@ -58,6 +64,7 @@ public final class CheckedProvidersTest extends TestCase {
     }
   }
 
+  @Test
   public void testThrowingCheckedProviderTypeLiteral_get_throwsException() {
     FooCheckedProvider provider =
         CheckedProviders.throwing(TypeLiteral.get(FooCheckedProvider.class), FooException.class);
@@ -75,6 +82,7 @@ public final class CheckedProvidersTest extends TestCase {
     void otherMethod();
   }
 
+  @Test
   public void testUnsupportedMethods_otherMethod_throwsIllegalArgumentException()
       throws NoSuchMethodException {
     String message =
@@ -96,6 +104,7 @@ public final class CheckedProvidersTest extends TestCase {
     StringException(String arg) {}
   }
 
+  @Test
   public void testCheckThrowable_unsupportedThrowableConstructor_throwsIllegalArgumentException() {
     String message =
         String.format(
@@ -115,6 +124,7 @@ public final class CheckedProvidersTest extends TestCase {
 
   private static final class BarException extends Exception {}
 
+  @Test
   public void testCheckThrowable_checkedExceptionNotDeclared_throwsIllegalArgumentException()
       throws Exception {
     String message =
@@ -132,6 +142,7 @@ public final class CheckedProvidersTest extends TestCase {
 
   private static final class ExpectedRuntimeException extends RuntimeException {}
 
+  @Test
   public void testCheckThrowable_runtimeExceptionNotDeclared_throwsExpectedRuntimeException()
       throws Exception {
     FooCheckedProvider provider =
@@ -147,6 +158,7 @@ public final class CheckedProvidersTest extends TestCase {
 
   private static final class ExpectedError extends Error {}
 
+  @Test
   public void testCheckThrowable_errorNotDeclared_throwsExpectedError() throws Exception {
     FooCheckedProvider provider =
         CheckedProviders.throwing(FooCheckedProvider.class, ExpectedError.class);

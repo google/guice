@@ -16,6 +16,8 @@
 
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -36,7 +38,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import junit.framework.AssertionFailedError;
 
 /**
  * A visitor for testing the servlet SPI extension.
@@ -105,7 +106,7 @@ class ServletSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
   @Override
   protected Integer visitOther(Binding<? extends Object> binding) {
     if (!allowedClasses.contains(binding.getKey().getTypeLiteral().getRawType())) {
-      throw new AssertionFailedError("invalid other binding: " + binding);
+      return fail("invalid other binding: " + binding);
     }
     otherCount++;
     return currentCount++;

@@ -19,6 +19,8 @@ package com.google.inject.multibindings;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -35,15 +37,16 @@ import java.lang.annotation.Retention;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests the various @ProvidesInto annotations.
  *
  * @author sameb@google.com (Sam Berlin)
  */
-public class ProvidesIntoTest extends TestCase {
+public class ProvidesIntoTest {
 
+  @Test
   public void testAnnotation() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -235,6 +238,7 @@ public class ProvidesIntoTest extends TestCase {
     return field.getAnnotation(WrappedKey.class);
   }
 
+  @Test
   public void testDoubleScannerIsIgnored() {
     Injector injector =
         Guice.createInjector(
@@ -256,6 +260,7 @@ public class ProvidesIntoTest extends TestCase {
     int[] value();
   }
 
+  @Test
   public void testArrayKeys_unwrapValuesTrue() {
     Module m =
         new AbstractModule() {
@@ -308,6 +313,7 @@ public class ProvidesIntoTest extends TestCase {
     return field.getAnnotation(ArrayWrappedKey.class);
   }
 
+  @Test
   public void testArrayKeys_unwrapValuesFalse() throws Exception {
     Module m =
         new AbstractModule() {
@@ -334,6 +340,7 @@ public class ProvidesIntoTest extends TestCase {
     assertEquals(2, map.size());
   }
 
+  @Test
   public void testProvidesIntoSetWithMapKey() {
     Module m =
         new AbstractModule() {
@@ -355,6 +362,7 @@ public class ProvidesIntoTest extends TestCase {
     }
   }
 
+  @Test
   public void testProvidesIntoOptionalWithMapKey() {
     Module m =
         new AbstractModule() {
@@ -376,6 +384,7 @@ public class ProvidesIntoTest extends TestCase {
     }
   }
 
+  @Test
   public void testProvidesIntoMapWithoutMapKey() {
     Module m =
         new AbstractModule() {
@@ -401,6 +410,7 @@ public class ProvidesIntoTest extends TestCase {
     TestEnum value();
   }
 
+  @Test
   public void testMoreThanOneMapKeyAnnotation() {
     Module m =
         new AbstractModule() {
@@ -427,6 +437,7 @@ public class ProvidesIntoTest extends TestCase {
   @Retention(RUNTIME)
   @interface MissingValueMethod {}
 
+  @Test
   public void testMapKeyMissingValueMethod() {
     Module m =
         new AbstractModule() {

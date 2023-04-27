@@ -16,6 +16,9 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,7 +27,9 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -32,10 +37,10 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class EntityManagerPerRequestProvisionTest extends TestCase {
+public class EntityManagerPerRequestProvisionTest {
   private Injector injector;
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -45,12 +50,13 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
     injector.getInstance(UnitOfWork.class).begin();
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
+  @Test
   public void testEntityManagerLifecyclePerTxn() {
     //obtain em
     JpaDao dao = injector.getInstance(JpaDao.class);
@@ -62,19 +68,20 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
 
     //im not sure this hack works...
     assertEquals(
-        "Entity managers closed inside same thread-scope",
         injector.getInstance(EntityManager.class),
-        JpaDao.em);
+        JpaDao.em,
+        "Entity managers closed inside same thread-scope");
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
     assertTrue(
+        dao.contains(te),
         "EntityManager was closed and reopened around txn"
-            + " (persistent object does not persist)",
-        dao.contains(te));
+            + " (persistent object does not persist)");
   }
 
+  @Test
   public void testEntityManagerLifecyclePerTxn2() {
     //obtain em
     JpaDao dao = injector.getInstance(JpaDao.class);
@@ -86,20 +93,20 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
 
     //im not sure this hack works...
     assertEquals(
-        "Duplicate entity managers crossing-scope",
         injector.getInstance(EntityManager.class),
-        JpaDao.em);
+        JpaDao.em,
+        "Duplicate entity managers crossing-scope");
     assertEquals(
-        "Duplicate entity managers crossing-scope",
         injector.getInstance(EntityManager.class),
-        JpaDao.em);
+        JpaDao.em,
+        "Duplicate entity managers crossing-scope");
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
 
     assertTrue(
-        "EntityManager was closed and reopened around txn" + " (persistent object doesnt persist)",
-        dao.contains(te));
+        dao.contains(te),
+        "EntityManager was closed and reopened around txn" + " (persistent object doesnt persist)");
   }
 
   public static class JpaDao {
@@ -112,11 +119,11 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
 
     @Transactional
     public <T> void persist(T t) {
-      assertTrue("em is not open!", em.isOpen());
-      assertTrue("no active txn!", em.getTransaction().isActive());
+      assertTrue(em.isOpen(), "em is not open!");
+      assertTrue(em.getTransaction().isActive(), "no active txn!");
       em.persist(t);
 
-      assertTrue("Persisting object failed", em.contains(t));
+      assertTrue(em.contains(t), "Persisting object failed");
     }
 
     @Transactional

@@ -23,6 +23,11 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Throwables;
 import com.google.inject.internal.Annotations;
@@ -30,12 +35,13 @@ import com.google.inject.spi.Message;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
 @SuppressWarnings("UnusedDeclaration")
-public class ProvisionExceptionTest extends TestCase {
+public class ProvisionExceptionTest {
 
+  @Test
   public void testExceptionsCollapsed() {
     try {
       Guice.createInjector().getInstance(A.class);
@@ -58,6 +64,7 @@ public class ProvisionExceptionTest extends TestCase {
    * There's a pass-through of user code in the scope. We want exceptions thrown by Guice to be
    * limited to a single exception, even if it passes through user code.
    */
+  @Test
   public void testExceptionsCollapsedWithScopes() {
     try {
       Guice.createInjector(
@@ -84,6 +91,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testMethodInjectionExceptions() {
     try {
       Guice.createInjector().getInstance(E.class);
@@ -97,6 +105,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindToProviderInstanceExceptions() {
     try {
       Guice.createInjector(
@@ -120,6 +129,7 @@ public class ProvisionExceptionTest extends TestCase {
   /**
    * This test demonstrates that if the user throws a ProvisionException, we wrap it to add context.
    */
+  @Test
   public void testProvisionExceptionsAreWrappedForBindToType() {
     try {
       Guice.createInjector().getInstance(F.class);
@@ -129,6 +139,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testProvisionExceptionsAreWrappedForBindToProviderType() {
     try {
       Guice.createInjector(
@@ -149,6 +160,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testProvisionExceptionsAreWrappedForBindToProviderInstance() {
     try {
       Guice.createInjector(
@@ -165,6 +177,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testProvisionExceptionIsSerializable() throws IOException {
     try {
       Guice.createInjector().getInstance(A.class);
@@ -187,6 +200,7 @@ public class ProvisionExceptionTest extends TestCase {
 
   // The only way to trigger an exception with _multiple_ user controlled throwables is by
   // triggering errors during injector creation.
+  @Test
   public void testMultipleCauses() {
     try {
       Guice.createInjector(
@@ -217,6 +231,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectInnerClass() throws Exception {
     Injector injector = Guice.createInjector();
     try {
@@ -230,6 +245,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectLocalClass() throws Exception {
     class LocalClass {}
 
@@ -245,6 +261,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindingAnnotationsOnMethodsAndConstructors() {
     try {
       Injector injector = Guice.createInjector();
@@ -275,6 +292,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindingAnnotationWarningForScala() {
     Injector injector =
         Guice.createInjector(
@@ -287,6 +305,7 @@ public class ProvisionExceptionTest extends TestCase {
     injector.getInstance(LikeScala.class);
   }
 
+  @Test
   public void testLinkedBindings() {
     Injector injector =
         Guice.createInjector(
@@ -309,6 +328,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testProviderKeyBindings() {
     Injector injector =
         Guice.createInjector(
@@ -330,6 +350,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testDuplicateCausesCollapsed() {
     final RuntimeException sharedException = new RuntimeException("fail");
     try {
@@ -351,6 +372,7 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  @Test
   public void testMultipleDuplicates() {
     final RuntimeException exception1 = new RuntimeException("fail");
     final RuntimeException exception2 = new RuntimeException("abort");

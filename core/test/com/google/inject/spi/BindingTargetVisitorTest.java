@@ -18,15 +18,16 @@ package com.google.inject.spi;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Simple little test that should compile. Ensures that wildcards on the generics are correct.
  *
  * @author phopkins@gmail.com
  */
-public class BindingTargetVisitorTest extends TestCase {
-  public void testBindingTargetVisitorTypeTest() throws Exception {
+public class BindingTargetVisitorTest {
+  @Test
+  public void testBindingTargetVisitorTypeTest() {
     Injector injector = Guice.createInjector();
     for (Binding<?> binding : injector.getBindings().values()) {
       binding.acceptTargetVisitor(new DefaultBindingTargetVisitor<Object, Object>() {});

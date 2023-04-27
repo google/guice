@@ -1,7 +1,7 @@
 package com.google.inject.assistedinject.subpkg;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.Iterables;
@@ -18,11 +18,9 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.inject.Inject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests that run in a subpackage, to make sure tests aren't passing because they're run in the same
@@ -30,7 +28,6 @@ import org.junit.runners.JUnit4;
  *
  * <p>See https://github.com/google/guice/issues/904
  */
-@RunWith(JUnit4.class)
 public final class SubpackageTestPrivateFallbackOnly {
   private static final double JAVA_VERSION =
       Double.parseDouble(StandardSystemProperty.JAVA_SPECIFICATION_VERSION.value());
@@ -52,14 +49,14 @@ public final class SubpackageTestPrivateFallbackOnly {
         public void close() {}
       };
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     loggerToWatch.addHandler(fakeHandler);
     setAllowPrivateLookupFallback(true);
     setAllowMethodHandleWorkaround(true);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     loggerToWatch.removeHandler(fakeHandler);
     setAllowPrivateLookupFallback(true);

@@ -16,6 +16,9 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,7 +27,9 @@ import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -32,10 +37,10 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class EntityManagerProvisionTest extends TestCase {
+public class EntityManagerProvisionTest {
   private Injector injector;
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -43,11 +48,12 @@ public class EntityManagerProvisionTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
+  @Test
   public void testEntityManagerLifecyclePerTxn() {
     //obtain em
     JpaDao dao = injector.getInstance(JpaDao.class);
@@ -61,11 +67,12 @@ public class EntityManagerProvisionTest extends TestCase {
     dao = injector.getInstance(JpaDao.class);
 
     assertFalse(
+        dao.contains(te),
         "EntityManager wasnt closed and reopened properly around txn"
-            + " (persistent object persists)",
-        dao.contains(te));
+            + " (persistent object persists)");
   }
 
+  @Test
   public void testEntityManagerLifecyclePerTxn2() {
     //obtain em
     JpaDao dao = injector.getInstance(JpaDao.class);
@@ -79,9 +86,9 @@ public class EntityManagerProvisionTest extends TestCase {
     dao = injector.getInstance(JpaDao.class);
 
     assertFalse(
+        dao.contains(te),
         "EntityManager wasnt closed and reopened properly around txn"
-            + " (persistent object persists)",
-        dao.contains(te));
+            + " (persistent object persists)");
   }
 
   public static class JpaDao {
@@ -96,11 +103,11 @@ public class EntityManagerProvisionTest extends TestCase {
     @Transactional
     public <T> void persist(T t) {
       lastEm = em.get();
-      assertTrue("em is not open!", lastEm.isOpen());
-      assertTrue("no active txn!", lastEm.getTransaction().isActive());
+      assertTrue(lastEm.isOpen(), "em is not open!");
+      assertTrue(lastEm.getTransaction().isActive(), "no active txn!");
       lastEm.persist(t);
 
-      assertTrue("Persisting object failed", lastEm.contains(t));
+      assertTrue(lastEm.contains(t), "Persisting object failed");
     }
 
     @Transactional

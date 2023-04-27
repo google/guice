@@ -16,14 +16,18 @@
 
 package com.google.inject;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
 
-public class BindingOrderTest extends TestCase {
+public class BindingOrderTest {
 
+  @Test
   public void testBindingOutOfOrder() {
     Guice.createInjector(
         new AbstractModule() {
@@ -44,6 +48,7 @@ public class BindingOrderTest extends TestCase {
 
   static class BoundSecondImpl implements BoundSecond {}
 
+  @Test
   public void testBindingOrderAndScopes() {
     Injector injector =
         Guice.createInjector(
@@ -58,6 +63,7 @@ public class BindingOrderTest extends TestCase {
     assertSame(injector.getInstance(A.class).b, injector.getInstance(A.class).b);
   }
 
+  @Test
   public void testBindingWithExtraThreads() throws InterruptedException {
     final CountDownLatch ready = new CountDownLatch(1);
     final CountDownLatch done = new CountDownLatch(1);

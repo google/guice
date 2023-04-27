@@ -19,6 +19,13 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
@@ -50,10 +57,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class ScopesTest extends TestCase {
+public class ScopesTest {
 
   static final long DEADLOCK_TIMEOUT_SECONDS = 1;
 
@@ -73,7 +81,7 @@ public class ScopesTest extends TestCase {
         }
       };
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     AnnotatedSingleton.nextInstanceId = 0;
     BoundAsSingleton.nextInstanceId = 0;
@@ -87,6 +95,7 @@ public class ScopesTest extends TestCase {
     ProvidedByAnnotatedSingleton.nextInstanceId = 0;
   }
 
+  @Test
   public void testSingletons() {
     Injector injector = Guice.createInjector(singletonsModule);
 
@@ -123,6 +132,7 @@ public class ScopesTest extends TestCase {
         injector.getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
+  @Test
   public void testJustInTimeAnnotatedSingleton() {
     Injector injector = Guice.createInjector();
 
@@ -135,6 +145,7 @@ public class ScopesTest extends TestCase {
         injector.getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
+  @Test
   public void testSingletonIsPerInjector() {
     assertNotSame(
         Guice.createInjector().getInstance(AnnotatedSingleton.class),
@@ -144,6 +155,7 @@ public class ScopesTest extends TestCase {
         Guice.createInjector().getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
+  @Test
   public void testOverriddingAnnotation() {
     Injector injector =
         Guice.createInjector(
@@ -164,6 +176,7 @@ public class ScopesTest extends TestCase {
         injector.getInstance(ProvidedByAnnotatedSingleton.class));
   }
 
+  @Test
   public void testScopingAnnotationsOnAbstractTypeViaBind() {
     try {
       Guice.createInjector(
@@ -199,6 +212,7 @@ public class ScopesTest extends TestCase {
 
   static class ComponentAnnotationTestImpl implements ComponentAnnotationTest {}
 
+  @Test
   public void testScopingAnnotationsOnAbstractTypeIsValidForComponent() {
     Guice.createInjector(
         new AbstractModule() {
@@ -209,6 +223,7 @@ public class ScopesTest extends TestCase {
         });
   }
 
+  @Test
   public void testScopingAnnotationsOnAbstractTypeViaImplementedBy() {
     try {
       Guice.createInjector().getInstance(D.class);
@@ -229,6 +244,7 @@ public class ScopesTest extends TestCase {
 
   static class DImpl implements D {}
 
+  @Test
   public void testScopingAnnotationsOnAbstractTypeViaProvidedBy() {
     try {
       Guice.createInjector().getInstance(E.class);
@@ -254,6 +270,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testScopeUsedButNotBound() {
     try {
       Guice.createInjector(
@@ -279,6 +296,7 @@ public class ScopesTest extends TestCase {
   @CustomScoped
   static class C {}
 
+  @Test
   public void testSingletonsInProductionStage() {
     Guice.createInjector(Stage.PRODUCTION, singletonsModule);
 
@@ -290,6 +308,7 @@ public class ScopesTest extends TestCase {
     assertEquals(0, NotASingleton.nextInstanceId);
   }
 
+  @Test
   public void testSingletonsInDevelopmentStage() {
     Guice.createInjector(Stage.DEVELOPMENT, singletonsModule);
 
@@ -301,14 +320,17 @@ public class ScopesTest extends TestCase {
     assertEquals(0, NotASingleton.nextInstanceId);
   }
 
+  @Test
   public void testSingletonScopeIsNotSerializable() throws IOException {
     Asserts.assertNotSerializable(Scopes.SINGLETON);
   }
 
+  @Test
   public void testNoScopeIsNotSerializable() throws IOException {
     Asserts.assertNotSerializable(Scopes.NO_SCOPE);
   }
 
+  @Test
   public void testUnscopedProviderWorksOutsideOfRequestedScope() {
     final RememberProviderScope scope = new RememberProviderScope();
 
@@ -344,6 +366,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testScopeAnnotationWithoutRuntimeRetention() {
     try {
       Guice.createInjector(new OuterRuntimeModule());
@@ -371,6 +394,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindScopeToAnnotationWithoutScopeAnnotation() {
     try {
       Guice.createInjector(new OuterDeprecatedModule());
@@ -406,6 +430,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindScopeTooManyTimes() {
     try {
       Guice.createInjector(new OuterScopeModule());
@@ -421,6 +446,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindDuplicateScope() {
     Injector injector =
         Guice.createInjector(
@@ -437,6 +463,7 @@ public class ScopesTest extends TestCase {
         injector.getInstance(AnnotatedCustomScoped.class));
   }
 
+  @Test
   public void testDuplicateScopeAnnotations() {
     Injector injector =
         Guice.createInjector(
@@ -458,6 +485,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testNullScopedAsASingleton() {
     Injector injector =
         Guice.createInjector(
@@ -487,6 +515,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testSingletonAnnotationOnParameterizedType() {
     Injector injector = Guice.createInjector();
     assertSame(
@@ -605,6 +634,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testScopeThatGetsAnUnrelatedObject() {
     Injector injector =
         Guice.createInjector(
@@ -637,6 +667,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testIsSingletonPositive() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));
@@ -702,6 +733,7 @@ public class ScopesTest extends TestCase {
     assertTrue(Scopes.isSingleton(injector.getBinding(i)));
   }
 
+  @Test
   public void testIsSingletonNegative() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));
@@ -756,6 +788,7 @@ public class ScopesTest extends TestCase {
     assertFalse(Scopes.isSingleton(injector.getBinding(f)));
   }
 
+  @Test
   public void testIsScopedPositive() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));
@@ -814,6 +847,7 @@ public class ScopesTest extends TestCase {
     assertTrue(isCustomScoped(injector.getBinding(g)));
   }
 
+  @Test
   public void testIsScopedNegative() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));
@@ -908,6 +942,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testSingletonConstructorThrows() {
     Injector injector = Guice.createInjector();
 
@@ -970,6 +1005,7 @@ public class ScopesTest extends TestCase {
    * other creating a deadlock and await timeout.
    */
 
+  @Test
   public void testInjectorsDontDeadlockOnSingletons() throws Exception {
     final Provider<S> provider = new SBarrierProvider(2);
     final Injector injector =
@@ -1041,6 +1077,7 @@ public class ScopesTest extends TestCase {
    * exactly one circular proxy object is created.
    */
 
+  @Test
   public void testSiblingInjectorGettingCircularSingletonsOneCircularProxy() throws Exception {
     final Provider<S> provider = new SBarrierProvider(2);
     final Injector injector =
@@ -1172,6 +1209,7 @@ public class ScopesTest extends TestCase {
    * cycle.
    */
 
+  @Test
   public void testUnresolvableSingletonCircularDependencyErrorMessage() throws Exception {
     final Provider<S> provider = new SBarrierProvider(3);
     final Injector injector =
@@ -1250,14 +1288,14 @@ public class ScopesTest extends TestCase {
         "Encountered circular dependency spanning several threads. Tried proxying "
             + this.getClass().getName());
     assertFalse(
-        "Both I0 and J0 can not be a part of a dependency cycle",
-        errorMessage.contains(I0.class.getName()) && errorMessage.contains(J0.class.getName()));
+        errorMessage.contains(I0.class.getName()) && errorMessage.contains(J0.class.getName()),
+        "Both I0 and J0 can not be a part of a dependency cycle");
     assertFalse(
-        "Both J0 and K0 can not be a part of a dependency cycle",
-        errorMessage.contains(J0.class.getName()) && errorMessage.contains(K0.class.getName()));
+        errorMessage.contains(J0.class.getName()) && errorMessage.contains(K0.class.getName()),
+        "Both J0 and K0 can not be a part of a dependency cycle");
     assertFalse(
-        "Both K0 and I0 can not be a part of a dependency cycle",
-        errorMessage.contains(K0.class.getName()) && errorMessage.contains(I0.class.getName()));
+        errorMessage.contains(K0.class.getName()) && errorMessage.contains(I0.class.getName()),
+        "Both K0 and I0 can not be a part of a dependency cycle");
 
     ListMultimap<String, String> threadToSingletons = ArrayListMultimap.create();
     boolean inSingletonsList = false;
@@ -1277,7 +1315,7 @@ public class ScopesTest extends TestCase {
       }
     }
 
-    assertEquals("All threads should be in the cycle", 3, threadToSingletons.keySet().size());
+    assertEquals(3, threadToSingletons.keySet().size(), "All threads should be in the cycle");
 
     // NOTE:  J0,K0,I0 are not reported because their locks are not part of the cycle.
     assertEquals(
@@ -1293,6 +1331,7 @@ public class ScopesTest extends TestCase {
 
   // Test for https://github.com/google/guice/issues/1032
 
+  @Test
   public void testScopeAppliedByUserInsteadOfScoping() throws Exception {
     Injector injector =
         java.util.concurrent.Executors.newSingleThreadExecutor()
@@ -1341,6 +1380,7 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  @Test
   public void testForInstanceOfNoScopingReturnsUnscoped() {
     Injector injector =
         Guice.createInjector(
@@ -1368,6 +1408,7 @@ public class ScopesTest extends TestCase {
                 }));
   }
 
+  @Test
   public void testScopedLinkedBindingDoesNotPropagateEagerSingleton() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));

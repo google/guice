@@ -22,6 +22,11 @@ import static com.google.inject.name.Names.named;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -51,10 +56,10 @@ import java.lang.annotation.Target;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author sberlin@gmail.com (Sam Berlin) */
-public class OverrideModuleTest extends TestCase {
+public class OverrideModuleTest {
 
   private static final Key<String> key2 = Key.get(String.class, named("2"));
   private static final Key<String> key3 = Key.get(String.class, named("3"));
@@ -65,11 +70,13 @@ public class OverrideModuleTest extends TestCase {
         public void configure(Binder binder) {}
       };
 
+  @Test
   public void testOverride() {
     Injector injector = createInjector(Modules.override(newModule("A")).with(newModule("B")));
     assertEquals("B", injector.getInstance(String.class));
   }
 
+  @Test
   public void testOverrideMultiple() {
     Module module =
         Modules.override(newModule("A"), newModule(1), newModule(0.5f))
@@ -81,11 +88,13 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(1.5d, injector.getInstance(Double.class), 0.0);
   }
 
+  @Test
   public void testOverrideUnmatchedTolerated() {
     Injector injector = createInjector(Modules.override(EMPTY_MODULE).with(newModule("B")));
     assertEquals("B", injector.getInstance(String.class));
   }
 
+  @Test
   public void testOverrideConstant() {
     Module original =
         new AbstractModule() {
@@ -107,6 +116,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals("B", injector.getInstance(Key.get(String.class, named("Test"))));
   }
 
+  @Test
   public void testGetProviderInModule() {
     Module original =
         new AbstractModule() {
@@ -122,6 +132,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals("A", injector.getInstance(key2));
   }
 
+  @Test
   public void testOverrideWhatGetProviderProvided() {
     Module original =
         new AbstractModule() {
@@ -139,6 +150,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals("B", injector.getInstance(key2));
   }
 
+  @Test
   public void testOverrideUsingOriginalsGetProvider() {
     Module original =
         new AbstractModule() {
@@ -162,6 +174,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals("B", injector.getInstance(key2));
   }
 
+  @Test
   public void testOverrideOfOverride() {
     Module original =
         new AbstractModule() {
@@ -214,6 +227,7 @@ public class OverrideModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testOverridesTwiceFails() {
     Module original = newModule("A");
     Module replacements = new OuterReplacementsModule();
@@ -234,6 +248,7 @@ public class OverrideModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testOverridesDoesntFixTwiceBoundInOriginal() {
     Module original =
         new AbstractModule() {
@@ -269,6 +284,7 @@ public class OverrideModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testStandardScopeAnnotation() {
     final SingleUseScope scope = new SingleUseScope();
 
@@ -286,6 +302,7 @@ public class OverrideModuleTest extends TestCase {
     assertTrue(scope.used);
   }
 
+  @Test
   public void testOverrideUntargettedBinding() {
     Module original =
         new AbstractModule() {
@@ -307,6 +324,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(0, injector.getInstance(Date.class).getTime());
   }
 
+  @Test
   public void testOverrideScopeAnnotation() {
     final Scope scope =
         new Scope() {
@@ -340,6 +358,7 @@ public class OverrideModuleTest extends TestCase {
     assertTrue(replacementScope.used);
   }
 
+  @Test
   public void testFailsIfOverridenScopeInstanceHasBeenUsed() {
     final Scope scope =
         new Scope() {
@@ -402,6 +421,7 @@ public class OverrideModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testOverrideIsLazy() {
     final AtomicReference<String> value = new AtomicReference<>("A");
     Module overridden =
@@ -427,6 +447,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals("B", injector.getInstance(Key.get(String.class, named("override"))));
   }
 
+  @Test
   public void testOverridePrivateModuleOverPrivateModule() {
     Module exposes5and6 =
         new AbstractModule() {
@@ -492,6 +513,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(6L, reverse.getInstance(Long.class).longValue());
   }
 
+  @Test
   public void testOverrideModuleAndPrivateModule() {
     Module exposes5 =
         new PrivateModule() {
@@ -517,6 +539,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(5, reverse.getInstance(Integer.class).intValue());
   }
 
+  @Test
   public void testOverrideDeepExpose() {
     final AtomicReference<Provider<Character>> charAProvider =
         new AtomicReference<Provider<Character>>();
@@ -620,6 +643,7 @@ public class OverrideModuleTest extends TestCase {
   private static final Key<String> RESULT_KEY = Key.get(String.class, named(RESULT));
   private static final Key<String> INPUT_KEY = Key.get(String.class, named(PRIVATE_INPUT));
 
+  @Test
   public void testExposedBindingOverride() throws Exception {
     Injector inj =
         Guice.createInjector(
@@ -634,6 +658,7 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(OVERRIDDEN_RESULT, inj.getInstance(RESULT_KEY));
   }
 
+  @Test
   public void testPrivateBindingOverride() throws Exception {
     Injector inj =
         Guice.createInjector(
@@ -666,6 +691,7 @@ public class OverrideModuleTest extends TestCase {
     protected void configure() {}
   }
 
+  @Test
   public void testEqualsNotCalledByDefaultOnInstance() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnEquals = true;
@@ -681,6 +707,7 @@ public class OverrideModuleTest extends TestCase {
             .with());
   }
 
+  @Test
   public void testEqualsNotCalledByDefaultOnProvider() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnEquals = true;
@@ -696,6 +723,7 @@ public class OverrideModuleTest extends TestCase {
             .with());
   }
 
+  @Test
   public void testHashcodeNeverCalledOnInstance() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnHashcode = true;
@@ -717,6 +745,7 @@ public class OverrideModuleTest extends TestCase {
             .with());
   }
 
+  @Test
   public void testHashcodeNeverCalledOnProviderInstance() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnHashcode = true;
@@ -777,6 +806,7 @@ public class OverrideModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testCorrectStage() {
     final Stage stage = Stage.PRODUCTION;
     Module module =
@@ -801,6 +831,7 @@ public class OverrideModuleTest extends TestCase {
     Guice.createInjector(stage, module);
   }
 
+  @Test
   public void testOverridesApplyOriginalScanners() {
     Injector injector =
         Guice.createInjector(

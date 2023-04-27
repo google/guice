@@ -17,16 +17,17 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class SerializationTest extends TestCase {
+public class SerializationTest {
 
+  @Test
   public void testAbstractModuleIsSerializable() throws IOException {
     Asserts.reserialize(new MyAbstractModule());
   }
@@ -34,6 +35,7 @@ public class SerializationTest extends TestCase {
   static class MyAbstractModule extends AbstractModule implements Serializable {
   }
 
+  @Test
   public void testCreationExceptionIsSerializable() throws IOException {
     CreationException exception = createCreationException();
     CreationException reserialized = Asserts.reserialize(exception);
@@ -52,7 +54,7 @@ public class SerializationTest extends TestCase {
               bind(List.class);
             }
           });
-      throw new AssertionFailedError();
+      return fail();
     } catch (CreationException e) {
       return e;
     }

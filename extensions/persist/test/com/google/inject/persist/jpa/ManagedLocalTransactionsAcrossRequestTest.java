@@ -16,6 +16,12 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -30,11 +36,14 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
+public class ManagedLocalTransactionsAcrossRequestTest {
   private Injector injector;
   private static final String UNIQUE_TEXT = "some unique text" + new Date();
   private static final String UNIQUE_TEXT_MERGE = "meRG_Esome unique text" + new Date();
@@ -42,7 +51,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
       "aSdoaksdoaksdmeRG_Esome unique text" + new Date();
   private static final String TRANSIENT_UNIQUE_TEXT = "some other unique text" + new Date();
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -50,11 +59,12 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
+  @Test
   public void testSimpleTransaction() {
     injector.getInstance(TransactionalObject.class).runOperationInTxn();
 
@@ -69,30 +79,31 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
             .getSingleResult();
     injector.getInstance(UnitOfWork.class).end();
 
-    assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
+    assertTrue(result instanceof JpaTestEntity, "odd result returned fatal");
 
     assertEquals(
-        "queried entity did not match--did automatic txn fail?",
         UNIQUE_TEXT,
-        ((JpaTestEntity) result).getText());
+        ((JpaTestEntity) result).getText(),
+        "queried entity did not match--did automatic txn fail?");
     injector.getInstance(UnitOfWork.class).end();
   }
 
+  @Test
   public void testSimpleTransactionWithMerge() {
     injector.getInstance(UnitOfWork.class).begin();
     EntityManager emOrig = injector.getInstance(EntityManager.class);
     JpaTestEntity entity =
         injector.getInstance(TransactionalObject.class).runOperationInTxnWithMerge();
 
-    assertNotNull("Entity was not given an id (was not persisted correctly?)", entity.getId());
+    assertNotNull(entity.getId(), "Entity was not given an id (was not persisted correctly?)");
 
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse(em.getTransaction().isActive());
 
     //test that the data has been stored
-    assertTrue("Em was closed after txn!", em.isOpen());
-    assertEquals("Em was not kept open across txns", emOrig, em);
-    assertTrue("Merge did not store state or did not return persistent copy", em.contains(entity));
+    assertTrue(em.isOpen(), "Em was closed after txn!");
+    assertEquals(emOrig, em, "Em was not kept open across txns");
+    assertTrue(em.contains(entity), "Merge did not store state or did not return persistent copy");
 
     Object result =
         em.createQuery("from JpaTestEntity where text = :text")
@@ -103,25 +114,27 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     assertTrue(result instanceof JpaTestEntity);
 
     assertEquals(
-        "queried entity did not match--did automatic txn fail?",
         UNIQUE_TEXT_MERGE,
-        ((JpaTestEntity) result).getText());
+        ((JpaTestEntity) result).getText(),
+        "queried entity did not match--did automatic txn fail?");
     injector.getInstance(UnitOfWork.class).end();
   }
 
-  public void disabled_testSimpleTransactionWithMergeAndDF() {
+  @Disabled
+  @Test
+  public void testSimpleTransactionWithMergeAndDF() {
     injector.getInstance(UnitOfWork.class).begin();
     EntityManager emOrig = injector.getInstance(EntityManager.class);
     JpaTestEntity entity =
         injector.getInstance(TransactionalObject.class).runOperationInTxnWithMergeForDf();
 
     EntityManager em = injector.getInstance(EntityManager.class);
-    assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
+    assertFalse(em.getTransaction().isActive(), "txn was not closed by transactional service");
 
     //test that the data has been stored
-    assertTrue("Em was closed after txn!", em.isOpen());
-    assertEquals("Em was not kept open across txns", emOrig, em);
-    assertTrue("Merge did not store state or did not return persistent copy", em.contains(entity));
+    assertTrue(em.isOpen(), "Em was closed after txn!");
+    assertEquals(emOrig, em, "Em was not kept open across txns");
+    assertTrue(em.contains(entity), "Merge did not store state or did not return persistent copy");
 
     Object result = injector.getInstance(TransactionalObject.class).find(UNIQUE_TEXT_MERGE_FORDF);
     injector.getInstance(UnitOfWork.class).end();
@@ -136,6 +149,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     injector.getInstance(UnitOfWork.class).end();
   }
 
+  @Test
   public void testSimpleTransactionRollbackOnChecked() {
     try {
       injector.getInstance(TransactionalObject.class).runOperationInTxnThrowingChecked();
@@ -148,8 +162,8 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     EntityManager em = injector.getInstance(EntityManager.class);
 
     assertFalse(
-        "Previous EM was not closed by transactional service (rollback didnt happen?)",
-        em.getTransaction().isActive());
+        em.getTransaction().isActive(),
+        "Previous EM was not closed by transactional service (rollback didnt happen?)");
 
     //test that the data has been stored
     try {
@@ -165,6 +179,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     injector.getInstance(UnitOfWork.class).end();
   }
 
+  @Test
   public void testSimpleTransactionRollbackOnUnchecked() {
     try {
       injector.getInstance(TransactionalObject.class).runOperationInTxnThrowingUnchecked();
@@ -176,8 +191,8 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse(
-        "Session was not closed by transactional service (rollback didnt happen?)",
-        em.getTransaction().isActive());
+        em.getTransaction().isActive(),
+        "Session was not closed by transactional service (rollback didnt happen?)");
 
     try {
       Object result =

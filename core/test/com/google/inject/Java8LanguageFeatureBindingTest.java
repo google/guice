@@ -16,25 +16,30 @@
 
 package com.google.inject;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test bindings to lambdas, method references, etc.
  *
  * @author cgdecker@google.com (Colin Decker)
  */
-public class Java8LanguageFeatureBindingTest extends TestCase {
+public class Java8LanguageFeatureBindingTest {
 
   // Some of these tests are kind of weird.
   // See https://github.com/google/guice/issues/757 for more on why they exist.
 
+  @Test
   public void testBinding_lambdaToInterface() {
     Injector injector =
         Guice.createInjector(
@@ -50,6 +55,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     assertFalse(predicate.test(null));
   }
 
+  @Test
   public void testProviderMethod_returningLambda() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -65,6 +71,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     assertEquals("foo", callable.call());
   }
 
+  @Test
   public void testProviderMethod_containingLambda_throwingException() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -87,6 +94,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     assertEquals("foo", expected.getCause().getMessage());
   }
 
+  @Test
   public void testProvider_usingJdk8Features() {
     try {
       Guice.createInjector(
@@ -129,6 +137,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     }
   }
 
+  @Test
   public void testBinding_toProvider_lambda() {
     Injector injector =
         Guice.createInjector(
@@ -144,6 +153,7 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
     assertEquals("Hello2", injector.getInstance(String.class));
   }
 
+  @Test
   public void testBinding_toProvider_methodReference() {
     Injector injector =
         Guice.createInjector(

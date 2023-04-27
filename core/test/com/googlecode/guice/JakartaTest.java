@@ -18,6 +18,13 @@ package com.googlecode.guice;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
@@ -41,21 +48,23 @@ import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class JakartaTest extends TestCase {
+public class JakartaTest {
 
   private final B b = new B();
   private final C c = new C();
   private final D d = new D();
   private final E e = new E();
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     J.nextInstanceId = 0;
     K.nextInstanceId = 0;
   }
 
+  @Test
   public void testInject() {
     Injector injector =
         Guice.createInjector(
@@ -77,6 +86,7 @@ public class JakartaTest extends TestCase {
     assertSame(e, a.e);
   }
 
+  @Test
   public void testQualifiedInject() {
     Injector injector =
         Guice.createInjector(
@@ -98,6 +108,7 @@ public class JakartaTest extends TestCase {
     assertSame(e, f.e);
   }
 
+  @Test
   public void testProviderInject() {
     Injector injector =
         Guice.createInjector(
@@ -119,6 +130,7 @@ public class JakartaTest extends TestCase {
     assertSame(e, g.eProvider.get());
   }
 
+  @Test
   public void testScopeAnnotation() {
     final TestScope scope = new TestScope();
 
@@ -152,6 +164,7 @@ public class JakartaTest extends TestCase {
     assertNotSame(h, injector.getInstance(H.class));
   }
 
+  @Test
   public void testSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -171,6 +184,7 @@ public class JakartaTest extends TestCase {
     assertSame(j, injector.getInstance(J.class));
   }
 
+  @Test
   public void testEagerSingleton() {
     Guice.createInjector(
         Stage.PRODUCTION,
@@ -186,6 +200,7 @@ public class JakartaTest extends TestCase {
     assertEquals(1, K.nextInstanceId);
   }
 
+  @Test
   public void testScopesIsSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -201,6 +216,7 @@ public class JakartaTest extends TestCase {
     assertTrue(Scopes.isSingleton(injector.getBinding(K.class)));
   }
 
+  @Test
   public void testInjectingFinalFieldsIsForbidden() {
     try {
       Guice.createInjector(
@@ -216,6 +232,7 @@ public class JakartaTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectingAbstractMethodsIsForbidden() {
     try {
       Guice.createInjector(
@@ -233,6 +250,7 @@ public class JakartaTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectingMethodsWithTypeParametersIsForbidden() {
     try {
       Guice.createInjector(
@@ -249,6 +267,7 @@ public class JakartaTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectingMethodsWithNonVoidReturnTypes() {
     Guice.createInjector(
         new AbstractModule() {
@@ -287,6 +306,7 @@ public class JakartaTest extends TestCase {
   //   injector.getInstance(Key.get(B.class, Names.named("3")));
   // }
 
+  @Test
   public void testGuicifyJakartaProvider() {
     Provider<String> jakartaProvider =
         new Provider<String>() {
@@ -311,6 +331,7 @@ public class JakartaTest extends TestCase {
     assertFalse(guicified instanceof HasDependencies);
   }
 
+  @Test
   public void testGuicifyWithDependencies() {
     Provider<String> jakartaProvider =
         new Provider<String>() {
@@ -350,7 +371,7 @@ public class JakartaTest extends TestCase {
   }
 
   private void validateDependencies(Set<Dependency<?>> actual, Class<?> owner) {
-    assertEquals(actual.toString(), 2, actual.size());
+    assertEquals(2, actual.size(), actual.toString());
     Dependency<?> dDep = null;
     Dependency<?> iDep = null;
     for (Dependency<?> dep : actual) {

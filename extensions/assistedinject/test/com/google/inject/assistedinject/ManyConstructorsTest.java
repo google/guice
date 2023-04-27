@@ -21,11 +21,16 @@ import com.google.inject.Asserts;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /** @author sameb@google.com (Sam Berlin) */
-public class ManyConstructorsTest extends TestCase {
+public class ManyConstructorsTest {
 
+  @Test
   public void testTwoConstructors() {
     Injector injector =
         Guice.createInjector(
@@ -44,6 +49,7 @@ public class ManyConstructorsTest extends TestCase {
     assertEquals(1, index.index.intValue());
   }
 
+  @Test
   public void testDifferentOrderParameters() {
     Injector injector =
         Guice.createInjector(
@@ -65,6 +71,7 @@ public class ManyConstructorsTest extends TestCase {
     assertEquals(2, index2.index.intValue());
   }
 
+  @Test
   public void testInterfaceToImpl() {
     Injector injector =
         Guice.createInjector(
@@ -86,6 +93,7 @@ public class ManyConstructorsTest extends TestCase {
     assertEquals(1, index.getIndex().intValue());
   }
 
+  @Test
   public void testUsingOneConstructor() {
     Injector injector =
         Guice.createInjector(
@@ -114,6 +122,7 @@ public class ManyConstructorsTest extends TestCase {
     assertEquals(1, index.index.intValue());
   }
 
+  @Test
   public void testTooManyMatchingConstructors() {
     try {
       Guice.createInjector(
@@ -136,6 +145,7 @@ public class ManyConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoMatchingConstructorsBecauseTooManyParams() {
     try {
       Guice.createInjector(
@@ -154,6 +164,7 @@ public class ManyConstructorsTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoMatchingConstrucotsBecauseTooLittleParams() {
     try {
       Guice.createInjector(
@@ -253,6 +264,7 @@ public class ManyConstructorsTest extends TestCase {
     Integer getIndex();
   }
 
+  @Test
   public void testDependenciesAndOtherAnnotations() {
     Injector injector =
         Guice.createInjector(

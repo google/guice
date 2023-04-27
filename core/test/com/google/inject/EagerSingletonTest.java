@@ -17,23 +17,27 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.getClassPathUrls;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class EagerSingletonTest extends TestCase {
+public class EagerSingletonTest {
 
-  @Override
+  @BeforeEach
   public void setUp() {
     A.instanceCount = 0;
     B.instanceCount = 0;
     C.instanceCount = 0;
   }
 
+  @Test
   public void testJustInTimeEagerSingletons() {
     Guice.createInjector(
         Stage.PRODUCTION,
@@ -55,19 +59,19 @@ public class EagerSingletonTest extends TestCase {
         });
 
     assertEquals(1, A.instanceCount);
-    assertEquals(
-        "Singletons discovered when creating singletons should not be built eagerly",
-        0,
-        B.instanceCount);
+    assertEquals(0, B.instanceCount,
+        "Singletons discovered when creating singletons should not be built eagerly");
     assertEquals(1, C.instanceCount);
   }
 
+  @Test
   public void testJustInTimeSingletonsAreNotEager() {
     Injector injector = Guice.createInjector(Stage.PRODUCTION);
     injector.getProvider(B.class);
     assertEquals(0, B.instanceCount);
   }
 
+  @Test
   public void testChildEagerSingletons() {
     Injector parent = Guice.createInjector(Stage.PRODUCTION);
     parent.createChildInjector(
@@ -85,6 +89,7 @@ public class EagerSingletonTest extends TestCase {
   // loaded during eager singleton creation due to failur to apply the lock when iterating over
   // all bindings.
 
+  @Test
   public void testJustInTimeEagerSingletons_multipleThreads() throws Exception {
     // in order to make the data race more likely we need a lot of jit bindings.  The easiest thing
     // is just to 'copy' out class for B a bunch of times.

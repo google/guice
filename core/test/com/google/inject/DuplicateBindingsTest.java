@@ -18,6 +18,9 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.*;
 import static com.google.inject.name.Names.named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -33,14 +36,14 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * A suite of tests for duplicate bindings.
  *
  * @author sameb@google.com (Sam Berlin)
  */
-public class DuplicateBindingsTest extends TestCase {
+public class DuplicateBindingsTest {
 
   private FooImpl foo = new FooImpl();
   private Provider<Foo> pFoo = Providers.<Foo>of(new FooImpl());
@@ -48,6 +51,7 @@ public class DuplicateBindingsTest extends TestCase {
   private Class<? extends Foo> clFoo = FooImpl.class;
   private Constructor<FooImpl> cFoo = FooImpl.cxtor();
 
+  @Test
   public void testDuplicateBindingsAreIgnored() {
     Injector injector =
         Guice.createInjector(
@@ -66,9 +70,10 @@ public class DuplicateBindingsTest extends TestCase {
     assertTrue(bindings.remove(Key.get(FooProvider.class))); // JIT binding
     assertTrue(bindings.remove(Key.get(Foo.class, named("providerMethod"))));
 
-    assertEquals(bindings.toString(), 0, bindings.size());
+    assertEquals(0, bindings.size(), bindings.toString());
   }
 
+  @Test
   public void testElementsDeduplicate() {
     List<Element> elements =
         Elements.getElements(
@@ -78,6 +83,7 @@ public class DuplicateBindingsTest extends TestCase {
     assertEquals(7, new LinkedHashSet<Element>(elements).size());
   }
 
+  @Test
   public void testProviderMethodsFailIfInstancesDiffer() {
     try {
       Guice.createInjector(new FailingProviderModule(), new FailingProviderModule());
@@ -91,6 +97,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testSameScopeInstanceIgnored() {
     Guice.createInjector(
         new ScopedModule(Scopes.SINGLETON, foo, pFoo, pclFoo, clFoo, cFoo),
@@ -101,24 +108,28 @@ public class DuplicateBindingsTest extends TestCase {
         new ScopedModule(Scopes.NO_SCOPE, foo, pFoo, pclFoo, clFoo, cFoo));
   }
 
+  @Test
   public void testSameScopeAnnotationIgnored() {
     Guice.createInjector(
         new AnnotatedScopeModule(Singleton.class, foo, pFoo, pclFoo, clFoo, cFoo),
         new AnnotatedScopeModule(Singleton.class, foo, pFoo, pclFoo, clFoo, cFoo));
   }
 
+  @Test
   public void testMixedAnnotationAndScopeForSingletonIgnored() {
     Guice.createInjector(
         new ScopedModule(Scopes.SINGLETON, foo, pFoo, pclFoo, clFoo, cFoo),
         new AnnotatedScopeModule(Singleton.class, foo, pFoo, pclFoo, clFoo, cFoo));
   }
 
+  @Test
   public void testMixedScopeAndUnscopedIgnored() {
     Guice.createInjector(
         new SimpleModule(foo, pFoo, pclFoo, clFoo, cFoo),
         new ScopedModule(Scopes.NO_SCOPE, foo, pFoo, pclFoo, clFoo, cFoo));
   }
 
+  @Test
   public void testMixedScopeFails() {
     try {
       Guice.createInjector(
@@ -162,6 +173,7 @@ public class DuplicateBindingsTest extends TestCase {
   }
 
   @SuppressWarnings("unchecked")
+  @Test
   public void testMixedTargetsFails() {
     try {
       Guice.createInjector(
@@ -204,6 +216,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionInEqualsThrowsCreationException() {
     try {
       Guice.createInjector(new ThrowingModule(), new ThrowingModule());
@@ -219,6 +232,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testChildInjectorDuplicateParentFail() {
     Injector injector = Guice.createInjector(new SimpleModule(foo, pFoo, pclFoo, clFoo, cFoo));
 
@@ -245,6 +259,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testDuplicatesSolelyInChildIgnored() {
     Injector injector = Guice.createInjector();
     injector.createChildInjector(
@@ -252,6 +267,7 @@ public class DuplicateBindingsTest extends TestCase {
         new SimpleModule(foo, pFoo, pclFoo, clFoo, cFoo));
   }
 
+  @Test
   public void testDifferentBindingTypesFail() {
     List<Element> elements = Elements.getElements(new FailedModule(foo, pFoo, pclFoo, clFoo, cFoo));
 
@@ -280,6 +296,7 @@ public class DuplicateBindingsTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitBindingsAreCheckedAfterConversions() {
     Guice.createInjector(
         new AbstractModule() {
@@ -291,6 +308,7 @@ public class DuplicateBindingsTest extends TestCase {
         });
   }
 
+  @Test
   public void testEqualsNotCalledByDefaultOnInstance() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnEquals = true;
@@ -304,6 +322,7 @@ public class DuplicateBindingsTest extends TestCase {
         });
   }
 
+  @Test
   public void testEqualsNotCalledByDefaultOnProvider() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnEquals = true;
@@ -317,6 +336,7 @@ public class DuplicateBindingsTest extends TestCase {
         });
   }
 
+  @Test
   public void testHashcodeNeverCalledOnInstance() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnHashcode = true;
@@ -336,6 +356,7 @@ public class DuplicateBindingsTest extends TestCase {
         });
   }
 
+  @Test
   public void testHashcodeNeverCalledOnProviderInstance() {
     final HashEqualsTester a = new HashEqualsTester();
     a.throwOnHashcode = true;

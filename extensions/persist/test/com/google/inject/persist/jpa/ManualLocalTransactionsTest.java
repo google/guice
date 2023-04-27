@@ -16,6 +16,10 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,7 +29,9 @@ import com.google.inject.persist.UnitOfWork;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * For instance, a session-per-request strategy will control the opening and closing of the EM at
@@ -34,12 +40,12 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class ManualLocalTransactionsTest extends TestCase {
+public class ManualLocalTransactionsTest {
   private Injector injector;
   private static final String UNIQUE_TEXT = "some unique text" + new Date();
   private static final String UNIQUE_TEXT_2 = "some other unique text" + new Date();
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -47,11 +53,12 @@ public class ManualLocalTransactionsTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
-  @Override
+  @AfterEach
   public void tearDown() {
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
+  @Test
   public void testSimpleCrossTxnWork() {
     injector.getInstance(UnitOfWork.class).begin();
 
@@ -63,10 +70,10 @@ public class ManualLocalTransactionsTest extends TestCase {
 
     //persisted entity should remain in the same em (which should still be open)
     assertTrue(
-        "EntityManager  appears to have been closed across txns!",
-        injector.getInstance(EntityManager.class).contains(entity));
-    assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
-    assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
+        injector.getInstance(EntityManager.class).contains(entity),
+        "EntityManager  appears to have been closed across txns!");
+    assertTrue(em.contains(entity), "EntityManager  appears to have been closed across txns!");
+    assertTrue(em.isOpen(), "EntityManager appears to have been closed across txns!");
 
     injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(UnitOfWork.class).begin();

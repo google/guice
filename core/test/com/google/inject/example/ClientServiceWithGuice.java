@@ -16,7 +16,7 @@
 
 package com.google.inject.example;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;

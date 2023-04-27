@@ -18,6 +18,13 @@ package com.googlecode.guice;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
@@ -41,21 +48,23 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class Jsr330Test extends TestCase {
+public class Jsr330Test {
 
   private final B b = new B();
   private final C c = new C();
   private final D d = new D();
   private final E e = new E();
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     J.nextInstanceId = 0;
     K.nextInstanceId = 0;
   }
 
+  @Test
   public void testInject() {
     Injector injector =
         Guice.createInjector(
@@ -77,6 +86,7 @@ public class Jsr330Test extends TestCase {
     assertSame(e, a.e);
   }
 
+  @Test
   public void testQualifiedInject() {
     Injector injector =
         Guice.createInjector(
@@ -98,6 +108,7 @@ public class Jsr330Test extends TestCase {
     assertSame(e, f.e);
   }
 
+  @Test
   public void testProviderInject() {
     Injector injector =
         Guice.createInjector(
@@ -119,6 +130,7 @@ public class Jsr330Test extends TestCase {
     assertSame(e, g.eProvider.get());
   }
 
+  @Test
   public void testScopeAnnotation() {
     final TestScope scope = new TestScope();
 
@@ -152,6 +164,7 @@ public class Jsr330Test extends TestCase {
     assertNotSame(h, injector.getInstance(H.class));
   }
 
+  @Test
   public void testSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -171,6 +184,7 @@ public class Jsr330Test extends TestCase {
     assertSame(j, injector.getInstance(J.class));
   }
 
+  @Test
   public void testEagerSingleton() {
     Guice.createInjector(
         Stage.PRODUCTION,
@@ -186,6 +200,7 @@ public class Jsr330Test extends TestCase {
     assertEquals(1, K.nextInstanceId);
   }
 
+  @Test
   public void testScopesIsSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -201,6 +216,7 @@ public class Jsr330Test extends TestCase {
     assertTrue(Scopes.isSingleton(injector.getBinding(K.class)));
   }
 
+  @Test
   public void testInjectingFinalFieldsIsForbidden() {
     try {
       Guice.createInjector(
@@ -216,6 +232,7 @@ public class Jsr330Test extends TestCase {
     }
   }
 
+  @Test
   public void testInjectingAbstractMethodsIsForbidden() {
     try {
       Guice.createInjector(
@@ -232,6 +249,7 @@ public class Jsr330Test extends TestCase {
     }
   }
 
+  @Test
   public void testInjectingMethodsWithTypeParametersIsForbidden() {
     try {
       Guice.createInjector(
@@ -248,6 +266,7 @@ public class Jsr330Test extends TestCase {
     }
   }
 
+  @Test
   public void testInjectingMethodsWithNonVoidReturnTypes() {
     Guice.createInjector(
         new AbstractModule() {
@@ -263,6 +282,7 @@ public class Jsr330Test extends TestCase {
    * implements javax.inject.Provider but not com.google.inject.Provider. For binary compatibility,
    * we don't (and won't) support binding to instances of javax.inject.Provider.
    */
+  @Test
   public void testBindProviderClass() {
     Injector injector =
         Guice.createInjector(
@@ -284,6 +304,7 @@ public class Jsr330Test extends TestCase {
     injector.getInstance(Key.get(B.class, Names.named("3")));
   }
 
+  @Test
   public void testGuicify330Provider() {
     Provider<String> jsr330Provider =
         new Provider<String>() {
@@ -308,6 +329,7 @@ public class Jsr330Test extends TestCase {
     assertFalse(guicified instanceof HasDependencies);
   }
 
+  @Test
   public void testGuicifyWithDependencies() {
     Provider<String> jsr330Provider =
         new Provider<String>() {
@@ -347,7 +369,7 @@ public class Jsr330Test extends TestCase {
   }
 
   private void validateDependencies(Set<Dependency<?>> actual, Class<?> owner) {
-    assertEquals(actual.toString(), 2, actual.size());
+    assertEquals(2, actual.size(), actual.toString());
     Dependency<?> dDep = null;
     Dependency<?> iDep = null;
     for (Dependency<?> dep : actual) {

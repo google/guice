@@ -15,6 +15,8 @@
  */
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -23,15 +25,16 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import java.util.HashMap;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Sanity checks the EDSL and resultant bound module(s).
  *
  * @author Dhanji R. Prasanna (dhanji gmail com)
  */
-public class EdslTest extends TestCase {
+public class EdslTest {
 
+  @Test
   public final void testExplicitBindingsWorksWithGuiceServlet() {
     Injector injector =
         Guice.createInjector(
@@ -52,6 +55,7 @@ public class EdslTest extends TestCase {
     assertNotNull(injector.getInstance(DummyServlet.class));
   }
 
+  @Test
   public final void testConfigureServlets() {
 
     //the various possible config calls--

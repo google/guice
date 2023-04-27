@@ -1,5 +1,6 @@
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -19,7 +20,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
@@ -28,11 +30,11 @@ import org.mockito.Mockito;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public class InjectedFilterPipelineTest extends TestCase {
+public class InjectedFilterPipelineTest {
   private Injector injector1;
   private Injector injector2;
 
-  @Override
+  @BeforeEach
   public final void setUp() {
     injector1 =
         Guice.createInjector(
@@ -69,9 +71,7 @@ public class InjectedFilterPipelineTest extends TestCase {
             });
   }
 
-  @Override
-  public final void tearDown() {}
-
+  @Test
   public final void testDispatchThruInjectedGuiceFilter() throws ServletException, IOException {
 
     // create mocks

@@ -16,16 +16,17 @@
 package com.google.inject.daggeradapter;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import dagger.Module;
 import dagger.Subcomponent;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@code @Module(subcomponents = Foo.class)} */
 
-public class ModuleSubcomponentsTest extends TestCase {
+public class ModuleSubcomponentsTest {
 
   @Module(subcomponents = TestSubcomponent.class)
   static class ModuleWithSubcomponents {}
@@ -38,6 +39,7 @@ public class ModuleSubcomponentsTest extends TestCase {
     }
   }
 
+  @Test
   public void testModuleSubcomponentsNotSupported() {
     try {
       Guice.createInjector(DaggerAdapter.from(ModuleWithSubcomponents.class));

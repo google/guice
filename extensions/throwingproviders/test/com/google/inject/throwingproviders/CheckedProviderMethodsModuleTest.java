@@ -31,10 +31,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.BindException;
 import java.rmi.RemoteException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /** Test methods for {@link CheckedProviderMethodsModule}. */
-public class CheckedProviderMethodsModuleTest extends TestCase {
+public class CheckedProviderMethodsModuleTest {
 
   private final TypeLiteral<RpcProvider<String>> rpcProviderOfString =
       new TypeLiteral<RpcProvider<String>>() {};
@@ -121,12 +124,14 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testNoAnnotationNoScope() throws BindException, RemoteException {
     Injector injector = Guice.createInjector(new TestModule());
     RpcProvider<String> provider = injector.getInstance(Key.get(rpcProviderOfString));
     assertEquals("Works", provider.get());
   }
 
+  @Test
   public void testWithScope() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
@@ -139,6 +144,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
     assertEquals((Integer) 120, provider.get());
   }
 
+  @Test
   public void testWithAnnotation() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
@@ -147,6 +153,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
     assertEquals((Long) 0xffL, provider.get());
   }
 
+  @Test
   public void testWithInjectedParameters() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
@@ -155,6 +162,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
     assertEquals(pair.first, 4.0d, 0.0);
   }
 
+  @Test
   public void testWithThrownException() {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);
@@ -169,6 +177,7 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testExposedMethod() throws BindException, RemoteException {
     TestModule testModule = new TestModule();
     Injector injector = Guice.createInjector(testModule);

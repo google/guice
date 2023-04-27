@@ -16,11 +16,14 @@
 
 package com.google.inject;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.internal.Messages;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import java.io.IOException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests that ProvisionExceptions are readable and clearly indicate to the user what went wrong with
@@ -28,8 +31,9 @@ import junit.framework.TestCase;
  *
  * @author sameb@google.com (Sam Berlin)
  */
-public class ProvisionExceptionsTest extends TestCase {
+public class ProvisionExceptionsTest {
 
+  @Test
   public void testConstructorRuntimeException() {
     Injector injector =
         Guice.createInjector(
@@ -55,6 +59,7 @@ public class ProvisionExceptionsTest extends TestCase {
     }
   }
 
+  @Test
   public void testConstructorCheckedException() {
     Injector injector =
         Guice.createInjector(
@@ -79,6 +84,7 @@ public class ProvisionExceptionsTest extends TestCase {
     }
   }
 
+  @Test
   public void testCustomProvidersRuntimeException() {
     Injector injector =
         Guice.createInjector(
@@ -110,6 +116,7 @@ public class ProvisionExceptionsTest extends TestCase {
     }
   }
 
+  @Test
   public void testProviderMethodRuntimeException() {
     Injector injector =
         Guice.createInjector(
@@ -138,6 +145,7 @@ public class ProvisionExceptionsTest extends TestCase {
     }
   }
 
+  @Test
   public void testProviderMethodCheckedException() {
     Injector injector =
         Guice.createInjector(

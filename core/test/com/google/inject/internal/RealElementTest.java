@@ -16,30 +16,36 @@
 
 package com.google.inject.internal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.inject.internal.Element.Type;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link com.google.inject.internal.RealElement}. */
-public class RealElementTest extends TestCase {
+public class RealElementTest {
 
   private Element systemElement;
   private RealElement realElement;
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     this.systemElement = Holder.class.getAnnotation(Element.class);
     this.realElement = new RealElement("b", Type.MULTIBINDER, "a", 1);
   }
 
+  @Test
   public void testEquals() {
     assertEquals(systemElement, realElement);
     assertEquals(realElement, systemElement);
   }
 
+  @Test
   public void testHashCode() {
     assertEquals(systemElement.hashCode(), realElement.hashCode());
   }
 
+  @Test
   public void testProperties() {
     assertEquals("a", realElement.keyType());
     assertEquals("b", realElement.setName());

@@ -19,6 +19,8 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.Annotations;
@@ -30,11 +32,12 @@ import com.google.inject.spi.PrivateElements;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class PrivateModuleTest extends TestCase {
+public class PrivateModuleTest {
 
+  @Test
   public void testBasicUsage() {
     Injector injector =
         Guice.createInjector(
@@ -76,6 +79,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("ii", ab2.b);
   }
 
+  @Test
   public void testWithoutPrivateModules() {
     Injector injector =
         Guice.createInjector(
@@ -98,6 +102,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("ii", injector.getInstance(Key.get(String.class, named("b"))));
   }
 
+  @Test
   public void testMisplacedExposedAnnotation() {
     try {
       Guice.createInjector(
@@ -119,6 +124,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testMisplacedExposeStatement() {
     try {
       Guice.createInjector(
@@ -138,6 +144,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testPrivateModulesAndProvidesMethods() {
     Injector injector =
         Guice.createInjector(
@@ -202,6 +209,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("ii", injector.getInstance(Key.get(String.class, named("d"))));
   }
 
+  @Test
   public void testCannotBindAKeyExportedByASibling() {
     try {
       Guice.createInjector(
@@ -232,6 +240,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testExposeButNoBind() {
     try {
       Guice.createInjector(
@@ -263,6 +272,7 @@ public class PrivateModuleTest extends TestCase {
    * Ensure that when we've got errors in different private modules, Guice presents all errors in a
    * unified message.
    */
+  @Test
   public void testMessagesFromPrivateModulesAreNicelyIntegrated() {
     try {
       Guice.createInjector(
@@ -298,6 +308,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testNestedPrivateInjectors() {
     Injector injector =
         Guice.createInjector(
@@ -320,6 +331,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("nested", injector.getInstance(String.class));
   }
 
+  @Test
   public void testInstallingRegularModulesFromPrivateModules() {
     Injector injector =
         Guice.createInjector(
@@ -341,6 +353,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("nested", injector.getInstance(String.class));
   }
 
+  @Test
   public void testNestedPrivateModulesWithSomeKeysUnexposed() {
     Injector injector =
         Guice.createInjector(
@@ -390,6 +403,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testDependenciesBetweenPrivateAndPublic() {
     Injector injector =
         Guice.createInjector(
@@ -429,6 +443,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("ABCD", injector.getInstance(Key.get(String.class, named("abcd"))));
   }
 
+  @Test
   public void testDependenciesBetweenPrivateAndPublicWithPublicEagerSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -485,6 +500,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("ABCDE", injector.getInstance(Key.get(String.class, named("abcde"))));
   }
 
+  @Test
   public void testDependenciesBetweenPrivateAndPublicWithPrivateEagerSingleton() {
     Injector injector =
         Guice.createInjector(
@@ -552,6 +568,7 @@ public class PrivateModuleTest extends TestCase {
 
   interface C {}
 
+  @Test
   public void testSpiAccess() {
     Injector injector =
         Guice.createInjector(
@@ -581,6 +598,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("private", privateInjector.getInstance(Key.get(String.class, Names.named("a"))));
   }
 
+  @Test
   public void testParentBindsSomethingInPrivate() {
     try {
       Guice.createInjector(new FailingModule());
@@ -601,6 +619,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testParentBindingToPrivateLinkedJitBinding() {
     Injector injector = Guice.createInjector(new ManyPrivateModules());
     try {
@@ -619,6 +638,7 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  @Test
   public void testParentBindingToPrivateJitBinding() {
     Injector injector = Guice.createInjector(new ManyPrivateModules());
     try {

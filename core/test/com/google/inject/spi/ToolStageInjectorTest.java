@@ -13,16 +13,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ToolStageInjectorTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-  @Override
+public class ToolStageInjectorTest {
+
+  @BeforeEach
   protected void setUp() throws Exception {
     Foo.s = null;
     Foo.sm = null;
   }
 
+  @Test
   public void testToolStageInjectorRestrictions() {
     Injector injector = Guice.createInjector(Stage.TOOL);
     try {
@@ -56,6 +62,7 @@ public class ToolStageInjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testToolStageDoesntInjectInstances() {
     final Foo foo = new Foo();
     Guice.createInjector(
@@ -73,6 +80,7 @@ public class ToolStageInjectorTest extends TestCase {
     assertNull(foo.m);
   }
 
+  @Test
   public void testToolStageDoesntInjectProviders() {
     final Foo foo = new Foo();
     Guice.createInjector(
@@ -90,6 +98,7 @@ public class ToolStageInjectorTest extends TestCase {
     assertNull(foo.m);
   }
 
+  @Test
   public void testToolStageWarnsOfMissingObjectGraph() {
     final Bar bar = new Bar();
     try {
@@ -113,6 +122,7 @@ public class ToolStageInjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testToolStageInjectsTooledMethods() {
     final Tooled tooled = new Tooled();
     Guice.createInjector(

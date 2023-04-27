@@ -18,6 +18,7 @@ package com.google.inject.servlet;
 
 import static com.google.inject.servlet.UriPatternType.REGEX;
 import static com.google.inject.servlet.UriPatternType.SERVLET;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -31,14 +32,14 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import java.util.Iterator;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * A very basic test that servlet module works with bindings.
  *
  * @author sameb@google.com (Sam Berlin)
  */
-public class ExtensionSpiTest extends TestCase {
+public class ExtensionSpiTest {
 
   private DummyFilterImpl dummyFilter1 = new DummyFilterImpl();
   private DummyFilterImpl dummyFilter2 = new DummyFilterImpl();
@@ -50,6 +51,7 @@ public class ExtensionSpiTest extends TestCase {
   private DummyServlet dummyServlet3 = new DummyServlet();
   private DummyServlet dummyServlet4 = new DummyServlet();
 
+  @Test
   public final void testSpiOnElements() {
     ServletSpiVisitor visitor = new ServletSpiVisitor(false);
     int count = 0;
@@ -62,6 +64,7 @@ public class ExtensionSpiTest extends TestCase {
     validateVisitor(visitor);
   }
 
+  @Test
   public final void testSpiOnInjector() {
     ServletSpiVisitor visitor = new ServletSpiVisitor(true);
     int count = 0;
@@ -239,7 +242,7 @@ public class ExtensionSpiTest extends TestCase {
     Iterator<Params> actualIterator = visitor.actual.iterator();
     int i = 0;
     for (Params param : expected) {
-      assertEquals("wrong " + i++ + "th param", param, actualIterator.next());
+      assertEquals(param, actualIterator.next(), "wrong " + i++ + "th param");
     }
   }
 

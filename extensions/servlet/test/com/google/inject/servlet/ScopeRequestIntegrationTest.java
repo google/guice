@@ -16,6 +16,14 @@
 
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
@@ -36,16 +44,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests continuation of requests */
 
-public class ScopeRequestIntegrationTest extends TestCase {
+public class ScopeRequestIntegrationTest {
   private static final String A_VALUE = "thereaoskdao";
   private static final String A_DIFFERENT_VALUE = "hiaoskd";
 
   private static final String SHOULDNEVERBESEEN = "Shouldneverbeseen!";
 
+  @Test
   public final void testNonHttpRequestScopedCallable()
       throws ServletException, IOException, InterruptedException, ExecutionException {
     ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -95,6 +104,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
     executor.awaitTermination(2, TimeUnit.SECONDS);
   }
 
+  @Test
   public final void testWrongValueClasses() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -120,6 +130,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
     }
   }
 
+  @Test
   public final void testNullReplacement() throws Exception {
     Injector injector =
         Guice.createInjector(

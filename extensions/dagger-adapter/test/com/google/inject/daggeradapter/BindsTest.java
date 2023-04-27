@@ -31,11 +31,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests of {@link Binds} support in {@link DaggerAdapter}. */
 
-public class BindsTest extends TestCase {
+public class BindsTest {
   @Module
   interface BasicModule {
     @Provides
@@ -50,6 +50,7 @@ public class BindsTest extends TestCase {
     Object object(CharSequence charSequence);
   }
 
+  @Test
   public void testBinds() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(BasicModule.class));
     Binding<Object> binding = injector.getBinding(Object.class);
@@ -82,6 +83,7 @@ public class BindsTest extends TestCase {
     Object fromCharSequence(CharSequence charSequence);
   }
 
+  @Test
   public void testMultibindings() {
     Injector injector =
         Guice.createInjector(
@@ -113,6 +115,7 @@ public class BindsTest extends TestCase {
     Object fromCharSequence(CharSequence charSequence);
   }
 
+  @Test
   public void testScopedMultibindings() {
     Injector injector =
         Guice.createInjector(
@@ -152,6 +155,7 @@ public class BindsTest extends TestCase {
     String unqualifiedToBinds(@BindsQualifier String binds);
   }
 
+  @Test
   public void testQualifiers() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(QualifiedBinds.class));
 
@@ -189,6 +193,7 @@ public class BindsTest extends TestCase {
     String unqualifiedToBinds(@JakartaBindsQualifier String binds);
   }
 
+  @Test
   public void testJakartaQualifiers() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(JakartaQualifiedBinds.class));
 

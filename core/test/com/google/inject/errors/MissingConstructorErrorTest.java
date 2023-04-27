@@ -1,8 +1,8 @@
 package com.google.inject.errors;
 
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
@@ -11,16 +11,13 @@ import com.google.inject.Provides;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import javax.inject.Inject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class MissingConstructorErrorTest {
 
-  @Before
-  public void checkStackTraceIsIncluded() {
+  @BeforeAll
+  public static void checkStackTraceIsIncluded() {
     // Only run the tests when the stack traces are included in the errors.
     assumeTrue(InternalFlags.getIncludeStackTraceOption() != IncludeStackTraceOption.OFF);
   }

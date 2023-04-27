@@ -10,13 +10,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class ContinuousStopwatchTest {
   private static final Logger logger = Logger.getLogger(ContinuousStopwatch.class.getName());
   // Records ContinuousStopwatch logs.
@@ -24,7 +21,7 @@ public final class ContinuousStopwatchTest {
   // Used to reset the log level after this test is over.
   private Level savedLogLevel;
 
-  @Before
+  @BeforeEach
   public void addLogHandler() {
     savedLogLevel = logger.getLevel();
     logger.setLevel(Level.FINE);
@@ -32,7 +29,7 @@ public final class ContinuousStopwatchTest {
     logger.addHandler(testLogHandler);
   }
 
-  @After
+  @AfterEach
   public void removeLogHandler() {
     Logger.getLogger(ContinuousStopwatch.class.getName()).removeHandler(testLogHandler);
     logger.setLevel(savedLogLevel);

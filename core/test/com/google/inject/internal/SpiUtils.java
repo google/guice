@@ -37,12 +37,12 @@ import static com.google.inject.internal.SpiUtils.BindType.PROVIDER_KEY;
 import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
 import static com.google.inject.internal.SpiUtils.VisitType.INJECTOR;
 import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -154,9 +154,9 @@ public class SpiUtils {
     List<Map.Entry<?, Binding<?>>> entries = Lists.newArrayList(mapbinder.getEntries());
     List<MapResult<?, ?>> mapResults = Lists.newArrayList(results);
     assertEquals(
-        "wrong entries, expected: " + mapResults + ", but was: " + entries,
         mapResults.size(),
-        entries.size());
+        entries.size(),
+        "wrong entries, expected: " + mapResults + ", but was: " + entries);
 
     for (MapResult<?, ?> result : mapResults) {
       Map.Entry<?, Binding<?>> found = null;
@@ -172,8 +172,8 @@ public class SpiUtils {
         fail("Could not find entry: " + result + " in remaining entries: " + entries);
       } else {
         assertTrue(
-            "mapBinder doesn't contain: " + found.getValue(),
-            mapbinder.containsElement(found.getValue()));
+            mapbinder.containsElement(found.getValue()),
+            "mapBinder doesn't contain: " + found.getValue());
         entries.remove(found);
       }
     }
@@ -309,9 +309,9 @@ public class SpiUtils {
     // Multiply by two because each has a value and Map.Entry.
     int expectedSize = 2 * (mapResults.size() + duplicates);
     assertEquals(
-        "Incorrect other matches:\n\t" + Joiner.on("\n\t").join(otherMatches),
         expectedSize,
-        sizeOfOther);
+        sizeOfOther,
+        "Incorrect other matches:\n\t" + Joiner.on("\n\t").join(otherMatches));
     assertTrue(entrySetMatch);
     assertTrue(javaxEntrySetMatch);
     assertTrue(mapProviderMatch);
@@ -326,9 +326,9 @@ public class SpiUtils {
     assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals(allowDuplicates, mapCollectionProviderMatch);
     assertEquals(
-        "other MapBindings found: " + otherMapBindings,
         expectedMapBindings,
-        otherMapBindings.size());
+        otherMapBindings.size(),
+        "other MapBindings found: " + otherMapBindings);
   }
 
   @SuppressWarnings("unchecked")
@@ -368,21 +368,21 @@ public class SpiUtils {
         Binding<?> value = entry.getValue();
         if (key.equals(result.k) && matches(value, result.v)) {
           assertTrue(
-              "mapBinder doesn't contain: " + entry.getValue(),
-              mapbinder.containsElement(entry.getValue()));
+              mapbinder.containsElement(entry.getValue()),
+              "mapBinder doesn't contain: " + entry.getValue());
           foundEntries.add(entry);
         }
       }
       assertTrue(
-          "Could not find entry: " + result + " in remaining entries: " + entries,
-          !foundEntries.isEmpty());
+          !foundEntries.isEmpty(),
+          "Could not find entry: " + result + " in remaining entries: " + entries);
 
       entries.removeAll(foundEntries);
     }
 
     assertTrue(
-        "Found all entries of: " + mapResults + ", but more were left over: " + entries,
-        entries.isEmpty());
+        entries.isEmpty(),
+        "Found all entries of: " + mapResults + ", but more were left over: " + entries);
 
     assertEquals(mapKey, mapbinder.getMapKey());
     assertEquals(keyType, mapbinder.getKeyTypeLiteral());
@@ -550,9 +550,9 @@ public class SpiUtils {
     // Multiply by 2 because each has a value, and Map.Entry
     int expectedSize = (mapResults.size() + duplicates) * 2;
     assertEquals(
-        "incorrect number of contains, leftover matches:\n" + Joiner.on("\n\t").join(otherMatches),
         expectedSize,
-        otherMatchesSize);
+        otherMatchesSize,
+        "incorrect number of contains, leftover matches:\n" + Joiner.on("\n\t").join(otherMatches));
 
     assertTrue(entrySetMatch);
     assertTrue(entrySetJavaxMatch);
@@ -568,9 +568,9 @@ public class SpiUtils {
     assertEquals(allowDuplicates, mapCollectionProviderMatch);
     assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals(
-        "other MapBindings found: " + otherMapBindings,
         expectedMapBindings,
-        otherMapBindings.size());
+        otherMapBindings.size(),
+        "other MapBindings found: " + otherMapBindings);
 
     // Validate that we can construct an injector out of the remaining bindings.
     Guice.createInjector(Elements.getModule(otherElements));
@@ -637,9 +637,9 @@ public class SpiUtils {
     List<Binding<?>> elements = Lists.newArrayList(multibinder.getElements());
     List<BindResult<?>> bindResults = Lists.newArrayList(results);
     assertEquals(
-        "wrong bind elements, expected: " + bindResults + ", but was: " + multibinder.getElements(),
         bindResults.size(),
-        elements.size());
+        elements.size(),
+        "wrong bind elements, expected: " + bindResults + ", but was: " + multibinder.getElements());
 
     for (BindResult<?> result : bindResults) {
       Binding<?> found = null;
@@ -705,14 +705,14 @@ public class SpiUtils {
     assertTrue(setOfExtendsKeyMatch);
 
     if (allowDuplicates) {
-      assertEquals("contained more than it should: " + otherContains, 1, otherContains.size());
+      assertEquals(1, otherContains.size(), "contained more than it should: " + otherContains);
     } else {
-      assertTrue("contained more than it should: " + otherContains, otherContains.isEmpty());
+      assertTrue(otherContains.isEmpty(), "contained more than it should: " + otherContains);
     }
     assertEquals(
-        "other multibindings found: " + otherMultibinders,
         otherMultibindings,
-        otherMultibinders.size());
+        otherMultibinders.size(),
+        "other multibindings found: " + otherMultibinders);
   }
 
   @SuppressWarnings("unchecked")
@@ -796,20 +796,20 @@ public class SpiUtils {
 
     if (allowDuplicates) {
       assertEquals(
-          "wrong contained elements: " + otherContains,
           bindResults.size() + 1 + duplicates,
-          otherContains.size());
+          otherContains.size(),
+          "wrong contained elements: " + otherContains);
     } else {
       assertEquals(
-          "wrong contained elements: " + otherContains,
           bindResults.size() + duplicates,
-          otherContains.size());
+          otherContains.size(),
+          "wrong contained elements: " + otherContains);
     }
 
     assertEquals(
-        "other multibindings found: " + otherMultibinders,
         otherMultibindings,
-        otherMultibinders.size());
+        otherMultibinders.size(),
+        "other multibindings found: " + otherMultibinders);
     assertTrue(collectionOfProvidersMatch);
     assertTrue(collectionOfJavaxProvidersMatch);
     assertTrue(setOfExtendsMatch);
@@ -876,8 +876,8 @@ public class SpiUtils {
       BindResult<?> expectedActual,
       BindResult<?> expectedUserLinkedActual) {
     if (expectedUserLinkedActual != null) {
-      assertNull("cannot have actual if expecting user binding", expectedActual);
-      assertNull("cannot have default if expecting user binding", expectedDefault);
+      assertNull(expectedActual, "cannot have actual if expecting user binding");
+      assertNull(expectedDefault, "cannot have default if expecting user binding");
     }
 
     Key<Optional<T>> optionalKey =
@@ -899,21 +899,21 @@ public class SpiUtils {
     assertEquals(javaOptionalKey, javaOptionalBinder.getKey());
 
     if (expectedDefault == null) {
-      assertNull("did not expect a default binding", optionalBinder.getDefaultBinding());
-      assertNull("did not expect a default binding", javaOptionalBinder.getDefaultBinding());
+      assertNull(optionalBinder.getDefaultBinding(), "did not expect a default binding");
+      assertNull(javaOptionalBinder.getDefaultBinding(), "did not expect a default binding");
     } else {
       assertTrue(
+          matches(optionalBinder.getDefaultBinding(), expectedDefault),
           "expectedDefault: "
               + expectedDefault
               + ", actualDefault: "
-              + optionalBinder.getDefaultBinding(),
-          matches(optionalBinder.getDefaultBinding(), expectedDefault));
+              + optionalBinder.getDefaultBinding());
       assertTrue(
+          matches(javaOptionalBinder.getDefaultBinding(), expectedDefault),
           "expectedDefault: "
               + expectedDefault
               + ", actualDefault: "
-              + javaOptionalBinder.getDefaultBinding(),
-          matches(javaOptionalBinder.getDefaultBinding(), expectedDefault));
+              + javaOptionalBinder.getDefaultBinding());
     }
 
     if (expectedActual == null && expectedUserLinkedActual == null) {
@@ -922,31 +922,31 @@ public class SpiUtils {
 
     } else if (expectedActual != null) {
       assertTrue(
+          matches(optionalBinder.getActualBinding(), expectedActual),
           "expectedActual: "
               + expectedActual
               + ", actualActual: "
-              + optionalBinder.getActualBinding(),
-          matches(optionalBinder.getActualBinding(), expectedActual));
+              + optionalBinder.getActualBinding());
       assertTrue(
+          matches(javaOptionalBinder.getActualBinding(), expectedActual),
           "expectedActual: "
               + expectedActual
               + ", actualActual: "
-              + javaOptionalBinder.getActualBinding(),
-          matches(javaOptionalBinder.getActualBinding(), expectedActual));
+              + javaOptionalBinder.getActualBinding());
 
     } else if (expectedUserLinkedActual != null) {
       assertTrue(
+          matches(optionalBinder.getActualBinding(), expectedUserLinkedActual),
           "expectedUserLinkedActual: "
               + expectedUserLinkedActual
               + ", actualActual: "
-              + optionalBinder.getActualBinding(),
-          matches(optionalBinder.getActualBinding(), expectedUserLinkedActual));
+              + optionalBinder.getActualBinding());
       assertTrue(
+          matches(javaOptionalBinder.getActualBinding(), expectedUserLinkedActual),
           "expectedUserLinkedActual: "
               + expectedUserLinkedActual
               + ", actualActual: "
-              + javaOptionalBinder.getActualBinding(),
-          matches(javaOptionalBinder.getActualBinding(), expectedUserLinkedActual));
+              + javaOptionalBinder.getActualBinding());
     }
 
     Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
@@ -1025,7 +1025,7 @@ public class SpiUtils {
       }
     }
 
-    assertEquals(otherMatches.toString(), 0, otherMatches.size());
+    assertEquals(0, otherMatches.size(), otherMatches.toString());
     // only expect a keymatch if either default or actual are set
     assertEquals(expectedDefault != null || expectedActual != null, keyMatch);
     assertTrue(optionalKeyMatch);
@@ -1037,9 +1037,9 @@ public class SpiUtils {
     assertEquals(expectedDefault != null, defaultMatch);
     assertEquals(expectedActual != null, actualMatch);
     assertEquals(
-        "other OptionalBindings found: " + otherOptionalBindings,
         expectedOtherOptionalBindings,
-        otherOptionalBindings.size());
+        otherOptionalBindings.size(),
+        "other OptionalBindings found: " + otherOptionalBindings);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1051,8 +1051,8 @@ public class SpiUtils {
       BindResult<?> expectedActual,
       BindResult<?> expectedUserLinkedActual) {
     if (expectedUserLinkedActual != null) {
-      assertNull("cannot have actual if expecting user binding", expectedActual);
-      assertNull("cannot have default if expecting user binding", expectedDefault);
+      assertNull(expectedActual, "cannot have actual if expecting user binding");
+      assertNull(expectedDefault, "cannot have default if expecting user binding");
     }
     Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
     Map<Key<?>, Binding<?>> indexed = index(elements);
@@ -1164,13 +1164,13 @@ public class SpiUtils {
         assertTrue(contains);
         if (b != null) { // otherwise it might just be a ProviderLookup into it
           assertTrue(
-              "expected: " + expectedDefault + ", but was: " + b, matches(b, expectedDefault));
+              matches(b, expectedDefault), "expected: " + expectedDefault + ", but was: " + b);
           defaultMatch = true;
         }
       } else if (key != null && key.equals(actualKey)) {
         assertTrue(contains);
         if (b != null) { // otherwise it might just be a ProviderLookup into it
-          assertTrue("expected: " + expectedActual + ", but was: " + b, matches(b, expectedActual));
+          assertTrue(matches(b, expectedActual), "expected: " + expectedActual + ", but was: " + b);
           actualMatch = true;
         }
       } else if (contains) {
@@ -1188,11 +1188,11 @@ public class SpiUtils {
     assertTrue(javaOptionalProviderKeyMatch);
     assertEquals(expectedDefault != null, defaultMatch);
     assertEquals(expectedActual != null, actualMatch);
-    assertEquals(otherContains.toString(), 0, otherContains.size());
+    assertEquals(0, otherContains.size(), otherContains.toString());
     assertEquals(
-        "other OptionalBindings found: " + otherOptionalElements,
         expectedOtherOptionalBindings,
-        otherOptionalElements.size());
+        otherOptionalElements.size(),
+        "other OptionalBindings found: " + otherOptionalElements);
 
     // Validate that we can construct an injector out of the remaining bindings.
     Guice.createInjector(Elements.getModule(nonContainedElements));

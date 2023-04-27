@@ -14,11 +14,11 @@
 
 package com.google.inject.internal;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -58,7 +58,7 @@ public final class WeakKeySetUtils {
     assertTrue(set.contains(key));
     assertEquals(expectedSources, set.getSources(key).size());
     for (Object source : sources) {
-      assertTrue("didn't contain source: " + source, set.getSources(key).contains(source));
+      assertTrue(set.getSources(key).contains(source), "didn't contain source: " + source);
     }
   }
 
@@ -66,14 +66,14 @@ public final class WeakKeySetUtils {
     // if we're expecting it to not be a source, loop around and wait for threads to run.
     for (int i = 0; i < 10; i++) {
       Set<Object> sources = set.getSources(key);
-      assertNotNull("expected at least one source", source);
+      assertNotNull(source, "expected at least one source");
       if (!sources.contains(source)) {
         break;
       }
       sleep();
     }
     Set<Object> sources = set.getSources(key);
-    assertNotNull("expected at least one source", source);
+    assertNotNull(source, "expected at least one source");
     assertFalse(sources.contains(source));
   }
 

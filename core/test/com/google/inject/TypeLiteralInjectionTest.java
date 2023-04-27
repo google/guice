@@ -18,18 +18,21 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.util.Types.listOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.util.Types;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Demonstrates type reification.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class TypeLiteralInjectionTest extends TestCase {
+public class TypeLiteralInjectionTest {
 
+  @Test
   public void testBindingToRawTypeLiteralIsNotAllowed() {
     try {
       Guice.createInjector(
@@ -47,6 +50,7 @@ public class TypeLiteralInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindingToParameterizedTypeLiteralIsNotAllowed() {
     try {
       Guice.createInjector(
@@ -65,6 +69,7 @@ public class TypeLiteralInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectTypeLiteralWithRawTypes() {
     C<?> c = Guice.createInjector().getInstance(C.class);
     assertEquals(TypeLiteral.get(String.class), c.string);
@@ -80,6 +85,7 @@ public class TypeLiteralInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectTypeLiteralWithClassTypes() {
     B<Integer> b = Guice.createInjector().getInstance(new Key<B<Integer>>() {});
     assertEquals(TypeLiteral.get(String.class), b.string);

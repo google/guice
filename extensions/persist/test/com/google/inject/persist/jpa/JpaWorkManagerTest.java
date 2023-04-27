@@ -16,6 +16,10 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -26,26 +30,28 @@ import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
-import junit.framework.TestCase;
 import org.hibernate.HibernateException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class JpaWorkManagerTest extends TestCase {
+public class JpaWorkManagerTest {
   private Injector injector;
   private static final String UNIQUE_TEXT_3 =
       JpaWorkManagerTest.class.getSimpleName()
           + "CONSTRAINT_VIOLATING some other unique text"
           + new Date();
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
   }
 
-  @Override
+  @AfterEach
   public void tearDown() {
     try {
       injector.getInstance(EntityManagerFactory.class).close();
@@ -54,6 +60,7 @@ public class JpaWorkManagerTest extends TestCase {
     }
   }
 
+  @Test
   public void testWorkManagerInSession() {
     injector.getInstance(PersistService.class).start();
     injector.getInstance(UnitOfWork.class).begin();
@@ -74,14 +81,14 @@ public class JpaWorkManagerTest extends TestCase {
       query.setParameter("text", UNIQUE_TEXT_3);
       final Object o = query.getSingleResult();
 
-      assertNotNull("no result!!", o);
-      assertTrue("Unknown type returned " + o.getClass(), o instanceof JpaTestEntity);
+      assertNotNull(o, "no result!!");
+      assertTrue(o instanceof JpaTestEntity, "Unknown type returned " + o.getClass());
       JpaTestEntity ent = (JpaTestEntity) o;
 
       assertEquals(
-          "Incorrect result returned or not persisted properly" + ent.getText(),
           UNIQUE_TEXT_3,
-          ent.getText());
+          ent.getText(),
+          "Incorrect result returned or not persisted properly" + ent.getText());
 
     } finally {
       injector.getInstance(EntityManager.class).getTransaction().commit();
@@ -89,12 +96,14 @@ public class JpaWorkManagerTest extends TestCase {
     }
   }
 
+  @Test
   public void testStartMoreThanOnce() {
     injector.getInstance(PersistService.class).start();
     // No exception is thrown on subsequent start.
     injector.getInstance(PersistService.class).start();
   }
 
+  @Test
   public void testCloseMoreThanOnce() {
     injector.getInstance(PersistService.class).start();
     injector.getInstance(PersistService.class).stop();
@@ -102,6 +111,7 @@ public class JpaWorkManagerTest extends TestCase {
     injector.getInstance(PersistService.class).stop();
   }
 
+  @Test
   public void testCloseWithoutStart() {
     // No exception.
     injector.getInstance(PersistService.class).stop();

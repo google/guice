@@ -16,6 +16,11 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -28,18 +33,20 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class JoiningLocalTransactionsTest extends TestCase {
+public class JoiningLocalTransactionsTest {
   private Injector injector;
   private static final String UNIQUE_TEXT =
       JoiningLocalTransactionsTest.class + "some unique text" + new Date();
   private static final String TRANSIENT_UNIQUE_TEXT =
       JoiningLocalTransactionsTest.class + "some other unique text" + new Date();
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -48,12 +55,13 @@ public class JoiningLocalTransactionsTest extends TestCase {
   }
 
   //cleanup entitymanager in case some of the rollback tests left it in an open state
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
+  @Test
   public void testSimpleTransaction() {
     injector
         .getInstance(JoiningLocalTransactionsTest.TransactionalObject.class)
@@ -61,7 +69,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
 
     injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
-    assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
+    assertFalse(em.getTransaction().isActive(), "txn was not closed by transactional service");
 
     //test that the data has been stored
     Object result =
@@ -70,14 +78,15 @@ public class JoiningLocalTransactionsTest extends TestCase {
             .getSingleResult();
     injector.getInstance(UnitOfWork.class).end();
 
-    assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
+    assertTrue(result instanceof JpaTestEntity, "odd result returned fatal");
 
     assertEquals(
-        "queried entity did not match--did automatic txn fail?",
         UNIQUE_TEXT,
-        ((JpaTestEntity) result).getText());
+        ((JpaTestEntity) result).getText(),
+        "queried entity did not match--did automatic txn fail?");
   }
 
+  @Test
   public void testSimpleTransactionRollbackOnChecked() {
     try {
       injector
@@ -92,8 +101,8 @@ public class JoiningLocalTransactionsTest extends TestCase {
     EntityManager em = injector.getInstance(EntityManager.class);
 
     assertFalse(
-        "EM was not closed by transactional service (rollback didnt happen?)",
-        em.getTransaction().isActive());
+        em.getTransaction().isActive(),
+        "EM was not closed by transactional service (rollback didnt happen?)");
 
     //test that the data has been stored
     try {
@@ -107,6 +116,7 @@ public class JoiningLocalTransactionsTest extends TestCase {
     }
   }
 
+  @Test
   public void testSimpleTransactionRollbackOnUnchecked() {
     try {
       injector
@@ -120,8 +130,8 @@ public class JoiningLocalTransactionsTest extends TestCase {
     injector.getInstance(UnitOfWork.class).begin();
     EntityManager em = injector.getInstance(EntityManager.class);
     assertFalse(
-        "Session was not closed by transactional service (rollback didnt happen?)",
-        em.getTransaction().isActive());
+        em.getTransaction().isActive(),
+        "Session was not closed by transactional service (rollback didnt happen?)");
 
     try {
       Object result =

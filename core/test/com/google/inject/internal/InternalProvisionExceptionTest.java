@@ -18,10 +18,11 @@ package com.google.inject.internal;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.inject.internal.util.SourceProvider;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public final class InternalProvisionExceptionTest extends TestCase {
+public final class InternalProvisionExceptionTest {
 
+  @Test
   public void testSourceFormatting() {
     // Note that the duplicate source gets dropped as well as the unknown source
     assertThat(

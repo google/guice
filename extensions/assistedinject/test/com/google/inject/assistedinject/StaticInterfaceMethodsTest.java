@@ -16,18 +16,20 @@
 
 package com.google.inject.assistedinject;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test static methods in interfaces.
  *
  * @author tavianator@tavianator.com (Tavian Barnes)
  */
-public class StaticInterfaceMethodsTest extends TestCase {
+public class StaticInterfaceMethodsTest {
 
   private static class Thing {
     final int i;
@@ -46,6 +48,7 @@ public class StaticInterfaceMethodsTest extends TestCase {
     }
   }
 
+  @Test
   public void testAssistedInjection() {
     Injector injector =
         Guice.createInjector(

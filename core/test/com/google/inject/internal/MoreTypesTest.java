@@ -17,7 +17,9 @@
 package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertContains;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.MoreTypes.ParameterizedTypeImpl;
@@ -27,11 +29,12 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author schmitt@google.com (Peter Schmitt) */
-public class MoreTypesTest extends TestCase {
+public class MoreTypesTest {
 
+  @Test
   public void testParameterizedTypeToString() {
     TypeLiteral<Inner<String>> innerString = new TypeLiteral<Inner<String>>() {};
     assertEquals(
@@ -51,6 +54,7 @@ public class MoreTypesTest extends TestCase {
         MoreTypes.typeToString(mapInnerLongToSetInnerLong.getType()));
   }
 
+  @Test
   public void testParameterizedType_lessArgs() {
     IllegalArgumentException expected =
         assertThrows(
@@ -64,6 +68,7 @@ public class MoreTypesTest extends TestCase {
             + " class");
   }
 
+  @Test
   public void testParameterizedType_correctArgs() {
 
     ParameterizedTypeImpl parameterizedType =
@@ -71,6 +76,7 @@ public class MoreTypesTest extends TestCase {
     assertEquals(parameterizedType.getRawType(), D.class);
   }
 
+  @Test
   public void testParameterizedType_moreArgs() {
 
     ParameterizedTypeImpl parameterizedType =
@@ -79,11 +85,13 @@ public class MoreTypesTest extends TestCase {
     assertEquals(parameterizedType.getRawType(), D.class);
   }
 
+  @Test
   public <T> void testEquals_typeVariable() throws Exception {
     Type type = getClass().getMethod("testEquals_typeVariable").getTypeParameters()[0];
     assertTrue(MoreTypes.equals(new TypeLiteral<T>() {}.getType(), type));
   }
 
+  @Test
   public <T> void testGetRawType_wildcard() throws Exception {
     WildcardType wildcard =
         (WildcardType)

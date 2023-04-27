@@ -18,13 +18,13 @@ package com.google.inject.assistedinject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
@@ -49,12 +49,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("deprecation")
-@RunWith(JUnit4.class)
 public class FactoryProvider2Test {
 
   private enum Color {
@@ -681,7 +678,7 @@ public class FactoryProvider2Test {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
+      assertEquals(4, expected.getErrorMessages().size(), expected.getMessage());
       // Assert each method individually, because JDK7 doesn't guarantee method ordering.
       assertContains(
           expected.getMessage(),
@@ -729,7 +726,7 @@ public class FactoryProvider2Test {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
+      assertEquals(4, expected.getErrorMessages().size(), expected.getMessage());
       assertContains(
           expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject.\n"
@@ -779,7 +776,7 @@ public class FactoryProvider2Test {
           });
       fail();
     } catch (CreationException expected) {
-      assertEquals(expected.getMessage(), 4, expected.getErrorMessages().size());
+      assertEquals(4, expected.getErrorMessages().size(), expected.getMessage());
       assertContains(
           expected.getMessage(),
           ") A Provider may not be a type in a factory method of an AssistedInject.\n"

@@ -178,6 +178,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <scope>test</scope>
       </dependency>
       <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.9.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>com.google.truth</groupId>
         <artifactId>truth</artifactId>
         <version>1.1.3</version>
@@ -200,8 +207,19 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -323,7 +341,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.19.1</version>
+          <version>3.0.0</version>
           <configuration>
             <skipTests>${guice.skipTests}</skipTests>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>

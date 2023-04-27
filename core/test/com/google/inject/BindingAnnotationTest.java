@@ -18,15 +18,18 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.internal.Annotations;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class BindingAnnotationTest extends TestCase {
+public class BindingAnnotationTest {
 
+  @Test
   public void testAnnotationWithValueMatchesKeyWithTypeOnly() throws CreationException {
     Injector c =
         Guice.createInjector(
@@ -43,6 +46,7 @@ public class BindingAnnotationTest extends TestCase {
     assertEquals("foo", foo.s);
   }
 
+  @Test
   public void testRequireExactAnnotationsDisablesFallback() {
     try {
       Guice.createInjector(
@@ -68,6 +72,7 @@ public class BindingAnnotationTest extends TestCase {
     }
   }
 
+  @Test
   public void testRequireExactAnnotationsDoesntBreakIfDefaultsExist() {
     Guice.createInjector(
             new AbstractModule() {
@@ -81,6 +86,7 @@ public class BindingAnnotationTest extends TestCase {
         .getInstance(RedFoo.class);
   }
 
+  @Test
   public void testRequireExactAnnotationsRequireAllOptionals() {
     try {
       Guice.createInjector(
@@ -103,6 +109,7 @@ public class BindingAnnotationTest extends TestCase {
     }
   }
 
+  @Test
   public void testAnnotationWithValueThatDoesntMatch() {
     try {
       Guice.createInjector(

@@ -16,12 +16,13 @@
 
 package com.google.inject.spi;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
 
 public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
   @Override
   protected Void visitOther(Binding<? extends T> binding) {
-    throw new AssertionFailedError();
+    return fail();
   }
 }

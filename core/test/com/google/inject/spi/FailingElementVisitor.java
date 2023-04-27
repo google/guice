@@ -16,11 +16,11 @@
 
 package com.google.inject.spi;
 
-import junit.framework.AssertionFailedError;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class FailingElementVisitor extends DefaultElementVisitor<Void> {
   @Override
   protected Void visitOther(Element element) {
-    throw new AssertionFailedError();
+    return fail();
   }
 }

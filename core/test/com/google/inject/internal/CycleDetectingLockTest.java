@@ -1,6 +1,8 @@
 package com.google.inject.internal;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
@@ -18,9 +20,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class CycleDetectingLockTest extends TestCase {
+public class CycleDetectingLockTest {
 
   static final long DEADLOCK_TIMEOUT_SECONDS = 1;
 
@@ -40,6 +42,7 @@ public class CycleDetectingLockTest extends TestCase {
    * Incorrect implementation detects a cycle waiting on S3.
    */
 
+  @Test
   public void testSingletonThreadsRuntimeCircularDependency() throws Exception {
     final CyclicBarrier signal1 = new CyclicBarrier(2);
     final CyclicBarrier signal2 = new CyclicBarrier(2);
@@ -128,6 +131,7 @@ public class CycleDetectingLockTest extends TestCase {
    * no deadlocks to detect.
    */
 
+  @Test
   public void testCycleDetectingLockFactoriesDoNotDeadlock() throws Exception {
     final CycleDetectingLockFactory<String> factoryA = new CycleDetectingLockFactory<>();
     final CycleDetectingLock<String> lockA = factoryA.create("A");
@@ -166,8 +170,8 @@ public class CycleDetectingLockTest extends TestCase {
     boolean deadlockADetected = threadA.get(DEADLOCK_TIMEOUT_SECONDS * 2, TimeUnit.SECONDS);
     boolean deadlockBDetected = threadB.get(DEADLOCK_TIMEOUT_SECONDS * 2, TimeUnit.SECONDS);
 
-    assertTrue("Deadlock should get detected", deadlockADetected || deadlockBDetected);
-    assertTrue("One deadlock should get detected", deadlockADetected != deadlockBDetected);
+    assertTrue(deadlockADetected || deadlockBDetected, "Deadlock should get detected");
+    assertTrue(deadlockADetected != deadlockBDetected, "One deadlock should get detected");
   }
 
   /**
@@ -183,6 +187,7 @@ public class CycleDetectingLockTest extends TestCase {
    * first lock.
    */
 
+  @Test
   public void testCycleReporting() throws Exception {
     final CycleDetectingLockFactory<String> factory = new CycleDetectingLockFactory<>();
     final CycleDetectingLock<String> lockA = factory.create("a");
@@ -239,6 +244,7 @@ public class CycleDetectingLockTest extends TestCase {
   // Tests issues https://github.com/google/guice/pull/1635 &
   // https://github.com/google/guice/issues/1510
   // These were problems with the implementation that caused the impl to loop forever and OOM.
+  @Test
   public void testConcurrentReentrance() throws Exception {
     int numConcurrentLockers = 8;
     ExecutorService service = Executors.newFixedThreadPool(numConcurrentLockers);

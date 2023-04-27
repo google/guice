@@ -18,20 +18,26 @@ package com.google.inject;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.internal.Annotations;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class ImplicitBindingTest extends TestCase {
+public class ImplicitBindingTest {
 
+  @Test
   public void testCircularDependency() throws CreationException {
     Injector injector = Guice.createInjector();
     Foo foo = injector.getInstance(Foo.class);
@@ -51,6 +57,7 @@ public class ImplicitBindingTest extends TestCase {
     }
   }
 
+  @Test
   public void testDefaultImplementation() {
     Injector injector = Guice.createInjector();
     I i = injector.getInstance(I.class);
@@ -72,12 +79,14 @@ public class ImplicitBindingTest extends TestCase {
     public void go() {}
   }
 
+  @Test
   public void testDefaultProvider() {
     Injector injector = Guice.createInjector();
     Provided provided = injector.getInstance(Provided.class);
     provided.go();
   }
 
+  @Test
   public void testBindingOverridesImplementedBy() {
     Injector injector =
         Guice.createInjector(
@@ -95,6 +104,7 @@ public class ImplicitBindingTest extends TestCase {
     void go();
   }
 
+  @Test
   public void testNoImplicitBindingIsCreatedForAnnotatedKeys() {
     try {
       Guice.createInjector().getInstance(Key.get(I.class, Names.named("i")));
@@ -128,6 +138,7 @@ public class ImplicitBindingTest extends TestCase {
    * make sure that all are cleaned up and traversed. It also makes sure we don't touch explicit
    * bindings.
    */
+  @Test
   public void testCircularJitBindingsLeaveNoResidue() {
     Injector injector =
         Guice.createInjector(
@@ -263,6 +274,7 @@ public class ImplicitBindingTest extends TestCase {
    *
    * <p>It works just fine when the other types are bound in a main injector.
    */
+  @Test
   public void testInstancesRequestingProvidersForThemselvesWithChildInjectors() {
     final Module testModule =
         new AbstractModule() {
@@ -338,6 +350,7 @@ public class ImplicitBindingTest extends TestCase {
    * <p>We also throw in a valid JIT binding, E, to guarantee that if something fails in this flow,
    * it can be recreated later if it's not from a failed sequence.
    */
+  @Test
   public void testRecursiveJitBindingsCleanupCorrectly() throws Exception {
     Injector injector = Guice.createInjector();
     try {
@@ -380,12 +393,14 @@ public class ImplicitBindingTest extends TestCase {
   // Valid JITable binding
   static class E {}
 
+  @Test
   public void testProvidedByNonEmptyEnum() {
     NonEmptyEnum cardSuit = Guice.createInjector().getInstance(NonEmptyEnum.class);
 
     assertEquals(NonEmptyEnum.HEARTS, cardSuit);
   }
 
+  @Test
   public void testProvidedByEmptyEnum() {
     EmptyEnum emptyEnumValue = Guice.createInjector().getInstance(EmptyEnum.class);
     assertNull(emptyEnumValue);
@@ -418,6 +433,7 @@ public class ImplicitBindingTest extends TestCase {
 
   // An enum cannot be implemented by anything, so it should not be possible to have a successful
   // binding when the enum is annotated with @ImplementedBy.
+  @Test
   public void testImplementedByEnum() {
     Injector injector = Guice.createInjector();
     try {
@@ -436,12 +452,14 @@ public class ImplicitBindingTest extends TestCase {
 
   private static class EnumWithImplementedByEnum {}
 
+  @Test
   public void testImplicitJdkBindings_publicCxtor() {
     Injector injector = Guice.createInjector();
     // String has a public nullary constructor, so Guice will call it.
     assertEquals("", injector.getInstance(String.class));
   }
 
+  @Test
   public void testRecursiveLoadWithOptionals() {
     Injector injector =
         Guice.createInjector(
@@ -479,6 +497,7 @@ public class ImplicitBindingTest extends TestCase {
     @Inject B1 b;
   }
 
+  @Test
   public void testRecursiveLoadWithoutOptionals_atInjectorCreation() {
     CreationException ce =
         assertThrows(
@@ -496,6 +515,7 @@ public class ImplicitBindingTest extends TestCase {
         .contains("No implementation for " + Unresolved.class.getName() + " was bound.");
   }
 
+  @Test
   public void testRecursiveLoadWithoutOptionals_afterCreation() {
     Injector injector = Guice.createInjector();
     ConfigurationException ce =

@@ -16,6 +16,9 @@
 
 package com.google.inject.spi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
@@ -28,11 +31,12 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class ModuleRewriterTest extends TestCase {
+public class ModuleRewriterTest {
 
+  @Test
   public void testRewriteBindings() {
     // create a module the binds String.class and CharSequence.class
     Module module =
@@ -80,6 +84,7 @@ public class ModuleRewriterTest extends TestCase {
     }
   }
 
+  @Test
   public void testGetProviderAvailableAtInjectMembersTime() {
     Module module =
         new AbstractModule() {

@@ -17,16 +17,18 @@
 package com.google.inject;
 
 import static com.google.common.base.StandardSystemProperty.JAVA_SPECIFICATION_VERSION;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.InetAddress;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * This test is split out from ImplicitBindingTest so that we can run it with --add_opens to
  * InetAddress, so validate that it will work when opened.
  */
-public class ImplicitBindingJdkPackagePrivateTest extends TestCase {
+public class ImplicitBindingJdkPackagePrivateTest {
 
+  @Test
   public void testImplicitJdkBindings_packagePrivateCxtor() {
     Injector injector = Guice.createInjector();
     // Validate that, when the JDK allows it, we can construct package private JDK things.

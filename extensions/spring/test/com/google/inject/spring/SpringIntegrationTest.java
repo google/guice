@@ -17,6 +17,9 @@
 package com.google.inject.spring;
 
 import static com.google.inject.spring.SpringIntegration.fromSpring;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
@@ -24,15 +27,16 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class SpringIntegrationTest extends TestCase {
+public class SpringIntegrationTest {
 
+  @Test
   public void testBindFromSpring() throws CreationException {
     final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
@@ -61,6 +65,7 @@ public class SpringIntegrationTest extends TestCase {
     assertNotSame(injector.getInstance(Prototype.class), injector.getInstance(Prototype.class));
   }
 
+  @Test
   public void testBindAll() throws CreationException {
     final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 

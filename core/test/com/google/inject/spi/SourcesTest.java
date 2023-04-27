@@ -5,12 +5,9 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Module;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Tests sources are set correctly in elements. */
-@RunWith(JUnit4.class)
 public final class SourcesTest {
 
   @Test

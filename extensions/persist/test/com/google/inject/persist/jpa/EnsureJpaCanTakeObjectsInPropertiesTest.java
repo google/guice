@@ -14,6 +14,8 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -24,12 +26,14 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
-import junit.framework.TestCase;
 import org.hibernate.cfg.Environment;
 import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
 import org.hsqldb.jdbc.JDBCDataSource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
+public class EnsureJpaCanTakeObjectsInPropertiesTest {
 
   private Injector injector;
 
@@ -57,12 +61,12 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
     }
   }
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = null;
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     if (injector == null) {
       return;
@@ -89,10 +93,12 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
+  @Test
   public void testWorksIfPassDataSource() {
     startPersistService(true);
   }
 
+  @Test
   public void testFailsIfNoDataSource() {
     try {
       startPersistService(false);

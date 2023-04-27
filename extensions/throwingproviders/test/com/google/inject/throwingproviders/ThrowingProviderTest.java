@@ -21,9 +21,9 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -52,16 +52,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TooManyListenersException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
 @SuppressWarnings("deprecation")
-@RunWith(JUnit4.class)
 public class ThrowingProviderTest {
   @Target(METHOD)
   @Retention(RUNTIME)

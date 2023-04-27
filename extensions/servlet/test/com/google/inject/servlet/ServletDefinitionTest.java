@@ -16,6 +16,9 @@
 
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,16 +38,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Basic unit test for lifecycle of a ServletDefinition (wrapper).
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
-public class ServletDefinitionTest extends TestCase {
+public class ServletDefinitionTest {
 
   @SuppressWarnings("unchecked") // Safe because mock will only ever return HttpServlet
+  @Test
   public final void testServletInitAndConfig() throws ServletException {
     Injector injector = mock(Injector.class);
     Binding<HttpServlet> binding = mock(Binding.class);
@@ -90,6 +94,7 @@ public class ServletDefinitionTest extends TestCase {
     }
   }
 
+  @Test
   public void testServiceWithContextPath() throws IOException, ServletException {
     String pattern = "/*";
     // some init params

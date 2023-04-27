@@ -2,14 +2,14 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests relating to modules.
  *
  * @author kevinb
  */
-public class ModuleTest extends TestCase {
+public class ModuleTest {
 
   static class A implements Module {
     @Override
@@ -62,6 +62,7 @@ public class ModuleTest extends TestCase {
 
   static class W {}
 
+  @Test
   public void testDiamond() throws Exception {
     Guice.createInjector(new A());
   }

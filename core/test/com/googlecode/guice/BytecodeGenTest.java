@@ -18,13 +18,13 @@ package com.googlecode.guice;
 
 import static com.google.inject.Asserts.getClassPathUrls;
 import static com.google.inject.matcher.Matchers.any;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
@@ -42,17 +42,14 @@ import java.net.URLClassLoader;
 import javax.inject.Inject;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * This test is in a separate package so we can test package-level visibility with confidence.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-@RunWith(JUnit4.class)
 public class BytecodeGenTest {
 
   private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
@@ -184,7 +181,7 @@ public class BytecodeGenTest {
   private Class<ProxyTestImpl> realClass;
   private Module testModule;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     assumeTrue(InternalFlags.isBytecodeGenEnabled());
 
@@ -283,7 +280,7 @@ public class BytecodeGenTest {
 
     // This test could be somewhat flaky when the GC isn't working.
     // If it fails, run the test again to make sure it's failing reliably.
-    assertNull("Proxy class was not unloaded.", clazzRef.get());
+    assertNull(clazzRef.get(), "Proxy class was not unloaded.");
   }
 
   @Test

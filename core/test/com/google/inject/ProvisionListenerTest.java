@@ -20,6 +20,13 @@ import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -37,7 +44,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link Binder#bindListener(Matcher, ProvisionListener...)}
@@ -45,8 +52,9 @@ import junit.framework.TestCase;
  * @author sameb@google.com (Sam Berlin)
  */
 // TODO(sameb): Add some tests for private modules & child injectors.
-public class ProvisionListenerTest extends TestCase {
+public class ProvisionListenerTest {
 
+  @Test
   public void testExceptionInListenerBeforeProvisioning() {
     Injector injector =
         Guice.createInjector(
@@ -71,6 +79,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionInListenerAfterProvisioning() {
     Injector injector =
         Guice.createInjector(
@@ -95,6 +104,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionInProvisionExplicitlyCalled() {
     Injector injector =
         Guice.createInjector(
@@ -118,6 +128,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionInProvisionAutomaticallyCalled() {
     Injector injector =
         Guice.createInjector(
@@ -141,6 +152,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testExceptionInFieldProvision() throws Exception {
     final CountAndCaptureExceptionListener listener = new CountAndCaptureExceptionListener();
     Injector injector =
@@ -188,6 +200,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(0, listener.afterProvision);
   }
 
+  @Test
   public void testExceptionInCxtorProvision() throws Exception {
     final CountAndCaptureExceptionListener listener = new CountAndCaptureExceptionListener();
     Injector injector =
@@ -236,6 +249,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(0, listener.afterProvision);
   }
 
+  @Test
   public void testListenerCallsProvisionTwice() {
     Injector injector =
         Guice.createInjector(
@@ -260,6 +274,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testCachedInScopePreventsProvisionNotify() {
     final Counter count1 = new Counter();
     Injector injector =
@@ -282,6 +297,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(0, count1.count);
   }
 
+  @Test
   public void testCombineAllBindListenerCalls() {
     final Counter count1 = new Counter();
     final Counter count2 = new Counter();
@@ -299,6 +315,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(1, count2.count);
   }
 
+  @Test
   public void testNotifyEarlyListenersIfFailBeforeProvision() {
     final Counter count1 = new Counter();
     final Counter count2 = new Counter();
@@ -328,6 +345,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testNotifyLaterListenersIfFailAfterProvision() {
     final Counter count1 = new Counter();
     final Counter count2 = new Counter();
@@ -357,6 +375,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testNotifiedKeysOfAllBindTypes() {
     final Capturer capturer = new Capturer();
     Injector injector =
@@ -423,6 +442,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(of(Key.get(Foo.class)), capturer.getAndClear());
   }
 
+  @Test
   public void testSingletonMatcher() {
     final Counter counter = new Counter();
     Injector injector =
@@ -449,6 +469,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(1, counter.count);
   }
 
+  @Test
   public void testCallingBindingDotGetProviderDotGet() {
     Injector injector =
         Guice.createInjector(
@@ -570,8 +591,8 @@ public class ProvisionListenerTest extends TestCase {
       if (provision.getBinding() instanceof InstanceBinding) {
         Class<? super T> expected = provision.getBinding().getKey().getRawType();
         assertTrue(
-            "expected instanceof: " + expected + ", but was: " + provisioned,
-            expected.isInstance(provisioned));
+            expected.isInstance(provisioned),
+            "expected instanceof: " + expected + ", but was: " + provisioned);
       } else {
         assertEquals(provision.getBinding().getKey().getRawType(), provisioned.getClass());
       }
@@ -651,6 +672,7 @@ public class ProvisionListenerTest extends TestCase {
   }
 
   @SuppressWarnings("unchecked")
+  @Test
   public void testDependencyChain() {
     final List<Class<?>> pList = Lists.newArrayList();
     final List<Class<?>> totalList = Lists.newArrayList();
@@ -713,6 +735,7 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(totalList, pList);
   }
 
+  @Test
   public void testModuleRequestInjection() {
     final AtomicBoolean notified = new AtomicBoolean();
     Guice.createInjector(
@@ -731,6 +754,7 @@ public class ProvisionListenerTest extends TestCase {
     assertTrue(notified.get());
   }
 
+  @Test
   public void testToProviderInstance() {
     final AtomicBoolean notified = new AtomicBoolean();
     Guice.createInjector(
@@ -755,6 +779,7 @@ public class ProvisionListenerTest extends TestCase {
     assertTrue(notified.get());
   }
 
+  @Test
   public void testInjectorInjectMembers() {
     final Object object =
         new Object() {
@@ -832,6 +857,7 @@ public class ProvisionListenerTest extends TestCase {
 
   private static class F {}
 
+  @Test
   public void testBindToInjectorWithListeningGivesSaneException() {
     try {
       Guice.createInjector(
@@ -849,6 +875,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testProvisionIsNotifiedAfterContextsClear() {
     Injector injector =
         Guice.createInjector(
@@ -875,7 +902,7 @@ public class ProvisionListenerTest extends TestCase {
     X.createY = true;
     X x = injector.getInstance(X.class);
     assertNotSame(x, x.y.x);
-    assertFalse("x.id: " + x.id + ", x.y.x.id: " + x.y.x.id, x.id == x.y.x.id);
+    assertFalse(x.id == x.y.x.id, "x.id: " + x.id + ", x.y.x.id: " + x.y.x.id);
   }
 
   private static class X {
@@ -912,6 +939,7 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
 
+  @Test
   public void testDeDuplicateProvisionListeners() {
     final Counter counter = new Counter();
     Injector injector =
@@ -924,6 +952,6 @@ public class ProvisionListenerTest extends TestCase {
               }
             });
     injector.getInstance(Many.class);
-    assertEquals("ProvisionListener not de-duplicated", 1, counter.count);
+    assertEquals(1, counter.count, "ProvisionListener not de-duplicated");
   }
 }

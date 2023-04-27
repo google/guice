@@ -17,7 +17,7 @@ package com.google.inject.daggeradapter;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.inject.Binder;
 import com.google.inject.CreationException;
@@ -35,11 +35,11 @@ import dagger.multibindings.StringKey;
 import java.lang.annotation.Retention;
 import java.util.Map;
 import javax.inject.Qualifier;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** {@link IntoMap} tests for {@link DaggerAdapter}. */
 
-public class IntoMapTest extends TestCase {
+public class IntoMapTest {
   @dagger.Module
   static class MapBindingDaggerModule1 {
     @dagger.Provides
@@ -67,6 +67,7 @@ public class IntoMapTest extends TestCase {
     }
   }
 
+  @Test
   public void testMapBindings() {
     Injector injector =
         Guice.createInjector(
@@ -90,6 +91,7 @@ public class IntoMapTest extends TestCase {
     }
   }
 
+  @Test
   public void testMapBindingsWithAnnotation() {
     Injector injector =
         Guice.createInjector(DaggerAdapter.from(new MapBindingWithAnnotationDaggerModule()));
@@ -108,6 +110,7 @@ public class IntoMapTest extends TestCase {
     }
   }
 
+  @Test
   public void testMapBindingsWithGuiceModule() {
     Injector injector =
         Guice.createInjector(
@@ -150,6 +153,7 @@ public class IntoMapTest extends TestCase {
     }
   }
 
+  @Test
   public void testWrappedMapKeys() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(new WrappedMapKeyModule()));
     Map<Wrapped, Integer> map = injector.getInstance(new Key<Map<Wrapped, Integer>>() {});
@@ -196,6 +200,7 @@ public class IntoMapTest extends TestCase {
     }
   }
 
+  @Test
   public void testBinds() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(BindsModule.class));
     Map<String, Object> map = injector.getInstance(new Key<Map<String, Object>>() {});
@@ -230,6 +235,7 @@ public class IntoMapTest extends TestCase {
     }
   }
 
+  @Test
   public void testMissingRuntimeRetention() {
     CreationException exception =
         assertThrows(
@@ -239,6 +245,7 @@ public class IntoMapTest extends TestCase {
     assertThat(exception).hasMessageThat().contains("Missing @MapKey annotation on method");
   }
 
+  @Test
   public void testMissingRuntimeRetentionUsingBinds() {
     CreationException exception =
         assertThrows(

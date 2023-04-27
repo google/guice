@@ -16,6 +16,10 @@
 
 package com.google.inject.grapher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
@@ -37,23 +41,23 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import java.util.Collection;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link TransitiveDependencyVisitor}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
-public class TransitiveDependencyVisitorTest extends TestCase {
+public class TransitiveDependencyVisitorTest {
   private TransitiveDependencyVisitor visitor;
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
-    super.setUp();
-
     visitor = new TransitiveDependencyVisitor();
   }
 
+  @Test
   public void testVisitConstructor() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class));
     Collection<Key<?>> dependencies = visitor.visit((ConstructorBinding<?>) binding);
@@ -62,6 +66,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
         dependencies, Key.get(A.class), Key.get(B.class), Key.get(C.class), Key.get(D.class));
   }
 
+  @Test
   public void testVisitConvertedConstant() {
     Binding<?> binding =
         getBinding(Key.get(Integer.class, Names.named("number")), new ConvertedConstantModule());
@@ -70,6 +75,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     assertDependencies(dependencies, Key.get(String.class, Names.named("number")));
   }
 
+  @Test
   public void testVisitInstance() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class), new InstanceModule());
     Collection<Key<?>> dependencies = visitor.visit((InstanceBinding<?>) binding);
@@ -78,6 +84,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     assertDependencies(dependencies, Key.get(A.class), Key.get(D.class));
   }
 
+  @Test
   public void testVisitInstance_instanceHasDependencies() {
     Binding<?> binding = getBinding(Key.get(Interface.class), new HasDependenciesModule());
     Collection<Key<?>> dependencies = visitor.visit((InstanceBinding<?>) binding);
@@ -87,6 +94,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     assertDependencies(dependencies, Key.get(G.class));
   }
 
+  @Test
   public void testVisitLinkedKey() {
     Binding<?> binding = getBinding(Key.get(Interface.class), new LinkedKeyModule());
     Collection<Key<?>> dependencies = visitor.visit((LinkedKeyBinding<?>) binding);
@@ -95,6 +103,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     assertDependencies(dependencies, Key.get(ConstructedClass.class));
   }
 
+  @Test
   public void testVisitProviderBinding() {
     Binding<?> binding = getBinding(Key.get(new TypeLiteral<Provider<ConstructedClass>>() {}));
     Collection<Key<?>> dependencies = visitor.visit((ProviderBinding<?>) binding);
@@ -102,6 +111,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     assertDependencies(dependencies, Key.get(ConstructedClass.class));
   }
 
+  @Test
   public void testVisitProviderInstance() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class), new ProviderInstanceModule());
     Collection<Key<?>> dependencies = visitor.visit((ProviderInstanceBinding<?>) binding);
@@ -110,6 +120,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
     assertDependencies(dependencies, Key.get(E.class), Key.get(F.class));
   }
 
+  @Test
   public void testVisitProviderKey() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class), new ProviderKeyModule());
     Collection<Key<?>> dependencies = visitor.visit((ProviderKeyBinding<?>) binding);
@@ -123,12 +134,12 @@ public class TransitiveDependencyVisitorTest extends TestCase {
   }
 
   private void assertDependencies(Collection<Key<?>> dependencies, Key<?>... keys) {
-    assertNotNull("Dependencies should not be null", dependencies);
+    assertNotNull(dependencies, "Dependencies should not be null");
     assertEquals(
-        "There should be " + keys.length + " dependencies", keys.length, dependencies.size());
+        keys.length, dependencies.size(), "There should be " + keys.length + " dependencies");
 
     for (Key<?> key : keys) {
-      assertTrue("Dependencies should contain " + key, dependencies.contains(key));
+      assertTrue(dependencies.contains(key), "Dependencies should contain " + key);
     }
   }
 

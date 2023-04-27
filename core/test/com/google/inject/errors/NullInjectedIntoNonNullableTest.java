@@ -1,8 +1,8 @@
 package com.google.inject.errors;
 
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -17,12 +17,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class NullInjectedIntoNonNullableTest {
 
   @Qualifier
@@ -76,8 +73,8 @@ public final class NullInjectedIntoNonNullableTest {
     }
   }
 
-  @Before
-  public void ensureStackTraceIsIncluded() {
+  @BeforeAll
+  public static void ensureStackTraceIsIncluded() {
     assumeTrue(InternalFlags.getIncludeStackTraceOption() != IncludeStackTraceOption.OFF);
   }
 

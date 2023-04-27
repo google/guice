@@ -21,6 +21,10 @@ import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.Asserts.awaitClear;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -39,10 +43,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class KeyTest extends TestCase {
+public class KeyTest {
 
   public void foo(List<String> a, List<String> b) {}
 
@@ -51,6 +55,7 @@ public class KeyTest extends TestCase {
   @Foo String baz;
   List<? extends CharSequence> wildcardExtends;
 
+  @Test
   public void testOfType() {
     Key<Object> k = Key.get(Object.class, Foo.class);
     Key<Integer> ki = k.ofType(Integer.class);
@@ -58,6 +63,7 @@ public class KeyTest extends TestCase {
     assertEquals(Foo.class, ki.getAnnotationType());
   }
 
+  @Test
   public void testWithAnnotation() {
     Key<Object> k = Key.get(Object.class);
     Key<Object> kf = k.withAnnotation(Foo.class);
@@ -65,6 +71,7 @@ public class KeyTest extends TestCase {
     assertEquals(Foo.class, kf.getAnnotationType());
   }
 
+  @Test
   public void testWithAnnotationInstance() throws NoSuchFieldException {
     Foo annotation = getClass().getDeclaredField("baz").getAnnotation(Foo.class);
     Key<Object> k = Key.get(Object.class);
@@ -75,12 +82,14 @@ public class KeyTest extends TestCase {
     assertEquals(annotation, kf.getAnnotation());
   }
 
+  @Test
   public void testKeyEquality() {
     Key<List<String>> a = new Key<List<String>>(Foo.class) {};
     Key<List<String>> b = Key.get(new TypeLiteral<List<String>>() {}, Foo.class);
     assertEqualsBothWays(a, b);
   }
 
+  @Test
   public void testProviderKey() throws NoSuchMethodException {
     Key<?> actual =
         Key.get(getClass().getMethod("foo", List.class, List.class).getGenericParameterTypes()[0])
@@ -91,6 +100,7 @@ public class KeyTest extends TestCase {
     assertEquals(expected.toString(), actual.toString());
   }
 
+  @Test
   public void testTypeEquality() throws Exception {
     Method m = getClass().getMethod("foo", List.class, List.class);
     Type[] types = m.getGenericParameterTypes();
@@ -104,6 +114,7 @@ public class KeyTest extends TestCase {
    * Key canonicalizes {@link int.class} to {@code Integer.class}, and won't expose wrapper types.
    */
   @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type
+  @Test
   public void testPrimitivesAndWrappersAreEqual() {
     Class[] primitives =
         new Class[] {
@@ -163,6 +174,7 @@ public class KeyTest extends TestCase {
     assertEquals(integerKey3, Key.get(intTypeLiteral, Names.named("int")));
   }
 
+  @Test
   public void testSerialization() throws IOException, NoSuchFieldException {
     assertNotSerializable(Key.get(B.class));
     assertNotSerializable(Key.get(B.class, Names.named("bee")));
@@ -173,6 +185,7 @@ public class KeyTest extends TestCase {
     assertNotSerializable(Key.get(Types.listOf(Types.subtypeOf(CharSequence.class))));
   }
 
+  @Test
   public void testEqualityOfAnnotationTypesAndInstances() throws NoSuchFieldException {
     Foo instance = getClass().getDeclaredField("baz").getAnnotation(Foo.class);
     Key<String> keyWithInstance = Key.get(String.class, instance);
@@ -180,9 +193,10 @@ public class KeyTest extends TestCase {
     assertEqualsBothWays(keyWithInstance, keyWithLiteral);
   }
 
+  @Test
   public void testNonBindingAnnotationOnKey() {
     try {
-      Key.get(String.class, Deprecated.class);
+      Key<String> key = Key.get(String.class, Deprecated.class);
       fail();
     } catch (IllegalArgumentException expected) {
       assertContains(
@@ -192,9 +206,10 @@ public class KeyTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindingAnnotationWithoutRuntimeRetention() {
     try {
-      Key.get(String.class, Bar.class);
+      Key<String> key = Key.get(String.class, Bar.class);
       fail();
     } catch (IllegalArgumentException expected) {
       assertContains(
@@ -207,6 +222,7 @@ public class KeyTest extends TestCase {
   <T> void parameterizedWithVariable(List<T> typeWithVariables) {}
 
   /** Test for issue 186 */
+  @Test
   public void testCannotCreateKeysWithTypeVariables() throws NoSuchMethodException {
     ParameterizedType listOfTType =
         (ParameterizedType)
@@ -217,7 +233,7 @@ public class KeyTest extends TestCase {
 
     TypeLiteral<?> listOfT = TypeLiteral.get(listOfTType);
     try {
-      Key.get(listOfT);
+      Key<?> key = Key.get(listOfT);
       fail("Guice should not allow keys for java.util.List<T>");
     } catch (ConfigurationException e) {
       assertContains(e.getMessage(), "List<T> cannot be used as a key; It is not fully specified.");
@@ -226,17 +242,18 @@ public class KeyTest extends TestCase {
     TypeVariable<?> tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
     TypeLiteral<?> t = TypeLiteral.get(tType);
     try {
-      Key.get(t);
+      Key<?> key = Key.get(t);
       fail("Guice should not allow keys for T");
     } catch (ConfigurationException e) {
       assertContains(e.getMessage(), "T cannot be used as a key; It is not fully specified.");
     }
   }
 
+  @Test
   public void testCannotGetKeyWithUnspecifiedTypeVariables() {
     TypeLiteral<Integer> typeLiteral = KeyTest.createTypeLiteral();
     try {
-      Key.get(typeLiteral);
+      Key<Integer> key = Key.get(typeLiteral);
       fail("Guice should not allow keys for T");
     } catch (ConfigurationException e) {
       assertContains(e.getMessage(), "T cannot be used as a key; It is not fully specified.");
@@ -247,6 +264,7 @@ public class KeyTest extends TestCase {
     return new TypeLiteral<T>() {};
   }
 
+  @Test
   public void testCannotCreateKeySubclassesWithUnspecifiedTypeVariables() {
     try {
       KeyTest.<Integer>createKey();
@@ -278,6 +296,7 @@ public class KeyTest extends TestCase {
     C c;
   }
 
+  @Test
   public void testKeysWithDefaultAnnotations() {
     AllDefaults allDefaults = HasAnnotations.class.getAnnotation(AllDefaults.class);
     assertEquals(Key.get(Foo.class, allDefaults), Key.get(Foo.class, AllDefaults.class));
@@ -326,6 +345,7 @@ public class KeyTest extends TestCase {
   @Marker
   static class HasAnnotations {}
 
+  @Test
   public void testAnonymousClassesDontHoldRefs() {
     final AtomicReference<Provider<List<String>>> stringProvider =
         new AtomicReference<Provider<List<String>>>();

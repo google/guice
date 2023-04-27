@@ -17,6 +17,7 @@
 package com.google.inject.grapher;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
@@ -38,14 +39,15 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link ShortNameFactory}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
-public class ShortNameFactoryTest extends TestCase {
+public class ShortNameFactoryTest {
   // Helper objects are up here because their line numbers are tested below.
   private static class Obj {
     @Annotated public String field;
@@ -69,39 +71,43 @@ public class ShortNameFactoryTest extends TestCase {
 
   private NameFactory nameFactory;
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
-    super.setUp();
-
     nameFactory = new ShortNameFactory();
   }
 
+  @Test
   public void testGetMemberName_field() throws Exception {
     Member field = Obj.class.getDeclaredField("field");
     assertEquals("field", nameFactory.getMemberName(field));
   }
 
+  @Test
   public void testGetMemberName_method() throws Exception {
     Member method = Obj.class.getDeclaredMethod("method", String.class);
     assertEquals("#method(...)", nameFactory.getMemberName(method));
   }
 
+  @Test
   public void testGetMemberName_constructor() throws Exception {
     Member constructor = Obj.class.getDeclaredConstructor();
     assertEquals("<init>", nameFactory.getMemberName(constructor));
   }
 
+  @Test
   public void testGetAnnotationName_annotationType() throws Exception {
     Key<?> key = Key.get(String.class, Annotated.class);
     assertEquals("@Annotated", nameFactory.getAnnotationName(key));
   }
 
+  @Test
   public void testGetAnnotationName_annotationInstance() throws Exception {
     Key<?> key =
         Key.get(String.class, Obj.class.getDeclaredField("field").getDeclaredAnnotations()[0]);
     assertEquals("@Annotated", nameFactory.getAnnotationName(key));
   }
 
+  @Test
   public void testGetAnnotationName_annotationInstanceWithParameters() throws Exception {
     Key<?> key = Key.get(String.class, Names.named("name"));
     assertEquals(
@@ -109,20 +115,22 @@ public class ShortNameFactoryTest extends TestCase {
         nameFactory.getAnnotationName(key));
   }
 
+  @Test
   public void testGetClassName_key() throws Exception {
     Key<?> key = Key.get(Obj.class);
     assertEquals(
-        "Class name should not have the package",
         "ShortNameFactoryTest$Obj",
-        nameFactory.getClassName(key));
+        nameFactory.getClassName(key),
+        "Class name should not have the package");
   }
 
+  @Test
   public void testGetClassName_keyWithTypeParameters() throws Exception {
     Key<?> key = Key.get(new TypeLiteral<Provider<String>>() {});
     assertEquals(
-        "Class name and type values should not have packages",
         "Provider<String>",
-        nameFactory.getClassName(key));
+        nameFactory.getClassName(key),
+        "Class name and type values should not have packages");
   }
 
   /**
@@ -130,44 +138,50 @@ public class ShortNameFactoryTest extends TestCase {
    *
    * @throws Exception
    */
+  @Test
   public void testGetSourceName_method() throws Exception {
     Member method = Obj.class.getDeclaredMethod("method", String.class);
     assertEquals(
-        "Method should be identified by its file name and line number",
-        "ShortNameFactoryTest.java:55",
-        nameFactory.getSourceName(method));
+        "ShortNameFactoryTest.java:57",
+        nameFactory.getSourceName(method),
+        "Method should be identified by its file name and line number");
   }
 
+  @Test
   public void testGetSourceName_stackTraceElement() throws Exception {
     StackTraceElement element =
         (StackTraceElement) StackTraceElements.forMember(Obj.class.getField("field"));
     assertEquals(
-        "Stack trace element should be identified by its file name and line number",
-        "ShortNameFactoryTest.java:53",
-        nameFactory.getSourceName(element));
+        "ShortNameFactoryTest.java:55",
+        nameFactory.getSourceName(element),
+        "Stack trace element should be identified by its file name and line number");
   }
 
+  @Test
   public void testGetInstanceName_defaultToString() throws Exception {
     assertEquals(
-        "Should use class name instead of Object#toString()",
         "ShortNameFactoryTest$Obj",
-        nameFactory.getInstanceName(new Obj()));
+        nameFactory.getInstanceName(new Obj()),
+        "Should use class name instead of Object#toString()");
   }
 
+  @Test
   public void testGetInstanceName_customToString() throws Exception {
     assertEquals(
-        "Should use class's toString() method since it's defined",
         "I'm a ToStringObj",
-        nameFactory.getInstanceName(new ToStringObj()));
+        nameFactory.getInstanceName(new ToStringObj()),
+        "Should use class's toString() method since it's defined");
   }
 
+  @Test
   public void testGetInstanceName_string() throws Exception {
     assertEquals(
-        "String should have quotes to evoke a string literal",
         "\"My String Instance\"",
-        nameFactory.getInstanceName("My String Instance"));
+        nameFactory.getInstanceName("My String Instance"),
+        "String should have quotes to evoke a string literal");
   }
 
+  @Test
   public void testGetInstanceName_providerMethod() throws Exception {
     final List<ProviderMethod<?>> methodHolder = new ArrayList<>(1);
 
@@ -184,9 +198,9 @@ public class ShortNameFactoryTest extends TestCase {
             });
 
     assertEquals(
-        "Method provider should pretty print as the method signature",
         "#provideInteger(String)",
-        nameFactory.getInstanceName(methodHolder.get(0)));
+        nameFactory.getInstanceName(methodHolder.get(0)),
+        "Method provider should pretty print as the method signature");
   }
 
   private static class ProvidingModule extends AbstractModule {

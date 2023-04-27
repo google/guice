@@ -3,10 +3,12 @@ package com.google.inject.spi;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Tests for {@link ModuleSource}. */
-public class ModuleSourceTest extends TestCase {
+public class ModuleSourceTest {
 
   private static final StackTraceElement BINDER_INSTALL =
       new StackTraceElement(
@@ -15,11 +17,13 @@ public class ModuleSourceTest extends TestCase {
           "Unknown Source",
           235 /* line number*/);
 
+  @Test
   public void testOneModule() {
     ModuleSource moduleSource = createWithSizeOne();
     checkSizeOne(moduleSource);
   }
 
+  @Test
   public void testTwoModules() {
     ModuleSource moduleSource = createWithSizeTwo();
     checkSizeTwo(moduleSource);
@@ -27,6 +31,7 @@ public class ModuleSourceTest extends TestCase {
     checkSizeOne(moduleSource);
   }
 
+  @Test
   public void testThreeModules() {
     ModuleSource moduleSource = createWithSizeThree();
     checkSizeThree(moduleSource);

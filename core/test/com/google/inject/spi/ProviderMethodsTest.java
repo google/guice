@@ -18,15 +18,15 @@ package com.google.inject.spi;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -70,13 +70,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
 @SuppressWarnings("ProvidesMethodOutsideOfModule")
-@RunWith(JUnit4.class)
 public class ProviderMethodsTest implements Module {
 
   @SuppressWarnings("unchecked")
@@ -430,8 +427,8 @@ public class ProviderMethodsTest implements Module {
 
     Element element = elements.get(0);
     assertTrue(
-        element + " instanceof ProviderInstanceBinding",
-        element instanceof ProviderInstanceBinding);
+        element instanceof ProviderInstanceBinding,
+      element + " instanceof ProviderInstanceBinding");
 
     ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) element;
     javax.inject.Provider<?> provider = binding.getUserSuppliedProvider();
@@ -677,13 +674,13 @@ public class ProviderMethodsTest implements Module {
     CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
     Guice.createInjector(Stage.PRODUCTION, module);
     assertEquals(
-        "Expected provider methods in the same class to share fastclass classes",
         module.fooCallerClass,
-        module.barCallerClass);
+        module.barCallerClass,
+        "Expected provider methods in the same class to share fastclass classes");
     assertFalse(
+        module.bazCallerClass.equals(module.barCallerClass),
         "Did not expect provider methods in the subclasses to share fastclass classes "
-            + "with their parent classes",
-        module.bazCallerClass.equals(module.barCallerClass));
+            + "with their parent classes");
   }
 
   private static class CallerInspecterSubClassModule extends CallerInspecterModule {

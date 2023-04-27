@@ -16,13 +16,14 @@
 
 package com.google.inject.example;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import junit.framework.Assert;
 
 /** @author crazybob@google.com (Bob Lee) */
 public class ClientServiceWithGuiceDefaults {
@@ -60,7 +61,7 @@ public class ClientServiceWithGuiceDefaults {
     MockService mock = new MockService();
     Client client = new Client(mock);
     client.go();
-    Assert.assertTrue(mock.isGone());
+    assertTrue(mock.isGone());
   }
 
   public static class MockService implements Service {

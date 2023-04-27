@@ -18,6 +18,10 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.Maps;
 import java.lang.annotation.ElementType;
@@ -26,20 +30,22 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  * @author sameb@google.com (Sam Berlin)
  */
-public class CircularDependencyTest extends TestCase {
+public class CircularDependencyTest {
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     AImpl.nextId = 0;
     BImpl.nextId = 0;
   }
 
+  @Test
   public void testCircularlyDependentConstructors() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -53,6 +59,7 @@ public class CircularDependencyTest extends TestCase {
     assertCircularDependencies(injector);
   }
 
+  @Test
   public void testCircularlyDependentConstructorsWithProviderMethods() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -72,6 +79,7 @@ public class CircularDependencyTest extends TestCase {
     assertCircularDependencies(injector);
   }
 
+  @Test
   public void testCircularlyDependentConstructorsWithProviderInstances() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -104,6 +112,7 @@ public class CircularDependencyTest extends TestCase {
     assertCircularDependencies(injector);
   }
 
+  @Test
   public void testCircularlyDependentConstructorsWithProviderKeys() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -117,6 +126,7 @@ public class CircularDependencyTest extends TestCase {
     assertCircularDependencies(injector);
   }
 
+  @Test
   public void testCircularlyDependentConstructorsWithProvidedBy() throws CreationException {
     Injector injector = Guice.createInjector();
     assertCircularDependencies(injector);
@@ -229,6 +239,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnresolvableCircularDependency() {
     try {
       Guice.createInjector().getInstance(C.class);
@@ -241,6 +252,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnresolvableCircularDependenciesWithProviderInstances() {
     try {
       Guice.createInjector(
@@ -266,6 +278,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnresolvableCircularDependenciesWithProviderKeys() {
     try {
       Guice.createInjector(
@@ -286,6 +299,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnresolvableCircularDependenciesWithProvidedBy() {
     try {
       Guice.createInjector().getInstance(C2.class);
@@ -340,6 +354,7 @@ public class CircularDependencyTest extends TestCase {
     D2(C2 c) {}
   }
 
+  @Test
   public void testDisabledCircularDependency() {
     try {
       Guice.createInjector(
@@ -359,6 +374,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testDisabledCircularDependenciesWithProviderInstances() {
     try {
       Guice.createInjector(
@@ -388,6 +404,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testDisabledCircularDependenciesWithProviderKeys() {
     try {
       Guice.createInjector(
@@ -409,6 +426,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testDisabledCircularDependenciesWithProvidedBy() {
     try {
       Guice.createInjector(
@@ -432,6 +450,7 @@ public class CircularDependencyTest extends TestCase {
    * As reported by issue 349, we give a lousy trace when a class is circularly dependent on itself
    * in multiple ways.
    */
+  @Test
   public void testCircularlyDependentMultipleWays() {
     Injector injector =
         Guice.createInjector(
@@ -445,6 +464,7 @@ public class CircularDependencyTest extends TestCase {
     injector.getInstance(A.class);
   }
 
+  @Test
   public void testDisablingCircularDependencies() {
     Injector injector =
         Guice.createInjector(
@@ -489,6 +509,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testCircularDependencyProxyDelegateNeverInitialized() {
     Injector injector =
         Guice.createInjector(
@@ -557,6 +578,7 @@ public class CircularDependencyTest extends TestCase {
    * Scopes.SINGLETON. This is especially important because the failure in Scopes.SINGLETON doesn't
    * have enough context to provide a decent error message.
    */
+  @Test
   public void testCircularDependenciesDetectedEarlyWhenDependenciesHaveDifferentTypes() {
     Injector injector =
         Guice.createInjector(
@@ -588,6 +610,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testPrivateModulesDontTriggerCircularErrorsInProviders() {
     Injector injector =
         Guice.createInjector(
@@ -644,6 +667,7 @@ public class CircularDependencyTest extends TestCase {
    * <p>This means that custom proxies have to do an {@code if(Scopes.isCircularProxy(..))} in order
    * to avoid exceptions.
    */
+  @Test
   public void testCustomScopeCircularProxies() {
     Injector injector =
         Guice.createInjector(
@@ -733,6 +757,7 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  @Test
   public void testDisabledNonConstructorCircularDependencies() {
     Injector injector =
         Guice.createInjector(

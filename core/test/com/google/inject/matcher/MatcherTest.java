@@ -27,6 +27,10 @@ import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.matcher.Matchers.only;
 import static com.google.inject.matcher.Matchers.returns;
 import static com.google.inject.matcher.Matchers.subclassesOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -35,12 +39,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.AbstractList;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
 
-public class MatcherTest extends TestCase {
+public class MatcherTest {
 
+  @Test
   public void testAny() {
     assertTrue(any().matches(null));
     assertEquals("any()", any().toString());
@@ -48,6 +53,7 @@ public class MatcherTest extends TestCase {
     assertFalse(any().equals(not(any())));
   }
 
+  @Test
   public void testNot() {
     assertFalse(not(any()).matches(null));
     assertEquals("not(any())", not(any()).toString());
@@ -55,6 +61,7 @@ public class MatcherTest extends TestCase {
     assertFalse(not(any()).equals(any()));
   }
 
+  @Test
   public void testAnd() {
     assertTrue(any().and(any()).matches(null));
     assertFalse(any().and(not(any())).matches(null));
@@ -63,6 +70,7 @@ public class MatcherTest extends TestCase {
     assertFalse(any().and(any()).equals(not(any())));
   }
 
+  @Test
   public void testOr() {
     assertTrue(any().or(not(any())).matches(null));
     assertFalse(not(any()).or(not(any())).matches(null));
@@ -71,6 +79,7 @@ public class MatcherTest extends TestCase {
     assertFalse(any().or(any()).equals(not(any())));
   }
 
+  @Test
   public void testAnnotatedWith() {
     assertTrue(annotatedWith(Foo.class).matches(Bar.class));
     assertFalse(annotatedWith(Foo.class).matches(MatcherTest.class.getMethods()[0]));
@@ -85,6 +94,7 @@ public class MatcherTest extends TestCase {
     }
   }
 
+  @Test
   public void testSubclassesOf() {
     assertTrue(subclassesOf(Runnable.class).matches(Runnable.class));
     assertTrue(subclassesOf(Runnable.class).matches(MyRunnable.class));
@@ -94,6 +104,7 @@ public class MatcherTest extends TestCase {
     assertFalse(subclassesOf(Runnable.class).equals(subclassesOf(Object.class)));
   }
 
+  @Test
   public void testOnly() {
     assertTrue(only(1000).matches(1000));
     assertFalse(only(1).matches(1000));
@@ -103,6 +114,7 @@ public class MatcherTest extends TestCase {
   }
 
   @SuppressWarnings("UnnecessaryBoxing")
+  @Test
   public void testIdenticalTo() {
     Object o = new Object();
     assertEquals("identicalTo(1)", identicalTo(1).toString());
@@ -112,6 +124,7 @@ public class MatcherTest extends TestCase {
     assertFalse(identicalTo(1).equals(identicalTo(new Integer(1))));
   }
 
+  @Test
   public void testInPackage() {
     Package matchersPackage = Matchers.class.getPackage();
     assertEquals("inPackage(com.google.inject.matcher)", inPackage(matchersPackage).toString());
@@ -121,6 +134,7 @@ public class MatcherTest extends TestCase {
     assertFalse(inPackage(matchersPackage).equals(inPackage(Object.class.getPackage())));
   }
 
+  @Test
   public void testInSubpackage() {
     String stringPackageName = String.class.getPackage().getName();
     assertEquals("inSubpackage(java.lang)", inSubpackage(stringPackageName).toString());
@@ -134,6 +148,7 @@ public class MatcherTest extends TestCase {
             .equals(inSubpackage(Matchers.class.getPackage().getName())));
   }
 
+  @Test
   public void testReturns() throws NoSuchMethodException {
     Matcher<Method> predicate = returns(only(String.class));
     assertTrue(predicate.matches(Object.class.getMethod("toString")));
@@ -143,6 +158,7 @@ public class MatcherTest extends TestCase {
     assertFalse(predicate.equals(returns(only(Integer.class))));
   }
 
+  @Test
   public void testSerialization() throws IOException {
     assertEqualWhenReserialized(any());
     assertEqualWhenReserialized(not(any()));

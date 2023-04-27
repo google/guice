@@ -18,6 +18,11 @@ package com.google.inject.assistedinject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -44,9 +49,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class FactoryModuleBuilderTest extends TestCase {
+public class FactoryModuleBuilderTest {
 
   private enum Color {
     BLUE,
@@ -56,6 +61,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     BLACK
   }
 
+  @Test
   public void testImplicitForwardingAssistedBindingFailsWithInterface() {
     try {
       Guice.createInjector(
@@ -78,6 +84,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     }
   }
 
+  @Test
   public void testImplicitForwardingAssistedBindingFailsWithAbstractClass() {
     try {
       Guice.createInjector(
@@ -100,6 +107,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     }
   }
 
+  @Test
   public void testImplicitForwardingAssistedBindingCreatesNewObjects() {
     final Mustang providedMustang = new Mustang(Color.BLUE);
     Injector injector =
@@ -123,6 +131,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.GREEN, created.color);
   }
 
+  @Test
   public void testExplicitForwardingAssistedBindingFailsWithInterface() {
     try {
       Guice.createInjector(
@@ -149,6 +158,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     }
   }
 
+  @Test
   public void testExplicitForwardingAssistedBindingFailsWithAbstractClass() {
     try {
       Guice.createInjector(
@@ -175,6 +185,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     }
   }
 
+  @Test
   public void testExplicitForwardingAssistedBindingCreatesNewObjects() {
     final Mustang providedMustang = new Mustang(Color.BLUE);
     Injector injector =
@@ -201,6 +212,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.GREEN, created.color);
   }
 
+  @Test
   public void testAnnotatedAndParentBoundReturnValue() {
     Injector injector =
         Guice.createInjector(
@@ -224,6 +236,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertTrue(injector.getInstance(Car.class) instanceof Golf);
   }
 
+  @Test
   public void testParentBoundReturnValue() {
     Injector injector =
         Guice.createInjector(
@@ -244,6 +257,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertTrue(injector.getInstance(Car.class) instanceof Golf);
   }
 
+  @Test
   public void testConfigureAnnotatedReturnValue() {
     Injector injector =
         Guice.createInjector(
@@ -263,6 +277,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertTrue(factory.getAmericanCar(Color.BLACK) instanceof Mustang);
   }
 
+  @Test
   public void testNoBindingAssistedInject() {
     Injector injector =
         Guice.createInjector(
@@ -279,6 +294,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.BLUE, mustang.color);
   }
 
+  @Test
   public void testBindingAssistedInject() {
     Injector injector =
         Guice.createInjector(
@@ -298,6 +314,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.BLUE, mustang.color);
   }
 
+  @Test
   public void testDuplicateBindings() {
     Injector injector =
         Guice.createInjector(
@@ -321,6 +338,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.BLUE, mustang.color);
   }
 
+  @Test
   public void testSimilarBindingsWithConflictingImplementations() {
     try {
       Injector injector =
@@ -347,6 +365,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     }
   }
 
+  @Test
   public void testMultipleReturnTypes() {
     Injector injector =
         Guice.createInjector(
@@ -367,6 +386,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.GREEN, beetle.color);
   }
 
+  @Test
   public void testParameterizedClassesWithNoImplements() {
     Injector injector =
         Guice.createInjector(
@@ -384,6 +404,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     Foo<String> foo = factory.create(new Bar());
   }
 
+  @Test
   public void testGenericErrorMessageMakesSense() {
     try {
       Guice.createInjector(
@@ -472,6 +493,7 @@ public class FactoryModuleBuilderTest extends TestCase {
 
   public static class ArtCar extends AbstractCar {}
 
+  @Test
   public void testFactoryBindingDependencies() {
     // validate dependencies work in all stages & as a raw element,
     // and that dependencies work for methods, fields, constructors,
@@ -573,6 +595,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     void register(@Named("cat3") String a) {}
   }
 
+  @Test
   public void testFactoryPublicAndReturnTypeNotPublic() {
     try {
       Guice.createInjector(
@@ -605,6 +628,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     Hidden create();
   }
 
+  @Test
   public void testSingletonScopeOnAssistedClassIsIgnored() {
     try {
       Guice.createInjector(

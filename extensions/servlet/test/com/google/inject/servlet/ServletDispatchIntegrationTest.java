@@ -17,6 +17,9 @@
 package com.google.inject.servlet;
 
 import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +39,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests the FilterPipeline that dispatches to guice-managed servlets, is a full integration test,
@@ -44,10 +48,10 @@ import junit.framework.TestCase;
  *
  * @author Dhanji R. Prasanna (dhanji gmail com)
  */
-public class ServletDispatchIntegrationTest extends TestCase {
+public class ServletDispatchIntegrationTest {
   private static int inits, services, destroys, doFilters;
 
-  @Override
+  @BeforeEach
   public void setUp() {
     inits = 0;
     services = 0;
@@ -57,6 +61,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
     GuiceFilter.reset();
   }
 
+  @Test
   public final void testDispatchRequestToManagedPipelineServlets()
       throws ServletException, IOException {
     final Injector injector =
@@ -92,15 +97,16 @@ public class ServletDispatchIntegrationTest extends TestCase {
     pipeline.destroyPipeline();
 
     assertTrue(
+        inits == 2 && services == 1 && destroys == 2,
         "lifecycle states did not fire correct number of times-- inits: "
             + inits
             + "; dos: "
             + services
             + "; destroys: "
-            + destroys,
-        inits == 2 && services == 1 && destroys == 2);
+            + destroys);
   }
 
+  @Test
   public final void testDispatchRequestToManagedPipelineWithFilter()
       throws ServletException, IOException {
     final Injector injector =
@@ -138,6 +144,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
     pipeline.destroyPipeline();
 
     assertTrue(
+        inits == 3 && services == 1 && destroys == 3 && doFilters == 1,
         "lifecycle states did not fire correct number of times-- inits: "
             + inits
             + "; dos: "
@@ -145,8 +152,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
             + "; destroys: "
             + destroys
             + "; doFilters: "
-            + doFilters,
-        inits == 3 && services == 1 && destroys == 3 && doFilters == 1);
+            + doFilters);
   }
 
   @Singleton
@@ -238,6 +244,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
     }
   }
 
+  @Test
   public void testForwardUsingRequestDispatcher() throws IOException, ServletException {
     Guice.createInjector(
         new ServletModule() {
@@ -259,13 +266,14 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
     new GuiceFilter().doFilter(requestMock, responseMock, mock(FilterChain.class));
 
-    assertEquals("Incorrect number of forwards", 1, ForwardedServlet.forwardedTo);
+    assertEquals(1, ForwardedServlet.forwardedTo, "Incorrect number of forwards");
 
     verify(requestMock).setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     verify(requestMock).removeAttribute(REQUEST_DISPATCHER_REQUEST);
     verify(responseMock).resetBuffer();
   }
 
+  @Test
   public final void testQueryInRequestUri_regex() throws Exception {
     final Injector injector =
         Guice.createInjector(
@@ -299,6 +307,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
     assertEquals(1, services);
   }
 
+  @Test
   public final void testQueryInRequestUri() throws Exception {
     final Injector injector =
         Guice.createInjector(

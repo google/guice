@@ -2,8 +2,8 @@ package com.google.inject.errors;
 
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -18,16 +18,13 @@ import java.lang.annotation.Retention;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Qualifier;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class DuplicateElementErrorTest {
 
-  @Before
-  public void checkStackTraceIsIncluded() {
+  @BeforeAll
+  public static void checkStackTraceIsIncluded() {
     // Only run the tests when the stack traces are included in the errors.
     assumeTrue(InternalFlags.getIncludeStackTraceOption() != IncludeStackTraceOption.OFF);
   }

@@ -32,11 +32,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Qualifier;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests of {@link Multibinds} support in {@link DaggerAdapter}. */
 
-public class MultibindsTest extends TestCase {
+public class MultibindsTest {
   @Retention(RetentionPolicy.RUNTIME)
   @Qualifier
   @interface TestQualifier {}
@@ -58,6 +58,7 @@ public class MultibindsTest extends TestCase {
     Map<Integer, Double> qualifiedMap();
   }
 
+  @Test
   public void testBinds() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(BasicModule.class));
 

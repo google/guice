@@ -29,11 +29,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 import javax.inject.Qualifier;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests of {@link BindsOptionalOf} support in {@link DaggerAdapter}. */
 
-public class OptionalBindingsTest extends TestCase {
+public class OptionalBindingsTest {
   @Retention(RetentionPolicy.RUNTIME)
   @Qualifier
   @interface TestQualifier {}
@@ -48,6 +48,7 @@ public class OptionalBindingsTest extends TestCase {
     Integer optionalQualifiedInteger();
   }
 
+  @Test
   public void testBinds() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(BasicModule.class));
 

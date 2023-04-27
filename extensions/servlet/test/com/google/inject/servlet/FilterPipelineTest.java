@@ -1,5 +1,6 @@
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * This is a basic whitebox test that verifies the glue between GuiceFilter and
@@ -26,9 +29,9 @@ import junit.framework.TestCase;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public class FilterPipelineTest extends TestCase {
+public class FilterPipelineTest {
 
-  @Override
+  @BeforeEach
   public final void setUp() {
     GuiceFilter.reset();
 
@@ -49,11 +52,12 @@ public class FilterPipelineTest extends TestCase {
         });
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     GuiceFilter.reset();
   }
 
+  @Test
   public final void testDispatchThruGuiceFilter() throws ServletException, IOException {
 
     // create mocks

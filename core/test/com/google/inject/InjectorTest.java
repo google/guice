@@ -19,6 +19,10 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -27,11 +31,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
 
-public class InjectorTest extends TestCase {
+public class InjectorTest {
 
   @Retention(RUNTIME)
   @BindingAnnotation
@@ -45,12 +49,14 @@ public class InjectorTest extends TestCase {
   @BindingAnnotation
   @interface I {}
 
+  @Test
   public void testToStringDoesNotInfinitelyRecurse() {
     Injector injector = Guice.createInjector(Stage.TOOL);
     String unused = injector.toString();
     String unused2 = injector.getBinding(Injector.class).toString();
   }
 
+  @Test
   public void testProviderMethods() throws CreationException {
     final SampleSingleton singleton = new SampleSingleton();
     final SampleSingleton other = new SampleSingleton();
@@ -73,6 +79,7 @@ public class InjectorTest extends TestCase {
 
   static class SampleSingleton {}
 
+  @Test
   public void testInjection() throws CreationException {
     Injector injector = createFooInjector();
     Foo foo = injector.getInstance(Foo.class);
@@ -100,6 +107,7 @@ public class InjectorTest extends TestCase {
         });
   }
 
+  @Test
   public void testGetInstance() throws CreationException {
     Injector injector = createFooInjector();
 
@@ -108,6 +116,7 @@ public class InjectorTest extends TestCase {
     assertEquals(5, bar.getI());
   }
 
+  @Test
   public void testIntAndIntegerAreInterchangeable() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -122,6 +131,7 @@ public class InjectorTest extends TestCase {
     assertEquals(5, (int) iw.i);
   }
 
+  @Test
   public void testInjectorApiIsNotSerializable() throws IOException {
     Injector injector = Guice.createInjector();
     assertNotSerializable(injector);
@@ -209,6 +219,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectStatics() throws CreationException {
     Guice.createInjector(
         new AbstractModule() {
@@ -224,6 +235,7 @@ public class InjectorTest extends TestCase {
     assertEquals(5, Static.i);
   }
 
+  @Test
   public void testInjectStaticInterface() {
     try {
       Guice.createInjector(
@@ -257,6 +269,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testPrivateInjection() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -288,6 +301,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testProtectedInjection() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -319,6 +333,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testInstanceInjectionHappensAfterFactoriesAreSetUp() {
     Guice.createInjector(
         new AbstractModule() {
@@ -335,6 +350,7 @@ public class InjectorTest extends TestCase {
         });
   }
 
+  @Test
   public void testSubtypeNotProvided() {
     try {
       Guice.createInjector().getInstance(Money.class);
@@ -348,6 +364,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testNotASubtype() {
     try {
       Guice.createInjector().getInstance(PineTree.class);
@@ -360,6 +377,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testRecursiveImplementationType() {
     try {
       Guice.createInjector().getInstance(SeaHorse.class);
@@ -373,6 +391,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testRecursiveProviderType() {
     try {
       Guice.createInjector().getInstance(Chicken.class);
@@ -415,6 +434,7 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  @Test
   public void testJitBindingFromAnotherThreadDuringInjection() {
     final ExecutorService executorService = Executors.newSingleThreadExecutor();
     final AtomicReference<JustInTime> got = new AtomicReference<>();

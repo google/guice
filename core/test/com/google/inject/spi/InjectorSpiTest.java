@@ -1,6 +1,13 @@
 package com.google.inject.spi;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.AbstractModule;
@@ -22,11 +29,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author sberlin@gmail.com (Sam Berlin) */
-public class InjectorSpiTest extends TestCase {
+public class InjectorSpiTest {
 
+  @Test
   public void testExistingBinding() {
     Injector injector =
         Guice.createInjector(
@@ -84,6 +92,7 @@ public class InjectorSpiTest extends TestCase {
   @SuppressWarnings("unused")
   private static void customMethod(Foo foo, Bar bar) {}
 
+  @Test
   public void testGetElements_standardItems() {
     Injector injector = Guice.createInjector(new AbstractModule() {});
 
@@ -129,6 +138,7 @@ public class InjectorSpiTest extends TestCase {
     assertThat(typeConverters).hasSize(10); // all the built-in converters.
   }
 
+  @Test
   public void testGetElements_providerLookups() {
     Method customMethod;
     try {
@@ -185,6 +195,7 @@ public class InjectorSpiTest extends TestCase {
     assertTrue(foundBarLookup);
   }
 
+  @Test
   public void testGetElements_staticInjectionRequests() throws Exception {
     Injector injector =
         Guice.createInjector(
@@ -222,6 +233,7 @@ public class InjectorSpiTest extends TestCase {
                 /* optional= */ false));
   }
 
+  @Test
   public void testGetElements_injectionRequest() throws Exception {
     Object foo =
         new Object() {
@@ -266,6 +278,7 @@ public class InjectorSpiTest extends TestCase {
     Asserts.awaitClear(fooRef);
   }
 
+  @Test
   public void testGetElements_membersInjectorLookup() throws Exception {
     final Object foo =
         new Object() {
@@ -320,6 +333,7 @@ public class InjectorSpiTest extends TestCase {
     Provider<Foo> fooP;
   }
 
+  @Test
   public void testGetAllMembersInjectorInjectionPoints_injectMembers_returned() {
     Injector injector =
         Guice.createInjector(
@@ -344,6 +358,7 @@ public class InjectorSpiTest extends TestCase {
     assertEquals(Key.get(Integer.class), actualDependencyKey);
   }
 
+  @Test
   public void testGetAllMembersInjectorInjectionPoints_getInstance() {
     Injector injector =
         Guice.createInjector(
@@ -360,6 +375,7 @@ public class InjectorSpiTest extends TestCase {
     assertThat(injectionPoints).isEmpty();
   }
 
+  @Test
   public void testGetAllMembersInjectorInjectionPoints_getInstanceAndInjectMembers() {
     Injector injector =
         Guice.createInjector(

@@ -10,11 +10,8 @@ import com.google.inject.spi.Message;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public final class MessagesTest {
   static class ExampleErrorDetail extends ErrorDetail<ExampleErrorDetail> {
     ExampleErrorDetail(String message) {

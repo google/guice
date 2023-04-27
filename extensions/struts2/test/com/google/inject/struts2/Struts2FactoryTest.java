@@ -16,6 +16,8 @@
 
 package com.google.inject.struts2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,15 +27,15 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import java.util.Date;
 import javax.inject.Singleton;
-import junit.framework.TestCase;
 import org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for Struts2Factory
  *
  * @author benmccann.com
  */
-public class Struts2FactoryTest extends TestCase {
+public class Struts2FactoryTest {
 
   private static final Date TODAY = new Date();
 
@@ -61,6 +63,7 @@ public class Struts2FactoryTest extends TestCase {
     }
   }
 
+  @Test
   public void testStruts2Factory() {
     Struts2Factory s2Factory = new Struts2Factory();
     TestListener testListener =

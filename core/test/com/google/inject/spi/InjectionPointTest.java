@@ -22,7 +22,13 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.name.Names.named;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -42,10 +48,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class InjectionPointTest extends TestCase {
+public class InjectionPointTest {
 
   public @Inject @Named("a") String foo;
 
@@ -56,6 +62,7 @@ public class InjectionPointTest extends TestCase {
     public Constructable(@Named("c") String param) {}
   }
 
+  @Test
   public void testFieldInjectionPoint() throws NoSuchFieldException, IOException, ErrorsException {
     TypeLiteral<?> typeLiteral = TypeLiteral.get(getClass());
     Field fooField = getClass().getField("foo");
@@ -85,6 +92,7 @@ public class InjectionPointTest extends TestCase {
         getOnlyElement(new InjectionPoint(typeLiteral, fooField, false).getDependencies()));
   }
 
+  @Test
   public void testMethodInjectionPoint() throws Exception {
     TypeLiteral<?> typeLiteral = TypeLiteral.get(getClass());
 
@@ -114,6 +122,7 @@ public class InjectionPointTest extends TestCase {
         getOnlyElement(new InjectionPoint(typeLiteral, barMethod, false).getDependencies()));
   }
 
+  @Test
   public void testConstructorInjectionPoint()
       throws NoSuchMethodException, IOException, ErrorsException {
     TypeLiteral<?> typeLiteral = TypeLiteral.get(Constructable.class);
@@ -143,6 +152,7 @@ public class InjectionPointTest extends TestCase {
         dependency, getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
   }
 
+  @Test
   public void testUnattachedDependency() throws IOException {
     Dependency<String> dependency = Dependency.get(Key.get(String.class, named("d")));
     assertEquals(
@@ -155,6 +165,7 @@ public class InjectionPointTest extends TestCase {
     assertEqualsBothWays(dependency, Dependency.get(Key.get(String.class, named("d"))));
   }
 
+  @Test
   public void testForConstructor() throws NoSuchMethodException {
     @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type.
     Constructor<HashSet> constructor = HashSet.class.getConstructor();
@@ -188,11 +199,13 @@ public class InjectionPointTest extends TestCase {
     }
   }
 
+  @Test
   public void testForConstructorOf() {
     InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(Constructable.class);
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
   }
 
+  @Test
   public void testForConstructorOfRequireAtInject_success() {
     InjectionPoint injectionPoint =
         InjectionPoint.forConstructorOf(
@@ -200,6 +213,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
   }
 
+  @Test
   public void testForConstructorOfRequireAtInject_fail() {
     ConfigurationException exception =
         assertThrows(
@@ -219,6 +233,7 @@ public class InjectionPointTest extends TestCase {
     NoArgNonConstructable() {}
   }
 
+  @Test
   public void testTooManyConstructors() {
     ConfigurationException exception =
         assertThrows(
@@ -238,6 +253,7 @@ public class InjectionPointTest extends TestCase {
     TooManyConstructors(String str) {}
   }
 
+  @Test
   public void testTooManyConstructors_withOptionalConstructorError() {
     ConfigurationException exception =
         assertThrows(
@@ -270,6 +286,7 @@ public class InjectionPointTest extends TestCase {
     TooManyConstructorsWithOptional(String str) {}
   }
 
+  @Test
   public void testAddForInstanceMethodsAndFields() throws Exception {
     Method instanceMethod = HasInjections.class.getMethod("instanceMethod", String.class);
     Field instanceField = HasInjections.class.getField("instanceField");
@@ -287,6 +304,7 @@ public class InjectionPointTest extends TestCase {
         .inOrder();
   }
 
+  @Test
   public void testAddForStaticMethodsAndFields() throws Exception {
     Method staticMethod = HasInjections.class.getMethod("staticMethod", String.class);
     Field staticField = HasInjections.class.getField("staticField");
@@ -327,6 +345,7 @@ public class InjectionPointTest extends TestCase {
     public String instanceField2;
   }
 
+  @Test
   public void testAddForParameterizedInjections() {
     TypeLiteral<?> type = new TypeLiteral<ParameterizedInjections<String>>() {};
 
@@ -345,6 +364,7 @@ public class InjectionPointTest extends TestCase {
     public ParameterizedInjections(Map<T, T> map) {}
   }
 
+  @Test
   public void testSignature() throws Exception {
     Signature fooA = new Signature(Foo.class.getDeclaredMethod("a", String.class, int.class));
     Signature fooB = new Signature(Foo.class.getDeclaredMethod("b"));
@@ -371,11 +391,12 @@ public class InjectionPointTest extends TestCase {
     void b() {}
   }
 
+  @Test
   public void testOverrideBehavior() {
     Set<InjectionPoint> points;
 
     points = InjectionPoint.forInstanceMethodsAndFields(Super.class);
-    assertEquals(points.toString(), 6, points.size());
+    assertEquals(6, points.size(), points.toString());
     assertPoints(
         points,
         Super.class,
@@ -387,7 +408,7 @@ public class InjectionPointTest extends TestCase {
         "gFirstThenAt");
 
     points = InjectionPoint.forInstanceMethodsAndFields(Sub.class);
-    assertEquals(points.toString(), 7, points.size());
+    assertEquals(7, points.size(), points.toString());
     // Superclass will always have is private members injected,
     // and 'gInject' was last @Injected in Super, so that remains the owner
     assertPoints(points, Super.class, "privateAtAndPublicG", "privateGAndPublicAt", "gInject");
@@ -402,7 +423,7 @@ public class InjectionPointTest extends TestCase {
         "gFirstThenAt");
 
     points = InjectionPoint.forInstanceMethodsAndFields(SubSub.class);
-    assertEquals(points.toString(), 6, points.size());
+    assertEquals(6, points.size(), points.toString());
     // Superclass still has all the injection points it did before..
     assertPoints(points, Super.class, "privateAtAndPublicG", "privateGAndPublicAt", "gInject");
     // Subclass is missing the privateGAndPublicAt because it first became public with
@@ -423,17 +444,18 @@ public class InjectionPointTest extends TestCase {
    * information. Guice would naively consider the subclass an injectable method and eject the
    * superclass from the 'overrideIndex', leaving only a class with improper generic types.
    */
+  @Test
   public void testSyntheticBridgeMethodsInSubclasses() {
     Set<InjectionPoint> points;
 
     points = InjectionPoint.forInstanceMethodsAndFields(RestrictedSuper.class);
     assertPointDependencies(points, new TypeLiteral<Provider<String>>() {});
-    assertEquals(points.toString(), 2, points.size());
+    assertEquals(2, points.size(), points.toString());
     assertPoints(points, RestrictedSuper.class, "jInject", "gInject");
 
     points = InjectionPoint.forInstanceMethodsAndFields(ExposedSub.class);
     assertPointDependencies(points, new TypeLiteral<Provider<String>>() {});
-    assertEquals(points.toString(), 2, points.size());
+    assertEquals(2, points.size(), points.toString());
     assertPoints(points, RestrictedSuper.class, "jInject", "gInject");
   }
 
@@ -445,7 +467,7 @@ public class InjectionPointTest extends TestCase {
         methods.add(point.getMember().getName());
       }
     }
-    assertEquals(points.toString(), ImmutableSet.copyOf(methodNames), methods);
+    assertEquals(ImmutableSet.copyOf(methodNames), methods, points.toString());
   }
 
   /** Asserts that each injection point has the specified dependencies, in the given order. */

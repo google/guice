@@ -17,6 +17,9 @@
 package com.google.inject.assistedinject;
 
 import static com.google.inject.name.Names.named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -38,16 +41,16 @@ import com.google.inject.spi.Elements;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for AssistedInject Spi.
  *
  * @author ramakrishna@google.com (Ramakrishna Rajanna)
  */
-public class ExtensionSpiTest extends TestCase {
+public class ExtensionSpiTest {
 
+  @Test
   public final void testSpiOnElements() throws Exception {
     AssistedInjectSpiVisitor visitor = new AssistedInjectSpiVisitor();
     Integer count = 0;
@@ -59,6 +62,7 @@ public class ExtensionSpiTest extends TestCase {
     validateVisitor(visitor);
   }
 
+  @Test
   public void testSpiOnVisitor() throws Exception {
     AssistedInjectSpiVisitor visitor = new AssistedInjectSpiVisitor();
     Integer count = 0;
@@ -226,7 +230,7 @@ public class ExtensionSpiTest extends TestCase {
     @Override
     protected Integer visitOther(Binding<?> binding) {
       if (!allowedClasses.contains(binding.getKey().getTypeLiteral().getRawType())) {
-        throw new AssertionFailedError("invalid other binding: " + binding);
+        return fail("invalid other binding: " + binding);
       }
       return currentCount++;
     }

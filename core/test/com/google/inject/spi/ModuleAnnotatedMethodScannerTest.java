@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -48,12 +48,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Set;
 import javax.inject.Qualifier;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link ModuleAnnotatedMethodScanner} usage. */
-@RunWith(JUnit4.class)
 public class ModuleAnnotatedMethodScannerTest {
 
   @Test

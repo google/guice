@@ -18,18 +18,22 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Retention;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class RequestInjectionTest extends TestCase {
+public class RequestInjectionTest {
 
   @Retention(RUNTIME)
   @BindingAnnotation
@@ -39,14 +43,14 @@ public class RequestInjectionTest extends TestCase {
   @BindingAnnotation
   @interface ForMethod {}
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
-    super.setUp();
     HasInjections.staticField = 0;
     HasInjections.staticMethod = null;
     NeedsThing.injectedCount = 0;
   }
 
+  @Test
   public void testInjectMembers() {
     final HasInjections hi = new HasInjections();
 
@@ -66,6 +70,7 @@ public class RequestInjectionTest extends TestCase {
     assertEquals(0, HasInjections.staticField);
   }
 
+  @Test
   public void testInjectStatics() throws CreationException {
     Guice.createInjector(
         new AbstractModule() {
@@ -81,6 +86,7 @@ public class RequestInjectionTest extends TestCase {
     assertEquals(5, HasInjections.staticField);
   }
 
+  @Test
   public void testInjectMembersAndStatics() {
     final HasInjections hi = new HasInjections();
 
@@ -101,6 +107,7 @@ public class RequestInjectionTest extends TestCase {
     assertEquals(5, HasInjections.staticField);
   }
 
+  @Test
   public void testValidationErrorOnInjectedMembers() {
     try {
       Guice.createInjector(
@@ -119,6 +126,7 @@ public class RequestInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testInjectionErrorOnInjectedMembers() {
     try {
       Guice.createInjector(
@@ -145,6 +153,7 @@ public class RequestInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testUserExceptionWhileInjectingInstance() {
     try {
       Guice.createInjector(
@@ -163,6 +172,7 @@ public class RequestInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testUserExceptionWhileInjectingStatically() {
     try {
       Guice.createInjector(
@@ -221,6 +231,7 @@ public class RequestInjectionTest extends TestCase {
    * membersInjectors in InitializableReference, so that they ultimately
    * can be requested in any order.
    */
+  @Test
   public void testEarlyInjectableReferencesWithSameIdentity() {
     Injector injector =
         Guice.createInjector(
@@ -305,6 +316,7 @@ public class RequestInjectionTest extends TestCase {
     }
   }
 
+  @Test
   public void testRequestInjectionWithParameterizedType() {
     NeedsThing<String> thing = new NeedsThing<>();
     Guice.createInjector(
@@ -320,6 +332,7 @@ public class RequestInjectionTest extends TestCase {
     assertEquals(1, NeedsThing.injectedCount);
   }
 
+  @Test
   public void testMultipleInjectionRequestsWithDifferentTypes() {
     NeedsThing<Integer> needer = new NeedsThing<>();
     CreationException ex =
@@ -337,6 +350,7 @@ public class RequestInjectionTest extends TestCase {
         "at RequestInjectionTest$Type2Module.configure(");
   }
 
+  @Test
   public void testMultipleRequestInjectionsForSameTypeInjectsOnce() {
     NeedsThing<String> thing = new NeedsThing<>();
     Guice.createInjector(

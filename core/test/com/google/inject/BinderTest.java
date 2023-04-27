@@ -20,6 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -36,12 +42,14 @@ import java.util.concurrent.Callable;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class BinderTest extends TestCase {
+public class BinderTest {
 
   private final Logger loggerToWatch = Logger.getLogger(Guice.class.getName());
 
@@ -62,19 +70,18 @@ public class BinderTest extends TestCase {
 
   Provider<Foo> fooProvider;
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
-    super.setUp();
     loggerToWatch.addHandler(fakeHandler);
     TwoParts.injectedCount = 0;
   }
 
-  @Override
+  @AfterEach
   protected void tearDown() throws Exception {
     loggerToWatch.removeHandler(fakeHandler);
-    super.tearDown();
   }
 
+  @Test
   public void testProviderFromBinder() {
     Guice.createInjector(
         new Module() {
@@ -96,6 +103,7 @@ public class BinderTest extends TestCase {
 
   static class Foo {}
 
+  @Test
   public void testMissingBindings() {
     try {
       Guice.createInjector(
@@ -149,6 +157,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testMissingDependency() {
     try {
       Guice.createInjector(
@@ -174,6 +183,7 @@ public class BinderTest extends TestCase {
     @Inject Runnable runnable;
   }
 
+  @Test
   public void testDanglingConstantBinding() {
     try {
       Guice.createInjector(
@@ -192,6 +202,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testRecursiveBinding() {
     try {
       Guice.createInjector(
@@ -208,6 +219,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testBindingNullConstant() {
     try {
       Guice.createInjector(
@@ -228,6 +240,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testToStringOnBinderApi() {
     try {
       Guice.createInjector(
@@ -258,6 +271,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testNothingIsSerializableInBinderApi() {
     try {
       Guice.createInjector(
@@ -286,6 +300,7 @@ public class BinderTest extends TestCase {
    * Although {@code String[].class} isn't equal to {@code new GenericArrayTypeImpl(String.class)},
    * Guice should treat these two types interchangeably.
    */
+  @Test
   public void testArrayTypeCanonicalization() {
     final String[] strings = new String[] {"A"};
     final Integer[] integers = new Integer[] {1};
@@ -377,6 +392,7 @@ public class BinderTest extends TestCase {
   }
 
   /** Binding something to two different things should give an error. */
+  @Test
   public void testSettingBindingTwice() {
     try {
       Guice.createInjector(new ParentModule());
@@ -392,6 +408,7 @@ public class BinderTest extends TestCase {
   }
 
   /** Binding an @ImplementedBy thing to something else should also fail. */
+  @Test
   public void testSettingAtImplementedByTwice() {
     try {
       Guice.createInjector(
@@ -415,6 +432,7 @@ public class BinderTest extends TestCase {
   }
 
   /** See issue 614, Problem One https://github.com/google/guice/issues/614 */
+  @Test
   public void testJitDependencyDoesntBlockOtherExplicitBindings() {
     Injector injector =
         Guice.createInjector(
@@ -432,6 +450,7 @@ public class BinderTest extends TestCase {
   }
 
   /** See issue 614, Problem Two https://github.com/google/guice/issues/id=614 */
+  @Test
   public void testJitDependencyCanUseExplicitDependencies() {
     Guice.createInjector(
         new AbstractModule() {
@@ -447,6 +466,7 @@ public class BinderTest extends TestCase {
    * Untargetted bindings should follow @ImplementedBy and @ProvidedBy annotations if they exist.
    * Otherwise the class should be constructed directly.
    */
+  @Test
   public void testUntargettedBinding() {
     Injector injector =
         Guice.createInjector(
@@ -471,6 +491,7 @@ public class BinderTest extends TestCase {
     assertSame(JustAClass.class, injector.getInstance(JustAClass.class).getClass());
   }
 
+  @Test
   public void testPartialInjectorGetInstance() {
     Injector injector = Guice.createInjector();
     try {
@@ -485,6 +506,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testUserReportedError() {
     final Message message = new Message(getClass(), "Whoops!");
     try {
@@ -501,6 +523,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testUserReportedErrorsAreAlsoLogged() {
     try {
       Guice.createInjector(
@@ -520,6 +543,7 @@ public class BinderTest extends TestCase {
         "An exception was caught and reported. Message: java.lang.IllegalArgumentException");
   }
 
+  @Test
   public void testBindingToProvider() {
     try {
       Guice.createInjector(
@@ -564,6 +588,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testCannotBindToGuiceTypes() {
     try {
       Guice.createInjector(new OuterCoreModule());
@@ -684,6 +709,7 @@ public class BinderTest extends TestCase {
     PAPER
   }
 
+  @Test
   public void testInjectRawProvider() {
     try {
       Guice.createInjector().getInstance(Provider.class);
@@ -718,6 +744,7 @@ public class BinderTest extends TestCase {
     }
   }
 
+  @Test
   public void testToInstanceWithDifferentTypesWorksAndDoesntInjectInstanceTwice() {
     Injector injector =
         Guice.createInjector(
@@ -760,6 +787,7 @@ public class BinderTest extends TestCase {
    * bind(HasImplementedByThatWantsExplicitClass.class}} is called before {@code
    * bind(JustAClass.class)}.
    */
+  @Test
   public void testJitDependencyCanUseExplicitDependenciesInAnyOrder() {
     // The test passes if injector creation doesn't throw.
     Guice.createInjector(
@@ -774,6 +802,7 @@ public class BinderTest extends TestCase {
 
   static class AnotherClass extends JustAClass {}
 
+  @Test
   public void testJitDependencyCanUseExplicitDependenciesInAnyOrder_withSubclass() {
     Injector injector =
         Guice.createInjector(

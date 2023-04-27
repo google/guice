@@ -16,6 +16,7 @@
 package com.google.inject.daggeradapter;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -41,7 +42,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DaggerAdapter}.
@@ -49,7 +50,7 @@ import junit.framework.TestCase;
  * @author cgruber@google.com (Christian Gruber)
  */
 
-public class DaggerAdapterTest extends TestCase {
+public class DaggerAdapterTest {
   @dagger.Module
   static class SimpleDaggerModule {
     @dagger.Provides
@@ -58,6 +59,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSimpleModule() {
     Injector i = Guice.createInjector(DaggerAdapter.from(new SimpleDaggerModule()));
     assertThat(i.getInstance(Integer.class)).isEqualTo(1);
@@ -70,6 +72,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testInteractionWithGuiceModules() {
     Injector i =
         Guice.createInjector(new SimpleGuiceModule(), DaggerAdapter.from(new SimpleDaggerModule()));
@@ -94,6 +97,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSetBindings() {
     Injector i =
         Guice.createInjector(
@@ -115,6 +119,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSetBindingsWithAnnotation() {
     Injector i =
         Guice.createInjector(DaggerAdapter.from(new SetBindingWithAnnotationDaggerModule()));
@@ -131,6 +136,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testSetBindingsWithGuiceModule() {
     Injector i =
         Guice.createInjector(
@@ -160,6 +166,7 @@ public class DaggerAdapterTest extends TestCase {
   @dagger.Module
   static class UnsupportedAnnotationSubclassModule extends UnsupportedAnnotationModule {}
 
+  @Test
   public void testUnsupportedBindingAnnotation() {
     try {
       Guice.createInjector(DaggerAdapter.from(new UnsupportedAnnotationModule()));
@@ -184,6 +191,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnsupportedBindingAnnotationFromModuleSuperclass() {
     try {
       Guice.createInjector(DaggerAdapter.from(new UnsupportedAnnotationSubclassModule()));
@@ -210,18 +218,21 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testStaticProvidesMethods() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(new StaticProvidesMethods()));
     String staticProvision = injector.getInstance(String.class);
     assertThat(staticProvision).isEqualTo("class");
   }
 
+  @Test
   public void testStaticProvidesMethods_classLiteral() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(StaticProvidesMethods.class));
     String staticProvision = injector.getInstance(String.class);
     assertThat(staticProvision).isEqualTo("class");
   }
 
+  @Test
   public void testStaticProvidesMethods_interface() {
     Injector injector =
         Guice.createInjector(DaggerAdapter.from(StaticProvidesMethodsInterface.class));
@@ -239,6 +250,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testClassLiteralWithInstanceProvidesMethod() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(ModuleWithInstanceMethods.class));
     assertThat(injector.getInstance(Integer.class)).isEqualTo(0);
@@ -264,6 +276,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testUnrelatedInstanceMethodsDontRequireInstantiation() {
     Injector injector =
         Guice.createInjector(DaggerAdapter.from(ModuleWithUnrelatedInstanceMethods.class));
@@ -283,6 +296,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testClassLiteralWithNonInstantiableInstanceProvidesMethod() {
     try {
       Guice.createInjector(DaggerAdapter.from(ModuleWithNonInstantiableInstanceMethods.class));
@@ -297,6 +311,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testModuleObjectsMustBeDaggerModules() {
     try {
       Guice.createInjector(DaggerAdapter.from(new Object()));
@@ -316,6 +331,7 @@ public class DaggerAdapterTest extends TestCase {
     }
   }
 
+  @Test
   public void testProducerModulesNotSupported() {
     try {
       Guice.createInjector(DaggerAdapter.from(new ProducerModuleWithProvidesMethod()));
@@ -359,6 +375,7 @@ public class DaggerAdapterTest extends TestCase {
     private ModuleWithMethodsToIgnore() {}
   }
 
+  @Test
   public void testFilteringMethods() {
     Module filteredModule =
         DaggerAdapter.builder()

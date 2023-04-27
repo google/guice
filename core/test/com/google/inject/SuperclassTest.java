@@ -16,11 +16,14 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class SuperclassTest extends TestCase {
+public class SuperclassTest {
 
+  @Test
   public void testSuperclassInjection() throws CreationException {
     Injector injector =
         Guice.createInjector(

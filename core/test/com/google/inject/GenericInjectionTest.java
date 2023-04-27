@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.util.Modules;
@@ -24,11 +27,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class GenericInjectionTest extends TestCase {
+public class GenericInjectionTest {
 
+  @Test
   public void testGenericInjection() throws CreationException {
     final List<String> names = Arrays.asList("foo", "bar", "bob");
 
@@ -55,12 +59,14 @@ public class GenericInjectionTest extends TestCase {
    * The workaround is to add an explicit binding for the parameterized type. See {@link
    * #testExplicitBindingOfGenericType()}.
    */
+  @Test
   public void testImplicitBindingOfGenericType() {
     Parameterized<String> parameterized =
         Guice.createInjector().getInstance(Key.get(new TypeLiteral<Parameterized<String>>() {}));
     assertNotNull(parameterized);
   }
 
+  @Test
   public void testExplicitBindingOfGenericType() {
     Injector injector =
         Guice.createInjector(
@@ -84,11 +90,13 @@ public class GenericInjectionTest extends TestCase {
     Parameterized() {}
   }
 
+  @Test
   public void testInjectingParameterizedDependenciesForImplicitBinding() {
     assertParameterizedDepsInjected(
         new Key<ParameterizedDeps<String, Integer>>() {}, Modules.EMPTY_MODULE);
   }
 
+  @Test
   public void testInjectingParameterizedDependenciesForBindingTarget() {
     final TypeLiteral<ParameterizedDeps<String, Integer>> type =
         new TypeLiteral<ParameterizedDeps<String, Integer>>() {};
@@ -103,6 +111,7 @@ public class GenericInjectionTest extends TestCase {
         });
   }
 
+  @Test
   public void testInjectingParameterizedDependenciesForBindingSource() {
     final TypeLiteral<ParameterizedDeps<String, Integer>> type =
         new TypeLiteral<ParameterizedDeps<String, Integer>>() {};
@@ -117,6 +126,7 @@ public class GenericInjectionTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindingToSubtype() {
     final TypeLiteral<ParameterizedDeps<String, Integer>> type =
         new TypeLiteral<ParameterizedDeps<String, Integer>>() {};
@@ -131,6 +141,7 @@ public class GenericInjectionTest extends TestCase {
         });
   }
 
+  @Test
   public void testBindingSubtype() {
     final TypeLiteral<SubParameterizedDeps<String, Long, Integer>> type =
         new TypeLiteral<SubParameterizedDeps<String, Long, Integer>>() {};

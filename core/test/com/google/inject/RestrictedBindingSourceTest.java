@@ -3,7 +3,7 @@ package com.google.inject;
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE_USE;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.TestLogHandler;
@@ -25,16 +25,13 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.inject.Named;
 import javax.inject.Qualifier;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link RestrictedBindingSource}.
  *
  * @author vzm@google.com (Vladimir Makaric)
  */
-@RunWith(JUnit4.class)
 public class RestrictedBindingSourceTest {
 
   // --------------------------------------------------------------------------

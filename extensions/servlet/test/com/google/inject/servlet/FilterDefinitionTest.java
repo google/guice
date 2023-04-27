@@ -1,5 +1,10 @@
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,7 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests the lifecycle of the encapsulated {@link FilterDefinition} class.
@@ -30,7 +35,8 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 @SuppressWarnings("unchecked") // Safe because mocks can only return the required types.
-public class FilterDefinitionTest extends TestCase {
+public class FilterDefinitionTest {
+  @Test
   public final void testFilterInitAndConfig() throws ServletException {
     Injector injector = mock(Injector.class);
     Binding<Filter> binding = mock(Binding.class);
@@ -78,6 +84,7 @@ public class FilterDefinitionTest extends TestCase {
     }
   }
 
+  @Test
   public final void testFilterCreateDispatchDestroy() throws ServletException, IOException {
     Injector injector = mock(Injector.class);
     Binding<Filter> binding = mock(Binding.class);
@@ -104,7 +111,7 @@ public class FilterDefinitionTest extends TestCase {
     filterDef.init(mock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
     assertTrue(filterDef.getFilter() instanceof MockFilter);
 
-    assertTrue("Init did not fire", mockFilter.isInit());
+    assertTrue(mockFilter.isInit(), "Init did not fire");
 
     Filter matchingFilter = filterDef.getFilterIfMatching(request);
     assertSame(mockFilter, matchingFilter);
@@ -120,12 +127,13 @@ public class FilterDefinitionTest extends TestCase {
           }
         });
 
-    assertTrue("Filter did not proceed down chain", proceed[0]);
+    assertTrue(proceed[0], "Filter did not proceed down chain");
 
     filterDef.destroy(Sets.<Filter>newIdentityHashSet());
-    assertTrue("Destroy did not fire", mockFilter.isDestroy());
+    assertTrue(mockFilter.isDestroy(), "Destroy did not fire");
   }
 
+  @Test
   public final void testFilterCreateDispatchDestroySupressChain()
       throws ServletException, IOException {
 
@@ -163,7 +171,7 @@ public class FilterDefinitionTest extends TestCase {
     filterDef.init(mock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
     assertTrue(filterDef.getFilter() instanceof MockFilter);
 
-    assertTrue("init did not fire", mockFilter.isInit());
+    assertTrue(mockFilter.isInit(), "init did not fire");
 
     Filter matchingFilter = filterDef.getFilterIfMatching(request);
     assertSame(mockFilter, matchingFilter);
@@ -179,12 +187,13 @@ public class FilterDefinitionTest extends TestCase {
           }
         });
 
-    assertFalse("filter did not suppress chain", proceed[0]);
+    assertFalse(proceed[0], "filter did not suppress chain");
 
     filterDef.destroy(Sets.<Filter>newIdentityHashSet());
-    assertTrue("destroy did not fire", mockFilter.isDestroy());
+    assertTrue(mockFilter.isDestroy(), "destroy did not fire");
   }
 
+  @Test
   public void testGetFilterIfMatching() throws ServletException {
     String pattern = "/*";
     final FilterDefinition filterDef =
@@ -220,6 +229,7 @@ public class FilterDefinitionTest extends TestCase {
     assertSame(filter, mockFilter);
   }
 
+  @Test
   public void testGetFilterIfMatchingNotMatching() throws ServletException {
     String pattern = "/*";
     final FilterDefinition filterDef =

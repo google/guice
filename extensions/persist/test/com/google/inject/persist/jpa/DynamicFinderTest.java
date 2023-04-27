@@ -16,6 +16,11 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -29,7 +34,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * A test around providing sessions (starting, closing etc.)
@@ -37,10 +44,10 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 
-public class DynamicFinderTest extends TestCase {
+public class DynamicFinderTest {
   private Injector injector;
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit").addFinder(JpaFinder.class));
 
@@ -48,11 +55,12 @@ public class DynamicFinderTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(PersistService.class).stop();
   }
 
+  @Test
   public void testDynamicFinderListAll() {
     //obtain em
     JpaDao dao = injector.getInstance(JpaDao.class);
@@ -88,11 +96,11 @@ public class DynamicFinderTest extends TestCase {
     @Transactional
     public <T> void persist(T t) {
       lastEm = em.get();
-      assertTrue("em is not open!", lastEm.isOpen());
-      assertTrue("no active txn!", lastEm.getTransaction().isActive());
+      assertTrue(lastEm.isOpen(), "em is not open!");
+      assertTrue(lastEm.getTransaction().isActive(), "no active txn!");
       lastEm.persist(t);
 
-      assertTrue("Persisting object failed", lastEm.contains(t));
+      assertTrue(lastEm.contains(t), "Persisting object failed");
     }
 
     @Transactional

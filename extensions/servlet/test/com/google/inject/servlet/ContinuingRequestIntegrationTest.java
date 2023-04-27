@@ -16,6 +16,12 @@
 
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,11 +50,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 /** Tests continuation of requests */
 
-public class ContinuingRequestIntegrationTest extends TestCase {
+public class ContinuingRequestIntegrationTest {
   private static final String PARAM_VALUE = "there";
   private static final String PARAM_NAME = "hi";
 
@@ -101,11 +108,12 @@ public class ContinuingRequestIntegrationTest extends TestCase {
   private ExecutorService executor;
   private Injector injector;
 
-  @Override
+  @AfterEach
   protected void tearDown() throws Exception {
     injector.getInstance(GuiceFilter.class).destroy();
   }
 
+  @Test
   public final void testRequestContinuesInOtherThread()
       throws ServletException, IOException, InterruptedException {
     executor = Executors.newSingleThreadExecutor();
@@ -146,6 +154,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
     assertEquals(PARAM_VALUE, injector.getInstance(OffRequestCallable.class).value);
   }
 
+  @Test
   public final void testRequestContinuationDiesInHttpRequestThread()
       throws ServletException, IOException, InterruptedException {
     executor = sameThreadExecutor;

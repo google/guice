@@ -18,6 +18,8 @@ package com.google.inject.name;
 
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
@@ -27,32 +29,35 @@ import com.google.inject.Key;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-public class NamesTest extends TestCase {
+public class NamesTest {
 
   @Named("foo")
   private String foo;
 
   private Named namedFoo;
 
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
-    super.setUp();
     namedFoo = getClass().getDeclaredField("foo").getAnnotation(Named.class);
   }
 
+  @Test
   public void testConsistentEqualsAndHashcode() {
     Named actual = Names.named("foo");
     assertEqualsBothWays(namedFoo, actual);
     assertEquals(namedFoo.toString(), actual.toString());
   }
 
+  @Test
   public void testNamedIsSerializable() throws IOException {
     assertEqualWhenReserialized(Names.named("foo"));
   }
 
+  @Test
   public void testBindPropertiesUsingProperties() {
     final Properties teams = new Properties();
     teams.setProperty("SanJose", "Sharks");
@@ -71,6 +76,7 @@ public class NamesTest extends TestCase {
     assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
   }
 
+  @Test
   public void testBindPropertiesUsingMap() {
     final Map<String, String> properties =
         ImmutableMap.of("SanJose", "Sharks", "Edmonton", "Oilers");
@@ -88,6 +94,7 @@ public class NamesTest extends TestCase {
     assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
   }
 
+  @Test
   public void testBindPropertiesIncludesInheritedProperties() {
     Properties defaults = new Properties();
     defaults.setProperty("Edmonton", "Eskimos");

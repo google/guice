@@ -1,3 +1,6 @@
+JUNIT_JUPITER_VERSION = "5.9.3"
+JUNIT_PLATFORM_VERSION = "1.9.3"
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
@@ -86,6 +89,48 @@ maven_install(
             "junit",
             "junit",
             "4.13.2",
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.junit.jupiter",
+            "junit-jupiter-api",
+            JUNIT_JUPITER_VERSION,
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.junit.jupiter",
+            "junit-jupiter-engine",
+            JUNIT_JUPITER_VERSION,
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.junit.vintage",
+            "junit-vintage-engine",
+            JUNIT_JUPITER_VERSION,
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.junit.platform",
+            "junit-platform-commons",
+            JUNIT_PLATFORM_VERSION,
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.junit.platform",
+            "junit-platform-engine",
+            JUNIT_PLATFORM_VERSION,
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.junit.platform",
+            "junit-platform-launcher",
+            JUNIT_PLATFORM_VERSION,
+            testonly = True,
+        ),
+        maven.artifact(
+            "org.opentest4j",
+            "opentest4j",
+            "1.2.0",
             testonly = True,
         ),
         maven.artifact(

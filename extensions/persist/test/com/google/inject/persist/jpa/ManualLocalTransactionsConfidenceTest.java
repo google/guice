@@ -16,6 +16,10 @@
 
 package com.google.inject.persist.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,18 +29,20 @@ import java.util.Date;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 
-public class ManualLocalTransactionsConfidenceTest extends TestCase {
+public class ManualLocalTransactionsConfidenceTest {
   private Injector injector;
   private static final String UNIQUE_TEXT_3 =
       ManualLocalTransactionsConfidenceTest.class.getSimpleName()
           + "CONSTRAINT_VIOLATING some other unique text"
           + new Date();
 
-  @Override
+  @BeforeEach
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
@@ -44,11 +50,12 @@ public class ManualLocalTransactionsConfidenceTest extends TestCase {
     injector.getInstance(PersistService.class).start();
   }
 
-  @Override
+  @AfterEach
   public final void tearDown() {
     injector.getInstance(PersistService.class).stop();
   }
 
+  @Test
   public void testThrowingCleanupInterceptorConfidence() {
     Exception e = null;
     try {
@@ -65,10 +72,10 @@ public class ManualLocalTransactionsConfidenceTest extends TestCase {
           "\n\n**********************************************************************************");
     }
 
-    assertNotNull("No exception was thrown!", e);
+    assertNotNull(e, "No exception was thrown!");
     assertTrue(
-        "Exception thrown was not what was expected (i.e. commit-time)",
-        e instanceof PersistenceException);
+        e instanceof PersistenceException,
+        "Exception thrown was not what was expected (i.e. commit-time)");
   }
 
   public static class TransactionalObject {

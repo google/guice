@@ -3,12 +3,9 @@ package com.google.inject;
 import static com.google.common.truth.Truth.assertThat;
 
 import javax.inject.Inject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /** Tests that code in {@link KotlinSupport} doesn't break when analyzing Java code. */
-@RunWith(JUnit4.class)
 public class KotlinSupportDoesNotBreakJavaTest {
 
   private static class InjectedViaConstructor {

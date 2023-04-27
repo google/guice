@@ -16,8 +16,8 @@
 
 package com.google.inject.persist.jpa;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,9 +26,10 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class JpaPersistServiceTest extends TestCase {
+public class JpaPersistServiceTest {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
@@ -40,13 +41,14 @@ public class JpaPersistServiceTest extends TestCase {
   private final EntityManagerFactory factory = mock(EntityManagerFactory.class);
   private final EntityManager entityManager = mock(EntityManager.class);
 
-  @Override
+  @BeforeEach
   public void setUp() throws Exception {
     when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES))
         .thenReturn(factory);
     when(factory.createEntityManager()).thenReturn(entityManager);
   }
 
+  @Test
   public void test_givenErrorOnEntityManagerClose_whenEndIsCalled_thenEntityManagerIsRemoved() {
     sut.start(factory);
     sut.begin();
@@ -57,7 +59,7 @@ public class JpaPersistServiceTest extends TestCase {
       sut.end();
       fail("Exception expected");
     } catch (SimulatedException expected) {
-      assertThat(sut.isWorking(), is(false));
+      assertFalse(sut.isWorking());
     }
   }
 

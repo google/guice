@@ -16,17 +16,18 @@
 package com.google.inject.daggeradapter;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import dagger.Module;
 import dagger.Provides;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@code @Module.includes} */
 
-public class ModuleIncludesTest extends TestCase {
+public class ModuleIncludesTest {
   @Module(includes = Included.class)
   static class Declared {
     @Provides
@@ -43,6 +44,7 @@ public class ModuleIncludesTest extends TestCase {
     }
   }
 
+  @Test
   public void testIncludedModules() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(Declared.class, Included.class));
     assertThat(injector.getInstance(String.class)).isEqualTo("included");
@@ -62,11 +64,13 @@ public class ModuleIncludesTest extends TestCase {
   @Module(includes = Deduplicated.class)
   static class Includes2 {}
 
+  @Test
   public void testDeduplicated() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(Includes1.class, Includes2.class));
     assertThat(injector.getInstance(String.class)).isEqualTo("deduplicated");
   }
 
+  @Test
   public void testInstanceOfModuleAndClassLiteral() {
     Guice.createInjector(DaggerAdapter.from(Deduplicated.class, new Deduplicated()));
   }
@@ -74,6 +78,7 @@ public class ModuleIncludesTest extends TestCase {
   // ProviderMethodsModule, which DaggerAdapter uses under the hood, de-duplicates modules that have
   // the same Scanner instance and same delegate module. So any Class object passed to DaggerAdapter
   // should be fine to use.
+  @Test
   public void testDeduplicatedModulesFromSeparateDaggerAdapters() {
     Injector injector =
         Guice.createInjector(
@@ -87,6 +92,7 @@ public class ModuleIncludesTest extends TestCase {
   @Module
   static final class ModuleWithIdentity {}
 
+  @Test
   public void testConflictingModuleInstances() {
     try {
       Guice.createInjector(DaggerAdapter.from(new ModuleWithIdentity(), new ModuleWithIdentity()));
@@ -109,6 +115,7 @@ public class ModuleIncludesTest extends TestCase {
     }
   }
 
+  @Test
   public void testInstanceOfModuleAndClassLiteral_InstanceWins() {
     Injector instanceModuleFirst =
         Guice.createInjector(
@@ -128,6 +135,7 @@ public class ModuleIncludesTest extends TestCase {
   @Module(includes = ModuleWithInstanceProvidesMethod.class)
   static final class IncludesInstanceModule {}
 
+  @Test
   public void testIncludesInstanceModule() {
     Injector injector = Guice.createInjector(DaggerAdapter.from(IncludesInstanceModule.class));
     assertThat(injector.getInstance(Integer.class)).isEqualTo(0);
@@ -151,6 +159,7 @@ public class ModuleIncludesTest extends TestCase {
   @Module(includes = NonInstantiableModuleWithInstanceProvidesMethod.class)
   static final class IncludesNonInstantiableInstanceModule {}
 
+  @Test
   public void testIncludesNonInstantiableInstanceModule() {
     try {
       Guice.createInjector(DaggerAdapter.from(IncludesNonInstantiableInstanceModule.class));

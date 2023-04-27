@@ -1,6 +1,8 @@
 package com.google.inject.spi;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -12,10 +14,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link ElementSource}. */
-public class ElementSourceTest extends TestCase {
+public class ElementSourceTest {
 
   private static final StackTraceElement BINDER_INSTALL =
       new StackTraceElement(
@@ -24,6 +26,7 @@ public class ElementSourceTest extends TestCase {
           "Unknown Source",
           234 /* line number*/);
 
+  @Test
   public void testGetCallStack_IntegrationTest() throws Exception {
     List<Element> elements = Elements.getElements(new A());
     for (Element element : elements) {

@@ -17,15 +17,21 @@
 package com.google.inject;
 
 import static com.google.inject.name.Names.named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.inject.name.Named;
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
-public class ProviderInjectionTest extends TestCase {
+public class ProviderInjectionTest {
 
+  @Test
   public void testProviderInjection() throws CreationException {
     Injector injector =
         Guice.createInjector(
@@ -49,6 +55,7 @@ public class ProviderInjectionTest extends TestCase {
   }
 
   /** Test for bug 155. */
+  @Test
   public void testProvidersAreInjectedWhenBound() {
     Module m =
         new AbstractModule() {
@@ -82,6 +89,7 @@ public class ProviderInjectionTest extends TestCase {
    * When custom providers are used at injector creation time, they should be injected before use.
    * In this testcase, we verify that a provider for List.class is injected before it is used.
    */
+  @Test
   public void testProvidersAreInjectedBeforeTheyAreUsed() {
     Injector injector =
         Guice.createInjector(
@@ -122,7 +130,7 @@ public class ProviderInjectionTest extends TestCase {
               }
             });
 
-    assertEquals("Providers not injected before use", "[true]", injector.getInstance(String.class));
+    assertEquals("[true]", injector.getInstance(String.class), "Providers not injected before use");
   }
 
   /**
@@ -130,6 +138,7 @@ public class ProviderInjectionTest extends TestCase {
    * used. It injects mutable Count objects and records their value at the time that they're
    * injected.
    */
+  @Test
   public void testCreationTimeInjectionOrdering() {
     Injector injector =
         Guice.createInjector(

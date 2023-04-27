@@ -19,14 +19,14 @@ package com.google.inject;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.matcher.Matchers.only;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -52,13 +52,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Named;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
-@RunWith(JUnit4.class)
 public class MethodInterceptionTest {
 
   private AtomicInteger count = new AtomicInteger();
@@ -85,7 +82,7 @@ public class MethodInterceptionTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void checkBytecodeGenIsEnabled() {
     assumeTrue(InternalFlags.isBytecodeGenEnabled());
   }
@@ -128,9 +125,9 @@ public class MethodInterceptionTest {
     assertNull(nullFoosTwo.foo()); // confirm it's being intercepted
 
     assertSame(
-        "Child injectors should share proxy classes, otherwise memory leaks!",
         nullFoosOne.getClass(),
-        nullFoosTwo.getClass());
+        nullFoosTwo.getClass(),
+        "Child injectors should share proxy classes, otherwise memory leaks!");
 
     Injector injector2 =
         Guice.createInjector(
@@ -144,9 +141,9 @@ public class MethodInterceptionTest {
     Interceptable separateNullFoos = injector2.getInstance(Interceptable.class);
     assertNull(separateNullFoos.foo()); // confirm it's being intercepted
     assertSame(
-        "different injectors should share proxy classes, otherwise memory leaks!",
         nullFoosOne.getClass(),
-        separateNullFoos.getClass());
+        separateNullFoos.getClass(),
+        "different injectors should share proxy classes, otherwise memory leaks!");
   }
 
   @Test
@@ -242,7 +239,7 @@ public class MethodInterceptionTest {
         nonInterceptedBinding.getMethodInterceptors());
 
     injector.getInstance(Interceptable.class).foo();
-    assertEquals("expected counting interceptor to be invoked first", 1, count.get());
+    assertEquals(1, count.get(), "expected counting interceptor to be invoked first");
   }
 
   @Test
@@ -337,7 +334,7 @@ public class MethodInterceptionTest {
         break;
       }
     }
-    assertTrue(Arrays.toString(interceptable.lastElements), proxyFrameFound);
+    assertTrue(proxyFrameFound, Arrays.toString(interceptable.lastElements));
     proxyFrameFound = false;
 
     interceptable.bar();
@@ -347,7 +344,7 @@ public class MethodInterceptionTest {
         break;
       }
     }
-    assertFalse(Arrays.toString(interceptable.lastElements), proxyFrameFound);
+    assertFalse(proxyFrameFound, Arrays.toString(interceptable.lastElements));
   }
 
   public static class Foo {}

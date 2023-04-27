@@ -16,29 +16,30 @@
 
 package com.google.inject.spi;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.inject.Scope;
 import java.lang.annotation.Annotation;
-import junit.framework.AssertionFailedError;
 
 public class FailingBindingScopingVisitor implements BindingScopingVisitor<Void> {
 
   @Override
   public Void visitEagerSingleton() {
-    throw new AssertionFailedError();
+    return fail();
   }
 
   @Override
   public Void visitScope(Scope scope) {
-    throw new AssertionFailedError();
+    return fail();
   }
 
   @Override
   public Void visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-    throw new AssertionFailedError();
+    return fail();
   }
 
   @Override
   public Void visitNoScoping() {
-    throw new AssertionFailedError();
+    return fail();
   }
 }

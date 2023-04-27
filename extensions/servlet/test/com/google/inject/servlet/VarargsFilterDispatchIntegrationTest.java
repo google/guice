@@ -1,5 +1,6 @@
 package com.google.inject.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +16,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * This tests that filter stage of the pipeline dispatches correctly to guice-managed filters.
@@ -24,10 +26,10 @@ import junit.framework.TestCase;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public class VarargsFilterDispatchIntegrationTest extends TestCase {
+public class VarargsFilterDispatchIntegrationTest {
   private static int inits, doFilters, destroys;
 
-  @Override
+  @BeforeEach
   public final void setUp() {
     inits = 0;
     doFilters = 0;
@@ -36,6 +38,7 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     GuiceFilter.reset();
   }
 
+  @Test
   public final void testDispatchRequestToManagedPipeline() throws ServletException, IOException {
     final Injector injector =
         Guice.createInjector(
@@ -67,16 +70,17 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     pipeline.destroyPipeline();
 
     assertTrue(
+        inits == 1 && doFilters == 3 && destroys == 1,
         "lifecycle states did not"
             + " fire correct number of times-- inits: "
             + inits
             + "; dos: "
             + doFilters
             + "; destroys: "
-            + destroys,
-        inits == 1 && doFilters == 3 && destroys == 1);
+            + destroys);
   }
 
+  @Test
   public final void testDispatchThatNoFiltersFire() throws ServletException, IOException {
     final Injector injector =
         Guice.createInjector(
@@ -107,16 +111,17 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     pipeline.destroyPipeline();
 
     assertTrue(
+        inits == 1 && doFilters == 0 && destroys == 1,
         "lifecycle states did not "
             + "fire correct number of times-- inits: "
             + inits
             + "; dos: "
             + doFilters
             + "; destroys: "
-            + destroys,
-        inits == 1 && doFilters == 0 && destroys == 1);
+            + destroys);
   }
 
+  @Test
   public final void testDispatchFilterPipelineWithRegexMatching()
       throws ServletException, IOException {
 
@@ -148,14 +153,14 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     pipeline.destroyPipeline();
 
     assertTrue(
+        inits == 1 && doFilters == 2 && destroys == 1,
         "lifecycle states did not fire "
             + "correct number of times-- inits: "
             + inits
             + "; dos: "
             + doFilters
             + "; destroys: "
-            + destroys,
-        inits == 1 && doFilters == 2 && destroys == 1);
+            + destroys);
   }
 
   @Singleton

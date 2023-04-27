@@ -19,8 +19,8 @@ package com.google.inject;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
@@ -28,17 +28,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for interception of default methods.
  *
  * @author cgdecker@google.com (Colin Decker)
  */
-@RunWith(JUnit4.class)
 public class DefaultMethodInterceptionTest {
 
   private static final AtomicInteger callCount = new AtomicInteger(0);
@@ -51,12 +48,12 @@ public class DefaultMethodInterceptionTest {
         return invocation.proceed();
       };
 
-  @Before
+  @BeforeEach
   public void checkBytecodeGenIsEnabled() {
     assumeTrue(InternalFlags.isBytecodeGenEnabled());
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     callCount.set(0);
     interceptedCallCount.set(0);

@@ -16,12 +16,15 @@
 
 package com.google.inject.servlet;
 
-import static junit.framework.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class UriPatternTypeTest extends TestCase {
+public class UriPatternTypeTest {
 
+  @Test
   public void testMatches_servlet() {
     UriPatternMatcher pattern = UriPatternType.get(UriPatternType.SERVLET, "/foo/*");
     assertTrue(pattern.matches("/foo/asdf"));
@@ -48,6 +51,7 @@ public class UriPatternTypeTest extends TestCase {
     assertTrue(pattern.matches("/asdf?val=1"));
   }
 
+  @Test
   public void testMatches_regex() {
     UriPatternMatcher pattern = UriPatternType.get(UriPatternType.REGEX, "/.*/foo");
     assertFalse(pattern.matches("/foo/asdf"));
@@ -58,6 +62,7 @@ public class UriPatternTypeTest extends TestCase {
     assertFalse(pattern.matches("/foo?val=1"));
   }
 
+  @Test
   public void testPatternWithPercentEncodedChars_servlet() {
     try {
       UriPatternType.get(UriPatternType.SERVLET, "/foo/%2f/*");
