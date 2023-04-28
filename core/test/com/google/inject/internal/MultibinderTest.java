@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.MoreCollectors.onlyElement;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.internal.RealMultibinder.collectionOfJakartaProvidersOf;
 import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
 import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
 import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
@@ -1417,6 +1418,10 @@ public class MultibinderTest extends TestCase {
         injector.getInstance(Key.get(collectionOfProvidersOfStrings));
     assertEquals(expectedValues, collectValues(providers));
 
+    Collection<jakarta.inject.Provider<String>> jakartaProviders =
+        injector.getInstance(Key.get(collectionOfJakartaProvidersOf(stringType)));
+    assertEquals(expectedValues, collectValuesJakarta(jakartaProviders));
+
     Collection<javax.inject.Provider<String>> javaxProviders =
         injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType)));
     assertEquals(expectedValues, collectValues(javaxProviders));
@@ -1443,6 +1448,10 @@ public class MultibinderTest extends TestCase {
         injector.getInstance(Key.get(collectionOfProvidersOfStrings, ann));
     Collection<String> values = collectValues(providers);
     assertEquals(expectedValues, values);
+
+    Collection<jakarta.inject.Provider<String>> jakartaProviders =
+        injector.getInstance(Key.get(collectionOfJakartaProvidersOf(stringType), ann));
+    assertEquals(expectedValues, collectValuesJakarta(jakartaProviders));
 
     Collection<javax.inject.Provider<String>> javaxProviders =
         injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType), ann));
@@ -1608,6 +1617,15 @@ public class MultibinderTest extends TestCase {
     } catch (CreationException e) {
       assertTrue(e.getMessage().contains("Set<? extends String> was bound multiple times"));
     }
+  }
+
+  private <T> Collection<T> collectValuesJakarta(
+      Collection<? extends jakarta.inject.Provider<T>> providers) {
+    Collection<T> values = Lists.newArrayList();
+    for (jakarta.inject.Provider<T> provider : providers) {
+      values.add(provider.get());
+    }
+    return values;
   }
 
   private <T> Collection<T> collectValues(
