@@ -117,6 +117,36 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.matcher"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.AbstractMatcher"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher.and_changed(com.google.inject.matcher.Matcher)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher.or_changed(com.google.inject.matcher.Matcher)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.util"/>
   <text>
     InsertCommentsHere
