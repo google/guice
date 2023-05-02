@@ -53,7 +53,6 @@ public final class RealMultibinder<T> implements Module {
 
   /** Implementation of newSetBinder. */
   public static <T> RealMultibinder<T> newRealSetBinder(Binder binder, Key<T> key) {
-    binder = binder.skipSources(RealMultibinder.class);
     RealMultibinder<T> result = new RealMultibinder<>(binder, key);
     binder.install(result);
     return result;

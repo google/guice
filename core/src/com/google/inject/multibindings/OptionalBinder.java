@@ -140,18 +140,15 @@ public class OptionalBinder<T> {
   // This class is non-final due to users mocking this in tests :(
 
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Class<T> type) {
-    return new OptionalBinder<T>(
-        newRealOptionalBinder(binder.skipSources(OptionalBinder.class), Key.get(type)));
+    return new OptionalBinder<T>(newRealOptionalBinder(binder, Key.get(type)));
   }
 
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, TypeLiteral<T> type) {
-    return new OptionalBinder<T>(
-        newRealOptionalBinder(binder.skipSources(OptionalBinder.class), Key.get(type)));
+    return new OptionalBinder<T>(newRealOptionalBinder(binder, Key.get(type)));
   }
 
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Key<T> type) {
-    return new OptionalBinder<T>(
-        newRealOptionalBinder(binder.skipSources(OptionalBinder.class), type));
+    return new OptionalBinder<T>(newRealOptionalBinder(binder, type));
   }
 
   private final RealOptionalBinder<T> delegate;

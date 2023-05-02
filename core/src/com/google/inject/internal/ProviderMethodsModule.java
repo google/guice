@@ -120,12 +120,10 @@ public final class ProviderMethodsModule implements Module {
           if (isStaticModule()
               && !Modifier.isStatic(method.getModifiers())
               && !Modifier.isAbstract(method.getModifiers())) {
-            binder
-                .skipSources(ProviderMethodsModule.class)
-                .addError(
-                    "%s is an instance method, but a class literal was passed. Make this method"
-                        + " static or pass an instance of the module instead.",
-                    method);
+            binder.addError(
+                "%s is an instance method, but a class literal was passed. Make this method"
+                    + " static or pass an instance of the module instead.",
+                method);
             continue;
           }
           if (result == null) {

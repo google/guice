@@ -134,7 +134,7 @@ public class Multibinder<T> {
    * @since 4.0
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Key<T> key) {
-    return new Multibinder<T>(newRealSetBinder(binder.skipSources(Multibinder.class), key));
+    return new Multibinder<T>(newRealSetBinder(binder, key));
   }
 
   /**

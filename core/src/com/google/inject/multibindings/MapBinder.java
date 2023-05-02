@@ -99,8 +99,7 @@ public class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(
       Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    return new MapBinder<K, V>(
-        newMapRealBinder(binder.skipSources(MapBinder.class), keyType, valueType));
+    return new MapBinder<K, V>(newMapRealBinder(binder, keyType, valueType));
   }
 
   /**
@@ -118,8 +117,7 @@ public class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(
       Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType, Annotation annotation) {
-    return new MapBinder<K, V>(
-        newRealMapBinder(binder.skipSources(MapBinder.class), keyType, valueType, annotation));
+    return new MapBinder<K, V>(newRealMapBinder(binder, keyType, valueType, annotation));
   }
 
   /**
@@ -140,8 +138,7 @@ public class MapBinder<K, V> {
       TypeLiteral<K> keyType,
       TypeLiteral<V> valueType,
       Class<? extends Annotation> annotationType) {
-    return new MapBinder<K, V>(
-        newRealMapBinder(binder.skipSources(MapBinder.class), keyType, valueType, annotationType));
+    return new MapBinder<K, V>(newRealMapBinder(binder, keyType, valueType, annotationType));
   }
 
   /**

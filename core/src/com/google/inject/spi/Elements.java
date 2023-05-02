@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -46,6 +47,7 @@ import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.internal.GuiceInternal;
+import com.google.inject.internal.InternalClassesToSkipSources;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.PrivateElementsImpl;
@@ -54,6 +56,9 @@ import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.multibindings.OptionalBinder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -174,6 +179,25 @@ public final class Elements {
   }
 
   private static class RecordingBinder implements Binder, PrivateBinder {
+    private static final ImmutableSet<Class<?>> CLASSES_TO_SKIP =
+        ImmutableSet.<Class<?>>builder()
+            .add(
+                Elements.class,
+                RecordingBinder.class,
+                AbstractModule.class,
+                ConstantBindingBuilderImpl.class,
+                AbstractBindingBuilder.class,
+                BindingBuilder.class,
+                MapBinder.class,
+                Multibinder.class,
+                OptionalBinder.class)
+            .addAll(InternalClassesToSkipSources.classesToSkipSources())
+            .build();
+
+    private static final SourceProvider DEFAULT_SOURCE_PROVIDER =
+        SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
+            CLASSES_TO_SKIP.toArray(new Class<?>[0]));
+
     private final Stage stage;
     private final Map<Module, ModuleInfo> modules;
     private final List<Element> elements;
@@ -209,14 +233,7 @@ public final class Elements {
       this.scanners = Sets.newLinkedHashSet();
       this.elements = Lists.newArrayList();
       this.source = null;
-      this.sourceProvider =
-          SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
-              Elements.class,
-              RecordingBinder.class,
-              AbstractModule.class,
-              ConstantBindingBuilderImpl.class,
-              AbstractBindingBuilder.class,
-              BindingBuilder.class);
+      this.sourceProvider = DEFAULT_SOURCE_PROVIDER;
       this.parent = null;
       this.privateElements = null;
       this.privateBindersForScanning = Lists.newArrayList();
@@ -528,14 +545,14 @@ public final class Elements {
       return source == this.source
           ? this
           : new RecordingBinder(
-              this, source, /* sourceProvider = */ null, /* trustedSource = */ false);
+              this, source, /* sourceProvider= */ null, /* trustedSource= */ false);
     }
 
     public RecordingBinder withTrustedSource(final Object source) {
       return source == this.source
           ? this
           : new RecordingBinder(
-              this, source, /* sourceProvider = */ null, /* trustedSource = */ true);
+              this, source, /* sourceProvider= */ null, /* trustedSource= */ true);
     }
 
     @Override
@@ -547,7 +564,7 @@ public final class Elements {
 
       SourceProvider newSourceProvider = sourceProvider.plusSkippedClasses(classesToSkip);
       return new RecordingBinder(
-          this, /* source = */ null, newSourceProvider, /* trustedSource = */ false);
+          this, /* source= */ null, newSourceProvider, /* trustedSource= */ false);
     }
 
     @Override

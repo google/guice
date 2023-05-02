@@ -71,7 +71,6 @@ public final class RealMapBinder<K, V> implements Module {
    */
   public static <K, V> RealMapBinder<K, V> newMapRealBinder(
       Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    binder = binder.skipSources(RealMapBinder.class);
     return newRealMapBinder(
         binder,
         keyType,
@@ -86,7 +85,6 @@ public final class RealMapBinder<K, V> implements Module {
    */
   public static <K, V> RealMapBinder<K, V> newRealMapBinder(
       Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType, Annotation annotation) {
-    binder = binder.skipSources(RealMapBinder.class);
     return newRealMapBinder(
         binder,
         keyType,
@@ -105,7 +103,6 @@ public final class RealMapBinder<K, V> implements Module {
       TypeLiteral<K> keyType,
       TypeLiteral<V> valueType,
       Class<? extends Annotation> annotationType) {
-    binder = binder.skipSources(RealMapBinder.class);
     return newRealMapBinder(
         binder,
         keyType,
@@ -1022,7 +1019,7 @@ public final class RealMapBinder<K, V> implements Module {
    *
    * <p>This will only exist if permitDuplicates() is called.
    */
-  private static final class MultimapBinder<K, V> implements Module {
+  static final class MultimapBinder<K, V> implements Module {
     private final BindingSelection<K, V> bindingSelection;
 
     private MultimapBinder(BindingSelection<K, V> bindingSelection) {
