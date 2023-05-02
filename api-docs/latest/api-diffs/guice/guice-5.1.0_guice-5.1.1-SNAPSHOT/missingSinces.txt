@@ -1,4 +1,5 @@
 OK: com.google.inject.util.Enhanced Class
+MISSING @SINCE TAG: com.google.inject.internal.InternalClassesToSkipSources Class
 MISSING @SINCE TAG: com.google.inject.internal.Annotations Method annotationInstanceClassString(java.lang.Class, boolean)
 MISSING @SINCE TAG: com.google.inject.internal.util.SourceProvider Method getCaller()
 OK: com.google.inject.util.Providers Method guicify(jakarta.inject.Provider)
