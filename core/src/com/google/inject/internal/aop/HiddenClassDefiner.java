@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 final class HiddenClassDefiner implements ClassDefiner {
 
   private static final Object THE_UNSAFE;
+  private static final Object TRUSTED_LOOKUP_BASE;
   private static final Object TRUSTED_LOOKUP_OFFSET;
   private static final Method GET_OBJECT_METHOD;
   private static final Object HIDDEN_CLASS_OPTIONS;
@@ -41,6 +42,8 @@ final class HiddenClassDefiner implements ClassDefiner {
       theUnsafeField.setAccessible(true);
       THE_UNSAFE = theUnsafeField.get(null);
       Field trustedLookupField = Lookup.class.getDeclaredField("IMPL_LOOKUP");
+      Method baseMethod = unsafeType.getMethod("staticFieldBase", Field.class);
+      TRUSTED_LOOKUP_BASE = baseMethod.invoke(THE_UNSAFE, trustedLookupField);
       Method offsetMethod = unsafeType.getMethod("staticFieldOffset", Field.class);
       TRUSTED_LOOKUP_OFFSET = offsetMethod.invoke(THE_UNSAFE, trustedLookupField);
       GET_OBJECT_METHOD = unsafeType.getMethod("getObject", Object.class, long.class);
@@ -56,7 +59,7 @@ final class HiddenClassDefiner implements ClassDefiner {
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
     Lookup trustedLookup =
-        (Lookup) GET_OBJECT_METHOD.invoke(THE_UNSAFE, Lookup.class, TRUSTED_LOOKUP_OFFSET);
+        (Lookup) GET_OBJECT_METHOD.invoke(THE_UNSAFE, TRUSTED_LOOKUP_BASE, TRUSTED_LOOKUP_OFFSET);
     Lookup definedLookup =
         (Lookup)
             HIDDEN_DEFINE_METHOD.invoke(
