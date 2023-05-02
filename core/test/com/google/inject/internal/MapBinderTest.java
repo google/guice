@@ -81,13 +81,17 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
-/** @author dpb@google.com (David P. Baker) */
+/**
+ * @author dpb@google.com (David P. Baker)
+ */
 public class MapBinderTest extends TestCase {
 
   private static final ImmutableSet<Key<?>> FRAMEWORK_KEYS =
       ImmutableSet.of(
           Key.get(java.util.logging.Logger.class), Key.get(Stage.class), Key.get(Injector.class));
 
+  final TypeLiteral<Map<String, jakarta.inject.Provider<String>>> mapOfStringJakartaProvider =
+      new TypeLiteral<Map<String, jakarta.inject.Provider<String>>>() {};
   final TypeLiteral<Map<String, javax.inject.Provider<String>>> mapOfStringJavaxProvider =
       new TypeLiteral<Map<String, javax.inject.Provider<String>>>() {};
   final TypeLiteral<Map<String, Provider<String>>> mapOfStringProvider =
@@ -134,30 +138,47 @@ public class MapBinderTest extends TestCase {
                 Key.get(Types.mapOf(String.class, String.class)),
                 // Map<K, Provider<V>>
                 Key.get(Types.mapOf(String.class, Types.providerOf(String.class))),
+                // Map<K, jakarta.inject.Provider<V>>
+                Key.get(Types.mapOf(String.class, Types.jakartaProviderOf(String.class))),
                 // Map<K, javax.inject.Provider<V>>
                 Key.get(Types.mapOf(String.class, javaxProviderOf(String.class))),
                 // Map<K, Set<V>>
                 Key.get(Types.mapOf(String.class, Types.setOf(String.class))),
                 // Map<K, Set<Provider<V>>
                 Key.get(Types.mapOf(String.class, Types.setOf(Types.providerOf(String.class)))),
+                // Map<K, Set<jakarta.inject.Provider<V>>
+                Key.get(
+                    Types.mapOf(String.class, Types.setOf(Types.jakartaProviderOf(String.class)))),
                 // Map<K, Set<javax.inject.Provider<V>>
                 Key.get(
                     Types.mapOf(String.class, Types.setOf(Types.javaxProviderOf(String.class)))),
                 // Map<K, Collection<Provider<V>>
                 Key.get(
                     Types.mapOf(String.class, Types.collectionOf(Types.providerOf(String.class)))),
+                // Map<K, Collection<jakarta.inject.Provider<V>>
+                Key.get(
+                    Types.mapOf(
+                        String.class, Types.collectionOf(Types.jakartaProviderOf(String.class)))),
                 // Map<K, Collection<javax.inject.Provider<V>>
                 Key.get(
                     Types.mapOf(
                         String.class, Types.collectionOf(Types.javaxProviderOf(String.class)))),
                 // Set<Map.Entry<K, Provider<V>>>
                 Key.get(Types.setOf(mapEntryOf(String.class, Types.providerOf(String.class)))),
+                // Set<Map.Entry<K, jakarta.inject.Provider<V>>>
+                Key.get(
+                    Types.setOf(mapEntryOf(String.class, Types.jakartaProviderOf(String.class)))),
                 // Set<Map.Entry<K, javax.inject.Provider<V>>>
                 Key.get(Types.setOf(mapEntryOf(String.class, Types.javaxProviderOf(String.class)))),
                 // Collection<Provider<Map.Entry<K, Provider<V>>>>
                 Key.get(
                     collectionOf(
                         Types.providerOf(
+                            mapEntryOf(String.class, Types.providerOf(String.class))))),
+                // Collection<jakarta.inject.Provider<Map.Entry<K, Provider<V>>>>
+                Key.get(
+                    collectionOf(
+                        Types.jakartaProviderOf(
                             mapEntryOf(String.class, Types.providerOf(String.class))))),
                 // Collection<javax.inject.Provider<Map.Entry<K, Provider<V>>>>
                 Key.get(
@@ -233,6 +254,7 @@ public class MapBinderTest extends TestCase {
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider));
     injector.getInstance(Key.get(mapOfStringJavaxProvider));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider));
   }
 
   public void testMapBinderAggregationForAnnotationInstance() {
@@ -270,6 +292,7 @@ public class MapBinderTest extends TestCase {
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, Names.named("abc")));
     injector.getInstance(Key.get(mapOfStringJavaxProvider, Names.named("abc")));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider, Names.named("abc")));
   }
 
   public void testMapBinderAggregationForAnnotationType() {
@@ -306,6 +329,7 @@ public class MapBinderTest extends TestCase {
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, Abc.class));
     injector.getInstance(Key.get(mapOfStringJavaxProvider, Abc.class));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider, Abc.class));
   }
 
   public void testMapBinderWithMultipleAnnotationValueSets() {
@@ -358,8 +382,10 @@ public class MapBinderTest extends TestCase {
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, named("abc")));
     injector.getInstance(Key.get(mapOfStringJavaxProvider, named("abc")));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider, named("abc")));
     injector.getInstance(Key.get(mapOfStringProvider, named("de")));
     injector.getInstance(Key.get(mapOfStringJavaxProvider, named("de")));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider, named("de")));
   }
 
   public void testMapBinderWithMultipleAnnotationTypeSets() {
@@ -412,8 +438,10 @@ public class MapBinderTest extends TestCase {
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, Abc.class));
     injector.getInstance(Key.get(mapOfStringJavaxProvider, Abc.class));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider, Abc.class));
     injector.getInstance(Key.get(mapOfStringProvider, De.class));
     injector.getInstance(Key.get(mapOfStringJavaxProvider, De.class));
+    injector.getInstance(Key.get(mapOfStringJakartaProvider, De.class));
   }
 
   public void testMapBinderWithMultipleTypes() {
@@ -830,15 +858,16 @@ public class MapBinderTest extends TestCase {
   }
 
   public void testMapBinderMapForbidsNullValues() {
-    Module m =
-        new AbstractModule() {
-          @Override
-          protected void configure() {
-            MapBinder.newMapBinder(binder(), String.class, String.class)
-                .addBinding("null")
-                .toProvider(Providers.<String>of(null));
-          }
-        };
+    class NullValueModule extends AbstractModule {
+      @Override
+      protected void configure() {
+        MapBinder.newMapBinder(binder(), String.class, String.class)
+            .addBinding("null")
+            .toProvider(Providers.<String>of(null));
+      }
+    }
+
+    Module m = new NullValueModule();
     Injector injector = Guice.createInjector(m);
 
     try {
@@ -848,7 +877,7 @@ public class MapBinderTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "Map injection failed due to null value for key \"null\", bound at:"
-              + " MapBinderTest$30.configure");
+              + " MapBinderTest$1NullValueModule.configure");
     }
   }
 
@@ -880,20 +909,20 @@ public class MapBinderTest extends TestCase {
   }
 
   public void testSourceLinesInMapBindings() {
+    class SimpleBinding extends AbstractModule {
+      @Override
+      protected void configure() {
+        MapBinder.newMapBinder(binder(), String.class, Integer.class).addBinding("one");
+      }
+    }
     try {
-      Guice.createInjector(
-          new AbstractModule() {
-            @Override
-            protected void configure() {
-              MapBinder.newMapBinder(binder(), String.class, Integer.class).addBinding("one");
-            }
-          });
+      Guice.createInjector(new SimpleBinding());
       fail();
     } catch (CreationException expected) {
       assertContains(
           expected.getMessage(),
           "No implementation for Integer",
-          "1  : MapBinderTest$33.configure");
+          "1  : MapBinderTest$1SimpleBinding.configure");
     }
   }
 
@@ -1270,7 +1299,8 @@ public class MapBinderTest extends TestCase {
                 mb1.addBinding(1).toInstance(1);
                 mb2.addBinding(2).toInstance(2);
 
-                // This assures us that the two binders are equivalent, so we expect the instance added to
+                // This assures us that the two binders are equivalent, so we expect the instance
+                // added to
                 // each to have been added to one set.
                 assertEquals(mb1, mb2);
               }

@@ -73,6 +73,15 @@ public final class RealMultibinder<T> implements Module {
   }
 
   @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<Collection<jakarta.inject.Provider<T>>> collectionOfJakartaProvidersOf(
+      TypeLiteral<T> elementType) {
+    Type providerType =
+        Types.newParameterizedType(jakarta.inject.Provider.class, elementType.getType());
+    Type type = Types.collectionOf(providerType);
+    return (TypeLiteral<Collection<jakarta.inject.Provider<T>>>) TypeLiteral.get(type);
+  }
+
+  @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersOf(
       TypeLiteral<T> elementType) {
     Type providerType =
@@ -115,6 +124,14 @@ public final class RealMultibinder<T> implements Module {
     binder
         .bind(bindingSelection.getCollectionOfProvidersKey())
         .toProvider(collectionOfProvidersProvider);
+
+    // The collection this exposes is internally an ImmutableList, so it's OK to massage
+    // the guice Provider to jakarta Provider in the value (since the guice Provider implements
+    // jakarta Provider).
+    @SuppressWarnings("unchecked")
+    Provider<Collection<jakarta.inject.Provider<T>>> jakartaProvider =
+        (Provider) collectionOfProvidersProvider;
+    binder.bind(bindingSelection.getCollectionOfJakartaProvidersKey()).toProvider(jakartaProvider);
 
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to javax Provider in the value (since the guice Provider implements
@@ -326,6 +343,7 @@ public final class RealMultibinder<T> implements Module {
     public ImmutableSet<Key<?>> getAlternateSetKeys() {
       return ImmutableSet.of(
           (Key<?>) bindingSelection.getCollectionOfProvidersKey(),
+          (Key<?>) bindingSelection.getCollectionOfJakartaProvidersKey(),
           (Key<?>) bindingSelection.getCollectionOfJavaxProvidersKey(),
           (Key<?>) bindingSelection.getSetOfExtendsKey());
     }
@@ -390,6 +408,7 @@ public final class RealMultibinder<T> implements Module {
     // these are all lazily allocated
     private String setName;
     private Key<Collection<Provider<T>>> collectionOfProvidersKey;
+    private Key<Collection<jakarta.inject.Provider<T>>> collectionOfJakartaProvidersKey;
     private Key<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersKey;
     private Key<Set<? extends T>> setOfExtendsKey;
     private Key<Boolean> permitDuplicatesKey;
@@ -507,6 +526,16 @@ public final class RealMultibinder<T> implements Module {
       return local;
     }
 
+    Key<Collection<jakarta.inject.Provider<T>>> getCollectionOfJakartaProvidersKey() {
+      Key<Collection<jakarta.inject.Provider<T>>> local = collectionOfJakartaProvidersKey;
+      if (local == null) {
+        local =
+            collectionOfJakartaProvidersKey =
+                setKey.ofType(collectionOfJakartaProvidersOf(elementType));
+      }
+      return local;
+    }
+
     Key<Collection<javax.inject.Provider<T>>> getCollectionOfJavaxProvidersKey() {
       Key<Collection<javax.inject.Provider<T>>> local = collectionOfJavaxProvidersKey;
       if (local == null) {
@@ -564,6 +593,7 @@ public final class RealMultibinder<T> implements Module {
             || binding.getKey().equals(getPermitDuplicatesKey())
             || binding.getKey().equals(setKey)
             || binding.getKey().equals(collectionOfProvidersKey)
+            || binding.getKey().equals(collectionOfJakartaProvidersKey)
             || binding.getKey().equals(collectionOfJavaxProvidersKey)
             || binding.getKey().equals(setOfExtendsKey);
       } else {

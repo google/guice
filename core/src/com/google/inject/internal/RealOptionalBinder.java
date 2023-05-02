@@ -92,6 +92,27 @@ public final class RealOptionalBinder<T> implements Module {
   }
 
   @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<Optional<jakarta.inject.Provider<T>>> optionalOfJakartaProvider(
+      TypeLiteral<T> type) {
+    return (TypeLiteral<Optional<jakarta.inject.Provider<T>>>)
+        TypeLiteral.get(
+            Types.newParameterizedType(
+                Optional.class,
+                newParameterizedType(jakarta.inject.Provider.class, type.getType())));
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T>
+      TypeLiteral<java.util.Optional<jakarta.inject.Provider<T>>> javaOptionalOfJakartaProvider(
+          TypeLiteral<T> type) {
+    return (TypeLiteral<java.util.Optional<jakarta.inject.Provider<T>>>)
+        TypeLiteral.get(
+            Types.newParameterizedType(
+                java.util.Optional.class,
+                newParameterizedType(jakarta.inject.Provider.class, type.getType())));
+  }
+
+  @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Optional<Provider<T>>> optionalOfProvider(TypeLiteral<T> type) {
     return (TypeLiteral<Optional<Provider<T>>>)
         TypeLiteral.get(
@@ -189,15 +210,16 @@ public final class RealOptionalBinder<T> implements Module {
     // Every OptionalBinder gets the following types bound
     // * {cgcb,ju}.Optional<Provider<T>>
     // * {cgcb,ju}.Optional<javax.inject.Provider<T>>
+    // * {cgcb,ju}.Optional<jakarta.inject.Provider<T>>
     // * {cgcb,ju}.Optional<T>
     // If setDefault() or setBinding() is called then also
     // * T is bound
 
-    // cgcb.Optional<Provider<T>>
+    // cgcb.Optional<c.g.i.Provider<T>>
     InternalProviderInstanceBindingImpl.Factory<Optional<Provider<T>>> optionalProviderFactory =
         new RealOptionalProviderProvider<>(bindingSelection);
     binder.bind(key.ofType(optionalOfProvider(typeLiteral))).toProvider(optionalProviderFactory);
-    // ju.Optional<Provider<T>>
+    // ju.Optional<c.g.i.Provider<T>>
     InternalProviderInstanceBindingImpl.Factory<java.util.Optional<Provider<T>>>
         javaOptionalProviderFactory = new JavaOptionalProviderProvider<>(bindingSelection);
     binder
@@ -207,7 +229,7 @@ public final class RealOptionalBinder<T> implements Module {
     // Provider is assignable to javax.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
 
-    // cgcb.Optional<ji.Provider<T>>
+    // cgcb.Optional<javax.inject.Provider<T>>
     @SuppressWarnings("unchecked")
     InternalProviderInstanceBindingImpl.Factory<Optional<javax.inject.Provider<T>>>
         optionalJavaxProviderFactory =
@@ -215,7 +237,7 @@ public final class RealOptionalBinder<T> implements Module {
     binder
         .bind(key.ofType(optionalOfJavaxProvider(typeLiteral)))
         .toProvider(optionalJavaxProviderFactory);
-    // ju.Optional<ji.Provider<T>>
+    // ju.Optional<javax.inject.Provider<T>>
     @SuppressWarnings("unchecked")
     InternalProviderInstanceBindingImpl.Factory<java.util.Optional<javax.inject.Provider<T>>>
         javaOptionalJavaxProviderFactory =
@@ -223,6 +245,26 @@ public final class RealOptionalBinder<T> implements Module {
     binder
         .bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
         .toProvider(javaOptionalJavaxProviderFactory);
+
+    // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
+    // cannot be modified so we can use some rawtypes hackery to share the same implementation.
+
+    // cgcb.Optional<jakarta.inject.Provider<T>>
+    @SuppressWarnings("unchecked")
+    InternalProviderInstanceBindingImpl.Factory<Optional<jakarta.inject.Provider<T>>>
+        optionalJakartaProviderFactory =
+            (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
+    binder
+        .bind(key.ofType(optionalOfJakartaProvider(typeLiteral)))
+        .toProvider(optionalJakartaProviderFactory);
+    // ju.Optional<jakarta.inject.Provider<T>>
+    @SuppressWarnings("unchecked")
+    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<jakarta.inject.Provider<T>>>
+        javaOptionalJakartaProviderFactory =
+            (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
+    binder
+        .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
+        .toProvider(javaOptionalJakartaProviderFactory);
 
     // cgcb.Optional<T>
     Key<Optional<T>> optionalKey = key.ofType(optionalOf(typeLiteral));
@@ -324,7 +366,8 @@ public final class RealOptionalBinder<T> implements Module {
       TypeLiteral<?> typeLiteral = key.getTypeLiteral();
       return ImmutableSet.of(
           (Key<?>) key.ofType(javaOptionalOfProvider(typeLiteral)),
-          (Key<?>) key.ofType(javaOptionalOfJavaxProvider(typeLiteral)));
+          (Key<?>) key.ofType(javaOptionalOfJavaxProvider(typeLiteral)),
+          (Key<?>) key.ofType(javaOptionalOfJakartaProvider(typeLiteral)));
     }
   }
 
@@ -496,7 +539,8 @@ public final class RealOptionalBinder<T> implements Module {
       TypeLiteral<?> typeLiteral = key.getTypeLiteral();
       return ImmutableSet.of(
           (Key<?>) key.ofType(optionalOfProvider(typeLiteral)),
-          (Key<?>) key.ofType(optionalOfJavaxProvider(typeLiteral)));
+          (Key<?>) key.ofType(optionalOfJavaxProvider(typeLiteral)),
+          (Key<?>) key.ofType(optionalOfJakartaProvider(typeLiteral)));
     }
 
     @Override
