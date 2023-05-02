@@ -213,7 +213,7 @@ public class BytecodeGenTest {
   public static class ProxyTestImpl implements ProxyTest {
 
     static {
-      //System.out.println(ProxyTestImpl.class.getClassLoader());
+      // System.out.println(ProxyTestImpl.class.getClassLoader());
     }
 
     @Override
@@ -423,9 +423,9 @@ public class BytecodeGenTest {
 
       if (name.startsWith("java.")
           || name.startsWith("javax.")
+          || name.startsWith("jakarta.")
           || name.equals(LogCreator.class.getName())
-          || (!name.startsWith("com.google.inject.")
-              && !name.startsWith("com.googlecode.guice"))) {
+          || (!name.startsWith("com.google.inject.") && !name.startsWith("com.googlecode.guice"))) {
 
         // standard parent delegation
         return super.loadClass(name, resolve);
