@@ -18,9 +18,11 @@ package com.google.inject.internal;
 
 import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.ContextualProvider;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.spi.ConstructorBinding;
+import com.google.inject.spi.ContextualProviderInstanceBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.InjectionPoint;
@@ -151,6 +153,32 @@ final class BindingProcessor extends AbstractBindingProcessor {
             putBinding(
                 new ProviderInstanceBindingImpl<T>(
                     injector, key, source, scopedFactory, scoping, provider, injectionPoints));
+            return true;
+          }
+
+          @Override
+          public Boolean visit(ContextualProviderInstanceBinding<? extends T> binding) {
+            prepareBinding();
+            ContextualProvider<? extends T> provider = binding.getUserSuppliedProvider();
+
+            Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
+            Initializable<ContextualProvider<? extends T>> initializable =
+                initializer.<ContextualProvider<? extends T>>requestInjection(
+                    injector, /* type= */ null, provider, null, source, injectionPoints, errors);
+            // always visited with Binding<T>
+            @SuppressWarnings("unchecked")
+            InternalFactory<T> factory =
+                new InternalContextualFactoryToInitializableAdapter<>(
+                    initializable,
+                    source,
+                    injector.provisionListenerStore.get((ContextualProviderInstanceBinding<T>) binding));
+            InternalFactory<? extends T> scopedFactory =
+                Scoping.scope(key, injector, factory, source, scoping);
+            putBinding(
+                new ContextualProviderInstanceBindingImpl<T>(
+                    key, source, scoping, scopedFactory, provider,
+                    ((ContextualProviderInstanceBindingImpl<? extends T>) binding).getInternalProvider(),
+                    injectionPoints));
             return true;
           }
 

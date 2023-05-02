@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.spi.ConstructorBinding;
+import com.google.inject.spi.ContextualProviderInstanceBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -80,6 +81,11 @@ public class TransitiveDependencyVisitor
 
   @Override
   public Collection<Key<?>> visit(ProviderInstanceBinding<?> binding) {
+    return visitHasDependencies(binding);
+  }
+
+  @Override
+  public Collection<Key<?>> visit(ContextualProviderInstanceBinding<?> binding) {
     return visitHasDependencies(binding);
   }
 

@@ -45,6 +45,11 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
   }
 
   @Override
+  public V visit(ContextualProviderInstanceBinding<? extends T> providerInstanceBinding) {
+    return visitOther(providerInstanceBinding);
+  }
+
+  @Override
   public V visit(ProviderKeyBinding<? extends T> providerKeyBinding) {
     return visitOther(providerKeyBinding);
   }

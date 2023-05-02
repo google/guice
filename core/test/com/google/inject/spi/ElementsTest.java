@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.ContextualProvider;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
@@ -513,6 +514,40 @@ public class ElementsTest extends TestCase {
                   @Override
                   public Void visit(ProviderKeyBinding<? extends T> binding) {
                     assertEquals(new Key<TProvider<List<Object>>>() {}, binding.getProviderKey());
+                    return null;
+                  }
+                });
+            return null;
+          }
+        });
+  }
+
+  public void testBindToContextualProvider() {
+    final ContextualProvider<String> aProvider =
+        new ContextualProvider<String>() {
+          @Override
+          public String get(InjectionPoint point) {
+            return "A";
+          }
+        };
+
+    checkModule(
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).toContextualProvider(aProvider);
+          }
+        },
+        new FailingElementVisitor() {
+          @Override
+          public <T> Void visit(Binding<T> command) {
+            assertTrue(command instanceof ContextualProviderInstanceBinding);
+            assertEquals(Key.get(String.class), command.getKey());
+            command.acceptTargetVisitor(
+                new FailingTargetVisitor<T>() {
+                  @Override
+                  public Void visit(ContextualProviderInstanceBinding<? extends T> binding) {
+                    assertSame(aProvider, binding.getUserSuppliedProvider());
                     return null;
                   }
                 });

@@ -16,11 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 
 /**
@@ -28,66 +24,20 @@ import javax.inject.Provider;
  *
  * @author sameb@google.com (Sam Berlin)
  */
-abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
-
-  protected final Object source;
-
+abstract class ProviderInternalFactory<T>
+    extends AbstractProviderInternalFactory<T, Provider<? extends T>> {
   ProviderInternalFactory(Object source) {
-    this.source = checkNotNull(source, "source");
+    super(source);
   }
 
-  protected T circularGet(
-      final Provider<? extends T> provider,
-      InternalContext context,
-      final Dependency<?> dependency,
-      @Nullable ProvisionListenerStackCallback<T> provisionCallback)
-      throws InternalProvisionException {
-    final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
-
-    // We have a circular reference between constructors. Return a proxy.
-    if (constructionContext.isConstructing()) {
-      Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
-      // TODO: if we can't proxy this object, can we proxy the other object?
-      @SuppressWarnings("unchecked")
-      T proxyType = (T) constructionContext.createProxy(context.getInjectorOptions(), expectedType);
-      return proxyType;
-    }
-
-    // Optimization: Don't go through the callback stack if no one's listening.
-    constructionContext.startConstruction();
-    try {
-      if (provisionCallback == null) {
-        return provision(provider, dependency, constructionContext);
-      } else {
-        return provisionCallback.provision(
-            context,
-            new ProvisionCallback<T>() {
-              @Override
-              public T call() throws InternalProvisionException {
-                return provision(provider, dependency, constructionContext);
-              }
-            });
-      }
-    } finally {
-      constructionContext.removeCurrentReference();
-      constructionContext.finishConstruction();
-    }
+  ProviderInternalFactory(
+      Object source,
+      ProvisionListenerStackCallback<T> provisionCallback) {
+    super(source, provisionCallback);
   }
 
-  /**
-   * Provisions a new instance. Subclasses should override this to catch exceptions and rethrow as
-   * ErrorsExceptions.
-   */
-  protected T provision(
-      Provider<? extends T> provider,
-      Dependency<?> dependency,
-      ConstructionContext<T> constructionContext)
-      throws InternalProvisionException {
-    T t = provider.get();
-    if (t == null && !dependency.isNullable()) {
-      InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
-    }
-    constructionContext.setProxyDelegates(t);
-    return t;
+  @Override
+  protected T provide(final Provider<? extends T> provider, final Dependency<?> dependency) {
+    return provider.get();
   }
 }

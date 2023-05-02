@@ -581,6 +581,14 @@ public final class Errors implements Serializable {
         ErrorId.INJECT_RAW_TYPE_LITERAL, "Cannot inject a TypeLiteral that has no type parameter");
   }
 
+  public Errors contextualProvideWithoutContext(Key<?> key) {
+    return addMessage(
+        ErrorId.CONTEXTUAL_PROVIDE_WITHOUT_CONTEXT,
+        "Cannot provide value for %s as no injection point context is available, and a" +
+            " non-contextual provider was not available",
+        key);
+  }
+
   public void throwCreationExceptionIfErrorsExist() {
     if (!hasErrors()) {
       return;

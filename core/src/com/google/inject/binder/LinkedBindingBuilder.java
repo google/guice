@@ -16,6 +16,7 @@
 
 package com.google.inject.binder;
 
+import com.google.inject.ContextualProvider;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
@@ -68,6 +69,8 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder toProvider(Key<? extends javax.inject.Provider<? extends T>> providerKey);
+
+  ScopedBindingBuilder toContextualProvider(ContextualProvider<? extends T> provider);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.

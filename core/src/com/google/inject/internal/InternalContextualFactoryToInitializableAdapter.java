@@ -18,21 +18,17 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.inject.ContextualProvider;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.InjectionPoint;
 
-/**
- * Adapts {@link ProviderInstanceBinding} providers, ensuring circular proxies fail (or proxy)
- * properly.
- *
- * @author sameb@google.com (Sam Berlin)
- */
-final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
+final class InternalContextualFactoryToInitializableAdapter<T>
+    extends AbstractProviderInternalFactory<T, ContextualProvider<? extends T>> {
 
-  private final Initializable<? extends javax.inject.Provider<? extends T>> initializable;
+  private final Initializable<? extends ContextualProvider<? extends T>> initializable;
 
-  public InternalFactoryToInitializableAdapter(
-      Initializable<? extends javax.inject.Provider<? extends T>> initializable,
+  public InternalContextualFactoryToInitializableAdapter(
+      Initializable<ContextualProvider<? extends T>> initializable,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
     super(source, provisionCallback);
@@ -46,16 +42,9 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   }
 
   @Override
-  protected T provision(
-      javax.inject.Provider<? extends T> provider,
-      Dependency<?> dependency,
-      ConstructionContext<T> constructionContext)
-      throws InternalProvisionException {
-    try {
-      return super.provision(provider, dependency, constructionContext);
-    } catch (RuntimeException userException) {
-      throw InternalProvisionException.errorInProvider(userException).addSource(source);
-    }
+  protected T provide(ContextualProvider<? extends T> provider, Dependency<?> dependency) {
+    InjectionPoint point = dependency.getInjectionPoint();
+    return provider.get(point);
   }
 
   @Override

@@ -42,7 +42,7 @@ public class LoggerInjectionTest extends TestCase {
     assertNull(injector.getInstance(Logger.class).getName());
     assertNull(injector.getProvider(Logger.class).get().getName());
     assertNull(injector.getBinding(Logger.class).getProvider().get().getName());
-    assertEquals("Provider<Logger>", injector.getProvider(Logger.class).toString());
+    assertEquals("ContextualProviderOf[Provider<Logger>]", injector.getProvider(Logger.class).toString());
   }
 
   public void testCanBindAnnotatedLogger() {

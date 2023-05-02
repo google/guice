@@ -33,7 +33,6 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   private final Class<? extends Provider<?>> providerType;
   private final Key<? extends Provider<T>> providerKey;
   private BindingImpl<? extends Provider<T>> providerBinding;
-  private ProvisionListenerStackCallback<T> provisionCallback;
 
   ProvidedByInternalFactory(
       Class<?> rawType,

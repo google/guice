@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
+import com.google.inject.ContextualProvider;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
@@ -150,6 +151,27 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     setBinding(
         new LinkedProviderBindingImpl<T>(
             base.getSource(), base.getKey(), base.getScoping(), providerKey));
+    return this;
+  }
+
+  @Override
+  public BindingBuilder<T> toContextualProvider(ContextualProvider<? extends T> provider) {
+    checkNotNull(provider, "provider");
+    checkNotTargetted();
+
+    // lookup the injection points, adding any errors to the binder's errors list
+    Set<InjectionPoint> injectionPoints;
+    try {
+      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
+    } catch (ConfigurationException e) {
+      copyErrorsToBinder(e);
+      injectionPoints = e.getPartialValue();
+    }
+
+    BindingImpl<T> base = getBinding();
+    setBinding(
+        ContextualProviderInstanceBindingImpl.<T>create(
+            base.getKey(), base.getSource(), base.getScoping(), provider, injectionPoints));
     return this;
   }
 

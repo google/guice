@@ -61,6 +61,7 @@ public enum ErrorId {
   SUBTYPE_NOT_PROVIDED,
   TOO_MANY_CONSTRUCTORS,
   VOID_PROVIDER_METHOD,
+  CONTEXTUAL_PROVIDE_WITHOUT_CONTEXT,
 
   // All other uncommon type of errors
   OTHER;

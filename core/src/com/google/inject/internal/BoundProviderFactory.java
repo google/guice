@@ -24,7 +24,6 @@ import javax.inject.Provider;
 /** Delegates to a custom factory which is also bound in the injector. */
 final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implements CreationListener {
 
-  private final ProvisionListenerStackCallback<T> provisionCallback;
   private final InjectorImpl injector;
   final Key<? extends javax.inject.Provider<? extends T>> providerKey;
   private InternalFactory<? extends javax.inject.Provider<? extends T>> providerFactory;
@@ -34,8 +33,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
-    super(source);
-    this.provisionCallback = provisionCallback;
+    super(source, provisionCallback);
     this.injector = injector;
     this.providerKey = providerKey;
   }

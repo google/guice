@@ -23,6 +23,7 @@ import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
+import com.google.inject.ContextualProvider;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -290,23 +291,18 @@ final class InjectorShell {
         .getBindingData()
         .putBinding(
             key,
-            new ProviderInstanceBindingImpl<Logger>(
-                injector,
+            ContextualProviderInstanceBindingImpl.<Logger>create(
                 key,
                 SourceProvider.UNKNOWN_SOURCE,
-                loggerFactory,
                 Scoping.UNSCOPED,
                 loggerFactory,
                 ImmutableSet.<InjectionPoint>of()));
   }
 
-  private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
+  private static class LoggerFactory implements ContextualProvider<Logger>, Provider<Logger> {
     @Override
-    public Logger get(InternalContext context, Dependency<?> dependency, boolean linked) {
-      InjectionPoint injectionPoint = dependency.getInjectionPoint();
-      return injectionPoint == null
-          ? Logger.getAnonymousLogger()
-          : Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+    public Logger get(InjectionPoint point) {
+      return Logger.getLogger(point.getMember().getDeclaringClass().getName());
     }
 
     @Override

@@ -38,6 +38,12 @@ public interface BindingTargetVisitor<T, V> {
   V visit(ProviderInstanceBinding<? extends T> binding);
 
   /**
+   * Visit a provider instance binding. The provider's {@code get} method is invoked to resolve
+   * injections. This target is found in both module and injector bindings.
+   */
+  V visit(ContextualProviderInstanceBinding<? extends T> binding);
+
+  /**
    * Visit a provider key binding. To resolve injections, the provider key is first resolved, then
    * that provider's {@code get} method is invoked. This target is found in both module and injector
    * bindings.
