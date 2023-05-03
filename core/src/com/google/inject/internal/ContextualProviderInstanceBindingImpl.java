@@ -103,7 +103,7 @@ class ContextualProviderInstanceBindingImpl<T> extends BindingImpl<T> implements
     @Override
     public T get(InternalContext context, Dependency<?> dependency, boolean linked) {
       InjectionContext injectionContext = InjectionContext.fromDependency(dependency);
-      return context == null
+      return injectionContext == null
           ? get() // without context
           : provider.get(injectionContext);
     }

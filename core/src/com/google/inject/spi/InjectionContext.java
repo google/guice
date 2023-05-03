@@ -55,7 +55,11 @@ public final class InjectionContext implements AnnotatedElement {
   }
 
   public Dependency<?> getDependency() {
-    return this.dependency;
+    return dependency;
+  }
+
+  public InjectionPoint getPoint() {
+    return dependency.getInjectionPoint();
   }
 
   public Member getMember() {
@@ -119,8 +123,13 @@ public final class InjectionContext implements AnnotatedElement {
       Member member = point.getMember();
       int index = dependency.getParameterIndex();
       if (index != -1) {
-        Method method = (Method) member;
-        return new InjectionContext(dependency, method.getParameters()[index]);
+        if (member instanceof Constructor) {
+          Constructor<?> constructor = (Constructor<?>) member;
+          return new InjectionContext(dependency, constructor.getParameters()[index]);
+        } else if (member instanceof Method) {
+          Method method = (Method) member;
+          return new InjectionContext(dependency, method.getParameters()[index]);
+        }
       } else {
         if (member instanceof Constructor) {
           return new InjectionContext(dependency, (Constructor<?>) member);

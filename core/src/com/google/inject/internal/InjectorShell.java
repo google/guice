@@ -303,7 +303,7 @@ final class InjectorShell {
   private static class LoggerFactory implements ContextualProvider<Logger>, Provider<Logger> {
     @Override
     public Logger get(InjectionContext context) {
-      return Logger.getLogger(context.getMember().getDeclaringClass().getName());
+      return Logger.getLogger(context.getPoint().getMember().getDeclaringClass().getName());
     }
 
     @Override
