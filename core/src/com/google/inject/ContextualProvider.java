@@ -16,8 +16,23 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InjectionContext;
 
+/**
+ * An object capable of providing instances of type {@code T} based on context
+ * obtained from an {@link InjectionContext}.
+ *
+ * @param <T> the type of object this provides
+ */
 public interface ContextualProvider<T> {
-  T get(InjectionPoint point);
+  /**
+   * Provides an instance of {@code T}.
+   *
+   * @param context the {@code InjectionContext} where a value is to be provided for
+   * @throws OutOfScopeException when an attempt is made to access a scoped object while the scope
+   *     in question is not currently active
+   * @throws ProvisionException if an instance cannot be provided. Such exceptions include messages
+   *     and throwables to describe why provision failed.
+   */
+  T get(InjectionContext context);
 }

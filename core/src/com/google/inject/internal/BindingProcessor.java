@@ -167,17 +167,22 @@ final class BindingProcessor extends AbstractBindingProcessor {
                     injector, /* type= */ null, provider, null, source, injectionPoints, errors);
             // always visited with Binding<T>
             @SuppressWarnings("unchecked")
+            ContextualProviderInstanceBinding<T> bindingAsT =
+                (ContextualProviderInstanceBinding<T>) binding;
             InternalFactory<T> factory =
                 new InternalContextualFactoryToInitializableAdapter<>(
                     initializable,
                     source,
-                    injector.provisionListenerStore.get((ContextualProviderInstanceBinding<T>) binding));
+                    injector.provisionListenerStore.get(bindingAsT));
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
+            @SuppressWarnings("unchecked")
+            ContextualProviderInstanceBindingImpl<T> bindingAsImpl =
+                (ContextualProviderInstanceBindingImpl<T>) binding;
             putBinding(
                 new ContextualProviderInstanceBindingImpl<T>(
                     key, source, scoping, scopedFactory, provider,
-                    ((ContextualProviderInstanceBindingImpl<? extends T>) binding).getInternalProvider(),
+                    bindingAsImpl.getInternalProvider(),
                     injectionPoints));
             return true;
           }

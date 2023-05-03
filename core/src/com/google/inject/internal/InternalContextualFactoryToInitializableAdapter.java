@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.ContextualProvider;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InjectionContext;
 
 final class InternalContextualFactoryToInitializableAdapter<T>
     extends AbstractProviderInternalFactory<T, ContextualProvider<? extends T>> {
@@ -43,8 +43,8 @@ final class InternalContextualFactoryToInitializableAdapter<T>
 
   @Override
   protected T provide(ContextualProvider<? extends T> provider, Dependency<?> dependency) {
-    InjectionPoint point = dependency.getInjectionPoint();
-    return provider.get(point);
+    InjectionContext context = InjectionContext.fromDependency(dependency);
+    return provider.get(context);
   }
 
   @Override

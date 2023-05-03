@@ -28,6 +28,7 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ContextualProviderInstanceBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.InjectionContext;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import java.util.Set;
@@ -60,7 +61,7 @@ class ContextualProviderInstanceBindingImpl<T> extends BindingImpl<T> implements
     );
   }
 
-  public ContextualProviderInstanceBindingImpl(
+  private ContextualProviderInstanceBindingImpl(
       Key<T> key,
       Object source,
       Scoping scoping,
@@ -80,11 +81,11 @@ class ContextualProviderInstanceBindingImpl<T> extends BindingImpl<T> implements
       Key<T> key,
       Object source,
       Scoping scoping,
-      InternalFactory<? extends T> wrapper,
+      InternalFactory<? extends T> internalFactory,
       ContextualProvider<? extends T> userSupplierProvider,
       InternalProvider<? extends T> internalProvider,
       Set<InjectionPoint> injectionPoints) {
-    super(null, key, source, wrapper, scoping);
+    super(null, key, source, internalFactory, scoping);
     this.userSupplierProvider = userSupplierProvider;
     this.internalProvider = internalProvider;
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
@@ -101,10 +102,10 @@ class ContextualProviderInstanceBindingImpl<T> extends BindingImpl<T> implements
 
     @Override
     public T get(InternalContext context, Dependency<?> dependency, boolean linked) {
-      InjectionPoint injectionPoint = dependency.getInjectionPoint();
-      return injectionPoint == null
+      InjectionContext injectionContext = InjectionContext.fromDependency(dependency);
+      return context == null
           ? get() // without context
-          : provider.get(injectionPoint);
+          : provider.get(injectionContext);
     }
 
     @Override

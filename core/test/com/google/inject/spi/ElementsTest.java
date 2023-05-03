@@ -526,7 +526,7 @@ public class ElementsTest extends TestCase {
     final ContextualProvider<String> aProvider =
         new ContextualProvider<String>() {
           @Override
-          public String get(InjectionPoint point) {
+          public String get(InjectionContext context) {
             return "A";
           }
         };

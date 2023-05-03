@@ -37,6 +37,7 @@ import com.google.inject.spi.BindingSourceRestriction;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+import com.google.inject.spi.InjectionContext;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.PrivateElements;
@@ -301,8 +302,8 @@ final class InjectorShell {
 
   private static class LoggerFactory implements ContextualProvider<Logger>, Provider<Logger> {
     @Override
-    public Logger get(InjectionPoint point) {
-      return Logger.getLogger(point.getMember().getDeclaringClass().getName());
+    public Logger get(InjectionContext context) {
+      return Logger.getLogger(context.getMember().getDeclaringClass().getName());
     }
 
     @Override

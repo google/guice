@@ -170,7 +170,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
     BindingImpl<T> base = getBinding();
     setBinding(
-        ContextualProviderInstanceBindingImpl.<T>create(
+        ContextualProviderInstanceBindingImpl.create(
             base.getKey(), base.getSource(), base.getScoping(), provider, injectionPoints));
     return this;
   }
