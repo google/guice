@@ -7,6 +7,7 @@ import static org.junit.Assume.assumeTrue;
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
+import com.google.inject.Exposed;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.PrivateModule;
@@ -14,6 +15,7 @@ import com.google.inject.Provides;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +44,14 @@ public final class ChildBindingAlreadySetErrorTest {
     protected void configure() {
       bind(Foo.class).to(SubFoo.class);
     }
+
+    // Expose _something_ so that the child/private injector doesn't immediately get GC'd.
+    @Provides
+    @Named("ChildModule")
+    @Exposed
+    String provideExposed() {
+      return "a";
+    }
   }
 
   @Test
@@ -60,6 +70,14 @@ public final class ChildBindingAlreadySetErrorTest {
     @Provides
     Foo provideFoo() {
       return new Foo();
+    }
+
+    // Expose _something_ so that the child/private injector doesn't immediately get GC'd.
+    @Provides
+    @Named("Child2Module")
+    @Exposed
+    String provideExposed() {
+      return "a";
     }
   }
 
@@ -106,12 +124,28 @@ public final class ChildBindingAlreadySetErrorTest {
       // Trigger a JIT binding for DependsOnFoo in this PrivateModule.
       getProvider(DependsOnFoo.class);
     }
+
+    // Expose _something_ so that the child/private injector doesn't immediately get GC'd.
+    @Provides
+    @Named("Child3Module")
+    @Exposed
+    String provideExposed() {
+      return "a";
+    }
   }
 
   static class ChildModule4 extends PrivateModule {
     @Override
     protected void configure() {
       bind(DependsOnFoo.class).toInstance(new DependsOnFoo(new Foo()));
+    }
+
+    // Expose _something_ so that the child/private injector doesn't immediately get GC'd.
+    @Provides
+    @Named("Child4Module")
+    @Exposed
+    String provideExposed() {
+      return "a";
     }
   }
 

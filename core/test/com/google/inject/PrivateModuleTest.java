@@ -646,18 +646,29 @@ public class PrivateModuleTest extends TestCase {
     @Override
     protected void configure() {
       // make sure duplicate sources are collapsed
-      install(new FailingPrivateModule());
-      install(new FailingPrivateModule());
+      install(new FailingPrivateModule("a"));
+      install(new FailingPrivateModule("b"));
       // but additional sources are listed
-      install(new SecondFailingPrivateModule());
+      install(new SecondFailingPrivateModule("c"));
     }
   }
 
   private static class FailingPrivateModule extends PrivateModule {
+    private final String exposeAs;
+
+    FailingPrivateModule(String exposeAs) {
+      this.exposeAs = exposeAs;
+    }
+
     @Override
     protected void configure() {
       Key<List<String>> key = new Key<List<String>>() {};
       bind(key).toInstance(new ArrayList<String>());
+
+      // Expose _something_ so that the child/private injector doesn't immediately get GC'd.
+      Key<String> exposedKey = new Key<String>(Names.named(exposeAs)) {};
+      bind(exposedKey).toInstance("exposed");
+      expose(exposedKey);
 
       // Add the Provider<List> binding, created just-in-time,
       // to make sure our linked JIT bindings have the correct source.
@@ -672,10 +683,21 @@ public class PrivateModuleTest extends TestCase {
 
   /** A second class, so we can see another name in the source list. */
   private static class SecondFailingPrivateModule extends PrivateModule {
+    private final String exposeAs;
+
+    SecondFailingPrivateModule(String exposeAs) {
+      this.exposeAs = exposeAs;
+    }
+
     @Override
     protected void configure() {
       Key<List<String>> key = new Key<List<String>>() {};
       bind(key).toInstance(new ArrayList<String>());
+
+      // Expose _something_ so that the child/private injector doesn't immediately get GC'd.
+      Key<String> exposedKey = new Key<String>(Names.named(exposeAs)) {};
+      bind(exposedKey).toInstance("exposed");
+      expose(exposedKey);
 
       // Add the Provider<List> binding, created just-in-time,
       // to make sure our linked JIT bindings have the correct source.
