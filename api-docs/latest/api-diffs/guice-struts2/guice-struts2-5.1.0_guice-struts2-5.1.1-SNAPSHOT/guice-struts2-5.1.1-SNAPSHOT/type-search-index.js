@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"com.google.inject.struts2","l":"GuiceObjectFactory"},{"p":"com.google.inject.struts2","l":"Struts2Factory"},{"p":"com.google.inject.struts2","l":"Struts2GuicePluginModule"}]

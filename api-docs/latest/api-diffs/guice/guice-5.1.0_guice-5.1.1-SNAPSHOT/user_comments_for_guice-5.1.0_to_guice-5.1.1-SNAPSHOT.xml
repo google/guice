@@ -51,6 +51,24 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.binder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toProvider_changed(jakarta.inject.Provider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.internal"/>
   <text>
     InsertCommentsHere
@@ -64,6 +82,18 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.internal.Annotations.annotationInstanceClassString_added(java.lang.Class, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.BindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.internal.BindingBuilder.toProvider_changed(jakarta.inject.Provider)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -153,6 +183,24 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderInstanceBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderInstanceBinding.getUserSuppliedProvider_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.util"/>
   <text>
     InsertCommentsHere
@@ -183,6 +231,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.util.Providers.guicify_removed(javax.inject.Provider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.util.Types"/>
   <text>
     InsertCommentsHere
@@ -190,6 +244,12 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.util.Types.jakartaProviderOf_added(java.lang.reflect.Type)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Types.javaxProviderOf_removed(java.lang.reflect.Type)"/>
   <text>
     InsertCommentsHere
   </text>

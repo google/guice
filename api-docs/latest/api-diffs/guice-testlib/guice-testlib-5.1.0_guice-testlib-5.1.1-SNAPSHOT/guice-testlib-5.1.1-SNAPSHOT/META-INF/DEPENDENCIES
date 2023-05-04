@@ -21,8 +21,6 @@ From: 'an unknown organization'
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Truth Core (http://github.com/google/truth/truth) com.google.truth:truth:jar:1.1.3
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - javax.inject (http://code.google.com/p/atinject/) javax.inject:javax.inject:jar:1
-    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Checker Qual (https://checkerframework.org) org.checkerframework:checker-qual:jar:3.13.0
     License: The MIT License  (http://opensource.org/licenses/MIT)
 
