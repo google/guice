@@ -21,7 +21,6 @@ java_library(
     tags = ["maven_coordinates=com.google.inject.extensions:guice-persist:" + POM_VERSION],
     deps = [
         "//core/src/com/google/inject",
-        "//extensions/servlet/src/com/google/inject/servlet",
         "//third_party/java/aopalliance",
         "//third_party/java/guava/annotations",
         "//third_party/java/guava/base",

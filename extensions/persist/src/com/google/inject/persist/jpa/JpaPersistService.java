@@ -63,9 +63,12 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     EntityManager em = entityManager.get();
     Preconditions.checkState(
         null != em,
-        "Requested EntityManager outside work unit. "
-            + "Try calling UnitOfWork.begin() first, or use a PersistFilter if you "
-            + "are inside a servlet environment.");
+        "Requested EntityManager outside work unit. As of Guice 6.0, Guice Persist doesn't"
+            + " automatically begin the unit of work when provisioning an EntityManager. To"
+            + " preserve the legacy behavior, construct the `JpaPersistModule` with a"
+            + " `JpaPersistOptions.builder().setAutoBeginWorkOnEntityManagerCreation(true).build()`."
+            + " Alternately, try calling UnitOfWork.begin() first, or use a PersistFilter if you"
+            + " are inside a servlet environment.");
 
     return em;
   }
