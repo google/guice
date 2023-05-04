@@ -22,9 +22,9 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import java.util.Date;
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
+import jakarta.inject.Provider;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import junit.framework.TestCase;
 
 /** @author Dhanji R. Prasanna (dhanji@gmail.com) */

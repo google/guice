@@ -17,7 +17,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.ProvidesIntoMap;
 import com.google.inject.multibindings.StringMapKey;
 import java.lang.annotation.Retention;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

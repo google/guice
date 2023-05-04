@@ -136,16 +136,6 @@ public final class Types {
   }
 
   /**
-   * Returns a type modelling a {@link javax.inject.Provider} that provides elements of type {@code
-   * elementType}.
-   *
-   * @return a {@link java.io.Serializable serializable} parameterized type.
-   */
-  public static Type javaxProviderOf(Type type) {
-    return Types.newParameterizedType(javax.inject.Provider.class, type);
-  }
-
-  /**
    * Returns a type modelling a {@link jakarta.inject.Provider} that provides elements of type
    * {@code elementType}.
    *

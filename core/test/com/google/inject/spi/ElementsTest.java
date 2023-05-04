@@ -380,17 +380,17 @@ public class ElementsTest extends TestCase {
           }
         };
 
-    final javax.inject.Provider<Integer> intSpecProvider =
-        new javax.inject.Provider<Integer>() {
+    final jakarta.inject.Provider<Integer> intSpecProvider =
+        new jakarta.inject.Provider<Integer>() {
           @Override
           public Integer get() {
             return 42;
           }
         };
 
-    final javax.inject.Provider<Double> doubleSpecProvider =
-        new javax.inject.Provider<Double>() {
-          @javax.inject.Inject String string;
+    final jakarta.inject.Provider<Double> doubleSpecProvider =
+        new jakarta.inject.Provider<Double>() {
+          @jakarta.inject.Inject String string;
 
           @Override
           public Double get() {

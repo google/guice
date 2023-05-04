@@ -432,8 +432,7 @@ public final class BoundFieldModule implements Module {
   }
 
   private static boolean hasInject(Field field) {
-    return field.isAnnotationPresent(javax.inject.Inject.class)
-        || field.isAnnotationPresent(com.google.inject.Inject.class)
+    return field.isAnnotationPresent(com.google.inject.Inject.class)
         || field.isAnnotationPresent(jakarta.inject.Inject.class);
   }
 
@@ -457,7 +456,6 @@ public final class BoundFieldModule implements Module {
    */
   private static boolean isTransparentProvider(Class<?> clazz) {
     return com.google.inject.Provider.class == clazz
-        || javax.inject.Provider.class == clazz
         || jakarta.inject.Provider.class == clazz;
   }
 
@@ -482,27 +480,12 @@ public final class BoundFieldModule implements Module {
               // @Nullable
               public Object get() {
                 Object val = getFieldValue(fieldInfo);
-                if (val instanceof javax.inject.Provider) {
-                  return ((javax.inject.Provider<?>) val).get();
-                } else if (val instanceof jakarta.inject.Provider) {
-                  return ((jakarta.inject.Provider<?>) val).get();
-                } else {
-                  throw new IllegalStateException(
-                      "unexpected field value: " + val + ", of type: " + val.getClass());
-                }
+                return ((jakarta.inject.Provider<?>) val).get();
               }
             });
       } else {
         Object val = getFieldValue(fieldInfo);
-        if (val instanceof javax.inject.Provider) {
-          binderUnsafe.toProvider((javax.inject.Provider<?>) val);
-        } else if (val instanceof jakarta.inject.Provider) {
-          // TODO(sameb): bind directly without using guicify when the API exists.
-          binderUnsafe.toProvider(Providers.guicify((jakarta.inject.Provider<?>) val));
-        } else {
-          throw new IllegalStateException(
-              "unexpected field value: " + val + ", of type: " + val.getClass());
-        }
+        binderUnsafe.toProvider((jakarta.inject.Provider<?>) val);
       }
     } else if (fieldInfo.bindAnnotation.lazy()) {
       binderUnsafe.toProvider(

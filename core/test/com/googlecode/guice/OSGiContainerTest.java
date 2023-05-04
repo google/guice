@@ -56,7 +56,7 @@ public class OSGiContainerTest {
   static final String AOPALLIANCE_JAR =
       System.getProperty("aopalliance.jar", "lib/aopalliance.jar");
   static final String JAVAX_INJECT_JAR =
-      System.getProperty("javax.inject.jar", "lib/javax.inject.jar");
+      System.getProperty("jakarta.inject.jar", "lib/jakarta.inject.jar");
   static final String GUAVA_JAR = System.getProperty("guava.jar", "lib/guava-25.1-android.jar");
 
   // dynamically build test bundles
@@ -78,9 +78,9 @@ public class OSGiContainerTest {
     buildBundle("aopalliance", instructions, AOPALLIANCE_JAR);
     instructions.clear();
 
-    // javax.inject is an API bundle --> export the full API
-    instructions.setProperty("Export-Package", "javax.inject.*");
-    buildBundle("javax.inject", instructions, JAVAX_INJECT_JAR);
+    // jakarta.inject is an API bundle --> export the full API
+    instructions.setProperty("Export-Package", "jakarta.inject.*");
+    buildBundle("jakarta.inject", instructions, JAVAX_INJECT_JAR);
     instructions.clear();
 
     // early versions of guava did not ship with OSGi metadata
@@ -143,7 +143,7 @@ public class OSGiContainerTest {
 
       // load all the necessary bundles and start the OSGi test bundle
       systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/aopalliance.jar");
-      systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/javax.inject.jar");
+      systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/jakarta.inject.jar");
       systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/guava.jar");
       systemContext.installBundle("reference:file:" + GUICE_JAR);
       systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/osgitests.jar").start();

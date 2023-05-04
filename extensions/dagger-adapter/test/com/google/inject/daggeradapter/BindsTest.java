@@ -96,38 +96,6 @@ public class BindsTest extends TestCase {
   }
 
   @Module
-  interface JavaxScopedMultibindingBindsModule {
-    @Binds
-    @IntoSet
-    @javax.inject.Singleton
-    Object fromString(String string);
-
-    @Binds
-    CharSequence toCharSequence(String string);
-
-    @Binds
-    @IntoSet
-    @javax.inject.Singleton
-    Object fromCharSequence(CharSequence charSequence);
-  }
-
-  public void testJavaxScopedMultibindings() {
-    Injector injector =
-        Guice.createInjector(
-            DaggerAdapter.from(
-                new CountingMultibindingProviderModule(),
-                JavaxScopedMultibindingBindsModule.class));
-
-    Binding<Set<Object>> binding = injector.getBinding(new Key<Set<Object>>() {});
-    assertThat(binding)
-        .hasProvidedValueThat()
-        .isEqualTo(ImmutableSet.of("multibound-1", "multibound-2"));
-    assertThat(binding)
-        .hasProvidedValueThat()
-        .isEqualTo(ImmutableSet.of("multibound-1", "multibound-2"));
-  }
-
-  @Module
   interface JakartaScopedMultibindingBindsModule {
     @Binds
     @IntoSet
@@ -157,45 +125,6 @@ public class BindsTest extends TestCase {
     assertThat(binding)
         .hasProvidedValueThat()
         .isEqualTo(ImmutableSet.of("multibound-1", "multibound-2"));
-  }
-
-  @Retention(RetentionPolicy.RUNTIME)
-  @javax.inject.Qualifier
-  @interface JavaxProvidesQualifier {}
-
-  @Retention(RetentionPolicy.RUNTIME)
-  @javax.inject.Qualifier
-  @interface JavaxBindsQualifier {}
-
-  @Module
-  interface JavaxQualifiedBinds {
-    @Provides
-    @JavaxProvidesQualifier
-    static String provides() {
-      return "qualifiers";
-    }
-
-    @Binds
-    @JavaxBindsQualifier
-    String bindsToProvides(@JavaxProvidesQualifier String provides);
-
-    @Binds
-    String unqualifiedToBinds(@JavaxBindsQualifier String binds);
-  }
-
-  public void testJavaxQualifiers() {
-    Injector injector = Guice.createInjector(DaggerAdapter.from(JavaxQualifiedBinds.class));
-
-    Binding<String> stringBinding = injector.getBinding(String.class);
-    assertThat(stringBinding).hasProvidedValueThat().isEqualTo("qualifiers");
-    assertThat(stringBinding)
-        .hasSource(JavaxQualifiedBinds.class, "unqualifiedToBinds", String.class);
-
-    Binding<String> qualifiedBinds =
-        injector.getBinding(Key.get(String.class, JavaxBindsQualifier.class));
-    assertThat(qualifiedBinds).hasProvidedValueThat().isEqualTo("qualifiers");
-    assertThat(qualifiedBinds)
-        .hasSource(JavaxQualifiedBinds.class, "bindsToProvides", String.class);
   }
 
   @Retention(RetentionPolicy.RUNTIME)

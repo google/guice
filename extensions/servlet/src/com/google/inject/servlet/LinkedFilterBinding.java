@@ -17,7 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Key;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * A linked binding to a filter.

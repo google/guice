@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.common.base.MoreObjects;
 import java.util.Map;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * Default implementation of InstanceFilterBinding.

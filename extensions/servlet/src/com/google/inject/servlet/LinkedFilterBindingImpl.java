@@ -19,7 +19,7 @@ package com.google.inject.servlet;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
 import java.util.Map;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * Default implementation of LinkedFilterBinding.

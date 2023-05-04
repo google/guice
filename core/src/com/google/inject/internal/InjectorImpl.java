@@ -784,7 +784,7 @@ final class InjectorImpl implements Injector, Lookups {
   <T> BindingImpl<T> createProvidedByBinding(
       Key<T> key, Scoping scoping, ProvidedBy providedBy, Errors errors) throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
-    Class<? extends javax.inject.Provider<?>> providerType = providedBy.value();
+    Class<? extends jakarta.inject.Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
     if (providerType == rawType) {

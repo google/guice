@@ -102,7 +102,7 @@ public final class InternalProvisionException extends Exception {
   }
 
   public static InternalProvisionException subtypeNotProvided(
-      Class<? extends javax.inject.Provider<?>> providerType, Class<?> type) {
+      Class<? extends jakarta.inject.Provider<?>> providerType, Class<?> type) {
     return create(
         ErrorId.SUBTYPE_NOT_PROVIDED, "%s doesn't provide instances of %s.", providerType, type);
   }

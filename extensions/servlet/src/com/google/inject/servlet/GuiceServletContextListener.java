@@ -18,9 +18,9 @@ package com.google.inject.servlet;
 
 import com.google.inject.Injector;
 import java.lang.ref.WeakReference;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 /**
  * As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener} class

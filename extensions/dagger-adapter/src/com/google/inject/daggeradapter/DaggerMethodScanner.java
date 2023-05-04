@@ -94,7 +94,8 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
   }
 
   private static final ImmutableSet<Class<? extends Annotation>> SCOPE_ANNOTATIONS =
-      ImmutableSet.of(javax.inject.Scope.class, jakarta.inject.Scope.class);
+      ImmutableSet.of(
+          jakarta.inject.Scope.class);
 
   private <T> void configureBindsKey(Binder binder, Method method, Key<T> key) {
     // the Dagger processor already validates the assignability of these two keys. parameterKey()

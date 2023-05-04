@@ -17,7 +17,7 @@ import com.google.inject.multibindings.ProvidesIntoSet;
 import java.lang.annotation.Retention;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

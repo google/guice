@@ -17,7 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Key;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 /**
  * A linked binding to a servlet.

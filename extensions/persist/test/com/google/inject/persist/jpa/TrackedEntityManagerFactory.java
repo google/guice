@@ -1,15 +1,15 @@
 package com.google.inject.persist.jpa;
 
 import java.util.Map;
-import javax.persistence.Cache;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnitUtil;
-import javax.persistence.Query;
-import javax.persistence.SynchronizationType;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.metamodel.Metamodel;
+import jakarta.persistence.Cache;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnitUtil;
+import jakarta.persistence.Query;
+import jakarta.persistence.SynchronizationType;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.metamodel.Metamodel;
 
 /** Proxy EntityManager that adds tracking capabilities, keeping a count of created objects. */
 class TrackedEntityManagerFactory implements EntityManagerFactory {

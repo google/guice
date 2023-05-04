@@ -33,7 +33,7 @@ import java.util.Set;
 final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
     implements ProviderKeyBinding<T>, HasDependencies, DelayedInitialize {
 
-  final Key<? extends javax.inject.Provider<? extends T>> providerKey;
+  final Key<? extends jakarta.inject.Provider<? extends T>> providerKey;
   final DelayedInitialize delayedInitializer;
 
   private LinkedProviderBindingImpl(
@@ -42,7 +42,7 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
       Object source,
       InternalFactory<? extends T> internalFactory,
       Scoping scoping,
-      Key<? extends javax.inject.Provider<? extends T>> providerKey,
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey,
       DelayedInitialize delayedInitializer) {
     super(injector, key, source, internalFactory, scoping);
     this.providerKey = providerKey;
@@ -55,7 +55,7 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
       Object source,
       InternalFactory<? extends T> internalFactory,
       Scoping scoping,
-      Key<? extends javax.inject.Provider<? extends T>> providerKey) {
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey) {
     this(injector, key, source, internalFactory, scoping, providerKey, null);
   }
 
@@ -63,7 +63,7 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
       Object source,
       Key<T> key,
       Scoping scoping,
-      Key<? extends javax.inject.Provider<? extends T>> providerKey) {
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey) {
     super(source, key, scoping);
     this.providerKey = providerKey;
     this.delayedInitializer = null;
@@ -75,7 +75,7 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
       Object source,
       InternalFactory<? extends T> internalFactory,
       Scoping scoping,
-      Key<? extends javax.inject.Provider<? extends T>> providerKey,
+      Key<? extends jakarta.inject.Provider<? extends T>> providerKey,
       DelayedInitialize delayedInitializer) {
     return new LinkedProviderBindingImpl<T>(
         injector, key, source, internalFactory, scoping, providerKey, delayedInitializer);
@@ -87,7 +87,7 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override
-  public Key<? extends javax.inject.Provider<? extends T>> getProviderKey() {
+  public Key<? extends jakarta.inject.Provider<? extends T>> getProviderKey() {
     return providerKey;
   }
 

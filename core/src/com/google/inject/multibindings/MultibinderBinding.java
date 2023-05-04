@@ -47,7 +47,7 @@ public interface MultibinderBinding<T> {
   /**
    * Returns the keys of other bindings that represent this set. This will return an entry for
    * {@code Collection<com.google.inject.Provider<V>>}, {@code
-   * Collection<javax.inject.Provider<V>>}, and {@code Set<? extends V>}.
+   * Collection<jakarta.inject.Provider<V>>}, and {@code Set<? extends V>}.
    *
    * @since 4.2.3
    */

@@ -36,7 +36,7 @@ import java.util.Set;
 
 class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderInstanceBinding<T> {
 
-  final javax.inject.Provider<? extends T> providerInstance;
+  final jakarta.inject.Provider<? extends T> providerInstance;
   final ImmutableSet<InjectionPoint> injectionPoints;
 
   public ProviderInstanceBindingImpl(
@@ -45,7 +45,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
       Object source,
       InternalFactory<? extends T> internalFactory,
       Scoping scoping,
-      javax.inject.Provider<? extends T> providerInstance,
+      jakarta.inject.Provider<? extends T> providerInstance,
       Set<InjectionPoint> injectionPoints) {
     super(injector, key, source, internalFactory, scoping);
     this.providerInstance = providerInstance;
@@ -57,7 +57,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
       Key<T> key,
       Scoping scoping,
       Set<InjectionPoint> injectionPoints,
-      javax.inject.Provider<? extends T> providerInstance) {
+      jakarta.inject.Provider<? extends T> providerInstance) {
     super(source, key, scoping);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.providerInstance = providerInstance;
@@ -78,7 +78,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
   }
 
   @Override
-  public javax.inject.Provider<? extends T> getUserSuppliedProvider() {
+  public jakarta.inject.Provider<? extends T> getUserSuppliedProvider() {
     return providerInstance;
   }
 

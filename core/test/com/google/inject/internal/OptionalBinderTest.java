@@ -78,11 +78,6 @@ public class OptionalBinderTest extends TestCase {
       new TypeLiteral<Optional<Provider<String>>>() {};
   final TypeLiteral<java.util.Optional<Provider<String>>> javaOptionalOfProviderString =
       new TypeLiteral<java.util.Optional<Provider<String>>>() {};
-  final TypeLiteral<Optional<javax.inject.Provider<String>>> optionalOfJavaxProviderString =
-      new TypeLiteral<Optional<javax.inject.Provider<String>>>() {};
-  final TypeLiteral<java.util.Optional<javax.inject.Provider<String>>>
-      javaOptionalOfJavaxProviderString =
-          new TypeLiteral<java.util.Optional<javax.inject.Provider<String>>>() {};
   final TypeLiteral<Optional<jakarta.inject.Provider<String>>> optionalOfJakartaProviderString =
       new TypeLiteral<Optional<jakarta.inject.Provider<String>>>() {};
   final TypeLiteral<java.util.Optional<jakarta.inject.Provider<String>>>
@@ -97,11 +92,6 @@ public class OptionalBinderTest extends TestCase {
       new TypeLiteral<Optional<Provider<Integer>>>() {};
   final TypeLiteral<java.util.Optional<Provider<Integer>>> javaOptionalOfProviderInteger =
       new TypeLiteral<java.util.Optional<Provider<Integer>>>() {};
-  final TypeLiteral<Optional<javax.inject.Provider<Integer>>> optionalOfJavaxProviderInteger =
-      new TypeLiteral<Optional<javax.inject.Provider<Integer>>>() {};
-  final TypeLiteral<java.util.Optional<javax.inject.Provider<Integer>>>
-      javaOptionalOfJavaxProviderInteger =
-          new TypeLiteral<java.util.Optional<javax.inject.Provider<Integer>>>() {};
   final TypeLiteral<Optional<jakarta.inject.Provider<Integer>>> optionalOfJakartaProviderInteger =
       new TypeLiteral<Optional<jakarta.inject.Provider<Integer>>>() {};
   final TypeLiteral<java.util.Optional<jakarta.inject.Provider<Integer>>>
@@ -225,20 +215,6 @@ public class OptionalBinderTest extends TestCase {
     assertThat(optionalP.isPresent()).isEqualTo(expectedPresent);
     if (expectedPresent) {
       assertThat(optionalP.get().get()).isEqualTo(expectedValueIfPresent);
-    }
-
-    Optional<javax.inject.Provider<String>> optionalJxP =
-        injector.getInstance(keyFor(optionalOfJavaxProviderString, annotation));
-    assertThat(optionalJxP.isPresent()).isEqualTo(expectedPresent);
-    if (expectedPresent) {
-      assertThat(optionalJxP.get().get()).isEqualTo(expectedValueIfPresent);
-    }
-    optionalJxP =
-        Optional.fromJavaUtil(
-            injector.getInstance(keyFor(javaOptionalOfJavaxProviderString, annotation)));
-    assertThat(optionalJxP.isPresent()).isEqualTo(expectedPresent);
-    if (expectedPresent) {
-      assertThat(optionalJxP.get().get()).isEqualTo(expectedValueIfPresent);
     }
 
     Optional<jakarta.inject.Provider<String>> optionalJkP =
@@ -671,8 +647,6 @@ public class OptionalBinderTest extends TestCase {
 
     Optional<Provider<Integer>> optionalP =
         injector.getInstance(Key.get(optionalOfProviderInteger));
-    Optional<javax.inject.Provider<Integer>> optionalJxP =
-        injector.getInstance(Key.get(optionalOfJavaxProviderInteger));
     Optional<jakarta.inject.Provider<Integer>> optionalJkP =
         injector.getInstance(Key.get(optionalOfJakartaProviderInteger));
 
@@ -708,14 +682,6 @@ public class OptionalBinderTest extends TestCase {
         Optional.fromJavaUtil(injector.getInstance(Key.get(javaOptionalOfJakartaProviderInteger)));
     assertEquals(13, optionalJkP.get().get().intValue());
     assertEquals(14, optionalJkP.get().get().intValue());
-
-    // Same with javax.provider
-    optionalJxP =
-        Optional.fromJavaUtil(injector.getInstance(Key.get(javaOptionalOfJavaxProviderInteger)));
-    assertEquals(15, optionalJxP.get().get().intValue());
-    assertEquals(16, optionalJxP.get().get().intValue());
-    assertEquals(17, optionalJxP.get().get().intValue());
-    assertEquals(18, optionalJxP.get().get().intValue());
   }
 
   public void testLinkedToNullProvidersMakeAbsentValuesAndPresentProviders_default()

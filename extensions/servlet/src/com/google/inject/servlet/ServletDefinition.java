@@ -33,15 +33,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * An internal representation of a servlet definition mapped to a particular URI pattern. Also
@@ -261,7 +261,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
           public String getPathTranslated() {
             final String info = getPathInfo();
 
-            return (null == info) ? null : getRealPath(info);
+            return (null == info) ? null : getServletContext().getRealPath(info);
           }
 
           // Memoizer pattern.

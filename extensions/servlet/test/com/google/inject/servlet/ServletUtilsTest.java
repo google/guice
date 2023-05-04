@@ -5,7 +5,7 @@ package com.google.inject.servlet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
 
 /**

@@ -23,7 +23,8 @@ wget $BASE_URL/guice/$OLD_VERSION/guice-$OLD_VERSION.jar
 echo "Diffing core..."
 pkgdiff  guice-$OLD_VERSION.jar $REPO_DIR/core/target/guice-$NEW_VERSION.jar &
 
-for EXT in assistedinject dagger-adapter grapher jmx jndi persist servlet spring struts2 testlib throwingproviders
+# struts2 not listed because we don't build it past the 7.0 line.
+for EXT in assistedinject dagger-adapter grapher jmx jndi persist servlet spring testlib throwingproviders
 do
     echo "Dowloading $EXT extension..."
     wget $BASE_URL/extensions/guice-$EXT/$OLD_VERSION/guice-$EXT-$OLD_VERSION.jar

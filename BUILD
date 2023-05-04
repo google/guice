@@ -24,7 +24,9 @@ javadoc_library(
         "//extensions/persist/src/com/google/inject/persist:javadoc-srcs",
         "//extensions/servlet/src/com/google/inject/servlet:javadoc-srcs",
         "//extensions/spring/src/com/google/inject/spring:javadoc-srcs",
-        "//extensions/struts2/src/com/google/inject/struts2:javadoc-srcs",
+        # struts2 doesn't work with jakarta.servlet, so we don't include it.
+        # We leave the commented out line as a bread-crumb for the future.
+        # "//extensions/struts2/src/com/google/inject/struts2:javadoc-srcs",
         "//extensions/testlib/src/com/google/inject/testing/fieldbinder:javadoc-srcs",
         "//extensions/testlib/src/com/google/inject/testing/throwingproviders:javadoc-srcs",
         "//extensions/throwingproviders/src/com/google/inject/throwingproviders:javadoc-srcs",
@@ -62,7 +64,7 @@ javadoc_library(
         ],
         "Servlet Extension": ["com.google.inject.servlet"],
         "Spring Extension": ["com.google.inject.spring"],
-        "Struts2 Extension": ["com.google.inject.struts2"],
+        # "Struts2 Extension": ["com.google.inject.struts2"],
         "Test Libraries Extension": ["com.google.inject.testing.*"],
         "ThrowingProviders Extension": ["com.google.inject.throwingproviders"],
     },
@@ -77,7 +79,7 @@ javadoc_library(
         "//extensions/persist/src/com/google/inject/persist",
         "//extensions/servlet/src/com/google/inject/servlet",
         "//extensions/spring/src/com/google/inject/spring",
-        "//extensions/struts2/src/com/google/inject/struts2",
+        # "//extensions/struts2/src/com/google/inject/struts2",
         "//extensions/testlib/src/com/google/inject/testing/fieldbinder",
         "//extensions/testlib/src/com/google/inject/testing/throwingproviders",
         "//extensions/throwingproviders/src/com/google/inject/throwingproviders",

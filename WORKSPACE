@@ -35,10 +35,9 @@ maven_install(
         "com.google.errorprone:error_prone_annotations:2.18.0",
         "com.google.guava:guava:31.0.1-jre",
         "commons-logging:commons-logging:1.2",
-        "javax.inject:javax.inject:1",
         "jakarta.inject:jakarta.inject-api:2.0.1",
-        "javax.persistence:javax.persistence-api:2.2",
-        "javax.servlet:servlet-api:2.5",
+        "jakarta.persistence:jakarta.persistence-api:3.0.0",
+        "jakarta.servlet:jakarta.servlet-api:5.0.0",
         "org.apache.struts:struts2-core:2.5.30",
         "org.apache.struts.xwork:xwork-core:2.3.37",
         "org.ow2.asm:asm:9.5",
@@ -68,12 +67,6 @@ maven_install(
             "com.google.truth.extensions",
             "truth-java8-extension",
             "1.1.3",
-            testonly = True,
-        ),
-        maven.artifact(
-            "javax.inject",
-            "javax.inject-tck",
-            "1",
             testonly = True,
         ),
         maven.artifact(
@@ -107,15 +100,9 @@ maven_install(
             testonly = True,
         ),
         maven.artifact(
-            "org.hibernate.javax.persistence",
-            "hibernate-jpa-2.0-api",
-            "1.0.0.Final",
-            testonly = True,
-        ),
-        maven.artifact(
             "org.hibernate",
-            "hibernate-core",
-            "5.6.3.Final",
+            "hibernate-core-jakarta",
+            "5.6.15.Final",
             testonly = True,
         ),
         maven.artifact(

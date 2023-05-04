@@ -22,6 +22,9 @@ cp -r core/target/site/api-diffs/* build/docs/api-diffs/
 EXTENSIONS=( $(ls -1 $(dirname $0)/../extensions) )
 for ext in "${EXTENSIONS[@]}"
 do
+    if [[ $ext == 'struts2' ]]; then
+        continue # struts2 doesn't support jakarta, so we drop support.
+    fi
     if [[ -f extensions/$ext/pom.xml ]]; then
         echo -e "Generating latest API diff for extension ${ext}\n"
         mvn spf4j-jdiff:jdiff -pl extensions/$ext -Dguice.skipTests=true

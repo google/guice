@@ -28,7 +28,7 @@ import dagger.Module;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import junit.framework.TestCase;
 
 /** Tests of {@link BindsOptionalOf} support in {@link DaggerAdapter}. */

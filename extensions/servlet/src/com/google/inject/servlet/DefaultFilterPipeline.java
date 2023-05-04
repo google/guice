@@ -16,12 +16,12 @@
 package com.google.inject.servlet;
 
 import java.io.IOException;
-import javax.inject.Inject;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.inject.Inject;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 /**
  * This default pipeline simply dispatches to web.xml's servlet pipeline.

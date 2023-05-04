@@ -43,7 +43,6 @@ import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.OverrideModuleTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-import com.googlecode.guice.Jsr330Test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -124,9 +123,6 @@ public class AllTests {
     suite.addTestSuite(NoopOverrideTest.class);
     suite.addTestSuite(ProvidersTest.class);
     suite.addTestSuite(TypesTest.class);
-
-    // googlecode.guice
-    suite.addTestSuite(Jsr330Test.class);
 
     // multibindings tests
     suite.addTestSuite(MapBinderTest.class);

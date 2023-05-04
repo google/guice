@@ -12,7 +12,7 @@ import com.google.inject.Provides;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import java.lang.annotation.Retention;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

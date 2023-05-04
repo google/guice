@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * Builds the guice module that binds configured filters, with their wrapper FilterDefinitions. Is

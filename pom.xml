@@ -127,16 +127,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject-tck</artifactId>
-        <version>1</version>
-      </dependency>
-      <dependency>
         <groupId>jakarta.inject</groupId>
         <artifactId>jakarta.inject-api</artifactId>
         <version>2.0.1</version>
@@ -454,9 +444,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <group><title>Spring Extension</title>
                 <packages>com.google.inject.spring</packages>
               </group>
+              <!-- struts2 doesn't support jakarta.servlet yet, so we can't release it
               <group><title>Struts2 Extension</title>
                 <packages>com.google.inject.struts2</packages>
               </group>
+              -->
               <group><title>JNDI Extension</title>
                 <packages>com.google.inject.jndi</packages>
               </group>

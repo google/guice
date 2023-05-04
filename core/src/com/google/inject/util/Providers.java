@@ -21,7 +21,6 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -97,35 +96,6 @@ public final class Providers {
   }
 
   /**
-   * Returns a Guice-friendly {@code com.google.inject.Provider} for the given JSR-330 {@code
-   * javax.inject.Provider}. The converse method is unnecessary, since Guice providers directly
-   * implement the JSR-330 interface.
-   *
-   * @since 3.0
-   */
-  public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
-    if (provider instanceof Provider) {
-      return (Provider<T>) provider;
-    }
-
-    final javax.inject.Provider<T> delegate = checkNotNull(provider, "provider");
-
-    // Ensure that we inject all injection points from the delegate provider.
-    Set<InjectionPoint> injectionPoints =
-        InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
-    if (injectionPoints.isEmpty()) {
-      return new GuicifiedJSR330Provider<T>(delegate);
-    } else {
-      Set<Dependency<?>> mutableDeps = Sets.newHashSet();
-      for (InjectionPoint ip : injectionPoints) {
-        mutableDeps.addAll(ip.getDependencies());
-      }
-      final Set<Dependency<?>> dependencies = ImmutableSet.copyOf(mutableDeps);
-      return new GuicifiedJSR330ProviderWithDependencies<T>(dependencies, delegate);
-    }
-  }
-
-  /**
    * Returns a Guice-friendly {@code com.google.inject.Provider} for the given {@code
    * jakarta.inject.Provider}. The converse method is unnecessary, since Guice providers directly
    * implement the jakarta.inject.Provider interface.
@@ -150,35 +120,6 @@ public final class Providers {
               .flatMap(ip -> ip.getDependencies().stream())
               .collect(toImmutableSet());
       return new GuicifiedJakartaProviderWithDependencies<T>(dependencies, delegate);
-    }
-  }
-
-  private static class GuicifiedJSR330Provider<T> implements Provider<T> {
-    protected final javax.inject.Provider<T> delegate;
-
-    private GuicifiedJSR330Provider(javax.inject.Provider<T> delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public T get() {
-      return delegate.get();
-    }
-
-    @Override
-    public String toString() {
-      return "guicified(" + delegate + ")";
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      return (obj instanceof GuicifiedJSR330Provider)
-          && Objects.equal(delegate, ((GuicifiedJSR330Provider<?>) obj).delegate);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hashCode(delegate);
     }
   }
 
@@ -208,28 +149,6 @@ public final class Providers {
     @Override
     public int hashCode() {
       return Objects.hashCode(delegate);
-    }
-  }
-
-  private static final class GuicifiedJSR330ProviderWithDependencies<T>
-      extends GuicifiedJSR330Provider<T> implements ProviderWithDependencies<T> {
-    private final Set<Dependency<?>> dependencies;
-
-    private GuicifiedJSR330ProviderWithDependencies(
-        Set<Dependency<?>> dependencies, javax.inject.Provider<T> delegate) {
-      super(delegate);
-      this.dependencies = dependencies;
-    }
-
-    @SuppressWarnings("unused")
-    @Inject
-    void initialize(Injector injector) {
-      injector.injectMembers(delegate);
-    }
-
-    @Override
-    public Set<Dependency<?>> getDependencies() {
-      return dependencies;
     }
   }
 

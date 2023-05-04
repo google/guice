@@ -43,7 +43,7 @@ public interface ProviderInstanceBinding<T> extends Binding<T>, HasDependencies 
    *
    * @since 4.0
    */
-  javax.inject.Provider<? extends T> getUserSuppliedProvider();
+  jakarta.inject.Provider<? extends T> getUserSuppliedProvider();
 
   /**
    * Returns the field and method injection points of the provider, injected at injector-creation

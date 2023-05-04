@@ -28,7 +28,7 @@ import com.google.inject.Injector;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.matcher.Matchers;
 import java.lang.reflect.Modifier;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;

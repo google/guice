@@ -25,7 +25,8 @@
     <module>persist</module>
     <module>servlet</module>
     <module>spring</module>
-    <module>struts2</module>
+    <!-- struts2 doesn't support jakarta.servlet yet, so we can't include it
+    <module>struts2</module> -->
     <module>testlib</module>
     <module>throwingproviders</module>
   </modules>

@@ -34,7 +34,7 @@ import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 import java.lang.annotation.Retention;
 import java.util.Map;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import junit.framework.TestCase;
 
 /** {@link IntoMap} tests for {@link DaggerAdapter}. */

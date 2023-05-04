@@ -92,8 +92,6 @@ public class MapBinderTest extends TestCase {
 
   final TypeLiteral<Map<String, jakarta.inject.Provider<String>>> mapOfStringJakartaProvider =
       new TypeLiteral<Map<String, jakarta.inject.Provider<String>>>() {};
-  final TypeLiteral<Map<String, javax.inject.Provider<String>>> mapOfStringJavaxProvider =
-      new TypeLiteral<Map<String, javax.inject.Provider<String>>>() {};
   final TypeLiteral<Map<String, Provider<String>>> mapOfStringProvider =
       new TypeLiteral<Map<String, Provider<String>>>() {};
   final TypeLiteral<Map<String, String>> mapOfString = new TypeLiteral<Map<String, String>>() {};
@@ -105,10 +103,6 @@ public class MapBinderTest extends TestCase {
 
   private final TypeLiteral<String> stringType = TypeLiteral.get(String.class);
   private final TypeLiteral<Integer> intType = TypeLiteral.get(Integer.class);
-
-  private Type javaxProviderOf(Type type) {
-    return Types.javaxProviderOf(type);
-  }
 
   private Type mapEntryOf(Type keyType, Type valueType) {
     return Types.newParameterizedTypeWithOwner(Map.class, Map.Entry.class, keyType, valueType);
@@ -165,23 +159,6 @@ public class MapBinderTest extends TestCase {
                     named(
                         "Multibinder<java.util.Map$Entry<java.lang.String, "
                             + "com.google.inject.Provider<java.lang.String>>> permits duplicates")),
-
-                // Map<K, javax.inject.Provider<V>>
-                Key.get(Types.mapOf(String.class, javaxProviderOf(String.class))),
-                // Map<K, Set<javax.inject.Provider<V>>
-                Key.get(
-                    Types.mapOf(String.class, Types.setOf(Types.javaxProviderOf(String.class)))),
-                // Map<K, Collection<javax.inject.Provider<V>>
-                Key.get(
-                    Types.mapOf(
-                        String.class, Types.collectionOf(Types.javaxProviderOf(String.class)))),
-                // Set<Map.Entry<K, javax.inject.Provider<V>>>
-                Key.get(Types.setOf(mapEntryOf(String.class, Types.javaxProviderOf(String.class)))),
-                // Collection<javax.inject.Provider<Map.Entry<K, Provider<V>>>>
-                Key.get(
-                    collectionOf(
-                        Types.javaxProviderOf(
-                            mapEntryOf(String.class, Types.providerOf(String.class))))),
 
                 // Map<K, jakarta.inject.Provider<V>>
                 Key.get(Types.mapOf(String.class, Types.jakartaProviderOf(String.class))),
@@ -256,7 +233,6 @@ public class MapBinderTest extends TestCase {
 
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider));
     injector.getInstance(Key.get(mapOfStringJakartaProvider));
   }
 
@@ -294,7 +270,6 @@ public class MapBinderTest extends TestCase {
 
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, Names.named("abc")));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider, Names.named("abc")));
     injector.getInstance(Key.get(mapOfStringJakartaProvider, Names.named("abc")));
   }
 
@@ -331,7 +306,6 @@ public class MapBinderTest extends TestCase {
 
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, Abc.class));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider, Abc.class));
     injector.getInstance(Key.get(mapOfStringJakartaProvider, Abc.class));
   }
 
@@ -384,10 +358,8 @@ public class MapBinderTest extends TestCase {
 
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, named("abc")));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider, named("abc")));
     injector.getInstance(Key.get(mapOfStringJakartaProvider, named("abc")));
     injector.getInstance(Key.get(mapOfStringProvider, named("de")));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider, named("de")));
     injector.getInstance(Key.get(mapOfStringJakartaProvider, named("de")));
   }
 
@@ -440,10 +412,8 @@ public class MapBinderTest extends TestCase {
 
     // just make sure these succeed
     injector.getInstance(Key.get(mapOfStringProvider, Abc.class));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider, Abc.class));
     injector.getInstance(Key.get(mapOfStringJakartaProvider, Abc.class));
     injector.getInstance(Key.get(mapOfStringProvider, De.class));
-    injector.getInstance(Key.get(mapOfStringJavaxProvider, De.class));
     injector.getInstance(Key.get(mapOfStringJakartaProvider, De.class));
   }
 
@@ -1529,7 +1499,7 @@ public class MapBinderTest extends TestCase {
       Object kToFind, Iterable<com.google.inject.spi.Element> elements) {
     for (com.google.inject.spi.Element element : elements) {
       if (element instanceof ProviderInstanceBinding) {
-        javax.inject.Provider<?> usp =
+        jakarta.inject.Provider<?> usp =
             ((ProviderInstanceBinding<?>) element).getUserSuppliedProvider();
         if (usp instanceof ProviderMapEntry) {
           ProviderMapEntry<?, ?> pme = (ProviderMapEntry<?, ?>) usp;

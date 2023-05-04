@@ -126,8 +126,8 @@ public class InjectorSpiTest extends TestCase {
     }
     assertThat(actualKeys)
         .containsExactly(Key.get(Stage.class), Key.get(Injector.class), Key.get(Logger.class));
-    // singleton for javax.inject.Singleton, jakarta.inject.Singleton & c.g.i.Singleton
-    assertThat(scopes).hasSize(3);
+    // singleton for jakarta.inject.Singleton & c.g.i.Singleton
+    assertThat(scopes).hasSize(2);
     assertThat(typeConverters).hasSize(10); // all the built-in converters.
   }
 

@@ -5,8 +5,8 @@ import com.google.inject.Guice;
 import com.google.inject.Provides;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 
 /** Hello world, Guice! */
 public class App {

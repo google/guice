@@ -24,7 +24,7 @@ import com.google.inject.Provides;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import java.util.Date;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import junit.framework.TestCase;
 import org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter;
 

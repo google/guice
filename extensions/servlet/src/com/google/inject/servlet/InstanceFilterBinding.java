@@ -16,7 +16,7 @@
 
 package com.google.inject.servlet;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * A binding to a single instance of a filter.

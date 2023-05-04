@@ -20,8 +20,8 @@ import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import java.lang.reflect.Method;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 

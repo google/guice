@@ -39,7 +39,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Before;
@@ -422,7 +422,6 @@ public class BytecodeGenTest {
       }
 
       if (name.startsWith("java.")
-          || name.startsWith("javax.")
           || name.startsWith("jakarta.")
           || name.equals(LogCreator.class.getName())
           || (!name.startsWith("com.google.inject.") && !name.startsWith("com.googlecode.guice"))) {

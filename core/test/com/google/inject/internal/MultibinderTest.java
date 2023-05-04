@@ -20,7 +20,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.MoreCollectors.onlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.internal.RealMultibinder.collectionOfJakartaProvidersOf;
-import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
 import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
 import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static com.google.inject.internal.SpiUtils.assertSetVisitor;
@@ -1423,10 +1422,6 @@ public class MultibinderTest extends TestCase {
     Collection<jakarta.inject.Provider<String>> jakartaProviders =
         injector.getInstance(Key.get(collectionOfJakartaProvidersOf(stringType)));
     assertEquals(expectedValues, collectValuesJakarta(jakartaProviders));
-
-    Collection<javax.inject.Provider<String>> javaxProviders =
-        injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType)));
-    assertEquals(expectedValues, collectValuesJavax(javaxProviders));
   }
 
   public void testMultibinderCanInjectCollectionOfProvidersWithAnnotation() {
@@ -1454,10 +1449,6 @@ public class MultibinderTest extends TestCase {
     Collection<jakarta.inject.Provider<String>> jakartaProviders =
         injector.getInstance(Key.get(collectionOfJakartaProvidersOf(stringType), ann));
     assertEquals(expectedValues, collectValuesJakarta(jakartaProviders));
-
-    Collection<javax.inject.Provider<String>> javaxProviders =
-        injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType), ann));
-    assertEquals(expectedValues, collectValuesJavax(javaxProviders));
   }
 
   public void testMultibindingProviderDependencies() {
@@ -1633,15 +1624,6 @@ public class MultibinderTest extends TestCase {
       Collection<? extends jakarta.inject.Provider<T>> providers) {
     Collection<T> values = Lists.newArrayList();
     for (jakarta.inject.Provider<T> provider : providers) {
-      values.add(provider.get());
-    }
-    return values;
-  }
-
-  private <T> Collection<T> collectValuesJavax(
-      Collection<? extends javax.inject.Provider<T>> providers) {
-    Collection<T> values = Lists.newArrayList();
-    for (javax.inject.Provider<T> provider : providers) {
       values.add(provider.get());
     }
     return values;

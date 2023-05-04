@@ -16,7 +16,7 @@
 
 package com.google.inject.servlet;
 
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 /**
  * A binding to a single instance of a servlet.

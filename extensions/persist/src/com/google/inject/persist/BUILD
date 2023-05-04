@@ -26,9 +26,8 @@ java_library(
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
         "//third_party/java/jakarta_inject",
-        "//third_party/java/javax_persistence",
-        "//third_party/java/jsr330_inject",
-        "//third_party/java/servlet/servlet_api",
+        "//third_party/java/jakarta_persistence",
+        "//third_party/java/jakarta_servlet_api",
     ],
 )
 

@@ -20,11 +20,11 @@ import com.google.common.collect.Maps;
 import com.google.inject.OutOfScopeException;
 import java.io.IOException;
 import java.util.Map;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * A wrapper for requests that makes requests immutable, taking a snapshot of the original request.

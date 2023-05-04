@@ -434,7 +434,7 @@ public class ProviderMethodsTest implements Module {
         element instanceof ProviderInstanceBinding);
 
     ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) element;
-    javax.inject.Provider<?> provider = binding.getUserSuppliedProvider();
+    jakarta.inject.Provider<?> provider = binding.getUserSuppliedProvider();
     assertTrue(provider instanceof ProviderMethod);
     assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());
     assertSame(provider, binding.getProviderInstance());

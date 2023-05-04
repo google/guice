@@ -41,6 +41,8 @@ _deploy_extension() {
         dir="testing"
     elif [[ $ext == 'jmx' ]]; then
         dir="tools/jmx"
+    elif [[ $ext == 'struts2' ]]; then
+        return # struts2 doesn't support jakarta, so we drop support.
     fi
 
     local jar_file="extensions/$ext/src/com/google/inject/$dir/${artifact_id}.jar"

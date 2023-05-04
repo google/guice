@@ -15,10 +15,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-    </dependency>
-    <dependency>
       <groupId>jakarta.inject</groupId>
       <artifactId>jakarta.inject-api</artifactId>
     </dependency>
@@ -46,8 +42,8 @@
      | Test dependencies
     -->
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject-tck</artifactId>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-tck</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -98,16 +94,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
-        <configuration>
-          <testExcludes>
-            <!--
-              Don't compile the jakarta TCK b/c it would clash w/ the javax.inject TCK.
-              We test it with the Bazel build for now, and basic jakarta functionality is tested
-              with the JakartaTest in the same package.
-            -->
-            <testExclude>**/GuiceJakartaTck.java</testExclude>
-          </testExcludes>
-        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>

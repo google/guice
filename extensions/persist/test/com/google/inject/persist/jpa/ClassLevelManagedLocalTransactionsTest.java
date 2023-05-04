@@ -26,9 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.inject.Provider;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
 
 /**

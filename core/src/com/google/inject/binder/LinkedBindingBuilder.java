@@ -57,17 +57,17 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    * @see com.google.inject.Injector#injectMembers
    * @since 4.0
    */
-  ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider);
+  ScopedBindingBuilder toProvider(jakarta.inject.Provider<? extends T> provider);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
-  ScopedBindingBuilder toProvider(Class<? extends javax.inject.Provider<? extends T>> providerType);
+  ScopedBindingBuilder toProvider(Class<? extends jakarta.inject.Provider<? extends T>> providerType);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder toProvider(
-      TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType);
+      TypeLiteral<? extends jakarta.inject.Provider<? extends T>> providerType);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
-  ScopedBindingBuilder toProvider(Key<? extends javax.inject.Provider<? extends T>> providerKey);
+  ScopedBindingBuilder toProvider(Key<? extends jakarta.inject.Provider<? extends T>> providerKey);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.

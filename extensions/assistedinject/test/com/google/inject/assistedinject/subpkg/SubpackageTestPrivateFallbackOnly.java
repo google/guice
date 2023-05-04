@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

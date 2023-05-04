@@ -19,7 +19,7 @@ java_library(
     plugins = [
     ],
     deps = [
-        "//third_party/java/jsr330_inject",
+        "//third_party/java/jakarta_inject",
     ],
 )
 
@@ -41,8 +41,8 @@ java_library(
         "//third_party/java/guava/collect",
         "//third_party/java/guava/escape",
         "//third_party/java/guava/net",
-        "//third_party/java/jsr330_inject",
-        "//third_party/java/servlet/servlet_api",
+        "//third_party/java/jakarta_inject",
+        "//third_party/java/jakarta_servlet_api",
     ],
 )
 

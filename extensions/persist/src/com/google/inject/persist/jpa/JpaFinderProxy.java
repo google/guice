@@ -31,8 +31,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -121,8 +121,8 @@ class JpaFinderProxy implements MethodInterceptor {
       } else if (annotation instanceof Named) {
         Named named = (Named) annotation;
         jpaQuery.setParameter(named.value(), argument);
-      } else if (annotation instanceof javax.inject.Named) {
-        javax.inject.Named named = (javax.inject.Named) annotation;
+      } else if (annotation instanceof jakarta.inject.Named) {
+        jakarta.inject.Named named = (jakarta.inject.Named) annotation;
         jpaQuery.setParameter(named.value(), argument);
       } else if (annotation instanceof jakarta.inject.Named) {
         jakarta.inject.Named named = (jakarta.inject.Named) annotation;
@@ -186,7 +186,7 @@ class JpaFinderProxy implements MethodInterceptor {
         //discover the named, first or max annotations then break out
         Class<? extends Annotation> annotationType = annotation.annotationType();
         if (Named.class.equals(annotationType)
-            || javax.inject.Named.class.equals(annotationType)
+            || jakarta.inject.Named.class.equals(annotationType)
             || jakarta.inject.Named.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           finderDescriptor.isBindAsRawParameters = false;

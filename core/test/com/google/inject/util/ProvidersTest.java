@@ -19,7 +19,7 @@ package com.google.inject.util;
 import com.google.common.base.Objects;
 import com.google.common.testing.EqualsTester;
 import com.google.inject.Provider;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import junit.framework.TestCase;
 
 /**
@@ -51,13 +51,6 @@ public class ProvidersTest extends TestCase {
   public void testGuicifyEquality() {
     new EqualsTester()
         .addEqualityGroup(
-            Providers.guicify(new JavaxProvider(10)), Providers.guicify(new JavaxProvider(10)))
-        .addEqualityGroup(
-            Providers.guicify(new JavaxProvider(11)), Providers.guicify(new JavaxProvider(11)))
-        .addEqualityGroup(
-            Providers.guicify(new JavaxProviderWithDependencies()),
-            Providers.guicify(new JavaxProviderWithDependencies()))
-        .addEqualityGroup(
             Providers.guicify(new JakartaProvider(10)), Providers.guicify(new JakartaProvider(10)))
         .addEqualityGroup(
             Providers.guicify(new JakartaProvider(11)), Providers.guicify(new JakartaProvider(11)))
@@ -65,29 +58,6 @@ public class ProvidersTest extends TestCase {
             Providers.guicify(new JakartaProviderWithDependencies()),
             Providers.guicify(new JakartaProviderWithDependencies()))
         .testEquals();
-  }
-
-  private static class JavaxProvider implements javax.inject.Provider<Integer> {
-    private final int value;
-
-    public JavaxProvider(int value) {
-      this.value = value;
-    }
-
-    @Override
-    public Integer get() {
-      return value;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hashCode(value);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      return (obj instanceof JavaxProvider) && (value == ((JavaxProvider) obj).value);
-    }
   }
 
   private static class JakartaProvider implements jakarta.inject.Provider<Integer> {
@@ -110,30 +80,6 @@ public class ProvidersTest extends TestCase {
     @Override
     public boolean equals(Object obj) {
       return (obj instanceof JakartaProvider) && (value == ((JakartaProvider) obj).value);
-    }
-  }
-
-  private static class JavaxProviderWithDependencies implements javax.inject.Provider<Integer> {
-    private int value;
-
-    @Inject
-    void setValue(int value) {
-      this.value = value;
-    }
-
-    @Override
-    public Integer get() {
-      return value;
-    }
-
-    @Override
-    public int hashCode() {
-      return 42;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      return (obj instanceof JavaxProviderWithDependencies);
     }
   }
 

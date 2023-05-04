@@ -5,9 +5,9 @@ import static org.mockito.Mockito.mock;
 import com.google.inject.Guice;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 import junit.framework.TestCase;
 
 /**

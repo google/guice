@@ -26,10 +26,10 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import java.io.IOException;
 import java.util.Date;
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
+import jakarta.inject.Provider;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import junit.framework.TestCase;
 
 /**

@@ -136,17 +136,6 @@ public final class RealMapBinder<K, V> implements Module {
                 newParameterizedType(jakarta.inject.Provider.class, valueType.getType())));
   }
 
-  // provider map <K, V> is safely a Map<K, javax.inject.Provider<V>>>
-  @SuppressWarnings("unchecked")
-  static <K, V> TypeLiteral<Map<K, javax.inject.Provider<V>>> mapOfJavaxProviderOf(
-      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    return (TypeLiteral<Map<K, javax.inject.Provider<V>>>)
-        TypeLiteral.get(
-            Types.mapOf(
-                keyType.getType(),
-                newParameterizedType(javax.inject.Provider.class, valueType.getType())));
-  }
-
   @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
   static <K, V> TypeLiteral<Map<K, Set<Provider<V>>>> mapOfSetOfProviderOf(
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
@@ -162,15 +151,6 @@ public final class RealMapBinder<K, V> implements Module {
         TypeLiteral.get(
             Types.mapOf(
                 keyType.getType(), Types.setOf(Types.jakartaProviderOf(valueType.getType()))));
-  }
-
-  @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
-  static <K, V> TypeLiteral<Map<K, Set<javax.inject.Provider<V>>>> mapOfSetOfJavaxProviderOf(
-      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    return (TypeLiteral<Map<K, Set<javax.inject.Provider<V>>>>)
-        TypeLiteral.get(
-            Types.mapOf(
-                keyType.getType(), Types.setOf(Types.javaxProviderOf(valueType.getType()))));
   }
 
   @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
@@ -191,16 +171,6 @@ public final class RealMapBinder<K, V> implements Module {
             Types.mapOf(
                 keyType.getType(),
                 Types.collectionOf(Types.jakartaProviderOf(valueType.getType()))));
-  }
-
-  @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
-  static <K, V>
-      TypeLiteral<Map<K, Collection<javax.inject.Provider<V>>>> mapOfCollectionOfJavaxProviderOf(
-          TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    return (TypeLiteral<Map<K, Collection<javax.inject.Provider<V>>>>)
-        TypeLiteral.get(
-            Types.mapOf(
-                keyType.getType(), Types.collectionOf(Types.javaxProviderOf(valueType.getType()))));
   }
 
   @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
@@ -233,26 +203,6 @@ public final class RealMapBinder<K, V> implements Module {
           TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     return (TypeLiteral<Set<Map.Entry<K, jakarta.inject.Provider<V>>>>)
         TypeLiteral.get(Types.setOf(entryOfJakartaProviderOf(keyType, valueType).getType()));
-  }
-
-  @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
-  static <K, V> TypeLiteral<Map.Entry<K, Provider<V>>> entryOfJavaxProviderOf(
-      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    return (TypeLiteral<Map.Entry<K, Provider<V>>>)
-        TypeLiteral.get(
-            newParameterizedTypeWithOwner(
-                Map.class,
-                Map.Entry.class,
-                keyType.getType(),
-                Types.javaxProviderOf(valueType.getType())));
-  }
-
-  @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
-  static <K, V>
-      TypeLiteral<Set<Map.Entry<K, javax.inject.Provider<V>>>> setOfEntryOfJavaxProviderOf(
-          TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
-    return (TypeLiteral<Set<Map.Entry<K, javax.inject.Provider<V>>>>)
-        TypeLiteral.get(Types.setOf(entryOfJavaxProviderOf(keyType, valueType).getType()));
   }
 
   /** Given a {@code Key<T>} will return a {@code Key<Provider<T>>}. */
@@ -357,14 +307,6 @@ public final class RealMapBinder<K, V> implements Module {
         (Provider) providerMapProvider;
     binder.bind(bindingSelection.getJakartaProviderMapKey()).toProvider(jakartaProviderMapProvider);
 
-    // The map this exposes is internally an ImmutableMap, so it's OK to massage
-    // the guice Provider to javax Provider in the value (since Guice provider
-    // implements javax Provider).
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Provider<Map<K, javax.inject.Provider<V>>> javaxProviderMapProvider =
-        (Provider) providerMapProvider;
-    binder.bind(bindingSelection.getJavaxProviderMapKey()).toProvider(javaxProviderMapProvider);
-
     RealMapProvider<K, V> mapProvider = new RealMapProvider<>(bindingSelection);
     // Bind Map<K, V> to the provider w/ extension support.
     binder
@@ -379,13 +321,6 @@ public final class RealMapBinder<K, V> implements Module {
     Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> jakartaEntrySetProviderKey =
         (Key) bindingSelection.getEntrySetBinder().getSetKey();
     binder.bind(bindingSelection.getEntrySetJakartaProviderKey()).to(jakartaEntrySetProviderKey);
-
-    // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
-    // safe to massage the return type like this
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> massagedEntrySetProviderKey =
-        (Key) bindingSelection.getEntrySetBinder().getSetKey();
-    binder.bind(bindingSelection.getEntrySetJavaxProviderKey()).to(massagedEntrySetProviderKey);
   }
 
   @Override
@@ -425,20 +360,16 @@ public final class RealMapBinder<K, V> implements Module {
     private final Key<Map<K, V>> mapKey;
 
     // Lazily computed
-    private Key<Map<K, jakarta.inject.Provider<V>>> jakartaProviderMapKey;
-    private Key<Map<K, javax.inject.Provider<V>>> javaxProviderMapKey;
     private Key<Map<K, Provider<V>>> providerMapKey;
     private Key<Map<K, Set<V>>> multimapKey;
     private Key<Map<K, Set<Provider<V>>>> providerSetMultimapKey;
-    private Key<Map<K, Set<jakarta.inject.Provider<V>>>> jakartaProviderSetMultimapKey;
-    private Key<Map<K, Set<javax.inject.Provider<V>>>> javaxProviderSetMultimapKey;
     private Key<Map<K, Collection<Provider<V>>>> providerCollectionMultimapKey;
+    private Key<Map<K, ? extends V>> mapOfKeyExtendsValueKey;
+    private Key<Map<K, jakarta.inject.Provider<V>>> jakartaProviderMapKey;
+    private Key<Map<K, Set<jakarta.inject.Provider<V>>>> jakartaProviderSetMultimapKey;
     private Key<Map<K, Collection<jakarta.inject.Provider<V>>>>
         jakartaProviderCollectionMultimapKey;
-    private Key<Map<K, Collection<javax.inject.Provider<V>>>> javaxProviderCollectionMultimapKey;
     private Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> entrySetJakartaProviderKey;
-    private Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> entrySetJavaxProviderKey;
-    private Key<Map<K, ? extends V>> mapOfKeyExtendsValueKey;
 
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
 
@@ -604,17 +535,13 @@ public final class RealMapBinder<K, V> implements Module {
       return key.equals(getMapKey())
           || key.equals(getProviderMapKey())
           || key.equals(getJakartaProviderMapKey())
-          || key.equals(getJavaxProviderMapKey())
           || key.equals(getMultimapKey())
           || key.equals(getProviderSetMultimapKey())
           || key.equals(getJakartaProviderSetMultimapKey())
-          || key.equals(getJavaxProviderSetMultimapKey())
           || key.equals(getProviderCollectionMultimapKey())
           || key.equals(getJakartaProviderCollectionMultimapKey())
-          || key.equals(getJavaxProviderCollectionMultimapKey())
           || key.equals(entrySetBinder.getSetKey())
           || key.equals(getEntrySetJakartaProviderKey())
-          || key.equals(getEntrySetJavaxProviderKey())
           || key.equals(getMapOfKeyExtendsValueKey())
           || matchesValueKey(key);
     }
@@ -640,14 +567,6 @@ public final class RealMapBinder<K, V> implements Module {
       Key<Map<K, jakarta.inject.Provider<V>>> local = jakartaProviderMapKey;
       if (local == null) {
         local = jakartaProviderMapKey = mapKey.ofType(mapOfJakartaProviderOf(keyType, valueType));
-      }
-      return local;
-    }
-
-    private Key<Map<K, javax.inject.Provider<V>>> getJavaxProviderMapKey() {
-      Key<Map<K, javax.inject.Provider<V>>> local = javaxProviderMapKey;
-      if (local == null) {
-        local = javaxProviderMapKey = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
       }
       return local;
     }
@@ -678,16 +597,6 @@ public final class RealMapBinder<K, V> implements Module {
       return local;
     }
 
-    private Key<Map<K, Set<javax.inject.Provider<V>>>> getJavaxProviderSetMultimapKey() {
-      Key<Map<K, Set<javax.inject.Provider<V>>>> local = javaxProviderSetMultimapKey;
-      if (local == null) {
-        local =
-            javaxProviderSetMultimapKey =
-                mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
-      }
-      return local;
-    }
-
     private Key<Map<K, Collection<Provider<V>>>> getProviderCollectionMultimapKey() {
       Key<Map<K, Collection<Provider<V>>>> local = providerCollectionMultimapKey;
       if (local == null) {
@@ -710,33 +619,12 @@ public final class RealMapBinder<K, V> implements Module {
       return local;
     }
 
-    private Key<Map<K, Collection<javax.inject.Provider<V>>>>
-        getJavaxProviderCollectionMultimapKey() {
-      Key<Map<K, Collection<javax.inject.Provider<V>>>> local = javaxProviderCollectionMultimapKey;
-      if (local == null) {
-        local =
-            javaxProviderCollectionMultimapKey =
-                mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
-      }
-      return local;
-    }
-
     private Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> getEntrySetJakartaProviderKey() {
       Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> local = entrySetJakartaProviderKey;
       if (local == null) {
         local =
             entrySetJakartaProviderKey =
                 mapKey.ofType(setOfEntryOfJakartaProviderOf(keyType, valueType));
-      }
-      return local;
-    }
-
-    private Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> getEntrySetJavaxProviderKey() {
-      Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> local = entrySetJavaxProviderKey;
-      if (local == null) {
-        local =
-            entrySetJavaxProviderKey =
-                mapKey.ofType(setOfEntryOfJavaxProviderOf(keyType, valueType));
       }
       return local;
     }
@@ -977,14 +865,11 @@ public final class RealMapBinder<K, V> implements Module {
     public Set<Key<?>> getAlternateMapKeys() {
       return ImmutableSet.of(
           (Key<?>) bindingSelection.getJakartaProviderMapKey(),
-          (Key<?>) bindingSelection.getJavaxProviderMapKey(),
           (Key<?>) bindingSelection.getProviderMapKey(),
           (Key<?>) bindingSelection.getProviderSetMultimapKey(),
           (Key<?>) bindingSelection.getJakartaProviderSetMultimapKey(),
-          (Key<?>) bindingSelection.getJavaxProviderSetMultimapKey(),
           (Key<?>) bindingSelection.getProviderCollectionMultimapKey(),
           (Key<?>) bindingSelection.getJakartaProviderCollectionMultimapKey(),
-          (Key<?>) bindingSelection.getJavaxProviderCollectionMultimapKey(),
           (Key<?>) bindingSelection.getMultimapKey(),
           (Key<?>) bindingSelection.getMapOfKeyExtendsValueKey());
     }
@@ -1152,14 +1037,6 @@ public final class RealMapBinder<K, V> implements Module {
 
       // Provide links from a few different public keys to the providerMultimapKey.
       // The collection this exposes is internally an ImmutableMap, so it's OK to massage
-      // the guice Provider to javax Provider in the value (since the guice Provider implements
-      // javax Provider).
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Set<javax.inject.Provider<V>>>> javaxProvider = (Provider) multimapProvider;
-      binder.bind(bindingSelection.getJavaxProviderSetMultimapKey()).toProvider(javaxProvider);
-
-      // Provide links from a few different public keys to the providerMultimapKey.
-      // The collection this exposes is internally an ImmutableMap, so it's OK to massage
       // the guice Provider to jakarta Provider in the value (since the guice Provider implements
       // jakarta Provider).
       @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1179,13 +1056,6 @@ public final class RealMapBinder<K, V> implements Module {
       binder
           .bind(bindingSelection.getJakartaProviderCollectionMultimapKey())
           .toProvider(collectionJakartaProvider);
-
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Collection<javax.inject.Provider<V>>>> collectionJavaxProvider =
-          (Provider) multimapProvider;
-      binder
-          .bind(bindingSelection.getJavaxProviderCollectionMultimapKey())
-          .toProvider(collectionJavaxProvider);
 
       // Binds a Map<K, Set<V>>
       @SuppressWarnings({"unchecked", "rawtypes"})

@@ -19,7 +19,9 @@ java_library(
         "//extensions/persist/src/com/google/inject/persist",
         "//extensions/servlet/src/com/google/inject/servlet",
         "//extensions/spring/src/com/google/inject/spring",
-        "//extensions/struts2/src/com/google/inject/struts2",
+        # struts2 doesn't work with jakarta.servlet, so we don't include it.
+        # We leave the commented out line as a bread-crumb for the future.
+        # "//extensions/struts2/src/com/google/inject/struts2",
         "//extensions/testlib/src/com/google/inject/testing:testlib",
         "//extensions/throwingproviders/src/com/google/inject/throwingproviders",
     ],

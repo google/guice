@@ -16,7 +16,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Singleton;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 /**
  * Used in unit tests to verify the EDSL.

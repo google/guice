@@ -28,7 +28,8 @@ import java.util.Optional;
 /** Utility methods for creating {@link Key}s. */
 final class Keys {
   private static final ImmutableSet<Class<? extends Annotation>> QUALIFIERS =
-      ImmutableSet.of(javax.inject.Qualifier.class, jakarta.inject.Qualifier.class);
+      ImmutableSet.of(
+          jakarta.inject.Qualifier.class);
 
   static Key<?> parameterKey(Parameter parameter) {
     Optional<Annotation> qualifier = getAnnotatedAnnotation(parameter, QUALIFIERS);

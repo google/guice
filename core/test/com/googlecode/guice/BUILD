@@ -20,24 +20,9 @@ java_library(
         "//third_party/java/aopalliance",
         "//third_party/java/guava/testing",
         "//third_party/java/jakarta_inject",
-        "//third_party/java/jsr330_inject",
         "//third_party/java/junit",
         "@maven//:biz_aQute_bnd",
         "@maven//:org_apache_felix_org_apache_felix_framework",
-    ],
-)
-
-# We split the TCK tests out from the normal libraries, because the jakarta.inject TCK uses the same
-# packages as the javax.inject TCK, so the two cannot be in the same classloader.
-
-java_library(
-    name = "javax_inject_tck_test",
-    srcs = ["GuiceTck.java"],
-    deps = [
-        "//core/src/com/google/inject",
-        "//third_party/java/jsr330_inject",
-        "//third_party/java/jsr330_inject:tck",
-        "//third_party/java/junit",
     ],
 )
 
@@ -102,12 +87,4 @@ guice_test_suites(
     sizes = ["small"],
     suffix = "_jakarta_tck",
     deps = [":jakarta_tck_test"],
-)
-
-guice_test_suites(
-    name = "gen_javax_inject_tck_tests",
-    srcs = ["GuiceTck.java"],
-    sizes = ["small"],
-    suffix = "_javax_inject_tck",
-    deps = [":javax_inject_tck_test"],
 )

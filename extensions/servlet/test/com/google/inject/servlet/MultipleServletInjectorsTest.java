@@ -23,9 +23,9 @@ import static org.mockito.Mockito.verify;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.http.HttpServlet;
 import junit.framework.TestCase;
 
 /**

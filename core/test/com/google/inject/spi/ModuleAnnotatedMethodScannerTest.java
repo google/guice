@@ -47,7 +47,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Set;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

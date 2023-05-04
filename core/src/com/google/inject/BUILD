@@ -52,7 +52,7 @@ java_library(
     srcs = PROVIDED_BY_SRCS,
     javacopts = JAVAC_OPTS,
     deps = [
-        "//third_party/java/jsr330_inject",
+        "//third_party/java/jakarta_inject",
     ],
 )
 
@@ -96,7 +96,6 @@ java_library(
         "//third_party/java/asm",
         "//third_party/java/error_prone:annotations",
         "//third_party/java/jsr305_annotations",
-        "//third_party/java/jsr330_inject",
         "//third_party/java/jakarta_inject",
     ],
 )
@@ -109,7 +108,7 @@ java_library(
     ],
     deps = [
         "//third_party/java/error_prone:annotations",
-        "//third_party/java/jsr330_inject",
+        "//third_party/java/jakarta_inject",
     ],
 )
 

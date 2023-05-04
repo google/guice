@@ -6,7 +6,7 @@
 
     <!-- JPA test "unit" -->
     <persistence-unit name="testUnit" transaction-type="RESOURCE_LOCAL">
-        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>com.google.inject.persist.jpa.JpaTestEntity</class>
         <class>com.google.inject.persist.jpa.JpaParentTestEntity</class>
@@ -26,7 +26,7 @@
     </persistence-unit>
 
     <persistence-unit name="testProperties" transaction-type="RESOURCE_LOCAL">
-        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>com.google.inject.persist.jpa.JpaTestEntity</class>
         <class>com.google.inject.persist.jpa.JpaParentTestEntity</class>
