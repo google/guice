@@ -28,18 +28,22 @@ import java.lang.reflect.Method;
  */
 final class HiddenClassDefiner implements ClassDefiner {
 
-  private static final sun.misc.Unsafe THE_UNSAFE;
-  private static final Object TRUSTED_LOOKUP_BASE;
-  private static final long TRUSTED_LOOKUP_OFFSET;
+  private static final Object THE_UNSAFE;
+  private static final Object TRUSTED_LOOKUP_OFFSET;
+  private static final Method GET_OBJECT_METHOD;
   private static final Object HIDDEN_CLASS_OPTIONS;
   private static final Method HIDDEN_DEFINE_METHOD;
 
   static {
     try {
-      THE_UNSAFE = UnsafeGetter.getUnsafe();
+      Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
+      Field theUnsafeField = unsafeType.getDeclaredField("theUnsafe");
+      theUnsafeField.setAccessible(true);
+      THE_UNSAFE = theUnsafeField.get(null);
       Field trustedLookupField = Lookup.class.getDeclaredField("IMPL_LOOKUP");
-      TRUSTED_LOOKUP_BASE = THE_UNSAFE.staticFieldBase(trustedLookupField);
-      TRUSTED_LOOKUP_OFFSET = THE_UNSAFE.staticFieldOffset(trustedLookupField);
+      Method offsetMethod = unsafeType.getMethod("staticFieldOffset", Field.class);
+      TRUSTED_LOOKUP_OFFSET = offsetMethod.invoke(THE_UNSAFE, trustedLookupField);
+      GET_OBJECT_METHOD = unsafeType.getMethod("getObject", Object.class, long.class);
       HIDDEN_CLASS_OPTIONS = classOptions("NESTMATE");
       HIDDEN_DEFINE_METHOD =
           Lookup.class.getMethod(
@@ -52,7 +56,7 @@ final class HiddenClassDefiner implements ClassDefiner {
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
     Lookup trustedLookup =
-        (Lookup) THE_UNSAFE.getObject(TRUSTED_LOOKUP_BASE, TRUSTED_LOOKUP_OFFSET);
+        (Lookup) GET_OBJECT_METHOD.invoke(THE_UNSAFE, Lookup.class, TRUSTED_LOOKUP_OFFSET);
     Lookup definedLookup =
         (Lookup)
             HIDDEN_DEFINE_METHOD.invoke(
