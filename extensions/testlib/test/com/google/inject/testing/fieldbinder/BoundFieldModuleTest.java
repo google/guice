@@ -238,9 +238,9 @@ public class BoundFieldModuleTest extends TestCase {
         testValue2, injector.getInstance(Key.get(Integer.class, SomeBindingAnnotation.class)));
   }
 
-  @Qualifier
+  @javax.inject.Qualifier
   @Retention(RUNTIME)
-  private static @interface SomeQualifier {}
+  private static @interface SomeJavaxQualifier {}
 
   public void testBindingWithQualifier() {
     final Integer testValue1 = 1024, testValue2 = 2048;
@@ -248,14 +248,15 @@ public class BoundFieldModuleTest extends TestCase {
         new Object() {
           @Bind private Integer anInt = testValue1;
 
-          @Bind @SomeQualifier private Integer anotherInt = testValue2;
+          @Bind @SomeJavaxQualifier private Integer anotherInt = testValue2;
         };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
     assertEquals(testValue1, injector.getInstance(Integer.class));
-    assertEquals(testValue2, injector.getInstance(Key.get(Integer.class, SomeQualifier.class)));
+    assertEquals(
+        testValue2, injector.getInstance(Key.get(Integer.class, SomeJavaxQualifier.class)));
   }
 
   @jakarta.inject.Qualifier
@@ -1050,20 +1051,20 @@ public class BoundFieldModuleTest extends TestCase {
   public void testGetBoundFields_getKey() throws Exception {
     Object instance =
         new Object() {
-          @Bind @SomeQualifier String value = "default";
+          @Bind @SomeBindingAnnotation String value = "default";
         };
     BoundFieldModule module = BoundFieldModule.of(instance);
     Guice.createInjector(module);
     BoundFieldInfo info = Iterables.getOnlyElement(module.getBoundFields());
 
-    assertEquals(Key.get(String.class, SomeQualifier.class), info.getBoundKey());
+    assertEquals(Key.get(String.class, SomeBindingAnnotation.class), info.getBoundKey());
   }
 
   public void testGetBoundFields_getBindAnnotation() throws Exception {
     Object instance =
         new Object() {
           @Bind(lazy = true)
-          @SomeQualifier
+          @SomeBindingAnnotation
           String value;
         };
     BoundFieldModule module = BoundFieldModule.of(instance);

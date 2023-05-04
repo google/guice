@@ -24,7 +24,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
 
-/** @author sberlin@gmail.com (Sam Berlin) */
+/**
+ * @author sberlin@gmail.com (Sam Berlin)
+ */
 public class InjectorSpiTest extends TestCase {
 
   public void testExistingBinding() {

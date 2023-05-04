@@ -328,6 +328,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <skipTests>${guice.skipTests}</skipTests>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <!--<argLine>-Dguice_include_stack_traces=OFF</argLine>-->
+            <trimStackTrace>false</trimStackTrace>
           </configuration>
           <executions>
             <execution>

@@ -187,33 +187,35 @@ public class SpiUtils {
       fail("Found all entries of: " + mapResults + ", but more were left over: " + entries);
     }
 
-    Key<?> mapOfJakartaProvider = mapKey.ofType(mapOfJakartaProviderOf(keyType, valueType));
-    Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
     Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
-    Key<?> mapOfSetOfJakartaProvider =
-        mapKey.ofType(mapOfSetOfJakartaProviderOf(keyType, valueType));
-    Key<?> mapOfSetOfJavaxProvider = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfCollectionOfProvider =
         mapKey.ofType(mapOfCollectionOfProviderOf(keyType, valueType));
-    Key<?> mapOfCollectionOfJakartaProvider =
-        mapKey.ofType(mapOfCollectionOfJakartaProviderOf(keyType, valueType));
-    Key<?> mapOfCollectionOfJavaxProvider =
-        mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> setOfJakartaEntry = mapKey.ofType(setOf(entryOfJakartaProviderOf(keyType, valueType)));
-    Key<?> setOfJavaxEntry = mapKey.ofType(setOf(entryOfJavaxProviderOf(keyType, valueType)));
     Key<?> collectionOfProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> collectionOfJakartaProvidersOfEntryOfProvider =
-        mapKey.ofType(collectionOfJakartaProvidersOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
-        mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> setOfExtendsOfEntryOfProvider =
         mapKey.ofType(setOfExtendsOf(entryOfProviderOf(keyType, valueType)));
     Key<?> mapOfKeyExtendsValueKey =
         mapKey.ofType(mapOf(keyType, TypeLiteral.get(Types.subtypeOf(valueType.getType()))));
+
+    Key<?> mapOfJakartaProvider = mapKey.ofType(mapOfJakartaProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfJakartaProvider =
+        mapKey.ofType(mapOfSetOfJakartaProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfJakartaProvider =
+        mapKey.ofType(mapOfCollectionOfJakartaProviderOf(keyType, valueType));
+    Key<?> setOfJakartaEntry = mapKey.ofType(setOf(entryOfJakartaProviderOf(keyType, valueType)));
+    Key<?> collectionOfJakartaProvidersOfEntryOfProvider =
+        mapKey.ofType(collectionOfJakartaProvidersOf(entryOfProviderOf(keyType, valueType)));
+
+    Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfJavaxProvider = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfJavaxProvider =
+        mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
+    Key<?> setOfJavaxEntry = mapKey.ofType(setOf(entryOfJavaxProviderOf(keyType, valueType)));
+    Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
+        mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
 
     assertEquals(
         ImmutableSet.of(
@@ -231,23 +233,26 @@ public class SpiUtils {
         mapbinder.getAlternateMapKeys());
 
     boolean entrySetMatch = false;
-    boolean jakartaEntrySetMatch = false;
-    boolean javaxEntrySetMatch = false;
-    boolean mapJakartaProviderMatch = false;
-    boolean mapJavaxProviderMatch = false;
     boolean mapProviderMatch = false;
     boolean mapSetMatch = false;
     boolean mapSetProviderMatch = false;
-    boolean mapSetJakartaProviderMatch = false;
-    boolean mapSetJavaxProviderMatch = false;
     boolean mapCollectionProviderMatch = false;
-    boolean mapCollectionJakartaProviderMatch = false;
-    boolean mapCollectionJavaxProviderMatch = false;
     boolean collectionOfProvidersOfEntryOfProviderMatch = false;
-    boolean collectionOfJakartaProvidersOfEntryOfProviderMatch = false;
-    boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     boolean setOfExtendsOfEntryOfProviderMatch = false;
     boolean mapOfKeyExtendsValueKeyMatch = false;
+
+    boolean jakartaEntrySetMatch = false;
+    boolean mapJakartaProviderMatch = false;
+    boolean mapSetJakartaProviderMatch = false;
+    boolean mapCollectionJakartaProviderMatch = false;
+    boolean collectionOfJakartaProvidersOfEntryOfProviderMatch = false;
+
+    boolean javaxEntrySetMatch = false;
+    boolean mapJavaxProviderMatch = false;
+    boolean mapSetJavaxProviderMatch = false;
+    boolean mapCollectionJavaxProviderMatch = false;
+    boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
+
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Binding<?>> otherMatches = Lists.newArrayList();
     Multimap<Object, IndexedBinding> indexedEntries =
@@ -266,60 +271,60 @@ public class SpiUtils {
       } else if (b.getKey().equals(mapOfProvider)) {
         assertTrue(contains);
         mapProviderMatch = true;
-      } else if (b.getKey().equals(mapOfJakartaProvider)) {
-        assertTrue(contains);
-        mapJakartaProviderMatch = true;
-      } else if (b.getKey().equals(mapOfJavaxProvider)) {
-        assertTrue(contains);
-        mapJavaxProviderMatch = true;
       } else if (b.getKey().equals(mapOfSet)) {
         assertTrue(contains);
         mapSetMatch = true;
       } else if (b.getKey().equals(mapOfSetOfProvider)) {
         assertTrue(contains);
         mapSetProviderMatch = true;
-      } else if (b.getKey().equals(mapOfSetOfJakartaProvider)) {
-        assertTrue(contains);
-        mapSetJakartaProviderMatch = true;
-      } else if (b.getKey().equals(mapOfSetOfJavaxProvider)) {
-        assertTrue(contains);
-        mapSetJavaxProviderMatch = true;
       } else if (b.getKey().equals(mapOfCollectionOfProvider)) {
         assertTrue(contains);
         mapCollectionProviderMatch = true;
-      } else if (b.getKey().equals(mapOfCollectionOfJakartaProvider)) {
-        assertTrue(contains);
-        mapCollectionJakartaProviderMatch = true;
-      } else if (b.getKey().equals(mapOfCollectionOfJavaxProvider)) {
-        assertTrue(contains);
-        mapCollectionJavaxProviderMatch = true;
       } else if (b.getKey().equals(setOfEntry)) {
         assertTrue(contains);
         entrySetMatch = true;
         // Validate that this binding is also a MultibinderBinding.
         assertThat(((Binding<T>) b).acceptTargetVisitor(visitor))
             .isInstanceOf(MultibinderBinding.class);
-      } else if (b.getKey().equals(setOfJakartaEntry)) {
-        assertTrue(contains);
-        jakartaEntrySetMatch = true;
-      } else if (b.getKey().equals(setOfJavaxEntry)) {
-        assertTrue(contains);
-        javaxEntrySetMatch = true;
       } else if (b.getKey().equals(collectionOfProvidersOfEntryOfProvider)) {
         assertTrue(contains);
         collectionOfProvidersOfEntryOfProviderMatch = true;
-      } else if (b.getKey().equals(collectionOfJakartaProvidersOfEntryOfProvider)) {
-        assertTrue(contains);
-        collectionOfJakartaProvidersOfEntryOfProviderMatch = true;
-      } else if (b.getKey().equals(collectionOfJavaxProvidersOfEntryOfProvider)) {
-        assertTrue(contains);
-        collectionOfJavaxProvidersOfEntryOfProviderMatch = true;
       } else if (b.getKey().equals(setOfExtendsOfEntryOfProvider)) {
         assertTrue(contains);
         setOfExtendsOfEntryOfProviderMatch = true;
       } else if (b.getKey().equals(mapOfKeyExtendsValueKey)) {
         assertTrue(contains);
         mapOfKeyExtendsValueKeyMatch = true;
+      } else if (b.getKey().equals(mapOfJakartaProvider)) {
+        assertTrue(contains);
+        mapJakartaProviderMatch = true;
+      } else if (b.getKey().equals(mapOfSetOfJakartaProvider)) {
+        assertTrue(contains);
+        mapSetJakartaProviderMatch = true;
+      } else if (b.getKey().equals(mapOfCollectionOfJakartaProvider)) {
+        assertTrue(contains);
+        mapCollectionJakartaProviderMatch = true;
+      } else if (b.getKey().equals(setOfJakartaEntry)) {
+        assertTrue(contains);
+        jakartaEntrySetMatch = true;
+      } else if (b.getKey().equals(collectionOfJakartaProvidersOfEntryOfProvider)) {
+        assertTrue(contains);
+        collectionOfJakartaProvidersOfEntryOfProviderMatch = true;
+      } else if (b.getKey().equals(mapOfJavaxProvider)) {
+        assertTrue(contains);
+        mapJavaxProviderMatch = true;
+      } else if (b.getKey().equals(mapOfSetOfJavaxProvider)) {
+        assertTrue(contains);
+        mapSetJavaxProviderMatch = true;
+      } else if (b.getKey().equals(mapOfCollectionOfJavaxProvider)) {
+        assertTrue(contains);
+        mapCollectionJavaxProviderMatch = true;
+      } else if (b.getKey().equals(setOfJavaxEntry)) {
+        assertTrue(contains);
+        javaxEntrySetMatch = true;
+      } else if (b.getKey().equals(collectionOfJavaxProvidersOfEntryOfProvider)) {
+        assertTrue(contains);
+        collectionOfJavaxProvidersOfEntryOfProviderMatch = true;
       } else if (contains) {
         if (b instanceof ProviderInstanceBinding) {
           ProviderInstanceBinding<?> pib = (ProviderInstanceBinding<?>) b;
@@ -349,23 +354,23 @@ public class SpiUtils {
         expectedSize,
         sizeOfOther);
     assertTrue(entrySetMatch);
-    assertTrue(jakartaEntrySetMatch);
-    assertTrue(javaxEntrySetMatch);
     assertTrue(mapProviderMatch);
-    assertTrue(mapJakartaProviderMatch);
-    assertTrue(mapJavaxProviderMatch);
     assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
-    assertTrue(collectionOfJakartaProvidersOfEntryOfProviderMatch);
-    assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertTrue(setOfExtendsOfEntryOfProviderMatch);
     assertTrue(mapOfKeyExtendsValueKeyMatch);
+    assertTrue(jakartaEntrySetMatch);
+    assertTrue(mapJakartaProviderMatch);
+    assertTrue(collectionOfJakartaProvidersOfEntryOfProviderMatch);
+    assertTrue(javaxEntrySetMatch);
+    assertTrue(mapJavaxProviderMatch);
+    assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
+    assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
-    assertEquals(allowDuplicates, mapSetJakartaProviderMatch);
-    assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
-    assertEquals(allowDuplicates, mapCollectionJakartaProviderMatch);
-    assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals(allowDuplicates, mapCollectionProviderMatch);
+    assertEquals(allowDuplicates, mapSetJakartaProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionJakartaProviderMatch);
     assertEquals(
         "other MapBindings found: " + otherMapBindings,
         expectedMapBindings,
@@ -430,32 +435,34 @@ public class SpiUtils {
     assertEquals(valueType, mapbinder.getValueTypeLiteral());
 
     Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
-    Key<?> mapOfJakartaProvider = mapKey.ofType(mapOfJakartaProviderOf(keyType, valueType));
-    Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
-    Key<?> mapOfSetOfJakartaProvider =
-        mapKey.ofType(mapOfSetOfJakartaProviderOf(keyType, valueType));
-    Key<?> mapOfSetOfJavaxProvider = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfCollectionOfProvider =
         mapKey.ofType(mapOfCollectionOfProviderOf(keyType, valueType));
-    Key<?> mapOfCollectionOfJakartaProvider =
-        mapKey.ofType(mapOfCollectionOfJakartaProviderOf(keyType, valueType));
-    Key<?> mapOfCollectionOfJavaxProvider =
-        mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> setOfJakartaEntry = mapKey.ofType(setOf(entryOfJakartaProviderOf(keyType, valueType)));
-    Key<?> setOfJavaxEntry = mapKey.ofType(setOf(entryOfJavaxProviderOf(keyType, valueType)));
     Key<?> collectionOfProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> collectionOfJakartaProvidersOfEntryOfProvider =
-        mapKey.ofType(collectionOfJakartaProvidersOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
-        mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> setOfExtendsOfEntryOfProvider =
         mapKey.ofType(setOfExtendsOf(entryOfProviderOf(keyType, valueType)));
     Key<?> mapOfKeyExtendsValueKey =
         mapKey.ofType(mapOf(keyType, TypeLiteral.get(Types.subtypeOf(valueType.getType()))));
+
+    Key<?> mapOfJakartaProvider = mapKey.ofType(mapOfJakartaProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfJakartaProvider =
+        mapKey.ofType(mapOfSetOfJakartaProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfJakartaProvider =
+        mapKey.ofType(mapOfCollectionOfJakartaProviderOf(keyType, valueType));
+    Key<?> setOfJakartaEntry = mapKey.ofType(setOf(entryOfJakartaProviderOf(keyType, valueType)));
+    Key<?> collectionOfJakartaProvidersOfEntryOfProvider =
+        mapKey.ofType(collectionOfJakartaProvidersOf(entryOfProviderOf(keyType, valueType)));
+
+    Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfJavaxProvider = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfJavaxProvider =
+        mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
+    Key<?> setOfJavaxEntry = mapKey.ofType(setOf(entryOfJavaxProviderOf(keyType, valueType)));
+    Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
+        mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
 
     assertEquals(
         ImmutableSet.of(
@@ -473,23 +480,26 @@ public class SpiUtils {
         mapbinder.getAlternateMapKeys());
 
     boolean entrySetMatch = false;
-    boolean entrySetJakartaMatch = false;
-    boolean entrySetJavaxMatch = false;
     boolean mapProviderMatch = false;
-    boolean mapJakartaProviderMatch = false;
-    boolean mapJavaxProviderMatch = false;
     boolean mapSetMatch = false;
     boolean mapSetProviderMatch = false;
-    boolean mapSetJakartaProviderMatch = false;
-    boolean mapSetJavaxProviderMatch = false;
     boolean mapCollectionProviderMatch = false;
-    boolean mapCollectionJakartaProviderMatch = false;
-    boolean mapCollectionJavaxProviderMatch = false;
     boolean collectionOfProvidersOfEntryOfProviderMatch = false;
-    boolean collectionOfJakartaProvidersOfEntryOfProviderMatch = false;
-    boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     boolean setOfExtendsOfEntryOfProviderMatch = false;
     boolean mapOfKeyExtendsValueKeyMatch = false;
+
+    boolean entrySetJakartaMatch = false;
+    boolean mapJakartaProviderMatch = false;
+    boolean mapSetJakartaProviderMatch = false;
+    boolean mapCollectionJakartaProviderMatch = false;
+    boolean collectionOfJakartaProvidersOfEntryOfProviderMatch = false;
+
+    boolean entrySetJavaxMatch = false;
+    boolean mapJavaxProviderMatch = false;
+    boolean mapSetJavaxProviderMatch = false;
+    boolean mapCollectionJavaxProviderMatch = false;
+    boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
+
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Element> otherMatches = Lists.newArrayList();
     List<Element> otherElements = Lists.newArrayList();
@@ -540,14 +550,6 @@ public class SpiUtils {
           matched = true;
           assertTrue(contains);
           mapProviderMatch = true;
-        } else if (key.equals(mapOfJakartaProvider)) {
-          matched = true;
-          assertTrue(contains);
-          mapJakartaProviderMatch = true;
-        } else if (key.equals(mapOfJavaxProvider)) {
-          matched = true;
-          assertTrue(contains);
-          mapJavaxProviderMatch = true;
         } else if (key.equals(mapOfSet)) {
           matched = true;
           assertTrue(contains);
@@ -556,26 +558,10 @@ public class SpiUtils {
           matched = true;
           assertTrue(contains);
           mapSetProviderMatch = true;
-        } else if (key.equals(mapOfSetOfJakartaProvider)) {
-          matched = true;
-          assertTrue(contains);
-          mapSetJakartaProviderMatch = true;
-        } else if (key.equals(mapOfSetOfJavaxProvider)) {
-          matched = true;
-          assertTrue(contains);
-          mapSetJavaxProviderMatch = true;
         } else if (key.equals(mapOfCollectionOfProvider)) {
           matched = true;
           assertTrue(contains);
           mapCollectionProviderMatch = true;
-        } else if (key.equals(mapOfCollectionOfJakartaProvider)) {
-          matched = true;
-          assertTrue(contains);
-          mapCollectionJakartaProviderMatch = true;
-        } else if (key.equals(mapOfCollectionOfJavaxProvider)) {
-          matched = true;
-          assertTrue(contains);
-          mapCollectionJavaxProviderMatch = true;
         } else if (key.equals(setOfEntry)) {
           matched = true;
           assertTrue(contains);
@@ -584,26 +570,10 @@ public class SpiUtils {
           if (b != null) {
             assertTrue(b.acceptTargetVisitor(visitor) instanceof MultibinderBinding);
           }
-        } else if (key.equals(setOfJakartaEntry)) {
-          matched = true;
-          assertTrue(contains);
-          entrySetJakartaMatch = true;
-        } else if (key.equals(setOfJavaxEntry)) {
-          matched = true;
-          assertTrue(contains);
-          entrySetJavaxMatch = true;
         } else if (key.equals(collectionOfProvidersOfEntryOfProvider)) {
           matched = true;
           assertTrue(contains);
           collectionOfProvidersOfEntryOfProviderMatch = true;
-        } else if (key.equals(collectionOfJakartaProvidersOfEntryOfProvider)) {
-          matched = true;
-          assertTrue(contains);
-          collectionOfJakartaProvidersOfEntryOfProviderMatch = true;
-        } else if (key.equals(collectionOfJavaxProvidersOfEntryOfProvider)) {
-          matched = true;
-          assertTrue(contains);
-          collectionOfJavaxProvidersOfEntryOfProviderMatch = true;
         } else if (key.equals(setOfExtendsOfEntryOfProvider)) {
           matched = true;
           assertTrue(contains);
@@ -612,6 +582,46 @@ public class SpiUtils {
           matched = true;
           assertTrue(contains);
           mapOfKeyExtendsValueKeyMatch = true;
+        } else if (key.equals(mapOfJakartaProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapJakartaProviderMatch = true;
+        } else if (key.equals(mapOfSetOfJakartaProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapSetJakartaProviderMatch = true;
+        } else if (key.equals(mapOfCollectionOfJakartaProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapCollectionJakartaProviderMatch = true;
+        } else if (key.equals(setOfJakartaEntry)) {
+          matched = true;
+          assertTrue(contains);
+          entrySetJakartaMatch = true;
+        } else if (key.equals(collectionOfJakartaProvidersOfEntryOfProvider)) {
+          matched = true;
+          assertTrue(contains);
+          collectionOfJakartaProvidersOfEntryOfProviderMatch = true;
+        } else if (key.equals(mapOfJavaxProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapJavaxProviderMatch = true;
+        } else if (key.equals(mapOfSetOfJavaxProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapSetJavaxProviderMatch = true;
+        } else if (key.equals(mapOfCollectionOfJavaxProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapCollectionJavaxProviderMatch = true;
+        } else if (key.equals(setOfJavaxEntry)) {
+          matched = true;
+          assertTrue(contains);
+          entrySetJavaxMatch = true;
+        } else if (key.equals(collectionOfJavaxProvidersOfEntryOfProvider)) {
+          matched = true;
+          assertTrue(contains);
+          collectionOfJavaxProvidersOfEntryOfProviderMatch = true;
         }
       }
 
@@ -632,23 +642,23 @@ public class SpiUtils {
         otherMatchesSize);
 
     assertTrue(entrySetMatch);
-    assertTrue(entrySetJakartaMatch);
-    assertTrue(entrySetJavaxMatch);
     assertTrue(mapProviderMatch);
-    assertTrue(mapJakartaProviderMatch);
-    assertTrue(mapJavaxProviderMatch);
     assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
-    assertTrue(collectionOfJakartaProvidersOfEntryOfProviderMatch);
-    assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertTrue(setOfExtendsOfEntryOfProviderMatch);
     assertTrue(mapOfKeyExtendsValueKeyMatch);
+    assertTrue(entrySetJakartaMatch);
+    assertTrue(mapJakartaProviderMatch);
+    assertTrue(collectionOfJakartaProvidersOfEntryOfProviderMatch);
+    assertTrue(entrySetJavaxMatch);
+    assertTrue(mapJavaxProviderMatch);
+    assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
+    assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
-    assertEquals(allowDuplicates, mapSetJakartaProviderMatch);
-    assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
     assertEquals(allowDuplicates, mapCollectionProviderMatch);
+    assertEquals(allowDuplicates, mapSetJakartaProviderMatch);
     assertEquals(allowDuplicates, mapCollectionJakartaProviderMatch);
-    assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals(
         "other MapBindings found: " + otherMapBindings,
         expectedMapBindings,

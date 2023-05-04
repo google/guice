@@ -85,7 +85,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import junit.framework.TestCase;
 
-/** @author jessewilson@google.com (Jesse Wilson) */
+/**
+ * @author jessewilson@google.com (Jesse Wilson)
+ */
 public class MultibinderTest extends TestCase {
 
   final TypeLiteral<Optional<String>> optionalOfString = new TypeLiteral<Optional<String>>() {};
@@ -1287,8 +1289,8 @@ public class MultibinderTest extends TestCase {
                 mb1.addBinding().toInstance(1);
                 mb2.addBinding().toInstance(2);
 
-                // This assures us that the two binders are equivalent, so we expect the instance added to
-                // each to have been added to one set.
+                // This assures us that the two binders are equivalent, so we expect the instance
+                // added to each to have been added to one set.
                 assertEquals(mb1, mb2);
               }
             });
@@ -1424,7 +1426,7 @@ public class MultibinderTest extends TestCase {
 
     Collection<javax.inject.Provider<String>> javaxProviders =
         injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType)));
-    assertEquals(expectedValues, collectValues(javaxProviders));
+    assertEquals(expectedValues, collectValuesJavax(javaxProviders));
   }
 
   public void testMultibinderCanInjectCollectionOfProvidersWithAnnotation() {
@@ -1455,7 +1457,7 @@ public class MultibinderTest extends TestCase {
 
     Collection<javax.inject.Provider<String>> javaxProviders =
         injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType), ann));
-    assertEquals(expectedValues, collectValues(javaxProviders));
+    assertEquals(expectedValues, collectValuesJavax(javaxProviders));
   }
 
   public void testMultibindingProviderDependencies() {
@@ -1619,6 +1621,14 @@ public class MultibinderTest extends TestCase {
     }
   }
 
+  private <T> Collection<T> collectValues(Collection<? extends Provider<T>> providers) {
+    Collection<T> values = Lists.newArrayList();
+    for (Provider<T> provider : providers) {
+      values.add(provider.get());
+    }
+    return values;
+  }
+
   private <T> Collection<T> collectValuesJakarta(
       Collection<? extends jakarta.inject.Provider<T>> providers) {
     Collection<T> values = Lists.newArrayList();
@@ -1628,7 +1638,7 @@ public class MultibinderTest extends TestCase {
     return values;
   }
 
-  private <T> Collection<T> collectValues(
+  private <T> Collection<T> collectValuesJavax(
       Collection<? extends javax.inject.Provider<T>> providers) {
     Collection<T> values = Lists.newArrayList();
     for (javax.inject.Provider<T> provider : providers) {

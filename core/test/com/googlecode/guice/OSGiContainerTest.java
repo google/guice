@@ -40,6 +40,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
+// TODO(sameb): This test isn't being used anymore. Kill it?
 @RunWith(JUnit4.class)
 public class OSGiContainerTest {
 

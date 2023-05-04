@@ -53,14 +53,14 @@ public class ProvidersTest extends TestCase {
         .addEqualityGroup(
             Providers.guicify(new JavaxProvider(10)), Providers.guicify(new JavaxProvider(10)))
         .addEqualityGroup(
-            Providers.guicify(new JakartaProvider(10)), Providers.guicify(new JakartaProvider(10)))
-        .addEqualityGroup(
             Providers.guicify(new JavaxProvider(11)), Providers.guicify(new JavaxProvider(11)))
-        .addEqualityGroup(
-            Providers.guicify(new JakartaProvider(11)), Providers.guicify(new JakartaProvider(11)))
         .addEqualityGroup(
             Providers.guicify(new JavaxProviderWithDependencies()),
             Providers.guicify(new JavaxProviderWithDependencies()))
+        .addEqualityGroup(
+            Providers.guicify(new JakartaProvider(10)), Providers.guicify(new JakartaProvider(10)))
+        .addEqualityGroup(
+            Providers.guicify(new JakartaProvider(11)), Providers.guicify(new JakartaProvider(11)))
         .addEqualityGroup(
             Providers.guicify(new JakartaProviderWithDependencies()),
             Providers.guicify(new JakartaProviderWithDependencies()))

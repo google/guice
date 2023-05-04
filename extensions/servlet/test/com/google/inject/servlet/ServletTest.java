@@ -24,6 +24,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -474,6 +475,7 @@ public class ServletTest extends TestCase {
               }
             });
     final HttpServletRequest request = newFakeHttpServletRequest();
+    final HttpServletResponse response = mock(HttpServletResponse.class); // spec requires non-null
     FilterChain filterChain =
         new FilterChain() {
           @Override
@@ -483,13 +485,13 @@ public class ServletTest extends TestCase {
         };
 
     try {
-      new GuiceFilter().doFilter(request, null, filterChain);
+      new GuiceFilter().doFilter(request, response, filterChain);
       fail();
     } catch (RuntimeException e) {
       assertSame(servletException, e);
     }
     try {
-      injector.getInstance(GuiceFilter.class).doFilter(request, null, filterChain);
+      injector.getInstance(GuiceFilter.class).doFilter(request, response, filterChain);
       fail();
     } catch (RuntimeException e) {
       assertSame(servletException, e);
@@ -497,7 +499,7 @@ public class ServletTest extends TestCase {
     try {
       injector
           .getInstance(Key.get(GuiceFilter.class, ScopingOnly.class))
-          .doFilter(request, null, filterChain);
+          .doFilter(request, response, filterChain);
       fail();
     } catch (RuntimeException e) {
       assertSame(chainException, e);
