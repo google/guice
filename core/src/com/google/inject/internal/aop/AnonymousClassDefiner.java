@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.aop;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
@@ -26,17 +25,16 @@ import java.lang.reflect.Method;
  */
 final class AnonymousClassDefiner implements ClassDefiner {
 
-  private static final Object THE_UNSAFE;
+  private static final sun.misc.Unsafe THE_UNSAFE;
   private static final Method ANONYMOUS_DEFINE_METHOD;
 
   static {
     try {
-      Class<?> unsafeType = Class.forName("sun.misc.Unsafe");
-      Field theUnsafeField = unsafeType.getDeclaredField("theUnsafe");
-      theUnsafeField.setAccessible(true);
-      THE_UNSAFE = theUnsafeField.get(null);
+      THE_UNSAFE = UnsafeGetter.getUnsafe();
+      // defineAnonymousClass was removed in JDK17, so we must refer to it reflectively.
       ANONYMOUS_DEFINE_METHOD =
-          unsafeType.getMethod("defineAnonymousClass", Class.class, byte[].class, Object[].class);
+          sun.misc.Unsafe.class.getMethod(
+              "defineAnonymousClass", Class.class, byte[].class, Object[].class);
     } catch (ReflectiveOperationException e) {
       throw new ExceptionInInitializerError(e);
     }
