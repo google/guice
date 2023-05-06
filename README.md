@@ -1,10 +1,10 @@
 Guice
 ====
 
--   **Latest release: [5.1.0](https://github.com/google/guice/wiki/Guice510)**
+-   **Latest release: [5.1.0](https://github.com/google/guice/wiki/Guice510) (supports `javax.{inject,servlet,persistence}`)**
 -   **Latest pre-releases:**
-    * **[6.0.0-rc2](https://github.com/google/guice/wiki/Guice600) (supports `jakarta.inject`, `jakarta.servlet`, and `jakarta.persistence`, [mostly supports](https://github.com/google/guice/wiki/Guice600#jee-jakarta-transition) `jakarta.inject`)**
-    * **[7.0.0-rc1](https://github.com/google/guice/wiki/Guice700) (supports `jakarta.inject`, `jakarta.servlet`, and `jakarta.persistence`)**
+    * **[6.0.0-rc2](https://github.com/google/guice/wiki/Guice600) (supports `javax.{inject,servlet,persistence}`, [mostly supports](https://github.com/google/guice/wiki/Guice600#jee-jakarta-transition) `jakarta.inject`)**
+    * **[7.0.0-rc1](https://github.com/google/guice/wiki/Guice700) (supports `jakarta.{inject,servlet,persistence}`)**
 -   **Documentation:**
     * [User Guide](https://github.com/google/guice/wiki/Motivation),
     * [5.1.0 javadocs](https://google.github.io/guice/api-docs/5.1.0/javadoc/index.html)
