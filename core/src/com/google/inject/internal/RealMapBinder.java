@@ -813,6 +813,7 @@ public final class RealMapBinder<K, V> implements Module {
       extends RealMapBinderProviderWithDependencies<K, V, Map<K, Provider<V>>> {
     private Map<K, Provider<V>> mapOfProviders;
     private Set<Dependency<?>> dependencies = RealMapBinder.MODULE_DEPENDENCIES;
+    private boolean initialized;
 
     private RealProviderMapProvider(BindingSelection<K, V> bindingSelection) {
       super(bindingSelection);
@@ -825,6 +826,10 @@ public final class RealMapBinder<K, V> implements Module {
 
     @Override
     protected void doInitialize(InjectorImpl injector, Errors errors) {
+      if (initialized) {
+        return;
+      }
+      initialized = true;
       ImmutableMap.Builder<K, Provider<V>> mapOfProvidersBuilder = ImmutableMap.builder();
       ImmutableSet.Builder<Dependency<?>> dependenciesBuilder = ImmutableSet.builder();
       for (Map.Entry<K, Binding<V>> entry : bindingSelection.getMapBindings().entrySet()) {
@@ -855,6 +860,8 @@ public final class RealMapBinder<K, V> implements Module {
 
     K[] keys;
 
+    private boolean initialized = false;
+
     RealMapProvider(BindingSelection<K, V> bindingSelection) {
       super(bindingSelection);
     }
@@ -865,6 +872,10 @@ public final class RealMapBinder<K, V> implements Module {
 
     @Override
     protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+      if (initialized) {
+        return;
+      }
+      initialized = true;
       @SuppressWarnings("unchecked")
       K[] keysArray = (K[]) new Object[bindingSelection.getMapBindings().size()];
       keys = keysArray;
@@ -1209,6 +1220,7 @@ public final class RealMapBinder<K, V> implements Module {
         extends RealMultimapBinderProviderWithDependencies<K, V, Map<K, Set<Provider<V>>>> {
       private Map<K, Set<Provider<V>>> multimapOfProviders;
       private Set<Dependency<?>> dependencies = RealMapBinder.MODULE_DEPENDENCIES;
+      private boolean initialized;
 
       private RealProviderMultimapProvider(Key<Map<K, V>> mapKey) {
         super(mapKey);
@@ -1221,6 +1233,10 @@ public final class RealMapBinder<K, V> implements Module {
 
       @Override
       protected void doInitialize(InjectorImpl injector, Errors errors) {
+        if (initialized) {
+          return;
+        }
+        initialized = true;
         ImmutableMap.Builder<K, Set<Provider<V>>> multimapOfProvidersBuilder =
             ImmutableMap.builder();
         ImmutableSet.Builder<Dependency<?>> dependenciesBuilder = ImmutableSet.builder();
@@ -1271,6 +1287,8 @@ public final class RealMapBinder<K, V> implements Module {
 
       private PerKeyData<K, V>[] perKeyDatas;
 
+      private boolean initialized = false;
+
       private RealMultimapProvider(Key<Map<K, V>> mapKey) {
         super(mapKey);
       }
@@ -1282,6 +1300,11 @@ public final class RealMapBinder<K, V> implements Module {
 
       @Override
       protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+        if (initialized) {
+          return;
+        }
+        initialized = true;
+
         @SuppressWarnings({"unchecked", "rawtypes"})
         PerKeyData<K, V>[] typedPerKeyData =
             new PerKeyData[bindingSelection.getMapBindings().size()];

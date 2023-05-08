@@ -749,6 +749,7 @@ public final class RealOptionalBinder<T> implements Module {
   private abstract static class RealOptionalBinderProviderWithDependencies<T, P>
       extends InternalProviderInstanceBindingImpl.Factory<P> {
     protected final BindingSelection<T> bindingSelection;
+    private boolean initialized = false;
 
     RealOptionalBinderProviderWithDependencies(BindingSelection<T> bindingSelection) {
       // We need delayed initialization so we can detect jit bindings created by other bindings
@@ -760,8 +761,15 @@ public final class RealOptionalBinder<T> implements Module {
 
     @Override
     final void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-      bindingSelection.initialize(injector, errors);
-      doInitialize();
+      if (!initialized) {
+        initialized = true;
+        // Note that bindingSelection.initialize has its own guard, because multiple Factory impls
+        // will delegate to the same bindingSelection (intentionally). The selection has some
+        // initialization, and each factory impl has other initialization that it may additionally
+        // do.
+        bindingSelection.initialize(injector, errors);
+        doInitialize();
+      }
     }
 
     /**
