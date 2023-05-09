@@ -302,10 +302,12 @@ public final class RealMapBinder<K, V> implements Module {
     // The map this exposes is internally an ImmutableMap, so it's OK to massage
     // the guice Provider to jakarta Provider in the value (since Guice provider
     // implements jakarta Provider).
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Provider<Map<K, jakarta.inject.Provider<V>>> jakartaProviderMapProvider =
-        (Provider) providerMapProvider;
-    binder.bind(bindingSelection.getJakartaProviderMapKey()).toProvider(jakartaProviderMapProvider);
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      Provider<Map<K, jakarta.inject.Provider<V>>> jakartaProviderMapProvider =
+          (Provider) providerMapProvider;
+      binder
+          .bind(bindingSelection.getJakartaProviderMapKey())
+          .toProvider(jakartaProviderMapProvider);
 
     RealMapProvider<K, V> mapProvider = new RealMapProvider<>(bindingSelection);
     // Bind Map<K, V> to the provider w/ extension support.
@@ -317,10 +319,10 @@ public final class RealMapBinder<K, V> implements Module {
 
     // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
     // safe to massage the return type like this
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> jakartaEntrySetProviderKey =
-        (Key) bindingSelection.getEntrySetBinder().getSetKey();
-    binder.bind(bindingSelection.getEntrySetJakartaProviderKey()).to(jakartaEntrySetProviderKey);
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> jakartaEntrySetProviderKey =
+          (Key) bindingSelection.getEntrySetBinder().getSetKey();
+      binder.bind(bindingSelection.getEntrySetJakartaProviderKey()).to(jakartaEntrySetProviderKey);
   }
 
   @Override
@@ -1050,10 +1052,12 @@ public final class RealMapBinder<K, V> implements Module {
       // The collection this exposes is internally an ImmutableMap, so it's OK to massage
       // the guice Provider to jakarta Provider in the value (since the guice Provider implements
       // jakarta Provider).
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Set<jakarta.inject.Provider<V>>>> jakartaProvider =
-          (Provider) multimapProvider;
-      binder.bind(bindingSelection.getJakartaProviderSetMultimapKey()).toProvider(jakartaProvider);
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Provider<Map<K, Set<jakarta.inject.Provider<V>>>> jakartaProvider =
+            (Provider) multimapProvider;
+        binder
+            .bind(bindingSelection.getJakartaProviderSetMultimapKey())
+            .toProvider(jakartaProvider);
 
       @SuppressWarnings({"unchecked", "rawtypes"})
       Provider<Map<K, Collection<Provider<V>>>> collectionProvider = (Provider) multimapProvider;
@@ -1061,12 +1065,12 @@ public final class RealMapBinder<K, V> implements Module {
           .bind(bindingSelection.getProviderCollectionMultimapKey())
           .toProvider(collectionProvider);
 
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Collection<jakarta.inject.Provider<V>>>> collectionJakartaProvider =
-          (Provider) multimapProvider;
-      binder
-          .bind(bindingSelection.getJakartaProviderCollectionMultimapKey())
-          .toProvider(collectionJakartaProvider);
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Provider<Map<K, Collection<jakarta.inject.Provider<V>>>> collectionJakartaProvider =
+            (Provider) multimapProvider;
+        binder
+            .bind(bindingSelection.getJakartaProviderCollectionMultimapKey())
+            .toProvider(collectionJakartaProvider);
 
       // Binds a Map<K, Set<V>>
       @SuppressWarnings({"unchecked", "rawtypes"})

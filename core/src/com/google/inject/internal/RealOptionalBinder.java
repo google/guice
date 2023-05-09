@@ -209,21 +209,21 @@ public final class RealOptionalBinder<T> implements Module {
     // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
     // cgcb.Optional<jakarta.inject.Provider<T>>
-    @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<Optional<jakarta.inject.Provider<T>>>
-        optionalJakartaProviderFactory =
-            (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
-    binder
-        .bind(key.ofType(optionalOfJakartaProvider(typeLiteral)))
-        .toProvider(optionalJakartaProviderFactory);
-    // ju.Optional<jakarta.inject.Provider<T>>
-    @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<jakarta.inject.Provider<T>>>
-        javaOptionalJakartaProviderFactory =
-            (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
-    binder
-        .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
-        .toProvider(javaOptionalJakartaProviderFactory);
+      @SuppressWarnings("unchecked")
+      InternalProviderInstanceBindingImpl.Factory<Optional<jakarta.inject.Provider<T>>>
+          optionalJakartaProviderFactory =
+              (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
+      binder
+          .bind(key.ofType(optionalOfJakartaProvider(typeLiteral)))
+          .toProvider(optionalJakartaProviderFactory);
+      // ju.Optional<jakarta.inject.Provider<T>>
+      @SuppressWarnings("unchecked")
+      InternalProviderInstanceBindingImpl.Factory<java.util.Optional<jakarta.inject.Provider<T>>>
+          javaOptionalJakartaProviderFactory =
+              (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
+      binder
+          .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
+          .toProvider(javaOptionalJakartaProviderFactory);
 
     // cgcb.Optional<T>
     Key<Optional<T>> optionalKey = key.ofType(optionalOf(typeLiteral));

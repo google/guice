@@ -119,10 +119,12 @@ public final class RealMultibinder<T> implements Module {
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to jakarta Provider in the value (since the guice Provider implements
     // jakarta Provider).
-    @SuppressWarnings("unchecked")
-    Provider<Collection<jakarta.inject.Provider<T>>> jakartaProvider =
-        (Provider) collectionOfProvidersProvider;
-    binder.bind(bindingSelection.getCollectionOfJakartaProvidersKey()).toProvider(jakartaProvider);
+      @SuppressWarnings("unchecked")
+      Provider<Collection<jakarta.inject.Provider<T>>> jakartaProvider =
+          (Provider) collectionOfProvidersProvider;
+      binder
+          .bind(bindingSelection.getCollectionOfJakartaProvidersKey())
+          .toProvider(jakartaProvider);
   }
 
   public void permitDuplicates() {
