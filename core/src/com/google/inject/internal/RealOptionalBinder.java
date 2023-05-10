@@ -202,6 +202,7 @@ public final class RealOptionalBinder<T> implements Module {
     return binder.bind(getKeyForActualBinding());
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings together.
   @Override
   public void configure(Binder binder) {
     bindingSelection.checkNotInitialized();
@@ -216,66 +217,40 @@ public final class RealOptionalBinder<T> implements Module {
     // * T is bound
 
     // cgcb.Optional<c.g.i.Provider<T>>
-    InternalProviderInstanceBindingImpl.Factory<Optional<Provider<T>>> optionalProviderFactory =
-        new RealOptionalProviderProvider<>(bindingSelection);
-    binder.bind(key.ofType(optionalOfProvider(typeLiteral))).toProvider(optionalProviderFactory);
-    // ju.Optional<c.g.i.Provider<T>>
-    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<Provider<T>>>
-        javaOptionalProviderFactory = new JavaOptionalProviderProvider<>(bindingSelection);
+    Key<Optional<Provider<T>>> guavaOptProviderKey = key.ofType(optionalOfProvider(typeLiteral));
     binder
-        .bind(key.ofType(javaOptionalOfProvider(typeLiteral)))
-        .toProvider(javaOptionalProviderFactory);
+        .bind(guavaOptProviderKey)
+        .toProvider(new RealOptionalProviderProvider<>(bindingSelection));
+    // ju.Optional<c.g.i.Provider<T>>
+    Key<java.util.Optional<Provider<T>>> javaOptProviderKey =
+        key.ofType(javaOptionalOfProvider(typeLiteral));
+    binder
+        .bind(javaOptProviderKey)
+        .toProvider(new JavaOptionalProviderProvider<>(bindingSelection));
 
     // Provider is assignable to javax.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
-
-    // cgcb.Optional<javax.inject.Provider<T>>
-    @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<Optional<javax.inject.Provider<T>>>
-        optionalJavaxProviderFactory =
-            (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
-    binder
-        .bind(key.ofType(optionalOfJavaxProvider(typeLiteral)))
-        .toProvider(optionalJavaxProviderFactory);
+    binder.bind(key.ofType(optionalOfJavaxProvider(typeLiteral))).to((Key) guavaOptProviderKey);
     // ju.Optional<javax.inject.Provider<T>>
-    @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<javax.inject.Provider<T>>>
-        javaOptionalJavaxProviderFactory =
-            (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
-    binder
-        .bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
-        .toProvider(javaOptionalJavaxProviderFactory);
+    binder.bind(key.ofType(javaOptionalOfJavaxProvider(typeLiteral))).to((Key) javaOptProviderKey);
 
     // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
-
     // cgcb.Optional<jakarta.inject.Provider<T>>
-    @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<Optional<jakarta.inject.Provider<T>>>
-        optionalJakartaProviderFactory =
-            (InternalProviderInstanceBindingImpl.Factory) optionalProviderFactory;
-    binder
-        .bind(key.ofType(optionalOfJakartaProvider(typeLiteral)))
-        .toProvider(optionalJakartaProviderFactory);
+    binder.bind(key.ofType(optionalOfJakartaProvider(typeLiteral))).to((Key) guavaOptProviderKey);
     // ju.Optional<jakarta.inject.Provider<T>>
-    @SuppressWarnings("unchecked")
-    InternalProviderInstanceBindingImpl.Factory<java.util.Optional<jakarta.inject.Provider<T>>>
-        javaOptionalJakartaProviderFactory =
-            (InternalProviderInstanceBindingImpl.Factory) javaOptionalProviderFactory;
     binder
         .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
-        .toProvider(javaOptionalJakartaProviderFactory);
+        .to((Key) javaOptProviderKey);
 
     // cgcb.Optional<T>
-    Key<Optional<T>> optionalKey = key.ofType(optionalOf(typeLiteral));
+    Key<Optional<T>> guavaOptKey = key.ofType(optionalOf(typeLiteral));
     binder
-        .bind(optionalKey)
-        .toProvider(new RealOptionalKeyProvider<>(bindingSelection, optionalKey));
+        .bind(guavaOptKey)
+        .toProvider(new RealOptionalKeyProvider<>(bindingSelection, guavaOptKey));
     // ju.Optional<T>
-    Key<java.util.Optional<T>> javaOptionalKey = key.ofType(javaOptionalOf(typeLiteral));
-    binder
-        .bind(javaOptionalKey)
-        .toProvider(new JavaOptionalProvider<>(bindingSelection, javaOptionalKey));
+    Key<java.util.Optional<T>> javaOptKey = key.ofType(javaOptionalOf(typeLiteral));
+    binder.bind(javaOptKey).toProvider(new JavaOptionalProvider<>(bindingSelection, javaOptKey));
   }
 
   /** Provides the binding for {@code java.util.Optional<T>}. */
@@ -704,8 +679,7 @@ public final class RealOptionalBinder<T> implements Module {
 
     /** Implementation of {@link OptionalBinderBinding#containsElement}. */
     boolean containsElement(Element element) {
-      // All of our bindings are ProviderInstanceBindings whose providers extend
-      // RealOptionalBinderProviderWithDependencies and have 'this' as its binding selection.
+      // We contain it if the provider is us.
       if (element instanceof ProviderInstanceBinding) {
         javax.inject.Provider<?> providerInstance =
             ((ProviderInstanceBinding<?>) element).getUserSuppliedProvider();
@@ -714,11 +688,18 @@ public final class RealOptionalBinder<T> implements Module {
               .bindingSelection.equals(this);
         }
       }
+
       if (element instanceof Binding) {
+        TypeLiteral<?> typeLiteral = key.getTypeLiteral();
         Key<?> elementKey = ((Binding) element).getKey();
-        // if it isn't one of the things we bound directly it might be an actual or default key
+        // if it isn't one of the things we bound directly it might be an actual or default key,
+        // or the javax or jakarta aliases of the optional provider.
         return elementKey.equals(getKeyForActualBinding())
-            || elementKey.equals(getKeyForDefaultBinding());
+            || elementKey.equals(getKeyForDefaultBinding())
+            || elementKey.equals(key.ofType(javaOptionalOfJavaxProvider(typeLiteral)))
+            || elementKey.equals(key.ofType(optionalOfJavaxProvider(typeLiteral)))
+            || elementKey.equals(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
+            || elementKey.equals(key.ofType(optionalOfJakartaProvider(typeLiteral)));
       }
       return false; // cannot match;
     }

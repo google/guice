@@ -340,52 +340,50 @@ public final class RealMapBinder<K, V> implements Module {
     return binder.bind(getKeyForNewValue(key));
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings.
   @Override
   public void configure(Binder binder) {
     checkConfiguration(!bindingSelection.isInitialized(), "MapBinder was already initialized");
 
     // Binds a Map<K, Provider<V>>
-    RealProviderMapProvider<K, V> providerMapProvider =
-        new RealProviderMapProvider<>(bindingSelection);
-    binder.bind(bindingSelection.getProviderMapKey()).toProvider(providerMapProvider);
+    binder
+        .bind(bindingSelection.getProviderMapKey())
+        .toProvider(new RealProviderMapProvider<>(bindingSelection));
 
     // The map this exposes is internally an ImmutableMap, so it's OK to massage
     // the guice Provider to jakarta Provider in the value (since Guice provider
     // implements jakarta Provider).
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Provider<Map<K, jakarta.inject.Provider<V>>> jakartaProviderMapProvider =
-        (Provider) providerMapProvider;
-    binder.bind(bindingSelection.getJakartaProviderMapKey()).toProvider(jakartaProviderMapProvider);
+    binder
+        .bind(bindingSelection.getJakartaProviderMapKey())
+        .to((Key) bindingSelection.getProviderMapKey());
 
     // The map this exposes is internally an ImmutableMap, so it's OK to massage
     // the guice Provider to javax Provider in the value (since Guice provider
     // implements javax Provider).
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Provider<Map<K, javax.inject.Provider<V>>> javaxProviderMapProvider =
-        (Provider) providerMapProvider;
-    binder.bind(bindingSelection.getJavaxProviderMapKey()).toProvider(javaxProviderMapProvider);
+    binder
+        .bind(bindingSelection.getJavaxProviderMapKey())
+        .to((Key) bindingSelection.getProviderMapKey());
 
-    RealMapProvider<K, V> mapProvider = new RealMapProvider<>(bindingSelection);
     // Bind Map<K, V> to the provider w/ extension support.
     binder
         .bind(bindingSelection.getMapKey())
-        .toProvider(new ExtensionRealMapProvider<>(mapProvider));
+        .toProvider(new ExtensionRealMapProvider<>(bindingSelection));
     // Bind Map<K, ? extends V> to the provider w/o the extension support.
-    binder.bind(bindingSelection.getMapOfKeyExtendsValueKey()).toProvider(mapProvider);
+    binder
+        .bind(bindingSelection.getMapOfKeyExtendsValueKey())
+        .to((Key) bindingSelection.getMapKey());
 
     // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
     // safe to massage the return type like this
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Key<Set<Map.Entry<K, jakarta.inject.Provider<V>>>> jakartaEntrySetProviderKey =
-        (Key) bindingSelection.getEntrySetBinder().getSetKey();
-    binder.bind(bindingSelection.getEntrySetJakartaProviderKey()).to(jakartaEntrySetProviderKey);
+    binder
+        .bind(bindingSelection.getEntrySetJakartaProviderKey())
+        .to((Key) bindingSelection.getEntrySetBinder().getSetKey());
 
     // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
     // safe to massage the return type like this
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> massagedEntrySetProviderKey =
-        (Key) bindingSelection.getEntrySetBinder().getSetKey();
-    binder.bind(bindingSelection.getEntrySetJavaxProviderKey()).to(massagedEntrySetProviderKey);
+    binder
+        .bind(bindingSelection.getEntrySetJavaxProviderKey())
+        .to((Key) bindingSelection.getEntrySetBinder().getSetKey());
   }
 
   @Override
@@ -847,8 +845,14 @@ public final class RealMapBinder<K, V> implements Module {
     }
   }
 
-  private static final class RealMapProvider<K, V>
-      extends RealMapBinderProviderWithDependencies<K, V, Map<K, V>> {
+  /**
+   * Implementation of a provider instance for the map that also exposes details about the MapBinder
+   * using the extension SPI, delegating to another provider instance for non-extension (e.g, the
+   * actual provider instance info) data.
+   */
+  private static final class ExtensionRealMapProvider<K, V>
+      extends RealMapBinderProviderWithDependencies<K, V, Map<K, V>>
+      implements ProviderWithExtensionVisitor<Map<K, V>>, MapBinderBinding<Map<K, V>> {
     Set<Dependency<?>> dependencies = RealMapBinder.MODULE_DEPENDENCIES;
 
     /**
@@ -862,12 +866,8 @@ public final class RealMapBinder<K, V> implements Module {
 
     private boolean initialized = false;
 
-    RealMapProvider(BindingSelection<K, V> bindingSelection) {
+    ExtensionRealMapProvider(BindingSelection<K, V> bindingSelection) {
       super(bindingSelection);
-    }
-
-    BindingSelection<K, V> getBindingSelection() {
-      return bindingSelection;
     }
 
     @Override
@@ -931,41 +931,9 @@ public final class RealMapBinder<K, V> implements Module {
     public Set<Dependency<?>> getDependencies() {
       return dependencies;
     }
-  }
-
-  /**
-   * Implementation of a provider instance for the map that also exposes details about the MapBinder
-   * using the extension SPI, delegating to another provider instance for non-extension (e.g, the
-   * actual provider instance info) data.
-   */
-  private static final class ExtensionRealMapProvider<K, V>
-      extends RealMapBinderProviderWithDependencies<K, V, Map<K, V>>
-      implements ProviderWithExtensionVisitor<Map<K, V>>, MapBinderBinding<Map<K, V>> {
-    final RealMapProvider<K, V> delegate;
-
-    ExtensionRealMapProvider(RealMapProvider<K, V> delegate) {
-      super(delegate.bindingSelection);
-      this.delegate = delegate;
-    }
 
     BindingSelection<K, V> getBindingSelection() {
       return bindingSelection;
-    }
-
-    @Override
-    protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-      delegate.doInitialize(injector, errors);
-    }
-
-    @Override
-    protected Map<K, V> doProvision(InternalContext context, Dependency<?> dependency)
-        throws InternalProvisionException {
-      return delegate.doProvision(context, dependency);
-    }
-
-    @Override
-    public Set<Dependency<?>> getDependencies() {
-      return delegate.getDependencies();
     }
 
     @Override
@@ -1154,55 +1122,46 @@ public final class RealMapBinder<K, V> implements Module {
       this.bindingSelection = bindingSelection;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings together.
     @Override
     public void configure(Binder binder) {
       // Binds a Map<K, Set<Provider<V>>>
-      Provider<Map<K, Set<Provider<V>>>> multimapProvider =
-          new RealProviderMultimapProvider<K, V>(bindingSelection.getMapKey());
-      binder.bind(bindingSelection.getProviderSetMultimapKey()).toProvider(multimapProvider);
+      binder
+          .bind(bindingSelection.getProviderSetMultimapKey())
+          .toProvider(new RealProviderMultimapProvider<K, V>(bindingSelection.getMapKey()));
 
       // Provide links from a few different public keys to the providerMultimapKey.
       // The collection this exposes is internally an ImmutableMap, so it's OK to massage
       // the guice Provider to javax Provider in the value (since the guice Provider implements
       // javax Provider).
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Set<javax.inject.Provider<V>>>> javaxProvider = (Provider) multimapProvider;
-      binder.bind(bindingSelection.getJavaxProviderSetMultimapKey()).toProvider(javaxProvider);
+       binder
+          .bind(bindingSelection.getJavaxProviderSetMultimapKey())
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
       // Provide links from a few different public keys to the providerMultimapKey.
       // The collection this exposes is internally an ImmutableMap, so it's OK to massage
       // the guice Provider to jakarta Provider in the value (since the guice Provider implements
       // jakarta Provider).
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Set<jakarta.inject.Provider<V>>>> jakartaProvider =
-          (Provider) multimapProvider;
-      binder.bind(bindingSelection.getJakartaProviderSetMultimapKey()).toProvider(jakartaProvider);
+      binder
+          .bind(bindingSelection.getJakartaProviderSetMultimapKey())
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Collection<Provider<V>>>> collectionProvider = (Provider) multimapProvider;
       binder
           .bind(bindingSelection.getProviderCollectionMultimapKey())
-          .toProvider(collectionProvider);
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Collection<jakarta.inject.Provider<V>>>> collectionJakartaProvider =
-          (Provider) multimapProvider;
       binder
           .bind(bindingSelection.getJakartaProviderCollectionMultimapKey())
-          .toProvider(collectionJakartaProvider);
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Collection<javax.inject.Provider<V>>>> collectionJavaxProvider =
-          (Provider) multimapProvider;
       binder
           .bind(bindingSelection.getJavaxProviderCollectionMultimapKey())
-          .toProvider(collectionJavaxProvider);
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
       // Binds a Map<K, Set<V>>
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      Provider<Map<K, Set<V>>> realMultimapProvider =
-          new RealMultimapProvider(bindingSelection.getMapKey());
-      binder.bind(bindingSelection.getMultimapKey()).toProvider(realMultimapProvider);
+      binder
+          .bind(bindingSelection.getMultimapKey())
+          .toProvider(new RealMultimapProvider(bindingSelection.getMapKey()));
     }
 
     @Override

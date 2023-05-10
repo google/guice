@@ -105,41 +105,34 @@ public final class RealMultibinder<T> implements Module {
     this.bindingSelection = new BindingSelection<>(key);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings together.
   @Override
   public void configure(Binder binder) {
     checkConfiguration(!bindingSelection.isInitialized(), "Multibinder was already initialized");
 
-    RealMultibinderProvider<T> setProvider = new RealMultibinderProvider<T>(bindingSelection);
     // Bind the setKey to the provider wrapped w/ extension support.
     binder
         .bind(bindingSelection.getSetKey())
-        .toProvider(new ExtensionRealMultibinderProvider<>(setProvider));
-    // Bind the <? extends T> to the provider w/o extension support.
-    // It's important the exactly one binding implement the extension support and show
-    // the other keys as aliases, to adhere to the extension contract.
-    binder.bind(bindingSelection.getSetOfExtendsKey()).toProvider(setProvider);
+        .toProvider(new RealMultibinderProvider<>(bindingSelection));
+    binder.bind(bindingSelection.getSetOfExtendsKey()).to(bindingSelection.getSetKey());
 
-    Provider<Collection<Provider<T>>> collectionOfProvidersProvider =
-        new RealMultibinderCollectionOfProvidersProvider<T>(bindingSelection);
     binder
         .bind(bindingSelection.getCollectionOfProvidersKey())
-        .toProvider(collectionOfProvidersProvider);
+        .toProvider(new RealMultibinderCollectionOfProvidersProvider<T>(bindingSelection));
 
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to jakarta Provider in the value (since the guice Provider implements
     // jakarta Provider).
-    @SuppressWarnings("unchecked")
-    Provider<Collection<jakarta.inject.Provider<T>>> jakartaProvider =
-        (Provider) collectionOfProvidersProvider;
-    binder.bind(bindingSelection.getCollectionOfJakartaProvidersKey()).toProvider(jakartaProvider);
+    binder
+        .bind(bindingSelection.getCollectionOfJakartaProvidersKey())
+        .to((Key) bindingSelection.getCollectionOfProvidersKey());
 
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to javax Provider in the value (since the guice Provider implements
     // javax Provider).
-    @SuppressWarnings("unchecked")
-    Provider<Collection<javax.inject.Provider<T>>> javaxProvider =
-        (Provider) collectionOfProvidersProvider;
-    binder.bind(bindingSelection.getCollectionOfJavaxProvidersKey()).toProvider(javaxProvider);
+    binder
+        .bind(bindingSelection.getCollectionOfJavaxProvidersKey())
+        .to((Key) bindingSelection.getCollectionOfProvidersKey());
   }
 
   public void permitDuplicates() {
@@ -233,7 +226,8 @@ public final class RealMultibinder<T> implements Module {
    * so it can be used to supply a {@code Set<T>} and {@code Set<? extends T>}, the latter being
    * useful for Kotlin support.
    */
-  private static final class RealMultibinderProvider<T> extends BaseFactory<T, Set<T>> {
+  private static final class RealMultibinderProvider<T> extends BaseFactory<T, Set<T>>
+      implements ProviderWithExtensionVisitor<Set<T>>, MultibinderBinding<Set<T>> {
     List<Binding<T>> bindings;
     SingleParameterInjector<T>[] injectors;
     boolean permitDuplicates;
@@ -296,33 +290,6 @@ public final class RealMultibinder<T> implements Module {
                   bindingSelection.getSetKey(), bindings, values, ImmutableList.of(getSource())));
       return new InternalProvisionException(message);
     }
-  }
-
-  /**
-   * Implementation of BaseFactory that exposes details about the multibinder through the extension
-   * SPI.
-   */
-  private static final class ExtensionRealMultibinderProvider<T> extends BaseFactory<T, Set<T>>
-      implements ProviderWithExtensionVisitor<Set<T>>, MultibinderBinding<Set<T>> {
-    final RealMultibinderProvider<T> delegate;
-
-    ExtensionRealMultibinderProvider(RealMultibinderProvider<T> delegate) {
-      // Note: method reference doesn't work for the 2nd arg for some reason when compiling on java8
-      super(delegate.bindingSelection, bs -> bs.getDependencies());
-      this.delegate = delegate;
-    }
-
-    @Override
-    protected void doInitialize() {
-      delegate.doInitialize();
-    }
-
-    @Override
-    protected ImmutableSet<T> doProvision(InternalContext context, Dependency<?> dependency)
-        throws InternalProvisionException {
-      return delegate.doProvision(context, dependency);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <B, V> V acceptExtensionVisitor(
