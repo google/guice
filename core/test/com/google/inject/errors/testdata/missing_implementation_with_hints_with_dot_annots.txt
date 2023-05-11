@@ -3,7 +3,7 @@ Unable to create injector, see the following errors:
 1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest.B() was bound.
 
 Did you mean?
-    MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest.A() bound at MissingImplementationErrorTest$HintsModule.provideKlass(MissingImplementationErrorTest.java:149)
+    * MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest.A() bound at MissingImplementationErrorTest$HintsModule.provideKlass(MissingImplementationErrorTest.java:149)
 
 Requested by:
 1  : MissingImplementationErrorTest$HintsModule.provideString(MissingImplementationErrorTest.java:155)
@@ -16,7 +16,7 @@ Learn more:
 2) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorTest$Klass2 annotated with @MissingImplementationErrorTest.A() was bound.
 
 Did you mean?
-    MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest.A() bound at MissingImplementationErrorTest$HintsModule.provideKlass(MissingImplementationErrorTest.java:149)
+    * MissingImplementationErrorTest$Klass annotated with @MissingImplementationErrorTest.A() bound at MissingImplementationErrorTest$HintsModule.provideKlass(MissingImplementationErrorTest.java:149)
 
 Requested by:
 1  : MissingImplementationErrorTest$HintsModule.provideAString(MissingImplementationErrorTest.java:162)
