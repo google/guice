@@ -114,9 +114,9 @@ public final class RealMultibinder<T> implements Module {
     // The collection this exposes is internally an ImmutableList, so it's OK to massage
     // the guice Provider to jakarta Provider in the value (since the guice Provider implements
     // jakarta Provider).
-      binder
-          .bind(bindingSelection.getCollectionOfJakartaProvidersKey())
-          .to((Key) bindingSelection.getCollectionOfProvidersKey());
+    binder
+        .bind(bindingSelection.getCollectionOfJakartaProvidersKey())
+        .to((Key) bindingSelection.getCollectionOfProvidersKey());
   }
 
   public void permitDuplicates() {
@@ -274,6 +274,7 @@ public final class RealMultibinder<T> implements Module {
                   bindingSelection.getSetKey(), bindings, values, ImmutableList.of(getSource())));
       return new InternalProvisionException(message);
     }
+
     @SuppressWarnings("unchecked")
     @Override
     public <B, V> V acceptExtensionVisitor(

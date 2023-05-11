@@ -211,11 +211,11 @@ public final class RealOptionalBinder<T> implements Module {
     // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
     // cannot be modified so we can use some rawtypes hackery to share the same implementation.
     // cgcb.Optional<jakarta.inject.Provider<T>>
-      binder.bind(key.ofType(optionalOfJakartaProvider(typeLiteral))).to((Key) guavaOptProviderKey);
-      // ju.Optional<jakarta.inject.Provider<T>>
-      binder
-          .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
-          .to((Key) javaOptProviderKey);
+    binder.bind(key.ofType(optionalOfJakartaProvider(typeLiteral))).to((Key) guavaOptProviderKey);
+    // ju.Optional<jakarta.inject.Provider<T>>
+    binder
+        .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
+        .to((Key) javaOptProviderKey);
 
     // cgcb.Optional<T>
     Key<Optional<T>> guavaOptKey = key.ofType(optionalOf(typeLiteral));

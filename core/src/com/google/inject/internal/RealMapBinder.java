@@ -303,9 +303,9 @@ public final class RealMapBinder<K, V> implements Module {
     // The map this exposes is internally an ImmutableMap, so it's OK to massage
     // the guice Provider to jakarta Provider in the value (since Guice provider
     // implements jakarta Provider).
-      binder
-          .bind(bindingSelection.getJakartaProviderMapKey())
-          .to((Key) bindingSelection.getProviderMapKey());
+    binder
+        .bind(bindingSelection.getJakartaProviderMapKey())
+        .to((Key) bindingSelection.getProviderMapKey());
 
     // Bind Map<K, V> to the provider w/ extension support.
     binder
@@ -318,9 +318,9 @@ public final class RealMapBinder<K, V> implements Module {
 
     // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
     // safe to massage the return type like this
-      binder
-          .bind(bindingSelection.getEntrySetJakartaProviderKey())
-          .to((Key) bindingSelection.getEntrySetBinder().getSetKey());
+    binder
+        .bind(bindingSelection.getEntrySetJakartaProviderKey())
+        .to((Key) bindingSelection.getEntrySetBinder().getSetKey());
   }
 
   @Override
@@ -1021,17 +1021,17 @@ public final class RealMapBinder<K, V> implements Module {
       // The collection this exposes is internally an ImmutableMap, so it's OK to massage
       // the guice Provider to jakarta Provider in the value (since the guice Provider implements
       // jakarta Provider).
-        binder
-            .bind(bindingSelection.getJakartaProviderSetMultimapKey())
-            .to((Key) bindingSelection.getProviderSetMultimapKey());
+      binder
+          .bind(bindingSelection.getJakartaProviderSetMultimapKey())
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
       binder
           .bind(bindingSelection.getProviderCollectionMultimapKey())
           .to((Key) bindingSelection.getProviderSetMultimapKey());
 
-        binder
-            .bind(bindingSelection.getJakartaProviderCollectionMultimapKey())
-            .to((Key) bindingSelection.getProviderSetMultimapKey());
+      binder
+          .bind(bindingSelection.getJakartaProviderCollectionMultimapKey())
+          .to((Key) bindingSelection.getProviderSetMultimapKey());
 
       // Binds a Map<K, Set<V>>
       binder

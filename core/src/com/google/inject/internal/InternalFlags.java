@@ -48,7 +48,7 @@ public final class InternalFlags {
   public enum IncludeStackTraceOption {
     /** No stack trace collection */
     OFF,
-    /**  Minimum stack trace collection (Default) */
+    /** Minimum stack trace collection (Default) */
     ONLY_FOR_DECLARING_SOURCE,
   }
 
@@ -197,8 +197,13 @@ public final class InternalFlags {
     } catch (SecurityException e) {
       return secureValue;
     } catch (IllegalArgumentException e) {
-      logger.warning(value + " is not a valid flag value for " + name + ". "
-          + " Values must be one of " + Arrays.asList(enumType.getEnumConstants()));
+      logger.warning(
+          value
+              + " is not a valid flag value for "
+              + name
+              + ". "
+              + " Values must be one of "
+              + Arrays.asList(enumType.getEnumConstants()));
       return defaultValue;
     }
   }
