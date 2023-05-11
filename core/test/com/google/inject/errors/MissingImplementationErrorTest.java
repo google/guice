@@ -1,14 +1,17 @@
 package com.google.inject.errors;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
@@ -169,5 +172,39 @@ public final class MissingImplementationErrorTest {
         assertThrows(CreationException.class, () -> Guice.createInjector(new HintsModule()));
     assertGuiceErrorEqualsIgnoreLineNumber(
         exception.getMessage(), "missing_implementation_with_hints" + GOLDEN_SUFFIX);
+  }
+
+  private static interface CustomType {
+    static class InnerType {}
+  }
+
+  @Test
+  public void missingImplementationWithHints_memoizesSuggestion() throws Exception {
+    Injector injector = Guice.createInjector();
+    ConfigurationException ex =
+        assertThrows(ConfigurationException.class, () -> injector.getInstance(CustomType.class));
+    // Ensure that the message doesn't contain a "Did you mean?" by default,
+    // because there's no other type that fits.
+    assertThat(ex).hasMessageThat().doesNotContain("Did you mean?");
+    // And even after we insert another type that fits, we don't redo the suggestions.
+    injector.getInstance(CustomType.InnerType.class);
+    assertThat(ex).hasMessageThat().doesNotContain("Did you mean?");
+  }
+
+  @Test
+  public void missingImplementationWithHints_lazyInjectorUsage() throws Exception {
+    // Note: this test is extremely contrived. This scenario is unlikely to happen for real, but
+    // it's a very convenient way to assert that usage of the injector is lazy.
+    // By adding a type into the injector after the exception is thrown but before we
+    // call getMessage, we're validating that the suggestions are populated only on getMessage
+    // usage.
+    // This test works in tandem with the above one which asserts that by default,
+    // the message *will not* have suggestions.
+    Injector injector = Guice.createInjector();
+    ConfigurationException ex =
+        assertThrows(ConfigurationException.class, () -> injector.getInstance(CustomType.class));
+    injector.getInstance(CustomType.InnerType.class);
+    assertThat(ex).hasMessageThat().containsMatch("Did you mean?");
+    assertThat(ex).hasMessageThat().containsMatch("InnerType");
   }
 }

@@ -809,6 +809,7 @@ public class OptionalBinderTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "No implementation for Integer",
+          "Requested by:",
           getShortName(module) + ".configure");
     }
   }

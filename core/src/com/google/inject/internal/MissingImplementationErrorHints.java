@@ -1,5 +1,6 @@
 package com.google.inject.internal;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.lang.Math.min;
 
 import com.google.common.collect.ImmutableList;
@@ -10,6 +11,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingSourceRestriction;
+import com.google.inject.spi.UntargettedBinding;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -47,22 +49,29 @@ final class MissingImplementationErrorHints {
 
     // Keys which have similar strings as the desired key
     List<String> possibleMatches = new ArrayList<>();
-    List<Binding<T>> sameTypes = injector.findBindingsByType(type);
+    ImmutableList<Binding<T>> sameTypes =
+        injector.findBindingsByType(type).stream()
+            .filter(b -> !(b instanceof UntargettedBinding)) // These aren't valid matches
+            .collect(toImmutableList());
     if (!sameTypes.isEmpty()) {
       suggestions.add("\nDid you mean?");
       int howMany = min(sameTypes.size(), MAX_MATCHING_TYPES_REPORTED);
       for (int i = 0; i < howMany; ++i) {
+        Key<?> bindingKey = sameTypes.get(i).getKey();
         // TODO: Look into a better way to prioritize suggestions. For example, possbily
         // use levenshtein distance of the given annotation vs actual annotation.
-        suggestions.add(Messages.format("\n    * %s", sameTypes.get(i).getKey()));
+        suggestions.add(
+            Messages.format(
+                "\n    * %s",
+                formatSuggestion(bindingKey, injector.getExistingBinding(bindingKey))));
       }
       int remaining = sameTypes.size() - MAX_MATCHING_TYPES_REPORTED;
       if (remaining > 0) {
         String plural = (remaining == 1) ? "" : "s";
         suggestions.add(
-            Messages.format("\n    %d more binding%s with other annotations.", remaining, plural));
+            Messages.format(
+                "\n    * %d more binding%s with other annotations.", remaining, plural));
       }
-      suggestions.add("\n");
     } else {
       // For now, do a simple substring search for possibilities. This can help spot
       // issues when there are generics being used (such as a wrapper class) and the
@@ -73,14 +82,14 @@ final class MissingImplementationErrorHints {
       String want = type.toString();
       Map<Key<?>, Binding<?>> bindingMap = injector.getAllBindings();
       for (Key<?> bindingKey : bindingMap.keySet()) {
+        Binding<?> binding = bindingMap.get(bindingKey);
+        // Ignore untargeted bindings, those aren't valid matches.
+        if (binding instanceof UntargettedBinding) {
+          continue;
+        }
         String have = bindingKey.getTypeLiteral().toString();
         if (have.contains(want) || want.contains(have)) {
-          Formatter fmt = new Formatter();
-          fmt.format("%s bound ", Messages.convert(bindingKey));
-          new SourceFormatter(
-                  bindingMap.get(bindingKey).getSource(), fmt, /* omitPreposition= */ false)
-              .format();
-          possibleMatches.add(fmt.toString());
+          possibleMatches.add(formatSuggestion(bindingKey, bindingMap.get(bindingKey)));
           // TODO: Consider a check that if there are more than some number of results,
           // don't suggest any.
           if (possibleMatches.size() > MAX_RELATED_TYPES_REPORTED) {
@@ -93,7 +102,7 @@ final class MissingImplementationErrorHints {
       if (!possibleMatches.isEmpty() && (possibleMatches.size() <= MAX_RELATED_TYPES_REPORTED)) {
         suggestions.add("\nDid you mean?");
         for (String possibleMatch : possibleMatches) {
-          suggestions.add(Messages.format("\n    %s", possibleMatch));
+          suggestions.add(Messages.format("\n    * %s", possibleMatch));
         }
       }
     }
@@ -109,5 +118,12 @@ final class MissingImplementationErrorHints {
     }
 
     return suggestions.build();
+  }
+
+  private static String formatSuggestion(Key<?> key, Binding<?> binding) {
+    Formatter fmt = new Formatter();
+    fmt.format("%s bound ", Messages.convert(key));
+    new SourceFormatter(binding.getSource(), fmt, /* omitPreposition= */ false).format();
+    return fmt.toString();
   }
 }

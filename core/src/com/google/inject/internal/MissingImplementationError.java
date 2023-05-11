@@ -1,5 +1,6 @@
 package com.google.inject.internal;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
@@ -8,6 +9,7 @@ import com.google.inject.spi.ErrorDetail;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /** Error reported by Guice when a key is not bound in the injector. */
@@ -15,21 +17,26 @@ final class MissingImplementationError<T>
     extends InternalErrorDetail<MissingImplementationError<T>> {
 
   private final Key<T> key;
-  private final ImmutableList<String> suggestions;
+  private final Supplier<ImmutableList<String>> suggestionsSupplier;
 
   public MissingImplementationError(Key<T> key, Injector injector, List<Object> sources) {
-    this(key, MissingImplementationErrorHints.getSuggestions(key, injector), sources);
+    this(
+        key,
+        // Defer building suggestions until messages are requested, to avoid the work associated
+        // with iterating bindings in scenarios where the exceptions are discarded.
+        Suppliers.memoize(() -> MissingImplementationErrorHints.getSuggestions(key, injector)),
+        sources);
   }
 
   private MissingImplementationError(
-      Key<T> key, ImmutableList<String> suggestions, List<Object> sources) {
+      Key<T> key, Supplier<ImmutableList<String>> suggestionsSupplier, List<Object> sources) {
     super(
         ErrorId.MISSING_IMPLEMENTATION,
         String.format("No implementation for %s was bound.", Messages.convert(key)),
         sources,
         null);
     this.key = key;
-    this.suggestions = suggestions;
+    this.suggestionsSupplier = suggestionsSupplier;
   }
 
   @Override
@@ -40,6 +47,7 @@ final class MissingImplementationError<T>
 
   @Override
   public void formatDetail(List<ErrorDetail<?>> mergeableErrors, Formatter formatter) {
+    ImmutableList<String> suggestions = suggestionsSupplier.get();
     if (!suggestions.isEmpty()) {
       suggestions.forEach(formatter::format);
     }
@@ -65,7 +73,7 @@ final class MissingImplementationError<T>
 
   @Override
   public MissingImplementationError<T> withSources(List<Object> newSources) {
-    return new MissingImplementationError<T>(key, suggestions, newSources);
+    return new MissingImplementationError<T>(key, suggestionsSupplier, newSources);
   }
 
   /** Omit the key itself in the source list since the information is redundant. */
