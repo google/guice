@@ -1,0 +1,3 @@
+OK: com.google.inject.persist.jpa.JpaPersistOptions Class
+OK: com.google.inject.persist.jpa.JpaPersistOptions.Builder Class
+NO DOC BLOCK: com.google.inject.persist.jpa.JpaPersistModule Constructor (java.lang.String, com.google.inject.persist.jpa.JpaPersistOptions)
