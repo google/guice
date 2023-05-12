@@ -1,15 +1,14 @@
 Guice
 ====
 
--   **Latest release: [5.1.0](https://github.com/google/guice/wiki/Guice510) (supports `javax.{inject,servlet,persistence}`)**
--   **Latest pre-releases:**
-    * **[6.0.0-rc2](https://github.com/google/guice/wiki/Guice600) (supports `javax.{inject,servlet,persistence}`, [mostly supports](https://github.com/google/guice/wiki/Guice600#jee-jakarta-transition) `jakarta.inject`)**
-    * **[7.0.0-rc1](https://github.com/google/guice/wiki/Guice700) (supports `jakarta.{inject,servlet,persistence}`)**
+-   **Latest releases:**
+    * **[6.0.0](https://github.com/google/guice/wiki/Guice600) (supports `javax.{inject,servlet,persistence}`, [mostly supports](https://github.com/google/guice/wiki/Guice600#jee-jakarta-transition) `jakarta.inject`)**
+    * **[7.0.0](https://github.com/google/guice/wiki/Guice700) (supports `jakarta.{inject,servlet,persistence}`)**
+    * (6.0.0 & 7.0.0 are equivalent except for their javax/jakarta support.)
 -   **Documentation:**
     * [User Guide](https://github.com/google/guice/wiki/Motivation),
-    * [5.1.0 javadocs](https://google.github.io/guice/api-docs/5.1.0/javadoc/index.html)
-    * [6.0.0 javadocs](https://google.github.io/guice/api-docs/6.0.0-rc2/javadoc/index.html)
-    * [7.0.0 javadocs](https://google.github.io/guice/api-docs/7.0.0-rc1/javadoc/index.html)
+    * [6.0.0 javadocs](https://google.github.io/guice/api-docs/6.0.0/javadoc/index.html)
+    * [7.0.0 javadocs](https://google.github.io/guice/api-docs/7.0.0/javadoc/index.html)
     * [Latest Snapshot javadocs](https://google.github.io/guice/api-docs/latest/javadoc/index.html)
 -   **Continuous Integration:**
     [![Build Status](https://github.com/google/guice/workflows/continuous-integration/badge.svg)](https://github.com/google/guice/actions)
@@ -39,7 +38,7 @@ Guice Core (Maven)
 <dependency>
   <groupId>com.google.inject</groupId>
   <artifactId>guice</artifactId>
-  <!-- {version} can be 5.1.0, 6.0.0-rc2, 7.0.0-rc1, etc. -->
+  <!-- {version} can be 6.0.0, 7.0.0, etc. -->
   <version>{version}</version>
 </dependency>
 ```
