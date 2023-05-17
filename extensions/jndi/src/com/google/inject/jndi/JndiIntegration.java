@@ -26,6 +26,7 @@ import javax.naming.NamingException;
  *
  * @author crazybob@google.com (Bob Lee)
  */
+@SuppressWarnings("BanJNDI")
 public class JndiIntegration {
 
   private JndiIntegration() {}

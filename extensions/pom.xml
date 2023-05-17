@@ -78,12 +78,9 @@
       <plugin>
         <artifactId>maven-remote-resources-plugin</artifactId>
       </plugin>
-      <!--
-       | Enable Java8 conformance checks
-      -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
       <!--
        | Add OSGi manifest: extensions are fragments that attach to the core

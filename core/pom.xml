@@ -84,17 +84,9 @@
       <plugin>
         <artifactId>maven-remote-resources-plugin</artifactId>
       </plugin>
-      <!--
-       | Enable Java8 conformance checks
-      -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>

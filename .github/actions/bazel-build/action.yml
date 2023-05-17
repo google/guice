@@ -19,8 +19,8 @@ runs:
         restore-keys: |
           ${{ runner.os }}-bazel-build-
     - name: 'Bazel build'
-      # Cross compile for Java 8, see http://openjdk.java.net/jeps/247
-      run: bazel build --javacopt="--release 8" //...
+      # Cross compile for Java 11, see http://openjdk.java.net/jeps/247
+      run: bazel build --javacopt="--release 11" //...
       shell: bash
     - name: 'Install local snapshot'
       run: ./util/install-local-snapshot.sh

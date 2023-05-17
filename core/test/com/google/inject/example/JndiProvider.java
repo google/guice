@@ -21,6 +21,7 @@ import com.google.inject.Provider;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+@SuppressWarnings("BanJNDI")
 class JndiProvider<T> implements Provider<T> {
 
   @Inject Context context;

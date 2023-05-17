@@ -32,7 +32,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <name>Google Guice</name>
 
   <description>
-    Guice is a lightweight dependency injection framework for Java 8 and above
+    Guice is a lightweight dependency injection framework for Java 11 and above
   </description>
 
   <url>https://github.com/google/guice</url>
@@ -51,13 +51,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <unsubscribe>http://groups.google.com/group/google-guice/subscribe</unsubscribe>
       <post>http://groups.google.com/group/google-guice/post</post>
     </mailingList>
-    <mailingList>
-      <name>Guice Developers List</name>
-      <archive>http://groups.google.com/group/google-guice-dev/topics</archive>
-      <subscribe>http://groups.google.com/group/google-guice-dev/subscribe</subscribe>
-      <unsubscribe>http://groups.google.com/group/google-guice-dev/subscribe</unsubscribe>
-      <post>http://groups.google.com/group/google-guice-dev/post</post>
-    </mailingList>
   </mailingLists>
 
   <scm>
@@ -72,8 +65,8 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </issueManagement>
 
   <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/google/guice</url>
+    <system>GitHub Actions</system>
+    <url>https://github.com/google/guice/actions</url>
   </ciManagement>
 
   <licenses>
@@ -272,44 +265,18 @@ See the Apache License Version 2.0 for the specific language governing permissio
           </executions>
         </plugin>
         <!--
-         | Make sure we only use Java8 methods
+         | Make sure we only use Java11 methods
         -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>3.11.0</version>
           <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
+            <release>11</release>
             <compilerArgs>
               <arg>-parameters</arg>
             </compilerArgs>
             <testCompilerArgument>-parameters</testCompilerArgument>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>1.16</version>
-          <configuration>
-            <signature>
-              <groupId>org.codehaus.mojo.signature</groupId>
-              <artifactId>java18</artifactId>
-              <version>1.0</version>
-            </signature>
-            <ignores>
-              <!-- workaround https://github.com/mojohaus/animal-sniffer/issues/18 -->
-              <ignore>java.lang.invoke.MethodHandle</ignore>
-            </ignores>
-          </configuration>
-          <executions>
-            <execution>
-              <id>check-java-1.8-compat</id>
-              <phase>process-classes</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -354,7 +321,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
               <Bundle-Name>${project.artifactId}</Bundle-Name>
               <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
-              <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+              <Bundle-RequiredExecutionEnvironment>JavaSE-11</Bundle-RequiredExecutionEnvironment>
               <Import-Package>!com.google.inject.*,!javax.annotation,*</Import-Package>
               <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
               <_consumer-policy>$(version;==;$(@))</_consumer-policy>
@@ -404,7 +371,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <version>3.2.0</version>
           <configuration>
             <doclint>html,syntax</doclint>
-            <source>8</source>
+            <source>11</source>
             <author>false</author>
             <protected>true</protected>
             <links>
@@ -518,6 +485,4 @@ See the Apache License Version 2.0 for the specific language governing permissio
       </plugin>
     </plugins>
   </build>
-
-  <!-- TODO(cgruber): Update the google parent pom or migrate to sonatype's -->
 </project>
