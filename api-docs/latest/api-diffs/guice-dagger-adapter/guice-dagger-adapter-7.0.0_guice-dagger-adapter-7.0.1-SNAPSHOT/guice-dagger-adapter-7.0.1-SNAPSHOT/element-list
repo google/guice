@@ -1,1 +1,2 @@
+module:com.google.guice.extensions.daggeradapter
 com.google.inject.daggeradapter

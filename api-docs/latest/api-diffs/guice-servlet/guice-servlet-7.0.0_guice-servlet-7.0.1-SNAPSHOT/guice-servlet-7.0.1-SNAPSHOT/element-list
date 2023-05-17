@@ -1,1 +1,2 @@
+module:com.google.guice.extensions.servlet
 com.google.inject.servlet

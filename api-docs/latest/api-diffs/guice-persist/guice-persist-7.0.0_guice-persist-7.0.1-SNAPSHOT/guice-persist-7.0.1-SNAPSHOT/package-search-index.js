@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.google.inject.persist"},{"l":"com.google.inject.persist.finder"},{"l":"com.google.inject.persist.jpa"}]
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"m":"com.google.guice.extensions.persist","l":"com.google.inject.persist"},{"m":"com.google.guice.extensions.persist","l":"com.google.inject.persist.finder"},{"m":"com.google.guice.extensions.persist","l":"com.google.inject.persist.jpa"}]

@@ -1,3 +1,4 @@
+module:com.google.guice
 com.google.inject
 com.google.inject.binder
 com.google.inject.matcher

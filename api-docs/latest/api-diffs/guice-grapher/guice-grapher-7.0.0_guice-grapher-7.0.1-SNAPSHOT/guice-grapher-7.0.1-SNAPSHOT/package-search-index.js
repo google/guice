@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.google.inject.grapher"},{"l":"com.google.inject.grapher.graphviz"}]
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"m":"com.google.guice.extensions.grapher","l":"com.google.inject.grapher"},{"m":"com.google.guice.extensions.grapher","l":"com.google.inject.grapher.graphviz"}]

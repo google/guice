@@ -1,3 +1,4 @@
+module:com.google.guice.extensions.persist
 com.google.inject.persist
 com.google.inject.persist.finder
 com.google.inject.persist.jpa

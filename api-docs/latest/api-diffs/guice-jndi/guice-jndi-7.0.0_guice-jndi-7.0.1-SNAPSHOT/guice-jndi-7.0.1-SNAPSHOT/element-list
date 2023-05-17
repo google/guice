@@ -1,1 +1,2 @@
+module:com.google.guice.extensions.jndi
 com.google.inject.jndi

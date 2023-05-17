@@ -1,1 +1,2 @@
+module:com.google.guice.extensions.spring
 com.google.inject.spring

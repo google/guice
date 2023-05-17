@@ -1,1 +1,2 @@
+module:com.google.guice.extensions.throwingproviders
 com.google.inject.throwingproviders

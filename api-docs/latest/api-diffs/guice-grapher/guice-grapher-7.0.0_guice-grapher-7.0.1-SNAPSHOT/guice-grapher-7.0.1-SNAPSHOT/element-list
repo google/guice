@@ -1,2 +1,3 @@
+module:com.google.guice.extensions.grapher
 com.google.inject.grapher
 com.google.inject.grapher.graphviz

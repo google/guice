@@ -1,0 +1,1 @@
+moduleSearchIndex = [{"l":"com.google.guice.extensions.grapher"}]
