@@ -1,7 +1,9 @@
 # Copyright 2011 Google Inc. All Rights Reserved.
 # Author: sameb@google.com (Sam Berlin)
 
-package(default_visibility = ["//:src"])
+package(
+    default_visibility = ["//:src"],
+)
 
 # A genrule to take everything under META-INF and move it the
 # root of the classpath.
