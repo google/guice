@@ -33,7 +33,7 @@ maven_install(
         "com.google.dagger:dagger:2.22.1",
         "com.google.dagger:dagger-producers:2.22.1",
         "com.google.errorprone:error_prone_annotations:2.18.0",
-        "com.google.guava:guava:31.0.1-jre",
+        "com.google.guava:guava:32.0.0-jre",
         "commons-logging:commons-logging:1.2",
         "jakarta.inject:jakarta.inject-api:2.0.1",
         "jakarta.persistence:jakarta.persistence-api:3.0.0",
@@ -54,7 +54,7 @@ maven_install(
         maven.artifact(
             "com.google.guava",
             "guava-testlib",
-            "31.0.1-jre",
+            "32.0.0-jre",
             testonly = True,
         ),
         maven.artifact(
