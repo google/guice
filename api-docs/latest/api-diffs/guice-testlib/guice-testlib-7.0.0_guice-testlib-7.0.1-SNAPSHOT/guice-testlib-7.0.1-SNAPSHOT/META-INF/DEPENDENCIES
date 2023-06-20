@@ -13,12 +13,12 @@ From: 'an unknown organization'
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Guava InternalFutureFailureAccess and InternalFutures (https://github.com/google/guava/failureaccess) com.google.guava:failureaccess:bundle:1.0.1
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - Guava: Google Core Libraries for Java (https://github.com/google/guava) com.google.guava:guava:bundle:31.0.1-jre
+  - Guava: Google Core Libraries for Java (https://github.com/google/guava) com.google.guava:guava:bundle:32.0.0-jre
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Guava ListenableFuture only (https://github.com/google/guava/listenablefuture) com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - J2ObjC Annotations (https://github.com/google/j2objc/) com.google.j2objc:j2objc-annotations:jar:1.3
-    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - J2ObjC Annotations (https://github.com/google/j2objc/) com.google.j2objc:j2objc-annotations:jar:2.8
+    License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Truth Core (http://github.com/google/truth/truth) com.google.truth:truth:jar:1.1.3
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Checker Qual (https://checkerframework.org) org.checkerframework:checker-qual:jar:3.13.0
