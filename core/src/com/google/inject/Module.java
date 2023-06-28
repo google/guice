@@ -28,6 +28,7 @@ package com.google.inject;
  * all methods annotated with {@literal @}{@link Provides}. Use scope and binding annotations on
  * these methods to configure the bindings.
  */
+@FunctionalInterface
 public interface Module {
 
   /**
