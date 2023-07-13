@@ -363,7 +363,7 @@ public final class BoundFieldModule implements Module {
     }
   }
 
-  /** Returns the the object originally passed to {@link BoundFieldModule#of}). */
+  /** Returns the object originally passed to {@link BoundFieldModule#of}). */
   public Object getInstance() {
     return instance;
   }
