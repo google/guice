@@ -53,7 +53,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public abstract class AbstractModule implements Module {
 
-  Binder binder;
+  private Binder binder;
 
   @Override
   public final synchronized void configure(Binder builder) {

@@ -438,8 +438,8 @@ public class CircularDependencyTest extends TestCase {
             new AbstractModule() {
               @Override
               protected void configure() {
-                binder.bind(A.class).to(E.class);
-                binder.bind(B.class).to(E.class);
+                bind(A.class).to(E.class);
+                bind(B.class).to(E.class);
               }
             });
     injector.getInstance(A.class);
@@ -452,8 +452,8 @@ public class CircularDependencyTest extends TestCase {
               @Override
               protected void configure() {
                 binder().disableCircularProxies();
-                binder.bind(A.class).to(E.class);
-                binder.bind(B.class).to(E.class);
+                bind(A.class).to(E.class);
+                bind(B.class).to(E.class);
               }
             });
 

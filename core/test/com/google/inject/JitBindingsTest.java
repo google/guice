@@ -141,7 +141,7 @@ public class JitBindingsTest extends TestCase {
             new AbstractModule() {
               @Override
               protected void configure() {
-                binder.requireExplicitBindings();
+                binder().requireExplicitBindings();
                 bind(Foo.class).to(ScopedFooImpl.class);
               }
             });
