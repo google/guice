@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        java: [11, 17, 21-ea]
+        java: [11, 17, 21]
         # Additionally add macos & windows with a single recent JDK
         include:
           - os: macos-latest
@@ -49,8 +49,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        # Bazel has issues with parsing "21-ea" as a java-version, so use 20 for now
-        java: [11, 17, 20]
+        java: [11, 17, 21]
         # Additionally add macos & windows with a single recent JDK
         include:
           - os: macos-latest
