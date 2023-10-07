@@ -53,6 +53,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.net.BindException;
 import java.rmi.AccessException;
 import java.rmi.RemoteException;
@@ -998,16 +999,25 @@ public class CheckedProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException ce) {
-      assertEquals(
-          InterruptedException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")",
-          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
+        String actualMessage = Iterables.getOnlyElement(ce.getErrorMessages()).getMessage();
+        assertTrue(
+                (InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage)
+                        ||
+                        (InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage));
     }
   }
 
@@ -1024,16 +1034,25 @@ public class CheckedProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException ce) {
-      assertEquals(
-          InterruptedException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")",
-          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
+        String actualMessage = Iterables.getOnlyElement(ce.getErrorMessages()).getMessage();
+        assertTrue(
+                (InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage)
+                        ||
+                        (InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage));
     }
   }
 
@@ -1127,16 +1146,25 @@ public class CheckedProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException ce) {
-      assertEquals(
-          IOException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")",
-          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
+        String actualMessage = Iterables.getOnlyElement(ce.getErrorMessages()).getMessage();
+        assertTrue(
+                (IOException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage)
+                        ||
+                        (IOException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage));
     }
   }
 
@@ -1153,16 +1181,25 @@ public class CheckedProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException ce) {
-      assertEquals(
-          IOException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")",
-          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
+        String actualMessage = Iterables.getOnlyElement(ce.getErrorMessages()).getMessage();
+        assertTrue(
+                (IOException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage)
+                        ||
+                        (IOException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(actualMessage));
     }
   }
 
@@ -1260,27 +1297,50 @@ public class CheckedProviderTest extends TestCase {
     } catch (CreationException ce) {
       // The only two that should fail are Interrupted & TooManyListeners.. the rest are OK.
       // Allow the msgs to come in any order.
-      ImmutableList<String> errors =
-          ce.getErrorMessages().stream().map(Message::getMessage).collect(toImmutableList());
-      String msg1 =
-          InterruptedException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")";
-      String msg2 =
-          TooManyListenersException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")";
-      assertThat(errors).containsExactly(msg1, msg2);
+        ImmutableList<String> errors =
+                ce.getErrorMessages().stream().map(Message::getMessage).collect(toImmutableList());
+        String msg1 =
+                InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")";
+        String msg2 =
+                TooManyListenersException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")";
+        String msg3 =
+                InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")";
+        String msg4 =
+                TooManyListenersException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")";
+        if(errors.contains(msg1) && errors.contains(msg2)) {
+            assertThat(errors).containsExactly(msg1, msg2);
+        }
+        else {
+            assertThat(errors).containsExactly(msg3, msg4);
+        }
     }
   }
 
@@ -1298,28 +1358,44 @@ public class CheckedProviderTest extends TestCase {
       fail();
     } catch (CreationException ce) {
       // The only two that should fail are Interrupted & TooManyListeners.. the rest are OK.
-      List<Message> errors = ImmutableList.copyOf(ce.getErrorMessages());
-      assertEquals(
-          InterruptedException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")",
-          errors.get(0).getMessage());
-      assertEquals(
-          TooManyListenersException.class.getName()
-              + " is not compatible with the exceptions (["
-              + RemoteException.class
-              + ", "
-              + BindException.class
-              + "]) declared in the CheckedProvider interface ("
-              + RemoteProvider.class.getName()
-              + ")",
-          errors.get(1).getMessage());
-      assertEquals(2, errors.size());
+        List<Message> errors = ImmutableList.copyOf(ce.getErrorMessages());
+        assertTrue(
+                (InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(errors.get(0).getMessage())
+                        ||
+                        (InterruptedException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(errors.get(0).getMessage()));
+        assertTrue(
+                (TooManyListenersException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + RemoteException.class
+                        + ", "
+                        + BindException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(errors.get(1).getMessage())
+                        ||
+                        (TooManyListenersException.class.getName()
+                        + " is not compatible with the exceptions (["
+                        + BindException.class
+                        + ", "
+                        + RemoteException.class
+                        + "]) declared in the CheckedProvider interface ("
+                        + RemoteProvider.class.getName()
+                        + ")").equals(errors.get(1).getMessage()));
+        assertEquals(2, errors.size());
     }
   }
 
@@ -1427,12 +1503,18 @@ public class CheckedProviderTest extends TestCase {
           });
       fail();
     } catch (CreationException ce) {
-      assertEquals(
-          ManyMethods.class.getName()
-              + " may not declare any new methods, but declared "
-              + Arrays.asList(ManyMethods.class.getDeclaredMethods()),
-          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
-    }
+        Method[] declaredMethods =  ManyMethods.class.getDeclaredMethods();
+        String actualMessage = Iterables.getOnlyElement(ce.getErrorMessages()).getMessage();
+        assertTrue(String.format(
+                "%s may not declare any new methods, but declared %s",
+                ManyMethods.class.getName(),
+                Arrays.toString(new Method[] {declaredMethods[0], declaredMethods[1]})).equals(actualMessage)
+                ||
+                String.format(
+                "%s may not declare any new methods, but declared %s",
+                ManyMethods.class.getName(),
+                Arrays.toString(new Method[] {declaredMethods[1], declaredMethods[0]})).equals(actualMessage));
+}
   }
 
   public void testIncorrectPredefinedType_Bind() {

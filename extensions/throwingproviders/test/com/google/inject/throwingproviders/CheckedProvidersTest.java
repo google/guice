@@ -4,6 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.inject.TypeLiteral;
+
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import junit.framework.TestCase;
 
@@ -77,18 +79,22 @@ public final class CheckedProvidersTest extends TestCase {
 
   public void testUnsupportedMethods_otherMethod_throwsIllegalArgumentException()
       throws NoSuchMethodException {
-    String message =
-        String.format(
+    Method[] declaredMethods =  MoreMethodsCheckedProvider.class.getDeclaredMethods();
+    String message1 = String.format(
             "%s may not declare any new methods, but declared %s",
             MoreMethodsCheckedProvider.class.getName(),
-            Arrays.toString(MoreMethodsCheckedProvider.class.getDeclaredMethods()));
+            Arrays.toString(new Method[] {declaredMethods[0], declaredMethods[1]}));
+    String message2 = String.format(
+            "%s may not declare any new methods, but declared %s",
+            MoreMethodsCheckedProvider.class.getName(),
+            Arrays.toString(new Method[] {declaredMethods[1], declaredMethods[0]}));
 
     try {
       CheckedProviders.of(
           new TypeLiteral<MoreMethodsCheckedProvider<String>>() {}, "SHOW ME WHAT YOU GOT");
       fail("Expected an exception to be thrown");
     } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessageThat().isEqualTo(message);
+        assertThat(e).hasMessageThat().isAnyOf(message1, message2);
     }
   }
 
