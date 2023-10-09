@@ -37,7 +37,7 @@ _collect_exports_aspect = aspect(
 )
 
 def _validate_target_libs_rule_impl(ctx):
-    """Validates that the transitive exports of the maven artifacts.
+    """Validates the transitive exports of the maven artifacts.
 
     If the main maven artifact target exports other targets, those exported targets need to be
     included in the artifact_target_libs, so that they get packaged into the final deployable
