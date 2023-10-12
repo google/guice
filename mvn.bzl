@@ -14,8 +14,8 @@
 
 """starlark macros to generate maven files."""
 
-load("@google_bazel_common//tools/javadoc:javadoc.bzl", "javadoc_library")
 load("@google_bazel_common//tools/jarjar:jarjar.bzl", "jarjar_library")
+load("@google_bazel_common//tools/javadoc:javadoc.bzl", "javadoc_library")
 load("@google_bazel_common//tools/maven:pom_file.bzl", "pom_file")
 
 ExportInfo = provider(
@@ -44,8 +44,8 @@ def _validate_target_libs_rule_impl(ctx):
     artifact.
     """
     target = ctx.attr.target
-    expected = [lib.label for lib in target[ExportInfo].exports.to_list()]
-    actual = [lib.label for lib in ctx.attr.actual_target_libs]
+    expected = [lib.label for lib in target[ExportInfo].exports.to_list() if str(lib.label) not in ctx.attr.optional_target_libs]
+    actual = [lib.label for lib in ctx.attr.actual_target_libs if lib.label not in ctx.attr.optional_target_libs]
     missing = sorted(['"{}"'.format(x) for x in expected if x not in actual])
     extra = sorted(['"{}"'.format(x) for x in actual if x not in expected])
     if missing or extra:
@@ -60,6 +60,10 @@ _validate_target_libs_rule = rule(
     attrs = {
         "target": attr.label(aspects = [_collect_exports_aspect]),
         "actual_target_libs": attr.label_list(),
+
+        # This is a string_list instead of label_list to allow exluding
+        # transitive exports for which the caller lacks visibility.
+        "optional_target_libs": attr.string_list(),
     },
 )
 
@@ -71,6 +75,7 @@ def gen_maven_artifact(
         javadoc_srcs,
         packaging = "jar",
         artifact_target_libs = [],
+        optional_artifact_target_libs = [],
         is_extension = False):
     """Generates files required for a maven artifact.
 
@@ -81,6 +86,10 @@ def gen_maven_artifact(
         artifact_target: The target containing the actual maven target.
         artifact_target_libs: The list of dependencies that should be packaged together with artifact_target,
             corresponding to the list of targets exported by artifact_target.
+        optional_artifact_target_libs: The list of labels that are allowed to be
+            omitted from artifact_target_libs. Other than these exceptions, all
+            transitive exports of artifact_target must be included in
+            artifact_target_libs.
         javadoc_srcs: Source files used to generate the Javadoc maven artifact.
         packaging: The packaging used for the artifact, default is "jar".
         is_extension: Whether the maven artifact is a Guice extension or not.
@@ -91,17 +100,24 @@ def gen_maven_artifact(
         name = name + "_validate_target_libs",
         target = artifact_target,
         actual_target_libs = artifact_target_libs,
+        optional_target_libs = optional_artifact_target_libs,
     )
 
     group_id = "com.google.inject"
     if is_extension:
         group_id = "com.google.inject.extensions"
 
-    # TODO: get artifact_target_libs from bazel and remove the need to pass this in explictly.
+    # Ideally we would get artifact_target_libs from bazel and remove the need
+    # to pass this in explictly. However, this doesn't seem possible in Starlark.
+    # A more significant refactoring of how we instantiate the rules here, or
+    # extensions to the rule implementation(s), may be necessary.
     artifact_targets = [artifact_target] + artifact_target_libs
 
     pom_file(
         name = "pom",
+        # pom_file already scans the transitive deps and exports
+        # so passing artifact_targets instead of artifact_target seems to be
+        # redundant.
         targets = artifact_targets,
         preferred_group_ids = [
             "com.google.inject",
@@ -132,6 +148,9 @@ def gen_maven_artifact(
             name = artifact_id + "-javadoc",
             srcs = javadoc_srcs,
             testonly = 1,
+            # javadoc_library already collects the transitive deps
+            # so passing artifact_targets instead of artifact_target appears to
+            # be redundant
             deps = artifact_targets,
         )
 
