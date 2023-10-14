@@ -25,7 +25,7 @@ public interface KotlinSupportInterface {
    */
   Predicate<Integer> getIsParameterKotlinNullablePredicate(Method method);
 
-  /** Checks for any errors on the constructor's parameters's annotations. */
+  /** Checks for any errors on the constructor's parameters' annotations. */
   void checkConstructorParameterAnnotations(Constructor<?> constructor, Errors errors);
 
   /** Returns whether the {@code clazz} is a local Kotlin class. */
