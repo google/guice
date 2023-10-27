@@ -188,7 +188,7 @@ public class KeyTest extends TestCase {
       assertContains(
           expected.getMessage(),
           "java.lang.Deprecated is not a binding annotation. ",
-          "Please annotate it with @BindingAnnotation.");
+          "Please annotate it with @Qualifier.");
     }
   }
 
