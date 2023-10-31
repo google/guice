@@ -73,11 +73,9 @@ java_library(
     tags = ["maven_coordinates=com.google.inject:guice:" + POM_VERSION],
     exports = [
         ":annotations",
+        ":caller_finder_common",
         ":implemented_by",
         ":provided_by",
-        # TODO(user): caller_finder_common shouldn't be exported, but validation requires
-        # it be exported right now.
-        ":caller_finder_common",
     ],
     deps = [
         ":annotations",
