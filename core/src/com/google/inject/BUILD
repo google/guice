@@ -80,23 +80,20 @@ java_library(
         ":caller_finder_common",
     ],
     deps = [
-        # Warning: Be very careful adding new dependencies,
-        # These all have to mirrored in the open-source
-        # build (and jarjar'd up).
         ":annotations",
         ":caller_finder_common",
         ":implemented_by",
         ":provided_by",
+        "//third_party/java/aopalliance",
+        "//third_party/java/asm",
+        "//third_party/java/error_prone:annotations",
         "//third_party/java/guava/annotations",
         "//third_party/java/guava/base",
         "//third_party/java/guava/cache",
         "//third_party/java/guava/collect",
         "//third_party/java/guava/primitives",
-        "//third_party/java/aopalliance",
-        "//third_party/java/asm",
-        "//third_party/java/error_prone:annotations",
-        "//third_party/java/jsr305_annotations",
         "//third_party/java/jakarta_inject",
+        "//third_party/java/jsr305_annotations",
     ],
 )
 
