@@ -36,6 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.AbstractList;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 /** @author crazybob@google.com (Bob Lee) */
 
@@ -158,16 +159,102 @@ public class MatcherTest extends TestCase {
     assertEqualWhenReserialized(only("a").and(only("b")));
   }
 
-  abstract static class MyRunnable implements Runnable {}
+  @Test
+  public void testEqualsForOrMatcher() {
+    Matcher matcherParam1 = new MockMatcher("parameter1");
+    Matcher matcherParam2 = new MockMatcher("parameter2");
+    Matcher differentMatcher1 = new MockMatcher("differentParameter1");
+    Matcher differentMatcher2 = new MockMatcher("differentParameter2");
+    Matchers.OrMatcher orMatcher1 = new Matchers.OrMatcher(matcherParam1, matcherParam2);
+    Matchers.OrMatcher orMatcher2 = new Matchers.OrMatcher(differentMatcher1, differentMatcher2);
+
+    assertFalse(orMatcher1.equals("notOrMatcher"));
+    assertTrue(orMatcher1.equals(new Matchers.OrMatcher(matcherParam1, matcherParam2)));
+    assertFalse(orMatcher1.equals(new Matchers.OrMatcher(differentMatcher1, differentMatcher1)));
+    assertFalse(orMatcher1.equals(new Matchers.OrMatcher(matcherParam1, differentMatcher2)));
+    assertFalse(orMatcher1.equals(orMatcher2));
+  }
+
+  @Test
+  public void testEqualsForAndMatcher() {
+    Matcher matcherParam1 = new MockMatcher("parameter1");
+    Matcher matcherParam2 = new MockMatcher("parameter2");
+    Matcher differentMatcher1 = new MockMatcher("differentParameter1");
+    Matcher differentMatcher2 = new MockMatcher("differentParameter2");
+    Matchers.AndMatcher andMatcher1 = new Matchers.AndMatcher(matcherParam1, matcherParam2);
+    Matchers.AndMatcher andMatcher2 = new Matchers.AndMatcher(differentMatcher1, differentMatcher2);
+
+    assertFalse(andMatcher1.equals("notAndMatcher"));
+    assertTrue(andMatcher1.equals(new Matchers.AndMatcher(matcherParam1, matcherParam2)));
+    assertFalse(andMatcher1.equals(new Matchers.AndMatcher(differentMatcher1, differentMatcher1)));
+    assertFalse(andMatcher1.equals(new Matchers.AndMatcher(matcherParam1, differentMatcher2)));
+    assertFalse(andMatcher1.equals(andMatcher2));
+  }
+
+  @Test
+  public void testEqualsSubpackage() {
+    String package1 = "com.example.package1";
+    String package2 = "com.example.package2";
+    InSubpackage inSubpackage1 = new InSubpackage(package1);
+    InSubpackage inSubpackage2 = new InSubpackage(package2);
+
+    assertFalse(inSubpackage1.equals("notInSubpackage"));
+    assertTrue(inSubpackage1.equals(new InSubpackage(package1)));
+    assertFalse(inSubpackage1.equals(inSubpackage2));
+  }
+
+  abstract static class MyRunnable implements Runnable {
+  }
 
   @Retention(RetentionPolicy.RUNTIME)
-  @interface Foo {}
+  @interface Foo {
+  }
 
   @Foo
-  static class Bar {}
+  static class Bar {
+  }
 
-  @interface Baz {}
+  @interface Baz {
+  }
 
   @Baz
-  static class Car {}
+  static class Car {
+  }
+}
+
+class MockMatcher implements Matcher {
+  private final String parameter;
+
+  public MockMatcher(String parameter) {
+    this.parameter = parameter;
+  }
+
+  @Override
+  public boolean matches(Object o) {
+    // Mock implementation for the matches method
+    return this.parameter.equals(o);
+  }
+}
+
+class InSubpackage {
+  private final String targetPackageName;
+
+  public InSubpackage(String targetPackageName) {
+    this.targetPackageName = targetPackageName;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other)
+      return true;
+    if (other == null || getClass() != other.getClass())
+      return false;
+    InSubpackage that = (InSubpackage) other;
+    return targetPackageName.equals(that.targetPackageName);
+  }
+
+  @Override
+  public int hashCode() {
+    return targetPackageName.hashCode();
+  }
 }

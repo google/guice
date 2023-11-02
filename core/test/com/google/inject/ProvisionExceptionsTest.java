@@ -20,7 +20,13 @@ import com.google.inject.internal.Messages;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import com.google.inject.spi.Message;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Tests that ProvisionExceptions are readable and clearly indicate to the user what went wrong with
@@ -157,13 +163,47 @@ public class ProvisionExceptionsTest extends TestCase {
       fail();
     } catch (ProvisionException pe) {
       pe.printStackTrace();
-      // Make sure our initial error message gives the user exception.
       Asserts.assertContains(
           pe.getMessage(), "1) [Guice/ErrorInCustomProvider]: IOException: boom!");
       assertEquals(1, pe.getErrorMessages().size());
       assertEquals(IOException.class, pe.getCause().getClass());
       assertEquals(IOException.class, Messages.getOnlyCause(pe.getErrorMessages()).getClass());
     }
+  }
+
+  @Test
+  public void testProvisionExceptionWithMessageAndCause() {
+    String errorMessage = "This is a test error message.";
+    Throwable cause = new Throwable("This is a test cause.");
+    ProvisionException provisionException = new ProvisionException(errorMessage, cause);
+    Collection<Message> errorMessages = provisionException.getErrorMessages();
+    assertNotNull(errorMessages);
+    assertEquals(1, errorMessages.size());
+    Message message = errorMessages.iterator().next();
+    assertEquals(errorMessage, message.getMessage());
+    assertEquals(cause, message.getCause());
+  }
+
+  @Test
+  public void testProvisionExceptionWithMessage() {
+    String errorMessage = "This is a test error message.";
+    ProvisionException provisionException = new ProvisionException(errorMessage);
+    Collection<Message> errorMessages = provisionException.getErrorMessages();
+    assertNotNull(errorMessages);
+    assertEquals(1, errorMessages.size());
+    Message message = errorMessages.iterator().next();
+    assertEquals(errorMessage, message.getMessage());
+    assertEquals(null, message.getCause());
+  }
+
+  @Test
+  public void testProvisionExceptionGetMessage() {
+    List<Message> messages = new ArrayList<>();
+    messages.add(new Message("Error 1"));
+    messages.add(new Message("Error 2"));
+    ProvisionException provisionException = new ProvisionException(messages);
+    String expectedMessage = "Unable to provision, see the following errors:\n\n1) Error 1\n\n2) Error 2\n\n2 errors";
+    assertEquals(expectedMessage, provisionException.getMessage());
   }
 
   private static interface Exploder {}
