@@ -1,0 +1,1 @@
+MISSING @SINCE TAG: com.google.inject.internal.KotlinSupportInterface Method isValueClass(java.lang.Class)
