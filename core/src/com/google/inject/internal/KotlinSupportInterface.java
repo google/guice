@@ -30,4 +30,7 @@ public interface KotlinSupportInterface {
 
   /** Returns whether the {@code clazz} is a local Kotlin class. */
   boolean isLocalClass(Class<?> clazz);
+
+  /** Returns whether the {@code clazz} is a Kotlin value class. */
+  boolean isValueClass(Class<?> clazz);
 }
