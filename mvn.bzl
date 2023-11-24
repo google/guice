@@ -55,7 +55,9 @@ def _validate_target_libs_rule_impl(ctx):
              "\n\t expected = [" + expected_formatted + "]" +
              "\n\t actual = [" + actual_formatted + "]")
 
-_validate_target_libs_rule = rule(
+# This rule exists to perform an assertion during the Starlark analysis phase, causing any macro or
+# BUILD file instantiating it to fail to generate.
+_validate_target_libs_binary = rule(
     implementation = _validate_target_libs_rule_impl,
     attrs = {
         "target": attr.label(aspects = [_collect_exports_aspect]),
@@ -93,10 +95,9 @@ def gen_maven_artifact(
         javadoc_srcs: Source files used to generate the Javadoc maven artifact.
         packaging: The packaging used for the artifact, default is "jar".
         is_extension: Whether the maven artifact is a Guice extension or not.
-
     """
 
-    _validate_target_libs_rule(
+    _validate_target_libs_binary(
         name = name + "_validate_target_libs",
         target = artifact_target,
         actual_target_libs = artifact_target_libs,

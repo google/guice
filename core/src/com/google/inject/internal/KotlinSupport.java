@@ -69,5 +69,10 @@ public final class KotlinSupport {
     public boolean isLocalClass(Class<?> clazz) {
       return false;
     }
+
+    @Override
+    public boolean isValueClass(Class<?> clazz) {
+      return false;
+    }
   }
 }

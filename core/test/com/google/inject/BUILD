@@ -84,6 +84,7 @@ java_library(
     deps = [
         ":add_opens_tests",
         ":tests",
+        "//core/src/com/google/inject",
         "//core/test/com/googlecode/guice:tests",
         "//third_party/java/junit",
     ],
