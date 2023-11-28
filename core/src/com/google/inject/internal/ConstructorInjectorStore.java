@@ -16,10 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.InterceptorBinding;
 
 /**
  * Constructor injectors by type.
@@ -34,7 +31,7 @@ final class ConstructorInjectorStore {
         @Override
         protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
             throws ErrorsException {
-          return createConstructor(constructorInjector, errors);
+          return injector.createConstructor(this, constructorInjector, errors);
         }
       };
 
@@ -64,39 +61,5 @@ final class ConstructorInjectorStore {
    */
   boolean remove(InjectionPoint ip) {
     return cache.remove(ip);
-  }
-
-  private <T> ConstructorInjector<T> createConstructor(InjectionPoint injectionPoint, Errors errors)
-      throws ErrorsException {
-    int numErrorsBefore = errors.size();
-
-    SingleParameterInjector<?>[] constructorParameterInjectors =
-        injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
-
-    @SuppressWarnings("unchecked") // the injector type agrees with the injection point type
-    MembersInjectorImpl<T> membersInjector =
-        (MembersInjectorImpl<T>)
-            injector.membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);
-    ConstructionProxyFactory<T> factory = null;
-    if (InternalFlags.isBytecodeGenEnabled()) {
-      ImmutableList<InterceptorBinding> injectorBindings =
-          injector.getBindingData().getInterceptorBindings();
-      ImmutableList<MethodAspect> methodAspects =
-          ImmutableList.<MethodAspect>builder()
-              .addAll(Lists.transform(injectorBindings, MethodAspect::fromBinding))
-              .addAll(membersInjector.getAddedAspects())
-              .build();
-      factory = new ProxyFactory<>(injectionPoint, methodAspects);
-    } else {
-      factory = new DefaultConstructionProxyFactory<>(injectionPoint);
-    }
-
-    errors.throwIfNewErrors(numErrorsBefore);
-
-    return new ConstructorInjector<T>(
-        membersInjector.getInjectionPoints(),
-        factory.create(),
-        constructorParameterInjectors,
-        membersInjector);
   }
 }

@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.MoreTypes.canonicalize;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeResolver;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.util.Types;
 import java.lang.reflect.Constructor;
@@ -32,6 +33,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -163,68 +166,21 @@ public class TypeLiteral<T> {
   TypeLiteral<?> resolve(Type toResolve) {
     return TypeLiteral.get(resolveType(toResolve));
   }
+    Type resolveType(Type toResolve) {
+       // this implementation is made a little more complicated in an attempt to avoid object-creation
+      while (true) {
+      List<TypeResolverToResolve> resolvers = Arrays.asList(
+                new TypeVariableResolver(type, rawType),
+                new GenericArrayTypeResolver(),
+                new ParameterizedTypeResolver(new TypeResolverChain(Collections.emptyList())),
+                new WildcardTypeResolver(new TypeResolverChain(Collections.emptyList()))
+                // Add more resolvers as needed
+        );
+        TypeResolverToResolve resolver = new TypeResolverChain(resolvers);
 
-  Type resolveType(Type toResolve) {
-    // this implementation is made a little more complicated in an attempt to avoid object-creation
-    while (true) {
-      if (toResolve instanceof TypeVariable) {
-        TypeVariable<?> original = (TypeVariable<?>) toResolve;
-        toResolve = MoreTypes.resolveTypeVariable(type, rawType, original);
-        if (toResolve == original) {
-          return toResolve;
-        }
-
-      } else if (toResolve instanceof GenericArrayType) {
-        GenericArrayType original = (GenericArrayType) toResolve;
-        Type componentType = original.getGenericComponentType();
-        Type newComponentType = resolveType(componentType);
-        return componentType == newComponentType ? original : Types.arrayOf(newComponentType);
-
-      } else if (toResolve instanceof ParameterizedType) {
-        ParameterizedType original = (ParameterizedType) toResolve;
-        Type ownerType = original.getOwnerType();
-        Type newOwnerType = resolveType(ownerType);
-        boolean changed = newOwnerType != ownerType;
-
-        Type[] args = original.getActualTypeArguments();
-        for (int t = 0, length = args.length; t < length; t++) {
-          Type resolvedTypeArgument = resolveType(args[t]);
-          if (resolvedTypeArgument != args[t]) {
-            if (!changed) {
-              args = args.clone();
-              changed = true;
-            }
-            args[t] = resolvedTypeArgument;
-          }
-        }
-
-        return changed
-            ? Types.newParameterizedTypeWithOwner(newOwnerType, original.getRawType(), args)
-            : original;
-
-      } else if (toResolve instanceof WildcardType) {
-        WildcardType original = (WildcardType) toResolve;
-        Type[] originalLowerBound = original.getLowerBounds();
-        Type[] originalUpperBound = original.getUpperBounds();
-
-        if (originalLowerBound.length == 1) {
-          Type lowerBound = resolveType(originalLowerBound[0]);
-          if (lowerBound != originalLowerBound[0]) {
-            return Types.supertypeOf(lowerBound);
-          }
-        } else if (originalUpperBound.length == 1) {
-          Type upperBound = resolveType(originalUpperBound[0]);
-          if (upperBound != originalUpperBound[0]) {
-            return Types.subtypeOf(upperBound);
-          }
-        }
-        return original;
-
-      } else {
-        return toResolve;
+        return resolver.resolve(toResolve);
       }
     }
-  }
 
   /**
    * Returns the generic form of {@code supertype}. For example, if this is {@code
@@ -337,4 +293,119 @@ public class TypeLiteral<T> {
         type);
     return resolve(method.getGenericReturnType());
   }
+}
+
+class TypeResolverChain implements TypeResolverToResolve {
+    private final List<TypeResolverToResolve> resolvers;
+
+    public TypeResolverChain(List<TypeResolverToResolve> resolvers) {
+        this.resolvers = resolvers;
+    }
+
+    @Override
+    public Type resolve(Type toResolve) {
+        for (TypeResolverToResolve resolver : resolvers) {
+            toResolve = resolve(toResolve);
+        }
+        return toResolve;
+    }
+}
+
+interface TypeResolverToResolve {
+    Type resolve(Type toResolve);
+}
+
+class TypeVariableResolver implements TypeResolverToResolve {
+    private final Type type;
+    private final Type rawType;
+
+    public TypeVariableResolver(Type type, Type rawType) {
+        this.type = type;
+        this.rawType = rawType;
+    }
+
+    @Override
+    public Type resolve(Type toResolve) {
+        if (toResolve instanceof TypeVariable) {
+            TypeVariable<?> original = (TypeVariable<?>) toResolve;
+            Type resolved = MoreTypes.resolveTypeVariable(type, (Class<?>) rawType, original);
+            return resolved == original ? toResolve : resolved;
+        }
+        return toResolve;
+    }
+
+}
+
+class GenericArrayTypeResolver implements TypeResolverToResolve {
+    @Override
+    public Type resolve(Type toResolve) {
+        if (toResolve instanceof GenericArrayType) {
+            GenericArrayType original = (GenericArrayType) toResolve;
+            Type componentType = original.getGenericComponentType();
+            Type newComponentType = resolve(componentType);
+            return componentType == newComponentType ? original : Types.arrayOf(newComponentType);
+        }
+        return toResolve;
+    }
+}
+
+class ParameterizedTypeResolver implements TypeResolverToResolve {
+    private final TypeResolverChain typeResolverChain;
+
+    public ParameterizedTypeResolver(TypeResolverChain typeResolverChain) {
+        this.typeResolverChain = typeResolverChain;
+    }
+
+    @Override
+    public Type resolve(Type toResolve) {
+        if (toResolve instanceof ParameterizedType) {
+            ParameterizedType original = (ParameterizedType) toResolve;
+            Type ownerType = original.getOwnerType();
+            Type newOwnerType = typeResolverChain.resolve(ownerType);
+            boolean changed = newOwnerType != ownerType;
+
+            Type[] args = original.getActualTypeArguments();
+            for (int t = 0, length = args.length; t < length; t++) {
+                Type resolvedTypeArgument = typeResolverChain.resolve(args[t]);
+                if (resolvedTypeArgument != args[t]) {
+                    if (!changed) {
+                        args = args.clone();
+                        changed = true;
+                    }
+                    args[t] = resolvedTypeArgument;
+                }
+            }
+
+            return changed
+                    ? Types.newParameterizedTypeWithOwner(newOwnerType, original.getRawType(), args)
+                    : original;
+        }
+        return toResolve;
+    }
+}
+
+class WildcardTypeResolver implements TypeResolverToResolve {
+    private final TypeResolverChain typeResolverChain;
+
+    public WildcardTypeResolver(TypeResolverChain typeResolverChain) {
+        this.typeResolverChain = typeResolverChain;
+    }
+
+    @Override
+    public Type resolve(Type toResolve) {
+        if (toResolve instanceof WildcardType) {
+            WildcardType original = (WildcardType) toResolve;
+            Type[] originalLowerBound = original.getLowerBounds();
+            Type[] originalUpperBound = original.getUpperBounds();
+
+            if (originalLowerBound.length == 1) {
+                Type lowerBound = typeResolverChain.resolve(originalLowerBound[0]);
+                return lowerBound != originalLowerBound[0] ? Types.supertypeOf(lowerBound) : toResolve;
+            } else if (originalUpperBound.length == 1) {
+                Type upperBound = typeResolverChain.resolve(originalUpperBound[0]);
+                return upperBound != originalUpperBound[0] ? Types.subtypeOf(upperBound) : toResolve;
+            }
+        }
+        return toResolve;
+    }
 }

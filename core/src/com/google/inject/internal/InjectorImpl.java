@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -48,6 +49,7 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.util.Providers;
@@ -870,12 +872,22 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
     // ask the parent to create the JIT binding
     if (parent != null) {
-      if (jitType == JitLimitation.NEW_OR_EXISTING_JIT
-          && jitDisabled
-          && !parent.options.jitDisabled) {
-        // If the binding would be forbidden here but allowed in a parent, report an error instead
+      boolean isJitTypeNewOrExisting = jitType == JitLimitation.NEW_OR_EXISTING_JIT;
+
+      // Check if JIT is disabled
+      boolean isJitDisabled = jitDisabled;
+
+      // Check if JIT is not disabled in the parent options
+      boolean isParentJitNotDisabled = !parent.options.jitDisabled;
+
+      // Combine conditions for readability
+      boolean shouldThrowError = isJitTypeNewOrExisting && isJitDisabled && isParentJitNotDisabled;
+
+      // If the combined conditions are true, throw an error
+      if (shouldThrowError) {
         throw errors.jitDisabledInParent(key).toException();
       }
+
 
       try {
         return parent.createJustInTimeBindingRecursive(
@@ -1240,5 +1252,39 @@ final class InjectorImpl implements Injector, Lookups {
     return MoreObjects.toStringHelper(Injector.class)
         .add("bindings", bindingData.getExplicitBindingsThisLevel().values())
         .toString();
+  }
+
+  <T> ConstructorInjector<T> createConstructor(FailableCache<InjectionPoint, ConstructorInjector<?>> failableCache, InjectionPoint injectionPoint, Errors errors)
+      throws ErrorsException {
+    int numErrorsBefore = errors.size();
+
+    SingleParameterInjector<?>[] constructorParameterInjectors =
+        getParametersInjectors(injectionPoint.getDependencies(), errors);
+
+    @SuppressWarnings("unchecked") // the injector type agrees with the injection point type
+    MembersInjectorImpl<T> membersInjector =
+        (MembersInjectorImpl<T>)
+            membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);
+    ConstructionProxyFactory<T> factory = null;
+    if (InternalFlags.isBytecodeGenEnabled()) {
+      ImmutableList<InterceptorBinding> injectorBindings =
+          getBindingData().getInterceptorBindings();
+      ImmutableList<MethodAspect> methodAspects =
+          ImmutableList.<MethodAspect>builder()
+              .addAll(Lists.transform(injectorBindings, MethodAspect::fromBinding))
+              .addAll(membersInjector.getAddedAspects())
+              .build();
+      factory = new ProxyFactory<>(injectionPoint, methodAspects);
+    } else {
+      factory = new DefaultConstructionProxyFactory<>(injectionPoint);
+    }
+
+    errors.throwIfNewErrors(numErrorsBefore);
+
+    return new ConstructorInjector<T>(
+        membersInjector.getInjectionPoints(),
+        factory.create(),
+        constructorParameterInjectors,
+        membersInjector);
   }
 }

@@ -147,56 +147,69 @@ final class BytecodeTasks {
 
   /** Unboxes a boxed value on the Java stack. */
   public static void unbox(MethodVisitor mv, Type primitiveType) {
+    String[] unboxingInfo = getUnboxingInfo(primitiveType);
+
+    if (unboxingInfo != null) {
+        String wrapper = unboxingInfo[0];
+        String method = unboxingInfo[1];
+        String descriptor = unboxingInfo[2];
+
+        mv.visitTypeInsn(CHECKCAST, wrapper);
+        mv.visitMethodInsn(INVOKEVIRTUAL, wrapper, method, descriptor, false);
+    }
+}
+
+private static String[] getUnboxingInfo(Type primitiveType) {
     String wrapper;
     String method;
     String descriptor;
 
     switch (primitiveType.getSort()) {
-      case Type.BOOLEAN:
-        wrapper = "java/lang/Boolean";
-        method = "booleanValue";
-        descriptor = "()Z";
-        break;
-      case Type.CHAR:
-        wrapper = "java/lang/Character";
-        method = "charValue";
-        descriptor = "()C";
-        break;
-      case Type.BYTE:
-        wrapper = "java/lang/Byte";
-        method = "byteValue";
-        descriptor = "()B";
-        break;
-      case Type.SHORT:
-        wrapper = "java/lang/Short";
-        method = "shortValue";
-        descriptor = "()S";
-        break;
-      case Type.INT:
-        wrapper = "java/lang/Integer";
-        method = "intValue";
-        descriptor = "()I";
-        break;
-      case Type.FLOAT:
-        wrapper = "java/lang/Float";
-        method = "floatValue";
-        descriptor = "()F";
-        break;
-      case Type.LONG:
-        wrapper = "java/lang/Long";
-        method = "longValue";
-        descriptor = "()J";
-        break;
-      case Type.DOUBLE:
-        wrapper = "java/lang/Double";
-        method = "doubleValue";
-        descriptor = "()D";
-        break;
-      default:
-        return;
+        case Type.BOOLEAN:
+            wrapper = "java/lang/Boolean";
+            method = "booleanValue";
+            descriptor = "()Z";
+            break;
+        case Type.CHAR:
+            wrapper = "java/lang/Character";
+            method = "charValue";
+            descriptor = "()C";
+            break;
+        case Type.BYTE:
+            wrapper = "java/lang/Byte";
+            method = "byteValue";
+            descriptor = "()B";
+            break;
+        case Type.SHORT:
+            wrapper = "java/lang/Short";
+            method = "shortValue";
+            descriptor = "()S";
+            break;
+        case Type.INT:
+            wrapper = "java/lang/Integer";
+            method = "intValue";
+            descriptor = "()I";
+            break;
+        case Type.FLOAT:
+            wrapper = "java/lang/Float";
+            method = "floatValue";
+            descriptor = "()F";
+            break;
+        case Type.LONG:
+            wrapper = "java/lang/Long";
+            method = "longValue";
+            descriptor = "()J";
+            break;
+        case Type.DOUBLE:
+            wrapper = "java/lang/Double";
+            method = "doubleValue";
+            descriptor = "()D";
+            break;
+        default:
+            return null;
     }
 
-    mv.visitTypeInsn(CHECKCAST, wrapper);
-    mv.visitMethodInsn(INVOKEVIRTUAL, wrapper, method, descriptor, false);
-  }
+    return new String[]{wrapper, method, descriptor};
+}
+
 }

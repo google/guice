@@ -254,12 +254,12 @@ final class BindingProcessor extends AbstractBindingProcessor {
   @Override
   public Boolean visit(PrivateElements privateElements) {
     for (Key<?> key : privateElements.getExposedKeys()) {
-      bindExposed(privateElements, key);
+      processExposedKey(privateElements, key);
     }
     return false; // leave the private elements for the PrivateElementsProcessor to handle
   }
 
-  private <T> void bindExposed(PrivateElements privateElements, Key<T> key) {
+  private <T> void processExposedKey(PrivateElements privateElements, Key<T> key) {
     ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<>(key, privateElements);
     processedBindingData.addCreationListener(exposedKeyFactory);
     putBinding(
@@ -270,4 +270,5 @@ final class BindingProcessor extends AbstractBindingProcessor {
             exposedKeyFactory,
             privateElements));
   }
+
 }

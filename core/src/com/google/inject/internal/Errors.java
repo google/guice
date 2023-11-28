@@ -130,34 +130,7 @@ public final class Errors implements Serializable {
         : new Errors(this, source);
   }
 
-  public Errors aopDisabled(InterceptorBinding binding) {
-    return addMessage(
-        ErrorId.AOP_DISABLED,
-        "Binding interceptor is not supported when bytecode generation is disabled. \nInterceptor"
-            + " bound at: %s",
-        binding.getSource());
-  }
-
-  /**
-   * We use a fairly generic error message here. The motivation is to share the same message for
-   * both bind time errors:
-   *
-   * <pre><code>Guice.createInjector(new AbstractModule() {
-   *   public void configure() {
-   *     bind(Runnable.class);
-   *   }
-   * }</code></pre>
-   *
-   * ...and at provide-time errors:
-   *
-   * <pre><code>Guice.createInjector().getInstance(Runnable.class);</code></pre>
-   *
-   * Otherwise we need to know who's calling when resolving a just-in-time binding, which makes
-   * things unnecessarily complex.
-   */
-  public Errors missingImplementation(Key<?> key) {
-    return addMessage(ErrorId.MISSING_IMPLEMENTATION, "No implementation for %s was bound.", key);
-  }
+  
 
   /** Within guice's core, allow for better missing binding messages */
   <T> Errors missingImplementationWithHint(Key<T> key, Injector injector) {
@@ -715,4 +688,50 @@ public final class Errors implements Serializable {
     formatter.format("  ");
     new SourceFormatter(source, formatter, false).format();
   }
+
+  public ErrorsHandler handler() {
+    return new ErrorsHandler(this);
+  }
+
+  
+}
+
+class ErrorsHandler {
+    private final Errors errors;
+
+    ErrorsHandler(Errors errors) {
+        this.errors = errors;
+    }
+
+    public ErrorsHandler aopDisabled(InterceptorBinding binding) {
+        errors.addMessage(
+                ErrorId.AOP_DISABLED,
+                "Binding interceptor is not supported when bytecode generation is disabled. \nInterceptor"
+                        + " bound at: %s",
+                binding.getSource());
+        return this;
+    }
+
+    /**
+   * We use a fairly generic error message here. The motivation is to share the same message for
+   * both bind time errors:
+   *
+   * <pre><code>Guice.createInjector(new AbstractModule() {
+   *   public void configure() {
+   *     bind(Runnable.class);
+   *   }
+   * }</code></pre>
+   *
+   * ...and at provide-time errors:
+   *
+   * <pre><code>Guice.createInjector().getInstance(Runnable.class);</code></pre>
+   *
+   * Otherwise we need to know who's calling when resolving a just-in-time binding, which makes
+   * things unnecessarily complex.
+   */
+
+    public ErrorsHandler missingImplementation(Key<?> key) {
+        errors.addMessage(ErrorId.MISSING_IMPLEMENTATION, "No implementation for %s was bound.", key);
+        return this;
+    }
 }
