@@ -21,7 +21,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 
-/** @author crazybob@google.com (Bob Lee) */
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
 final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
 
   private final Provider<? extends T> provider;
@@ -42,7 +44,10 @@ final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     // were also dropped.
     context.setDependency(dependency);
     try {
-      T t = provider.get();
+      T t;
+      synchronized (this) {
+        t = provider.get();
+      }
       if (t == null && !dependency.isNullable()) {
         InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
       }
