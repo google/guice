@@ -53,11 +53,13 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
       Dependency<?> dependency,
       ConstructionContext<T> constructionContext)
       throws InternalProvisionException {
+    T t;
     try {
-      return super.provision(provider, dependency, constructionContext);
+      t = super.provision(provider, dependency, constructionContext);
     } catch (RuntimeException userException) {
       throw InternalProvisionException.errorInProvider(userException).addSource(source);
     }
+    return t;
   }
 
   @Override
