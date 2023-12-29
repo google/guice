@@ -18,12 +18,12 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import com.google.inject.internal.MoreTypes;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -95,14 +95,14 @@ public final class Dependency<T> {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(injectionPoint, parameterIndex, key);
+    return Objects.hash(injectionPoint, parameterIndex, key);
   }
 
   @Override
   public boolean equals(Object o) {
     if (o instanceof Dependency) {
       Dependency<?> dependency = (Dependency<?>) o;
-      return Objects.equal(injectionPoint, dependency.injectionPoint)
+      return Objects.equals(injectionPoint, dependency.injectionPoint)
           && parameterIndex == dependency.parameterIndex
           && key.equals(dependency.key);
     } else {

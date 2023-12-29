@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Scope;
@@ -34,6 +33,7 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 /**
  * Visits bindings to return a {@code IndexedBinding} that can be used to emulate the binding
@@ -83,16 +83,16 @@ class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding
       }
       IndexedBinding o = (IndexedBinding) obj;
       return type == o.type
-          && Objects.equal(scope, o.scope)
+          && Objects.equals(scope, o.scope)
           && typeLiteral.equals(o.typeLiteral)
           && annotationType == o.annotationType
           && annotationName.equals(o.annotationName)
-          && Objects.equal(extraEquality, o.extraEquality);
+          && Objects.equals(extraEquality, o.extraEquality);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(
+      return Objects.hash(
           type, scope, typeLiteral, annotationType, annotationName, extraEquality);
     }
   }

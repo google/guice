@@ -23,7 +23,6 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -49,6 +48,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
@@ -755,7 +755,7 @@ public class OverrideModuleTest extends TestCase {
         if (equality == null && o.equality == null) {
           return this == o;
         } else {
-          return Objects.equal(equality, o.equality);
+          return Objects.equals(equality, o.equality);
         }
       } else {
         return false;

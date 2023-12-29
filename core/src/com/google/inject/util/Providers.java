@@ -19,7 +19,6 @@ package com.google.inject.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.Inject;
@@ -28,6 +27,7 @@ import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderWithDependencies;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -73,7 +73,7 @@ public final class Providers {
     @Override
     public boolean equals(Object obj) {
       return (obj instanceof ConstantProvider)
-          && Objects.equal(instance, ((ConstantProvider<?>) obj).instance);
+          && Objects.equals(instance, ((ConstantProvider<?>) obj).instance);
     }
 
     @Override
@@ -143,7 +143,7 @@ public final class Providers {
     @Override
     public boolean equals(Object obj) {
       return (obj instanceof GuicifiedJakartaProvider)
-          && Objects.equal(delegate, ((GuicifiedJakartaProvider<?>) obj).delegate);
+          && Objects.equals(delegate, ((GuicifiedJakartaProvider<?>) obj).delegate);
     }
 
     @Override

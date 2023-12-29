@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -40,6 +39,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Creates bindings to methods annotated with {@literal @}{@link Provides}. Use the scope and
@@ -346,7 +346,7 @@ public final class ProviderMethodsModule implements Module {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(delegate, scanner);
+    return Objects.hash(delegate, scanner);
   }
 
   /** Is it scanning the built-in @Provides* methods. */

@@ -16,9 +16,9 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.base.Objects;
 import java.lang.reflect.Member;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Node for types that have {@link com.google.inject.spi.Dependency}s and are bound to {@link
@@ -47,7 +47,7 @@ public class ImplementationNode extends Node {
       return false;
     }
     ImplementationNode other = (ImplementationNode) obj;
-    return super.equals(other) && Objects.equal(members, other.members);
+    return super.equals(other) && Objects.equals(members, other.members);
   }
 
   @Override

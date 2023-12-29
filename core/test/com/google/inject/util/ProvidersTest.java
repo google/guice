@@ -16,7 +16,6 @@
 
 package com.google.inject.util;
 
-import com.google.common.base.Objects;
 import com.google.common.testing.EqualsTester;
 import com.google.inject.Provider;
 import jakarta.inject.Inject;
@@ -74,7 +73,7 @@ public class ProvidersTest extends TestCase {
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(value);
+      return Integer.hashCode(value);
     }
 
     @Override

@@ -19,11 +19,11 @@ package com.google.inject.spi;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -136,6 +136,6 @@ public final class MembersInjectorLookup<T> implements Element {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(type, source);
+    return Objects.hash(type, source);
   }
 }

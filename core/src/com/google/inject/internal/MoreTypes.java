@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
@@ -35,6 +34,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Static methods for working with types that we aren't publishing in the public {@code Types} API.
@@ -224,7 +224,7 @@ public class MoreTypes {
 
       ParameterizedType pa = (ParameterizedType) a;
       ParameterizedType pb = (ParameterizedType) b;
-      return Objects.equal(pa.getOwnerType(), pb.getOwnerType())
+      return Objects.equals(pa.getOwnerType(), pb.getOwnerType())
           && pa.getRawType().equals(pb.getRawType())
           && Arrays.equals(getSharedTypeArguments(pa), getSharedTypeArguments(pb));
 

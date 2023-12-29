@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -60,6 +59,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -430,7 +430,7 @@ final class InjectorImpl implements Injector, Lookups {
         SyntheticProviderBindingImpl<?> o = (SyntheticProviderBindingImpl<?>) obj;
         return getKey().equals(o.getKey())
             && getScoping().equals(o.getScoping())
-            && Objects.equal(providedBinding, o.providedBinding);
+            && Objects.equals(providedBinding, o.providedBinding);
       } else {
         return false;
       }
@@ -438,7 +438,7 @@ final class InjectorImpl implements Injector, Lookups {
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(getKey(), getScoping(), providedBinding);
+      return Objects.hash(getKey(), getScoping(), providedBinding);
     }
   }
 
@@ -576,7 +576,7 @@ final class InjectorImpl implements Injector, Lookups {
         ConvertedConstantBindingImpl<?> o = (ConvertedConstantBindingImpl<?>) obj;
         return getKey().equals(o.getKey())
             && getScoping().equals(o.getScoping())
-            && Objects.equal(value, o.value);
+            && Objects.equals(value, o.value);
       } else {
         return false;
       }
@@ -584,7 +584,7 @@ final class InjectorImpl implements Injector, Lookups {
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(getKey(), getScoping(), value);
+      return Objects.hash(getKey(), getScoping(), value);
     }
   }
 

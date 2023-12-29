@@ -18,7 +18,6 @@ package com.google.inject.assistedinject;
 
 import static com.google.inject.internal.Annotations.getKey;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -42,6 +41,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -406,7 +406,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(factoryType, implementationType);
+    return Objects.hash(factoryType, implementationType);
   }
 
   @Override

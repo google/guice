@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.*;
 import static com.google.inject.name.Names.named;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Annotations;
 import com.google.inject.name.Named;
@@ -32,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
 
@@ -632,7 +632,7 @@ public class DuplicateBindingsTest extends TestCase {
         if (equality == null && o.equality == null) {
           return this == o;
         } else {
-          return Objects.equal(equality, o.equality);
+          return Objects.equals(equality, o.equality);
         }
       } else {
         return false;

@@ -18,7 +18,6 @@ package com.google.inject.internal;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.base.Equivalence;
-import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -33,6 +32,7 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /** Utility methods for {@link Message} objects */
@@ -49,7 +49,7 @@ public final class Messages {
     // merging errors.
     if (!sources.isEmpty()
         && !messageSources.isEmpty()
-        && Objects.equal(messageSources.get(0), sources.get(sources.size() - 1))) {
+        && Objects.equals(messageSources.get(0), sources.get(sources.size() - 1))) {
       messageSources = messageSources.subList(1, messageSources.size());
     }
     return message.withSource(
@@ -261,14 +261,14 @@ public final class Messages {
     @Override
     protected boolean doEquivalent(Throwable a, Throwable b) {
       return a.getClass().equals(b.getClass())
-          && Objects.equal(a.getMessage(), b.getMessage())
+          && Objects.equals(a.getMessage(), b.getMessage())
           && Arrays.equals(a.getStackTrace(), b.getStackTrace())
           && equivalent(a.getCause(), b.getCause());
     }
 
     @Override
     protected int doHash(Throwable t) {
-      return Objects.hashCode(t.getClass().hashCode(), t.getMessage(), hash(t.getCause()));
+      return Objects.hash(t.getClass().hashCode(), t.getMessage(), hash(t.getCause()));
     }
   }
 
