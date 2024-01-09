@@ -60,11 +60,8 @@ public abstract class AbstractModule implements Module {
     checkState(this.binder == null, "Re-entry is not allowed.");
 
     this.binder = checkNotNull(builder, "builder");
-    try {
-      configure();
-    } finally {
-      this.binder = null;
-    }
+    configure();
+    this.binder = null;
   }
 
   /** Configures a {@link Binder} via the exposed methods. */
