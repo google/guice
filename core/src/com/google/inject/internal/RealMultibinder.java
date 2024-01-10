@@ -236,21 +236,33 @@ public final class RealMultibinder<T> implements Module {
         // if localInjectors == null, then we have no bindings so return the empty set.
         return ImmutableSet.of();
       }
-      // Ideally we would just add to an ImmutableSet.Builder, but if we did that and there were
-      // duplicates we wouldn't be able to tell which one was the duplicate.  So to manage this we
-      // first put everything into an array and then construct the set.  This way if something gets
-      // dropped we can figure out what it is.
+
+      // If duplicates aren't permitted, we need to capture the original values in order to show a
+      // meaningful error message to users (if duplicates were encountered).
       @SuppressWarnings("unchecked")
-      T[] values = (T[]) new Object[localInjectors.length];
+      T[] values = !permitDuplicates ? (T[]) new Object[localInjectors.length] : null;
+
+      // Avoid ImmutableSet.copyOf(T[]), because it assumes there'll be duplicates in the input, but
+      // in the usual case of permitDuplicates==false, we know the exact size must be
+      // `localInjector.length` (otherwise we fail).  This uses `builderWithExpectedSize` to avoid
+      // the overhead of copyOf or an unknown builder size. If permitDuplicates==true, this will
+      // assume a potentially larger size (but never a smaller size), and `build` will then reduce
+      // as necessary.
+      ImmutableSet.Builder<T> setBuilder =
+          ImmutableSet.<T>builderWithExpectedSize(localInjectors.length);
       for (int i = 0; i < localInjectors.length; i++) {
         SingleParameterInjector<T> parameterInjector = localInjectors[i];
         T newValue = parameterInjector.inject(context);
         if (newValue == null) {
           throw newNullEntryException(i);
         }
-        values[i] = newValue;
+        if (!permitDuplicates) {
+          values[i] = newValue;
+        }
+        setBuilder.add(newValue);
       }
-      ImmutableSet<T> set = ImmutableSet.copyOf(values);
+      ImmutableSet<T> set = setBuilder.build();
+
       // There are fewer items in the set than the array.  Figure out which one got dropped.
       if (!permitDuplicates && set.size() < values.length) {
         throw newDuplicateValuesException(values);
