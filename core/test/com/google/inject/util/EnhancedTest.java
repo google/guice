@@ -1,9 +1,9 @@
 package com.google.inject.util;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.Assume.assumeTrue;
 
+import com.google.common.truth.Truth8;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -46,8 +46,8 @@ public final class EnhancedTest {
     assertThat(bar.bar()).isEqualTo("bar");
 
     // The actual tests.
-    assertThat(Enhanced.unenhancedClass(foo.getClass())).isEqualTo(Optional.of(Foo.class));
-    assertThat(Enhanced.unenhancedClass(bar.getClass())).isEmpty();
+    Truth8.assertThat(Enhanced.unenhancedClass(foo.getClass())).isEqualTo(Optional.of(Foo.class));
+    Truth8.assertThat(Enhanced.unenhancedClass(bar.getClass())).isEmpty();
   }
 
   private static class InterceptingModule extends AbstractModule {
