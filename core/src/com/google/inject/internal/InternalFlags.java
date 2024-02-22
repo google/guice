@@ -122,7 +122,8 @@ public final class InternalFlags {
     AUTO {
       @Override
       boolean enabled() {
-        return System.console() != null && System.getenv("TERM") != null;
+        boolean systemConsoleIsTerminal = System.console() != null;
+        return systemConsoleIsTerminal && System.getenv("TERM") != null;
       }
     },
     ON {
