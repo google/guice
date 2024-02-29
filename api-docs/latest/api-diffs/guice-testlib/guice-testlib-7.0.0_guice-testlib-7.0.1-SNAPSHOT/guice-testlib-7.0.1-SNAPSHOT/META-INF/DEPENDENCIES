@@ -19,7 +19,7 @@ From: 'an unknown organization'
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - J2ObjC Annotations (https://github.com/google/j2objc/) com.google.j2objc:j2objc-annotations:jar:2.8
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - Truth Core (http://github.com/google/truth/truth) com.google.truth:truth:jar:1.3.0
+  - Truth Core (http://github.com/google/truth/truth) com.google.truth:truth:jar:1.4.0
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Checker Qual (https://checkerframework.org/) org.checkerframework:checker-qual:jar:3.42.0
     License: The MIT License  (http://opensource.org/licenses/MIT)
