@@ -1,0 +1,5 @@
+{
+  "note" : "Please restart the plugin after making changes to the lists below. If you want to mock files of any package, please add the package to packagesToMock list ex org.apache.commons. If you don't want to mock files of any package, please add the package to packagesToNotMock list ex com.google.gson Please make sure the json is a valid json, or it will revert to default list of packages.",
+  "classesAndPackagesNotToMock" : [ ],
+  "classesAndPackagesToMock" : [ ]
+}
