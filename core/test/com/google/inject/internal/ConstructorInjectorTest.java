@@ -8,12 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.junit.rules.ExpectedException;
 
-import java.util.List;
 import java.util.HashSet;
-
-import com.google.inject.Binding;
-
-import java.util.ArrayList;
 
 import com.google.inject.Key;
 
@@ -41,9 +36,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mockStatic;
 
-import org.junit.Ignore;
-
-public class ConstructorInjectorSapientGeneratedJunit4Test {
+public class ConstructorInjectorTest {
 
     @Rule()
     public Timeout timeoutRule = Timeout.seconds(5);

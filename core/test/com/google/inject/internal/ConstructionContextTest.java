@@ -4,21 +4,17 @@ import org.junit.rules.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.MockedStatic;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.hamcrest.Matchers.is;
 
-import org.junit.Ignore;
-
-public class ConstructionContextSapientGeneratedJunit4Test {
+public class ConstructionContextTest {
 
     @Rule()
     public Timeout timeoutRule = Timeout.seconds(5);
