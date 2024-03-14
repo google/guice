@@ -32,5 +32,35 @@
     InsertCommentsHere
   </text>
 </comment>
+<comment>
+  <identifier id="com.google.inject.spi"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScanner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScanner.prepareMethod_added(com.google.inject.Binder, java.lang.annotation.Annotation, com.google.inject.Key, com.google.inject.spi.InjectionPoint)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScanner.prepareMethod_added(com.google.inject.Binder, java.lang.annotation.Annotation, com.google.inject.Key, com.google.inject.spi.InjectionPoint, java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScanner.prepareMethod_removed(com.google.inject.Binder, java.lang.annotation.Annotation, com.google.inject.Key, com.google.inject.spi.InjectionPoint)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
 
 </comments>

@@ -1,1 +1,3 @@
 MISSING @SINCE TAG: com.google.inject.internal.KotlinSupportInterface Method isValueClass(java.lang.Class)
+MISSING @SINCE TAG: com.google.inject.spi.ModuleAnnotatedMethodScanner Method prepareMethod(com.google.inject.Binder, java.lang.annotation.Annotation, com.google.inject.Key, com.google.inject.spi.InjectionPoint, java.lang.Object)
+MISSING @SINCE TAG: com.google.inject.spi.ModuleAnnotatedMethodScanner Method prepareMethod(com.google.inject.Binder, java.lang.annotation.Annotation, com.google.inject.Key, com.google.inject.spi.InjectionPoint)
