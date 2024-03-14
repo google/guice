@@ -47,7 +47,7 @@ public final class ElementSource {
   final ElementSource originalElementSource;
 
   /**
-   * Wheather the originalElementSource was set externaly (untrusted) or by Guice internals
+   * Whether the originalElementSource was set externally (untrusted) or by Guice internals
    * (trusted).
    *
    * <p>External code can set the originalElementSource to an arbitrary ElementSource via

@@ -295,7 +295,8 @@ public final class ProviderMethodsModule implements Module {
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
     boolean prepareMethodError = false;
     try {
-      key = scanner.prepareMethod(binder, annotation, key, point);
+      key =
+          scanner.prepareMethod(binder, annotation, key, point, isStaticModule() ? null : delegate);
     } catch (Throwable t) {
       prepareMethodError = true;
       binder.addError(t);
