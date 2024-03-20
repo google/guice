@@ -15,8 +15,6 @@ java_library(
             "subpkg/SubpackageTestPrivateFallbackOnly.java",
         ],
     ),
-    plugins = [
-    ],
     deps = [
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",
@@ -34,8 +32,6 @@ java_library(
     name = "SubpackageTestPrivateFallbackOnly",
     srcs = [
         "subpkg/SubpackageTestPrivateFallbackOnly.java",
-    ],
-    plugins = [
     ],
     deps = [
         "//core/src/com/google/inject",

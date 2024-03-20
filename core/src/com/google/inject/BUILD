@@ -68,8 +68,6 @@ java_library(
         exclude = IMPLEMENTED_BY_SRCS + PROVIDED_BY_SRCS + ANNOTATION_SRCS + CALLER_FINDER_COMMON_SRCS,
     ),
     javacopts = JAVAC_OPTS,
-    plugins = [
-    ],
     tags = ["maven_coordinates=com.google.inject:guice:" + POM_VERSION],
     exports = [
         ":annotations",
@@ -99,8 +97,6 @@ java_library(
     name = "annotations",
     srcs = ANNOTATION_SRCS,
     javacopts = JAVAC_OPTS,
-    plugins = [
-    ],
     deps = [
         "//third_party/java/error_prone:annotations",
         "//third_party/java/jakarta_inject",

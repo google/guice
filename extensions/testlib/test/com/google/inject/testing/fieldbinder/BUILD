@@ -10,8 +10,6 @@ package(
 java_library(
     name = "tests",
     srcs = glob(["*.java"]),
-    plugins = [
-    ],
     deps = [
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",

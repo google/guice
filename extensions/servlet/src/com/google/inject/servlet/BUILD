@@ -1,12 +1,12 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
-load("//:mvn.bzl", "gen_maven_artifact")
 load(
     "//:build_defs.bzl",
     "JAVAC_OPTS",
     "POM_VERSION",
 )
+load("//:mvn.bzl", "gen_maven_artifact")
 
 package(
     default_visibility = ["//:src"],
@@ -16,8 +16,6 @@ java_library(
     name = "request-scoped-annotation",
     srcs = ["RequestScoped.java"],
     javacopts = JAVAC_OPTS,
-    plugins = [
-    ],
     deps = [
         "//third_party/java/jakarta_inject",
     ],
@@ -30,8 +28,6 @@ java_library(
         exclude = ["RequestScoped.java"],
     ),
     javacopts = JAVAC_OPTS,
-    plugins = [
-    ],
     tags = ["maven_coordinates=com.google.inject.extensions:guice-servlet:" + POM_VERSION],
     exports = [":request-scoped-annotation"],
     deps = [

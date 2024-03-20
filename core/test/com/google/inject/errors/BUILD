@@ -9,8 +9,6 @@ java_library(
     name = "tests",
     srcs = glob(["*.java"]),
     javacopts = ["-Xep:BetaApi:OFF"],
-    plugins = [
-    ],
     resources = [
         ":test_error_files",
     ],

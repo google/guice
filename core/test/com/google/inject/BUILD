@@ -48,8 +48,6 @@ java_library(
         ],
     ),
     javacopts = ["-Xep:BetaApi:OFF"],
-    plugins = [
-    ],
     deps = [
         ":testsupport",
         "//core/src/com/google/inject",

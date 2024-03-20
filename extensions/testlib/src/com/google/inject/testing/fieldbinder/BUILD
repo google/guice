@@ -15,8 +15,6 @@ java_library(
     name = "fieldbinder",
     srcs = glob(["*.java"]),
     javacopts = JAVAC_OPTS,
-    plugins = [
-    ],
     deps = [
         "//core/src/com/google/inject",
         "//third_party/java/error_prone:annotations",
