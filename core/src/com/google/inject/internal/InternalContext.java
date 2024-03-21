@@ -29,8 +29,7 @@ final class InternalContext implements AutoCloseable {
 
   private final InjectorOptions options;
 
-  private final IdentityHashMap<Object, ConstructionContext<?>> constructionContexts =
-      new IdentityHashMap<>();
+  private IdentityHashMap<Object, ConstructionContext<?>> constructionContexts;
 
   /** Keeps track of the type that is currently being requested for injection. */
   private Dependency<?> dependency;
@@ -77,11 +76,17 @@ final class InternalContext implements AutoCloseable {
 
   @SuppressWarnings("unchecked")
   <T> ConstructionContext<T> getConstructionContext(Object key) {
+
+    /** Lazily initialize the constructionContexts map. */
+    if (constructionContexts == null) {
+        constructionContexts = new IdentityHashMap<>();
+    }
+
     ConstructionContext<T> constructionContext =
-        (ConstructionContext<T>) constructionContexts.get(key);
+            (ConstructionContext<T>) constructionContexts.get(key);
     if (constructionContext == null) {
-      constructionContext = new ConstructionContext<>();
-      constructionContexts.put(key, constructionContext);
+        constructionContext = new ConstructionContext<>();
+        constructionContexts.put(key, constructionContext);
     }
     return constructionContext;
   }
