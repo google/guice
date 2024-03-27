@@ -1,12 +1,12 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
-load("//:mvn.bzl", "gen_maven_artifact")
 load(
     "//:build_defs.bzl",
     "JAVAC_OPTS",
     "POM_VERSION",
 )
+load("//:mvn.bzl", "gen_maven_artifact")
 
 package(
     default_visibility = ["//:src"],
