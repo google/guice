@@ -16,8 +16,8 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.base.Objects;
 import com.google.inject.Key;
+import java.util.Objects;
 
 /**
  * ID of a node in the graph. An ID is given by a {@link Key} and a node type, which is used to
@@ -65,7 +65,7 @@ public final class NodeId {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(key, nodeType);
+    return Objects.hash(key, nodeType);
   }
 
   @Override
@@ -74,7 +74,7 @@ public final class NodeId {
       return false;
     }
     NodeId other = (NodeId) obj;
-    return Objects.equal(key, other.key) && Objects.equal(nodeType, other.nodeType);
+    return Objects.equals(key, other.key) && Objects.equals(nodeType, other.nodeType);
   }
 
   @Override
