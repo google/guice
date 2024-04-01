@@ -35,6 +35,15 @@ IMPLEMENTED_BY_SRCS = [
     "ImplementedBy.java",
 ]
 
+CALLER_FINDER_STACK_WALKER_SRCS = ["internal/util/DirectStackWalkerFinder.java"]
+
+java_library(
+    name = "caller_finder_impl",
+    srcs = CALLER_FINDER_STACK_WALKER_SRCS,
+    javacopts = JAVAC_OPTS,
+    deps = [":caller_finder_common"],
+)
+
 java_library(
     name = "caller_finder_common",
     srcs = CALLER_FINDER_COMMON_SRCS,
@@ -65,19 +74,25 @@ java_library(
     name = "inject",
     srcs = glob(
         ["**/*.java"],
-        exclude = IMPLEMENTED_BY_SRCS + PROVIDED_BY_SRCS + ANNOTATION_SRCS + CALLER_FINDER_COMMON_SRCS,
+        exclude = IMPLEMENTED_BY_SRCS +
+                  PROVIDED_BY_SRCS +
+                  ANNOTATION_SRCS +
+                  CALLER_FINDER_COMMON_SRCS +
+                  CALLER_FINDER_STACK_WALKER_SRCS,
     ),
     javacopts = JAVAC_OPTS,
     tags = ["maven_coordinates=com.google.inject:guice:" + POM_VERSION],
     exports = [
         ":annotations",
         ":caller_finder_common",
+        ":caller_finder_impl",
         ":implemented_by",
         ":provided_by",
     ],
     deps = [
         ":annotations",
         ":caller_finder_common",
+        ":caller_finder_impl",
         ":implemented_by",
         ":provided_by",
         "//third_party/java/aopalliance",
@@ -120,6 +135,7 @@ gen_maven_artifact(
         ":annotations",
         ":implemented_by",
         ":caller_finder_common",
+        ":caller_finder_impl",
         ":provided_by",
     ],
     javadoc_srcs = [":javadoc-srcs"],

@@ -96,6 +96,6 @@ public final class SourceProvider {
   }
 
   private static CallerFinder loadCallerFinder() {
-    return new NewThrowableFinder();
+    return new DirectStackWalkerFinder();
   }
 }
