@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """starlark marcors to generate test suites."""
+
+load("@rules_java//java:defs.bzl", "java_test")
 
 _TEMPLATE = """package {VAR_PACKAGE};
 import org.junit.runners.Suite;
@@ -88,8 +89,7 @@ def guice_test_suites(name, deps, srcs = None, args = [], suffix = "", sizes = N
         test_classes = test_classes,
         package_name = package_name.replace("/", "."),
     )
-
-    native.java_test(
+    java_test(
         name = "AllTestsSuite" + suffix,
         test_class = (package_name + "/" + suite_name).replace("/", "."),
         jvm_flags = flags,
