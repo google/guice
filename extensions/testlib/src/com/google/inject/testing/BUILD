@@ -1,10 +1,10 @@
 # Copyright 2022 Google Inc.  All rights reserved.
 load("@rules_java//java:defs.bzl", "java_library")
-load("//:mvn.bzl", "gen_maven_artifact")
 load(
     "//:build_defs.bzl",
     "POM_VERSION",
 )
+load("//:mvn.bzl", "gen_maven_artifact")
 
 package(
     
