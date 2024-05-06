@@ -155,7 +155,9 @@ public class BytecodeGenTest {
         // standard bootdelegation of java.*
         return super.loadClass(name, resolve);
 
-      } else if (!name.contains(".internal.")) {
+      } else if (!name.contains(".internal.") || name.contains("InternalFlags")) {
+        // Note: the !!contains(InternalFlags) shouldn't be necessary,
+        // but Bazel 7.1.1 w/ JDK11 seems to have a weird classloader that causes issues w/o it.
 
         /*
          * load public and test classes directly from the classpath - we don't

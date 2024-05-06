@@ -47,7 +47,10 @@ java_library(
 guice_test_suites(
     name = "gen_tests",
     sizes = ["small"],
-    deps = [":tests"],
+    deps = [
+        ":tests",
+        "//extensions/assistedinject/src/com/google/inject/assistedinject",  # bazel requires this b/c of package_info.java
+    ],
 )
 
 [guice_test_suites(
@@ -59,7 +62,10 @@ guice_test_suites(
         "small",
     ],
     suffix = "_stack_trace_%s" % include_stack_trace_option,
-    deps = [":tests"],
+    deps = [
+        ":tests",
+        "//extensions/assistedinject/src/com/google/inject/assistedinject",  # bazel requires this b/c of package_info.java
+    ],
 ) for include_stack_trace_option in [
     "OFF",
 ]]
@@ -69,7 +75,10 @@ guice_test_suites(
     srcs = ["subpkg/SubpackageTestPrivateFallbackOnly.java"],
     sizes = ["small"],
     suffix = "SubpackageTestPrivateFallbackOnly",
-    deps = [":SubpackageTestPrivateFallbackOnly"],
+    deps = [
+        ":SubpackageTestPrivateFallbackOnly",
+        "//extensions/assistedinject/src/com/google/inject/assistedinject",  # bazel requires this b/c of package_info.java
+    ],
 )
 
 [guice_test_suites(
@@ -82,7 +91,10 @@ guice_test_suites(
         "small",
     ],
     suffix = "_SubpackageTestPrivateFallbackOnly_stack_trace_%s" % include_stack_trace_option,
-    deps = [":SubpackageTestPrivateFallbackOnly"],
+    deps = [
+        ":SubpackageTestPrivateFallbackOnly",
+        "//extensions/assistedinject/src/com/google/inject/assistedinject",  # bazel requires this b/c of package_info.java
+    ],
 ) for include_stack_trace_option in [
     "OFF",
 ]]
