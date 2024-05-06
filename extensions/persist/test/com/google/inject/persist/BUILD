@@ -41,7 +41,10 @@ guice_test_suites(
         "small",
         "medium",
     ],
-    deps = [":tests"],
+    deps = [
+        ":tests",
+        "//extensions/persist/src/com/google/inject/persist",  # bazel requires this b/c of package_info.java
+    ],
 )
 
 [guice_test_suites(
@@ -52,7 +55,10 @@ guice_test_suites(
         "medium",
     ],
     suffix = "_stack_trace_%s" % include_stack_trace_option,
-    deps = [":tests"],
+    deps = [
+        ":tests",
+        "//extensions/persist/src/com/google/inject/persist",  # bazel requires this b/c of package_info.java
+    ],
 ) for include_stack_trace_option in [
     "OFF",
 ]]
