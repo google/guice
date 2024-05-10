@@ -58,7 +58,8 @@ final class UnsafeClassDefiner implements ClassDefiner {
   static {
     ClassDefiner unsafeDefiner =
         tryPrivileged(AnonymousClassDefiner::new, "Cannot bind Unsafe.defineAnonymousClass");
-    if (unsafeDefiner == null) {
+
+    if (AnonymousClassDefiner.HAS_ERROR || unsafeDefiner == null) {
       unsafeDefiner =
           tryPrivileged(
               HiddenClassDefiner::new, "Cannot bind MethodHandles.Lookup.defineHiddenClass");

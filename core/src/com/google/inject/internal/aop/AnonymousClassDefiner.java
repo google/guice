@@ -28,20 +28,36 @@ final class AnonymousClassDefiner implements ClassDefiner {
   private static final sun.misc.Unsafe THE_UNSAFE;
   private static final Method ANONYMOUS_DEFINE_METHOD;
 
+  /** True if this class err'd during initialization and should not be used. */
+  static final boolean HAS_ERROR;
+
   static {
+    sun.misc.Unsafe theUnsafe;
+    Method anonymousDefineMethod;
     try {
-      THE_UNSAFE = UnsafeGetter.getUnsafe();
+      theUnsafe = UnsafeGetter.getUnsafe();
       // defineAnonymousClass was removed in JDK17, so we must refer to it reflectively.
-      ANONYMOUS_DEFINE_METHOD =
+      anonymousDefineMethod =
           sun.misc.Unsafe.class.getMethod(
               "defineAnonymousClass", Class.class, byte[].class, Object[].class);
     } catch (ReflectiveOperationException e) {
-      throw new ExceptionInInitializerError(e);
+      theUnsafe = null;
+      anonymousDefineMethod = null;
     }
+
+    THE_UNSAFE = theUnsafe;
+    ANONYMOUS_DEFINE_METHOD = anonymousDefineMethod;
+    HAS_ERROR = theUnsafe == null;
   }
 
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
+    if (HAS_ERROR) {
+      throw new IllegalStateException(
+          "Should not be called. An earlier error occurred during AnonymousClassDefiner static"
+              + " initialization.");
+    }
+
     return (Class<?>) ANONYMOUS_DEFINE_METHOD.invoke(THE_UNSAFE, hostClass, bytecode, null);
   }
 }
