@@ -16,7 +16,7 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Node in a guice dependency graph.
@@ -53,13 +53,13 @@ public abstract class Node {
       return false;
     }
     Node other = (Node) obj;
-    return Objects.equal(id, other.id)
-        && (ignoreSourceInComparisons || Objects.equal(source, other.source));
+    return Objects.equals(id, other.id)
+        && (ignoreSourceInComparisons || Objects.equals(source, other.source));
   }
 
   @Override
   public int hashCode() {
-    return ignoreSourceInComparisons ? id.hashCode() : Objects.hashCode(id, source);
+    return ignoreSourceInComparisons ? id.hashCode() : Objects.hash(id, source);
   }
 
   /**

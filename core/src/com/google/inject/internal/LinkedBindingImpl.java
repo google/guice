@@ -20,7 +20,6 @@ import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 import static com.google.inject.spi.Elements.withTrustedSource;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -28,6 +27,7 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.LinkedKeyBinding;
+import java.util.Objects;
 import java.util.Set;
 
 final class LinkedBindingImpl<T> extends BindingImpl<T>
@@ -101,7 +101,7 @@ final class LinkedBindingImpl<T> extends BindingImpl<T>
       LinkedBindingImpl<?> o = (LinkedBindingImpl<?>) obj;
       return getKey().equals(o.getKey())
           && getScoping().equals(o.getScoping())
-          && Objects.equal(targetKey, o.targetKey);
+          && Objects.equals(targetKey, o.targetKey);
     } else {
       return false;
     }
@@ -109,6 +109,6 @@ final class LinkedBindingImpl<T> extends BindingImpl<T>
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getKey(), getScoping(), targetKey);
+    return Objects.hash(getKey(), getScoping(), targetKey);
   }
 }

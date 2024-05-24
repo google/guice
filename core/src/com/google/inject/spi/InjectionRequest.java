@@ -18,10 +18,10 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -93,13 +93,13 @@ public final class InjectionRequest<T> implements Element {
   @Override
   public boolean equals(Object obj) {
     return obj instanceof InjectionRequest
-        && Objects.equal(((InjectionRequest<?>) obj).instance, instance)
+        && Objects.equals(((InjectionRequest<?>) obj).instance, instance)
         && ((InjectionRequest<?>) obj).type.equals(type)
         && ((InjectionRequest<?>) obj).source.equals(source);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(type, source);
+    return Objects.hash(type, source);
   }
 }
