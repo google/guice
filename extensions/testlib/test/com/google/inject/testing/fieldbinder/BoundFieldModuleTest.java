@@ -668,7 +668,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
-  @SuppressWarnings("rawtypes") // Testing rawtypes
+  @SuppressWarnings({"rawtypes", "JUnitIncompatibleType"}) // Testing rawtypes
   public void testRawProviderCanBindToIncorrectType() {
     final Integer testValue = 1024;
     Object instance =
