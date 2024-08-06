@@ -17,7 +17,6 @@
 package com.google.inject.servlet;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Binding;
@@ -26,6 +25,7 @@ import com.google.inject.Stage;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import jakarta.servlet.Filter;
@@ -139,10 +139,10 @@ class ServletSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
     public boolean equals(Object obj) {
       if (obj instanceof Params) {
         Params o = (Params) obj;
-        return Objects.equal(pattern, o.pattern)
-            && Objects.equal(keyOrInstance, o.keyOrInstance)
-            && Objects.equal(params, o.params)
-            && Objects.equal(patternType, o.patternType);
+        return Objects.equals(pattern, o.pattern)
+            && Objects.equals(keyOrInstance, o.keyOrInstance)
+            && Objects.equals(params, o.params)
+            && Objects.equals(patternType, o.patternType);
       } else {
         return false;
       }
@@ -150,7 +150,7 @@ class ServletSpiVisitor extends DefaultBindingTargetVisitor<Object, Integer>
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(pattern, keyOrInstance, params, patternType);
+      return Objects.hash(pattern, keyOrInstance, params, patternType);
     }
 
     @Override

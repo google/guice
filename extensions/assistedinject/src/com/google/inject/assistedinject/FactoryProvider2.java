@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -71,6 +70,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -928,7 +928,7 @@ final class FactoryProvider2<F>
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(factoryKey, collector);
+    return Objects.hash(factoryKey, collector);
   }
 
   @Override
@@ -937,7 +937,7 @@ final class FactoryProvider2<F>
       return false;
     }
     FactoryProvider2<?> other = (FactoryProvider2<?>) obj;
-    return factoryKey.equals(other.factoryKey) && Objects.equal(collector, other.collector);
+    return factoryKey.equals(other.factoryKey) && Objects.equals(collector, other.collector);
   }
 
   /** Returns true if {@code thrown} can be thrown by {@code invoked} without wrapping. */

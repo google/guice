@@ -1,6 +1,5 @@
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.ErrorDetail;
@@ -9,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Objects;
 
 /** Error reported when Guice can't find an useable constructor to create objects. */
 final class MissingConstructorError extends InternalErrorDetail<MissingConstructorError> {
@@ -29,8 +29,8 @@ final class MissingConstructorError extends InternalErrorDetail<MissingConstruct
   public boolean isMergeable(ErrorDetail<?> other) {
     if (other instanceof MissingConstructorError) {
       MissingConstructorError otherMissing = (MissingConstructorError) other;
-      return Objects.equal(type, otherMissing.type)
-          && Objects.equal(atInjectRequired, otherMissing.atInjectRequired);
+      return Objects.equals(type, otherMissing.type)
+          && Objects.equals(atInjectRequired, otherMissing.atInjectRequired);
     }
     return false;
   }

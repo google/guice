@@ -16,8 +16,8 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.base.Objects;
 import java.lang.reflect.Member;
+import java.util.Objects;
 
 /**
  * Node for instances. Used when a type is bound to an instance.
@@ -50,13 +50,13 @@ public class InstanceNode extends Node {
     }
     InstanceNode other = (InstanceNode) obj;
     return super.equals(other)
-        && Objects.equal(instance, other.instance)
-        && Objects.equal(members, other.members);
+        && Objects.equals(instance, other.instance)
+        && Objects.equals(members, other.members);
   }
 
   @Override
   public int hashCode() {
-    return 31 * super.hashCode() + Objects.hashCode(instance, members);
+    return 31 * super.hashCode() + Objects.hash(instance, members);
   }
 
   @Override
