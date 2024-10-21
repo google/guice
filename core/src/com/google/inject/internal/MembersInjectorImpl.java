@@ -85,8 +85,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     if (instance == null) {
       return;
     }
-    final InternalContext context = injector.enterContext();
-    try {
+    try (InternalContext context = injector.enterContext()) {
       if (provisionCallback != null && provisionCallback.hasListeners()) {
         provisionCallback.provision(
             context,
@@ -100,8 +99,6 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
       } else {
         injectMembers(instance, context, toolableOnly);
       }
-    } finally {
-      context.close();
     }
 
     // TODO: We *could* notify listeners too here,
