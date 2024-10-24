@@ -26,7 +26,7 @@ runs:
       run: ./util/install-local-snapshot.sh
       shell: bash
     - name: 'Upload local snapshot for local mvn artifiact tests'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: local-snapshot
         path: ~/.m2/repository/com/google/inject
