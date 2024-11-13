@@ -12,6 +12,10 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingSourceRestriction;
 import com.google.inject.spi.UntargettedBinding;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -40,6 +44,69 @@ final class MissingImplementationErrorHints {
           .addAll(Primitives.allWrapperTypes())
           .build();
 
+  /**
+   * Returns whether two types look similar (i.e. if you were to ignore their package). This helps
+   * users who, for example, have injected the wrong Optional (java.util.Optional vs
+   * com.google.common.base.Optional). For generic types, the entire structure must match in
+   * addition to the simple names of the generic arguments (e.g. Optional&lt;String&gt; won't be
+   * similar to Optional&lt;Integer&gt;).
+   */
+  static boolean areSimilarLookingTypes(Type a, Type b) {
+    if (a instanceof Class && b instanceof Class) {
+      return ((Class) a).getSimpleName().equals(((Class) b).getSimpleName());
+    }
+    if (a instanceof ParameterizedType && b instanceof ParameterizedType) {
+      ParameterizedType aType = (ParameterizedType) a;
+      ParameterizedType bType = (ParameterizedType) b;
+      if (!areSimilarLookingTypes(aType.getRawType(), bType.getRawType())) {
+        return false;
+      }
+      Type[] aArgs = aType.getActualTypeArguments();
+      Type[] bArgs = bType.getActualTypeArguments();
+      if (aArgs.length != bArgs.length) {
+        return false;
+      }
+      for (int i = 0; i < aArgs.length; i++) {
+        if (!areSimilarLookingTypes(aArgs[i], bArgs[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (a instanceof GenericArrayType && b instanceof GenericArrayType) {
+      GenericArrayType aType = (GenericArrayType) a;
+      GenericArrayType bType = (GenericArrayType) b;
+      return areSimilarLookingTypes(
+          aType.getGenericComponentType(), bType.getGenericComponentType());
+    }
+    if (a instanceof WildcardType && b instanceof WildcardType) {
+      WildcardType aType = (WildcardType) a;
+      WildcardType bType = (WildcardType) b;
+      Type[] aLowerBounds = aType.getLowerBounds();
+      Type[] bLowerBounds = bType.getLowerBounds();
+      if (aLowerBounds.length != bLowerBounds.length) {
+        return false;
+      }
+      for (int i = 0; i < aLowerBounds.length; i++) {
+        if (!areSimilarLookingTypes(aLowerBounds[i], bLowerBounds[i])) {
+          return false;
+        }
+      }
+      Type[] aUpperBounds = aType.getUpperBounds();
+      Type[] bUpperBounds = bType.getUpperBounds();
+      if (aUpperBounds.length != bUpperBounds.length) {
+        return false;
+      }
+      for (int i = 0; i < aUpperBounds.length; i++) {
+        if (!areSimilarLookingTypes(aUpperBounds[i], bUpperBounds[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
   static <T> ImmutableList<String> getSuggestions(Key<T> key, Injector injector) {
     ImmutableList.Builder<String> suggestions = ImmutableList.builder();
     TypeLiteral<T> type = key.getTypeLiteral();
@@ -49,9 +116,11 @@ final class MissingImplementationErrorHints {
 
     // Keys which have similar strings as the desired key
     List<String> possibleMatches = new ArrayList<>();
-    ImmutableList<Binding<T>> sameTypes =
-        injector.findBindingsByType(type).stream()
+    ImmutableList<Binding<?>> sameTypes =
+        injector.getAllBindings().values().stream()
             .filter(b -> !(b instanceof UntargettedBinding)) // These aren't valid matches
+            .filter(
+                b -> areSimilarLookingTypes(b.getKey().getTypeLiteral().getType(), type.getType()))
             .collect(toImmutableList());
     if (!sameTypes.isEmpty()) {
       suggestions.add("\nDid you mean?");

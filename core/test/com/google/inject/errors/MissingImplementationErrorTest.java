@@ -17,6 +17,7 @@ import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Optional;
 import jakarta.inject.Provider;
 import jakarta.inject.Qualifier;
 import org.junit.Before;
@@ -206,5 +207,29 @@ public final class MissingImplementationErrorTest {
     injector.getInstance(CustomType.InnerType.class);
     assertThat(ex).hasMessageThat().containsMatch("Did you mean?");
     assertThat(ex).hasMessageThat().containsMatch("InnerType");
+  }
+
+  private static final class MismatchedOptionalsModule extends AbstractModule {
+    @Override
+    protected void configure() {}
+
+    @Provides
+    Optional<String> provideString() {
+      return Optional.of("ignored");
+    }
+
+    @Provides
+    Optional<Integer> provideInteger(com.google.common.base.Optional<String> dep) {
+      return Optional.of(123);
+    }
+  }
+
+  @Test
+  public void testMismatchedOptionals() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class, () -> Guice.createInjector(new MismatchedOptionalsModule()));
+    assertGuiceErrorEqualsIgnoreLineNumber(
+        exception.getMessage(), "missing_implementation_with_mismatched_optionals.txt");
   }
 }

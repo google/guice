@@ -1,0 +1,26 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for base.Optional<String> was bound.
+
+Did you mean?
+    * util.Optional<String> bound at MissingImplementationErrorTest$MismatchedOptionalsModule.provideString(MissingImplementationErrorTest.java:218)
+
+Requested by:
+1  : MissingImplementationErrorTest$MismatchedOptionalsModule.provideInteger(MissingImplementationErrorTest.java:223)
+      \_ for 1st parameter dep
+     at MissingImplementationErrorTest$MismatchedOptionalsModule.provideInteger(MissingImplementationErrorTest.java:223)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+1 error
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorTest$MismatchedOptionalsModule: "com.google.inject.errors.MissingImplementationErrorTest$MismatchedOptionalsModule"
+base.Optional:                                            "com.google.common.base.Optional"
+util.Optional:                                            "java.util.Optional"
+========================
+End of classname legend:
+========================
