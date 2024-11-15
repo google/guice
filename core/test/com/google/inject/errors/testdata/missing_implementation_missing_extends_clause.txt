@@ -1,0 +1,26 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorKtTest$Producer<MissingImplementationErrorKtTest$Foo> was bound.
+
+Did you mean?
+    * MissingImplementationErrorKtTest$Producer<? extends MissingImplementationErrorKtTest$Foo> bound at MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule.configure(MissingImplementationErrorKtTest.kt:118)
+
+Requested by:
+1  : MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:36)
+      \_ for 1st parameter unused
+     at MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:36)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+1 error
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorKtTest$Foo:                                 "com.google.inject.errors.MissingImplementationErrorKtTest$Foo"
+MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule: "com.google.inject.errors.MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule"
+MissingImplementationErrorKtTest$Producer:                            "com.google.inject.errors.MissingImplementationErrorKtTest$Producer"
+========================
+End of classname legend:
+========================

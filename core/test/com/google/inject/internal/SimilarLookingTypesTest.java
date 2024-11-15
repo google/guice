@@ -84,6 +84,42 @@ public final class SimilarLookingTypesTest {
   }
 
   @Test
+  public void similarExtendsCase() {
+    assertThat(
+            areSimilarLookingTypes(
+                new TypeLiteral<Optional<Foo>>() {}.getType(),
+                new TypeLiteral<Optional<? extends Foo>>() {}.getType()))
+        .isTrue();
+  }
+
+  @Test
+  public void differentExtendsCase() {
+    assertThat(
+            areSimilarLookingTypes(
+                new TypeLiteral<Optional<String>>() {}.getType(),
+                new TypeLiteral<Optional<? extends Foo>>() {}.getType()))
+        .isFalse();
+  }
+
+  @Test
+  public void similarSuperCase() {
+    assertThat(
+            areSimilarLookingTypes(
+                new TypeLiteral<Optional<Foo>>() {}.getType(),
+                new TypeLiteral<Optional<? super Foo>>() {}.getType()))
+        .isTrue();
+  }
+
+  @Test
+  public void differentSuperCase() {
+    assertThat(
+            areSimilarLookingTypes(
+                new TypeLiteral<Optional<String>>() {}.getType(),
+                new TypeLiteral<Optional<? super Foo>>() {}.getType()))
+        .isFalse();
+  }
+
+  @Test
   public void differentWildcardType_extends() {
     assertThat(
             areSimilarLookingTypes(

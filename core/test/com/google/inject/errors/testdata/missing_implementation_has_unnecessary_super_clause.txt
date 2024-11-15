@@ -1,0 +1,26 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorKtTest$Consumer<? super MissingImplementationErrorKtTest$Foo> was bound.
+
+Did you mean?
+    * MissingImplementationErrorKtTest$Consumer<MissingImplementationErrorKtTest$Foo> bound at MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule.provideConsumerOfFoo(MissingImplementationErrorKtTest.kt:98)
+
+Requested by:
+1  : MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:103)
+      \_ for 1st parameter unused
+     at MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:103)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+1 error
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorKtTest$Consumer:                                 "com.google.inject.errors.MissingImplementationErrorKtTest$Consumer"
+MissingImplementationErrorKtTest$Foo:                                      "com.google.inject.errors.MissingImplementationErrorKtTest$Foo"
+MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule: "com.google.inject.errors.MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule"
+========================
+End of classname legend:
+========================

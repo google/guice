@@ -47,9 +47,9 @@ final class MissingImplementationErrorHints {
   /**
    * Returns whether two types look similar (i.e. if you were to ignore their package). This helps
    * users who, for example, have injected the wrong Optional (java.util.Optional vs
-   * com.google.common.base.Optional). For generic types, the entire structure must match in
-   * addition to the simple names of the generic arguments (e.g. Optional&lt;String&gt; won't be
-   * similar to Optional&lt;Integer&gt;).
+   * com.google.common.base.Optional). For generic types, the entire structure must mostly match
+   * (wildcard types of extends and super can be ignored) in addition to the simple names of the
+   * generic arguments (e.g. Optional&lt;String&gt; won't be similar to Optional&lt;Integer&gt;).
    */
   static boolean areSimilarLookingTypes(Type a, Type b) {
     if (a instanceof Class && b instanceof Class) {
@@ -104,6 +104,24 @@ final class MissingImplementationErrorHints {
       }
       return true;
     }
+    // The next section handles when one type is a wildcard type and the other is not (e.g. to
+    // catch cases of `Foo` vs `? extends/super Foo`).
+    if (a instanceof WildcardType ^ b instanceof WildcardType) {
+      WildcardType wildcardType = a instanceof WildcardType ? (WildcardType) a : (WildcardType) b;
+      Type otherType = (wildcardType == a) ? b : a;
+      Type[] upperBounds = wildcardType.getUpperBounds();
+      Type[] lowerBounds = wildcardType.getLowerBounds();
+      if (upperBounds.length == 1 && lowerBounds.length == 0) {
+        // This is the '? extends Foo' case
+        return areSimilarLookingTypes(upperBounds[0], otherType);
+      }
+      if (lowerBounds.length == 1
+          && upperBounds.length == 1
+          && upperBounds[0].equals(Object.class)) {
+        // this is the '? super Foo' case
+        return areSimilarLookingTypes(lowerBounds[0], otherType);
+      }
+    }
     return false;
   }
 
@@ -116,25 +134,25 @@ final class MissingImplementationErrorHints {
 
     // Keys which have similar strings as the desired key
     List<String> possibleMatches = new ArrayList<>();
-    ImmutableList<Binding<?>> sameTypes =
+    ImmutableList<Binding<?>> similarTypes =
         injector.getAllBindings().values().stream()
             .filter(b -> !(b instanceof UntargettedBinding)) // These aren't valid matches
             .filter(
                 b -> areSimilarLookingTypes(b.getKey().getTypeLiteral().getType(), type.getType()))
             .collect(toImmutableList());
-    if (!sameTypes.isEmpty()) {
+    if (!similarTypes.isEmpty()) {
       suggestions.add("\nDid you mean?");
-      int howMany = min(sameTypes.size(), MAX_MATCHING_TYPES_REPORTED);
+      int howMany = min(similarTypes.size(), MAX_MATCHING_TYPES_REPORTED);
       for (int i = 0; i < howMany; ++i) {
-        Key<?> bindingKey = sameTypes.get(i).getKey();
-        // TODO: Look into a better way to prioritize suggestions. For example, possbily
+        Key<?> bindingKey = similarTypes.get(i).getKey();
+        // TODO: Look into a better way to prioritize suggestions. For example, possibly
         // use levenshtein distance of the given annotation vs actual annotation.
         suggestions.add(
             Messages.format(
                 "\n    * %s",
                 formatSuggestion(bindingKey, injector.getExistingBinding(bindingKey))));
       }
-      int remaining = sameTypes.size() - MAX_MATCHING_TYPES_REPORTED;
+      int remaining = similarTypes.size() - MAX_MATCHING_TYPES_REPORTED;
       if (remaining > 0) {
         String plural = (remaining == 1) ? "" : "s";
         suggestions.add(
@@ -178,7 +196,7 @@ final class MissingImplementationErrorHints {
 
     // If where are no possibilities to suggest, then handle the case of missing
     // annotations on simple types. This is usually a bad idea.
-    if (sameTypes.isEmpty()
+    if (similarTypes.isEmpty()
         && possibleMatches.isEmpty()
         && key.getAnnotationType() == null
         && COMMON_AMBIGUOUS_TYPES.contains(key.getTypeLiteral().getRawType())) {

@@ -5,19 +5,33 @@ package(
     default_testonly = 1,
 )
 
+ERROR_MESSAGE_TEST_UTILS_SRCS = ["ErrorMessageTestUtils.java"]
+
+java_library(
+    name = "error_message_test_utils",
+    srcs = ERROR_MESSAGE_TEST_UTILS_SRCS,
+    deps = [
+        "//third_party/java/guava/io",
+        "//third_party/java/truth",
+    ],
+)
+
 java_library(
     name = "tests",
-    srcs = glob(["*.java"]),
+    srcs = glob(
+        ["*.java"],
+        exclude = ERROR_MESSAGE_TEST_UTILS_SRCS,
+    ),
     javacopts = ["-Xep:BetaApi:OFF"],
     resources = [
         ":test_error_files",
     ],
     deps = [
+        ":error_message_test_utils",
         "//core/src/com/google/inject",
         "//third_party/java/guava/annotations",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
-        "//third_party/java/guava/io",
         "//third_party/java/jakarta_inject",
         "//third_party/java/junit",
         "//third_party/java/truth",
