@@ -1,14 +1,16 @@
 Unable to create injector, see the following errors:
 
-1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorKtTest$Consumer<MissingImplementationErrorKtTest$Foo> was bound.
+1) [Guice/MissingImplementation]: No implementation for Consumer<Foo> was bound.
 
-Did you mean?
-    * MissingImplementationErrorKtTest$Consumer<? super MissingImplementationErrorKtTest$Foo> bound at MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule.configure(MissingImplementationErrorKtTest.kt:118)
+You might be running into a @JvmSuppressWildcards or @JvmWildcards issue.
+Consider these options instead (these are guesses but use your best judgment):
+    * Inject this: Consumer<@JvmWildcards Foo>
+    * Or bind this: Consumer<@JvmSuppressWildcards Foo> at MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule.configure(MissingImplementationErrorKtTest.kt:114)
 
 Requested by:
-1  : MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:81)
+1  : MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:79)
       \_ for 1st parameter unused
-     at MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:81)
+     at MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:79)
 
 Learn more:
   https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
@@ -18,8 +20,8 @@ Learn more:
 ======================
 Full classname legend:
 ======================
-MissingImplementationErrorKtTest$Consumer:                          "com.google.inject.errors.MissingImplementationErrorKtTest$Consumer"
-MissingImplementationErrorKtTest$Foo:                               "com.google.inject.errors.MissingImplementationErrorKtTest$Foo"
+Consumer:                                                           "com.google.inject.errors.Consumer"
+Foo:                                                                "com.google.inject.errors.Foo"
 MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule: "com.google.inject.errors.MissingImplementationErrorKtTest$InjectionMissingSuperClauseModule"
 ========================
 End of classname legend:

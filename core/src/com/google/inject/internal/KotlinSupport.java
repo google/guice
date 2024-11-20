@@ -74,5 +74,10 @@ public final class KotlinSupport {
     public boolean isValueClass(Class<?> clazz) {
       return false;
     }
+
+    @Override
+    public boolean isKotlinClass(Class<?> clazz) {
+      return false;
+    }
   }
 }

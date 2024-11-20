@@ -24,7 +24,8 @@ final class MissingImplementationError<T>
         key,
         // Defer building suggestions until messages are requested, to avoid the work associated
         // with iterating bindings in scenarios where the exceptions are discarded.
-        Suppliers.memoize(() -> MissingImplementationErrorHints.getSuggestions(key, injector)),
+        Suppliers.memoize(
+            () -> MissingImplementationErrorHints.getSuggestions(key, injector, sources)),
         sources);
   }
 

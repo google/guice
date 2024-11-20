@@ -1,9 +1,11 @@
 Unable to create injector, see the following errors:
 
-1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorKtTest$Producer<MissingImplementationErrorKtTest$Foo> was bound.
+1) [Guice/MissingImplementation]: No implementation for Producer<Foo> was bound.
 
-Did you mean?
-    * MissingImplementationErrorKtTest$Producer<? extends MissingImplementationErrorKtTest$Foo> bound at MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule.configure(MissingImplementationErrorKtTest.kt:118)
+You might be running into a @JvmSuppressWildcards or @JvmWildcards issue.
+Consider these options instead (these are guesses but use your best judgment):
+    * Inject this: Producer<@JvmWildcards Foo>
+    * Or bind this: Producer<@JvmSuppressWildcards Foo> at MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule.configure(MissingImplementationErrorKtTest.kt:114)
 
 Requested by:
 1  : MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:36)
@@ -18,9 +20,9 @@ Learn more:
 ======================
 Full classname legend:
 ======================
-MissingImplementationErrorKtTest$Foo:                                 "com.google.inject.errors.MissingImplementationErrorKtTest$Foo"
+Foo:                                                                  "com.google.inject.errors.Foo"
 MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule: "com.google.inject.errors.MissingImplementationErrorKtTest$InjectionMissingExtendsClauseModule"
-MissingImplementationErrorKtTest$Producer:                            "com.google.inject.errors.MissingImplementationErrorKtTest$Producer"
+Producer:                                                             "com.google.inject.errors.Producer"
 ========================
 End of classname legend:
 ========================

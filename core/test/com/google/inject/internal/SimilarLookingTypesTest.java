@@ -2,9 +2,11 @@ package com.google.inject.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.internal.MissingImplementationErrorHints.areSimilarLookingTypes;
+import static com.google.inject.internal.MissingImplementationErrorHints.convertToLatterViaJvmAnnotations;
 
 import com.google.inject.TypeLiteral;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -135,5 +137,36 @@ public final class SimilarLookingTypesTest {
                 new TypeLiteral<List<?>>() {}.getType(),
                 new TypeLiteral<List<? super String>>() {}.getType()))
         .isFalse();
+  }
+
+  @Test
+  public void oneTypeConversion() {
+    assertThat(
+            convertToLatterViaJvmAnnotations(
+                new TypeLiteral<Map<String, Integer>>() {},
+                new TypeLiteral<Map<? extends String, Integer>>() {}))
+        .isEqualTo("java.util.Map<@JvmWildcards java.lang.String, java.lang.Integer>");
+  }
+
+  @Test
+  public void mixedConversion() {
+    assertThat(
+            convertToLatterViaJvmAnnotations(
+                new TypeLiteral<Map<String, ? extends Integer>>() {},
+                new TypeLiteral<Map<? extends String, Integer>>() {}))
+        .isEqualTo(
+            "java.util.Map<@JvmWildcards java.lang.String,"
+                + " @JvmSuppressWildcards java.lang.Integer>");
+  }
+
+  @Test
+  public void complexConversion() {
+    assertThat(
+            convertToLatterViaJvmAnnotations(
+                new TypeLiteral<Map<List<? extends String>, ? super Integer>>() {},
+                new TypeLiteral<Map<? extends List<? extends String>, Integer>>() {}))
+        .isEqualTo(
+            "java.util.Map<@JvmWildcards java.util.List<out java.lang.String>,"
+                + " @JvmSuppressWildcards java.lang.Integer>");
   }
 }

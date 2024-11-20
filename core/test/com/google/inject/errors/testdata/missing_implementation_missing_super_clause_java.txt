@@ -1,0 +1,24 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for List<String> was bound.
+
+Did you mean?
+    * List<? super String> bound at MissingImplementationErrorTest$InjectionMissingSuperClauseModule.provideString(MissingImplementationErrorTest.java:268)
+
+Requested by:
+1  : MissingImplementationErrorTest$InjectionMissingSuperClauseModule.provideInteger(MissingImplementationErrorTest.java:273)
+      \_ for 1st parameter dep
+     at MissingImplementationErrorTest$InjectionMissingSuperClauseModule.provideInteger(MissingImplementationErrorTest.java:273)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+1 error
+
+======================
+Full classname legend:
+======================
+MissingImplementationErrorTest$InjectionMissingSuperClauseModule: "com.google.inject.errors.MissingImplementationErrorTest$InjectionMissingSuperClauseModule"
+========================
+End of classname legend:
+========================

@@ -1,14 +1,16 @@
 Unable to create injector, see the following errors:
 
-1) [Guice/MissingImplementation]: No implementation for MissingImplementationErrorKtTest$Producer<? extends MissingImplementationErrorKtTest$Foo> was bound.
+1) [Guice/MissingImplementation]: No implementation for Producer<? extends Foo> was bound.
 
-Did you mean?
-    * MissingImplementationErrorKtTest$Producer<MissingImplementationErrorKtTest$Foo> bound at MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.provideProducerOfFoo(MissingImplementationErrorKtTest.kt:53)
+You might be running into a @JvmSuppressWildcards or @JvmWildcards issue.
+Consider these options instead (these are guesses but use your best judgment):
+    * Inject this: Producer<@JvmSuppressWildcards Foo>
+    * Or bind this: Producer<@JvmWildcards Foo> at MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.provideProducerOfFoo(MissingImplementationErrorKtTest.kt:52)
 
 Requested by:
-1  : MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:58)
+1  : MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:56)
       \_ for 1st parameter unused
-     at MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:58)
+     at MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:56)
 
 Learn more:
   https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
@@ -18,9 +20,9 @@ Learn more:
 ======================
 Full classname legend:
 ======================
-MissingImplementationErrorKtTest$Foo:                                        "com.google.inject.errors.MissingImplementationErrorKtTest$Foo"
+Foo:                                                                         "com.google.inject.errors.Foo"
 MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule: "com.google.inject.errors.MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule"
-MissingImplementationErrorKtTest$Producer:                                   "com.google.inject.errors.MissingImplementationErrorKtTest$Producer"
+Producer:                                                                    "com.google.inject.errors.Producer"
 ========================
 End of classname legend:
 ========================

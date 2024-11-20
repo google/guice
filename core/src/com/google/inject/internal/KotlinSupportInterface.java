@@ -33,4 +33,7 @@ public interface KotlinSupportInterface {
 
   /** Returns whether the {@code clazz} is a Kotlin value class. */
   boolean isValueClass(Class<?> clazz);
+
+  /** Returns whether the {@code clazz} is a Kotlin class. */
+  boolean isKotlinClass(Class<?> clazz);
 }

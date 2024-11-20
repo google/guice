@@ -47,6 +47,7 @@ final class ErrorMessageTestUtils {
           ErrorMessageTestUtils.class.getResource(
               "/core/test/com/google/inject/errors/testdata/" + fileName);
     }
-    return Resources.toString(resource, UTF_8);
+    String expectedError = Resources.toString(resource, UTF_8);
+    return expectedError;
   }
 }
