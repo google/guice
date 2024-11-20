@@ -41,7 +41,7 @@ final class MissingImplementationErrorHints {
   private static final String WILDCARD_SUPER = "? super ";
 
   private static final String WILDCARDS_WARNING =
-      "\nYou might be running into a @JvmSuppressWildcards or @JvmWildcards issue.";
+      "\nYou might be running into a @JvmSuppressWildcards or @JvmWildcard issue.";
 
   private static final String WILDCARDS_POSSIBLE_FIXES =
       "\nConsider these options instead (these are guesses but use your best judgment):";
@@ -150,7 +150,7 @@ final class MissingImplementationErrorHints {
 
   /**
    * Conceptually, this method converts aType to be like bType by adding
-   * appropriate @JvmSuppressWildcards or @JvmWildcards annotations. This assumes that the two types
+   * appropriate @JvmSuppressWildcards or @JvmWildcard annotations. This assumes that the two types
    * only differ in variance (e.g. `Foo` vs `? extends Foo`) and that aType is implemented in
    * Kotlin. For example, if this method is called with the (List&lt;? super String&gt;,
    * List&lt;String&gt;), it will return "List&lt;@JvmSuppressWildcards String&gt;".
@@ -169,10 +169,10 @@ final class MissingImplementationErrorHints {
           conversion.append("@JvmSuppressWildcards ");
           i += WILDCARD_SUPER.length(); // Skip over the "? super " part
         } else if (b.startsWith(WILDCARD_EXTENDS, j)) {
-          conversion.append("@JvmWildcards ");
+          conversion.append("@JvmWildcard ");
           j += WILDCARD_EXTENDS.length(); // Skip over the "? extends " part
         } else if (b.startsWith(WILDCARD_SUPER, j)) {
-          conversion.append("@JvmWildcards ");
+          conversion.append("@JvmWildcard ");
           j += WILDCARD_SUPER.length(); // Skip over the "? super " part
         }
       }

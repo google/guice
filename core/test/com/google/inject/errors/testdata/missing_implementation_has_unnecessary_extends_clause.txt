@@ -2,10 +2,10 @@ Unable to create injector, see the following errors:
 
 1) [Guice/MissingImplementation]: No implementation for Producer<? extends Foo> was bound.
 
-You might be running into a @JvmSuppressWildcards or @JvmWildcards issue.
+You might be running into a @JvmSuppressWildcards or @JvmWildcard issue.
 Consider these options instead (these are guesses but use your best judgment):
     * Inject this: Producer<@JvmSuppressWildcards Foo>
-    * Or bind this: Producer<@JvmWildcards Foo> at MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.provideProducerOfFoo(MissingImplementationErrorKtTest.kt:52)
+    * Or bind this: Producer<@JvmWildcard Foo> at MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.provideProducerOfFoo(MissingImplementationErrorKtTest.kt:52)
 
 Requested by:
 1  : MissingImplementationErrorKtTest$InjectionHasUnnecessaryExtendsClauseModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:56)

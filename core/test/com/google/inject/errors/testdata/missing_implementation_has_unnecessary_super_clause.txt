@@ -2,10 +2,10 @@ Unable to create injector, see the following errors:
 
 1) [Guice/MissingImplementation]: No implementation for Consumer<? super Foo> was bound.
 
-You might be running into a @JvmSuppressWildcards or @JvmWildcards issue.
+You might be running into a @JvmSuppressWildcards or @JvmWildcard issue.
 Consider these options instead (these are guesses but use your best judgment):
     * Inject this: Consumer<@JvmSuppressWildcards Foo>
-    * Or bind this: Consumer<@JvmWildcards Foo> at MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule.provideConsumerOfFoo(MissingImplementationErrorKtTest.kt:95)
+    * Or bind this: Consumer<@JvmWildcard Foo> at MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule.provideConsumerOfFoo(MissingImplementationErrorKtTest.kt:95)
 
 Requested by:
 1  : MissingImplementationErrorKtTest$InjectionHasUnnecessarySuperClauseModule.injectConsumerOfFoo(MissingImplementationErrorKtTest.kt:99)

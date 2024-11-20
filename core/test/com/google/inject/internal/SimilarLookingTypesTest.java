@@ -145,7 +145,7 @@ public final class SimilarLookingTypesTest {
             convertToLatterViaJvmAnnotations(
                 new TypeLiteral<Map<String, Integer>>() {},
                 new TypeLiteral<Map<? extends String, Integer>>() {}))
-        .isEqualTo("java.util.Map<@JvmWildcards java.lang.String, java.lang.Integer>");
+        .isEqualTo("java.util.Map<@JvmWildcard java.lang.String, java.lang.Integer>");
   }
 
   @Test
@@ -155,7 +155,7 @@ public final class SimilarLookingTypesTest {
                 new TypeLiteral<Map<String, ? extends Integer>>() {},
                 new TypeLiteral<Map<? extends String, Integer>>() {}))
         .isEqualTo(
-            "java.util.Map<@JvmWildcards java.lang.String,"
+            "java.util.Map<@JvmWildcard java.lang.String,"
                 + " @JvmSuppressWildcards java.lang.Integer>");
   }
 
@@ -166,7 +166,7 @@ public final class SimilarLookingTypesTest {
                 new TypeLiteral<Map<List<? extends String>, ? super Integer>>() {},
                 new TypeLiteral<Map<? extends List<? extends String>, Integer>>() {}))
         .isEqualTo(
-            "java.util.Map<@JvmWildcards java.util.List<out java.lang.String>,"
+            "java.util.Map<@JvmWildcard java.util.List<out java.lang.String>,"
                 + " @JvmSuppressWildcards java.lang.Integer>");
   }
 }
