@@ -41,9 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * @author jessewilson@google.com (Jesse Wilson)
- */
+/** @author jessewilson@google.com (Jesse Wilson) */
 @RunWith(JUnit4.class)
 public class ParentInjectorTest {
 
@@ -72,10 +70,8 @@ public class ParentInjectorTest {
     } catch (ConfigurationException e) {
       assertContains(
           e.getMessage(),
-          "A binding for ParentInjectorTest$A already exists in one or more child injectors or"
-              + " private modules. Bindings from children can only be used by a parent if the child"
-              + " was a PrivateModule and the binding was exposed. Parent injectors cannot create"
-              + " bindings that already exist in a child.",
+          "Unable to create binding for ParentInjectorTest$A because it was already configured on"
+              + " one or more child injectors or private modules.",
           "ParentInjectorTest$9.configure");
     }
   }

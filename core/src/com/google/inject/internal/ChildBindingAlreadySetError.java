@@ -21,10 +21,8 @@ final class ChildBindingAlreadySetError extends InternalErrorDetail<ChildBinding
     super(
         ErrorId.CHILD_BINDING_ALREADY_SET,
         String.format(
-            "A binding for %s already exists in one or more child injectors or private modules."
-                + " Bindings from children can only be used by a parent if the child was a"
-                + " PrivateModule and the binding was exposed. Parent injectors cannot create"
-                + " bindings that already exist in a child.",
+            "Unable to create binding for %s because it was already configured on one or more"
+                + " child injectors or private modules.",
             Messages.convert(key)),
         sources,
         null);

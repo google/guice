@@ -53,12 +53,10 @@ public class JitBindingsTest extends TestCase {
   }
 
   private String inChildMessage(Class<?> clazz) {
-    return "A binding for JitBindingsTest$"
+    return "Unable to create binding for "
+        + "JitBindingsTest$"
         + clazz.getSimpleName()
-        + " already exists in one or more child"
-        + " injectors or private modules. Bindings from children can only be used by a parent if"
-        + " the child was a PrivateModule and the binding was exposed. Parent injectors cannot"
-        + " create bindings that already exist in a child.";
+        + " because it was already configured on one or more child injectors or private modules";
   }
 
   public void testLinkedBindingWorks() {
