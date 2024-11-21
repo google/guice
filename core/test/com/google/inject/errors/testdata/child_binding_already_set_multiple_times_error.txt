@@ -1,6 +1,6 @@
 Guice configuration errors:
 
-1) [Guice/ChildBindingAlreadySet]: Unable to create binding for ChildBindingAlreadySetErrorTest$Foo because it was already configured on one or more child injectors or private modules.
+1) [Guice/ChildBindingAlreadySet]: A binding for ChildBindingAlreadySetErrorTest$Foo already exists in one or more child injectors or private modules. Bindings from children can only be used by a parent if the child was a PrivateModule and the binding was exposed. Parent injectors cannot create bindings that already exist in a child.
 
 Bound at:
 1 : ChildBindingAlreadySetErrorTest$ChildModule.configure(ChildBindingAlreadySetErrorTest.java:34)

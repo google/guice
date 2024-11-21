@@ -32,7 +32,9 @@ import java.util.Collection;
 import java.util.List;
 import junit.framework.TestCase;
 
-/** @author jessewilson@google.com (Jesse Wilson) */
+/**
+ * @author jessewilson@google.com (Jesse Wilson)
+ */
 public class PrivateModuleTest extends TestCase {
 
   public void testBasicUsage() {
@@ -589,8 +591,10 @@ public class PrivateModuleTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for List<String> ",
-          "because it was already configured on one or more child injectors or private modules.",
+          "A binding for List<String> already exists in one or more child injectors",
+          " or private modules. Bindings from children can only be used by a parent if the child",
+          " was a PrivateModule and the binding was exposed. Parent injectors cannot create",
+          " bindings that already exist in a child.",
           "1 : PrivateModuleTest$FailingPrivateModule.configure",
           "PrivateModuleTest$FailingModule -> PrivateModuleTest$ManyPrivateModules ->"
               + " PrivateModuleTest$FailingPrivateModule",
@@ -610,8 +614,10 @@ public class PrivateModuleTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for List<String> because it was already configured on one or"
-              + " more child injectors or private modules",
+          "A binding for List<String> already exists in one or more child injectors",
+          " or private modules. Bindings from children can only be used by a parent if the child",
+          " was a PrivateModule and the binding was exposed. Parent injectors cannot create",
+          " bindings that already exist in a child.",
           "1 : PrivateModuleTest$FailingPrivateModule.configure",
           "PrivateModuleTest$ManyPrivateModules -> PrivateModuleTest$FailingPrivateModule",
           "2 : PrivateModuleTest$SecondFailingPrivateModule.configure",
@@ -628,8 +634,10 @@ public class PrivateModuleTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(
           expected.toString(),
-          "Unable to create binding for PrivateModuleTest$PrivateFoo because it was already"
-              + " configured on one or more child injectors or private modules.",
+          "A binding for PrivateModuleTest$PrivateFoo already exists in one or more child",
+          " injectors or private modules. Bindings from children can only be used by a parent if",
+          " the child was a PrivateModule and the binding was exposed. Parent injectors cannot",
+          " create bindings that already exist in a child.",
           "as a just-in-time binding");
     }
   }
