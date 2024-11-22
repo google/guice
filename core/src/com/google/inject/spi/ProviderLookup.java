@@ -20,13 +20,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.Errors;
 import com.google.inject.util.Types;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -146,6 +146,6 @@ public final class ProviderLookup<T> implements Element {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(dependency, source);
+    return Objects.hash(dependency, source);
   }
 }
