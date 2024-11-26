@@ -1143,14 +1143,11 @@ final class InjectorImpl implements Injector, Lookups {
     return new Provider<T>() {
       @Override
       public T get() {
-        InternalContext currentContext = enterContext();
-        try {
+        try (InternalContext currentContext = enterContext()) {
           T t = internalFactory.get(currentContext, dependency, false);
           return t;
         } catch (InternalProvisionException e) {
           throw e.addSource(dependency).toProvisionException();
-        } finally {
-          currentContext.close();
         }
       }
 
