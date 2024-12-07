@@ -82,9 +82,7 @@ final class InjectorJitBindingData {
    * overriding explicit bindings declared in a child injector.
    */
   void banKeyInParent(Key<?> key, InjectorBindingData injectorBindingData, Object source) {
-    if (parent.isPresent()) {
-      parent.get().banKey(key, injectorBindingData, source);
-    }
+      parent.ifPresent(injectorJitBindingData -> injectorJitBindingData.banKey(key, injectorBindingData, source));
   }
 
   /**
