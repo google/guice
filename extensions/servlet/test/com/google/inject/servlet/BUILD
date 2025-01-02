@@ -10,7 +10,10 @@ package(
 java_library(
     name = "tests",
     srcs = glob(["**/*.java"]),
-    javacopts = ["-Xep:FutureReturnValueIgnored:OFF"],
+    javacopts = [
+        "-Xep:FutureReturnValueIgnored:OFF",
+        "-Xep:MixedArrayDimensions:OFF",
+    ],
     deps = [
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",
