@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
  *
  * @author crazybob@google.com (Bob Lee)
  */
+@SuppressWarnings("rawtypes") // lots of preexisting issues, and it's not worth fixing them all
 public class Matchers {
   private Matchers() {}
 

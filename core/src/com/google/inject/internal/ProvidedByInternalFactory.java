@@ -32,14 +32,15 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   private final Class<?> rawType;
   private final Class<? extends Provider<?>> providerType;
   private final Key<? extends Provider<T>> providerKey;
-  private BindingImpl<? extends Provider<T>> providerBinding;
+  private InternalFactory<? extends Provider<T>> providerFactory;
   private ProvisionListenerStackCallback<T> provisionCallback;
 
   ProvidedByInternalFactory(
       Class<?> rawType,
       Class<? extends Provider<?>> providerType,
-      Key<? extends Provider<T>> providerKey) {
-    super(providerKey);
+      Key<? extends Provider<T>> providerKey,
+      int circularFactoryId) {
+    super(providerKey, circularFactoryId);
     this.rawType = rawType;
     this.providerType = providerType;
     this.providerKey = providerKey;
@@ -51,43 +52,37 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
 
   @Override
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-    providerBinding =
-        injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
+    providerFactory =
+        injector.getInternalFactory(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
   }
 
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    BindingImpl<? extends Provider<T>> localProviderBinding = providerBinding;
-    if (localProviderBinding == null) {
+    InternalFactory<? extends Provider<T>> localProviderFactory = providerFactory;
+    if (localProviderFactory == null) {
       throw new IllegalStateException("not initialized");
     }
-    Key<? extends Provider<T>> localProviderKey = providerKey;
     try {
-      Provider<? extends T> provider =
-          localProviderBinding.getInternalFactory().get(context, dependency, true);
+      Provider<? extends T> provider = localProviderFactory.get(context, dependency, true);
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {
-      throw ipe.addSource(localProviderKey);
+      throw ipe.addSource(providerKey);
     }
   }
 
   @Override
   protected T provision(
       jakarta.inject.Provider<? extends T> provider,
-      Dependency<?> dependency,
-      ConstructionContext<T> constructionContext)
+      InternalContext context,
+      Dependency<?> dependency)
       throws InternalProvisionException {
-    try {
-      Object o = super.provision(provider, dependency, constructionContext);
-      if (o != null && !rawType.isInstance(o)) {
-        throw InternalProvisionException.subtypeNotProvided(providerType, rawType);
-      }
-      @SuppressWarnings("unchecked") // protected by isInstance() check above
-      T t = (T) o;
-      return t;
-    } catch (RuntimeException e) {
-      throw InternalProvisionException.errorInProvider(e).addSource(source);
+    Object o = super.provision(provider, context, dependency);
+    if (o != null && !rawType.isInstance(o)) {
+      throw InternalProvisionException.subtypeNotProvided(providerType, rawType).addSource(source);
     }
+    @SuppressWarnings("unchecked") // protected by isInstance() check above
+    T t = (T) o;
+    return t;
   }
 }

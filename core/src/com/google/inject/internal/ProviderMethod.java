@@ -24,6 +24,7 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provides;
 import com.google.inject.internal.InternalProviderInstanceBindingImpl.InitializationTiming;
+import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -44,7 +45,7 @@ import java.util.function.BiFunction;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingImpl.CyclicFactory<T>
+public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingImpl.Factory<T>
     implements HasDependencies, ProvidesMethodBinding<T>, ProviderWithExtensionVisitor<T> {
 
   /**
@@ -92,13 +93,16 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   private final ImmutableSet<Dependency<?>> dependencies;
   private final boolean exposed;
   private final Annotation annotation;
+  private int circularFactoryId;
 
   /**
    * Set by {@link #initialize(InjectorImpl, Errors)} so it is always available prior to injection.
    */
   private SingleParameterInjector<?>[] parameterInjectors;
 
-  /** @param method the method to invoke. Its return type must be the same type as {@code key}. */
+  /**
+   * @param method the method to invoke. Its return type must be the same type as {@code key}.
+   */
   ProviderMethod(
       Key<T> key,
       Method method,
@@ -162,23 +166,60 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   @Override
   void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     parameterInjectors = injector.getParametersInjectors(dependencies.asList(), errors);
+    circularFactoryId = injector.circularFactoryIdFactory.next();
   }
 
   @Override
-  protected T doProvision(InternalContext context, Dependency<?> dependency)
+  public final T get(final InternalContext context, final Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
+    @SuppressWarnings("unchecked")
+    T result = (T) context.tryStartConstruction(circularFactoryId, dependency);
+    if (result != null) {
+      // We have a circular reference between bindings. Return a proxy.
+      return result;
+    }
+    // Optimization: Don't go through the callback stack if no one's listening.
+    if (provisionCallback == null) {
+      return provision(dependency, context);
+    } else {
+      return provisionCallback.provision(
+          context,
+          new ProvisionCallback<T>() {
+            @Override
+            public T call() throws InternalProvisionException {
+              return provision(dependency, context);
+            }
+          });
+    }
+  }
+
+  private T provision(Dependency<?> dependency, InternalContext context)
+      throws InternalProvisionException {
+    T t = null;
     try {
-      T t = doProvision(SingleParameterInjector.getAll(context, parameterInjectors));
+      t = doProvision(SingleParameterInjector.getAll(context, parameterInjectors));
       if (t == null && !dependency.isNullable()) {
         InternalProvisionException.onNullInjectedIntoNonNullableDependency(getMethod(), dependency);
       }
       return t;
     } catch (IllegalAccessException e) {
       throw new AssertionError(e);
+    } catch (InternalProvisionException e) {
+      throw e.addSource(getSource());
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
       throw InternalProvisionException.errorInProvider(cause).addSource(getSource());
+    } catch (Throwable unexpected) {
+      throw InternalProvisionException.errorInProvider(unexpected).addSource(getSource());
+    } finally {
+      context.finishConstruction(circularFactoryId, t);
     }
+  }
+
+  @Override
+  protected T doProvision(InternalContext context, Dependency<?> dependency)
+      throws InternalProvisionException {
+    throw new AssertionError(); // should never be called since we override get()
   }
 
   /** Extension point for our subclasses to implement the provisioning strategy. */

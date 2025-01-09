@@ -404,7 +404,6 @@ public class BinderTest extends TestCase {
           });
       fail();
     } catch (CreationException expected) {
-      expected.printStackTrace();
       assertContains(
           expected.getMessage(),
           "BinderTest$HasImplementedBy1 was bound multiple times.",

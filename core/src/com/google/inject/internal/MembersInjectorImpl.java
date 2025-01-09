@@ -166,6 +166,14 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     }
   }
 
+  /**
+   * Returns true if a call to {@link #injectMembers} and {@link #notifyListeners} would have no
+   * effect.
+   */
+  boolean isEmpty() {
+    return memberInjectors == null && userMembersInjectors == null && injectionListeners == null;
+  }
+
   @Override
   public String toString() {
     return "MembersInjector<" + typeLiteral + ">";

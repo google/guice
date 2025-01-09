@@ -31,9 +31,11 @@ import jakarta.inject.Provider;
 abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
 
   protected final Object source;
+  private final int circularFactoryId;
 
-  ProviderInternalFactory(Object source) {
+  ProviderInternalFactory(Object source, int circularFactoryId) {
     this.source = checkNotNull(source, "source");
+    this.circularFactoryId = circularFactoryId;
   }
 
   protected T circularGet(
@@ -42,36 +44,25 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       final Dependency<?> dependency,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback)
       throws InternalProvisionException {
-    final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
-
-    // We have a circular reference between constructors. Return a proxy.
-    if (constructionContext.isConstructing()) {
-      Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
-      // TODO: if we can't proxy this object, can we proxy the other object?
-      @SuppressWarnings("unchecked")
-      T proxyType = (T) constructionContext.createProxy(context.getInjectorOptions(), expectedType);
-      return proxyType;
+    @SuppressWarnings("unchecked")
+    T result = (T) context.tryStartConstruction(circularFactoryId, dependency);
+    if (result != null) {
+      // We have a circular reference between bindings. Return a proxy.
+      return result;
     }
-
     // Optimization: Don't go through the callback stack if no one's listening.
-    constructionContext.startConstruction();
-    try {
-      if (provisionCallback == null) {
-        return provision(provider, dependency, constructionContext);
-      } else {
-        return provisionCallback.provision(
-            context,
-            new ProvisionCallback<T>() {
-              @Override
-              public T call() throws InternalProvisionException {
-                return provision(provider, dependency, constructionContext);
-              }
-            });
+    if (provisionCallback == null) {
+      return provision(provider, context, dependency);
+    } else {
+      return provisionCallback.provision(
+          context,
+          new ProvisionCallback<T>() {
+            @Override
+            public T call() throws InternalProvisionException {
+              return provision(provider, context, dependency);
+            }
+          });
       }
-    } finally {
-      constructionContext.removeCurrentReference();
-      constructionContext.finishConstruction();
-    }
   }
 
   /**
@@ -79,15 +70,19 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    * ErrorsExceptions.
    */
   protected T provision(
-      Provider<? extends T> provider,
-      Dependency<?> dependency,
-      ConstructionContext<T> constructionContext)
+      Provider<? extends T> provider, InternalContext context, Dependency<?> dependency)
       throws InternalProvisionException {
-    T t = provider.get();
+    T t = null;
+    try {
+      t = provider.get();
+    } catch (RuntimeException e) {
+      throw InternalProvisionException.errorInProvider(e).addSource(source);
+    } finally {
+      context.finishConstruction(circularFactoryId, t);
+    }
     if (t == null && !dependency.isNullable()) {
       InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
     }
-    constructionContext.setProxyDelegates(t);
     return t;
   }
 }

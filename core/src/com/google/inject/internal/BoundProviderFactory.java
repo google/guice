@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
-import jakarta.inject.Provider;
 
 /** Delegates to a custom factory which is also bound in the injector. */
 final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implements CreationListener {
@@ -34,7 +33,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       Key<? extends jakarta.inject.Provider<? extends T>> providerKey,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
-    super(source);
+    super(source, injector.circularFactoryIdFactory.next());
     this.provisionCallback = provisionCallback;
     this.injector = injector;
     this.providerKey = providerKey;
@@ -59,19 +58,6 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(providerKey);
-    }
-  }
-
-  @Override
-  protected T provision(
-      Provider<? extends T> provider,
-      Dependency<?> dependency,
-      ConstructionContext<T> constructionContext)
-      throws InternalProvisionException {
-    try {
-      return super.provision(provider, dependency, constructionContext);
-    } catch (RuntimeException userException) {
-      throw InternalProvisionException.errorInProvider(userException);
     }
   }
 

@@ -35,17 +35,21 @@ final class ConstructorInjector<T> {
   private final ImmutableSet<InjectionPoint> injectableMembers;
   private final SingleParameterInjector<?>[] parameterInjectors;
   private final ConstructionProxy<T> constructionProxy;
-  private final MembersInjectorImpl<T> membersInjector;
+  @Nullable private final MembersInjectorImpl<T> membersInjector;
+  private final int circularFactoryId;
 
   ConstructorInjector(
       Set<InjectionPoint> injectableMembers,
       ConstructionProxy<T> constructionProxy,
       SingleParameterInjector<?>[] parameterInjectors,
-      MembersInjectorImpl<T> membersInjector) {
+      @Nullable MembersInjectorImpl<T> membersInjector,
+      int circularFactoryId) {
     this.injectableMembers = ImmutableSet.copyOf(injectableMembers);
     this.constructionProxy = constructionProxy;
     this.parameterInjectors = parameterInjectors;
-    this.membersInjector = membersInjector;
+    this.membersInjector =
+        membersInjector == null || membersInjector.isEmpty() ? null : membersInjector;
+    this.circularFactoryId = circularFactoryId;
   }
 
   public ImmutableSet<InjectionPoint> getInjectableMembers() {
@@ -65,64 +69,50 @@ final class ConstructorInjector<T> {
       Dependency<?> dependency,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback)
       throws InternalProvisionException {
-    final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
-    // We have a circular reference between constructors. Return a proxy.
-    if (constructionContext.isConstructing()) {
-      // TODO (user): if we can't proxy this object, can we proxy the other object?
-      return constructionContext.createProxy(
-          context.getInjectorOptions(), dependency.getKey().getTypeLiteral().getRawType());
+    @SuppressWarnings("unchecked")
+    T result = (T) context.tryStartConstruction(circularFactoryId, dependency);
+    if (result != null) {
+      // We have a circular reference between bindings. Return a proxy.
+      return result;
     }
 
-    // If we're re-entering this factory while injecting fields or methods,
-    // return the same instance. This prevents infinite loops.
-    T t = constructionContext.getCurrentReference();
-    if (t != null) {
-      if (context.getInjectorOptions().disableCircularProxies) {
-        throw InternalProvisionException.circularDependenciesDisabled(
-            dependency.getKey().getTypeLiteral().getRawType());
-      }
-      return t;
-    }
-
-    constructionContext.startConstruction();
-    try {
-      // Optimization: Don't go through the callback stack if we have no listeners.
-      if (provisionCallback == null) {
-        return provision(context, constructionContext);
-      } else {
-        return provisionCallback.provision(
-            context,
-            new ProvisionCallback<T>() {
-              @Override
-              public T call() throws InternalProvisionException {
-                return provision(context, constructionContext);
-              }
-            });
-      }
-    } finally {
-      constructionContext.finishConstruction();
+    // Optimization: Don't go through the callback stack if we have no listeners.
+    if (provisionCallback == null) {
+      return provision(context);
+    } else {
+      // NOTE: `provision` always calls the callback, even if provision listeners
+      // throw exceptions.
+      return provisionCallback.provision(
+          context,
+          new ProvisionCallback<T>() {
+            @Override
+            public T call() throws InternalProvisionException {
+              return provision(context);
+            }
+          });
     }
   }
 
   /** Provisions a new T. */
-  private T provision(InternalContext context, ConstructionContext<T> constructionContext)
-      throws InternalProvisionException {
+  private T provision(InternalContext context) throws InternalProvisionException {
+    MembersInjectorImpl<T> localMembersInjector = membersInjector;
     try {
-      T t;
+      T t = null;
       try {
         Object[] parameters = SingleParameterInjector.getAll(context, parameterInjectors);
         t = constructionProxy.newInstance(parameters);
-        constructionContext.setProxyDelegates(t);
       } finally {
-        constructionContext.finishConstruction();
+        if (localMembersInjector == null) {
+          context.finishConstruction(circularFactoryId, t);
+        } else {
+          context.finishConstructionAndSetReference(circularFactoryId, t);
+        }
       }
 
-      // Store reference. If an injector re-enters this factory, they'll get the same reference.
-      constructionContext.setCurrentReference(t);
-
-      MembersInjectorImpl<T> localMembersInjector = membersInjector;
-      localMembersInjector.injectMembers(t, context, false);
-      localMembersInjector.notifyListeners(t);
+      if (localMembersInjector != null) {
+        localMembersInjector.injectMembers(t, context, /* toolableOnly= */ false);
+        localMembersInjector.notifyListeners(t);
+      }
 
       return t;
     } catch (InvocationTargetException userException) {
@@ -130,7 +120,9 @@ final class ConstructorInjector<T> {
       throw InternalProvisionException.errorInjectingConstructor(cause)
           .addSource(constructionProxy.getInjectionPoint());
     } finally {
-      constructionContext.removeCurrentReference();
+      if (localMembersInjector != null) {
+        context.clearCurrentReference(circularFactoryId);
+      }
     }
   }
 }

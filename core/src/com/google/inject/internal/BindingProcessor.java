@@ -145,7 +145,8 @@ final class BindingProcessor extends AbstractBindingProcessor {
                 new InternalFactoryToInitializableAdapter<T>(
                     initializable,
                     source,
-                    injector.provisionListenerStore.get((ProviderInstanceBinding<T>) binding));
+                    injector.provisionListenerStore.get((ProviderInstanceBinding<T>) binding),
+                    injector.circularFactoryIdFactory.next());
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
             putBinding(

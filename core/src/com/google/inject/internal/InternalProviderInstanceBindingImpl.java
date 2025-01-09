@@ -7,7 +7,6 @@ import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallba
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.ProviderWithExtensionVisitor;
 
 /**
  * A {@link ProviderInstanceBindingImpl} for implementing 'native' guice extensions.
@@ -64,10 +63,7 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     originalFactory.initialize(injector, errors);
   }
 
-  /**
-   * A base factory implementation. Any Factories that delegate to other bindings should use the
-   * {@code CyclicFactory} subclass, but trivial factories can use this one.
-   */
+  /** A base factory implementation. */
   abstract static class Factory<T> implements InternalFactory<T>, Provider<T>, HasDependencies {
     private final InitializationTiming initializationTiming;
     private Object source;
@@ -130,66 +126,5 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
      */
     protected abstract T doProvision(InternalContext context, Dependency<?> dependency)
         throws InternalProvisionException;
-  }
-
-  /**
-   * An base factory implementation that can be extended to provide a specialized implementation of
-   * a {@link ProviderWithExtensionVisitor} and also implements {@link InternalFactory}
-   */
-  abstract static class CyclicFactory<T> extends Factory<T> {
-
-    CyclicFactory(InitializationTiming initializationTiming) {
-      super(initializationTiming);
-    }
-
-    @Override
-    public final T get(
-        final InternalContext context, final Dependency<?> dependency, boolean linked)
-        throws InternalProvisionException {
-      final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
-      // We have a circular reference between bindings. Return a proxy.
-      if (constructionContext.isConstructing()) {
-        Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
-        @SuppressWarnings("unchecked")
-        T proxyType =
-            (T) constructionContext.createProxy(context.getInjectorOptions(), expectedType);
-        return proxyType;
-      }
-      // Optimization: Don't go through the callback stack if no one's listening.
-      constructionContext.startConstruction();
-      try {
-        if (provisionCallback == null) {
-          return provision(dependency, context, constructionContext);
-        } else {
-          return provisionCallback.provision(
-              context,
-              new ProvisionCallback<T>() {
-                @Override
-                public T call() throws InternalProvisionException {
-                  return provision(dependency, context, constructionContext);
-                }
-              });
-        }
-      } finally {
-        constructionContext.removeCurrentReference();
-        constructionContext.finishConstruction();
-      }
-    }
-
-    private T provision(
-        Dependency<?> dependency,
-        InternalContext context,
-        ConstructionContext<T> constructionContext)
-        throws InternalProvisionException {
-      try {
-        T t = doProvision(context, dependency);
-        constructionContext.setProxyDelegates(t);
-        return t;
-      } catch (InternalProvisionException ipe) {
-        throw ipe.addSource(getSource());
-      } catch (Throwable t) {
-        throw InternalProvisionException.errorInProvider(t).addSource(getSource());
-      }
-    }
   }
 }

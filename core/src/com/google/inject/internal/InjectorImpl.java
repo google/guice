@@ -118,6 +118,7 @@ final class InjectorImpl implements Injector, Lookups {
   private final InjectorJitBindingData jitBindingData;
   final InjectorImpl parent;
   final InjectorOptions options;
+  final InternalContext.CircularFactoryIdFactory circularFactoryIdFactory;
 
   Lookups lookups = new DeferredLookups(this);
 
@@ -136,11 +137,13 @@ final class InjectorImpl implements Injector, Lookups {
 
     if (parent != null) {
       localContext = parent.localContext;
+      circularFactoryIdFactory = parent.circularFactoryIdFactory;
     } else {
       // No ThreadLocal.initialValue(), as that would cause classloader leaks. See
       // https://github.com/google/guice/issues/288#issuecomment-48216933,
       // https://github.com/google/guice/issues/288#issuecomment-48216944
       localContext = new ThreadLocal<>();
+      circularFactoryIdFactory = new InternalContext.CircularFactoryIdFactory();
     }
   }
 
@@ -192,7 +195,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (isProvider(key)) {
       try {
         // This is safe because isProvider above ensures that T is a Provider<?>
-        @SuppressWarnings({"unchecked", "cast"})
+        @SuppressWarnings("unchecked")
         Key<?> providedKey = (Key<?>) getProvidedKey((Key) key, new Errors());
         if (getExistingBinding(providedKey) != null) {
           return getBinding(key);
@@ -683,7 +686,7 @@ final class InjectorImpl implements Injector, Lookups {
   /** Safely gets the dependencies of possibly not initialized bindings. */
   private Set<Dependency<?>> getInternalDependencies(BindingImpl<?> binding) {
     if (binding instanceof ConstructorBindingImpl) {
-      return ((ConstructorBindingImpl) binding).getInternalDependencies();
+      return ((ConstructorBindingImpl<?>) binding).getInternalDependencies();
     } else if (binding instanceof HasDependencies) {
       return ((HasDependencies) binding).getDependencies();
     } else {
@@ -807,7 +810,8 @@ final class InjectorImpl implements Injector, Lookups {
     @SuppressWarnings("unchecked")
     Key<? extends Provider<T>> providerKey = (Key<? extends Provider<T>>) Key.get(providerType);
     ProvidedByInternalFactory<T> internalFactory =
-        new ProvidedByInternalFactory<T>(rawType, providerType, providerKey);
+        new ProvidedByInternalFactory<T>(
+            rawType, providerType, providerKey, circularFactoryIdFactory.next());
     Object source = rawType;
     BindingImpl<T> binding =
         LinkedProviderBindingImpl.createWithInitializer(
@@ -937,7 +941,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (isProvider(key)) {
       // These casts are safe. We know T extends Provider<X> and that given Key<Provider<X>>,
       // createSyntheticProviderBinding() will return BindingImpl<Provider<X>>.
-      @SuppressWarnings({"unchecked", "cast"})
+      @SuppressWarnings("unchecked")
       BindingImpl<T> binding = (BindingImpl<T>) createSyntheticProviderBinding((Key) key, errors);
       return binding;
     }
@@ -946,7 +950,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (isMembersInjector(key)) {
       // These casts are safe. T extends MembersInjector<X> and that given Key<MembersInjector<X>>,
       // createMembersInjectorBinding() will return BindingImpl<MembersInjector<X>>.
-      @SuppressWarnings({"unchecked", "cast"})
+      @SuppressWarnings("unchecked")
       BindingImpl<T> binding = (BindingImpl<T>) createMembersInjectorBinding((Key) key, errors);
       return binding;
     }
@@ -1228,7 +1232,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
     InternalContext ctx = (InternalContext) reference[0];
     if (ctx == null) {
-      reference[0] = ctx = new InternalContext(options, reference);
+      reference[0] = ctx = InternalContext.create(options.disableCircularProxies, reference);
     } else {
       ctx.enter();
     }

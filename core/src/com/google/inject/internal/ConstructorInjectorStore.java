@@ -97,6 +97,7 @@ final class ConstructorInjectorStore {
         membersInjector.getInjectionPoints(),
         factory.create(),
         constructorParameterInjectors,
-        membersInjector);
+        membersInjector,
+        injector.circularFactoryIdFactory.next());
   }
 }

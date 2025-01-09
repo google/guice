@@ -73,7 +73,12 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
         new DefaultConstructionProxyFactory<T>(constructorInjectionPoint).create();
     this.constructorInjectionPoint = constructorInjectionPoint;
     factory.constructorInjector =
-        new ConstructorInjector<T>(injectionPoints, constructionProxy, null, null);
+        new ConstructorInjector<T>(
+            injectionPoints,
+            constructionProxy,
+            null,
+            null,
+            /* circularFactoryId= */ InternalContext.CircularFactoryIdFactory.INVALID_ID);
   }
 
   /**

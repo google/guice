@@ -246,7 +246,7 @@ public final class InternalProvisionException extends Exception {
     return builder.build();
   }
 
-  /** Returns this exception convered to a ProvisionException. */
+  /** Returns this exception converted to a ProvisionException. */
   public ProvisionException toProvisionException() {
     ProvisionException exception = new ProvisionException(getErrors());
     return exception;

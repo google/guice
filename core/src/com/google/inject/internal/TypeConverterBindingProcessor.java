@@ -73,7 +73,7 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
         injector,
         Matchers.subclassesOf(Enum.class),
         new TypeConverter() {
-          @SuppressWarnings("rawtypes") // Unavoidable, only way to use Enum.valueOf
+          @SuppressWarnings({"rawtypes", "unchecked"}) // Unavoidable, only way to use Enum.valueOf
           @Override
           public Object convert(String value, TypeLiteral<?> toType) {
             return Enum.valueOf((Class) toType.getRawType(), value);

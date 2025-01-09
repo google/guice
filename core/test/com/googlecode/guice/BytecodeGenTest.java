@@ -187,6 +187,7 @@ public class BytecodeGenTest {
   private Module testModule;
 
   @Before
+  @SuppressWarnings("unchecked")
   public void setUp() throws Exception {
     assumeTrue(InternalFlags.isBytecodeGenEnabled());
 
