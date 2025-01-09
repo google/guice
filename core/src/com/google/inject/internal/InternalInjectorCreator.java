@@ -204,8 +204,8 @@ public final class InternalInjectorCreator {
       // jit bindings must be accessed while holding the lock.
       candidateBindings.addAll(injector.getJitBindingData().getJitBindings().values());
     }
-    InternalContext context = injector.enterContext();
-    try {
+
+    try (InternalContext context = injector.enterContext()) {
       for (BindingImpl<?> binding : candidateBindings) {
         if (isEagerSingleton(injector, binding, stage)) {
           Dependency<?> dependency = Dependency.get(binding.getKey());
@@ -216,8 +216,6 @@ public final class InternalInjectorCreator {
           }
         }
       }
-    } finally {
-      context.close();
     }
   }
 

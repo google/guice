@@ -137,8 +137,7 @@ final class InjectionRequestProcessor extends AbstractProcessor {
     }
 
     void injectMembers() {
-      InternalContext context = injector.enterContext();
-      try {
+      try (InternalContext context = injector.enterContext()) {
         boolean isStageTool = injector.options.stage == Stage.TOOL;
         for (SingleMemberInjector memberInjector : memberInjectors) {
           // Run injections if we're not in tool stage (ie, PRODUCTION or DEV),
@@ -151,8 +150,6 @@ final class InjectionRequestProcessor extends AbstractProcessor {
             }
           }
         }
-      } finally {
-        context.close();
       }
     }
   }

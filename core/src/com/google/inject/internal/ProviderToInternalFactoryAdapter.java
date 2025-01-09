@@ -32,8 +32,7 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   @Override
   public T get() {
-    InternalContext context = injector.enterContext();
-    try {
+    try (InternalContext context = injector.enterContext()) {
       // Always pretend that we are a linked binding, to support
       // scoping implicit bindings.  If we are not actually a linked
       // binding, we'll fail properly elsewhere in the chain.
@@ -41,8 +40,6 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
       return t;
     } catch (InternalProvisionException e) {
       throw e.toProvisionException();
-    } finally {
-      context.close();
     }
   }
 
