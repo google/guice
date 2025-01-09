@@ -102,14 +102,13 @@ public class MatcherTest extends TestCase {
     assertFalse(only(1).equals(only(2)));
   }
 
-  @SuppressWarnings("UnnecessaryBoxing")
   public void testIdenticalTo() {
     Object o = new Object();
     assertEquals("identicalTo(1)", identicalTo(1).toString());
     assertTrue(identicalTo(o).matches(o));
     assertFalse(identicalTo(o).matches(new Object()));
     assertEqualsBothWays(identicalTo(o), identicalTo(o));
-    assertFalse(identicalTo(1).equals(identicalTo(new Integer(1))));
+    assertFalse(identicalTo("hello").equals(identicalTo(new String("hello"))));
   }
 
   public void testInPackage() {
