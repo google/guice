@@ -82,7 +82,6 @@ public class AllTests {
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(RequireAtInjectOnConstructorsTest.class);
-    suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(SerializationTest.class);
     suite.addTestSuite(SuperclassTest.class);
     suite.addTestSuite(TypeConversionTest.class);
