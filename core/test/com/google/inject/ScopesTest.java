@@ -60,7 +60,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1048,11 +1047,8 @@ public class ScopesTest {
     returnReal.set(true);
     injector.getInstance(aKey);
     injector.getInstance(bKey);
-    // still throws about not being ready, it never will be
-    e = assertThrows(IllegalStateException.class, finalProxy::doSomething);
-    assertThat(e)
-        .hasMessageThat()
-        .contains("Please wait until after injection has completed to use this object.");
+    // Now it works, since the provider succeeded.
+    finalProxy.doSomething();
   }
 
   /**

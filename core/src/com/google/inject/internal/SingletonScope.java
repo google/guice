@@ -14,7 +14,6 @@ import com.google.inject.Singleton;
 import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
-import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -116,11 +115,14 @@ public class SingletonScope implements Scope {
       final Object proxyCycleLock = new Object();
 
       /**
-       * List of invocation handlers for circular proxies. Typically this is `null` as we don't
-       * allocate proxies, but when we do, we allocate a new list and store the handlers here until
-       * the instance is initialized.
+       * An invocation handler for circular proxies. Typically this is `null` as we don't allocate
+       * proxies, but when we do, we allocate a handler and pass it to each allocated proxy
+       *
+       * <p>TODO: lukes - We could instead store the actual proxy here and then reuse it instead of
+       * allocating a new one, and we can access the invocation handler via
+       * `Proxy.getInvocationHandler(proxy)`.
        */
-      List<DelegatingInvocationHandler<T>> invocationHandlers;
+      DelegatingInvocationHandler invocationHandler;
 
       /**
        * For each binding there is a separate lock that we hold during object creation.
@@ -139,7 +141,7 @@ public class SingletonScope implements Scope {
        * The singleton provider needs a reference back to the injector, in order to get ahold of
        * InternalContext during instantiation.
        */
-      final @Nullable InjectorImpl injector;
+      @Nullable final InjectorImpl injector;
 
       {
         // If we are getting called by Scoping
@@ -190,12 +192,9 @@ public class SingletonScope implements Scope {
                   synchronized (proxyCycleLock) {
                     // guarantee thread-safety for instance and proxies initialization
                     instance = providedNotNull;
-                    if (invocationHandlers != null) {
-                      for (DelegatingInvocationHandler<T> handler : invocationHandlers) {
-                        handler.setDelegate(provided);
-                      }
-                      // initialization of each handler can happen no more than once
-                      invocationHandlers = null;
+                    if (invocationHandler != null) {
+                      invocationHandler.setDelegate(provided);
+                      invocationHandler = null;
                     }
                   }
                 } else {
@@ -205,14 +204,6 @@ public class SingletonScope implements Scope {
                       "Singleton is called recursively returning different results");
                 }
               }
-            } catch (RuntimeException e) {
-              // something went wrong, be sure to clean up our proxy list
-              synchronized (proxyCycleLock) {
-                // TODO it might be better to set the delegate to something that throws this
-                // exception, instead
-                invocationHandlers = null;
-              }
-              throw e;
             } finally {
               // always release our creation lock, even on failures
               creationLock.unlock();
@@ -239,13 +230,10 @@ public class SingletonScope implements Scope {
                   if (!rawType.isInterface()) {
                     throw InternalProvisionException.cannotProxyClass(rawType);
                   }
-                  if (invocationHandlers == null) {
-                    invocationHandlers = new ArrayList<>();
-                  }
 
-                  DelegatingInvocationHandler<T> invocationHandler =
-                      new DelegatingInvocationHandler<>();
-                  invocationHandlers.add(invocationHandler);
+                  if (invocationHandler == null) {
+                    invocationHandler = new DelegatingInvocationHandler();
+                  }
 
                   @SuppressWarnings("unchecked")
                   T proxy = (T) BytecodeGen.newCircularProxy(rawType, invocationHandler);

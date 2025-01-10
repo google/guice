@@ -21,22 +21,20 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-class DelegatingInvocationHandler<T> implements InvocationHandler {
-
-  private volatile boolean initialized;
-
-  private T delegate;
+final class DelegatingInvocationHandler implements InvocationHandler {
+  private static final Object UNINITIALIZED_PROXY = new Object();
+  private volatile Object delegate = UNINITIALIZED_PROXY;
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    try {
-      // checking volatile field for synchronization
-      Preconditions.checkState(
-          initialized,
-          "This is a proxy used to support"
-              + " circular references. The object we're"
-              + " proxying is not constructed yet. Please wait until after"
-              + " injection has completed to use this object.");
+    // checking volatile field for synchronization
+    final Object delegate = this.delegate;
+    Preconditions.checkState(
+        delegate != UNINITIALIZED_PROXY,
+        "This is a proxy used to support"
+            + " circular references. The object we're"
+            + " proxying is not constructed yet. Please wait until after"
+            + " injection has completed to use this object.");
       Preconditions.checkNotNull(
           delegate,
           "This is a proxy used to support"
@@ -44,21 +42,19 @@ class DelegatingInvocationHandler<T> implements InvocationHandler {
               + " proxying is initialized to null."
               + " No methods can be called.");
 
+    try {
       // TODO: method.setAccessible(true); ?
       // this would fix visibility errors when we proxy a
       // non-public interface.
       return method.invoke(delegate, args);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalAccessException | IllegalArgumentException e) {
       throw new RuntimeException(e);
     } catch (InvocationTargetException e) {
       throw e.getTargetException();
     }
   }
 
-  void setDelegate(T delegate) {
+  void setDelegate(Object delegate) {
     this.delegate = delegate;
-    initialized = true;
   }
 }

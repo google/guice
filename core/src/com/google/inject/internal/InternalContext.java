@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 /**
@@ -383,10 +382,6 @@ abstract class InternalContext implements AutoCloseable {
 
   @VisibleForTesting
   static final class WithProxySupport extends InternalContext {
-    // Need a custom private class to ensure we can tell the difference between this and a user
-    // constructed object.
-    private static final class ProxyDelegates
-        extends ArrayList<DelegatingInvocationHandler<Object>> {}
 
     // Open addressed hash table, power of 2 size using robin hood hashing.
     // Keys are the circular factory ids
@@ -441,10 +436,8 @@ abstract class InternalContext implements AutoCloseable {
     }
 
     private void setProxyDelegates(Object context, Object result) {
-      if (context instanceof ProxyDelegates) {
-        for (DelegatingInvocationHandler<Object> handler : (ProxyDelegates) context) {
-          handler.setDelegate(result);
-        }
+      if (context instanceof DelegatingInvocationHandler) {
+        ((DelegatingInvocationHandler) context).setDelegate(result);
       }
     }
 
@@ -473,7 +466,7 @@ abstract class InternalContext implements AutoCloseable {
         if (c == key) {
           Object current = this.constructionContexts[index];
           // This must be a value set by setCurrentReference, just return it.
-          if (current != null && !(current instanceof ProxyDelegates)) {
+          if (current != null && !(current instanceof DelegatingInvocationHandler)) {
             return current;
           }
           // now we need to check if we can proxy the class
@@ -482,12 +475,14 @@ abstract class InternalContext implements AutoCloseable {
             throw InternalProvisionException.cannotProxyClass(raw);
           }
           if (current == null) {
-            current = new ProxyDelegates();
+            // TODO: lukes - We could instead store the actual proxy here and then reuse it instead
+            // of allocating a new one, and we can access the invocation handler via
+            // `Proxy.getInvocationHandler(proxy)`. But that would be a bit more expensive to check
+            // for.
+            current = new DelegatingInvocationHandler();
             this.constructionContexts[index] = current;
           }
-          DelegatingInvocationHandler<Object> handler = new DelegatingInvocationHandler<>();
-          ((ProxyDelegates) current).add(handler);
-          return BytecodeGen.newCircularProxy(raw, handler);
+          return BytecodeGen.newCircularProxy(raw, (DelegatingInvocationHandler) current);
         }
         // See how far is the current key from its ideal slot in the table.
         int cDistance = distance(c, index, len);
