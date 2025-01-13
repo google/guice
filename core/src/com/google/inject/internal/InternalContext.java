@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.Keep;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -47,8 +48,7 @@ abstract class InternalContext implements AutoCloseable {
     // The first factory id is 1 so that we never produce a circular factory id of 0.
     // The tables below use 0 to represent an empty slot which is convenient since arrays are always
     // zero initialized.
-    @SuppressWarnings({"FieldCanBeFinal", "unused"})
-    private int id = 1;
+    @Keep private int id = 1;
 
     /** Returns the next circular factory id. */
     int next() {
