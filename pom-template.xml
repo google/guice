@@ -30,7 +30,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
 
   <description>
-    Guice is a lightweight dependency injection framework for Java 8 and above
+    Guice is a lightweight dependency injection framework for Java 11 and above
   </description>
 
   <url>https://github.com/google/guice</url>

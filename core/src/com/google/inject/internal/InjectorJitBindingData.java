@@ -45,11 +45,13 @@ final class InjectorJitBindingData {
     return Collections.unmodifiableMap(jitBindings);
   }
 
-  BindingImpl<?> getJitBinding(Key<?> key) {
-    return jitBindings.get(key);
+  <T> BindingImpl<T> getJitBinding(Key<T> key) {
+    @SuppressWarnings("unchecked") // safe because putJitBinding maintains this relationship
+    BindingImpl<T> binding = (BindingImpl<T>) jitBindings.get(key);
+    return binding;
   }
 
-  void putJitBinding(Key<?> key, BindingImpl<?> binding) {
+  <T> void putJitBinding(Key<T> key, BindingImpl<T> binding) {
     jitBindings.put(key, binding);
   }
 

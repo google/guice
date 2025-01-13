@@ -150,7 +150,7 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
     @SuppressWarnings("unchecked") // safe because we only put matching entries into the map
-    List<Binding<T>> list =
+    var list =
         (List<Binding<T>>)
             (List) bindingData.getIndexedExplicitBindings().get(checkNotNull(type, "type"));
     return Collections.unmodifiableList(list);
@@ -161,7 +161,7 @@ final class InjectorImpl implements Injector, Lookups {
   public <T> BindingImpl<T> getBinding(Key<T> key) {
     Errors errors = new Errors(checkNotNull(key, "key"));
     try {
-      BindingImpl<T> result = getBindingOrThrow(key, errors, JitLimitation.EXISTING_JIT);
+      var result = getBindingOrThrow(key, errors, JitLimitation.EXISTING_JIT);
       errors.throwConfigurationExceptionIfErrorsExist();
       return result;
     } catch (ErrorsException e) {
@@ -175,15 +175,14 @@ final class InjectorImpl implements Injector, Lookups {
   @Override
   public <T> BindingImpl<T> getExistingBinding(Key<T> key) {
     // Check explicit bindings, i.e. bindings created by modules.
-    BindingImpl<T> explicitBinding = bindingData.getExplicitBinding(checkNotNull(key, "key"));
+    var explicitBinding = bindingData.getExplicitBinding(checkNotNull(key, "key"));
     if (explicitBinding != null) {
       return explicitBinding;
     }
     synchronized (jitBindingData.lock()) {
       // See if any jit bindings have been created for this key.
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
-        @SuppressWarnings("unchecked")
-        BindingImpl<T> jitBinding = (BindingImpl<T>) injector.jitBindingData.getJitBinding(key);
+        var jitBinding = injector.jitBindingData.getJitBinding(key);
         if (jitBinding != null) {
           return jitBinding;
         }
@@ -196,7 +195,7 @@ final class InjectorImpl implements Injector, Lookups {
       try {
         // This is safe because isProvider above ensures that T is a Provider<?>
         @SuppressWarnings("unchecked")
-        Key<?> providedKey = (Key<?>) getProvidedKey((Key) key, new Errors());
+        var providedKey = (Key<?>) getProvidedKey((Key) key, new Errors());
         if (getExistingBinding(providedKey) != null) {
           return getBinding(key);
         }
@@ -268,8 +267,8 @@ final class InjectorImpl implements Injector, Lookups {
     synchronized (jitBindingData.lock()) {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
-        @SuppressWarnings("unchecked") // we only store bindings that match their key
-        BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindingData.getJitBinding(key);
+
+        var binding = injector.jitBindingData.getJitBinding(key);
 
         if (binding != null) {
           // If we found a JIT binding and we don't allow them,
@@ -634,7 +633,7 @@ final class InjectorImpl implements Injector, Lookups {
       Key<?> depKey = dep.getKey();
       InjectionPoint ip = dep.getInjectionPoint();
       if (encountered.add(depKey)) { // only check if we haven't looked at this key yet
-        BindingImpl<?> depBinding = jitBindingData.getJitBinding(depKey);
+        var depBinding = jitBindingData.getJitBinding(depKey);
         if (depBinding != null) { // if the binding still exists, validate
           boolean failed = cleanup(depBinding, encountered); // if children fail, we fail
           if (depBinding instanceof ConstructorBindingImpl) {

@@ -142,8 +142,11 @@ abstract class AbstractGlueGenerator {
       return signature -> {
         try {
           // pass this signature's index into the table function to retrieve the invoker
-          return (BiFunction<Object, Object[], Object>)
-              invokerTable.invokeExact(signatureTable.applyAsInt(signature));
+          @SuppressWarnings("unchecked")
+          var invoker =
+              (BiFunction<Object, Object[], Object>)
+                  invokerTable.invokeExact(signatureTable.applyAsInt(signature));
+          return invoker;
         } catch (Throwable e) {
           throw asIfUnchecked(e);
         }

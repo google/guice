@@ -16,9 +16,9 @@
 JAVAC_OPTS = [
     "-Xdoclint:html,syntax",
     "-source",
-    "1.8",
+    "11",
     "-target",
-    "1.8",
+    "11",
 ]
 
 POM_VERSION = "${project.version}"

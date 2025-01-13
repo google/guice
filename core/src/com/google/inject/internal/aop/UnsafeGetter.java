@@ -16,6 +16,7 @@
 
 package com.google.inject.internal.aop;
 
+@SuppressWarnings("SunApi")
 final class UnsafeGetter {
 
   private UnsafeGetter() {}

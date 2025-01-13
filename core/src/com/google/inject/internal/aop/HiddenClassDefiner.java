@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
+@SuppressWarnings("SunApi")
 final class HiddenClassDefiner implements ClassDefiner {
 
   private static final sun.misc.Unsafe THE_UNSAFE;

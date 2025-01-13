@@ -33,7 +33,7 @@ public final class OsgiWrapper implements Callable<Integer> {
           .collect(Collectors.joining(","));
 
   private static final String DESCRIPTION =
-      "Guice is a lightweight dependency injection framework for Java 8 and above";
+      "Guice is a lightweight dependency injection framework for Java 11 and above";
 
   private static final String COPYRIGHT = "Copyright (C) 2022 Google Inc.";
 

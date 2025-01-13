@@ -33,7 +33,7 @@ javadoc_library(
     ],
     doctitle = "Guice Dependency Injection API",
     external_javadoc_links = [
-        "https://docs.oracle.com/javase/8/docs/api/",
+        "https://docs.oracle.com/javase/11/docs/api/",
         "https://guava.dev/releases/snapshot-jre/api/docs/",
         "https://google.github.io/truth/api/latest/",
         "http://errorprone.info/api/latest/",
