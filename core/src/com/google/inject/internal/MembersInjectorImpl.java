@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
@@ -67,41 +66,36 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
   @Override
   public void injectMembers(T instance) {
+    if (instance == null) {
+      return;
+    }
     TypeLiteral<T> localTypeLiteral = typeLiteral;
-    try {
-      injectAndNotify(instance, null, null, localTypeLiteral, false);
+    try (InternalContext context = injector.enterContext()) {
+      injectAndNotify(context, instance, /* provisionCallback= */ null, localTypeLiteral, false);
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(localTypeLiteral).toProvisionException();
     }
   }
 
   void injectAndNotify(
+      InternalContext context,
       final T instance,
-      final Key<T> key, // possibly null!
-      final ProvisionListenerStackCallback<T> provisionCallback, // possibly null!
+      @Nullable final ProvisionListenerStackCallback<T> provisionCallback, // possibly null!
       final Object source,
       final boolean toolableOnly)
       throws InternalProvisionException {
-    if (instance == null) {
-      return;
-    }
-    final InternalContext context = injector.enterContext();
-    try {
-      if (provisionCallback != null && provisionCallback.hasListeners()) {
-        provisionCallback.provision(
-            context,
-            new ProvisionCallback<T>() {
-              @Override
-              public T call() throws InternalProvisionException {
-                injectMembers(instance, context, toolableOnly);
-                return instance;
-              }
-            });
-      } else {
-        injectMembers(instance, context, toolableOnly);
-      }
-    } finally {
-      context.close();
+    if (provisionCallback != null) {
+      provisionCallback.provision(
+          context,
+          new ProvisionCallback<T>() {
+            @Override
+            public T call() throws InternalProvisionException {
+              injectMembers(instance, context, toolableOnly);
+              return instance;
+            }
+          });
+    } else {
+      injectMembers(instance, context, toolableOnly);
     }
 
     // TODO: We *could* notify listeners too here,

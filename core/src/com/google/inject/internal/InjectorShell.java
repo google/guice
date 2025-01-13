@@ -323,11 +323,11 @@ final class InjectorShell {
   private static void bindStage(InjectorImpl injector, Stage stage) {
     Key<Stage> key = Key.get(Stage.class);
     InstanceBindingImpl<Stage> stageBinding =
-        new InstanceBindingImpl<Stage>(
+        new InstanceBindingImpl<>(
             injector,
             key,
             SourceProvider.UNKNOWN_SOURCE,
-            new ConstantFactory<Stage>(Initializables.of(stage)),
+            new ConstantFactory<Stage>(stage),
             ImmutableSet.<InjectionPoint>of(),
             stage);
     injector.getBindingData().putBinding(key, stageBinding);

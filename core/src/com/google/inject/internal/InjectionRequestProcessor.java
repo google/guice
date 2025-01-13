@@ -24,6 +24,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -76,12 +77,12 @@ final class InjectionRequestProcessor extends AbstractProcessor {
       InjectionRequest<T> request, Set<InjectionPoint> injectionPoints, Errors errors) {
     // We don't need to keep the return value, because we're not _using_ the injected value
     // anyway... we're just injecting it.
-    Initializable<T> unused =
+    Optional<Initializable<T>> unused =
         initializer.requestInjection(
             injector,
             request.getType(),
             request.getInstance(),
-            null,
+            /* binding= */ null,
             request.getSource(),
             injectionPoints,
             errors);

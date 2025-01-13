@@ -19,23 +19,27 @@ package com.google.inject.internal;
 import com.google.common.base.MoreObjects;
 import com.google.inject.spi.Dependency;
 
-/** @author crazybob@google.com (Bob Lee) */
-final class ConstantFactory<T> implements InternalFactory<T> {
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
+final class InitializableFactory<T> implements InternalFactory<T> {
 
-  private final T instance;
+  private final Initializable<T> initializable;
 
-  public ConstantFactory(T instance) {
-    this.instance = instance;
+  public InitializableFactory(Initializable<T> initializable) {
+    this.initializable = initializable;
   }
 
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    return instance;
+    return initializable.get(context);
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(ConstantFactory.class).add("value", instance).toString();
+    return MoreObjects.toStringHelper(InitializableFactory.class)
+        .add("value", initializable)
+        .toString();
   }
 }

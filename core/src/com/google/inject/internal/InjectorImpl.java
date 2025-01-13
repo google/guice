@@ -349,8 +349,7 @@ final class InjectorImpl implements Injector, Lookups {
             TypeLiteral.get(((ParameterizedType) membersInjectorType).getActualTypeArguments()[0]);
     MembersInjector<T> membersInjector = membersInjectorStore.get(instanceType, errors);
 
-    InternalFactory<MembersInjector<T>> factory =
-        new ConstantFactory<MembersInjector<T>>(Initializables.of(membersInjector));
+    InternalFactory<MembersInjector<T>> factory = new ConstantFactory<>(membersInjector);
 
     return new InstanceBindingImpl<MembersInjector<T>>(
         this,
@@ -520,7 +519,7 @@ final class InjectorImpl implements Injector, Lookups {
           injector,
           key,
           originalBinding.getSource(),
-          new ConstantFactory<T>(Initializables.of(value)),
+          new ConstantFactory<T>(value),
           Scoping.UNSCOPED);
       this.value = value;
       provider = Providers.of(value);
@@ -771,8 +770,7 @@ final class InjectorImpl implements Injector, Lookups {
 
     @SuppressWarnings("unchecked") // by definition, innerType == T, so this is safe
     TypeLiteral<T> value = (TypeLiteral<T>) TypeLiteral.get(innerType);
-    InternalFactory<TypeLiteral<T>> factory =
-        new ConstantFactory<TypeLiteral<T>>(Initializables.of(value));
+    InternalFactory<TypeLiteral<T>> factory = new ConstantFactory<>(value);
     return new InstanceBindingImpl<TypeLiteral<T>>(
         this,
         key,

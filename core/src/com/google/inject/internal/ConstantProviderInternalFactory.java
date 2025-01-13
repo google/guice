@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2025 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,38 +19,27 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.ProviderInstanceBinding;
+import javax.annotation.Nullable;
+import jakarta.inject.Provider;
 
-/**
- * Adapts {@link ProviderInstanceBinding} providers, ensuring circular proxies fail (or proxy)
- * properly.
- *
- * @author sameb@google.com (Sam Berlin)
- */
-final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
+/** An InternalFactory that delegates to a constant provider. */
+final class ConstantProviderInternalFactory<T> extends ProviderInternalFactory<T> {
+  private final Provider<T> provider;
+  @Nullable private final ProvisionListenerStackCallback<T> provisionCallback;
 
-  private final ProvisionListenerStackCallback<T> provisionCallback;
-  private final Initializable<? extends jakarta.inject.Provider<? extends T>> initializable;
-
-  public InternalFactoryToInitializableAdapter(
-      Initializable<? extends jakarta.inject.Provider<? extends T>> initializable,
+  ConstantProviderInternalFactory(
+      Provider<T> provider,
       Object source,
-      ProvisionListenerStackCallback<T> provisionCallback,
+      @Nullable ProvisionListenerStackCallback<T> provisionCallback,
       int circularFactoryId) {
     super(source, circularFactoryId);
+    this.provider = checkNotNull(provider);
     this.provisionCallback = provisionCallback;
-    this.initializable = checkNotNull(initializable, "provider");
   }
 
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    return circularGet(initializable.get(context), context, dependency, provisionCallback);
-  }
-
-
-  @Override
-  public String toString() {
-    return initializable.toString();
+    return circularGet(provider, context, dependency, provisionCallback);
   }
 }
