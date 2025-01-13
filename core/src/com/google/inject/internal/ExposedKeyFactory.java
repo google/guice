@@ -53,7 +53,12 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    // TODO(lukes): add a source to the thrown exception?
-    return delegate.getInternalFactory().get(context, dependency, linked);
+    try {
+      return delegate.getInternalFactory().get(context, dependency, linked);
+    } catch (InternalProvisionException e) {
+      // add source information like key and/or private elements for better traceability
+      e.addSource("ExposedKeyFactory for key: " + key + " in private elements: " + privateElements);
+      throw e;
+    }
   }
 }
