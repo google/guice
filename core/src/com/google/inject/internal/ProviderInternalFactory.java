@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
 import javax.annotation.Nullable;
 import jakarta.inject.Provider;
@@ -55,14 +54,8 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       return provision(provider, context, dependency);
     } else {
       return provisionCallback.provision(
-          context,
-          new ProvisionCallback<T>() {
-            @Override
-            public T call() throws InternalProvisionException {
-              return provision(provider, context, dependency);
-            }
-          });
-      }
+          context, dependency, (ctx, dep) -> provision(provider, ctx, dep));
+    }
   }
 
   /**

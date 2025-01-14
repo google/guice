@@ -18,7 +18,9 @@ package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Binding;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProvisionListener;
 import java.util.List;
 import java.util.Set;
@@ -58,9 +60,11 @@ final class ProvisionListenerStackCallback<T> {
     return listeners.length > 0;
   }
 
-  public T provision(InternalContext context, ProvisionCallback<T> callable)
+  @CanIgnoreReturnValue
+  public T provision(
+      InternalContext context, Dependency<?> dependency, ProvisionCallback<T> callable)
       throws InternalProvisionException {
-    Provision provision = new Provision(callable);
+    Provision provision = new Provision(context, dependency, callable);
     RuntimeException caught = null;
     try {
       provision.provision();
@@ -85,19 +89,22 @@ final class ProvisionListenerStackCallback<T> {
     }
   }
 
-  // TODO(sameb): Can this be more InternalFactory-like?
-  public interface ProvisionCallback<T> {
-    public T call() throws InternalProvisionException;
+  interface ProvisionCallback<T> {
+    T call(InternalContext context, Dependency<?> dependency) throws InternalProvisionException;
   }
 
-  private class Provision extends ProvisionListener.ProvisionInvocation<T> {
+  private final class Provision extends ProvisionListener.ProvisionInvocation<T> {
     final ProvisionCallback<T> callable;
+    final InternalContext context;
+    final Dependency<?> dependency;
     int index = -1;
     T result;
     InternalProvisionException exceptionDuringProvision;
     ProvisionListener erredListener;
 
-    public Provision(ProvisionCallback<T> callable) {
+    Provision(InternalContext context, Dependency<?> dependency, ProvisionCallback<T> callable) {
+      this.context = context;
+      this.dependency = dependency;
       this.callable = callable;
     }
 
@@ -106,7 +113,7 @@ final class ProvisionListenerStackCallback<T> {
       index++;
       if (index == listeners.length) {
         try {
-          result = callable.call();
+          result = callable.call(context, dependency);
         } catch (InternalProvisionException ipe) {
           exceptionDuringProvision = ipe;
           throw ipe.toProvisionException();

@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 import javax.annotation.Nullable;
@@ -87,12 +86,10 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     if (provisionCallback != null) {
       provisionCallback.provision(
           context,
-          new ProvisionCallback<T>() {
-            @Override
-            public T call() throws InternalProvisionException {
-              injectMembers(instance, context, toolableOnly);
-              return instance;
-            }
+          /* dependency= */ null, // not used
+          (ctx, dep) -> {
+            injectMembers(instance, ctx, toolableOnly);
+            return instance;
           });
     } else {
       injectMembers(instance, context, toolableOnly);

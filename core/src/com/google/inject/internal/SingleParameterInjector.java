@@ -56,8 +56,15 @@ final class SingleParameterInjector<T> {
     Object[] parameters = new Object[size];
 
     // optimization: use manual for/each to save allocating an iterator here
+    Dependency<?> dependency = null;
+    try {
     for (int i = 0; i < size; i++) {
-      parameters[i] = parameterInjectors[i].inject(context);
+        SingleParameterInjector<?> injector = parameterInjectors[i];
+        dependency = injector.dependency;
+        parameters[i] = injector.factory.get(context, dependency, false);
+      }
+    } catch (InternalProvisionException ipe) {
+      throw ipe.addSource(dependency);
     }
     return parameters;
   }

@@ -30,7 +30,7 @@ import javax.annotation.Nullable;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-final class ConstructorInjector<T> {
+final class ConstructorInjector<T> implements ProvisionCallback<T> {
 
   private final ImmutableSet<InjectionPoint> injectableMembers;
   private final SingleParameterInjector<?>[] parameterInjectors;
@@ -82,15 +82,15 @@ final class ConstructorInjector<T> {
     } else {
       // NOTE: `provision` always calls the callback, even if provision listeners
       // throw exceptions.
-      return provisionCallback.provision(
-          context,
-          new ProvisionCallback<T>() {
-            @Override
-            public T call() throws InternalProvisionException {
-              return provision(context);
-            }
-          });
+      return provisionCallback.provision(context, dependency, this);
     }
+  }
+
+  // Implements ProvisionCallback<T>
+  @Override
+  public final T call(InternalContext context, Dependency<?> dependency)
+      throws InternalProvisionException {
+    return provision(context);
   }
 
   /** Provisions a new T. */

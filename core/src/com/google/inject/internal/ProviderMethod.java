@@ -24,7 +24,6 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provides;
 import com.google.inject.internal.InternalProviderInstanceBindingImpl.InitializationTiming;
-import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -178,22 +177,11 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       // We have a circular reference between bindings. Return a proxy.
       return result;
     }
-    // Optimization: Don't go through the callback stack if no one's listening.
-    if (provisionCallback == null) {
-      return provision(dependency, context);
-    } else {
-      return provisionCallback.provision(
-          context,
-          new ProvisionCallback<T>() {
-            @Override
-            public T call() throws InternalProvisionException {
-              return provision(dependency, context);
-            }
-          });
-    }
+    return super.get(context, dependency, linked);
   }
 
-  private T provision(Dependency<?> dependency, InternalContext context)
+  @Override
+  protected T doProvision(InternalContext context, Dependency<?> dependency)
       throws InternalProvisionException {
     T t = null;
     try {
@@ -214,12 +202,6 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     } finally {
       context.finishConstruction(circularFactoryId, t);
     }
-  }
-
-  @Override
-  protected T doProvision(InternalContext context, Dependency<?> dependency)
-      throws InternalProvisionException {
-    throw new AssertionError(); // should never be called since we override get()
   }
 
   /** Extension point for our subclasses to implement the provisioning strategy. */

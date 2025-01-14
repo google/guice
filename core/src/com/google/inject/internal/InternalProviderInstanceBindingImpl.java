@@ -3,7 +3,6 @@ package com.google.inject.internal;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
@@ -64,7 +63,11 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
   }
 
   /** A base factory implementation. */
-  abstract static class Factory<T> implements InternalFactory<T>, Provider<T>, HasDependencies {
+  abstract static class Factory<T>
+      implements InternalFactory<T>,
+          Provider<T>,
+          HasDependencies,
+          ProvisionListenerStackCallback.ProvisionCallback<T> {
     private final InitializationTiming initializationTiming;
     private Object source;
     private Provider<T> delegateProvider;
@@ -108,16 +111,17 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
       if (provisionCallback == null) {
         return doProvision(context, dependency);
       } else {
-        return provisionCallback.provision(
-            context,
-            new ProvisionCallback<T>() {
-              @Override
-              public T call() throws InternalProvisionException {
-                return doProvision(context, dependency);
-              }
-            });
+        return provisionCallback.provision(context, dependency, this);
       }
     }
+
+    // Implements ProvisionCallback<T>
+    @Override
+    public final T call(InternalContext context, Dependency<?> dependency)
+        throws InternalProvisionException {
+      return doProvision(context, dependency);
+    }
+
     /**
      * Creates an object to be injected.
      *
