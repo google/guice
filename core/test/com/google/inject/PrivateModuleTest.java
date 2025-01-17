@@ -19,6 +19,7 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.Annotations;
@@ -632,6 +633,39 @@ public class PrivateModuleTest extends TestCase {
               + " configured on one or more child injectors or private modules.",
           "as a just-in-time binding");
     }
+  }
+
+  public void testExposedBindingAdvertisesExposeSource() {
+    Injector injector =
+        Guice.createInjector(
+            new PrivateModule() {
+              @Override
+              protected void configure() {
+                binder().withSource("configure").expose(String.class);
+              }
+
+              @Provides
+              String provideIndirectlyExposed() {
+                throw new Error();
+              }
+
+              @Provides
+              @Exposed
+              Integer provideDirectlyExposed() {
+                throw new Error();
+              }
+            });
+    ProvisionException expected =
+        assertThrows(ProvisionException.class, () -> injector.getInstance(String.class));
+    assertContains(
+        expected.toString(), "provideIndirectlyExposed", "configure", "while locating String");
+    expected = assertThrows(ProvisionException.class, () -> injector.getInstance(Integer.class));
+    assertContains(
+        expected.toString(),
+        // We see the source of the exposed binding, and the provider as identical.
+        "provideDirectlyExposed",
+        "provideDirectlyExposed",
+        "while locating Integer");
   }
 
   private static class FailingModule extends AbstractModule {

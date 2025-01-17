@@ -269,14 +269,10 @@ final class BindingProcessor extends AbstractBindingProcessor {
   }
 
   private <T> void bindExposed(PrivateElements privateElements, Key<T> key) {
-    ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<>(key, privateElements);
+    Object source = privateElements.getExposedSource(key);
+    ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<>(key, source, privateElements);
     processedBindingData.addCreationListener(exposedKeyFactory);
     putBinding(
-        new ExposedBindingImpl<T>(
-            injector,
-            privateElements.getExposedSource(key),
-            key,
-            exposedKeyFactory,
-            privateElements));
+        new ExposedBindingImpl<T>(injector, source, key, exposedKeyFactory, privateElements));
   }
 }

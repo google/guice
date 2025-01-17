@@ -26,11 +26,13 @@ import com.google.inject.spi.PrivateElements;
  */
 final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener {
   private final Key<T> key;
+  private final Object source;
   private final PrivateElements privateElements;
-  private BindingImpl<T> delegate;
+  private InternalFactory<T> delegate;
 
-  ExposedKeyFactory(Key<T> key, PrivateElements privateElements) {
+  ExposedKeyFactory(Key<T> key, Object source, PrivateElements privateElements) {
     this.key = key;
+    this.source = source;
     this.privateElements = privateElements;
   }
 
@@ -47,13 +49,18 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
       return;
     }
 
-    this.delegate = explicitBinding;
+    @SuppressWarnings("unchecked") // safe because InternalFactory<T> is covariant
+    InternalFactory<T> delegate = (InternalFactory<T>) explicitBinding.getInternalFactory();
+    this.delegate = delegate;
   }
 
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    // TODO(lukes): add a source to the thrown exception?
-    return delegate.getInternalFactory().get(context, dependency, linked);
+    try {
+      return delegate.get(context, dependency, linked);
+    } catch (InternalProvisionException ipe) {
+      throw ipe.addSource(source);
+    }
   }
 }
