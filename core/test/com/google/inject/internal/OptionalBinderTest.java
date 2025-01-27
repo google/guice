@@ -1211,6 +1211,25 @@ public class OptionalBinderTest extends TestCase {
     assertFalse(other1.equals(other2));
   }
 
+  static final class JitInjectable {
+    @Inject
+    JitInjectable() {}
+  }
+
+  public void testOptionalBinderAndProviderLookup() {
+    Optional<JitInjectable> optional =
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    OptionalBinder.newOptionalBinder(binder(), JitInjectable.class);
+                    getProvider(JitInjectable.class);
+                  }
+                })
+            .getInstance(new Key<Optional<JitInjectable>>() {});
+    assertThat(optional).isPresent();
+  }
+
   /**
    * Returns the short name for a module instance. Used to get the name of the anoymous class that
    * can change depending on the order the module intance is created.
