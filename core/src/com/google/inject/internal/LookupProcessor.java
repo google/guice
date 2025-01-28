@@ -22,7 +22,8 @@ import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ProviderLookup;
 
 /**
- * Handles {@code Binder.getProvider} and {@code Binder.getMembersInjector(TypeLiteral)} commands.
+ * Satisfies delegates for {@code Binder.getProvider} and {@code
+ * Binder.getMembersInjector(TypeLiteral)} commands.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
@@ -39,7 +40,6 @@ final class LookupProcessor extends AbstractProcessor {
       MembersInjector<T> membersInjector =
           injector.membersInjectorStore.get(lookup.getType(), errors);
       lookup.initializeDelegate(membersInjector);
-      injector.getBindingData().putMembersInjectorLookup(lookup);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }
@@ -53,7 +53,6 @@ final class LookupProcessor extends AbstractProcessor {
     try {
       Provider<T> provider = injector.getProviderOrThrow(lookup.getDependency(), errors);
       lookup.initializeDelegate(provider);
-      injector.getBindingData().putProviderLookup(lookup);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }

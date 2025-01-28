@@ -215,6 +215,10 @@ final class InjectorShell {
       new BindingProcessor(errors, initializer, processedBindingData).process(injector, elements);
       new UntargettedBindingProcessor(errors, processedBindingData).process(injector, elements);
       stopwatch.resetAndLog("Binding creation");
+      // lookups can create jit bindings, so do that early, but after untargeted bindings so that
+      // we leverage those bindings if they exist.
+      new LookupBindingProcessor(errors).process(injector, elements);
+      stopwatch.resetAndLog("lookup binding creation");
 
       new ModuleAnnotatedMethodScannerProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Module annotated method scanners creation");

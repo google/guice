@@ -143,16 +143,15 @@ public final class InternalInjectorCreator {
     initializer.validateOustandingInjections(errors);
     stopwatch.resetAndLog("Instance member validation");
 
+    processedBindingData.initializeDelayedBindings();
+    stopwatch.resetAndLog("Delayed Binding initialization");
+
     new LookupProcessor(errors).process(shells);
     for (InjectorShell shell : shells) {
       ((DeferredLookups) shell.getInjector().lookups).initialize(errors);
     }
     stopwatch.resetAndLog("Provider verification");
 
-    // This needs to come late since some user bindings rely on requireBinding calls to create
-    // jit bindings during the LookupProcessor.
-    processedBindingData.initializeDelayedBindings();
-    stopwatch.resetAndLog("Delayed Binding initialization");
 
     for (InjectorShell shell : shells) {
       if (!shell.getElements().isEmpty()) {

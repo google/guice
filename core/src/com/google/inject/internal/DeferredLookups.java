@@ -42,7 +42,9 @@ final class DeferredLookups implements Lookups {
 
   /** Initialize the specified lookups, either immediately or when the injector is created. */
   void initialize(Errors errors) {
+    // Since we are initializing the lookups, we can now use the injector as the lookups.
     injector.lookups = injector;
+    new LookupBindingProcessor(errors).process(injector, lookups);
     new LookupProcessor(errors).process(injector, lookups);
   }
 
