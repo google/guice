@@ -101,7 +101,7 @@ public class KeyTest extends TestCase {
   }
 
   /**
-   * Key canonicalizes {@link int.class} to {@code Integer.class}, and won't expose wrapper types.
+   * Key canonicalizes {@code int.class} to {@code Integer.class}, and won't expose wrapper types.
    */
   @SuppressWarnings("rawtypes") // Unavoidable because class literal uses raw type
   public void testPrimitivesAndWrappersAreEqual() {

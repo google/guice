@@ -1,6 +1,7 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
+load("//:build_defs.bzl", "JAVAC_OPTS")
 
 package(
     default_testonly = 1,
@@ -9,6 +10,7 @@ package(
 java_library(
     name = "tests",
     srcs = glob(["**/*.java"]),
+    javacopts = JAVAC_OPTS,
     deps = [
         "//core/src/com/google/inject",
         "//extensions/jmx/src/com/google/inject/tools/jmx",

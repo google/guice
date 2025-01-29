@@ -1,6 +1,7 @@
 # Copyright 2011 Google Inc.  All rights reserved.
 # Author: sameb@google.com (Sam Berlin)
 load("@rules_java//java:defs.bzl", "java_library")
+load("//:build_defs.bzl", "JAVAC_OPTS")
 load("//:test_defs.bzl", "guice_test_suites")
 
 package(
@@ -13,7 +14,7 @@ java_library(
     javacopts = [
         "-Xep:FutureReturnValueIgnored:OFF",
         "-Xep:MixedArrayDimensions:OFF",
-    ],
+    ] + JAVAC_OPTS,
     deps = [
         "//core/src/com/google/inject",
         "//core/test/com/google/inject:testsupport",

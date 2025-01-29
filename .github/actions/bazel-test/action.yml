@@ -17,5 +17,5 @@ runs:
         restore-keys: |
           ${{ runner.os }}-java-${{matrix.java}}-bazel-test-
     - name: Bazel test
-      run: bazel test //... --test_output=errors
+      run: bazel test --javacopt="--release 11" //... --test_output=errors
       shell: bash

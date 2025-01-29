@@ -1,4 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_library")
+load("//:build_defs.bzl", "JAVAC_OPTS")
 load("//:test_defs.bzl", "guice_test_suites")
 
 package(
@@ -10,6 +11,7 @@ ERROR_MESSAGE_TEST_UTILS_SRCS = ["ErrorMessageTestUtils.java"]
 java_library(
     name = "error_message_test_utils",
     srcs = ERROR_MESSAGE_TEST_UTILS_SRCS,
+    javacopts = JAVAC_OPTS,
     deps = [
         "//third_party/java/guava/io",
         "//third_party/java/truth",
@@ -22,7 +24,7 @@ java_library(
         ["*.java"],
         exclude = ERROR_MESSAGE_TEST_UTILS_SRCS,
     ),
-    javacopts = ["-Xep:BetaApi:OFF"],
+    javacopts = ["-Xep:BetaApi:OFF"] + JAVAC_OPTS,
     resources = [
         ":test_error_files",
     ],
