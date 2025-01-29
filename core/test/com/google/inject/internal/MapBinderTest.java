@@ -25,6 +25,7 @@ import static com.google.inject.internal.SpiUtils.instance;
 import static com.google.inject.internal.SpiUtils.providerInstance;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -1245,7 +1246,6 @@ public class MapBinderTest extends TestCase {
     return result;
   }
 
-  @SuppressWarnings("unchecked")
   private <V> Set<V> setOf(V... elements) {
     return new HashSet<V>(Arrays.asList(elements));
   }
@@ -1461,7 +1461,6 @@ public class MapBinderTest extends TestCase {
     assertEquals("a", ((InstanceBinding) secondBinding).getInstance());
   }
 
-  @SuppressWarnings("rawtypes")
   public void testGetEntriesMissingProviderMapEntry() {
     List<com.google.inject.spi.Element> elements =
         Lists.newArrayList(Elements.getElements(new MapBinderWithTwoEntriesModule()));
@@ -1515,7 +1514,6 @@ public class MapBinderTest extends TestCase {
     return null;
   }
 
-  @SuppressWarnings("rawtypes")
   public void testGetEntriesMissingBindingForValue() {
     List<com.google.inject.spi.Element> elements =
         Lists.newArrayList(Elements.getElements(new MapBinderWithTwoEntriesModule()));
@@ -1627,6 +1625,22 @@ public class MapBinderTest extends TestCase {
           .hasMessageThat()
           .contains("Map<Integer, ? extends String> was bound multiple times.");
     }
+  }
+
+  public void testMapBinderConflicDoesntCauseErrorDuringLookupProcessor() {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            MapBinder<Integer, String> mapBinder =
+                MapBinder.newMapBinder(binder(), Integer.class, String.class);
+            mapBinder.addBinding(1).toInstance("1");
+            mapBinder.addBinding(1).toInstance("2"); // duplicate key
+            getProvider(new Key<Map<Integer, String>>() {});
+          }
+        };
+    CreationException e = assertThrows(CreationException.class, () -> Guice.createInjector(module));
+    assertThat(e).hasMessageThat().contains("Duplicate key \"1\" found in Map<Integer, String>.");
   }
 
   /**

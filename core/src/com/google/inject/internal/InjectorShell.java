@@ -278,6 +278,11 @@ final class InjectorShell {
     }
 
     @Override
+    public Provider<Injector> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+      return InternalFactory.makeProviderFor(injector, this);
+    }
+
+    @Override
     public String toString() {
       return "Provider<Injector>";
     }
@@ -307,15 +312,24 @@ final class InjectorShell {
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
     @Override
     public Logger get(InternalContext context, Dependency<?> dependency, boolean linked) {
-      InjectionPoint injectionPoint = dependency.getInjectionPoint();
-      return injectionPoint == null
-          ? Logger.getAnonymousLogger()
-          : Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+      return makeLogger(dependency);
     }
 
     @Override
     public Logger get() {
       return Logger.getAnonymousLogger();
+    }
+
+    @Override
+    public Provider<Logger> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+      return InternalFactory.makeProviderFor(makeLogger(dependency), this);
+    }
+
+    private static Logger makeLogger(Dependency<?> dependency) {
+      InjectionPoint injectionPoint = dependency.getInjectionPoint();
+      return injectionPoint == null
+          ? Logger.getAnonymousLogger()
+          : Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
     }
 
     @Override
@@ -331,7 +345,7 @@ final class InjectorShell {
             injector,
             key,
             SourceProvider.UNKNOWN_SOURCE,
-            new ConstantFactory<Stage>(stage),
+            ConstantFactory.create(stage, SourceProvider.UNKNOWN_SOURCE),
             ImmutableSet.<InjectionPoint>of(),
             stage);
     injector.getBindingData().putBinding(key, stageBinding);

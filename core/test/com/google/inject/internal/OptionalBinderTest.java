@@ -46,6 +46,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.SpiUtils.VisitType;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -1228,6 +1229,37 @@ public class OptionalBinderTest extends TestCase {
                 })
             .getInstance(new Key<Optional<JitInjectable>>() {});
     assertThat(optional).isPresent();
+  }
+
+  /**
+   * Tests that an OptionalBinder that depends on a Multibinder resolves initialization order
+   * correctly to an optimized provider.
+   */
+  public void testOptionalBinderDependsOnMultibinder() {
+    Key<Set<String>> key = new Key<Set<String>>() {};
+    Optional<Provider<Set<String>>> e =
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    OptionalBinder.newOptionalBinder(binder(), key);
+                    Multibinder.newSetBinder(binder(), String.class);
+                  }
+                })
+            .getInstance(new Key<Optional<Provider<Set<String>>>>() {});
+    // Check that we are using the optimized path.
+    assertThat(e.get()).isInstanceOf(InternalFactory.InstanceProvider.class);
+    e =
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    Multibinder.newSetBinder(binder(), String.class);
+                    OptionalBinder.newOptionalBinder(binder(), key);
+                  }
+                })
+            .getInstance(new Key<Optional<Provider<Set<String>>>>() {});
+    assertThat(e.get()).isInstanceOf(InternalFactory.InstanceProvider.class);
   }
 
   /**

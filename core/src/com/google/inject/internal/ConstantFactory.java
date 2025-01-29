@@ -17,21 +17,52 @@
 package com.google.inject.internal;
 
 import com.google.common.base.MoreObjects;
+import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 
-/** @author crazybob@google.com (Bob Lee) */
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
 final class ConstantFactory<T> implements InternalFactory<T> {
+  private static <T> InternalFactory<T> nullFactory(Object source) {
+    return new InternalFactory<T>() {
+      @Override
+      public T get(InternalContext context, Dependency<?> dependency, boolean linked)
+          throws InternalProvisionException {
+        if (!dependency.isNullable()) {
+          InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
+        }
+        return null;
+      }
+
+      @Override
+      public Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+        return InternalFactory.makeProviderForNull(source, this, dependency);
+      }
+    };
+  }
 
   private final T instance;
 
-  public ConstantFactory(T instance) {
+  static <T> InternalFactory<T> create(T instance, Object source) {
+    if (instance == null) {
+      return nullFactory(source);
+    }
+    return new ConstantFactory<>(instance);
+  }
+
+  private ConstantFactory(T instance) {
     this.instance = instance;
   }
 
   @Override
-  public T get(InternalContext context, Dependency<?> dependency, boolean linked)
-      throws InternalProvisionException {
+  public T get(InternalContext context, Dependency<?> dependency, boolean linked) {
     return instance;
+  }
+
+  @Override
+  public Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+    return InternalFactory.makeProviderFor(instance, this);
   }
 
   @Override

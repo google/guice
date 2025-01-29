@@ -49,7 +49,7 @@ final class LookupProcessor extends AbstractProcessor {
 
   @Override
   public <T> Boolean visit(ProviderLookup<T> lookup) {
-    // ensure the provider can be created
+    // ensure the provider can be created and initialize the delegate.
     try {
       Provider<T> provider = injector.getProviderOrThrow(lookup.getDependency(), errors);
       lookup.initializeDelegate(provider);

@@ -349,7 +349,8 @@ final class InjectorImpl implements Injector, Lookups {
             TypeLiteral.get(((ParameterizedType) membersInjectorType).getActualTypeArguments()[0]);
     MembersInjector<T> membersInjector = membersInjectorStore.get(instanceType, errors);
 
-    InternalFactory<MembersInjector<T>> factory = new ConstantFactory<>(membersInjector);
+    InternalFactory<MembersInjector<T>> factory =
+        ConstantFactory.create(membersInjector, SourceProvider.UNKNOWN_SOURCE);
 
     return new InstanceBindingImpl<MembersInjector<T>>(
         this,
@@ -388,11 +389,17 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     static <T> InternalFactory<Provider<T>> createInternalFactory(Binding<T> providedBinding) {
-      final Provider<T> provider = providedBinding.getProvider();
+      // Defer calling `getProvider` until we need it, Bindingimple has an internal cache and by
+      // delaying we can ensure we link to an optimized provider instance.
       return new InternalFactory<Provider<T>>() {
         @Override
         public Provider<T> get(InternalContext context, Dependency<?> dependency, boolean linked) {
-          return provider;
+          return providedBinding.getProvider();
+        }
+
+        @Override
+        public Provider<Provider<T>> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+          return InternalFactory.makeProviderFor(providedBinding.getProvider(), this);
         }
       };
     }
@@ -519,7 +526,7 @@ final class InjectorImpl implements Injector, Lookups {
           injector,
           key,
           originalBinding.getSource(),
-          new ConstantFactory<T>(value),
+          ConstantFactory.create(value, originalBinding.getSource()),
           Scoping.UNSCOPED);
       this.value = value;
       provider = Providers.of(value);
@@ -595,7 +602,17 @@ final class InjectorImpl implements Injector, Lookups {
     }
   }
 
-  <T> void initializeJitBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
+  /** For multibinding bindings that delegate to each other. */
+  <T> void initializeBindingIfDelayed(Binding<T> binding, Errors errors) throws ErrorsException {
+    if (binding instanceof InternalProviderInstanceBindingImpl
+        && ((InternalProviderInstanceBindingImpl) binding).getInitializationTiming()
+            == InternalProviderInstanceBindingImpl.InitializationTiming.DELAYED) {
+      ((DelayedInitialize) binding).initialize(this, errors);
+    }
+  }
+
+  private <T> void initializeJitBinding(BindingImpl<T> binding, Errors errors)
+      throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
     // Note: We don't need to synchronize on jitBindingData.lock() during injector creation.
@@ -770,7 +787,8 @@ final class InjectorImpl implements Injector, Lookups {
 
     @SuppressWarnings("unchecked") // by definition, innerType == T, so this is safe
     TypeLiteral<T> value = (TypeLiteral<T>) TypeLiteral.get(innerType);
-    InternalFactory<TypeLiteral<T>> factory = new ConstantFactory<>(value);
+    InternalFactory<TypeLiteral<T>> factory =
+        ConstantFactory.create(value, SourceProvider.UNKNOWN_SOURCE);
     return new InstanceBindingImpl<TypeLiteral<T>>(
         this,
         key,
@@ -1135,39 +1153,13 @@ final class InjectorImpl implements Injector, Lookups {
     return getProvider(Key.get(checkNotNull(type, "type")));
   }
 
-  <T> Provider<T> getProviderOrThrow(final Dependency<T> dependency, Errors errors)
-      throws ErrorsException {
-    Key<T> key = dependency.getKey();
-    BindingImpl<? extends T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
-    final InternalFactory<? extends T> internalFactory = binding.getInternalFactory();
-
-    return new Provider<T>() {
-      @Override
-      public T get() {
-        InternalContext currentContext = enterContext();
-        try {
-          T t = internalFactory.get(currentContext, dependency, false);
-          return t;
-        } catch (InternalProvisionException e) {
-          throw e.addSource(dependency).toProvisionException();
-        } finally {
-          currentContext.close();
-        }
-      }
-
-      @Override
-      public String toString() {
-        return internalFactory.toString();
-      }
-    };
-  }
-
   @Override
   public <T> Provider<T> getProvider(final Key<T> key) {
     checkNotNull(key, "key");
     Errors errors = new Errors(key);
     try {
-      Provider<T> result = getProviderOrThrow(Dependency.get(key), errors);
+      // Access off the BindingImpl to leverage the cached provider.
+      Provider<T> result = getBindingOrThrow(key, errors, JitLimitation.NO_JIT).getProvider();
       errors.throwIfNewErrors(0);
       return result;
     } catch (ErrorsException e) {
@@ -1175,6 +1167,30 @@ final class InjectorImpl implements Injector, Lookups {
           new ConfigurationException(errors.merge(e.getErrors()).getMessages());
       throw exception;
     }
+  }
+
+  // A special implementation for BindingImpl to break a recursive dependency with getProvider so
+  // that getProvider can leverage the cache inside BindingImpl
+  <T> Provider<T> getProviderForBindingImpl(Key<T> key) {
+    Errors errors = new Errors(key);
+    try {
+      return getProviderOrThrow(Dependency.get(key), errors);
+    } catch (ErrorsException e) {
+      ConfigurationException exception =
+          new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+      throw exception;
+    }
+  }
+
+  // Used by LookupProcessor to satisfy delegates.
+  <T> Provider<T> getProviderOrThrow(Dependency<T> dependency, Errors errors)
+      throws ErrorsException {
+    var key = dependency.getKey();
+    BindingImpl<T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
+    @SuppressWarnings("unchecked") // safe because Providers are covariant.
+    Provider<T> provider =
+        (Provider<T>) binding.getInternalFactory().makeProvider(this, dependency);
+    return provider;
   }
 
   @Override

@@ -31,7 +31,6 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * The actual multibinder plays several roles:
@@ -164,12 +163,10 @@ public final class RealMultibinder<T> implements Module {
    */
   private abstract static class BaseFactory<ValueT, ProvidedT>
       extends InternalProviderInstanceBindingImpl.Factory<ProvidedT> {
-    final Function<BindingSelection<ValueT>, ImmutableSet<Dependency<?>>> dependenciesFn;
     final BindingSelection<ValueT> bindingSelection;
+    private boolean initialized = false;
 
-    BaseFactory(
-        BindingSelection<ValueT> bindingSelection,
-        Function<BindingSelection<ValueT>, ImmutableSet<Dependency<?>>> dependenciesFn) {
+    BaseFactory(BindingSelection<ValueT> bindingSelection) {
       // While Multibinders only depend on bindings created in modules so we could theoretically
       // initialize eagerly, they also depend on
       // 1. findBindingsByType returning results
@@ -177,21 +174,32 @@ public final class RealMultibinder<T> implements Module {
       // neither of those is available during eager initialization, so we use DELAYED
       super(InitializationTiming.DELAYED);
       this.bindingSelection = bindingSelection;
-      this.dependenciesFn = dependenciesFn;
     }
 
     @Override
     void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+      if (initialized) {
+        return;
+      }
       bindingSelection.initialize(injector, errors);
       doInitialize();
+      initialized = true;
     }
 
     abstract void doInitialize();
 
     @Override
-    public Set<Dependency<?>> getDependencies() {
-      return dependenciesFn.apply(bindingSelection);
+    public final Provider<ProvidedT> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+      // The !initialized case typically means that an error was reported during initialization
+      // so use a trivial implementation
+      if (initialized) {
+        return doMakeProvider(injector, dependency);
+      }
+      return super.makeProvider(injector, dependency);
     }
+
+    protected abstract Provider<ProvidedT> doMakeProvider(
+        InjectorImpl injector, Dependency<?> dependency);
 
     @Override
     public boolean equals(Object obj) {
@@ -217,8 +225,12 @@ public final class RealMultibinder<T> implements Module {
     boolean permitDuplicates;
 
     RealMultibinderProvider(BindingSelection<T> bindingSelection) {
-      // Note: method reference doesn't work for the 2nd arg for some reason when compiling on java8
-      super(bindingSelection, bs -> bs.getDependencies());
+      super(bindingSelection);
+    }
+
+    @Override
+    public ImmutableSet<Dependency<?>> getDependencies() {
+      return bindingSelection.getDependencies();
     }
 
     @Override
@@ -268,6 +280,14 @@ public final class RealMultibinder<T> implements Module {
         throw newDuplicateValuesException(values);
       }
       return set;
+    }
+
+    @Override
+    protected Provider<Set<T>> doMakeProvider(InjectorImpl injector, Dependency<?> dependency) {
+      if (injectors == null) {
+        return InternalFactory.makeProviderFor(ImmutableSet.of(), this);
+      }
+      return InternalFactory.makeDefaultProvider(this, injector, dependency);
     }
 
     private InternalProvisionException newNullEntryException(int i) {
@@ -340,8 +360,12 @@ public final class RealMultibinder<T> implements Module {
     ImmutableList<Provider<T>> providers;
 
     RealMultibinderCollectionOfProvidersProvider(BindingSelection<T> bindingSelection) {
-      // Note: method reference doesn't work for the 2nd arg for some reason when compiling on java8
-      super(bindingSelection, bs -> bs.getProviderDependencies());
+      super(bindingSelection);
+    }
+
+    @Override
+    public ImmutableSet<Dependency<?>> getDependencies() {
+      return bindingSelection.getProviderDependencies();
     }
 
     @Override
@@ -357,6 +381,12 @@ public final class RealMultibinder<T> implements Module {
     protected ImmutableList<Provider<T>> doProvision(
         InternalContext context, Dependency<?> dependency) {
       return providers;
+    }
+
+    @Override
+    protected Provider<Collection<Provider<T>>> doMakeProvider(
+        InjectorImpl injector, Dependency<?> dependency) {
+      return InternalFactory.makeProviderFor(providers, this);
     }
   }
 
@@ -446,12 +476,12 @@ public final class RealMultibinder<T> implements Module {
     }
 
     ImmutableList<Binding<T>> getBindings() {
-      checkConfiguration(isInitialized, "not initialized");
+      checkConfiguration(isInitialized(), "not initialized");
       return bindings;
     }
 
     SingleParameterInjector<T>[] getParameterInjectors() {
-      checkConfiguration(isInitialized, "not initialized");
+      checkConfiguration(isInitialized(), "not initialized");
       return parameterinjectors;
     }
 

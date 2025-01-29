@@ -64,6 +64,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
       throw new IllegalStateException("not initialized");
     }
     try {
+      // TODO: lukes - Is this the right 'dependency' to pass?
       Provider<? extends T> provider = localProviderFactory.get(context, dependency, true);
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {

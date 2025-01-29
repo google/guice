@@ -54,6 +54,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
     try {
+      // TODO: lukes - are we passing the right dependency here?
       jakarta.inject.Provider<? extends T> provider = providerFactory.get(context, dependency, true);
       return circularGet(provider, context, dependency, provisionCallback);
     } catch (InternalProvisionException ipe) {

@@ -43,6 +43,8 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
         source,
         scopedFactory,
         scoping,
+        // Pass the original factory as the provider instance. A number of checks rely on being able
+        // to downcast this provider to access the original factory.
         originalFactory,
         ImmutableSet.<InjectionPoint>of());
     this.originalFactory = originalFactory;
@@ -56,10 +58,10 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
   public void initialize(final InjectorImpl injector, final Errors errors) throws ErrorsException {
     originalFactory.source = getSource();
     originalFactory.provisionCallback = injector.provisionListenerStore.get(this);
-    // For these kinds of providers, the 'user supplied provider' is really 'guice supplied'
-    // So make our user supplied provider just delegate to the guice supplied one.
-    originalFactory.delegateProvider = getProvider();
     originalFactory.initialize(injector, errors);
+    // Pass information so we can implement the provider protocol.
+    originalFactory.injector = injector;
+    originalFactory.dependency = Dependency.get(getKey());
   }
 
   /** A base factory implementation. */
@@ -70,7 +72,8 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
           ProvisionListenerStackCallback.ProvisionCallback<T> {
     private final InitializationTiming initializationTiming;
     private Object source;
-    private Provider<T> delegateProvider;
+    private InjectorImpl injector;
+    private Dependency<?> dependency;
     ProvisionListenerStackCallback<T> provisionCallback;
 
     Factory(InitializationTiming initializationTiming) {
@@ -97,12 +100,17 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
 
     @Override
     public final T get() {
-      Provider<T> local = delegateProvider;
+      var local = injector;
       if (local == null) {
         throw new IllegalStateException(
             "This Provider cannot be used until the Injector has been created.");
       }
-      return local.get();
+      // This is an inlined version of InternalFactory.makeDefaultProvider
+      try (InternalContext context = local.enterContext()) {
+        return get(context, dependency, false);
+      } catch (InternalProvisionException e) {
+        throw e.addSource(dependency).toProvisionException();
+      }
     }
 
     @Override

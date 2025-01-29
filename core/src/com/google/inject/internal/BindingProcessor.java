@@ -120,7 +120,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
             InternalFactory<? extends T> factory =
                 ref.isPresent()
                     ? new InitializableFactory<>(ref.get())
-                    : new ConstantFactory<>(instance);
+                    : ConstantFactory.create(instance, source);
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
             putBinding(

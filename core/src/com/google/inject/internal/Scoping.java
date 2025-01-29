@@ -298,7 +298,7 @@ public abstract class Scoping {
     // SingletonScope as well.
     Provider<T> scoped =
         scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
-    return new InternalFactoryToProviderAdapter<T>(scoped, source);
+    return InternalFactoryToScopedProviderAdapter.create(scope, scoped, source);
   }
 
   /**

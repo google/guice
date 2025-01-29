@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -64,16 +65,23 @@ public abstract class BindingImpl<T> implements Binding<T> {
     return source;
   }
 
-  private volatile Provider<T> provider;
+  // We don't care if we initialize this multiple times, so we use LazyInit instead of a double
+  // checked locking pattern.
+  @LazyInit private volatile Provider<T> provider;
 
   @Override
   public Provider<T> getProvider() {
+    // Read into a local so we only read the field once.
+    var provider = this.provider;
     if (provider == null) {
       if (injector == null) {
         throw new UnsupportedOperationException("getProvider() not supported for module bindings");
       }
-
-      provider = injector.getProvider(key);
+      // NOTE: we cannot simply call internalFactory.getProvider() since that will not correctly
+      // enforce injector rules around jit bindings.  So we go through a special method in
+      // InjectorImpl to make the provider.
+      provider = injector.getProviderForBindingImpl(key);
+      this.provider = provider;
     }
     return provider;
   }
