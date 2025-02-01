@@ -25,7 +25,6 @@ import static com.google.inject.internal.aop.ClassBuilding.signature;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.MapMaker;
 import com.google.inject.internal.aop.ClassBuilding;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -33,7 +32,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.BitSet;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -51,19 +49,23 @@ import java.util.function.Function;
  */
 public final class BytecodeGen {
 
-  private static final Map<Class<?>, Boolean> circularProxyTypeCache =
-      new MapMaker().weakKeys().makeMap();
-
   /** Returns true if the given object is a circular proxy. */
   public static boolean isCircularProxy(Object object) {
-    return object != null && circularProxyTypeCache.containsKey(object.getClass());
+    return object instanceof Proxy
+        && Proxy.getInvocationHandler(object) instanceof DelegatingInvocationHandler;
   }
 
   /** Creates a new circular proxy for the given type. */
-  static <T> T newCircularProxy(Class<T> type, InvocationHandler handler) {
-    Object proxy = Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] {type}, handler);
-    circularProxyTypeCache.put(proxy.getClass(), Boolean.TRUE);
-    return type.cast(proxy);
+  static <T> T newCircularProxy(Class<T> type, DelegatingInvocationHandler handler) {
+    // Ideally we would add a marker interface to the list of interfaces to implement so that
+    // `isCircularProxy` could just use an instanceof test, but this does not work if the type
+    // in question is owned by a classloader that isn't ours or a descendant of ours.
+    // The other option is something like ClassValue, but it is difficult to bootstrap and would
+    // consume memory for every class passed to `isCircularProxy` which is much larger than the
+    // number of circular proxies.
+    @SuppressWarnings("unchecked") // This is guaranteed by the contract on newProxyInstance
+    T proxy = (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] {type}, handler);
+    return proxy;
   }
 
   public static final String ENHANCER_BY_GUICE_MARKER = "$$EnhancerByGuice$$";
@@ -176,4 +178,6 @@ public final class BytecodeGen {
           return buildFastClass(hostClass);
         }
       };
+
+  private BytecodeGen() {}
 }
