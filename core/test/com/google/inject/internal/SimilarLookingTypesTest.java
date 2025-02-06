@@ -3,6 +3,7 @@ package com.google.inject.internal;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.internal.MissingImplementationErrorHints.areSimilarLookingTypes;
 import static com.google.inject.internal.MissingImplementationErrorHints.convertToLatterViaJvmAnnotations;
+import static com.google.inject.internal.MissingImplementationErrorHints.differOnlyInVariance;
 
 import com.google.inject.TypeLiteral;
 import java.util.List;
@@ -20,6 +21,11 @@ public final class SimilarLookingTypesTest {
   }
 
   private static class Foo {}
+
+  @Test
+  public void sameTypes() {
+    assertThat(areSimilarLookingTypes(Foo.class, Foo.class)).isTrue();
+  }
 
   @Test
   public void similarClasses() {
@@ -168,5 +174,32 @@ public final class SimilarLookingTypesTest {
         .isEqualTo(
             "java.util.Map<@JvmWildcard java.util.List<out java.lang.String>,"
                 + " @JvmSuppressWildcards java.lang.Integer>");
+  }
+
+  @Test
+  public void sameTypesDoNotOnlyDifferInVariance() {
+    assertThat(
+            differOnlyInVariance(
+                new TypeLiteral<List<? extends Foo>>() {}.getType(),
+                new TypeLiteral<List<? extends Foo>>() {}.getType()))
+        .isFalse();
+  }
+
+  @Test
+  public void typesThatOnlyDifferInVariance() {
+    assertThat(
+            differOnlyInVariance(
+                new TypeLiteral<List<Foo>>() {}.getType(),
+                new TypeLiteral<List<? extends Foo>>() {}.getType()))
+        .isTrue();
+  }
+
+  @Test
+  public void differentTypesDoNotOnlyDifferInVariance() {
+    assertThat(
+            differOnlyInVariance(
+                new TypeLiteral<List<Foo>>() {}.getType(),
+                new TypeLiteral<List<String>>() {}.getType()))
+        .isFalse();
   }
 }

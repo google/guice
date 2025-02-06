@@ -69,8 +69,12 @@ final class MissingImplementationErrorHints {
         a, b, (aClass, bClass) -> aClass.getSimpleName().equals(bClass.getSimpleName()));
   }
 
-  private static boolean areOnlyDifferencesInVariance(Type a, Type b) {
-    return areSimilarTypes(a, b, Object::equals);
+  /**
+   * Returns whether the two types are different but only differ in variance (e.g. Foo vs ? extends
+   * Foo). Same types will return false.
+   */
+  static boolean differOnlyInVariance(Type a, Type b) {
+    return !a.equals(b) && areSimilarTypes(a, b, Object::equals);
   }
 
   private static boolean areSimilarTypes(
@@ -242,7 +246,7 @@ final class MissingImplementationErrorHints {
             .filter(
                 b ->
                     (injectionFromKotlin || wasBoundInKotlin(b))
-                        && areOnlyDifferencesInVariance(
+                        && differOnlyInVariance(
                             b.getKey().getTypeLiteral().getType(), type.getType()))
             .collect(toImmutableList());
 

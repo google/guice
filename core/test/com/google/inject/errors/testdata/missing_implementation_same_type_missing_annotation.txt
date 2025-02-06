@@ -1,0 +1,27 @@
+Unable to create injector, see the following errors:
+
+1) [Guice/MissingImplementation]: No implementation for Producer<Foo> was bound.
+
+Did you mean?
+    * Producer<Foo> annotated with @MyAnnotation() bound at MissingImplementationErrorKtTest$InjectionMissingAnnotationModule.providesAnnotatedProducerOfFoo(MissingImplementationErrorKtTest.kt:119)
+
+Requested by:
+1  : MissingImplementationErrorKtTest$InjectionMissingAnnotationModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:123)
+      \_ for 1st parameter unused
+     at MissingImplementationErrorKtTest$InjectionMissingAnnotationModule.injectProducerOfFoo(MissingImplementationErrorKtTest.kt:123)
+
+Learn more:
+  https://github.com/google/guice/wiki/MISSING_IMPLEMENTATION
+
+1 error
+
+======================
+Full classname legend:
+======================
+Foo:                                                               "com.google.inject.errors.Foo"
+MissingImplementationErrorKtTest$InjectionMissingAnnotationModule: "com.google.inject.errors.MissingImplementationErrorKtTest$InjectionMissingAnnotationModule"
+MyAnnotation:                                                      "com.google.inject.errors.MyAnnotation"
+Producer:                                                          "com.google.inject.errors.Producer"
+========================
+End of classname legend:
+========================
