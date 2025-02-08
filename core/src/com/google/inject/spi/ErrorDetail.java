@@ -1,11 +1,11 @@
 package com.google.inject.spi;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.Messages;
 import java.io.Serializable;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -111,7 +111,7 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(message, cause, sources);
+    return Objects.hash(message, cause, sources);
   }
 
   @Override
@@ -120,7 +120,7 @@ public abstract class ErrorDetail<SelfT extends ErrorDetail<SelfT>> implements S
       return false;
     }
     ErrorDetail<?> e = (ErrorDetail<?>) o;
-    return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
+    return message.equals(e.message) && Objects.equals(cause, e.cause) && sources.equals(e.sources);
   }
 
   /** Returns a new instance of the same {@link ErrorDetail} with updated sources. */

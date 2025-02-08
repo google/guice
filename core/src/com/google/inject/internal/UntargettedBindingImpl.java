@@ -20,12 +20,12 @@ import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 import static com.google.inject.spi.Elements.withTrustedSource;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.UntargettedBinding;
+import java.util.Objects;
 
 final class UntargettedBindingImpl<T> extends BindingImpl<T> implements UntargettedBinding<T> {
 
@@ -87,6 +87,6 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getKey(), getScoping());
+    return Objects.hash(getKey(), getScoping());
   }
 }

@@ -20,7 +20,6 @@ import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 import static com.google.inject.spi.Elements.withTrustedSource;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -32,6 +31,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Providers;
+import java.util.Objects;
 import java.util.Set;
 
 class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderInstanceBinding<T> {
@@ -73,6 +73,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
     }
   }
 
+  @Override
   public Provider<? extends T> getProviderInstance() {
     return Providers.guicify(providerInstance);
   }
@@ -131,7 +132,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
       ProviderInstanceBindingImpl<?> o = (ProviderInstanceBindingImpl<?>) obj;
       return getKey().equals(o.getKey())
           && getScoping().equals(o.getScoping())
-          && Objects.equal(providerInstance, o.providerInstance);
+          && Objects.equals(providerInstance, o.providerInstance);
     } else {
       return false;
     }
@@ -139,6 +140,6 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderI
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getKey(), getScoping());
+    return Objects.hash(getKey(), getScoping());
   }
 }
