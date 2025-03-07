@@ -45,7 +45,9 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    return circularGet(initializable.get(context), context, dependency, provisionCallback);
+    synchronized (initializable) {
+      return circularGet(initializable.get(context), context, dependency, provisionCallback);
+    }
   }
 
 
