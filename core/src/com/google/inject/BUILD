@@ -104,6 +104,7 @@ java_library(
         "//third_party/java/guava/collect",
         "//third_party/java/guava/primitives",
         "//third_party/java/jakarta_inject",
+        "//third_party/java/jspecify_annotations",
         "//third_party/java/jsr305_annotations",
     ],
 )

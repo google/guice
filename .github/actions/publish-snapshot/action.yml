@@ -5,7 +5,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup JDK
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12
       with:
         distribution: ${{ env.USE_JAVA_DISTRIBUTION }}
         java-version: ${{ env.USE_JAVA_VERSION }}
@@ -13,7 +13,7 @@ runs:
         server-username: MAVEN_USERNAME
         server-password: MAVEN_PASSWORD
     - name: 'Cache local Maven repository'
-      uses: actions/cache@v2
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}

@@ -39,7 +39,7 @@ jobs:
       max-parallel: 4
     name: Test using Maven with JDK ${{ matrix.java }} on ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: ./.github/actions/maven-test
 
   # Note: We can't fold this into the matrix because it changes the `steps`,
@@ -61,14 +61,14 @@ jobs:
       max-parallel: 4
     name: Test using Bazel with JDK ${{ matrix.java }} on ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: ./.github/actions/bazel-test
 
   bazel-build:
     runs-on: ubuntu-latest
     name: Bazel Build
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: ./.github/actions/bazel-build
 
   local-artifact-tests:
@@ -76,7 +76,7 @@ jobs:
     needs: [bazel-build]
     name: Local Artifact Tests
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: ./.github/actions/local-artifact-tests
 
   publish:
@@ -86,7 +86,7 @@ jobs:
     name: Publish Javadoc and Snapshot
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: ./.github/actions/publish-snapshot
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

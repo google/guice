@@ -155,6 +155,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <version>9.5</version>
       </dependency>
       <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13.2</version>

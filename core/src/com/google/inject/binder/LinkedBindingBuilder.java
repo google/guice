@@ -20,6 +20,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import java.lang.reflect.Constructor;
+import org.jspecify.annotations.Nullable;
 
 /**
  * See the EDSL examples at {@link com.google.inject.Binder}.
@@ -49,7 +50,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    *
    * @see com.google.inject.Injector#injectMembers
    */
-  ScopedBindingBuilder toProvider(Provider<? extends T> provider);
+  ScopedBindingBuilder toProvider(Provider<? extends @Nullable T> provider);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
@@ -57,17 +58,17 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    * @see com.google.inject.Injector#injectMembers
    * @since 4.0
    */
-  ScopedBindingBuilder toProvider(jakarta.inject.Provider<? extends T> provider);
+  ScopedBindingBuilder toProvider(jakarta.inject.Provider<? extends @Nullable T> provider);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
-  ScopedBindingBuilder toProvider(Class<? extends jakarta.inject.Provider<? extends T>> providerType);
+  ScopedBindingBuilder toProvider(Class<? extends jakarta.inject.Provider<? extends @Nullable T>> providerType);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
   ScopedBindingBuilder toProvider(
-      TypeLiteral<? extends jakarta.inject.Provider<? extends T>> providerType);
+      TypeLiteral<? extends jakarta.inject.Provider<? extends @Nullable T>> providerType);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
-  ScopedBindingBuilder toProvider(Key<? extends jakarta.inject.Provider<? extends T>> providerKey);
+  ScopedBindingBuilder toProvider(Key<? extends jakarta.inject.Provider<? extends @Nullable T>> providerKey);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.

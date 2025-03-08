@@ -112,6 +112,11 @@ maven_install(
             testonly = True,
         ),
         maven.artifact(
+            "org.jspecify",
+            "jspecify",
+            "1.0.0",
+        ),
+        maven.artifact(
             "org.mockito",
             "mockito-core",
             "4.2.0",
