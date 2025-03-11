@@ -19,7 +19,10 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Provider;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 
 /**
  * Creates objects which will be injected.
@@ -45,12 +48,34 @@ interface InternalFactory<T> {
   }
 
   /**
+   * Returns the method handle for the object to be injected.
+   *
+   * <p>The signature of the method handle is {@code (InternalContext) -> T} where `T` is the type
+   * of the object to be injected as determined by the {@link Dependency}.
+   *
+   * @param options the injector options
+   * @param dependency the dependency to be injected
+   * @param linked true if getting as a result of a linked binding
+   * @return the method handle for the object to be injected
+   */
+  default MethodHandle getHandle(
+      InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    // The default implementation simply delegates to the `get` method.
+    MethodHandle handle = InternalMethodHandles.INTERNAL_FACTORY_GET_HANDLE.bindTo(this);
+    return MethodHandles.insertArguments(handle, 1, dependency, linked)
+        .asType(InternalMethodHandles.makeFactoryType(dependency));
+  }
+
+  /**
    * Returns a provider for the object to be injected using the given factory.
    *
    * <p>This delegates to the {@link #get} method.
    */
   static <T> Provider<T> makeDefaultProvider(
       InternalFactory<T> factory, InjectorImpl injector, Dependency<?> dependency) {
+    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+      return InternalMethodHandles.makeProvider(factory, injector, dependency);
+    }
     return new DefaultProvider<>(factory, injector, dependency);
   }
 

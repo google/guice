@@ -26,9 +26,12 @@ import javax.annotation.Nullable;
 /**
  * Internal context. Used to coordinate injections and support circular dependencies.
  *
+ * <p>This is only used within thie package, but needs to be public so it can be used in generated
+ * method signatures for classes that might be loaded in child classloaders.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-abstract class InternalContext implements AutoCloseable {
+public abstract class InternalContext implements AutoCloseable {
 
   /** A factory for generating unique circular factory ids. */
   static final class CircularFactoryIdFactory {

@@ -133,7 +133,7 @@ guice_test_suites(
 )
 
 [guice_test_suites(
-    name = "gen_tests_stack_trace_%s" % include_stack_trace_option,
+    name = "gen_tests_stack_trace_%s_use_experimental_method_handles_%s" % (include_stack_trace_option, use_experimental_method_handles_option),
     args = [
         "--guice_include_stack_traces=%s" % include_stack_trace_option,
     ],
@@ -146,7 +146,7 @@ guice_test_suites(
         "small",
         "medium",
     ],
-    suffix = "_stack_trace_%s" % include_stack_trace_option,
+    suffix = "_stack_trace_%s_use_experimental_method_handles_%s" % (include_stack_trace_option, use_experimental_method_handles_option),
     deps = [
         ":add_opens_tests",
         ":tests",
@@ -154,12 +154,16 @@ guice_test_suites(
     ],
 ) for include_stack_trace_option in [
     "OFF",
+] for use_experimental_method_handles_option in [
+    "NO",
+    "YES",
 ]]
 
 [guice_test_suites(
-    name = "gen_tests_class_loading_%s" % custom_class_loading_option,
+    name = "gen_tests_class_loading_%s_method_handles_%s" % (custom_class_loading_option, use_experimental_method_handles_option),
     args = [
         "--guice_custom_class_loading=%s" % custom_class_loading_option,
+        "--guice_use_experimental_method_handles=%s" % use_experimental_method_handles_option,
     ],
     jvm_flags = [
         # those 2 options are required for some tests that checks stack traces
@@ -170,7 +174,7 @@ guice_test_suites(
         "small",
         "medium",
     ],
-    suffix = "_custom_class_loading_%s" % custom_class_loading_option,
+    suffix = "_custom_class_loading_%s_method_handles_%s" % (custom_class_loading_option, use_experimental_method_handles_option),
     deps = [
         ":add_opens_tests",
         ":tests",
@@ -180,4 +184,7 @@ guice_test_suites(
     "OFF",
     "ANONYMOUS",
     "CHILD",
+] for use_experimental_method_handles_option in [
+    "NO",
+    "YES",
 ]]
