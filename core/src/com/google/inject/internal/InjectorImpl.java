@@ -52,6 +52,7 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -389,7 +390,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     static <T> InternalFactory<Provider<T>> createInternalFactory(Binding<T> providedBinding) {
-      // Defer calling `getProvider` until we need it, Bindingimple has an internal cache and by
+      // Defer calling `getProvider` until we need it, BindingImpl has an internal cache and by
       // delaying we can ensure we link to an optimized provider instance.
       return new InternalFactory<Provider<T>>() {
         @Override
@@ -400,6 +401,13 @@ final class InjectorImpl implements Injector, Lookups {
         @Override
         public Provider<Provider<T>> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
           return InternalFactory.makeProviderFor(providedBinding.getProvider(), this);
+        }
+
+        @Override
+        public MethodHandle getHandle(
+            InjectorOptions options, Dependency<?> dependency, boolean linked) {
+          return InternalMethodHandles.constantFactoryGetHandle(
+              Provider.class, providedBinding.getProvider());
         }
       };
     }

@@ -18,8 +18,10 @@ package com.google.inject.internal;
 
 import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
 
 /**
  * A placeholder which enables us to swap in the real factory once the injector is created. Used for
@@ -60,6 +62,12 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(targetKey);
     }
+  }
+
+  @Override
+  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+        targetFactory.getHandle(options, dependency, /* linked= */ true), targetKey);
   }
 
   @Override

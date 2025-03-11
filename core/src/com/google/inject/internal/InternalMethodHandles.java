@@ -89,6 +89,52 @@ public final class InternalMethodHandles {
   }
 
   /**
+   * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
+   * given instance.
+   */
+  static MethodHandle constantFactoryGetHandle(Dependency<?> dependency, Object instance) {
+    return constantFactoryGetHandle(dependency.getKey().getTypeLiteral().getRawType(), instance);
+  }
+
+  /**
+   * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
+   * given instance.
+   */
+  static MethodHandle constantFactoryGetHandle(Class<?> forType, Object instance) {
+    var constant = MethodHandles.constant(forType, instance);
+    return MethodHandles.dropArguments(constant, 0, InternalContext.class);
+  }
+
+  private static final MethodHandle INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE =
+      findVirtualOrDie(
+          InternalProvisionException.class,
+          "addSource",
+          methodType(InternalProvisionException.class, Object.class));
+
+  /**
+   * Surrounds the delegate with a catch block that rethrows the exception with the given source.
+   *
+   * <pre>{@code
+   * try {
+   *   return delegate(...);
+   * } catch (InternalProvisionException ipe) {
+   *   throw ipe.addSource(source);
+   * }
+   * }</pre>
+   */
+  static MethodHandle catchInternalProvisionExceptionAndRethrowWithSource(
+      MethodHandle delegate, Object source) {
+    var addSourceAndRethrow =
+        MethodHandles.filterReturnValue(
+            MethodHandles.insertArguments(
+                InternalMethodHandles.INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE, 1, source),
+            MethodHandles.throwException(
+                delegate.type().returnType(), InternalProvisionException.class));
+    return MethodHandles.catchException(
+        delegate, InternalProvisionException.class, addSourceAndRethrow);
+  }
+
+  /**
    * Generates a provider instance that delegates to the given factory.
    *
    * <p>This leverages the {@link InternalFactory#getHandle} method, but it only invokes it lazily.

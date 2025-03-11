@@ -17,8 +17,10 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.PrivateElements;
+import java.lang.invoke.MethodHandle;
 
 /**
  * This factory exists in a parent injector. When invoked, it retrieves its value from a child
@@ -62,5 +64,11 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(source);
     }
+  }
+
+  @Override
+  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+        this.delegate.getHandle(options, dependency, linked), source);
   }
 }

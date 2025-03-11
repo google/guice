@@ -18,7 +18,9 @@ package com.google.inject.internal;
 
 import com.google.common.base.MoreObjects;
 import com.google.inject.Provider;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -63,6 +65,11 @@ final class ConstantFactory<T> implements InternalFactory<T> {
   @Override
   public Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
     return InternalFactory.makeProviderFor(instance, this);
+  }
+
+  @Override
+  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    return InternalMethodHandles.constantFactoryGetHandle(dependency, instance);
   }
 
   @Override

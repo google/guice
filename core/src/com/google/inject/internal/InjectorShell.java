@@ -41,6 +41,7 @@ import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
+import java.lang.invoke.MethodHandle;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -283,6 +284,12 @@ final class InjectorShell {
     }
 
     @Override
+    public MethodHandle getHandle(
+        InjectorOptions options, Dependency<?> dependency, boolean linked) {
+      return InternalMethodHandles.constantFactoryGetHandle(dependency, injector);
+    }
+
+    @Override
     public String toString() {
       return "Provider<Injector>";
     }
@@ -323,6 +330,12 @@ final class InjectorShell {
     @Override
     public Provider<Logger> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
       return InternalFactory.makeProviderFor(makeLogger(dependency), this);
+    }
+
+    @Override
+    public MethodHandle getHandle(
+        InjectorOptions options, Dependency<?> dependency, boolean linked) {
+      return InternalMethodHandles.constantFactoryGetHandle(dependency, makeLogger(dependency));
     }
 
     private static Logger makeLogger(Dependency<?> dependency) {
