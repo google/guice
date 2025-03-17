@@ -15,7 +15,7 @@
  */
 package com.google.inject.internal;
 
-import com.google.common.collect.Ordering;
+import com.google.common.collect.Comparators;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -50,10 +50,10 @@ public final class DeclaredMembers {
             Comparator.comparing(Method::getName)
                 .thenComparing(Method::getReturnType, Comparator.comparing(Class::getName))
                 .thenComparing(
-                    method -> Arrays.asList(method.getParameterTypes()),
-                    // TODO: use Comparators.lexicographical when it's not @Beta.
-                    Ordering.<Class<?>>from(Comparator.comparing(Class::getName))
-                        .lexicographical()))
+                        method -> Arrays.asList(method.getParameterTypes()),
+                        Comparators.lexicographical(Comparator.comparing(Class::getName))
+                )
+        )
         .toArray(Method[]::new);
   }
 }
