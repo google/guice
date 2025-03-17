@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Asserts;
@@ -30,7 +32,9 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
 import java.lang.ref.WeakReference;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -198,5 +202,76 @@ public final class InternalMethodHandlesTest {
             () -> {
               var unused = (String) nullHandle.invokeExact((InternalContext) null);
             });
+  }
+
+  @Test
+  public void buildImmutableSetFactory_empty() throws Throwable {
+    MethodHandle handle = InternalMethodHandles.buildImmutableSetFactory(ImmutableList.of());
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableSet.class));
+    assertThat(handle.invoke(null)).isEqualTo(ImmutableSet.of());
+  }
+
+  @Test
+  public void buildImmutableSetFactory_singleton() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildImmutableSetFactory(
+            ImmutableList.of(InternalMethodHandles.constantFactoryGetHandle(String.class, "a")));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableSet.class));
+    assertThat(handle.invoke(null)).isEqualTo(ImmutableSet.of("a"));
+  }
+
+  @Test
+  public void buildImmutableSetFactory_manyMaintainsOrder() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildImmutableSetFactory(
+            ImmutableList.of(
+                InternalMethodHandles.constantFactoryGetHandle(String.class, "a"),
+                InternalMethodHandles.constantFactoryGetHandle(String.class, "b"),
+                InternalMethodHandles.constantFactoryGetHandle(String.class, "c")));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableSet.class));
+    assertThat((ImmutableSet) handle.invoke(null))
+        .containsExactlyElementsIn(ImmutableSet.of("a", "b", "c"))
+        .inOrder();
+  }
+
+  @Test
+  public void buildImmutableMap_empty() throws Throwable {
+    MethodHandle handle = InternalMethodHandles.buildImmutableMapFactory(ImmutableList.of());
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableMap.class));
+    assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of());
+  }
+
+  @Test
+  public void buildImmutableMap_singleton() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildImmutableMapFactory(
+            ImmutableList.of(
+                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle(String.class, "a"))));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableMap.class));
+    assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of("a", "a"));
+  }
+
+  @Test
+  public void buildImmutableMap_manyMaintainsOrder() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildImmutableMapFactory(
+            ImmutableList.of(
+                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle(String.class, "a")),
+                Map.entry("b", InternalMethodHandles.constantFactoryGetHandle(String.class, "b")),
+                Map.entry("c", InternalMethodHandles.constantFactoryGetHandle(String.class, "c"))));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableMap.class));
+    assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of("a", "a", "b", "b", "c", "c"));
+  }
+
+  @Test
+  public void buildImmutableMap_rejectsDuplicateKeys() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildImmutableMapFactory(
+            ImmutableList.of(
+                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle(String.class, "a")),
+                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle(String.class, "b"))));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.makeFactoryType(ImmutableMap.class));
+    var e = assertThrows(IllegalArgumentException.class, () -> handle.invoke(null));
+    assertThat(e).hasMessageThat().contains("Multiple entries with same key");
   }
 }

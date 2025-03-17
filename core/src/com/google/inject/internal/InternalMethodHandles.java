@@ -16,6 +16,8 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.invoke.MethodType.methodType;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
@@ -29,6 +31,8 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.Keep;
 import com.google.inject.Provider;
@@ -43,6 +47,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.VarHandle;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -54,7 +60,7 @@ import org.objectweb.asm.Type;
 /** Utility methods for working with method handles and our internal guice protocols. */
 public final class InternalMethodHandles {
   private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
+  private static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
 
   static MethodType makeFactoryType(Dependency<?> dependency) {
     return makeFactoryType(dependency.getKey().getTypeLiteral().getRawType());
@@ -62,6 +68,14 @@ public final class InternalMethodHandles {
 
   static MethodType makeFactoryType(Class<?> forType) {
     return methodType(forType, InternalContext.class);
+  }
+
+  static MethodHandle castReturnToObject(MethodHandle handle) {
+    return castReturnTo(handle, Object.class);
+  }
+
+  static MethodHandle castReturnTo(MethodHandle handle, Class<?> returnType) {
+    return handle.asType(handle.type().changeReturnType(returnType));
   }
 
   /** Direct handle for {@link InternalFactory#get} */
@@ -730,6 +744,142 @@ public final class InternalMethodHandles {
   private static <E extends Throwable> E sneakyThrow(Throwable e) throws E {
     throw (E) e;
   }
+
+  /**
+   * Builds an ImmutableSet factory that delegates to the given element handles.
+   *
+   * <p>This generates code that looks like:
+   *
+   * <pre>{@code
+   * ImmutableSet impl(InternalContext ctx) {
+   *   return ImmutableSet.builderWithExpectedSize(elements.size())
+   *       .add(<value>(ctx))
+   *       ...
+   *       .build();
+   * }
+   * }</pre>
+   *
+   * <p>Plus handling for some special cases.
+   */
+  static MethodHandle buildImmutableSetFactory(Iterable<MethodHandle> elementHandles) {
+    var elementHandlesList =
+        stream(elementHandles)
+            // Cast return types to object and enforce that this is a factory type.
+            .map(InternalMethodHandles::castReturnToObject)
+            .collect(toImmutableList());
+    if (elementHandlesList.isEmpty()) {
+      // ImmutableSet.of()
+      return constantFactoryGetHandle(ImmutableSet.class, ImmutableSet.of());
+    }
+    if (elementHandlesList.size() == 1) {
+      // ImmutableSet.of(<element>(ctx))
+      return MethodHandles.filterReturnValue(elementHandlesList.get(0), IMMUTABLE_SET_OF_HANDLE);
+    }
+    // ImmutableSet.builderWithExpectedSize(<size>)
+    var builder =
+        MethodHandles.insertArguments(
+            IMMUTABLE_SET_BUILDER_OF_SIZE_HANDLE, 0, elementHandlesList.size());
+    // Add any InternalContext arguments to the builder.
+    builder = MethodHandles.dropArguments(builder, 0, InternalContext.class);
+    for (var handle : elementHandlesList) {
+      // builder = builder.add(<handle>(ctx))
+      builder =
+          MethodHandles.foldArguments(
+              MethodHandles.filterArguments(IMMUTABLE_SET_BUILDER_ADD_HANDLE, 1, handle), builder);
+    }
+    return MethodHandles.filterReturnValue(builder, IMMUTABLE_SET_BUILDER_BUILD_HANDLE);
+  }
+
+  private static final MethodHandle IMMUTABLE_SET_OF_HANDLE =
+      InternalMethodHandles.findStaticOrDie(
+          ImmutableSet.class, "of", methodType(ImmutableSet.class, Object.class));
+  private static final MethodHandle IMMUTABLE_SET_BUILDER_OF_SIZE_HANDLE =
+      InternalMethodHandles.findStaticOrDie(
+          ImmutableSet.class,
+          "builderWithExpectedSize",
+          methodType(ImmutableSet.Builder.class, int.class));
+  private static final MethodHandle IMMUTABLE_SET_BUILDER_ADD_HANDLE =
+      InternalMethodHandles.findVirtualOrDie(
+          ImmutableSet.Builder.class, "add", methodType(ImmutableSet.Builder.class, Object.class));
+  private static final MethodHandle IMMUTABLE_SET_BUILDER_BUILD_HANDLE =
+      InternalMethodHandles.findVirtualOrDie(
+          ImmutableSet.Builder.class, "build", methodType(ImmutableSet.class));
+
+  /**
+   * Builds an ImmutableMap factory that delegates to the given entries.
+   *
+   * <p>This generates code that looks like:
+   *
+   * <pre>{@code
+   * ImmutableMap impl(InternalContext ctx) {
+   *   return ImmutableMap.builderWithExpectedSize(entries.size())
+   *       .put(<key>, <value>(ctx))
+   *       ...
+   *       .buildOrThrow();
+   * }
+   * }</pre>
+   *
+   * <p>Plus handling for some special cases.
+   */
+  static <T> MethodHandle buildImmutableMapFactory(List<Map.Entry<T, MethodHandle>> entries) {
+    if (entries.isEmpty()) {
+      return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.class, ImmutableMap.of());
+    }
+    // ImmutableMap.Builder.of(K, V) has a special case for a single entry.
+    if (entries.size() == 1) {
+      var entry = entries.get(0);
+      return MethodHandles.filterReturnValue(
+          castReturnToObject(entry.getValue()),
+          MethodHandles.insertArguments(IMMUTABLE_MAP_OF_HANDLE, 0, entry.getKey()));
+    }
+    // Otherwise, we use the builder API by chaining a bunch of put() calls.
+    // It might be slightly more efficient to bind to one of the ImmutableMap.of(...) overloads
+    // since that would eliminate the need for the builder (and all the `put` calls).
+    // The other option is to call `ImmutableMap.ofEntries(entries)` which also might be slightly
+    // more efficient.  But these are probably pretty minor optimizations.
+    var builder =
+        MethodHandles.insertArguments(
+            IMMUTABLE_MAP_BUILDER_WITH_EXPECTED_SIZE_HANDLE, 0, entries.size());
+    builder = MethodHandles.dropArguments(builder, 0, InternalContext.class);
+    for (Map.Entry<T, MethodHandle> entry : entries) {
+      // `put` has the signature `put(Builder, K, V)->Builder` (the first parameter is 'this').
+      // Insert the 'constant' key to get this signature:
+      // (Builder, V)->Builder
+      var put = MethodHandles.insertArguments(IMMUTABLE_MAP_BUILDER_PUT_HANDLE, 1, entry.getKey());
+      // Construct the value, by calling the factory method handle to supply the first argument (the
+      // value).  Because the entry is a MethodHandle with signature `(InternalContext)->V` we need
+      // to cast the return type to `Object` to match the signature of `put`.
+      // (Builder, InternalContext)->Builder
+      put = MethodHandles.filterArguments(put, 1, castReturnToObject(entry.getValue()));
+      // Fold works by invoking the 'builder' and then passing it to the first argument of the
+      // `put` method, and then passing the arguments to `builder` to put as well. Like this:
+      //  Builder fold(InternalContext ctx) {
+      //   bar builder = <builder-handle>(ctx);
+      //   return <put-handle>(builder, ctx);
+      // }
+      // (InternalContext)->Builder
+      // Now, that has the same signture as builder, so assign back and loop.
+      builder = MethodHandles.foldArguments(put, builder);
+    }
+    return MethodHandles.filterReturnValue(builder, IMMUTABLE_MAP_BUILDER_BUILD_OR_THROW_HANDLE);
+  }
+
+  private static final MethodHandle IMMUTABLE_MAP_OF_HANDLE =
+      InternalMethodHandles.findStaticOrDie(
+          ImmutableMap.class, "of", methodType(ImmutableMap.class, Object.class, Object.class));
+  private static final MethodHandle IMMUTABLE_MAP_BUILDER_WITH_EXPECTED_SIZE_HANDLE =
+      InternalMethodHandles.findStaticOrDie(
+          ImmutableMap.class,
+          "builderWithExpectedSize",
+          methodType(ImmutableMap.Builder.class, int.class));
+  private static final MethodHandle IMMUTABLE_MAP_BUILDER_PUT_HANDLE =
+      InternalMethodHandles.findVirtualOrDie(
+          ImmutableMap.Builder.class,
+          "put",
+          methodType(ImmutableMap.Builder.class, Object.class, Object.class));
+  private static final MethodHandle IMMUTABLE_MAP_BUILDER_BUILD_OR_THROW_HANDLE =
+      InternalMethodHandles.findVirtualOrDie(
+          ImmutableMap.Builder.class, "buildOrThrow", methodType(ImmutableMap.class));
 
   private InternalMethodHandles() {}
 }
