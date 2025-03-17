@@ -1,0 +1,154 @@
+/*
+ * Copyright (C) 2025 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.google.inject.internal;
+
+import static com.google.common.truth.Truth.assertThat;
+import static java.lang.invoke.MethodType.methodType;
+import static org.junit.Assert.assertThrows;
+
+import com.google.errorprone.annotations.Keep;
+import com.google.inject.Key;
+import com.google.inject.Stage;
+import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+@RunWith(JUnit4.class)
+public final class LinkageContextTest {
+  private static final Dependency<?> DEP = Dependency.get(Key.get(String.class));
+  private static final InternalFactory<?> FACTORY = ConstantFactory.create("Hello World", "source");
+
+  private final LinkageContext context =
+      new LinkageContext(
+          new InjectorImpl.InjectorOptions(
+              // Values are not important for this test.
+              Stage.PRODUCTION,
+              /* jitDisabled= */ false,
+              /* disableCircularProxies= */ true,
+              /* atInjectRequired= */ false,
+              /* exactBindingAnnotationsRequired= */ true));
+
+  @Test
+  public void testMakeHandle_returnsHandle() throws Throwable {
+    String result =
+        (String)
+            context
+                .makeHandle(
+                    FACTORY,
+                    DEP,
+                    () ->
+                        InternalMethodHandles.constantFactoryGetHandle(String.class, "Hello World"))
+                .invokeExact((InternalContext) null);
+    assertThat(result).isEqualTo("Hello World");
+  }
+
+  @Keep
+  static String incrementAndReturn(InternalContext ignored, String s, int[] callCount) {
+    callCount[0]++;
+    return s;
+  }
+
+  private static final MethodHandle INCREMENT_AND_RETURN_HANDLE =
+      InternalMethodHandles.findStaticOrDie(
+          LinkageContextTest.class,
+          "incrementAndReturn",
+          methodType(String.class, InternalContext.class, String.class, int[].class));
+
+  // Demonstrate that a recursive call links ultimately to the same method handle of the initial
+  // call.
+  @Test
+  public void testMakeHandle_resolvesCycles() throws Throwable {
+    int[] callCount = new int[1];
+    MethodHandle[] recursiveHandle = new MethodHandle[1];
+    MethodHandle handle =
+        context.makeHandle(
+            FACTORY,
+            DEP,
+            () -> {
+              recursiveHandle[0] =
+                  context.makeHandle(
+                      FACTORY,
+                      DEP,
+                      () -> {
+                        throw new AssertionError("Should not be called");
+                      });
+              return MethodHandles.insertArguments(
+                  INCREMENT_AND_RETURN_HANDLE, 1, "Hello World", callCount);
+            });
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat(callCount[0]).isEqualTo(1);
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat(callCount[0]).isEqualTo(2);
+
+    // The recursive handle is linked to the same instance, just indirectly.
+    assertThat((String) recursiveHandle[0].invokeExact((InternalContext) null))
+        .isEqualTo("Hello World");
+    assertThat(callCount[0]).isEqualTo(3);
+  }
+
+  @Keep
+  static String detectsCycle(InternalContext ctx, int[] callCount)
+      throws InternalProvisionException {
+    callCount[0]++;
+    var unused = ctx.tryStartConstruction(1, DEP);
+    return "Hello World";
+  }
+
+  private static final MethodHandle DETECTS_CYCLE_HANDLE =
+      InternalMethodHandles.findStaticOrDie(
+          LinkageContextTest.class,
+          "detectsCycle",
+          methodType(String.class, InternalContext.class, int[].class));
+
+  @Test
+  public void testMakeHandle_isRecursive() throws Throwable {
+    int[] callCount = new int[1];
+    MethodHandle handle =
+        context.makeHandle(
+            FACTORY,
+            DEP,
+            () -> {
+              var recursiveHandle =
+                  context.makeHandle(
+                      FACTORY,
+                      DEP,
+                      () -> {
+                        throw new AssertionError("Should not be called");
+                      });
+
+              // This calls `detectsCycle` and then the recursive handle.
+              return MethodHandles.foldArguments(
+                  recursiveHandle,
+                  InternalMethodHandles.dropReturn(
+                      MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 1, callCount)));
+            });
+    var ipe =
+        assertThrows(
+            InternalProvisionException.class,
+            () -> {
+              var unused =
+                  (String)
+                      handle.invokeExact(
+                          InternalContext.create(
+                              /* disableCircularProxies= */ true, new Object[] {null}));
+            });
+    // It throws on the second call, so we should have called it twice.
+    assertThat(callCount[0]).isEqualTo(2);
+  }
+}

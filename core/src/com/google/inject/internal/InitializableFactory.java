@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.Provider;
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 
@@ -48,7 +47,7 @@ final class InitializableFactory<T> implements InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return InternalMethodHandles.initializableFactoryGetHandle(initializable, dependency);
   }
 

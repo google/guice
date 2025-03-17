@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
@@ -65,9 +64,9 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
   }
 
   @Override
-  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-        targetFactory.getHandle(options, dependency, /* linked= */ true), targetKey);
+        targetFactory.getHandle(context, dependency, /* linked= */ true), targetKey);
   }
 
   @Override

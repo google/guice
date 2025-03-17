@@ -60,7 +60,7 @@ import org.objectweb.asm.Type;
 /** Utility methods for working with method handles and our internal guice protocols. */
 public final class InternalMethodHandles {
   private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
+  static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
 
   static MethodType makeFactoryType(Dependency<?> dependency) {
     return makeFactoryType(dependency.getKey().getTypeLiteral().getRawType());
@@ -474,7 +474,7 @@ public final class InternalMethodHandles {
    *
    * <p>TODO(lukes): once guice is on jdk16+ we can use MEthodHandles.dropReturn directly.
    */
-  private static MethodHandle dropReturn(MethodHandle handle) {
+  static MethodHandle dropReturn(MethodHandle handle) {
     if (handle.type().returnType().equals(void.class)) {
       return handle;
     }
@@ -521,7 +521,7 @@ public final class InternalMethodHandles {
                 // enough.
                 () ->
                     factory
-                        .getHandle(options, dependency, /* linked= */ false)
+                        .getHandle(new LinkageContext(options), dependency, /* linked= */ false)
                         .asType(OBJECT_FACTORY_TYPE),
                 factory.toString());
     return typedProvider;

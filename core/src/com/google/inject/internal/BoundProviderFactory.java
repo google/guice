@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
@@ -65,15 +64,19 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   }
 
   @Override
-  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
-    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-            circularGetHandle(
-                providerFactory.getHandle(options, PROVIDER_DEPENDENCY, /* linked= */ true),
-                options,
-                dependency,
-                provisionCallback),
-            providerKey)
-        .asType(InternalMethodHandles.makeFactoryType(dependency));
+  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+    return context.makeHandle(
+        this,
+        dependency,
+        () ->
+            InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+                    circularGetHandle(
+                        providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
+                        context.options(),
+                        dependency,
+                        provisionCallback),
+                    providerKey)
+                .asType(InternalMethodHandles.makeFactoryType(dependency)));
   }
 
   @Override

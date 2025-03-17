@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 
@@ -50,11 +49,11 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   }
 
   @Override
-  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return circularGetHandle(
         InternalMethodHandles.initializableFactoryGetHandle(
             initializable, jakarta.inject.Provider.class),
-        options,
+        context.options(),
         dependency,
         provisionCallback);
   }

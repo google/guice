@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Provider;
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -53,13 +52,12 @@ interface InternalFactory<T> {
    * <p>The signature of the method handle is {@code (InternalContext) -> T} where `T` is the type
    * of the object to be injected as determined by the {@link Dependency}.
    *
-   * @param options the injector options
+   * @param context the linkage context
    * @param dependency the dependency to be injected
    * @param linked true if getting as a result of a linked binding
    * @return the method handle for the object to be injected
    */
-  default MethodHandle getHandle(
-      InjectorOptions options, Dependency<?> dependency, boolean linked) {
+  default MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     // The default implementation simply delegates to the `get` method.
     MethodHandle handle = InternalMethodHandles.INTERNAL_FACTORY_GET_HANDLE.bindTo(this);
     return MethodHandles.insertArguments(handle, 1, dependency, linked)

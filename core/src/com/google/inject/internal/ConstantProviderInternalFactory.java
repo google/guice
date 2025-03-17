@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 import javax.annotation.Nullable;
@@ -46,11 +45,12 @@ final class ConstantProviderInternalFactory<T> extends ProviderInternalFactory<T
   }
 
   @Override
-  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return circularGetHandleImmediate(
-        InternalMethodHandles.constantFactoryGetHandle(jakarta.inject.Provider.class, provider),
-        options,
-        dependency,
-        provisionCallback);
+            InternalMethodHandles.constantFactoryGetHandle(jakarta.inject.Provider.class, provider),
+            context.options(),
+            dependency,
+            provisionCallback)
+        .asType(InternalMethodHandles.makeFactoryType(dependency));
   }
 }
