@@ -17,8 +17,10 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
 
 /** Delegates to a custom factory which is also bound in the injector. */
 final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implements CreationListener {
@@ -60,6 +62,18 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(providerKey);
     }
+  }
+
+  @Override
+  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            circularGetHandle(
+                providerFactory.getHandle(options, PROVIDER_DEPENDENCY, /* linked= */ true),
+                options,
+                dependency,
+                provisionCallback),
+            providerKey)
+        .asType(InternalMethodHandles.makeFactoryType(dependency));
   }
 
   @Override

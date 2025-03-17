@@ -16,10 +16,15 @@
 
 package com.google.inject.internal;
 
+import static java.lang.invoke.MethodType.methodType;
+
+import com.google.errorprone.annotations.Keep;
 import com.google.inject.Key;
-import com.google.inject.ProvidedBy;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import jakarta.inject.Provider;
 
 /**
@@ -70,6 +75,50 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(providerKey);
     }
+  }
+
+  @Override
+  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            circularGetHandle(
+                providerFactory.getHandle(options, PROVIDER_DEPENDENCY, /* linked= */ true),
+                options,
+                dependency,
+                provisionCallback),
+            providerKey)
+        .asType(InternalMethodHandles.makeFactoryType(dependency));
+  }
+
+  @Override
+  protected MethodHandle provisionHandle(MethodHandle providerHandle, Dependency<?> dependency) {
+    // Do normal provisioning and then check that the result is the correct subtype.
+    MethodHandle invokeProvider = super.provisionHandle(providerHandle, dependency);
+    return MethodHandles.filterReturnValue(
+            invokeProvider,
+            MethodHandles.insertArguments(
+                CHECK_SUBTYPE_NOT_PROVIDED_MH, 1, source, providerType, rawType))
+        // doCheckSubtypeNotProvided turns the return type to Object, so we need to fix it.
+        .asType(invokeProvider.type());
+  }
+
+  private static final MethodHandle CHECK_SUBTYPE_NOT_PROVIDED_MH =
+      InternalMethodHandles.findStaticOrDie(
+          ProvidedByInternalFactory.class,
+          "doCheckSubtypeNotProvided",
+          methodType(Object.class, Object.class, Object.class, Class.class, Class.class));
+
+  @Keep
+  static Object doCheckSubtypeNotProvided(
+      Object result,
+      Object source,
+      Class<? extends jakarta.inject.Provider<?>> providerType,
+      Class<?> providedType)
+      throws InternalProvisionException {
+    if (result != null && !providedType.isInstance(result)) {
+      throw InternalProvisionException.subtypeNotProvided(providerType, providedType)
+          .addSource(source);
+    }
+    return result;
   }
 
   @Override

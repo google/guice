@@ -20,13 +20,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.Asserts;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -99,5 +104,99 @@ public final class InternalMethodHandlesTest {
         throw new AssertionError();
       }
     };
+  }
+
+  @Test
+  public void testConstantFactoryGetHandle() throws Throwable {
+    var handle = InternalMethodHandles.constantFactoryGetHandle(String.class, "Hello World");
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+  }
+
+  @Test
+  public void testInitialiableFactoryGetHandle() throws Throwable {
+    var handle =
+        InternalMethodHandles.initializableFactoryGetHandle(
+            ctx -> "Hello World", Dependency.get(Key.get(String.class)));
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+  }
+
+  @Test
+  public void testInitialiableFactoryGetHandle_onlyCalledOnce() throws Throwable {
+    AtomicInteger callCount = new AtomicInteger(0);
+    var handle =
+        InternalMethodHandles.initializableFactoryGetHandle(
+            ctx -> {
+              callCount.incrementAndGet();
+              return "Hello World";
+            },
+            Dependency.get(Key.get(String.class)));
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat(callCount.get()).isEqualTo(1);
+
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat(callCount.get()).isEqualTo(1);
+  }
+
+  @Test
+  public void testInitialiableFactoryGetHandle_calledMultipleTimesWhenThrowing() throws Throwable {
+    AtomicInteger callCount = new AtomicInteger(0);
+    var handle =
+        InternalMethodHandles.initializableFactoryGetHandle(
+            ctx -> {
+              callCount.incrementAndGet();
+              if (callCount.get() < 3) {
+                throw InternalProvisionException.cannotProxyClass(String.class);
+              }
+              return "Hello World";
+            },
+            Dependency.get(Key.get(String.class)));
+    assertThrows(
+        InternalProvisionException.class,
+        () -> {
+          var unused = (String) handle.invokeExact((InternalContext) null);
+        });
+    assertThat(callCount.get()).isEqualTo(1);
+
+    assertThrows(
+        InternalProvisionException.class,
+        () -> {
+          var unused = (String) handle.invokeExact((InternalContext) null);
+        });
+    assertThat(callCount.get()).isEqualTo(2);
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat(callCount.get()).isEqualTo(3);
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat(callCount.get()).isEqualTo(3);
+  }
+
+  private static final class TestClass {
+    @Inject
+    @SuppressWarnings("unused")
+    TestClass(String s) {}
+  }
+
+  @Test
+  public void testNullCheckResult() throws Throwable {
+    var nonNullStringDep =
+        Iterables.getOnlyElement(
+            Dependency.forInjectionPoints(
+                ImmutableSet.of(InjectionPoint.forConstructorOf(TestClass.class))));
+    var handle =
+        InternalMethodHandles.nullCheckResult(
+            InternalMethodHandles.constantFactoryGetHandle(String.class, "Hello World"),
+            "source",
+            nonNullStringDep);
+    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    var nullHandle =
+        InternalMethodHandles.nullCheckResult(
+            InternalMethodHandles.constantFactoryGetHandle(String.class, null),
+            "source",
+            nonNullStringDep);
+    var e =
+        assertThrows(
+            InternalProvisionException.class,
+            () -> {
+              var unused = (String) nullHandle.invokeExact((InternalContext) null);
+            });
   }
 }

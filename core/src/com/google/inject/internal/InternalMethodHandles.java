@@ -15,6 +15,7 @@
  */
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.invoke.MethodType.methodType;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
@@ -32,6 +33,7 @@ import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.Keep;
 import com.google.inject.Provider;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
+import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.aop.ClassDefining;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.CallSite;
@@ -39,9 +41,11 @@ import java.lang.invoke.ConstantCallSite;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.VarHandle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
@@ -50,11 +54,14 @@ import org.objectweb.asm.Type;
 /** Utility methods for working with method handles and our internal guice protocols. */
 public final class InternalMethodHandles {
   private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private static final MethodType OBJECT_FACTORY_TYPE =
-      methodType(Object.class, InternalContext.class);
+  static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
 
   static MethodType makeFactoryType(Dependency<?> dependency) {
-    return methodType(dependency.getKey().getTypeLiteral().getRawType(), InternalContext.class);
+    return makeFactoryType(dependency.getKey().getTypeLiteral().getRawType());
+  }
+
+  static MethodType makeFactoryType(Class<?> forType) {
+    return methodType(forType, InternalContext.class);
   }
 
   /** Direct handle for {@link InternalFactory#get} */
@@ -105,11 +112,225 @@ public final class InternalMethodHandles {
     return MethodHandles.dropArguments(constant, 0, InternalContext.class);
   }
 
+  /**
+   * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
+   * result of the given initializable.
+   */
+  static MethodHandle initializableFactoryGetHandle(
+      Initializable<?> initializable, Dependency<?> dependency) {
+    return new InitializableCallSite(makeFactoryType(dependency), initializable).dynamicInvoker();
+  }
+
+  /**
+   * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
+   * result of the given initializable.
+   */
+  static MethodHandle initializableFactoryGetHandle(
+      Initializable<?> initializable, Class<?> forType) {
+    return new InitializableCallSite(makeFactoryType(forType), initializable).dynamicInvoker();
+  }
+
+  /**
+   * A callsite is a code location that can dispatch to a method handle. Here we constructe one in
+   * order to implement a simple 'code patching' pattern. Because `Initializable` is guaranteed to
+   * always return the same value after constructions we can take advantage of that to implement a
+   * lazy init pattern.
+   *
+   * <p>This generates a method handle that replaces itself with a constant. This is similar to a
+   * normal lazy-init pattern but implemented via 'code patching'.
+   *
+   * <p>In normal java you would implement this like
+   *
+   * <pre>{@code
+   * private static Initialiable delegate = <init>;
+   * get(InternalContext context) {
+   *   var value = delegate.get(context);
+   *   delegate = (ctx) -> value;
+   *   return value;
+   * }
+   * }</pre>
+   *
+   * <p>Basically we replace the Initializable with a {@link #constantFactoryGetHandle} as soon as
+   * the initializable succeeds. This technique is transparent to the JVM and allows the jit to
+   * inline and propagate the constant..
+   */
+  private static final class InitializableCallSite extends MutableCallSite {
+    static final MethodHandle BOOTSTRAP_CALL_MH =
+        findVirtualOrDie(
+            InitializableCallSite.class,
+            "bootstrapCall",
+            methodType(Object.class, Initializable.class, InternalContext.class));
+
+    InitializableCallSite(MethodType type, Initializable<?> initializable) {
+      super(type);
+      // Have the first call go to `bootstrapCall` which will set the target to the constant
+      // factory get handle if the initializable succeeds.
+      setTarget(
+          MethodHandles.insertArguments(BOOTSTRAP_CALL_MH.bindTo(this), 0, initializable)
+              .asType(type));
+    }
+
+    @Keep
+    Object bootstrapCall(Initializable<?> initializable, InternalContext context)
+        throws InternalProvisionException {
+      // If this throws, we will call back through here on the next call which is the typical
+      // behavior of initializables.
+      // We also do not synchronize and instead rely on the underlying initializable to enforce
+      // single-initialization semantics, but we publish via a volatile call site.
+      Object value = initializable.get(context);
+      setTarget(constantFactoryGetHandle(this.type().returnType(), value));
+      // This ensures that other threads will see the new target.  This isn't strictly necessary
+      // since Initializable is both ThreadSafe and idempotent, but it should improve performance
+      // by allowing the JIT to inline the constant.
+      MutableCallSite.syncAll(new MutableCallSite[] {this});
+      return value;
+    }
+  }
+
+  /**
+   * Returns a handle that checks the result of the delegate and throws an
+   * InternalProvisionException if the result is null using the dependency and source information
+   *
+   * <p>The returned handle has the same type as the delegate.
+   */
+  static MethodHandle nullCheckResult(
+      MethodHandle delegate, Object source, Dependency<?> dependency) {
+    var returnType = delegate.type().returnType();
+    if (dependency.isNullable() || returnType.isPrimitive()) {
+      return delegate;
+    }
+    // (T) -> T
+    var nullCheckResult =
+        MethodHandles.insertArguments(NULL_CHECK_RESULT_MH, 1, source, dependency)
+            // Cast the parameter and return types to the delegates types.
+            .asType(methodType(returnType, returnType));
+    return MethodHandles.filterReturnValue(delegate, nullCheckResult);
+  }
+
+  private static final MethodHandle NULL_CHECK_RESULT_MH =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "doNullCheckResult",
+          methodType(Object.class, Object.class, Object.class, Dependency.class));
+
+  @Keep
+  private static Object doNullCheckResult(Object result, Object source, Dependency<?> dependency)
+      throws InternalProvisionException {
+    if (result == null) {
+      // This will either throw, warn or do nothing.
+      InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
+    }
+    return result;
+  }
+
+  /**
+   * Returns a handle with the same signature as the delegate that invokes it through the provision
+   * callback, if it is non-null.
+   *
+   * <p>The returned handle has the same type as the delegate.
+   *
+   * <p>TODO(lukes): This is a simple and 'manual' solution to the problem of adapting handles to
+   * the ProvisionCallback interface. The alternative solution is to generate bytecode for each one,
+   * which would unlock more efficient invocations, but bring complexity and overhead.
+   * ProvisionListeners should be rare in performance-sensitive code anyway.
+   */
+  static final MethodHandle invokeThroughProvisionCallback(
+      MethodHandle delegate,
+      Dependency<?> dependency,
+      @Nullable ProvisionListenerStackCallback<?> listener) {
+    var type = delegate.type();
+    checkArgument(type.parameterType(0).equals(InternalContext.class));
+    if (listener == null) {
+      return delegate;
+    }
+    // (InternalContext, ProvisionCallback)->Object
+    var provision =
+        MethodHandles.insertArguments(
+            PROVISION_CALLBACK_PROVISION_HANDLE.bindTo(listener), 1, dependency);
+    // Support a few kinds of provision callbacks, as needed.
+    // The problem we have is that we need to create a MethodHandle that constructs a
+    // ProvisionCallback around the delegate.  If the delegate only accepts an InternalContext then
+    // we can construct a constant ProvisionCallback that just calls the delegate.  If the delegate
+    // has other 'free' parameters we will need to construct a MethodHandle that accepts those free
+    // parameters and constructs a ProvisionCallback that calls the delegate with those parameters
+    // plus the InternalContext and the ProvisionCallback.
+    switch (type.parameterCount()) {
+      case 1:
+        {
+          // By allocating the delegate here it will be a constant across all invocations.
+          var finalDelegate = delegate.asType(OBJECT_FACTORY_TYPE);
+          ProvisionCallback<Object> callback =
+              (ctx, dep) -> {
+                try {
+                  // This invokeExact is not as fast as it could be since the `delegate` is not
+                  // constant foldable. The only solution to that is custom bytecode generation, but
+                  // that probably isn't worth the effort since provision callbacks are rare.
+                  return (Object) finalDelegate.invokeExact(ctx);
+                } catch (Throwable t) {
+                  // This is lame but is needed to work around the different exception semantics of
+                  // method handles.  In reality this is either a InternalProvisionException or a
+                  // RuntimeException. Both of which are throwable by this method.
+                  // The only alternative is to generate bytecode to call the method handle which
+                  // avoids this problem at great expense.
+                  throw sneakyThrow(t);
+                }
+              };
+          return MethodHandles.insertArguments(provision, 1, callback).asType(delegate.type());
+        }
+      case 2:
+        var callback =
+            MethodHandles.insertArguments(
+                MAKE_PROVISION_CALLBACK_1_HANDLE,
+                0,
+                delegate.asType(
+                    delegate
+                        .type()
+                        .changeReturnType(Object.class)
+                        .changeParameterType(1, Object.class)));
+        return MethodHandles.filterArguments(provision, 1, callback).asType(delegate.type());
+      default:
+        // We could add support for more cases here as needed.
+        throw new IllegalArgumentException(
+            "Unexpected number of parameters to delegate: " + type.parameterCount());
+    }
+  }
+
+  private static final MethodHandle MAKE_PROVISION_CALLBACK_1_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "makeProvisionCallback",
+          methodType(ProvisionCallback.class, MethodHandle.class, Object.class));
+
+  // A simple factory for the case where the delegate only has a single free parameter.
+  @Keep
+  private static final ProvisionCallback<Object> makeProvisionCallback(
+      MethodHandle delegate, Object capture) {
+    return (ctx, dep) -> {
+      try {
+        return (Object) delegate.invokeExact(ctx, capture);
+      } catch (Throwable t) {
+        throw sneakyThrow(t);
+      }
+    };
+  }
+
+  private static final MethodHandle PROVISION_CALLBACK_PROVISION_HANDLE =
+      findVirtualOrDie(
+          ProvisionListenerStackCallback.class,
+          "provision",
+          methodType(
+              Object.class, InternalContext.class, Dependency.class, ProvisionCallback.class));
+
   private static final MethodHandle INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE =
       findVirtualOrDie(
           InternalProvisionException.class,
           "addSource",
           methodType(InternalProvisionException.class, Object.class));
+  private static final MethodHandle INTERNAL_PROVISION_EXCEPTION_ERROR_IN_PROVIDER_HANDLE =
+      findStaticOrDie(
+          InternalProvisionException.class,
+          "errorInProvider",
+          methodType(InternalProvisionException.class, Throwable.class));
 
   /**
    * Surrounds the delegate with a catch block that rethrows the exception with the given source.
@@ -127,12 +348,140 @@ public final class InternalMethodHandles {
     var addSourceAndRethrow =
         MethodHandles.filterReturnValue(
             MethodHandles.insertArguments(
-                InternalMethodHandles.INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE, 1, source),
+                INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE, 1, source),
             MethodHandles.throwException(
                 delegate.type().returnType(), InternalProvisionException.class));
     return MethodHandles.catchException(
         delegate, InternalProvisionException.class, addSourceAndRethrow);
   }
+
+  /**
+   * Surrounds the delegate with a catch block that rethrows the exception with the given source.
+   *
+   * <pre>{@code
+   * try {
+   *   return delegate(...);
+   * } catch (RuntimeException re) {
+   *   throw InternalProvisionException.errorInProvider(re).addSource(source);
+   * }
+   * }</pre>
+   */
+  static MethodHandle catchErrorInProviderAndRethrowWithSource(
+      MethodHandle delegate, Object source) {
+    var addSourceAndRethrow =
+        MethodHandles.filterReturnValue(
+            MethodHandles.filterReturnValue(
+                INTERNAL_PROVISION_EXCEPTION_ERROR_IN_PROVIDER_HANDLE,
+                MethodHandles.insertArguments(
+                    INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE, 1, source)),
+            MethodHandles.throwException(
+                delegate.type().returnType(), InternalProvisionException.class));
+    return MethodHandles.catchException(delegate, RuntimeException.class, addSourceAndRethrow);
+  }
+
+  /**
+   * Surrounds the delegate with a try..finally.. that calls `finishConstruction` on the context.
+   */
+  static MethodHandle finishConstruction(MethodHandle delegate, int circularFactoryId) {
+    // (Throwable, Object, InternalContext)->Object
+    var finishConstruction =
+        MethodHandles.insertArguments(FINISH_CONSTRUCTION_HANDLE, 3, circularFactoryId);
+
+    return MethodHandles.tryFinally(delegate, finishConstruction).asType(delegate.type());
+  }
+
+  private static final MethodHandle FINISH_CONSTRUCTION_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "finallyFinishConstruction",
+          methodType(
+              Object.class, Throwable.class, Object.class, InternalContext.class, int.class));
+
+  @Keep
+  private static Object finallyFinishConstruction(
+      Throwable ignored, Object result, InternalContext context, int circularFactoryId) {
+    context.finishConstruction(circularFactoryId, result);
+    return result;
+  }
+
+  /**
+   * Adds a call to {@link InternalContext#tryStartConstruction} and an early return if it returns
+   * non-null.
+   *
+   * <pre>{@code
+   * T result = context.tryStartConstruction(circularFactoryId, dependency);
+   * if (result != null) {
+   *   return result;
+   * }
+   * return delegate(...);
+   * }</pre>
+   */
+  static MethodHandle tryStartConstruction(
+      InjectorOptions options,
+      MethodHandle delegate,
+      Dependency<?> dependency,
+      int circularFactoryId) {
+
+    // (InternalContext)->Object
+    var tryStartConstruction =
+        MethodHandles.insertArguments(
+            TRY_START_CONSTRUCTION_HANDLE, 1, circularFactoryId, dependency);
+    if (options.disableCircularProxies
+        || !dependency.getKey().getTypeLiteral().getRawType().isInterface()) {
+      // When proxies are disabled or the class is not an interface we don't need to check the
+      // result of tryStartConstruction since it will always return null or throw.
+      tryStartConstruction = dropReturn(tryStartConstruction);
+      return MethodHandles.foldArguments(delegate, tryStartConstruction);
+    }
+    // This takes the first Object parameter and casts it to the return type of the delegate.
+    // It also ignores all the other parameters.
+    var returnProxy =
+        MethodHandles.dropArguments(
+            MethodHandles.identity(Object.class)
+                .asType(methodType(delegate.type().returnType(), Object.class)),
+            1,
+            delegate.type().parameterList());
+
+    // Otherwise we need to test the return value of tryStartConstruction since it might be a
+    // proxy.
+    var guard =
+        MethodHandles.guardWithTest(
+            IS_NULL_HANDLE,
+            // Ignore the 'null' return from tryStartConstruction and call the delegate.
+            MethodHandles.dropArguments(delegate, 0, Object.class),
+            // Just return the result of tryStartConstruction
+            returnProxy);
+    // Call tryStartConstruction and then execute the guard.
+    return MethodHandles.foldArguments(guard, tryStartConstruction).asType(delegate.type());
+  }
+
+  /**
+   * Drops the return value from a method handle.
+   *
+   * <p>TODO(lukes): once guice is on jdk16+ we can use MEthodHandles.dropReturn directly.
+   */
+  private static MethodHandle dropReturn(MethodHandle handle) {
+    if (handle.type().returnType().equals(void.class)) {
+      return handle;
+    }
+    return MethodHandles.filterReturnValue(
+        handle, MethodHandles.empty(methodType(void.class, handle.type().returnType())));
+  }
+
+  private static final MethodHandle IS_NULL_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class, "isNull", methodType(boolean.class, Object.class));
+
+  @Keep
+  private static boolean isNull(Object result) {
+    return result == null;
+  }
+
+  private static final MethodHandle TRY_START_CONSTRUCTION_HANDLE =
+      findVirtualOrDie(
+          InternalContext.class,
+          "tryStartConstruction",
+          methodType(Object.class, int.class, Dependency.class));
 
   /**
    * Generates a provider instance that delegates to the given factory.
@@ -372,6 +721,14 @@ public final class InternalMethodHandles {
       }
     }
     return (ConstantCallSite) handleCreator;
+  }
+
+  // The `throws` clause tricks Java type inference into deciding that E must be some subtype of
+  // RuntimeException but because the cast is unchecked it doesn't check.  So the compiler cannot
+  // tell that this might be a checked exception.
+  @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals", "CheckedExceptionNotThrown"})
+  private static <E extends Throwable> E sneakyThrow(Throwable e) throws E {
+    throw (E) e;
   }
 
   private InternalMethodHandles() {}

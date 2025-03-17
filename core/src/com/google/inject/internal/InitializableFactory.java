@@ -19,7 +19,9 @@ package com.google.inject.internal;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.Provider;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -43,6 +45,11 @@ final class InitializableFactory<T> implements InternalFactory<T> {
       throws InternalProvisionException {
     // NOTE: we do not need to check nullishness here because Initializables never contain nulls.
     return initializable.get(context);
+  }
+
+  @Override
+  public MethodHandle getHandle(InjectorOptions options, Dependency<?> dependency, boolean linked) {
+    return InternalMethodHandles.initializableFactoryGetHandle(initializable, dependency);
   }
 
   @Override
