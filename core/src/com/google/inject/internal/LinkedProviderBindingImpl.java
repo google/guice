@@ -20,7 +20,6 @@ import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 import static com.google.inject.spi.Elements.withTrustedSource;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -28,7 +27,9 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.ProviderKeyBinding;
+import java.util.Objects;
 import java.util.Set;
+
 
 final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
     implements ProviderKeyBinding<T>, HasDependencies, DelayedInitialize {
@@ -138,7 +139,7 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
       LinkedProviderBindingImpl<?> o = (LinkedProviderBindingImpl<?>) obj;
       return getKey().equals(o.getKey())
           && getScoping().equals(o.getScoping())
-          && Objects.equal(providerKey, o.providerKey);
+          && Objects.equals(providerKey, o.providerKey);
     } else {
       return false;
     }
@@ -146,6 +147,6 @@ final class LinkedProviderBindingImpl<T> extends BindingImpl<T>
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getKey(), getScoping(), providerKey);
+    return Objects.hash(getKey(), getScoping(), providerKey);
   }
 }

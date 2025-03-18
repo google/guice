@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -29,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Key;
 import com.google.inject.internal.util.SourceProvider;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -120,7 +120,7 @@ final class WeakKeySet {
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(key, source);
+      return Objects.hash(key, source);
     }
 
     @Override
@@ -134,7 +134,7 @@ final class WeakKeySet {
       }
 
       KeyAndSource other = (KeyAndSource) obj;
-      return Objects.equal(key, other.key) && Objects.equal(source, other.source);
+      return Objects.equals(key, other.key) && Objects.equals(source, other.source);
     }
   }
 }

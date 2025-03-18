@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
@@ -27,6 +26,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ScopeBinding;
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 /**
  * References a scope, either directly (as a scope instance), or indirectly (as a scope annotation).
@@ -261,8 +261,8 @@ public abstract class Scoping {
   public boolean equals(Object obj) {
     if (obj instanceof Scoping) {
       Scoping o = (Scoping) obj;
-      return Objects.equal(getScopeAnnotation(), o.getScopeAnnotation())
-          && Objects.equal(getScopeInstance(), o.getScopeInstance());
+      return Objects.equals(getScopeAnnotation(), o.getScopeAnnotation())
+          && Objects.equals(getScopeInstance(), o.getScopeInstance());
     } else {
       return false;
     }
@@ -270,7 +270,7 @@ public abstract class Scoping {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getScopeAnnotation(), getScopeInstance());
+    return Objects.hash(getScopeAnnotation(), getScopeInstance());
   }
 
   public abstract <V> V acceptVisitor(BindingScopingVisitor<V> visitor);

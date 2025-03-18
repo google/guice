@@ -18,9 +18,9 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -87,6 +87,6 @@ public final class StaticInjectionRequest implements Element {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(source, type);
+    return Objects.hash(source, type);
   }
 }

@@ -45,7 +45,6 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -79,6 +78,7 @@ import com.google.inject.util.Types;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -1287,7 +1287,7 @@ public class SpiUtils {
         break;
       case PROVIDER_INSTANCE:
         if (item instanceof ProviderInstanceBinding
-            && Objects.equal(
+            && Objects.equals(
                 ((ProviderInstanceBinding) item).getUserSuppliedProvider().get(),
                 result.instance)) {
           return true;
