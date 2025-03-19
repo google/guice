@@ -6,6 +6,7 @@ import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
 
 /**
  * A {@link ProviderInstanceBindingImpl} for implementing 'native' guice extensions.
@@ -123,6 +124,13 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
       }
     }
 
+    @Override
+    public MethodHandle getHandle(
+        LinkageContext context, Dependency<?> dependency, boolean linked) {
+      return InternalMethodHandles.invokeThroughProvisionCallback(
+          doGetHandle(context, dependency, linked), dependency, provisionCallback);
+    }
+
     // Implements ProvisionCallback<T>
     @Override
     public final T call(InternalContext context, Dependency<?> dependency)
@@ -138,5 +146,9 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
      */
     protected abstract T doProvision(InternalContext context, Dependency<?> dependency)
         throws InternalProvisionException;
+
+    /** Creates a method handle that constructs the object to be injected. */
+    protected abstract MethodHandle doGetHandle(
+        LinkageContext context, Dependency<?> dependency, boolean linked);
   }
 }

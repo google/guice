@@ -4,11 +4,13 @@ import static com.google.inject.internal.Element.Type.MULTIBINDER;
 import static com.google.inject.internal.Errors.checkConfiguration;
 import static com.google.inject.internal.Errors.checkNotNull;
 import static com.google.inject.name.Names.named;
+import static java.lang.invoke.MethodType.methodType;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.Keep;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -27,7 +29,10 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -283,6 +288,87 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
+    protected MethodHandle doGetHandle(
+        LinkageContext context, Dependency<?> dependency, boolean linked) {
+      if (injectors == null) {
+        return InternalMethodHandles.constantFactoryGetHandle(dependency, ImmutableSet.of());
+      }
+      // null check each element
+      List<MethodHandle> elementHandles = new ArrayList<>(injectors.length);
+      for (int i = 0; i < injectors.length; i++) {
+        var element = injectors[i].getInjectHandle(context);
+        element = element.asType(element.type().changeReturnType(Object.class));
+        elementHandles.add(
+            MethodHandles.filterReturnValue(
+                element,
+                MethodHandles.insertArguments(
+                    NULL_CHECK_RESULT_HANDLE, 1, bindings.get(i).getSource())));
+      }
+      // At size one permitDuplicates is irrelevant and we can bind to the SingletonImmutableSet
+      // class directly.
+      if (permitDuplicates || elementHandles.size() == 1) {
+        // we just want to construct an ImmutableSet.Builder, and add everything to it.
+        // This generates exactly the code a human would write.
+        return InternalMethodHandles.buildImmutableSetFactory(elementHandles)
+            .asType(InternalMethodHandles.makeFactoryType(dependency));
+      } else {
+        // Duplicates are not permitted, so we need to check for duplicates by constructing all
+        // elements and then checking the size of the set.
+        // We need to construct an array anyway for the error cases so just do it here.
+        var collector =
+            MAKE_IMMUTABLE_SET_AND_CHECK_DUPLICATES_HANDLE
+                .bindTo(this)
+                .asCollector(Object[].class, elementHandles.size());
+        collector =
+            MethodHandles.filterArguments(
+                collector, 0, elementHandles.toArray(new MethodHandle[0]));
+        collector =
+            MethodHandles.permuteArguments(
+                collector,
+                methodType(ImmutableSet.class, InternalContext.class),
+                new int[elementHandles.size()]);
+        return collector.asType(InternalMethodHandles.makeFactoryType(dependency));
+      }
+    }
+
+    private static final MethodHandle MAKE_IMMUTABLE_SET_AND_CHECK_DUPLICATES_HANDLE =
+        InternalMethodHandles.findVirtualOrDie(
+            RealMultibinderProvider.class,
+            "makeImmutableSetAndCheckDuplicates",
+            methodType(ImmutableSet.class, Object[].class));
+
+    @Keep
+    ImmutableSet<T> makeImmutableSetAndCheckDuplicates(T[] elements)
+        throws InternalProvisionException {
+      // Avoid ImmutableSet.copyOf(T[]), because it assumes there'll be duplicates in the input, but
+      // in the usual case of permitDuplicates==false, we know the exact size must be
+      // `localInjector.length` (otherwise we fail).  This uses `builderWithExpectedSize` to avoid
+      // the overhead of copyOf or an unknown builder size.
+      var set = ImmutableSet.<T>builderWithExpectedSize(elements.length).add(elements).build();
+      if (set.size() < elements.length) {
+        throw newDuplicateValuesException(elements);
+      }
+      return set;
+    }
+
+    private static final MethodHandle NULL_CHECK_RESULT_HANDLE =
+        InternalMethodHandles.findStaticOrDie(
+            RealMultibinderProvider.class,
+            "nullCheckResult",
+            methodType(Object.class, Object.class, Object.class));
+
+    @Keep
+    static Object nullCheckResult(Object result, Object source) throws InternalProvisionException {
+      if (result == null) {
+        throw InternalProvisionException.create(
+            ErrorId.NULL_ELEMENT_IN_SET,
+            "Set injection failed due to null element bound at: %s",
+            source);
+      }
+      return result;
+    }
+
+    @Override
     protected Provider<Set<T>> doMakeProvider(InjectorImpl injector, Dependency<?> dependency) {
       if (injectors == null) {
         return InternalFactory.makeProviderFor(ImmutableSet.of(), this);
@@ -387,6 +473,12 @@ public final class RealMultibinder<T> implements Module {
     protected Provider<Collection<Provider<T>>> doMakeProvider(
         InjectorImpl injector, Dependency<?> dependency) {
       return InternalFactory.makeProviderFor(providers, this);
+    }
+
+    @Override
+    protected MethodHandle doGetHandle(
+        LinkageContext context, Dependency<?> dependency, boolean linked) {
+      return InternalMethodHandles.constantFactoryGetHandle(dependency, providers);
     }
   }
 

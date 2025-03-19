@@ -47,6 +47,9 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.VarHandle;
+import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,6 +71,30 @@ public final class InternalMethodHandles {
 
   static MethodType makeFactoryType(Class<?> forType) {
     return methodType(forType, InternalContext.class);
+  }
+
+  /**
+   * Returns a method handle for the given method, or null if the method is not accessible.
+   *
+   * <p>Ideally we would change guice APIs to accept MethodHandle.Lookup objects instead of trying
+   * to access user methods with Guice's internal permissions. However, this is sufficient for now.
+   */
+  @Nullable
+  static MethodHandle unreflect(Method method) {
+    try {
+      if (!Modifier.isPublic(method.getModifiers())
+          || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+        method.setAccessible(true);
+      }
+    } catch (SecurityException | InaccessibleObjectException e) {
+      return null;
+    }
+    try {
+      return lookup.unreflect(method);
+    } catch (IllegalAccessException e) {
+      // caller should have handled this.
+      throw new LinkageError("inaccessible method: " + method, e);
+    }
   }
 
   static MethodHandle castReturnToObject(MethodHandle handle) {
@@ -340,11 +367,6 @@ public final class InternalMethodHandles {
           InternalProvisionException.class,
           "addSource",
           methodType(InternalProvisionException.class, Object.class));
-  private static final MethodHandle INTERNAL_PROVISION_EXCEPTION_ERROR_IN_PROVIDER_HANDLE =
-      findStaticOrDie(
-          InternalProvisionException.class,
-          "errorInProvider",
-          methodType(InternalProvisionException.class, Throwable.class));
 
   /**
    * Surrounds the delegate with a catch block that rethrows the exception with the given source.
@@ -366,7 +388,8 @@ public final class InternalMethodHandles {
             MethodHandles.throwException(
                 delegate.type().returnType(), InternalProvisionException.class));
     return MethodHandles.catchException(
-        delegate, InternalProvisionException.class, addSourceAndRethrow);
+            delegate, InternalProvisionException.class, addSourceAndRethrow)
+        .asType(delegate.type());
   }
 
   /**
@@ -375,22 +398,38 @@ public final class InternalMethodHandles {
    * <pre>{@code
    * try {
    *   return delegate(...);
-   * } catch (RuntimeException re) {
+   * } catch (InternalProvisionException ipe) {
+   *   throw ipe.addSource(source);
+   * } catch (Throwable re) {
    *   throw InternalProvisionException.errorInProvider(re).addSource(source);
    * }
    * }</pre>
    */
   static MethodHandle catchErrorInProviderAndRethrowWithSource(
       MethodHandle delegate, Object source) {
-    var addSourceAndRethrow =
-        MethodHandles.filterReturnValue(
-            MethodHandles.filterReturnValue(
-                INTERNAL_PROVISION_EXCEPTION_ERROR_IN_PROVIDER_HANDLE,
-                MethodHandles.insertArguments(
-                    INTERNAL_PROVISION_EXCEPTION_ADD_SOURCE_HANDLE, 1, source)),
-            MethodHandles.throwException(
-                delegate.type().returnType(), InternalProvisionException.class));
-    return MethodHandles.catchException(delegate, RuntimeException.class, addSourceAndRethrow);
+    var rethrow =
+        MethodHandles.insertArguments(
+            CATCH_ERROR_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+
+    return MethodHandles.catchException(castReturnToObject(delegate), Throwable.class, rethrow)
+        .asType(delegate.type());
+  }
+
+  private static final MethodHandle CATCH_ERROR_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "doCatchErrorInProviderAndRethrowWithSource",
+          methodType(Object.class, Throwable.class, Object.class));
+
+  @Keep
+  private static Object doCatchErrorInProviderAndRethrowWithSource(Throwable re, Object source)
+      throws InternalProvisionException {
+    // MethodHandles don't support 'parallel catch clauses' so we need to do this manually with a
+    // single catch block that does both.
+    if (re instanceof InternalProvisionException) {
+      throw ((InternalProvisionException) re).addSource(source);
+    }
+    throw InternalProvisionException.errorInProvider(re).addSource(source);
   }
 
   /**
@@ -401,7 +440,13 @@ public final class InternalMethodHandles {
     var finishConstruction =
         MethodHandles.insertArguments(FINISH_CONSTRUCTION_HANDLE, 3, circularFactoryId);
 
-    return MethodHandles.tryFinally(delegate, finishConstruction).asType(delegate.type());
+    return castReturnTo(
+        MethodHandles.tryFinally(
+            // We need to cast the return type to Object so it matches the type of the
+            // `finallyFinishConstruction` method.
+            castReturnToObject(delegate), finishConstruction),
+        // cast back to the original return type.
+        delegate.type().returnType());
   }
 
   private static final MethodHandle FINISH_CONSTRUCTION_HANDLE =

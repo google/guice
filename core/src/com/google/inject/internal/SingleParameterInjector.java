@@ -16,17 +16,21 @@
 
 package com.google.inject.internal;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.spi.Dependency;
+import java.lang.invoke.MethodHandle;
 
 /** Resolves a single parameter, to be used in a constructor or method invocation. */
 final class SingleParameterInjector<T> {
   private static final Object[] NO_ARGUMENTS = {};
+  private static final MethodHandle[] NO_ARGUMENTS_HANDLES = {};
 
   private final Dependency<T> dependency;
 
   private final Object source;
 
   private final InternalFactory<? extends T> factory;
+  @LazyInit private MethodHandle handle;
 
   SingleParameterInjector(Dependency<T> dependency, BindingImpl<? extends T> binding) {
     this.dependency = dependency;
@@ -41,6 +45,18 @@ final class SingleParameterInjector<T> {
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(localDependency);
     }
+  }
+
+  /** Returns a method handle for the injection. */
+  MethodHandle getInjectHandle(LinkageContext context) {
+    var handle = this.handle;
+    if (handle == null) {
+      handle =
+          InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+              factory.getHandle(context, dependency, /* linked= */ false), dependency);
+      this.handle = handle;
+    }
+    return handle;
   }
 
   // TODO(lukes): inline into callers to decrease stack depth
@@ -65,6 +81,19 @@ final class SingleParameterInjector<T> {
       }
     } catch (InternalProvisionException ipe) {
       throw ipe.addSource(dependency);
+    }
+    return parameters;
+  }
+
+  /** Returns an array of handles for all parameters. */
+  static MethodHandle[] getAllHandles(
+      LinkageContext context, SingleParameterInjector<?>[] parameterInjectors) {
+    if (parameterInjectors == null) {
+      return NO_ARGUMENTS_HANDLES;
+    }
+    MethodHandle[] parameters = new MethodHandle[parameterInjectors.length];
+    for (int i = 0; i < parameterInjectors.length; i++) {
+      parameters[i] = parameterInjectors[i].getInjectHandle(context);
     }
     return parameters;
   }
