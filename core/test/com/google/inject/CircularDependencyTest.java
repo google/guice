@@ -463,7 +463,7 @@ public class CircularDependencyTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(
           expected.getMessage(),
-          "Found a circular dependency involving CircularDependencyTest$A, and circular"
+          "Found a circular dependency involving CircularDependencyTest$E, and circular"
               + " dependencies are disabled.");
     }
   }

@@ -93,9 +93,6 @@ public abstract class InternalContext implements AutoCloseable {
   // enough space for 12 values before we need to resize the table
   private static final int INITIAL_TABLE_SIZE = 16;
 
-  /** Keeps track of the type that is currently being requested for injection. */
-  private Dependency<?> dependency;
-
   /**
    * The number of times {@link #enter()} has been called + 1 for initial construction. This value
    * is decremented when {@link #close()} is called.
@@ -188,12 +185,10 @@ public abstract class InternalContext implements AutoCloseable {
   /**
    * Returns the current dependency being injected.
    *
-   * <p>This is only used by scope implementations to detect circular dependencies and to enforce
-   * nullability
+   * <p>This is only used by scope implementations to detect circular dependencies.
    */
-  Dependency<?> getDependency() {
-    return dependency;
-  }
+  @Nullable
+  abstract Dependency<?> getDependency();
 
   /**
    * Used to set the current dependency.
@@ -201,9 +196,7 @@ public abstract class InternalContext implements AutoCloseable {
    * <p>The currentDependency field is only used by InternalFactoryToProviderAdapter to propagate
    * information to singleton scope. See comments in that class about alternatives.
    */
-  void setDependency(Dependency<?> dependency) {
-    this.dependency = dependency;
-  }
+  abstract void setDependency(Dependency<?> dependency);
 
   @VisibleForTesting
   static final class WithoutProxySupport extends InternalContext {
@@ -381,6 +374,17 @@ public abstract class InternalContext implements AutoCloseable {
         }
       }
     }
+
+    @Override
+    void setDependency(Dependency<?> dependency) {
+      // ignore
+    }
+
+    @Nullable
+    @Override
+    Dependency<?> getDependency() {
+      return null;
+    }
   }
 
   @VisibleForTesting
@@ -397,6 +401,12 @@ public abstract class InternalContext implements AutoCloseable {
     // If the value is not `null` then either it is a `ProxyDelegates` instance or a 'current
     // reference' which might be any other type.
     private Object[] constructionContexts = new Object[INITIAL_TABLE_SIZE];
+
+    /**
+     * Keeps track of the type that is currently being requested for injection. Only needed for
+     * scope implementations and scope delegate providers.
+     */
+    private Dependency<?> currentDependency;
 
     // The number of elements in the table, used to determine when to resize the table.
     private int tableSize;
@@ -600,6 +610,16 @@ public abstract class InternalContext implements AutoCloseable {
           insert(key, null, oldConstructionContexts[j]);
         }
       }
+    }
+
+    @Override
+    void setDependency(Dependency<?> dependency) {
+      this.currentDependency = dependency;
+    }
+
+    @Override
+    Dependency<?> getDependency() {
+      return currentDependency;
     }
   }
 
