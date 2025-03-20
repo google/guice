@@ -218,10 +218,10 @@ public class SingletonScope implements Scope {
               // guarantee thread-safety for instance and proxies initialization
               if (instance == null) {
                 // creating a proxy to satisfy circular dependency across several threads
-                // This can be null when proxies are disabled.
-                Dependency<?> dependency = context.getDependency();
-                Class<?> rawType =
-                    (dependency == null ? key : dependency.getKey()).getTypeLiteral().getRawType();
+                Dependency<?> dependency =
+                    Preconditions.checkNotNull(
+                        context.getDependency(), "internalContext.getDependency()");
+                Class<?> rawType = dependency.getKey().getTypeLiteral().getRawType();
 
                 try {
                   if (!context.areCircularProxiesEnabled()) {
