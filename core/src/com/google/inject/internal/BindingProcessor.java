@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -134,10 +133,17 @@ final class BindingProcessor extends AbstractBindingProcessor {
             prepareBinding();
             @SuppressWarnings("unchecked") // always visited with Binding<T>
             var provider = (jakarta.inject.Provider<T>) binding.getUserSuppliedProvider();
+            // This is how we support ProviderMethods and native multibinders. By detecting them
+            // here, we can leverage faster `InternalFactory` implementations.
             if (provider instanceof InternalProviderInstanceBindingImpl.Factory) {
               InternalProviderInstanceBindingImpl.Factory<T> asProviderMethod =
                   (InternalProviderInstanceBindingImpl.Factory<T>) provider;
-              return visitInternalProviderInstanceBindingFactory(asProviderMethod);
+              // Try to claim it exclusively, otherwise we will treat it as a normal provider
+              // instance binding.  This prevents undefined behavior where multiple injectors
+              // race to initialize the binding based on different settings.
+              if (asProviderMethod.bindToInjector(injector)) {
+                return visitInternalProviderInstanceBindingFactory(asProviderMethod);
+              }
             }
             Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
             Optional<Initializable<jakarta.inject.Provider<T>>> initializable =

@@ -74,7 +74,8 @@ public abstract class InternalContext implements AutoCloseable {
         // for correctness.
         int next = (int) ID_HANDLE.getOpaque(this);
         if (next == 0) {
-          // If this ever happens we can switch to using `long` values.
+          // If this ever happens we could switch to using `long` values, but realistically we would
+          // likely run out of memory somewhere else before that.
           throw new IllegalStateException("Circular factory id overflow");
         }
         if (ID_HANDLE.weakCompareAndSetPlain(this, next, next + 1)) {
@@ -478,10 +479,6 @@ public abstract class InternalContext implements AutoCloseable {
             throw InternalProvisionException.cannotProxyClass(raw);
           }
           if (current == null) {
-            // TODO: lukes - We could instead store the actual proxy here and then reuse it instead
-            // of allocating a new one, and we can access the invocation handler via
-            // `Proxy.getInvocationHandler(proxy)`. But that would be a bit more expensive to check
-            // for.
             current = new DelegatingInvocationHandler();
             this.constructionContexts[index] = current;
           }

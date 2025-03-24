@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 /**
  * Default {@link Injector} implementation.
@@ -1225,6 +1226,7 @@ final class InjectorImpl implements Injector, Lookups {
   private final ThreadLocal<Object[]> localContext;
 
   /** Only to be called by the {@link SingletonScope} provider. */
+  @Nullable
   InternalContext getLocalContext() {
     return (InternalContext) localContext.get()[0];
   }
@@ -1253,6 +1255,9 @@ final class InjectorImpl implements Injector, Lookups {
     }
     InternalContext ctx = (InternalContext) reference[0];
     if (ctx == null) {
+      // Construction depends on the `disableCircularProxies` option which means that every factory
+      // that shares the context will also share the same value for `disableCircularProxies`
+      // regardless of the options of the injector that created the factory.
       reference[0] = ctx = InternalContext.create(options.disableCircularProxies, reference);
     } else {
       ctx.enter();

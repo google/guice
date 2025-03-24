@@ -1,5 +1,7 @@
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -60,8 +62,12 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     originalFactory.source = getSource();
     originalFactory.provisionCallback = injector.provisionListenerStore.get(this);
     originalFactory.initialize(injector, errors);
-    // Pass information so we can implement the provider protocol.
-    originalFactory.injector = injector;
+    checkState(
+        injector == originalFactory.injector,
+        "Factory should have already been bound to this injector.");
+    checkState(
+        injector == this.getInjector(),
+        "Binding should be initialized on the same injector that created it.");
     originalFactory.dependency = Dependency.get(getKey());
   }
 
@@ -80,6 +86,29 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     Factory(InitializationTiming initializationTiming) {
       this.initializationTiming = initializationTiming;
     }
+
+    /**
+     * Exclusively binds this factory to the given injector.
+     *
+     * <p>This is needed since the implementations of this class are used to construct bindings via
+     * `bind(key).toProvider(factory-instance)` and the BindingProcessor tests for this type to find
+     * the 'native factory' implementation. This works well but is a bit ambiguous since users can
+     * also bind these providers to _other_ injectors which can create some confusion as to how
+     * 'initialization' works.
+     *
+     * <p>Thus, the binding processor uses this method to make an 'exclusive' claim on the factory
+     * and prevent other injectors from also binding to it. We synchronize this method but not all
+     * read/writes to `injector` since binding initialization is a single threaded process, we just
+     * need to prevent multiple injectors from racing on the claim.
+     */
+    synchronized boolean bindToInjector(InjectorImpl injector) {
+      if (this.injector == null) {
+        this.injector = injector;
+        return true;
+      }
+      return false;
+    }
+
     /**
      * The binding source.
      *
@@ -101,16 +130,20 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
 
     @Override
     public final T get() {
-      var local = injector;
-      if (local == null) {
+      var localInjector = injector;
+      var localDependency = dependency;
+      // Check both of these to ensure that we have been 'bound' via `bindToinjector` and
+      // `initialize` has been called on our Binding.
+      if (localInjector == null || localDependency == null) {
         throw new IllegalStateException(
-            "This Provider cannot be used until the Injector has been created.");
+            "This Provider cannot be used until the Injector has been created and this binding has"
+                + " been initialized.");
       }
       // This is an inlined version of InternalFactory.makeDefaultProvider
-      try (InternalContext context = local.enterContext()) {
-        return get(context, dependency, false);
+      try (InternalContext context = localInjector.enterContext()) {
+        return get(context, localDependency, false);
       } catch (InternalProvisionException e) {
-        throw e.addSource(dependency).toProvisionException();
+        throw e.addSource(localDependency).toProvisionException();
       }
     }
 

@@ -16,6 +16,7 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.junit.Assert.assertEquals;
@@ -1106,8 +1107,11 @@ public class ProviderMethodsTest implements Module {
       moduleBinding.getUserSuppliedProvider().get();
       fail();
     } catch (IllegalStateException ise) {
-      assertEquals(
-          "This Provider cannot be used until the Injector has been created.", ise.getMessage());
+      assertThat(ise)
+          .hasMessageThat()
+          .isEqualTo(
+              "This Provider cannot be used until the Injector has been created and this binding"
+                  + " has been initialized.");
     }
   }
 

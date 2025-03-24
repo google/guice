@@ -320,7 +320,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     private static final MethodHandle BIFUNCTION_APPLY_HANDLE =
         InternalMethodHandles.findVirtualOrDie(
             BiFunction.class, "apply", methodType(Object.class, Object.class, Object.class));
-    ;
+
     final BiFunction<Object, Object[], Object> fastMethod;
 
     FastClassProviderMethod(
