@@ -46,16 +46,20 @@ filegroup(
 )
 
 [guice_test_suites(
-    name = "gen_tests_stack_trace%s" % include_stack_trace_option,
+    name = "gen_tests_stack_trace%s_use_experimental_method_handles_%s" % (include_stack_trace_option, use_experimental_method_handles_option),
     args = [
         "--guice_include_stack_traces=%s" % include_stack_trace_option,
+        "--guice_use_experimental_method_handles=%s" % use_experimental_method_handles_option,
     ],
     sizes = [
         "small",
     ],
-    suffix = "_stack_trace_%s" % include_stack_trace_option,
+    suffix = "_stack_trace_%s_use_experimental_method_handles_%s" % (include_stack_trace_option, use_experimental_method_handles_option),
     deps = [":tests"],
 ) for include_stack_trace_option in [
     "OFF",
     "ONLY_FOR_DECLARING_SOURCE",
+] for use_experimental_method_handles_option in [
+    "NO",
+    "YES",
 ]]

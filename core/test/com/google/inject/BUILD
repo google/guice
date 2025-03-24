@@ -138,6 +138,7 @@ guice_test_suites(
     name = "gen_tests_stack_trace_%s_use_experimental_method_handles_%s" % (include_stack_trace_option, use_experimental_method_handles_option),
     args = [
         "--guice_include_stack_traces=%s" % include_stack_trace_option,
+        "--guice_use_experimental_method_handles=%s" % use_experimental_method_handles_option,
     ],
     jvm_flags = [
         # those 2 options are required for some tests that checks stack traces

@@ -1,5 +1,6 @@
 package com.google.inject.errors;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.errors.ErrorMessageTestUtils.assertGuiceErrorEqualsIgnoreLineNumber;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
@@ -10,6 +11,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
+import com.google.inject.Singleton;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import java.lang.annotation.Retention;
@@ -60,7 +62,7 @@ public final class NullInjectedIntoNonNullableTest {
             try {
               field = IntermediateModule.class.getField("NULL");
             } catch (NoSuchFieldException error) {
-              throw new AssertionError("NULL field missing!");
+              throw new AssertionError("NULL field missing!", error);
             }
             binder()
                 .withSource(field)
@@ -109,5 +111,32 @@ public final class NullInjectedIntoNonNullableTest {
         assertThrows(ProvisionException.class, () -> injector.getInstance(Foo.class));
     assertGuiceErrorEqualsIgnoreLineNumber(
         exception.getMessage(), "null_returned_from_provider_with_module_stack.txt");
+  }
+
+  // Ensure we report the error when the dependency is a singleton, no matter how many times we
+  // try to provision it.
+  @Test
+  public void nullReturnedFromSingletonBinding() {
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(String.class)
+                    .annotatedWith(Bar.class)
+                    .toProvider(() -> null)
+                    .in(Singleton.class);
+              }
+
+              @Provides
+              String provideString(@Bar String string) {
+                return string;
+              }
+            });
+    var pe = assertThrows(ProvisionException.class, () -> injector.getInstance(String.class));
+    assertThat(pe).hasMessageThat().contains("[Guice/NullInjectedIntoNonNullable]");
+
+    pe = assertThrows(ProvisionException.class, () -> injector.getInstance(String.class));
+    assertThat(pe).hasMessageThat().contains("[Guice/NullInjectedIntoNonNullable]");
   }
 }

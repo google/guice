@@ -105,6 +105,20 @@ public final class InternalMethodHandles {
     return handle.asType(handle.type().changeReturnType(returnType));
   }
 
+  private static final MethodHandle PROVIDER_GET_HANDLE =
+      findVirtualOrDie(jakarta.inject.Provider.class, "get", methodType(Object.class));
+
+  /**
+   * Returns a method handle that calls {@code <providerHandle>.get()}.
+   *
+   * <p>The returned handle has the same parameters as the delegate and returns {@link Object}.
+   */
+  static MethodHandle getProvider(MethodHandle providerHandle) {
+    return MethodHandles.filterReturnValue(
+        // need to cast to jakarta.inject.Provider to exactly match the signature of Provider.get
+        castReturnTo(providerHandle, jakarta.inject.Provider.class), PROVIDER_GET_HANDLE);
+  }
+
   /** Direct handle for {@link InternalFactory#get} */
   static final MethodHandle INTERNAL_FACTORY_GET_HANDLE =
       findVirtualOrDie(

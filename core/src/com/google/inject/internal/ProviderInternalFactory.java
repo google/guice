@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.inject.internal.InternalMethodHandles.findVirtualOrDie;
 import static java.lang.invoke.MethodType.methodType;
 
 import com.google.inject.Key;
@@ -143,9 +142,6 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
     return createProviderAndPass.asType(InternalMethodHandles.makeFactoryType(dependency));
   }
 
-  private static final MethodHandle PROVIDER_GET_HANDLE =
-      findVirtualOrDie(jakarta.inject.Provider.class, "get", methodType(Object.class));
-
   /**
    * Returns a method handle that calls {@code providerHandle.get()} and catches any
    * RuntimeException as an InternalProvisionException.
@@ -158,7 +154,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
     // Call Provider.get() and catch any RuntimeException as an InternalProvisionException.
     var invokeProvider =
         InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(
-            MethodHandles.filterReturnValue(providerHandle, PROVIDER_GET_HANDLE), source);
+            InternalMethodHandles.getProvider(providerHandle), source);
     // Wrap in a try..finally.. that calls `finishConstruction` on the context.
     invokeProvider = InternalMethodHandles.finishConstruction(invokeProvider, circularFactoryId);
 
