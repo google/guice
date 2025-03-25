@@ -16,8 +16,8 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.inject.name.Names.named;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -33,6 +33,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,14 +63,28 @@ public final class InternalMethodHandlesTest {
     InternalFactory<String> factory =
         new InternalFactory<String>() {
           @Override
-          @SuppressWarnings("ReferenceEquality")
           public String get(InternalContext context, Dependency<?> dependency, boolean linked)
               throws InternalProvisionException {
-            checkNotNull(context);
+            throw new AssertionError();
+          }
+
+          @Override
+          @SuppressWarnings("ReferenceEquality")
+          public MethodHandle getHandle(
+              LinkageContext context, Dependency<?> dependency, boolean linked) {
+
             // Identity is intentional here.
             checkArgument(dep == dependency);
             checkArgument(!linked);
-            throw InternalProvisionException.create(ErrorId.OPTIONAL_CONSTRUCTOR, "Hello World");
+            return MethodHandles.dropArguments(
+                MethodHandles.insertArguments(
+                    MethodHandles.throwException(
+                        dependency.getKey().getTypeLiteral().getRawType(),
+                        InternalProvisionException.class),
+                    0,
+                    InternalProvisionException.create(ErrorId.OPTIONAL_CONSTRUCTOR, "Hello World")),
+                0,
+                InternalContext.class);
           }
         };
     Provider<String> provider = InternalMethodHandles.makeProvider(factory, injector, dep);
@@ -108,6 +123,40 @@ public final class InternalMethodHandlesTest {
         throw new AssertionError();
       }
     };
+  }
+
+  @Test
+  public void providerMaker_makesAScopedProvider() {
+    InjectorImpl injector = (InjectorImpl) Guice.createInjector();
+    InternalFactory<String> factory =
+        new InternalFactory<String>() {
+          @Override
+          public String get(InternalContext context, Dependency<?> dependency, boolean linked)
+              throws InternalProvisionException {
+            throw new AssertionError();
+          }
+
+          @Override
+          public MethodHandle getHandle(
+              LinkageContext context, Dependency<?> dependency, boolean linked) {
+            return InternalMethodHandles.constantFactoryGetHandle(
+                dependency, dependency.toString());
+          }
+        };
+    Provider<String> provider =
+        InternalMethodHandles.makeScopedProvider(factory, injector, Key.get(String.class));
+
+    // When no dependency is set, the implementation uses the key from its constructor.
+    assertThat(provider.get()).isEqualTo("Key[type=java.lang.String, annotation=[none]]");
+    try (InternalContext ctx = injector.enterContext()) {
+      var dep = Dependency.get(Key.get(String.class, named("a")));
+      ctx.setDependency(dep);
+      assertThat(provider.get()).isEqualTo(dep.toString());
+
+      dep = Dependency.get(Key.get(String.class, named("b")));
+      ctx.setDependency(dep);
+      assertThat(provider.get()).isEqualTo(dep.toString());
+    }
   }
 
   @Test

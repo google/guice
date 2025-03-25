@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.invoke.MethodType.methodType;
+import static java.util.Arrays.stream;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -31,10 +32,14 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ObjectArrays;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.Keep;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
+import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.aop.ClassDefining;
@@ -564,18 +569,37 @@ public final class InternalMethodHandles {
         (Provider)
             ProviderMaker.defineClass(
                 injector,
+                factory,
                 dependency,
-                /* name= */ dependency.getKey().getTypeLiteral().getRawType().getSimpleName(),
-                // TODO(b/366058184): Decide if this laziness is required. Because `makeProvider` is
-                // called during injector initialization it is possible that it is too early for
-                // some factories.  However, by binding a lazy provider we delay that linkage until
-                // the first time the provider is actually invoked which is by definition late
-                // enough.
                 () ->
-                    factory
-                        .getHandle(new LinkageContext(), dependency, /* linked= */ false)
-                        .asType(OBJECT_FACTORY_TYPE),
-                factory.toString());
+                    new ConstantCallSite(
+                        factory
+                            .getHandle(new LinkageContext(), dependency, /* linked= */ false)
+                            .asType(OBJECT_FACTORY_TYPE)),
+                /* isScoped= */ false);
+    return typedProvider;
+  }
+
+  /**
+   * Returns a {@link ProviderToInternalFactoryAdapter} subtype to support scoping.
+   *
+   * <p>The unique thing about scoping is that we need to support many different {@link Dependency}
+   * instances.
+   */
+  static <T> ProviderToInternalFactoryAdapter<T> makeScopedProvider(
+      InternalFactory<? extends T> factory, InjectorImpl injector, Key<T> forKey) {
+    var dependency = Dependency.get(forKey);
+    // This is safe due to the implementation of InternalFactory.getHandle which we cannot enforce
+    // with generic type constraints.
+    @SuppressWarnings("unchecked")
+    ProviderToInternalFactoryAdapter<T> typedProvider =
+        (ProviderToInternalFactoryAdapter)
+            ProviderMaker.defineClass(
+                injector,
+                factory,
+                dependency,
+                () -> new ScopedDelegateCallSite(factory, dependency),
+                /* isScoped= */ true);
     return typedProvider;
   }
 
@@ -587,10 +611,13 @@ public final class InternalMethodHandles {
    */
   public abstract static class GeneratedProvider<T> implements Provider<T> {
     private final InjectorImpl injector;
+    private final InternalFactory<? extends T> factory;
     private final Dependency<?> dependency;
 
-    protected GeneratedProvider(InjectorImpl injector, Dependency<?> dependency) {
+    protected GeneratedProvider(
+        InjectorImpl injector, InternalFactory<T> factory, Dependency<?> dependency) {
       this.injector = injector;
+      this.factory = factory;
       this.dependency = dependency;
     }
 
@@ -606,6 +633,11 @@ public final class InternalMethodHandles {
       }
     }
 
+    @Override
+    public String toString() {
+      return factory.toString();
+    }
+
     @ForOverride
     protected abstract T doGet(InternalContext context) throws InternalProvisionException;
   }
@@ -618,9 +650,14 @@ public final class InternalMethodHandles {
    */
   static final class ProviderMaker {
     private static final Type PROVIDER_TYPE = Type.getType(GeneratedProvider.class);
-    private static final String CTOR_TYPE =
-        methodType(void.class, InjectorImpl.class, Dependency.class).toMethodDescriptorString();
-    private static final String HANDLE_DESCRIPTOR = OBJECT_FACTORY_TYPE.toMethodDescriptorString();
+    private static final Type SCOPED_PROVIDER_TYPE =
+        Type.getType(ProviderToInternalFactoryAdapter.class);
+    private static final MethodType CTOR_TYPE =
+        methodType(void.class, InjectorImpl.class, InternalFactory.class, Dependency.class);
+
+    private static final MethodType SCOPED_CTOR_TYPE =
+        methodType(void.class, InjectorImpl.class, InternalFactory.class);
+
     private static final Handle BOOSTRAP_HANDLE =
         new Handle(
             H_INVOKESTATIC,
@@ -632,6 +669,9 @@ public final class InternalMethodHandles {
 
     private static final ConcurrentHashMap<String, Integer> nameUses = new ConcurrentHashMap<>();
 
+    // These are character that are not allowed as part of an unqualified class name part.
+    private static final CharMatcher NAME_MANGLE_CHARS = CharMatcher.anyOf("[].;/<>");
+
     /**
      * Defines and constructs a stateless provider class that delegates to the given handleCreator.
      *
@@ -639,15 +679,19 @@ public final class InternalMethodHandles {
      */
     static Provider<?> defineClass(
         InjectorImpl injector,
+        InternalFactory<?> factory,
         Dependency<?> dependency,
-        String name,
-        Supplier<MethodHandle> handleCreator,
-        String toString) {
+        Supplier<CallSite> handleCreator,
+        boolean isScoped) {
       // Even if we are using the anonymous classloading mechanisms we still need to pick a name,
       // it just ends up being ignored.
+      var baseType = isScoped ? SCOPED_PROVIDER_TYPE : PROVIDER_TYPE;
+      var name = dependency.getKey().getTypeLiteral().getRawType().getSimpleName();
+      // We need to mangle this name to avoid `[]` characters, for now we just remove them.
+      name = NAME_MANGLE_CHARS.removeFrom(name);
       String actualName =
-          InternalMethodHandles.class.getPackageName().replace('.', '/')
-              + "/GeneratedProvider$"
+          baseType.getInternalName()
+              + "$"
               + name
               + "$"
               + nameUses.compute(name, (key, value) -> value == null ? 0 : value + 1);
@@ -658,7 +702,7 @@ public final class InternalMethodHandles {
           ACC_PUBLIC | ACC_SUPER | ACC_FINAL,
           actualName,
           /* signature= */ null,
-          PROVIDER_TYPE.getInternalName(),
+          baseType.getInternalName(),
           /* interfaces= */ null);
       // Allocate a static field to store the handle creator or the resolved callsite.
       cw.visitField(
@@ -667,61 +711,52 @@ public final class InternalMethodHandles {
           "Ljava/lang/Object;",
           /* signature= */ null,
           /* value= */ null);
+      var ctorType = isScoped ? SCOPED_CTOR_TYPE : CTOR_TYPE;
       {
         // generate a default constructor
-        // This is just a default constructor that calls the Object constructor.
-        // basically `super();`
+        // This is just a default constructor that calls the super class constructor.
+        // basically `super(injector, factory, dependency?);`
+        int stackHeight = 0;
         MethodVisitor mv =
             cw.visitMethod(
-                ACC_PUBLIC, "<init>", CTOR_TYPE, /* signature= */ null, /* exceptions= */ null);
-        mv.visitCode();
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitVarInsn(ALOAD, 1);
-        mv.visitVarInsn(ALOAD, 2);
-        mv.visitMethodInsn(
-            INVOKESPECIAL,
-            PROVIDER_TYPE.getInternalName(),
-            "<init>",
-            CTOR_TYPE,
-            /* isInterface= */ false);
-        mv.visitInsn(RETURN);
-        mv.visitMaxs(
-            /* maxStack= */ 3, // Just pushing the parameters
-            /* maxLocals= */ 3 // all the parameters
-            );
-        mv.visitEnd();
-      }
-      {
-        // generate a toString() method
-        // This just returns the the `toString` argument.
-        MethodVisitor mv =
-            cw.visitMethod(
-                ACC_PUBLIC | ACC_FINAL,
-                "toString",
-                "()Ljava/lang/String;",
+                ACC_PUBLIC,
+                "<init>",
+                ctorType.toMethodDescriptorString(),
                 /* signature= */ null,
                 /* exceptions= */ null);
         mv.visitCode();
-        mv.visitLdcInsn(toString);
-        mv.visitInsn(ARETURN);
+        mv.visitVarInsn(ALOAD, stackHeight++); // this
+        mv.visitVarInsn(ALOAD, stackHeight++); // injector
+        mv.visitVarInsn(ALOAD, stackHeight++); // factory
+        if (!isScoped) {
+          mv.visitVarInsn(ALOAD, stackHeight++); // maybe dependency
+        }
+        mv.visitMethodInsn(
+            INVOKESPECIAL,
+            baseType.getInternalName(),
+            "<init>",
+            ctorType.toMethodDescriptorString(),
+            /* isInterface= */ false);
+        mv.visitInsn(RETURN);
         mv.visitMaxs(
-            /* maxStack= */ 1, // Just pushing the string constant
-            /* maxLocals= */ 1 // Just the 'this' variable.
+            /* maxStack= */ stackHeight, // Just pushing the parameters
+            /* maxLocals= */ stackHeight // all the parameters
             );
         mv.visitEnd();
       }
       {
+        String descriptor = OBJECT_FACTORY_TYPE.toMethodDescriptorString();
         // generate a doGet() method
         MethodVisitor mv =
             cw.visitMethod(
                 ACC_PROTECTED | ACC_FINAL,
                 "doGet",
-                OBJECT_FACTORY_TYPE.toMethodDescriptorString(),
+                descriptor,
                 /* signature= */ null,
                 /* exceptions= */ null);
         mv.visitCode();
         mv.visitVarInsn(ALOAD, 1); // ctx
-        mv.visitInvokeDynamicInsn("get", HANDLE_DESCRIPTOR, BOOSTRAP_HANDLE);
+        mv.visitInvokeDynamicInsn("get", descriptor, BOOSTRAP_HANDLE);
         mv.visitInsn(ARETURN);
         mv.visitMaxs(
             /* maxStack= */ 1, // Just the return value of the dynamic call
@@ -736,7 +771,9 @@ public final class InternalMethodHandles {
       try {
         clazz =
             ClassDefining.defineCollectable(
-                /* lifetimeOwner= */ injector, GeneratedProvider.class, cw.toByteArray());
+                /* lifetimeOwner= */ injector,
+                isScoped ? ProviderToInternalFactoryAdapter.class : GeneratedProvider.class,
+                cw.toByteArray());
       } catch (Exception e) {
         throw new LinkageError("failed to define class", e);
       }
@@ -746,16 +783,255 @@ public final class InternalMethodHandles {
         throw new LinkageError("missing or inaccessible field: definer", e);
       }
       try {
+        MethodHandle ctor = lookup.findConstructor(clazz, ctorType);
         return (Provider<?>)
-            clazz
-                .getConstructor(InjectorImpl.class, Dependency.class)
-                .newInstance(injector, dependency);
-      } catch (ReflectiveOperationException e) {
+            (isScoped
+                ? ctor.invoke(injector, factory)
+                : ctor.invoke(injector, factory, dependency));
+      } catch (Throwable e) {
         throw new LinkageError("missing or inaccessible constructor", e);
       }
     }
 
     private ProviderMaker() {}
+  }
+
+  /**
+   * A callsite to implement the logic for the implementation of InternalFactories that are being
+   * scoped when circular proxies are enabled.
+   *
+   * <p>To support circular proxies the {@link InternalFactoryToScopedProviderAdapter} will call
+   * {@link InternalContext#setDependency} to propagate dependency information across the scope
+   * implementation. This allows proxies to be constructed for super-interfaces that are needed at
+   * the injection point rather than the concrete type of the binding.
+   *
+   * <p>This uses a self-patching callsite that will re-patch whenever we see a new dependency. When
+   * a new dependency is seen the callsite will call through to the {@link #fallback} method which
+   * will compute the new handle and update the callsite with it. This is threadsafe because handle
+   * allocation is done under a lock and we are essentially accumulating new handles so prior ones
+   * remain available. So even if multiple threads are racing to update the callsite, they will all
+   * end up with the same set of handles.
+   */
+  private static final class ScopedDelegateCallSite extends MutableCallSite {
+    private static final MethodHandle FALLBACK_GET_HANDLE =
+        findVirtualOrDie(
+            ScopedDelegateCallSite.class,
+            "fallback",
+            methodType(Object.class, InternalContext.class));
+    private static final MethodHandle DEPENDENCY_EQUALS_HANDLE =
+        findStaticOrDie(
+            ScopedDelegateCallSite.class,
+            "dependencyEquals",
+            methodType(boolean.class, InternalContext.class, Dependency.class, Dependency.class));
+    private static final MethodHandle INVOKE_HANDLE_HANDLE =
+        findStaticOrDie(
+            ScopedDelegateCallSite.class,
+            "invokeHandle",
+            methodType(
+                Object.class,
+                ImmutableMap.class,
+                MethodHandle[].class,
+                Dependency.class,
+                MethodHandle.class,
+                InternalContext.class));
+
+    private static final MethodHandle SWITCH_KEY_HANDLE =
+        findStaticOrDie(
+            ScopedDelegateCallSite.class,
+            "switchKey",
+            methodType(int.class, ImmutableMap.class, Dependency.class, InternalContext.class));
+
+    /** {@link MethodHandles#tableSwitch} if it is available. */
+    @Nullable private static final MethodHandle TABLE_SWITCH_HANDLE;
+
+    static {
+      MethodHandle handle;
+      try {
+        handle =
+            lookup.findStatic(
+                MethodHandles.class,
+                "tableSwitch",
+                methodType(MethodHandle.class, MethodHandle.class, MethodHandle[].class));
+      } catch (Throwable t) {
+        handle = null;
+      }
+      TABLE_SWITCH_HANDLE = handle;
+    }
+
+    private final InternalFactory<?> factory;
+    private final MethodHandle fallback;
+
+    /**
+     * A dependency object for factory being scoped. So for:
+     * `bind(X.class).to(Y.class).in(Scopes.SINGLETON)`, we would allocate one of these for the `Y`
+     * provider and the this dependency object would be {@code Dependency.get(Key.get(Y.class))}.
+     *
+     * <p>This is needed because {@link InternalFactory#getHandle} requires a non-null dependency
+     * object (unlike {@link InternalFactory#get} which only sometimes requires it), so if scoped
+     * providers interacted with outside an injector context this will be the dependency that is
+     * used.
+     */
+    private final Dependency<?> bindingDependency;
+
+    // We update this map under a lock in a 'copy on write' fashion.
+    @GuardedBy("this")
+    private ImmutableMap<Dependency<?>, Integer> handleIndices = ImmutableMap.of();
+
+    @GuardedBy("this")
+    private MethodHandle[] handles = new MethodHandle[0];
+
+    ScopedDelegateCallSite(InternalFactory<?> factory, Dependency<?> bindingDependency) {
+      super(OBJECT_FACTORY_TYPE);
+      this.factory = factory;
+      this.bindingDependency = bindingDependency;
+      this.fallback = FALLBACK_GET_HANDLE.bindTo(this);
+      setTarget(fallback);
+    }
+
+    @Keep
+    Object fallback(InternalContext context) throws Throwable {
+      MethodHandle handle;
+      synchronized (this) {
+        Dependency<?> dependency = getDependency(context, bindingDependency);
+        int handleIndex = handleIndices.getOrDefault(dependency, -1);
+        if (handleIndex == -1) {
+          // Always pretend that we are a linked binding, to support
+          // scoping implicit bindings.  If we are not actually a linked
+          // binding, we'll fail properly elsewhere in the chain.
+          handle =
+              castReturnToObject(
+                  factory.getHandle(new LinkageContext(), dependency, /* linked= */ true));
+          handleIndices =
+              ImmutableMap.<Dependency<?>, Integer>builder()
+                  .putAll(handleIndices)
+                  .put(dependency, handleIndices.size())
+                  .buildOrThrow();
+          handles = ObjectArrays.concat(handles, handle);
+          // Now rebuild the target
+          // Special case for a single handle, we can just use a guard.  This case is very common
+          // for bindings that are scoped and bound to a single interface.
+          // Generate `dependencyEquals(ctx, dependency) ? handle(ctx) : fallback(ctx)`
+          if (handles.length == 1) {
+            // This is a handle of type (InternalContext) -> boolean
+            var isEqual =
+                MethodHandles.insertArguments(
+                    DEPENDENCY_EQUALS_HANDLE, 1, bindingDependency, dependency);
+            setTarget(MethodHandles.guardWithTest(isEqual, handle, fallback));
+          } else {
+            // If we have multiple handles we need to pick the right one based on the dependency.
+            // in jdk17+ we can use a switch statement, but in jdk11 we need to use a simpler
+            // approach of a dispatch through a map and an Array.
+            if (TABLE_SWITCH_HANDLE != null) {
+              // Generate a switch. Switches always take an `int` as the first argument (the switch
+              // expression).  We don't actually use it in the cases, so we drop it.
+              // The function will look like
+              // Object switch(InternalContext ctx) {
+              //   int index = getSwitchIndex(handles, defaultDependency, ctx);
+              //   switch (index) {
+              //     case 0:
+              //       return handle0(ctx)
+              //     ...
+              //     case 1:
+              //       return handles1(ctx);
+              //     ...
+              //     default:
+              //       return callsite.fallback(ctx);
+              //   }
+              // }
+              // NOTE: This pattern is modeled after how the JVM generates switch statements for
+              // enums and simple class patterns.
+              var switchHandle =
+                  (MethodHandle)
+                      TABLE_SWITCH_HANDLE.invokeExact(
+                          /* fallback= */ MethodHandles.dropArguments(fallback, 0, int.class),
+                          /* targets= */ stream(handles)
+                              .map(h -> MethodHandles.dropArguments(h, 0, int.class))
+                              .toArray(MethodHandle[]::new));
+              var getIndex =
+                  MethodHandles.insertArguments(
+                      SWITCH_KEY_HANDLE, 0, handleIndices, bindingDependency);
+              // This will return a handle of type (InternalContext) -> MethodHandle
+              var executeSwitch = MethodHandles.foldArguments(switchHandle, getIndex);
+              setTarget(executeSwitch);
+            } else {
+              // If we cannot use a switch statement, we need to use a dispatch through the array.
+              // This is the jdk11 path. Generates:
+              // `invokeHandle(handles, handleIndices, bindingDependency, fallback, ctx)`
+              //
+              // The main alternative is to generate a set of guardWithTest handles that 'binary
+              // search' for the matching handle.  This would be more efficient than the
+              // exactInvoker, but would be more complicated to generate. The table switch path
+              // above should trigger most of the time so optimizing this path probably isn't that
+              // important.
+              var getHandle =
+                  MethodHandles.insertArguments(
+                      INVOKE_HANDLE_HANDLE, 0, handleIndices, handles, bindingDependency, fallback);
+              setTarget(getHandle);
+            }
+          }
+          // Ensure all callers see the update.
+          MutableCallSite.syncAll(new MutableCallSite[] {this});
+        } else {
+          handle = handles[handleIndex];
+        }
+      }
+      // For the current invocation just invoke the delegate handle directly.
+      return handle.invokeExact(context);
+    }
+
+    /**
+     * A helper to get the dependency from the context or the default dependency if that isn't
+     * available.
+     */
+    private static Dependency<?> getDependency(
+        InternalContext context, Dependency<?> bindingDependency) {
+      var dep = context.getDependency();
+      if (dep == null) {
+        // We need to handle null in case the provider is being called directly but outside of its
+        // original call-stack, so the InternalContext may not have a dependency set.
+        dep = bindingDependency;
+      }
+      return dep;
+    }
+
+    /** Used for the guard in the case that we have constructed a single delegate handle. */
+    @Keep
+    static boolean dependencyEquals(
+        InternalContext context, Dependency<?> bindingDependency, Dependency<?> dependency) {
+      return dependency.equals(getDependency(context, bindingDependency));
+    }
+
+    /**
+     * Used for the guard in the case that we have many handles and no `tableSwitch` support.
+     *
+     * <p>The caller should use a `MethodHandle.exactInvoker` to invoke the handle.
+     */
+    @Keep
+    static Object invokeHandle(
+        ImmutableMap<Dependency<?>, Integer> handleIndices,
+        MethodHandle[] handles,
+        Dependency<?> bindingDependency,
+        MethodHandle fallback,
+        InternalContext context)
+        throws Throwable {
+      int switchKey = switchKey(handleIndices, bindingDependency, context);
+      return switchKey == -1
+          ? fallback.invokeExact(context)
+          : handles[switchKey].invokeExact(context);
+    }
+
+    /**
+     * Used for the switch statement in the case that we have many handles and `tableSwitch`
+     * support.
+     */
+    @Keep
+    static int switchKey(
+        ImmutableMap<Dependency<?>, Integer> handleIndices,
+        Dependency<?> bindingDependency,
+        InternalContext context) {
+      var index = handleIndices.get(getDependency(context, bindingDependency));
+      return index == null ? -1 : index;
+    }
   }
 
   /**
@@ -779,14 +1055,13 @@ public final class InternalMethodHandles {
       synchronized (lookup.getClass()) {
         handleCreator = varHandle.get();
         if (handleCreator instanceof Supplier) {
-          ConstantCallSite callSite =
-              new ConstantCallSite((MethodHandle) ((Supplier) handleCreator).get());
+          CallSite callSite = (CallSite) ((Supplier) handleCreator).get();
           varHandle.setVolatile((Object) callSite);
           return callSite;
         }
       }
     }
-    return (ConstantCallSite) handleCreator;
+    return (CallSite) handleCreator;
   }
 
   // The `throws` clause tricks Java type inference into deciding that E must be some subtype of

@@ -26,6 +26,7 @@ import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.UntargettedBinding;
+import java.lang.invoke.MethodHandle;
 
 final class UntargettedBindingImpl<T> extends BindingImpl<T> implements UntargettedBinding<T> {
 
@@ -37,6 +38,12 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
         new InternalFactory<T>() {
           @Override
           public T get(InternalContext context, Dependency<?> dependency, boolean linked) {
+            throw new AssertionError();
+          }
+
+          @Override
+          public MethodHandle getHandle(
+              LinkageContext context, Dependency<?> dependency, boolean linked) {
             throw new AssertionError();
           }
         },
