@@ -36,7 +36,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.Keep;
 import com.google.inject.Provider;
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.aop.ClassDefining;
 import com.google.inject.spi.Dependency;
@@ -490,22 +489,17 @@ public final class InternalMethodHandles {
    * }</pre>
    */
   static MethodHandle tryStartConstruction(
-      InjectorOptions options,
-      MethodHandle delegate,
-      Dependency<?> dependency,
-      int circularFactoryId) {
+      MethodHandle delegate, Dependency<?> dependency, int circularFactoryId) {
+    // NOTE: we cannot optimize this further by assuming that the return value is always null when
+    // circular proxies are disabled, because if parent and child injectors differ in that setting
+    // then injectors with circularProxiesDisabled may still run in a context where they are enabled
+    // and visa versa.
 
     // (InternalContext)->Object
     var tryStartConstruction =
         MethodHandles.insertArguments(
             TRY_START_CONSTRUCTION_HANDLE, 1, circularFactoryId, dependency);
-    if (options.disableCircularProxies
-        || !dependency.getKey().getTypeLiteral().getRawType().isInterface()) {
-      // When proxies are disabled or the class is not an interface we don't need to check the
-      // result of tryStartConstruction since it will always return null or throw.
-      tryStartConstruction = dropReturn(tryStartConstruction);
-      return MethodHandles.foldArguments(delegate, tryStartConstruction);
-    }
+
     // This takes the first Object parameter and casts it to the return type of the delegate.
     // It also ignores all the other parameters.
     var returnProxy =
@@ -565,7 +559,6 @@ public final class InternalMethodHandles {
       InternalFactory<T> factory, InjectorImpl injector, Dependency<?> dependency) {
     // This is safe due to the implementation of InternalFactory.getHandle which we cannot enforce
     // with generic type constraints.
-    InjectorOptions options = injector.options;
     @SuppressWarnings("unchecked")
     Provider<T> typedProvider =
         (Provider)
@@ -580,7 +573,7 @@ public final class InternalMethodHandles {
                 // enough.
                 () ->
                     factory
-                        .getHandle(new LinkageContext(options), dependency, /* linked= */ false)
+                        .getHandle(new LinkageContext(), dependency, /* linked= */ false)
                         .asType(OBJECT_FACTORY_TYPE),
                 factory.toString());
     return typedProvider;

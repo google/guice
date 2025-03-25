@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.errorprone.annotations.Keep;
 import com.google.inject.Key;
-import com.google.inject.Stage;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -34,18 +33,9 @@ public final class LinkageContextTest {
   private static final Dependency<?> DEP = Dependency.get(Key.get(String.class));
   private static final InternalFactory<?> FACTORY = ConstantFactory.create("Hello World", "source");
 
-  private final LinkageContext context =
-      new LinkageContext(
-          new InjectorImpl.InjectorOptions(
-              // Values are not important for this test.
-              Stage.PRODUCTION,
-              /* jitDisabled= */ false,
-              /* disableCircularProxies= */ true,
-              /* atInjectRequired= */ false,
-              /* exactBindingAnnotationsRequired= */ true));
-
   @Test
   public void testMakeHandle_returnsHandle() throws Throwable {
+    LinkageContext context = new LinkageContext();
     String result =
         (String)
             context
@@ -74,6 +64,7 @@ public final class LinkageContextTest {
   // call.
   @Test
   public void testMakeHandle_resolvesCycles() throws Throwable {
+    LinkageContext context = new LinkageContext();
     int[] callCount = new int[1];
     MethodHandle[] recursiveHandle = new MethodHandle[1];
     MethodHandle handle =
@@ -118,6 +109,7 @@ public final class LinkageContextTest {
 
   @Test
   public void testMakeHandle_isRecursive() throws Throwable {
+    LinkageContext context = new LinkageContext();
     int[] callCount = new int[1];
     MethodHandle handle =
         context.makeHandle(

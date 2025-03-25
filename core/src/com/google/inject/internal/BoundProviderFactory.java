@@ -72,7 +72,6 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
             InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
                     circularGetHandle(
                         providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
-                        context.options(),
                         dependency,
                         provisionCallback),
                     providerKey)

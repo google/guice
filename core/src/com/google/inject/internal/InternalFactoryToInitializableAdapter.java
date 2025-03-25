@@ -53,7 +53,6 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
     return circularGetHandle(
         InternalMethodHandles.initializableFactoryGetHandle(
             initializable, jakarta.inject.Provider.class),
-        context.options(),
         dependency,
         provisionCallback);
   }

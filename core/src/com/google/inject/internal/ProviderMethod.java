@@ -241,8 +241,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
         () -> {
           MethodHandle handle = super.getHandle(context, dependency, linked);
           // Handle circular proxies.
-          return InternalMethodHandles.tryStartConstruction(
-              context.options(), handle, dependency, circularFactoryId);
+          return InternalMethodHandles.tryStartConstruction(handle, dependency, circularFactoryId);
         });
   }
 

@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
 /**
@@ -881,5 +882,55 @@ public class CircularDependencyTest extends TestCase {
             "Found a circular dependency involving CircularDependencyTest$L, and circular"
                 + " dependencies are disabled");
     assertEquals("parent", parent.getInstance(parentKey));
+  }
+
+  public void testFromParentToChildChildWithDisabledCircularProxies_closeOverProvider() {
+    var parentKey = Key.get(String.class);
+    AtomicReference<Provider<String>> childProvider = new AtomicReference<>();
+    Injector parent =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Provides
+              String provideString() {
+                return childProvider.get().get();
+              }
+            });
+    var childKey = Key.get(String.class, named("child"));
+    Injector child =
+        parent.createChildInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                binder().disableCircularProxies();
+              }
+
+              @Provides
+              @Named("child")
+              String provideString(L ignored) {
+                return "child";
+              }
+            });
+    childProvider.set(child.getProvider(childKey));
+    // If we directly call child.getInstance(childKey) we will get a ProvisionException because the
+    // child injector has disabled circular proxies.
+    var pe = assertThrows(ProvisionException.class, () -> child.getInstance(childKey));
+    assertThat(pe)
+        .hasMessageThat()
+        .contains(
+            "Found a circular dependency involving CircularDependencyTest$L, and circular"
+                + " dependencies are disabled");
+    // If we launder it through a parent injector which hasn't disabled circular proxies, we should
+    // get the value.
+    // TODO(lukes): This behavior is undesireable, the current definition of InjectorOptions is
+    // the problem.  Most InjectorOptions define how bindings are created, but
+    // `disableCircularProxies` defines how provisions execute which means it can flow across
+    // injectors.  The best solution here would probably be to do one of the following:
+    // 1. Only allow `disableCircularProxies` to be set on the root injector
+    // 2. Model this as an `InternalFlag` so that it is JVM wide.
+    // 3. Change how InternalContext works so that `enterContext` always resets the
+    // disableCircularProxies flag.
+    // #1 is probably the easiest solution to implement but it is a breaking change that would
+    // require applications to change.
+    assertEquals("child", parent.getInstance(parentKey));
   }
 }

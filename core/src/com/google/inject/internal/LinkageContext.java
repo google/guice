@@ -39,16 +39,6 @@ final class LinkageContext {
   private final IdentityHashMap<InternalFactory<?>, Object> linkingFactories =
       new IdentityHashMap<>();
 
-  private final InjectorImpl.InjectorOptions options;
-
-  LinkageContext(InjectorImpl.InjectorOptions options) {
-    this.options = options;
-  }
-
-  InjectorImpl.InjectorOptions options() {
-    return options;
-  }
-
   /**
    * Creates a MethodHandle for a 'circular' factory in a way that resolve cycles.
    *

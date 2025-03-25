@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.invoke.MethodType.methodType;
 
 import com.google.inject.Key;
-import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -75,7 +74,6 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    */
   protected MethodHandle circularGetHandleImmediate(
       MethodHandle providerHandle,
-      InjectorOptions options,
       Dependency<?> dependency,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
 
@@ -87,8 +85,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
             invokeProvider, dependency, provisionCallback);
     // Start construction and possibly return a proxy.
     invokeProvider =
-        InternalMethodHandles.tryStartConstruction(
-            options, invokeProvider, dependency, circularFactoryId);
+        InternalMethodHandles.tryStartConstruction(invokeProvider, dependency, circularFactoryId);
     return invokeProvider;
   }
 
@@ -100,7 +97,6 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    */
   protected MethodHandle circularGetHandle(
       MethodHandle providerHandle,
-      InjectorOptions options,
       Dependency<?> dependency,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
     // The combinators below assume this type.
@@ -125,7 +121,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
             MethodHandles.identity(jakarta.inject.Provider.class), 0, InternalContext.class);
     // (InternalContext, Provider) ->T
     var invokeProvider =
-        circularGetHandleImmediate(providerPlaceholder, options, dependency, provisionCallback);
+        circularGetHandleImmediate(providerPlaceholder, dependency, provisionCallback);
     // To call `fold` we need to permute the arguments so that the provider is the first argument.
     // (Provider, InternalContext) ->T
     invokeProvider =

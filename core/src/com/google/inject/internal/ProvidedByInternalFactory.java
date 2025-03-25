@@ -85,7 +85,6 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
             InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
                     circularGetHandle(
                         providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
-                        context.options(),
                         dependency,
                         provisionCallback),
                     providerKey)
