@@ -16,12 +16,18 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.InternalMethodHandles.findStaticOrDie;
+import static com.google.inject.internal.InternalMethodHandles.findVirtualOrDie;
+import static java.lang.invoke.MethodType.methodType;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import javax.annotation.Nullable;
 
 /**
@@ -65,17 +71,25 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
   @Override
   public void injectMembers(T instance) {
+    // TODO(b/366058184): investigate a methodhandle version of this to support explicit members
+    // injection requests.
     if (instance == null) {
       return;
     }
-    TypeLiteral<T> localTypeLiteral = typeLiteral;
     try (InternalContext context = injector.enterContext()) {
-      injectAndNotify(context, instance, /* provisionCallback= */ null, localTypeLiteral, false);
+      injectMembers(instance, context);
     } catch (InternalProvisionException ipe) {
-      throw ipe.addSource(localTypeLiteral).toProvisionException();
+      throw ipe.addSource(typeLiteral).toProvisionException();
     }
   }
 
+  // Exposed for use in the constructor injector.
+  void injectMembers(T instance, InternalContext context) throws InternalProvisionException {
+    doInjectMembers(instance, context, /* toolableOnly= */ false);
+    notifyListeners(instance);
+  }
+
+  // Exposed for use in the Initializer for `toInstance` bindings.
   void injectAndNotify(
       InternalContext context,
       final T instance,
@@ -88,11 +102,11 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
           context,
           /* dependency= */ null, // not used
           (ctx, dep) -> {
-            injectMembers(instance, ctx, toolableOnly);
+            doInjectMembers(instance, ctx, toolableOnly);
             return instance;
           });
     } else {
-      injectMembers(instance, context, toolableOnly);
+      doInjectMembers(instance, context, toolableOnly);
     }
 
     // TODO: We *could* notify listeners too here,
@@ -108,7 +122,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     }
   }
 
-  void notifyListeners(T instance) throws InternalProvisionException {
+  private void notifyListeners(T instance) throws InternalProvisionException {
     ImmutableList<InjectionListener<? super T>> localInjectionListeners = injectionListeners;
     if (localInjectionListeners == null) {
       // no listeners
@@ -126,7 +140,99 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     }
   }
 
-  void injectMembers(T t, InternalContext context, boolean toolableOnly)
+  /**
+   * Returns a method handle that injects all members. The signature is {@code (T, InternalContext)
+   * -> void}
+   */
+  MethodHandle getInjectMembersAndNotifyListenersHandle(LinkageContext linkageContext) {
+    var handle = MethodHandles.empty(methodType(void.class, Object.class, InternalContext.class));
+    if (memberInjectors != null) {
+      for (SingleMemberInjector injector : memberInjectors) {
+        handle = MethodHandles.foldArguments(injector.getInjectHandle(linkageContext), handle);
+      }
+    }
+    if (userMembersInjectors != null) {
+      for (MembersInjector<? super T> injector : userMembersInjectors) {
+        var userHandle = INJECT_MEMBERS_HANDLE.bindTo(injector);
+        // Wrap it in a try..catch.
+        // Catch RuntimeException and rethrow as InternalProvisionException.errorInUserInjector
+        // (RuntimeException)->InternalProvisionException
+        var rethrow =
+            MethodHandles.insertArguments(ERROR_IN_USER_INJECTOR_HANDLE, 0, injector, typeLiteral);
+        // Throw that exception.
+        // (RuntimeException)->void
+        rethrow =
+            MethodHandles.filterArguments(
+                MethodHandles.throwException(void.class, InternalProvisionException.class),
+                0,
+                rethrow);
+        // Catch any exceptions and rethrow it.
+        userHandle = MethodHandles.catchException(userHandle, RuntimeException.class, rethrow);
+        // match the expected signature of the method.
+        userHandle = MethodHandles.dropArguments(userHandle, 1, InternalContext.class);
+        // Execute prior and then this listener.
+        handle = MethodHandles.foldArguments(userHandle, handle);
+      }
+    }
+
+    // Now notify listeners.
+    if (injectionListeners != null) {
+      for (InjectionListener<? super T> listener : injectionListeners) {
+        var listenerHandle = AFTER_INJECTION_HANDLE.bindTo(listener);
+        // Wrap it in a try..catch.
+        // Catch RuntimeException and rethrow as
+        // InternalProvisionException.errorNotifyingInjectionListener
+        // (RuntimeException)->InternalProvisionException
+        var rethrow =
+            MethodHandles.insertArguments(
+                ERROR_NOTIFYING_INJECTION_LISTENER_HANDLE, 0, listener, typeLiteral);
+        // (RuntimeException)->void
+        rethrow =
+            MethodHandles.filterArguments(
+                MethodHandles.throwException(void.class, InternalProvisionException.class),
+                0,
+                rethrow);
+
+        listenerHandle =
+            MethodHandles.catchException(listenerHandle, RuntimeException.class, rethrow);
+        // match the expected signature of the method.
+        listenerHandle = MethodHandles.dropArguments(listenerHandle, 1, InternalContext.class);
+        // Execute prior and then this listener.
+        handle = MethodHandles.foldArguments(listenerHandle, handle);
+      }
+    }
+
+    return handle;
+  }
+
+  private static final MethodHandle INJECT_MEMBERS_HANDLE =
+      findVirtualOrDie(
+          MembersInjector.class, "injectMembers", methodType(void.class, Object.class));
+
+  private static final MethodHandle AFTER_INJECTION_HANDLE =
+      findVirtualOrDie(
+          InjectionListener.class, "afterInjection", methodType(void.class, Object.class));
+
+  private static final MethodHandle ERROR_IN_USER_INJECTOR_HANDLE =
+      findStaticOrDie(
+          InternalProvisionException.class,
+          "errorInUserInjector",
+          methodType(
+              InternalProvisionException.class,
+              MembersInjector.class,
+              TypeLiteral.class,
+              RuntimeException.class));
+  private static final MethodHandle ERROR_NOTIFYING_INJECTION_LISTENER_HANDLE =
+      findStaticOrDie(
+          InternalProvisionException.class,
+          "errorNotifyingInjectionListener",
+          methodType(
+              InternalProvisionException.class,
+              InjectionListener.class,
+              TypeLiteral.class,
+              RuntimeException.class));
+
+  private void doInjectMembers(T t, InternalContext context, boolean toolableOnly)
       throws InternalProvisionException {
     ImmutableList<SingleMemberInjector> localMembersInjectors = memberInjectors;
     if (localMembersInjectors != null) {

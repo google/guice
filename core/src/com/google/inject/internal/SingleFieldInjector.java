@@ -16,9 +16,14 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
+import static java.lang.invoke.MethodType.methodType;
+
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 
 /** Sets an injectable field. */
@@ -26,7 +31,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
   final Field field;
   final InjectionPoint injectionPoint;
   final Dependency<?> dependency;
-  final BindingImpl<?> binding;
+  final InternalFactory<?> factory;
 
   public SingleFieldInjector(InjectorImpl injector, InjectionPoint injectionPoint, Errors errors)
       throws ErrorsException {
@@ -36,7 +41,10 @@ final class SingleFieldInjector implements SingleMemberInjector {
 
     // Ewwwww...
     field.setAccessible(true);
-    binding = injector.getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT);
+    factory =
+        injector
+            .getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT)
+            .getInternalFactory();
   }
 
   @Override
@@ -47,12 +55,35 @@ final class SingleFieldInjector implements SingleMemberInjector {
   @Override
   public void inject(InternalContext context, Object o) throws InternalProvisionException {
     try {
-      Object value = binding.getInternalFactory().get(context, dependency, false);
+      Object value = factory.get(context, dependency, /* linked= */ false);
       field.set(o, value);
     } catch (InternalProvisionException e) {
       throw e.addSource(dependency);
     } catch (IllegalAccessException e) {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     }
+  }
+
+  @Override
+  public MethodHandle getInjectHandle(LinkageContext linkageContext) {
+    // unreflect should always succeed due to the setAccessible call in the constructor.
+    // (T, V)->void
+    var handle = InternalMethodHandles.unreflectSetter(field);
+    // Add an ignored receiver if there are no parameters (aka it is a static field).
+    if (handle.type().parameterCount() == 0) {
+      handle = MethodHandles.dropArguments(handle, 0, Object.class);
+    }
+    // Catch and rethrow exceptions from our dependency factory.
+    var injectHandle =
+        InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            factory.getHandle(linkageContext, dependency, /* linked= */ false), dependency);
+    // We might need a boxing conversion or some other type conversion here to satisfy a generic.
+    injectHandle = castReturnTo(injectHandle, handle.type().parameterType(1));
+    // Call the injectHandle and pass it to the field handle.
+    // (T, InternalContext)->void
+    handle = MethodHandles.filterArguments(handle, 1, injectHandle);
+    // (Object, InternalContext)->void
+    handle = handle.asType(methodType(void.class, Object.class, InternalContext.class));
+    return handle;
   }
 }

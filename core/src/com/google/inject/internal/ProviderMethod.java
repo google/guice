@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -310,16 +311,11 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     return Objects.hashCode(method, annotation);
   }
 
-
   /**
    * A {@link ProviderMethod} implementation that uses bytecode generation to invoke the provider
    * method.
    */
   private static final class FastClassProviderMethod<T> extends ProviderMethod<T> {
-    private static final MethodHandle BIFUNCTION_APPLY_HANDLE =
-        InternalMethodHandles.findVirtualOrDie(
-            BiFunction.class, "apply", methodType(Object.class, Object.class, Object.class));
-
     final BiFunction<Object, Object[], Object> fastMethod;
 
     FastClassProviderMethod(

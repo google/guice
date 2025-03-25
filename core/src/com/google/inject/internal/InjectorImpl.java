@@ -54,7 +54,6 @@ import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -1110,12 +1109,6 @@ final class InjectorImpl implements Injector, Lookups {
     BindingImpl<? extends T> binding =
         getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT);
     return new SingleParameterInjector<T>(dependency, binding);
-  }
-
-  /** Invokes a method. */
-  interface MethodInvoker {
-    Object invoke(Object target, Object... parameters)
-        throws IllegalAccessException, InvocationTargetException;
   }
 
   /** Cached constructor injectors for each type */

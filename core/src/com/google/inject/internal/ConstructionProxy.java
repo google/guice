@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,6 +34,12 @@ interface ConstructionProxy<T> {
 
   /** Constructs an instance of {@code T} for the given arguments. */
   T newInstance(Object... arguments) throws InvocationTargetException;
+
+  /**
+   * Returns the method handle for the constructor, using the supplied handles to provide
+   * parameters.
+   */
+  MethodHandle getConstructHandle(MethodHandle[] parameterHandles);
 
   /** Returns the injection point for this constructor. */
   InjectionPoint getInjectionPoint();

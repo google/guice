@@ -16,14 +16,21 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
+import static java.lang.invoke.MethodType.methodType;
+import static java.util.Arrays.stream;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -45,6 +52,16 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
+    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+      MethodHandle target = InternalMethodHandles.unreflectConstructor(constructor);
+      // If construction fails fall through to the fastclass approach which can
+      // access more constructors.  See comments in ProviderMethod on how to change
+      // Guice APIs to better support this.
+      if (target != null) {
+        return new MethodHandleProxy<T>(injectionPoint, constructor, target);
+      }
+    }
+
     if (InternalFlags.isBytecodeGenEnabled()) {
       try {
         BiFunction<Object, Object[], Object> fastConstructor =
@@ -56,22 +73,47 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
         /* fall-through */
       }
     }
-
+    if (!Modifier.isPublic(constructor.getDeclaringClass().getModifiers())
+        || !Modifier.isPublic(constructor.getModifiers())) {
+      constructor.setAccessible(true);
+    }
     return new ReflectiveProxy<T>(injectionPoint, constructor);
   }
 
-  /** A {@link ConstructionProxy} that uses bytecode generation to invoke the constructor. */
-  private static final class FastClassProxy<T> implements ConstructionProxy<T> {
+  private abstract static class DefaultConstructorProxy<T> implements ConstructionProxy<T> {
     final InjectionPoint injectionPoint;
     final Constructor<T> constructor;
+
+    DefaultConstructorProxy(InjectionPoint injectionPoint, Constructor<T> constructor) {
+      this.injectionPoint = injectionPoint;
+      this.constructor = constructor;
+    }
+
+    @Override
+    public InjectionPoint getInjectionPoint() {
+      return injectionPoint;
+    }
+
+    @Override
+    public Constructor<T> getConstructor() {
+      return constructor;
+    }
+
+    @Override
+    public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
+      return ImmutableMap.of();
+    }
+  }
+
+  /** A {@link ConstructionProxy} that uses bytecode generation to invoke the constructor. */
+  private static final class FastClassProxy<T> extends DefaultConstructorProxy<T> {
     final BiFunction<Object, Object[], Object> fastConstructor;
 
     FastClassProxy(
         InjectionPoint injectionPoint,
         Constructor<T> constructor,
         BiFunction<Object, Object[], Object> fastConstructor) {
-      this.injectionPoint = injectionPoint;
-      this.constructor = constructor;
+      super(injectionPoint, constructor);
       this.fastConstructor = fastConstructor;
     }
 
@@ -86,32 +128,32 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     }
 
     @Override
-    public InjectionPoint getInjectionPoint() {
-      return injectionPoint;
-    }
-
-    @Override
-    public Constructor<T> getConstructor() {
-      return constructor;
-    }
-
-    @Override
-    public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
-      return ImmutableMap.of();
+    public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
+      var handle =
+          InternalMethodHandles.BIFUNCTION_APPLY_HANDLE
+              .bindTo(fastConstructor)
+              .asType(methodType(Object.class, Object.class, Object[].class));
+      handle = MethodHandles.insertArguments(handle, 0, (Object) null);
+      handle = handle.asCollector(Object[].class, parameterHandles.length);
+      handle =
+          MethodHandles.filterArguments(
+              handle,
+              0,
+              stream(parameterHandles)
+                  .map(InternalMethodHandles::castReturnToObject)
+                  .toArray(MethodHandle[]::new));
+      handle =
+          MethodHandles.permuteArguments(
+              handle,
+              methodType(Object.class, InternalContext.class),
+              new int[parameterHandles.length]);
+      return handle;
     }
   }
 
-  private static final class ReflectiveProxy<T> implements ConstructionProxy<T> {
-    final Constructor<T> constructor;
-    final InjectionPoint injectionPoint;
-
+  private static final class ReflectiveProxy<T> extends DefaultConstructorProxy<T> {
     ReflectiveProxy(InjectionPoint injectionPoint, Constructor<T> constructor) {
-      if (!Modifier.isPublic(constructor.getDeclaringClass().getModifiers())
-          || !Modifier.isPublic(constructor.getModifiers())) {
-        constructor.setAccessible(true);
-      }
-      this.injectionPoint = injectionPoint;
-      this.constructor = constructor;
+      super(injectionPoint, constructor);
     }
 
     @Override
@@ -126,18 +168,44 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     }
 
     @Override
-    public InjectionPoint getInjectionPoint() {
-      return injectionPoint;
+    public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
+      // should be impossible to get here with methodhandles enabled
+      throw new AssertionError("impossible");
+    }
+  }
+
+  private static final class MethodHandleProxy<T> extends DefaultConstructorProxy<T> {
+    final MethodHandle target;
+
+    MethodHandleProxy(
+        InjectionPoint injectionPoint, Constructor<T> constructor, MethodHandle target) {
+      super(injectionPoint, constructor);
+      this.target = target;
     }
 
     @Override
-    public Constructor<T> getConstructor() {
-      return constructor;
+    public T newInstance(Object... arguments) throws InvocationTargetException {
+      try {
+        @SuppressWarnings("unchecked")
+        T t = (T) target.invokeWithArguments(arguments);
+        return t;
+      } catch (Throwable e) {
+        throw new InvocationTargetException(e); // match JDK reflection behaviour
+      }
     }
 
     @Override
-    public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
-      return ImmutableMap.of();
+    public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
+      var type = target.type();
+      var typedHandles =
+          IntStream.range(0, parameterHandles.length)
+              .mapToObj(i -> castReturnTo(parameterHandles[i], type.parameterType(i)))
+              .toArray(MethodHandle[]::new);
+      var handle = MethodHandles.filterArguments(target, 0, typedHandles);
+      return MethodHandles.permuteArguments(
+          handle,
+          methodType(type.returnType(), InternalContext.class),
+          new int[typedHandles.length]);
     }
   }
 }

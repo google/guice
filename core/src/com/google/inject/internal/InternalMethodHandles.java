@@ -44,6 +44,7 @@ import com.google.inject.Provider;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.aop.ClassDefining;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
 import java.lang.invoke.MethodHandle;
@@ -51,12 +52,14 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.VarHandle;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.objectweb.asm.ClassWriter;
@@ -68,6 +71,16 @@ import org.objectweb.asm.Type;
 public final class InternalMethodHandles {
   private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
   static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
+
+  /**
+   * A handle for {@link BiFunction#apply}, useful for targeting fastclasses.
+   *
+   * <p>TODO(b/366058184): Have the fastclass code hand us a handle directly so we can avoid the
+   * `BiFunction` abstraction.
+   */
+  static final MethodHandle BIFUNCTION_APPLY_HANDLE =
+      findVirtualOrDie(
+          BiFunction.class, "apply", methodType(Object.class, Object.class, Object.class));
 
   static MethodType makeFactoryType(Dependency<?> dependency) {
     return makeFactoryType(dependency.getKey().getTypeLiteral().getRawType());
@@ -86,18 +99,54 @@ public final class InternalMethodHandles {
   @Nullable
   static MethodHandle unreflect(Method method) {
     try {
-      if (!Modifier.isPublic(method.getModifiers())
-          || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-        method.setAccessible(true);
-      }
+      method.setAccessible(true);
     } catch (SecurityException | InaccessibleObjectException e) {
       return null;
     }
     try {
       return lookup.unreflect(method);
     } catch (IllegalAccessException e) {
-      // caller should have handled this.
+      // setAccessible should have handled this.
       throw new LinkageError("inaccessible method: " + method, e);
+    }
+  }
+
+  /**
+   * Returns a method handle for the given constructor, or null if it is not accessible.
+   *
+   * <p>Ideally we would change Guice APIs to accept MethodHandle.Lookup objects instead of trying
+   * to access user methods with Guice's internal permissions. However, this is sufficient for now.
+   */
+  @Nullable
+  static MethodHandle unreflectConstructor(Constructor<?> ctor) {
+    try {
+      ctor.setAccessible(true);
+    } catch (SecurityException | InaccessibleObjectException e) {
+      return null;
+    }
+    try {
+      return lookup.unreflectConstructor(ctor);
+    } catch (IllegalAccessException e) {
+      // setAccessible should have handled this.
+      throw new LinkageError("inaccessible constructor: " + ctor, e);
+    }
+  }
+
+  /**
+   * Returns a method handle for setting the given field, or null if the field is not accessible.
+   */
+  @Nullable
+  static MethodHandle unreflectSetter(Field field) {
+    try {
+      field.setAccessible(true);
+    } catch (SecurityException | InaccessibleObjectException e) {
+      return null;
+    }
+    try {
+      return lookup.unreflectSetter(field);
+    } catch (IllegalAccessException e) {
+      // setAccessible should have handled this.
+      throw new LinkageError("inaccessible field: " + field, e);
     }
   }
 
@@ -451,6 +500,79 @@ public final class InternalMethodHandles {
   }
 
   /**
+   * Surrounds the delegate with a catch block that rethrows the exception with the given source.
+   *
+   * <pre>{@code
+   * try {
+   *   return delegate(...);
+   * } catch (Throwable re) {
+   *   throw InternalProvisionException.errorInProvider(re).addSource(source);
+   * }
+   * }</pre>
+   */
+  static MethodHandle catchErrorInMethodAndRethrowWithSource(MethodHandle delegate, Object source) {
+    var rethrow =
+        MethodHandles.insertArguments(
+            CATCH_ERROR_IN_METHOD_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+
+    return MethodHandles.catchException(castReturnToObject(delegate), Throwable.class, rethrow)
+        .asType(delegate.type());
+  }
+
+  private static final MethodHandle CATCH_ERROR_IN_METHOD_AND_RETHROW_WITH_SOURCE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "doCatchErrorInMethodAndRethrowWithSource",
+          methodType(Object.class, Throwable.class, Object.class));
+
+  @Keep
+  private static Object doCatchErrorInMethodAndRethrowWithSource(Throwable re, Object source)
+      throws InternalProvisionException {
+    if (re instanceof InternalProvisionException) {
+      // This error is from a dependency, just let it propagate
+      throw ((InternalProvisionException) re);
+    }
+    throw InternalProvisionException.errorInjectingMethod(re).addSource(source);
+  }
+
+  /**
+   * Surrounds the delegate with a catch block that rethrows the exception with the given source.
+   *
+   * <pre>{@code
+   * try {
+   *   return delegate(...);
+   * } catch (Throwable re) {
+   *   throw InternalProvisionException.errorInProvider(re).addSource(source);
+   * }
+   * }</pre>
+   */
+  static MethodHandle catchErrorInConstructorAndRethrowWithSource(
+      MethodHandle delegate, InjectionPoint source) {
+    var rethrow =
+        MethodHandles.insertArguments(
+            CATCH_ERROR_IN_CONSTRUCTOR_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+
+    return MethodHandles.catchException(castReturnToObject(delegate), Throwable.class, rethrow)
+        .asType(delegate.type());
+  }
+
+  private static final MethodHandle CATCH_ERROR_IN_CONSTRUCTOR_AND_RETHROW_WITH_SOURCE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "doCatchErrorInConstructorAndRethrowWithSource",
+          methodType(Object.class, Throwable.class, InjectionPoint.class));
+
+  @Keep
+  private static Object doCatchErrorInConstructorAndRethrowWithSource(
+      Throwable re, InjectionPoint source) throws InternalProvisionException {
+    if (re instanceof InternalProvisionException) {
+      // This error is from a dependency, just let it propagate
+      throw ((InternalProvisionException) re);
+    }
+    throw InternalProvisionException.errorInjectingConstructor(re).addSource(source);
+  }
+
+  /**
    * Surrounds the delegate with a try..finally.. that calls `finishConstruction` on the context.
    */
   static MethodHandle finishConstruction(MethodHandle delegate, int circularFactoryId) {
@@ -482,6 +604,70 @@ public final class InternalMethodHandles {
   }
 
   /**
+   * Surrounds the delegate with a try..finally.. that calls `finishConstructionAndSetReference` on
+   * the context.
+   */
+  static MethodHandle finishConstructionAndSetReference(
+      MethodHandle delegate, int circularFactoryId) {
+    var finishConstruction =
+        MethodHandles.insertArguments(
+            FINISH_CONSTRUCTION_AND_SET_REFERENCE_HANDLE, 3, circularFactoryId);
+
+    return castReturnTo(
+        MethodHandles.tryFinally(
+            // We need to cast the return type to Object so it matches the type of the
+            // `finallyFinishConstructionAndSetReference` method.
+            castReturnToObject(delegate), finishConstruction),
+        // cast back to the original return type.
+        delegate.type().returnType());
+  }
+
+  private static final MethodHandle FINISH_CONSTRUCTION_AND_SET_REFERENCE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "finallyFinishConstructionAndSetReference",
+          methodType(
+              Object.class, Throwable.class, Object.class, InternalContext.class, int.class));
+
+  @Keep
+  private static Object finallyFinishConstructionAndSetReference(
+      Throwable ignored, Object result, InternalContext context, int circularFactoryId) {
+    context.finishConstructionAndSetReference(circularFactoryId, result);
+    return result;
+  }
+
+  /**
+   * Surrounds the delegate with a try..finally.. that calls {@link
+   * InternalContext#clearCurrentReference}.
+   */
+  static MethodHandle clearReference(MethodHandle delegate, int circularFactoryId) {
+    var clearReference =
+        MethodHandles.insertArguments(CLEAR_REFERENCE_HANDLE, 3, circularFactoryId);
+
+    return castReturnTo(
+        MethodHandles.tryFinally(
+            // We need to cast the return type to Object so it matches the type of the
+            // `finallyClearReference` method.
+            castReturnToObject(delegate), clearReference),
+        // cast back to the original return type.
+        delegate.type().returnType());
+  }
+
+  private static final MethodHandle CLEAR_REFERENCE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "finallyClearReference",
+          methodType(
+              Object.class, Throwable.class, Object.class, InternalContext.class, int.class));
+
+  @Keep
+  private static Object finallyClearReference(
+      Throwable ignored, Object result, InternalContext context, int circularFactoryId) {
+    context.clearCurrentReference(circularFactoryId);
+    return result;
+  }
+
+  /**
    * Adds a call to {@link InternalContext#tryStartConstruction} and an early return if it returns
    * non-null.
    *
@@ -504,13 +690,12 @@ public final class InternalMethodHandles {
     var tryStartConstruction =
         MethodHandles.insertArguments(
             TRY_START_CONSTRUCTION_HANDLE, 1, circularFactoryId, dependency);
-
     // This takes the first Object parameter and casts it to the return type of the delegate.
     // It also ignores all the other parameters.
+    var returnType = dependency.getKey().getTypeLiteral().getRawType();
     var returnProxy =
         MethodHandles.dropArguments(
-            MethodHandles.identity(Object.class)
-                .asType(methodType(delegate.type().returnType(), Object.class)),
+            MethodHandles.identity(Object.class).asType(methodType(returnType, Object.class)),
             1,
             delegate.type().parameterList());
 
@@ -520,11 +705,11 @@ public final class InternalMethodHandles {
         MethodHandles.guardWithTest(
             IS_NULL_HANDLE,
             // Ignore the 'null' return from tryStartConstruction and call the delegate.
-            MethodHandles.dropArguments(delegate, 0, Object.class),
+            castReturnTo(MethodHandles.dropArguments(delegate, 0, Object.class), returnType),
             // Just return the result of tryStartConstruction
             returnProxy);
     // Call tryStartConstruction and then execute the guard.
-    return MethodHandles.foldArguments(guard, tryStartConstruction).asType(delegate.type());
+    return MethodHandles.foldArguments(guard, tryStartConstruction);
   }
 
   /**

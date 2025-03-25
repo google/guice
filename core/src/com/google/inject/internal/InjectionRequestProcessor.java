@@ -138,6 +138,8 @@ final class InjectionRequestProcessor extends AbstractProcessor {
     }
 
     void injectMembers() {
+
+      // TODO(b/366058184): investigate a methodhandle version of this.
       InternalContext context = injector.enterContext();
       try {
         boolean isStageTool = injector.options.stage == Stage.TOOL;

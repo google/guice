@@ -17,10 +17,19 @@
 package com.google.inject.internal;
 
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
 
 /** Injects a field or method of a given object. */
 interface SingleMemberInjector {
   void inject(InternalContext context, Object o) throws InternalProvisionException;
+
+  /**
+   * Returns a method handle for injecting the member.
+   *
+   * <p>The signature is {@code (Object, InternalContext) -> void} where the first parameter is the
+   * instance to inject into.
+   */
+  MethodHandle getInjectHandle(LinkageContext linkageContext);
 
   InjectionPoint getInjectionPoint();
 }

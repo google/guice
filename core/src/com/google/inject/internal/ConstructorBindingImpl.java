@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
 import static com.google.inject.spi.Elements.withTrustedSource;
+import static java.lang.invoke.MethodType.methodType;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -34,6 +35,8 @@ import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -304,5 +307,29 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
       return (T) localInjector.construct(context, dependency, provisionCallback);
     }
+
+    @Override
+    public MethodHandle getHandle(
+        LinkageContext context, Dependency<?> dependency, boolean linked) {
+      if (!linked && failIfNotLinked) {
+        var throwHandle =
+            MethodHandles.foldArguments(
+                MethodHandles.throwException(
+                    dependency.getKey().getTypeLiteral().getRawType(),
+                    InternalProvisionException.class),
+                MethodHandles.insertArguments(JIT_DISABLED_HANDLE, 0, key));
+        return MethodHandles.dropArguments(throwHandle, 0, InternalContext.class);
+      }
+      return context.makeHandle(
+          this,
+          dependency,
+          () -> constructorInjector.getConstructHandle(context, dependency, provisionCallback));
+    }
+
+    private static final MethodHandle JIT_DISABLED_HANDLE =
+        InternalMethodHandles.findStaticOrDie(
+            InternalProvisionException.class,
+            "jitDisabled",
+            methodType(InternalProvisionException.class, Key.class));
   }
 }

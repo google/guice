@@ -16,11 +16,18 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.InjectorImpl.MethodInvoker;
+import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
+import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
+import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
+import static java.lang.invoke.MethodType.methodType;
+
 import com.google.inject.spi.InjectionPoint;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.function.BiFunction;
 
 /** Invokes an injectable method. */
@@ -37,11 +44,85 @@ final class SingleMethodInjector implements SingleMemberInjector {
     parameterInjectors = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
   }
 
+  /** Invokes a method. */
+  private interface MethodInvoker {
+    Object invoke(Object target, Object... parameters)
+        throws IllegalAccessException, InvocationTargetException;
+
+    /**
+     * Returns a method handle for the injection with the signature (Object, InternalContext)->void.
+     */
+    MethodHandle getInjectHandle(LinkageContext linkageContext, MethodHandle[] parameterHandles);
+  }
+
   private MethodInvoker createMethodInvoker(final Method method) {
+    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+      MethodHandle methodHandle = InternalMethodHandles.unreflect(method);
+      if (methodHandle != null) {
+        if ((method.getModifiers() & Modifier.STATIC) != 0) {
+          // insert a fake ignored receiver
+          methodHandle = MethodHandles.dropArguments(methodHandle, 0, Object.class);
+        }
+        var finalMethodHandle = methodHandle;
+        return new MethodInvoker() {
+          @Override
+          public Object invoke(Object target, Object... parameters)
+              throws InvocationTargetException {
+            // This path can happen if the top level caller calls InternalFactory.get()
+            // Should rarely happen.
+            try {
+              return finalMethodHandle.bindTo(target).invokeWithArguments(parameters);
+            } catch (Throwable e) {
+              throw new InvocationTargetException(e); // match JDK reflection behaviour
+            }
+          }
+
+          @Override
+          public MethodHandle getInjectHandle(
+              LinkageContext linkageContext, MethodHandle[] parameterHandles) {
+            var methodType = finalMethodHandle.type();
+            // Cast each parameterHandle to the type of the parameter it is bound to.
+            // This addresses generics, unboxing, and other tiny type differences that Java usually
+            // handles for us.
+            for (int i = 0; i < parameterHandles.length; i++) {
+              parameterHandles[i] =
+                  castReturnTo(parameterHandles[i], methodType.parameterType(i + 1));
+            }
+            // Invoke the handle with the parameters.
+            // The signature is now:
+            // (Object, InternalContext,InternalContext,InternalContext,InternalContext)-R
+            // With one internalContext per parameter.
+            var handle = MethodHandles.filterArguments(finalMethodHandle, 1, parameterHandles);
+            // We never care about return values from injected methods.
+            handle = InternalMethodHandles.dropReturn(handle);
+            // Cast the receiver to Object.
+            handle = handle.asType(handle.type().changeParameterType(0, Object.class));
+            // Merge all the internalcontext parameters, since all the parameters should share it.
+            int[] permutations = new int[parameterHandles.length + 1];
+            Arrays.fill(permutations, 1);
+            permutations[0] = 0;
+            handle =
+                MethodHandles.permuteArguments(
+                    handle,
+                    methodType(void.class, Object.class, InternalContext.class),
+                    permutations);
+            return handle;
+          }
+        };
+      }
+    }
     if (InternalFlags.isBytecodeGenEnabled()) {
       try {
         BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
+        // (Object o1, Object o2, ...Object oN, Object receiver) -> void
         if (fastMethod != null) {
+          MethodHandle fastMethodHandle =
+              InternalFlags.getUseExperimentalMethodHandlesOption()
+                  ? BIFUNCTION_APPLY_HANDLE
+                      .bindTo(fastMethod)
+                      .asType(methodType(Object.class, Object[].class, Object.class))
+                      .asCollector(Object[].class, method.getParameterCount())
+                  : null;
           return new MethodInvoker() {
             @Override
             public Object invoke(Object target, Object... parameters)
@@ -51,6 +132,31 @@ final class SingleMethodInjector implements SingleMemberInjector {
               } catch (Throwable e) {
                 throw new InvocationTargetException(e); // match JDK reflection behaviour
               }
+            }
+
+            @Override
+            public MethodHandle getInjectHandle(
+                LinkageContext linkageContext, MethodHandle[] parameterHandles) {
+              // We are calling the fast class method which we have use `asCollector` adapter to
+              // turn into N object parameters, cast each parameterInjector to Object to account.
+              for (int i = 0; i < parameterHandles.length; i++) {
+                parameterHandles[i] = castReturnToObject(parameterHandles[i]);
+              }
+              // Invoke the handle with the parameters.
+              // The signature is now:
+              // (nternalContext,InternalContext,InternalContext...,Object receiver)-R
+              // With one internalContext per parameter.
+              var handle = MethodHandles.filterArguments(fastMethodHandle, 0, parameterHandles);
+              // Now permute to 1. move the receiver to the beginning and 2. merge all the internal
+              // context parameters
+              int[] permutations = new int[parameterHandles.length + 1];
+              permutations[parameterHandles.length] = 1;
+              handle =
+                  MethodHandles.permuteArguments(
+                      handle,
+                      methodType(void.class, InternalContext.class, Object.class),
+                      permutations);
+              return handle;
             }
           };
         }
@@ -64,12 +170,18 @@ final class SingleMethodInjector implements SingleMemberInjector {
         || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
       method.setAccessible(true);
     }
-
     return new MethodInvoker() {
       @Override
       public Object invoke(Object target, Object... parameters)
           throws IllegalAccessException, InvocationTargetException {
         return method.invoke(target, parameters);
+      }
+
+      @Override
+      public MethodHandle getInjectHandle(
+          LinkageContext linkageContext, MethodHandle[] parameterHandles) {
+        // There is no way to get here and have methodhandles enabled.
+        throw new AssertionError("impossible");
       }
     };
   }
@@ -84,12 +196,25 @@ final class SingleMethodInjector implements SingleMemberInjector {
     Object[] parameters = SingleParameterInjector.getAll(context, parameterInjectors);
 
     try {
-      methodInvoker.invoke(o, parameters);
+      var unused = methodInvoker.invoke(o, parameters);
     } catch (IllegalAccessException e) {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null ? userException.getCause() : userException;
       throw InternalProvisionException.errorInjectingMethod(cause).addSource(injectionPoint);
     }
+  }
+
+  @Override
+  public MethodHandle getInjectHandle(LinkageContext linkageContext) {
+    MethodHandle[] parameterInjectors =
+        SingleParameterInjector.getAllHandles(linkageContext, this.parameterInjectors);
+    var methodHandle =
+        methodInvoker
+            .getInjectHandle(linkageContext, parameterInjectors)
+            .asType(methodType(void.class, Object.class, InternalContext.class));
+    methodHandle =
+        InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(methodHandle, injectionPoint);
+    return methodHandle;
   }
 }
