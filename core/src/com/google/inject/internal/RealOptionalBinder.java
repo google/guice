@@ -291,19 +291,17 @@ public final class RealOptionalBinder<T> implements Module {
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
       if (target == null) {
-        return InternalMethodHandles.constantFactoryGetHandle(
-            dependency, java.util.Optional.empty());
+        return InternalMethodHandles.constantFactoryGetHandle(java.util.Optional.empty());
       }
       return context.makeHandle(
           this,
-          dependency,
           () -> {
             var handle = target.getHandle(context, this.targetDependency, /* linked= */ false);
             handle =
                 InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
                     handle, targetDependency);
-            return MethodHandles.filterReturnValue(
-                castReturnToObject(handle), OPTIONAL_OF_NULLABLE_MH);
+            return castReturnToObject(
+                MethodHandles.filterReturnValue(handle, OPTIONAL_OF_NULLABLE_MH));
           });
     }
 
@@ -392,7 +390,7 @@ public final class RealOptionalBinder<T> implements Module {
     @Override
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.constantFactoryGetHandle(dependency, value);
+      return InternalMethodHandles.constantFactoryGetHandle(value);
     }
 
     @Override
@@ -441,7 +439,6 @@ public final class RealOptionalBinder<T> implements Module {
         LinkageContext context, Dependency<?> dependency, boolean linked) {
       return context.makeHandle(
           this,
-          dependency,
           () ->
               InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
                   targetFactory.getHandle(context, dependency, /* linked= */ true), targetKey));
@@ -486,7 +483,7 @@ public final class RealOptionalBinder<T> implements Module {
     @Override
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.constantFactoryGetHandle(dependency, value);
+      return InternalMethodHandles.constantFactoryGetHandle(value);
     }
 
     @Override
@@ -554,18 +551,17 @@ public final class RealOptionalBinder<T> implements Module {
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
       if (delegate == null) {
-        return InternalMethodHandles.constantFactoryGetHandle(dependency, Optional.absent());
+        return InternalMethodHandles.constantFactoryGetHandle(Optional.absent());
       }
       return context.makeHandle(
           this,
-          dependency,
           () -> {
             var handle = delegate.getHandle(context, targetDependency, /* linked= */ false);
             handle =
                 InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
                     handle, targetDependency);
-            handle = castReturnToObject(handle);
-            return MethodHandles.filterReturnValue(handle, OPTIONAL_FROM_NULLABLE_MH);
+            return castReturnToObject(
+                MethodHandles.filterReturnValue(handle, OPTIONAL_FROM_NULLABLE_MH));
           });
     }
 

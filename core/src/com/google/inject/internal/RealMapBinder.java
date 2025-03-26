@@ -4,7 +4,6 @@ import static com.google.inject.internal.Element.Type.MAPBINDER;
 import static com.google.inject.internal.Errors.checkConfiguration;
 import static com.google.inject.internal.Errors.checkNotNull;
 import static com.google.inject.internal.InternalMethodHandles.buildImmutableMapFactory;
-import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static com.google.inject.internal.RealMultibinder.setOf;
 import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
@@ -745,7 +744,7 @@ public final class RealMapBinder<K, V> implements Module {
     @Override
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.constantFactoryGetHandle(dependency, mapOfProviders);
+      return InternalMethodHandles.constantFactoryGetHandle(mapOfProviders);
     }
   }
 
@@ -830,15 +829,13 @@ public final class RealMapBinder<K, V> implements Module {
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
       if (injectors == null) {
-        return InternalMethodHandles.constantFactoryGetHandle(dependency, ImmutableMap.of());
+        return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.of());
       }
       List<Map.Entry<K, MethodHandle>> entries = new ArrayList<>(injectors.length);
       for (int i = 0; i < injectors.length; i++) {
         var key = keys[i];
         var valueHandle = injectors[i].getInjectHandle(context);
-        // Cast the return type to be compatible with the immutablemap factory and the
-        // maybeThrowNullValueException method.
-        valueHandle = castReturnToObject(valueHandle);
+
         // Null check the value.
         valueHandle =
             MethodHandles.filterReturnValue(
@@ -850,8 +847,7 @@ public final class RealMapBinder<K, V> implements Module {
                     bindingSelection.getMapBindings().get(key).getSource()));
         entries.add(Map.entry(key, valueHandle));
       }
-      return buildImmutableMapFactory(entries)
-          .asType(InternalMethodHandles.makeFactoryType(dependency));
+      return buildImmutableMapFactory(entries);
     }
 
     @Override
@@ -1142,7 +1138,7 @@ public final class RealMapBinder<K, V> implements Module {
       @Override
       protected MethodHandle doGetHandle(
           LinkageContext context, Dependency<?> dependency, boolean linked) {
-        return InternalMethodHandles.constantFactoryGetHandle(dependency, multimapOfProviders);
+        return InternalMethodHandles.constantFactoryGetHandle(multimapOfProviders);
       }
     }
 
@@ -1258,7 +1254,7 @@ public final class RealMapBinder<K, V> implements Module {
       protected MethodHandle doGetHandle(
           LinkageContext context, Dependency<?> dependency, boolean linked) {
         if (perKeyDatas.length == 0) {
-          return InternalMethodHandles.constantFactoryGetHandle(dependency, ImmutableMap.of());
+          return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.of());
         }
         List<Map.Entry<K, MethodHandle>> entries = new ArrayList<>(perKeyDatas.length);
         for (PerKeyData<K, V> perKeyData : perKeyDatas) {
@@ -1268,7 +1264,6 @@ public final class RealMapBinder<K, V> implements Module {
             SingleParameterInjector<V> injector = perKeyData.injectors[j];
             MethodHandle elementHandle = injector.getInjectHandle(context);
             // Null check each element.
-            elementHandle = castReturnToObject(elementHandle);
             elementHandle =
                 MethodHandles.filterReturnValue(
                     elementHandle,
@@ -1285,8 +1280,7 @@ public final class RealMapBinder<K, V> implements Module {
                   perKeyData.key, InternalMethodHandles.buildImmutableSetFactory(elementHandles)));
         }
 
-        return buildImmutableMapFactory(entries)
-            .asType(InternalMethodHandles.makeFactoryType(dependency));
+        return buildImmutableMapFactory(entries);
       }
     }
   }
@@ -1326,7 +1320,7 @@ public final class RealMapBinder<K, V> implements Module {
     @Override
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.constantFactoryGetHandle(dependency, entry);
+      return InternalMethodHandles.constantFactoryGetHandle(entry);
     }
 
     K getKey() {

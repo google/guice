@@ -291,13 +291,12 @@ public final class RealMultibinder<T> implements Module {
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
       if (injectors == null) {
-        return InternalMethodHandles.constantFactoryGetHandle(dependency, ImmutableSet.of());
+        return InternalMethodHandles.constantFactoryGetHandle(ImmutableSet.of());
       }
       // null check each element
       List<MethodHandle> elementHandles = new ArrayList<>(injectors.length);
       for (int i = 0; i < injectors.length; i++) {
         var element = injectors[i].getInjectHandle(context);
-        element = element.asType(element.type().changeReturnType(Object.class));
         elementHandles.add(
             MethodHandles.filterReturnValue(
                 element,
@@ -309,8 +308,7 @@ public final class RealMultibinder<T> implements Module {
       if (permitDuplicates || elementHandles.size() == 1) {
         // we just want to construct an ImmutableSet.Builder, and add everything to it.
         // This generates exactly the code a human would write.
-        return InternalMethodHandles.buildImmutableSetFactory(elementHandles)
-            .asType(InternalMethodHandles.makeFactoryType(dependency));
+        return InternalMethodHandles.buildImmutableSetFactory(elementHandles);
       } else {
         // Duplicates are not permitted, so we need to check for duplicates by constructing all
         // elements and then checking the size of the set.
@@ -327,7 +325,7 @@ public final class RealMultibinder<T> implements Module {
                 collector,
                 methodType(ImmutableSet.class, InternalContext.class),
                 new int[elementHandles.size()]);
-        return collector.asType(InternalMethodHandles.makeFactoryType(dependency));
+        return collector;
       }
     }
 
@@ -478,7 +476,7 @@ public final class RealMultibinder<T> implements Module {
     @Override
     protected MethodHandle doGetHandle(
         LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.constantFactoryGetHandle(dependency, providers);
+      return InternalMethodHandles.constantFactoryGetHandle(providers);
     }
   }
 

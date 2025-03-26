@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static java.lang.invoke.MethodType.methodType;
 
 import com.google.inject.Key;
@@ -100,8 +101,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       Dependency<?> dependency,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
     // The combinators below assume this type.
-    providerHandle =
-        providerHandle.asType(providerHandle.type().changeReturnType(jakarta.inject.Provider.class));
+    providerHandle = castReturnTo(providerHandle, jakarta.inject.Provider.class);
     // TODO: lukes - This is annoying, but various tests assert that we invoke the provision
     // listener for the Provider and then for the thing being provided, but if we just called
     // `circularGetHandleImmediate` then the order would be reversed since the provision callback
@@ -133,9 +133,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
                 InternalContext.class),
             new int[] {1, 0});
     // Basically invoke the `providerHandle` and then pass the provider to `invokeProvider`
-    var createProviderAndPass = MethodHandles.foldArguments(invokeProvider, 0, providerHandle);
-    // Ensure we are respecting our type.
-    return createProviderAndPass.asType(InternalMethodHandles.makeFactoryType(dependency));
+    return MethodHandles.foldArguments(invokeProvider, 0, providerHandle);
   }
 
   /**
@@ -145,8 +143,6 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    * <p>Subclasses should override this to add more validation checks.
    */
   protected MethodHandle provisionHandle(MethodHandle providerHandle, Dependency<?> dependency) {
-    providerHandle =
-        providerHandle.asType(providerHandle.type().changeReturnType(jakarta.inject.Provider.class));
     // Call Provider.get() and catch any RuntimeException as an InternalProvisionException.
     var invokeProvider =
         InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(

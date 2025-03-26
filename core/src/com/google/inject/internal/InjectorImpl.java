@@ -406,8 +406,7 @@ final class InjectorImpl implements Injector, Lookups {
         @Override
         public MethodHandle getHandle(
             LinkageContext context, Dependency<?> dependency, boolean linked) {
-          return InternalMethodHandles.constantFactoryGetHandle(
-              Provider.class, providedBinding.getProvider());
+          return InternalMethodHandles.constantFactoryGetHandle(providedBinding.getProvider());
         }
       };
     }

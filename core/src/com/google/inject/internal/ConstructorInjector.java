@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
@@ -102,6 +102,11 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
     var handle =
         constructionProxy.getConstructHandle(
             SingleParameterInjector.getAllHandles(linkageContext, parameterInjectors));
+    checkState(
+        handle.type().equals(InternalMethodHandles.FACTORY_TYPE),
+        "expected %s but got %s",
+        InternalMethodHandles.FACTORY_TYPE,
+        handle.type());
     // If there are members injectors  we call `finishConstructionAndSetReference` so that
     // cycle detection can find the newly constructed reference.
     if (membersInjector != null) {
@@ -116,7 +121,7 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
               membersHandle);
       // Then execute thje membersHandle after constructing the object (and calling
       // finishConstructionAndSetReference)
-      handle = MethodHandles.foldArguments(membersHandle, castReturnToObject(handle));
+      handle = MethodHandles.foldArguments(membersHandle, handle);
     } else {
       // Otherwise we are done!
       handle = InternalMethodHandles.finishConstruction(handle, circularFactoryId);

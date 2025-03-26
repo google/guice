@@ -17,8 +17,6 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
-import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static com.google.inject.internal.InternalMethodHandles.findVirtualOrDie;
 import static java.lang.invoke.MethodType.methodType;
 
@@ -98,7 +96,7 @@ class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
         MethodHandles.foldArguments(
             invokeProvider,
             MethodHandles.insertArguments(INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE, 1, dependency));
-    return castReturnTo(invokeProvider, dependency.getKey().getTypeLiteral().getRawType());
+    return invokeProvider;
   }
 
   private static final MethodHandle INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE =
@@ -166,8 +164,11 @@ class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
 
     private static MethodHandle getHandleForConstant(
         Dependency<?> dependency, Object source, Object value) {
-      var handle = InternalMethodHandles.constantFactoryGetHandle(dependency, value);
-      handle = InternalMethodHandles.nullCheckResult(handle, source, dependency);
+      var handle = InternalMethodHandles.constantFactoryGetHandle(value);
+      // Since this is a constant, we only need to null check if it is actually null.
+      if (value == null) {
+        handle = InternalMethodHandles.nullCheckResult(handle, source, dependency);
+      }
       return handle;
     }
 
@@ -195,14 +196,12 @@ class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
         // This will allow us to eventually 'fold' the result into the callsite.
         // (InternalContext, InternalContext) -> Object
         var invokeBootstrap =
-            MethodHandles.filterArguments(
-                BOOTSTRAP_CALL_MH.bindTo(this), 1, castReturnToObject(actualGetHandle));
-
-        // (InternalContext, InternalContext) -> T
-        invokeBootstrap = castReturnTo(invokeBootstrap, actualGetHandle.type().returnType());
-        // (InternalContext) -> T
+            MethodHandles.filterArguments(BOOTSTRAP_CALL_MH.bindTo(this), 1, actualGetHandle);
+        // Merge the two internalContext parameters into one.
+        // (InternalContext) -> Object
         invokeBootstrap =
-            MethodHandles.permuteArguments(invokeBootstrap, actualGetHandle.type(), new int[2]);
+            MethodHandles.permuteArguments(
+                invokeBootstrap, InternalMethodHandles.FACTORY_TYPE, new int[2]);
         setTarget(invokeBootstrap);
       }
 

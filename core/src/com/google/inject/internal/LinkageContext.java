@@ -17,7 +17,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MutableCallSite;
 import java.util.IdentityHashMap;
@@ -55,26 +54,23 @@ final class LinkageContext {
    * cycle detection but it is not clear that that is even feasible.
    *
    * @param source the factory that is calling this method
-   * @param dependency the dependency that is being injected, used to ensure the returned handle has
-   *     the correct signature
    * @param factory a supplier of the method handle to be invoked
-   * @return a method handle that will invoke the given factory, resolving cycles as needed
+   * @return a method handle that will invoke the given factory, resolving cycles as needed, using
+   *     the {@link InternalFactory#FACTORY_TYPE} signature.
    */
-  MethodHandle makeHandle(
-      InternalFactory<?> source, Dependency<?> dependency, Supplier<MethodHandle> factory) {
+  MethodHandle makeHandle(InternalFactory<?> source, Supplier<MethodHandle> factory) {
     var previous = linkingFactories.putIfAbsent(source, CONSTRUCTING);
-    var handleType = InternalMethodHandles.makeFactoryType(dependency);
     if (previous == CONSTRUCTING) {
       // We are the first to 're-enter' this factory, so we need to create a MutableCallSite that
       // will be used to resolve the cycle.
-      previous = new MutableCallSite(InternalMethodHandles.OBJECT_FACTORY_TYPE);
+      previous = new MutableCallSite(InternalMethodHandles.FACTORY_TYPE);
       linkingFactories.put(source, previous);
     }
     if (previous instanceof MutableCallSite) {
       // We are re-entering the same factory, so we can just return the dynamic invoker and rely on
       // the original invocation to finish the construction and call setTarget to finalize the
       // callsite.
-      return ((MutableCallSite) previous).dynamicInvoker().asType(handleType);
+      return ((MutableCallSite) previous).dynamicInvoker();
     } else {
       checkState(previous == null, "Unexpected previous value: %s", previous);
     }
@@ -83,9 +79,9 @@ final class LinkageContext {
     checkState(previous != null, "construction state was cleared already?");
     if (previous != CONSTRUCTING) {
       var callSite = (MutableCallSite) previous;
-      callSite.setTarget(handle.asType(InternalMethodHandles.OBJECT_FACTORY_TYPE));
+      callSite.setTarget(handle);
       MutableCallSite.syncAll(new MutableCallSite[] {callSite});
     }
-    return handle.asType(handleType);
+    return handle;
   }
 }

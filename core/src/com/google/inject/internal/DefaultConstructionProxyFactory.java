@@ -17,8 +17,8 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
+import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
-import static java.util.Arrays.stream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
@@ -133,20 +133,14 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
           InternalMethodHandles.BIFUNCTION_APPLY_HANDLE
               .bindTo(fastConstructor)
               .asType(methodType(Object.class, Object.class, Object[].class));
-      handle = MethodHandles.insertArguments(handle, 0, (Object) null);
+      handle = MethodHandles.insertArguments(handle, 0, (Object) null); // no receiver type.
       handle = handle.asCollector(Object[].class, parameterHandles.length);
-      handle =
-          MethodHandles.filterArguments(
-              handle,
-              0,
-              stream(parameterHandles)
-                  .map(InternalMethodHandles::castReturnToObject)
-                  .toArray(MethodHandle[]::new));
+      // Pass all the parameters to the constructor.
+      handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
+      // merge all the internalcontext parameters into a single object factory.
       handle =
           MethodHandles.permuteArguments(
-              handle,
-              methodType(Object.class, InternalContext.class),
-              new int[parameterHandles.length]);
+              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
       return handle;
     }
   }
@@ -197,15 +191,15 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @Override
     public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
       var type = target.type();
+      // Adapt the parameter handles to the constructor signature.
       var typedHandles =
           IntStream.range(0, parameterHandles.length)
               .mapToObj(i -> castReturnTo(parameterHandles[i], type.parameterType(i)))
               .toArray(MethodHandle[]::new);
       var handle = MethodHandles.filterArguments(target, 0, typedHandles);
+      handle = castReturnToObject(handle); // satisfy the signature of the factory type.
       return MethodHandles.permuteArguments(
-          handle,
-          methodType(type.returnType(), InternalContext.class),
-          new int[typedHandles.length]);
+          handle, InternalMethodHandles.FACTORY_TYPE, new int[typedHandles.length]);
     }
   }
 }

@@ -238,7 +238,6 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return context.makeHandle(
         this,
-        dependency,
         () -> {
           MethodHandle handle = super.getHandle(context, dependency, linked);
           // Handle circular proxies.
@@ -252,12 +251,13 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       LinkageContext context, Dependency<?> dependency, boolean linked) {
     MethodHandle handle =
         doProvisionHandle(SingleParameterInjector.getAllHandles(context, parameterInjectors));
+    handle = castReturnToObject(handle);
     handle = InternalMethodHandles.nullCheckResult(handle, getMethod(), dependency);
     // catch everything else and rethrow as an error in provider.
     handle = InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(handle, getSource());
     handle = InternalMethodHandles.finishConstruction(handle, circularFactoryId);
 
-    return handle.asType(InternalMethodHandles.makeFactoryType(dependency));
+    return handle;
   }
 
   /** Extension point for our subclasses to implement the provisioning strategy. */
@@ -351,17 +351,14 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
               .asType(methodType(Object.class, Object[].class))
               // Allow it to be called as a varargs method.
               .asCollector(Object[].class, parameters.length);
-      // We need to convert everything to return plain Object to populate the Object array.
-      for (int i = 0; i < parameters.length; i++) {
-        parameters[i] = castReturnToObject(parameters[i]);
-      }
+
       // The signature is now (...InternaleContext)->Object, but we want to pass the same context
       // to all the parameters.
       apply = MethodHandles.filterArguments(apply, 0, parameters);
       // Merge all the internalcontext parameters into a single object factory.
       apply =
           MethodHandles.permuteArguments(
-              apply, InternalMethodHandles.OBJECT_FACTORY_TYPE, new int[parameters.length]);
+              apply, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
       return apply;
     }
   }
@@ -427,13 +424,12 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       // Pass the parameters to the provider method.
       // The signature is now (...InternalContext)->T, one InternalContext per parameter.
       var handle = MethodHandles.filterArguments(providerMethod, 0, parameters);
+      handle = castReturnToObject(handle);
       // Merge all the internalcontext parameters into a single object factory returning the type of
       // the method.
       handle =
           MethodHandles.permuteArguments(
-              handle,
-              InternalMethodHandles.makeFactoryType(methodType.returnType()),
-              new int[parameters.length]);
+              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
       return handle;
     }
 

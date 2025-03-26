@@ -16,8 +16,6 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Streams.stream;
 import static java.lang.invoke.MethodType.methodType;
 import static java.util.Arrays.stream;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
@@ -33,6 +31,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ObjectArrays;
@@ -70,7 +69,19 @@ import org.objectweb.asm.Type;
 /** Utility methods for working with method handles and our internal guice protocols. */
 public final class InternalMethodHandles {
   private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  static final MethodType OBJECT_FACTORY_TYPE = makeFactoryType(Object.class);
+
+  /**
+   * The type of the method handle for {@link InternalFactory#getHandle}.
+   *
+   * <p>In theory we could specialize types for handles to be more specific, and this might even
+   * allow us to do something cool like support {@code @Provides int provideInt() { return 1; }}
+   * without boxing. However, this adds a fair bit of complexity as every single factory helper in
+   * this file would need to support generic returns (e.g. the try-catch and finally adapters), this
+   * is achievable but would be a fair bit of complexity for a small performance win. Instead we
+   * model everything as returning Object and rely on various injection sinks to enforce
+   * correctness, which is the same strategy that we use for the `InternalFactory.get` protocol.
+   */
+  static final MethodType FACTORY_TYPE = methodType(Object.class, InternalContext.class);
 
   /**
    * A handle for {@link BiFunction#apply}, useful for targeting fastclasses.
@@ -82,13 +93,6 @@ public final class InternalMethodHandles {
       findVirtualOrDie(
           BiFunction.class, "apply", methodType(Object.class, Object.class, Object.class));
 
-  static MethodType makeFactoryType(Dependency<?> dependency) {
-    return makeFactoryType(dependency.getKey().getTypeLiteral().getRawType());
-  }
-
-  static MethodType makeFactoryType(Class<?> forType) {
-    return methodType(forType, InternalContext.class);
-  }
 
   /**
    * Returns a method handle for the given method, or null if the method is not accessible.
@@ -204,29 +208,20 @@ public final class InternalMethodHandles {
   }
 
   /**
-   * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
+   * Returns a method handle with the signature {@code (InternalContext) -> Object} that returns the
    * given instance.
    */
-  static MethodHandle constantFactoryGetHandle(Dependency<?> dependency, Object instance) {
-    return constantFactoryGetHandle(dependency.getKey().getTypeLiteral().getRawType(), instance);
-  }
-
-  /**
-   * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
-   * given instance.
-   */
-  static MethodHandle constantFactoryGetHandle(Class<?> forType, Object instance) {
-    var constant = MethodHandles.constant(forType, instance);
-    return MethodHandles.dropArguments(constant, 0, InternalContext.class);
+  static MethodHandle constantFactoryGetHandle(Object instance) {
+    return MethodHandles.dropArguments(
+        MethodHandles.constant(Object.class, instance), 0, InternalContext.class);
   }
 
   /**
    * Returns a method handle with the signature {@code (InternalContext) -> T} that returns the
    * result of the given initializable.
    */
-  static MethodHandle initializableFactoryGetHandle(
-      Initializable<?> initializable, Dependency<?> dependency) {
-    return new InitializableCallSite(makeFactoryType(dependency), initializable).dynamicInvoker();
+  static MethodHandle initializableFactoryGetHandle(Initializable<?> initializable) {
+    return new InitializableCallSite(initializable).dynamicInvoker();
   }
 
   /**
@@ -235,7 +230,7 @@ public final class InternalMethodHandles {
    */
   static MethodHandle initializableFactoryGetHandle(
       Initializable<?> initializable, Class<?> forType) {
-    return new InitializableCallSite(makeFactoryType(forType), initializable).dynamicInvoker();
+    return new InitializableCallSite(initializable).dynamicInvoker();
   }
 
   /**
@@ -269,13 +264,11 @@ public final class InternalMethodHandles {
             "bootstrapCall",
             methodType(Object.class, Initializable.class, InternalContext.class));
 
-    InitializableCallSite(MethodType type, Initializable<?> initializable) {
-      super(type);
+    InitializableCallSite(Initializable<?> initializable) {
+      super(FACTORY_TYPE);
       // Have the first call go to `bootstrapCall` which will set the target to the constant
       // factory get handle if the initializable succeeds.
-      setTarget(
-          MethodHandles.insertArguments(BOOTSTRAP_CALL_MH.bindTo(this), 0, initializable)
-              .asType(type));
+      setTarget(MethodHandles.insertArguments(BOOTSTRAP_CALL_MH.bindTo(this), 0, initializable));
     }
 
     @Keep
@@ -286,7 +279,7 @@ public final class InternalMethodHandles {
       // We also do not synchronize and instead rely on the underlying initializable to enforce
       // single-initialization semantics, but we publish via a volatile call site.
       Object value = initializable.get(context);
-      setTarget(constantFactoryGetHandle(this.type().returnType(), value));
+      setTarget(constantFactoryGetHandle(value));
       // This ensures that other threads will see the new target.  This isn't strictly necessary
       // since Initializable is both ThreadSafe and idempotent, but it should improve performance
       // by allowing the JIT to inline the constant.
@@ -303,15 +296,12 @@ public final class InternalMethodHandles {
    */
   static MethodHandle nullCheckResult(
       MethodHandle delegate, Object source, Dependency<?> dependency) {
-    var returnType = delegate.type().returnType();
-    if (dependency.isNullable() || returnType.isPrimitive()) {
+    if (dependency.isNullable()) {
       return delegate;
     }
-    // (T) -> T
+    // (Object) -> Object
     var nullCheckResult =
-        MethodHandles.insertArguments(NULL_CHECK_RESULT_MH, 1, source, dependency)
-            // Cast the parameter and return types to the delegates types.
-            .asType(methodType(returnType, returnType));
+        MethodHandles.insertArguments(NULL_CHECK_RESULT_MH, 1, source, dependency);
     return MethodHandles.filterReturnValue(delegate, nullCheckResult);
   }
 
@@ -366,7 +356,7 @@ public final class InternalMethodHandles {
       case 1:
         {
           // By allocating the delegate here it will be a constant across all invocations.
-          var finalDelegate = delegate.asType(OBJECT_FACTORY_TYPE);
+          var finalDelegate = delegate.asType(FACTORY_TYPE);
           ProvisionCallback<Object> callback =
               (ctx, dep) -> {
                 try {
@@ -504,29 +494,32 @@ public final class InternalMethodHandles {
    *
    * <pre>{@code
    * try {
-   *   return delegate(...);
+   *   delegate(...);
    * } catch (Throwable re) {
    *   throw InternalProvisionException.errorInProvider(re).addSource(source);
    * }
    * }</pre>
    */
   static MethodHandle catchErrorInMethodAndRethrowWithSource(MethodHandle delegate, Object source) {
+    checkArgument(
+        delegate.type().returnType().equals(void.class),
+        "MethodHandle must return void: %s",
+        delegate.type());
     var rethrow =
         MethodHandles.insertArguments(
             CATCH_ERROR_IN_METHOD_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
 
-    return MethodHandles.catchException(castReturnToObject(delegate), Throwable.class, rethrow)
-        .asType(delegate.type());
+    return MethodHandles.catchException(delegate, Throwable.class, rethrow);
   }
 
   private static final MethodHandle CATCH_ERROR_IN_METHOD_AND_RETHROW_WITH_SOURCE_HANDLE =
       findStaticOrDie(
           InternalMethodHandles.class,
           "doCatchErrorInMethodAndRethrowWithSource",
-          methodType(Object.class, Throwable.class, Object.class));
+          methodType(void.class, Throwable.class, Object.class));
 
   @Keep
-  private static Object doCatchErrorInMethodAndRethrowWithSource(Throwable re, Object source)
+  private static void doCatchErrorInMethodAndRethrowWithSource(Throwable re, Object source)
       throws InternalProvisionException {
     if (re instanceof InternalProvisionException) {
       // This error is from a dependency, just let it propagate
@@ -552,8 +545,7 @@ public final class InternalMethodHandles {
         MethodHandles.insertArguments(
             CATCH_ERROR_IN_CONSTRUCTOR_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
 
-    return MethodHandles.catchException(castReturnToObject(delegate), Throwable.class, rethrow)
-        .asType(delegate.type());
+    return MethodHandles.catchException(delegate, Throwable.class, rethrow);
   }
 
   private static final MethodHandle CATCH_ERROR_IN_CONSTRUCTOR_AND_RETHROW_WITH_SOURCE_HANDLE =
@@ -580,13 +572,7 @@ public final class InternalMethodHandles {
     var finishConstruction =
         MethodHandles.insertArguments(FINISH_CONSTRUCTION_HANDLE, 3, circularFactoryId);
 
-    return castReturnTo(
-        MethodHandles.tryFinally(
-            // We need to cast the return type to Object so it matches the type of the
-            // `finallyFinishConstruction` method.
-            castReturnToObject(delegate), finishConstruction),
-        // cast back to the original return type.
-        delegate.type().returnType());
+    return MethodHandles.tryFinally(delegate, finishConstruction);
   }
 
   private static final MethodHandle FINISH_CONSTRUCTION_HANDLE =
@@ -613,13 +599,7 @@ public final class InternalMethodHandles {
         MethodHandles.insertArguments(
             FINISH_CONSTRUCTION_AND_SET_REFERENCE_HANDLE, 3, circularFactoryId);
 
-    return castReturnTo(
-        MethodHandles.tryFinally(
-            // We need to cast the return type to Object so it matches the type of the
-            // `finallyFinishConstructionAndSetReference` method.
-            castReturnToObject(delegate), finishConstruction),
-        // cast back to the original return type.
-        delegate.type().returnType());
+    return MethodHandles.tryFinally(delegate, finishConstruction);
   }
 
   private static final MethodHandle FINISH_CONSTRUCTION_AND_SET_REFERENCE_HANDLE =
@@ -644,13 +624,7 @@ public final class InternalMethodHandles {
     var clearReference =
         MethodHandles.insertArguments(CLEAR_REFERENCE_HANDLE, 3, circularFactoryId);
 
-    return castReturnTo(
-        MethodHandles.tryFinally(
-            // We need to cast the return type to Object so it matches the type of the
-            // `finallyClearReference` method.
-            castReturnToObject(delegate), clearReference),
-        // cast back to the original return type.
-        delegate.type().returnType());
+    return MethodHandles.tryFinally(delegate, clearReference);
   }
 
   private static final MethodHandle CLEAR_REFERENCE_HANDLE =
@@ -692,12 +666,9 @@ public final class InternalMethodHandles {
             TRY_START_CONSTRUCTION_HANDLE, 1, circularFactoryId, dependency);
     // This takes the first Object parameter and casts it to the return type of the delegate.
     // It also ignores all the other parameters.
-    var returnType = dependency.getKey().getTypeLiteral().getRawType();
     var returnProxy =
         MethodHandles.dropArguments(
-            MethodHandles.identity(Object.class).asType(methodType(returnType, Object.class)),
-            1,
-            delegate.type().parameterList());
+            MethodHandles.identity(Object.class), 1, delegate.type().parameterList());
 
     // Otherwise we need to test the return value of tryStartConstruction since it might be a
     // proxy.
@@ -705,7 +676,7 @@ public final class InternalMethodHandles {
         MethodHandles.guardWithTest(
             IS_NULL_HANDLE,
             // Ignore the 'null' return from tryStartConstruction and call the delegate.
-            castReturnTo(MethodHandles.dropArguments(delegate, 0, Object.class), returnType),
+            MethodHandles.dropArguments(delegate, 0, Object.class),
             // Just return the result of tryStartConstruction
             returnProxy);
     // Call tryStartConstruction and then execute the guard.
@@ -760,7 +731,7 @@ public final class InternalMethodHandles {
                     new ConstantCallSite(
                         factory
                             .getHandle(new LinkageContext(), dependency, /* linked= */ false)
-                            .asType(OBJECT_FACTORY_TYPE)),
+                            .asType(FACTORY_TYPE)),
                 /* isScoped= */ false);
     return typedProvider;
   }
@@ -930,7 +901,7 @@ public final class InternalMethodHandles {
         mv.visitEnd();
       }
       {
-        String descriptor = OBJECT_FACTORY_TYPE.toMethodDescriptorString();
+        String descriptor = FACTORY_TYPE.toMethodDescriptorString();
         // generate a doGet() method
         MethodVisitor mv =
             cw.visitMethod(
@@ -1066,7 +1037,7 @@ public final class InternalMethodHandles {
     private MethodHandle[] handles = new MethodHandle[0];
 
     ScopedDelegateCallSite(InternalFactory<?> factory, Dependency<?> bindingDependency) {
-      super(OBJECT_FACTORY_TYPE);
+      super(FACTORY_TYPE);
       this.factory = factory;
       this.bindingDependency = bindingDependency;
       this.fallback = FALLBACK_GET_HANDLE.bindTo(this);
@@ -1083,9 +1054,7 @@ public final class InternalMethodHandles {
           // Always pretend that we are a linked binding, to support
           // scoping implicit bindings.  If we are not actually a linked
           // binding, we'll fail properly elsewhere in the chain.
-          handle =
-              castReturnToObject(
-                  factory.getHandle(new LinkageContext(), dependency, /* linked= */ true));
+          handle = factory.getHandle(new LinkageContext(), dependency, /* linked= */ true);
           handleIndices =
               ImmutableMap.<Dependency<?>, Integer>builder()
                   .putAll(handleIndices)
@@ -1274,18 +1243,22 @@ public final class InternalMethodHandles {
    * <p>Plus handling for some special cases.
    */
   static MethodHandle buildImmutableSetFactory(Iterable<MethodHandle> elementHandles) {
-    var elementHandlesList =
-        stream(elementHandles)
-            // Cast return types to object and enforce that this is a factory type.
-            .map(InternalMethodHandles::castReturnToObject)
-            .collect(toImmutableList());
+    var elementHandlesList = ImmutableList.copyOf(elementHandles);
+    for (var handle : elementHandlesList) {
+      checkArgument(
+          handle.type().equals(FACTORY_TYPE),
+          "Element handle must be a factory type %s got %s",
+          handle.type(),
+          FACTORY_TYPE);
+    }
     if (elementHandlesList.isEmpty()) {
       // ImmutableSet.of()
-      return constantFactoryGetHandle(ImmutableSet.class, ImmutableSet.of());
+      return constantFactoryGetHandle(ImmutableSet.of());
     }
     if (elementHandlesList.size() == 1) {
       // ImmutableSet.of(<element>(ctx))
-      return MethodHandles.filterReturnValue(elementHandlesList.get(0), IMMUTABLE_SET_OF_HANDLE);
+      return MethodHandles.filterReturnValue(elementHandlesList.get(0), IMMUTABLE_SET_OF_HANDLE)
+          .asType(FACTORY_TYPE);
     }
     // ImmutableSet.builderWithExpectedSize(<size>)
     var builder =
@@ -1299,7 +1272,8 @@ public final class InternalMethodHandles {
           MethodHandles.foldArguments(
               MethodHandles.filterArguments(IMMUTABLE_SET_BUILDER_ADD_HANDLE, 1, handle), builder);
     }
-    return MethodHandles.filterReturnValue(builder, IMMUTABLE_SET_BUILDER_BUILD_HANDLE);
+    return MethodHandles.filterReturnValue(builder, IMMUTABLE_SET_BUILDER_BUILD_HANDLE)
+        .asType(FACTORY_TYPE);
   }
 
   private static final MethodHandle IMMUTABLE_SET_OF_HANDLE =
@@ -1335,14 +1309,15 @@ public final class InternalMethodHandles {
    */
   static <T> MethodHandle buildImmutableMapFactory(List<Map.Entry<T, MethodHandle>> entries) {
     if (entries.isEmpty()) {
-      return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.class, ImmutableMap.of());
+      return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.of());
     }
     // ImmutableMap.Builder.of(K, V) has a special case for a single entry.
     if (entries.size() == 1) {
       var entry = entries.get(0);
       return MethodHandles.filterReturnValue(
-          castReturnToObject(entry.getValue()),
-          MethodHandles.insertArguments(IMMUTABLE_MAP_OF_HANDLE, 0, entry.getKey()));
+              entry.getValue(),
+              MethodHandles.insertArguments(IMMUTABLE_MAP_OF_HANDLE, 0, entry.getKey()))
+          .asType(FACTORY_TYPE);
     }
     // Otherwise, we use the builder API by chaining a bunch of put() calls.
     // It might be slightly more efficient to bind to one of the ImmutableMap.of(...) overloads
@@ -1362,7 +1337,7 @@ public final class InternalMethodHandles {
       // value).  Because the entry is a MethodHandle with signature `(InternalContext)->V` we need
       // to cast the return type to `Object` to match the signature of `put`.
       // (Builder, InternalContext)->Builder
-      put = MethodHandles.filterArguments(put, 1, castReturnToObject(entry.getValue()));
+      put = MethodHandles.filterArguments(put, 1, entry.getValue());
       // Fold works by invoking the 'builder' and then passing it to the first argument of the
       // `put` method, and then passing the arguments to `builder` to put as well. Like this:
       //  Builder fold(InternalContext ctx) {
@@ -1373,7 +1348,8 @@ public final class InternalMethodHandles {
       // Now, that has the same signture as builder, so assign back and loop.
       builder = MethodHandles.foldArguments(put, builder);
     }
-    return MethodHandles.filterReturnValue(builder, IMMUTABLE_MAP_BUILDER_BUILD_OR_THROW_HANDLE);
+    return MethodHandles.filterReturnValue(builder, IMMUTABLE_MAP_BUILDER_BUILD_OR_THROW_HANDLE)
+        .asType(FACTORY_TYPE);
   }
 
   private static final MethodHandle IMMUTABLE_MAP_OF_HANDLE =

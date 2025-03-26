@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import static java.lang.invoke.MethodType.methodType;
-import static java.util.Arrays.stream;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -195,19 +194,14 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
               .bindTo(enhancedConstructor)
               .asType(methodType(Object.class, Object.class, Object[].class));
       handle = MethodHandles.insertArguments(handle, 0, (Object) callbacks);
+      // Turn the array parameter into a fixed set of parameters.
       handle = handle.asCollector(Object[].class, parameterHandles.length);
-      handle =
-          MethodHandles.filterArguments(
-              handle,
-              0,
-              stream(parameterHandles)
-                  .map(InternalMethodHandles::castReturnToObject)
-                  .toArray(MethodHandle[]::new));
+      // Pass all the parameters to the constructor.
+      handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
+      // Merge all the internalcontext parameters into a single object factory.
       handle =
           MethodHandles.permuteArguments(
-              handle,
-              methodType(Object.class, InternalContext.class),
-              new int[parameterHandles.length]);
+              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
       return handle;
     }
 

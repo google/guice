@@ -53,7 +53,7 @@ final class ConstantFactory<T> implements InternalFactory<T> {
       @Override
       public MethodHandle getHandle(
           LinkageContext context, Dependency<?> dependency, boolean linked) {
-        var returnNull = MethodHandles.empty(InternalMethodHandles.makeFactoryType(dependency));
+        var returnNull = InternalMethodHandles.constantFactoryGetHandle(null);
         if (dependency.isNullable()) {
           // Just return a constant null handle.
           return returnNull;
@@ -93,7 +93,7 @@ final class ConstantFactory<T> implements InternalFactory<T> {
 
   @Override
   public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    return InternalMethodHandles.constantFactoryGetHandle(dependency, instance);
+    return InternalMethodHandles.constantFactoryGetHandle(instance);
   }
 
   @Override

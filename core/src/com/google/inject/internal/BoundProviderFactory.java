@@ -67,15 +67,13 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return context.makeHandle(
         this,
-        dependency,
         () ->
             InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                    circularGetHandle(
-                        providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
-                        dependency,
-                        provisionCallback),
-                    providerKey)
-                .asType(InternalMethodHandles.makeFactoryType(dependency)));
+                circularGetHandle(
+                    providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
+                    dependency,
+                    provisionCallback),
+                providerKey));
   }
 
   @Override

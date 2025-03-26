@@ -80,15 +80,13 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return context.makeHandle(
         this,
-        dependency,
         () ->
             InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                    circularGetHandle(
-                        providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
-                        dependency,
-                        provisionCallback),
-                    providerKey)
-                .asType(InternalMethodHandles.makeFactoryType(dependency)));
+                circularGetHandle(
+                    providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
+                    dependency,
+                    provisionCallback),
+                providerKey));
   }
 
   @Override
@@ -96,11 +94,9 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
     // Do normal provisioning and then check that the result is the correct subtype.
     MethodHandle invokeProvider = super.provisionHandle(providerHandle, dependency);
     return MethodHandles.filterReturnValue(
-            invokeProvider,
-            MethodHandles.insertArguments(
-                CHECK_SUBTYPE_NOT_PROVIDED_MH, 1, source, providerType, rawType))
-        // doCheckSubtypeNotProvided turns the return type to Object, so we need to fix it.
-        .asType(invokeProvider.type());
+        invokeProvider,
+        MethodHandles.insertArguments(
+            CHECK_SUBTYPE_NOT_PROVIDED_MH, 1, source, providerType, rawType));
   }
 
   private static final MethodHandle CHECK_SUBTYPE_NOT_PROVIDED_MH =

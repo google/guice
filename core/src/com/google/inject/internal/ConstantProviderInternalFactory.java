@@ -47,9 +47,6 @@ final class ConstantProviderInternalFactory<T> extends ProviderInternalFactory<T
   @Override
   public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     return circularGetHandleImmediate(
-            InternalMethodHandles.constantFactoryGetHandle(jakarta.inject.Provider.class, provider),
-            dependency,
-            provisionCallback)
-        .asType(InternalMethodHandles.makeFactoryType(dependency));
+        InternalMethodHandles.constantFactoryGetHandle(provider), dependency, provisionCallback);
   }
 }

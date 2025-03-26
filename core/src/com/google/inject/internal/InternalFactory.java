@@ -60,8 +60,7 @@ interface InternalFactory<T> {
   default MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
     // The default implementation simply delegates to the `get` method.
     MethodHandle handle = InternalMethodHandles.INTERNAL_FACTORY_GET_HANDLE.bindTo(this);
-    return MethodHandles.insertArguments(handle, 1, dependency, linked)
-        .asType(InternalMethodHandles.makeFactoryType(dependency));
+    return MethodHandles.insertArguments(handle, 1, dependency, linked);
   }
 
   /**

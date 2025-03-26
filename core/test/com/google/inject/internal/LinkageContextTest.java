@@ -16,6 +16,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
 import static org.junit.Assert.assertThrows;
 
@@ -36,14 +37,11 @@ public final class LinkageContextTest {
   @Test
   public void testMakeHandle_returnsHandle() throws Throwable {
     LinkageContext context = new LinkageContext();
-    String result =
-        (String)
+    var result =
+        (Object)
             context
                 .makeHandle(
-                    FACTORY,
-                    DEP,
-                    () ->
-                        InternalMethodHandles.constantFactoryGetHandle(String.class, "Hello World"))
+                    FACTORY, () -> InternalMethodHandles.constantFactoryGetHandle("Hello World"))
                 .invokeExact((InternalContext) null);
     assertThat(result).isEqualTo("Hello World");
   }
@@ -70,25 +68,24 @@ public final class LinkageContextTest {
     MethodHandle handle =
         context.makeHandle(
             FACTORY,
-            DEP,
             () -> {
               recursiveHandle[0] =
                   context.makeHandle(
                       FACTORY,
-                      DEP,
                       () -> {
                         throw new AssertionError("Should not be called");
                       });
-              return MethodHandles.insertArguments(
-                  INCREMENT_AND_RETURN_HANDLE, 1, "Hello World", callCount);
+              return castReturnToObject(
+                  MethodHandles.insertArguments(
+                      INCREMENT_AND_RETURN_HANDLE, 1, "Hello World", callCount));
             });
-    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(1);
-    assertThat((String) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(2);
 
     // The recursive handle is linked to the same instance, just indirectly.
-    assertThat((String) recursiveHandle[0].invokeExact((InternalContext) null))
+    assertThat((Object) recursiveHandle[0].invokeExact((InternalContext) null))
         .isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(3);
   }
@@ -114,28 +111,27 @@ public final class LinkageContextTest {
     MethodHandle handle =
         context.makeHandle(
             FACTORY,
-            DEP,
             () -> {
               var recursiveHandle =
                   context.makeHandle(
                       FACTORY,
-                      DEP,
                       () -> {
                         throw new AssertionError("Should not be called");
                       });
 
               // This calls `detectsCycle` and then the recursive handle.
-              return MethodHandles.foldArguments(
-                  recursiveHandle,
-                  InternalMethodHandles.dropReturn(
-                      MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 1, callCount)));
+              return castReturnToObject(
+                  MethodHandles.foldArguments(
+                      recursiveHandle,
+                      InternalMethodHandles.dropReturn(
+                          MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 1, callCount))));
             });
     var ipe =
         assertThrows(
             InternalProvisionException.class,
             () -> {
               var unused =
-                  (String)
+                  (Object)
                       handle.invokeExact(
                           InternalContext.create(
                               /* disableCircularProxies= */ true, new Object[] {null}));

@@ -38,6 +38,8 @@ interface ConstructionProxy<T> {
   /**
    * Returns the method handle for the constructor, using the supplied handles to provide
    * parameters.
+   *
+   * <p>The returned handle has {@link InternalMethodHandles#FACTORY_TYPE} as its signature.
    */
   MethodHandle getConstructHandle(MethodHandle[] parameterHandles);
 

@@ -322,7 +322,6 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       }
       return context.makeHandle(
           this,
-          dependency,
           () -> constructorInjector.getConstructHandle(context, dependency, provisionCallback));
     }
 
