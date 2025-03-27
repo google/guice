@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import static com.google.inject.name.Names.named;
+
 import junit.framework.TestCase;
 
 /** @author crazybob@google.com (Bob Lee) */
@@ -48,11 +50,24 @@ public class BoundProviderTest extends TestCase {
               @Override
               protected void configure() {
                 bind(Foo.class).toProvider(SingletonFooProvider.class);
+                bind(Foo.class)
+                    .annotatedWith(named("javax"))
+                    .toProvider(JavaxInjectSingletonFooProvider.class);
               }
             });
 
     Foo a = injector.getInstance(Foo.class);
     Foo b = injector.getInstance(Foo.class);
+
+    assertEquals(0, a.i);
+    assertEquals(1, b.i);
+    assertNotNull(a.bar);
+    assertNotNull(b.bar);
+    assertSame(a.bar, b.bar);
+
+    var javaxKey = Key.get(Foo.class, named("javax"));
+    a = injector.getInstance(javaxKey);
+    b = injector.getInstance(javaxKey);
 
     assertEquals(0, a.i);
     assertEquals(1, b.i);
@@ -97,6 +112,27 @@ public class BoundProviderTest extends TestCase {
 
     @Inject
     public SingletonFooProvider(Bar bar) {
+      this.bar = bar;
+    }
+
+    @Override
+    public Foo get() {
+      return new Foo(this.bar, count++);
+    }
+  }
+
+  // Use a jakarta.inject.Provider as well.  Dependency.get() always canonicalizes the jakarta.inject
+  // provider to the Guice provider, which at one point caused a bug in the MethodHandle
+  // implementation which attempted to enforce types derived from the
+  // Dependency objects
+  @Singleton
+  static class JavaxInjectSingletonFooProvider implements jakarta.inject.Provider<Foo> {
+
+    final Bar bar;
+    int count = 0;
+
+    @Inject
+    JavaxInjectSingletonFooProvider(Bar bar) {
       this.bar = bar;
     }
 
