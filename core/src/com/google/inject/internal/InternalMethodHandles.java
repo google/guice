@@ -54,7 +54,9 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,6 +95,41 @@ public final class InternalMethodHandles {
       findVirtualOrDie(
           BiFunction.class, "apply", methodType(Object.class, Object.class, Object.class));
 
+  /**
+   * A handle for {@link Method#invoke}, useful when we can neither use a fastclass or direct method
+   * handle.
+   */
+  static final MethodHandle METHOD_INVOKE_HANDLE =
+      findVirtualOrDie(
+          Method.class, "invoke", methodType(Object.class, Object.class, Object[].class));
+
+  /**
+   * A handle for {@link Method#invoke}, useful when we can neither use a fastclass or direct method
+   * handle.
+   */
+  static final MethodHandle CONSTRUCTOR_NEWINSTANCE_HANDLE =
+      findVirtualOrDie(Constructor.class, "newInstance", methodType(Object.class, Object[].class));
+
+  /**
+   * The maximum arity of a method handle that can be bound.
+   *
+   * <ul>
+   *   <li>There is a hard limit imposed by the JVM of 255 parameters.
+   *   <li>MethodHandles add another parameter to represent the 'direct bound handle'
+   *   <li>A MethodHandle that is invoked from Java by `invokeExact` adds another parameter to
+   *       represent the receiver `MethodHandle` of `invokeExact`.
+   * </ul>
+   *
+   * <p>This leaves us with 255 - 2 = 253 parameters as the maximum arity of a method handle that
+   * can be bound.
+   *
+   * <p>TODO(b/366058184): For now we use this to decide when to back off and have callers
+   * workaround generally by generating a fastclass. We should just enforce this limit on users
+   * basically no one should really need to use so many parameters in a constructor/method and for
+   * guice injectable methods the workarounds are generally quite simple anyway, so we can just make
+   * this an error.
+   */
+  private static final int MAX_BINDABLE_ARITY = 253;
 
   /**
    * Returns a method handle for the given method, or null if the method is not accessible.
@@ -102,6 +139,14 @@ public final class InternalMethodHandles {
    */
   @Nullable
   static MethodHandle unreflect(Method method) {
+    // account for the `this` param if any
+    int paramSize = Modifier.isStatic(method.getModifiers()) ? 1 : 0;
+    for (var param : method.getParameterTypes()) {
+      paramSize += param.isPrimitive() ? Type.getType(param).getSize() : 1;
+    }
+    if (paramSize > MAX_BINDABLE_ARITY) {
+      return null;
+    }
     try {
       method.setAccessible(true);
     } catch (SecurityException | InaccessibleObjectException e) {
@@ -123,6 +168,13 @@ public final class InternalMethodHandles {
    */
   @Nullable
   static MethodHandle unreflectConstructor(Constructor<?> ctor) {
+    int paramSize = 1; // constructors always have a `this` param
+    for (var param : ctor.getParameterTypes()) {
+      paramSize += param.isPrimitive() ? Type.getType(param).getSize() : 1;
+    }
+    if (paramSize > MAX_BINDABLE_ARITY) {
+      return null;
+    }
     try {
       ctor.setAccessible(true);
     } catch (SecurityException | InaccessibleObjectException e) {
@@ -683,6 +735,12 @@ public final class InternalMethodHandles {
     return MethodHandles.foldArguments(guard, tryStartConstruction);
   }
 
+  private static final MethodHandle TRY_START_CONSTRUCTION_HANDLE =
+      findVirtualOrDie(
+          InternalContext.class,
+          "tryStartConstruction",
+          methodType(Object.class, int.class, Dependency.class));
+
   /**
    * Drops the return value from a method handle.
    *
@@ -705,11 +763,24 @@ public final class InternalMethodHandles {
     return result == null;
   }
 
-  private static final MethodHandle TRY_START_CONSTRUCTION_HANDLE =
-      findVirtualOrDie(
-          InternalContext.class,
-          "tryStartConstruction",
-          methodType(Object.class, int.class, Dependency.class));
+  static MethodHandle catchInvocationTargetExceptionAndRethrowCause(MethodHandle handle) {
+    return MethodHandles.catchException(
+        handle,
+        InvocationTargetException.class,
+        CATCH_INVOCATION_TARGET_EXCEPTION_AND_RETHROW_CAUSE_HANDLE);
+  }
+
+  private static final MethodHandle CATCH_INVOCATION_TARGET_EXCEPTION_AND_RETHROW_CAUSE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "doCatchInvocationTargetExceptionAndRethrowCause",
+          methodType(Object.class, InvocationTargetException.class));
+
+  @Keep
+  private static Object doCatchInvocationTargetExceptionAndRethrowCause(InvocationTargetException e)
+      throws Throwable {
+    throw e.getCause();
+  }
 
   /**
    * Generates a provider instance that delegates to the given factory.
@@ -1264,16 +1335,43 @@ public final class InternalMethodHandles {
     var builder =
         MethodHandles.insertArguments(
             IMMUTABLE_SET_BUILDER_OF_SIZE_HANDLE, 0, elementHandlesList.size());
-    // Add any InternalContext arguments to the builder.
-    builder = MethodHandles.dropArguments(builder, 0, InternalContext.class);
-    for (var handle : elementHandlesList) {
-      // builder = builder.add(<handle>(ctx))
-      builder =
-          MethodHandles.foldArguments(
-              MethodHandles.filterArguments(IMMUTABLE_SET_BUILDER_ADD_HANDLE, 1, handle), builder);
-    }
+
+    builder = MethodHandles.foldArguments(doAddToImmutableSet(elementHandlesList), builder);
     return MethodHandles.filterReturnValue(builder, IMMUTABLE_SET_BUILDER_BUILD_HANDLE)
         .asType(FACTORY_TYPE);
+  }
+
+  /**
+   * A helper to generate calls to add to the ImmutableSet builder.
+   *
+   * <p>Returns a handle of type (ImmutableSet.Builder, InternalContext) -> ImmutableSet.Builder
+   */
+  private static MethodHandle doAddToImmutableSet(ImmutableList<MethodHandle> elementHandlesList) {
+    // We don't want to 'fold' too deep as it can lead to a stack overflow.  So we have a special
+    // case for small lists.
+    if (elementHandlesList.size() < 32) {
+      var builder =
+          MethodHandles.dropArguments(
+              MethodHandles.identity(ImmutableSet.Builder.class), 1, InternalContext.class);
+      for (var handle : elementHandlesList) {
+        // builder = builder.add(<handle>(ctx))
+        builder =
+            MethodHandles.foldArguments(
+                MethodHandles.filterArguments(IMMUTABLE_SET_BUILDER_ADD_HANDLE, 1, handle),
+                dropReturn(builder));
+      }
+      return builder;
+    } else {
+      // Otherwise we split and recurse, this basically ensures that none of the lambda forms are
+      // too big and the 'folds' are not too deep.
+      int half = elementHandlesList.size() / 2;
+      var left = elementHandlesList.subList(0, half);
+      var right = elementHandlesList.subList(half, elementHandlesList.size());
+      // We are basically creating 2 methods in a chain that add to the builder
+      // We do this by calling `doAddToImmutableSet` recursively.
+      return MethodHandles.foldArguments(
+          doAddToImmutableSet(right), dropReturn(doAddToImmutableSet(left)));
+    }
   }
 
   private static final MethodHandle IMMUTABLE_SET_OF_HANDLE =
@@ -1327,29 +1425,49 @@ public final class InternalMethodHandles {
     var builder =
         MethodHandles.insertArguments(
             IMMUTABLE_MAP_BUILDER_WITH_EXPECTED_SIZE_HANDLE, 0, entries.size());
-    builder = MethodHandles.dropArguments(builder, 0, InternalContext.class);
-    for (Map.Entry<T, MethodHandle> entry : entries) {
-      // `put` has the signature `put(Builder, K, V)->Builder` (the first parameter is 'this').
-      // Insert the 'constant' key to get this signature:
-      // (Builder, V)->Builder
-      var put = MethodHandles.insertArguments(IMMUTABLE_MAP_BUILDER_PUT_HANDLE, 1, entry.getKey());
-      // Construct the value, by calling the factory method handle to supply the first argument (the
-      // value).  Because the entry is a MethodHandle with signature `(InternalContext)->V` we need
-      // to cast the return type to `Object` to match the signature of `put`.
-      // (Builder, InternalContext)->Builder
-      put = MethodHandles.filterArguments(put, 1, entry.getValue());
-      // Fold works by invoking the 'builder' and then passing it to the first argument of the
-      // `put` method, and then passing the arguments to `builder` to put as well. Like this:
-      //  Builder fold(InternalContext ctx) {
-      //   bar builder = <builder-handle>(ctx);
-      //   return <put-handle>(builder, ctx);
-      // }
-      // (InternalContext)->Builder
-      // Now, that has the same signture as builder, so assign back and loop.
-      builder = MethodHandles.foldArguments(put, builder);
-    }
+    builder = MethodHandles.foldArguments(doPutEntries(entries), builder);
     return MethodHandles.filterReturnValue(builder, IMMUTABLE_MAP_BUILDER_BUILD_OR_THROW_HANDLE)
         .asType(FACTORY_TYPE);
+  }
+
+  /** Returns a handle of type (ImmutableMap.Builder, InternalContext) -> ImmutableMap.Builder */
+  private static <T> MethodHandle doPutEntries(List<Map.Entry<T, MethodHandle>> entries) {
+    int size = entries.size();
+    checkArgument(size > 0, "entries must not be empty");
+    if (size < 32) {
+      MethodHandle builder = null;
+      for (Map.Entry<T, MethodHandle> entry : entries) {
+        // `put` has the signature `put(Builder, K, V)->Builder` (the first parameter is 'this').
+        // Insert the 'constant' key to get this signature:
+        // (Builder, V)->Builder
+        var put =
+            MethodHandles.insertArguments(IMMUTABLE_MAP_BUILDER_PUT_HANDLE, 1, entry.getKey());
+        // Construct the value, by calling the factory method handle to supply the first argument
+        // (the
+        // value).  Because the entry is a MethodHandle with signature `(InternalContext)->V` we
+        // need
+        // to cast the return type to `Object` to match the signature of `put`.
+        // (Builder, InternalContext)->Builder
+        put = MethodHandles.filterArguments(put, 1, entry.getValue());
+        // Fold works by invoking the 'builder' and then passing it to the first argument of the
+        // `put` method, and then passing the arguments to `builder` to put as well. Like this:
+        //  Builder fold(InternalContext ctx) {
+        //   bar builder = <builder-handle>(ctx);
+        //   return <put-handle>(builder, ctx);
+        // }
+        // (InternalContext)->Builder
+        // Now, that has the same signture as builder, so assign back and loop.
+        builder = builder == null ? put : MethodHandles.foldArguments(put, dropReturn(builder));
+      }
+      return builder;
+    } else {
+      // Otherwise we split and recurse, this basically ensures that none of the lambda forms are
+      // too big and the 'folds' are not too deep.
+      int half = size / 2;
+      return MethodHandles.foldArguments(
+          doPutEntries(entries.subList(half, size)),
+          dropReturn(doPutEntries(entries.subList(0, half))));
+    }
   }
 
   private static final MethodHandle IMMUTABLE_MAP_OF_HANDLE =

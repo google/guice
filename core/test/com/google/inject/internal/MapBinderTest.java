@@ -1643,6 +1643,32 @@ public class MapBinderTest extends TestCase {
     assertThat(e).hasMessageThat().contains("Duplicate key \"1\" found in Map<Integer, String>.");
   }
 
+  // Test a large map to ensure we don't create bad methodhandles that are too big or have too many
+  // parameters or are too recursive.
+
+  public void testLargeMapBinder() {
+    for (boolean permmitDuplicates : new boolean[] {true, false}) {
+      final int size = 100_000;
+      Module module =
+          new AbstractModule() {
+            @Override
+            protected void configure() {
+              MapBinder<Integer, String> mapBinder =
+                  MapBinder.newMapBinder(binder(), Integer.class, String.class);
+              if (permmitDuplicates) {
+                mapBinder = mapBinder.permitDuplicates();
+              }
+              for (int i = 0; i < size; i++) {
+                mapBinder.addBinding(i).toInstance(String.valueOf(i));
+              }
+            }
+          };
+      Injector injector = Guice.createInjector(module);
+      Map<Integer, String> map = injector.getInstance(new Key<Map<Integer, String>>() {});
+      assertThat(map).hasSize(size);
+    }
+  }
+
   /**
    * Will find and return the {@link com.google.inject.spi.Element} that is an {@link
    * InstanceBinding} and binds {@code vToFind}.

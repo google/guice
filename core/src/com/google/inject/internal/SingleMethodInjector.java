@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
+import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -121,6 +122,10 @@ final class SingleMethodInjector implements SingleMemberInjector {
                   ? BIFUNCTION_APPLY_HANDLE
                       .bindTo(fastMethod)
                       .asType(methodType(Object.class, Object[].class, Object.class))
+                      // Have it collect N arguments into an array of type Object[]
+                      // This is safe because the number of parameters is the same as the number of
+                      // parameters to the method which should never exceed the maximum number of
+                      // method parameters.
                       .asCollector(Object[].class, method.getParameterCount())
                   : null;
           return new MethodInvoker() {
@@ -180,8 +185,23 @@ final class SingleMethodInjector implements SingleMemberInjector {
       @Override
       public MethodHandle getInjectHandle(
           LinkageContext linkageContext, MethodHandle[] parameterHandles) {
-        // There is no way to get here and have methodhandles enabled.
-        throw new AssertionError("impossible");
+        // See comments in ProviderMethod on why we use reflection here and how rarely this happens.
+        // bind to the `Method` object
+        var handle = METHOD_INVOKE_HANDLE.bindTo(method);
+        // collect the parameters into an array of type Object[]
+        var arrayHandle =
+            MethodHandles.identity(Object[].class)
+                .asCollector(Object[].class, parameterHandles.length);
+        // supply all parameters
+        arrayHandle = MethodHandles.filterArguments(arrayHandle, 0, parameterHandles);
+        arrayHandle =
+            MethodHandles.permuteArguments(
+                arrayHandle,
+                methodType(Object[].class, InternalContext.class),
+                new int[parameterHandles.length]);
+        handle = InternalMethodHandles.dropReturn(handle); // we never care about return values.
+        handle = MethodHandles.filterArguments(handle, 1, arrayHandle);
+        return handle;
       }
     };
   }

@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
+import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -349,7 +350,10 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
           MethodHandles.insertArguments(BIFUNCTION_APPLY_HANDLE.bindTo(fastMethod), 0, instance)
               // Cast the parameter type to be an Object array
               .asType(methodType(Object.class, Object[].class))
-              // Allow it to be called as a varargs method.
+              // Have it collect N arrguments into an array of type Object[]
+              // This is safe because the number of parameters is the same as the number of
+              // parameters to the method which should never exceed the maximum number of
+              // method parameters.
               .asCollector(Object[].class, parameters.length);
 
       // The signature is now (...InternaleContext)->Object, but we want to pass the same context
@@ -385,7 +389,31 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
 
     @Override
     MethodHandle doProvisionHandle(MethodHandle[] parameters) {
-      throw new AssertionError("impossible");
+      // We can hit this case if
+      // 1. the method/class/parameters are non-public and we are using bytecode gen but a security
+      // manager or modules configuration are installed that blocks access to our fastclass
+      // generation and the setAccessible method.
+      // 2. The method has too many parameters to be supported by method handles (and fastclass also
+      // fails)
+      // So we fall back to reflection.
+      // You might be wondering... why is it that MethodHandles cannot handle methods with the
+      // maximum number of parameters but java reflection can? And yes it is true that java
+      // reflection is based on MethodHandles, but it supports a fallback for exactly this case that
+      // goes through a JVM native method... le sigh...
+
+      // bind to the `Method` object
+      var handle = METHOD_INVOKE_HANDLE.bindTo(method);
+      // insert the instance
+      handle = MethodHandles.insertArguments(handle, 0, instance);
+      // collect the parameters into an array of type Object[]
+      handle = handle.asCollector(Object[].class, parameters.length);
+      // supply all parameters
+      handle = MethodHandles.filterArguments(handle, 0, parameters);
+      // Merge all the parameters into a single object factory method.
+      handle =
+          MethodHandles.permuteArguments(
+              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
+      return handle;
     }
   }
 
@@ -430,6 +458,9 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       handle =
           MethodHandles.permuteArguments(
               handle, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
+      // MethodHandles expect the root Throwable to be thrown directly, unpack and rethrow the
+      // cause instead of complicating the normal flow.
+      handle = InternalMethodHandles.catchInvocationTargetExceptionAndRethrowCause(handle);
       return handle;
     }
 

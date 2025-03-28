@@ -17,7 +17,9 @@
 package com.google.inject.internal;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.MoreCollectors.onlyElement;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.internal.RealMultibinder.collectionOfJakartaProvidersOf;
 import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
@@ -82,6 +84,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.IntStream;
 import junit.framework.TestCase;
 
 /**
@@ -1609,6 +1612,38 @@ public class MultibinderTest extends TestCase {
       fail();
     } catch (CreationException e) {
       assertTrue(e.getMessage().contains("Set<? extends String> was bound multiple times"));
+    }
+  }
+
+  // In the methodhandle implementation we need to ensure we don't create methods with too many
+  // parameters.
+
+  public void testLargeMultibinder() {
+    for (boolean permmitDuplicates : new boolean[] {true, false}) {
+      // Test a size larger than the number of method parameters.
+      // Sizes up to 100K work fine but are too slow.
+      final int size = 100_000;
+      Injector injector =
+          Guice.createInjector(
+              new AbstractModule() {
+                @Override
+                protected void configure() {
+                  Multibinder<String> multibinder =
+                      Multibinder.newSetBinder(binder(), String.class);
+                  if (permmitDuplicates) {
+                    multibinder = multibinder.permitDuplicates();
+                  }
+                  for (int i = 0; i < size; i++) {
+                    multibinder.addBinding().toInstance("" + i);
+                  }
+                }
+              });
+      Set<String> set = injector.getInstance(new Key<Set<String>>() {});
+      assertThat(set)
+          .isEqualTo(
+              IntStream.range(0, size)
+                  .mapToObj(i -> Integer.toString(i))
+                  .collect(toImmutableSet()));
     }
   }
 

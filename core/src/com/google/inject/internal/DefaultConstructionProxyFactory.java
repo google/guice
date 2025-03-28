@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.InternalMethodHandles.CONSTRUCTOR_NEWINSTANCE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -134,6 +135,9 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
               .bindTo(fastConstructor)
               .asType(methodType(Object.class, Object.class, Object[].class));
       handle = MethodHandles.insertArguments(handle, 0, (Object) null); // no receiver type.
+      // NOTE: is is safe to use asCollector here because the number of parameters is the same
+      // as the number of parameters to the constructor which should never exceed the maxiumum
+      // number of method parameters.
       handle = handle.asCollector(Object[].class, parameterHandles.length);
       // Pass all the parameters to the constructor.
       handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
@@ -163,8 +167,15 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     @Override
     public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
-      // should be impossible to get here with methodhandles enabled
-      throw new AssertionError("impossible");
+      // See comments in ProviderMethod on how this rarely happens and why it happens
+      var handle = CONSTRUCTOR_NEWINSTANCE_HANDLE.bindTo(constructor);
+      // collect the parameters into an array of type Object[]
+      handle = handle.asCollector(Object[].class, parameterHandles.length);
+      // apply all the parameters to the constructor.
+      handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
+      // merge all the internalcontext parameters into a single object factory.
+      return MethodHandles.permuteArguments(
+          handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
     }
   }
 
