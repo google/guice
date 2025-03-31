@@ -116,6 +116,9 @@ public final class InternalMethodHandlesTest {
       public String get(InternalContext context, Dependency<?> dependency, boolean linked) {
         throw new AssertionError();
       }
+      @Override public MethodHandle getHandle(LinkageContext context, boolean linked) {
+        throw new AssertionError();
+      }
     };
   }
 

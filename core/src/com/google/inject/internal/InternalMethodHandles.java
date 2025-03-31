@@ -228,13 +228,6 @@ public final class InternalMethodHandles {
         castReturnTo(providerHandle, jakarta.inject.Provider.class), PROVIDER_GET_HANDLE);
   }
 
-  /** Direct handle for {@link InternalFactory#get} */
-  static final MethodHandle INTERNAL_FACTORY_GET_HANDLE =
-      findVirtualOrDie(
-          InternalFactory.class,
-          "get",
-          methodType(Object.class, InternalContext.class, Dependency.class, boolean.class));
-
   static MethodHandle findStaticOrDie(Class<?> clazz, String name, MethodType type) {
     try {
       return lookup.findStatic(clazz, name, type);
