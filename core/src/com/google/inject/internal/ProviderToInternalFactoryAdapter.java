@@ -37,12 +37,12 @@ import com.google.inject.spi.Dependency;
 public class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   private final InjectorImpl injector;
-  private final InternalFactory<? extends T> internalFactory;
+  final InternalFactory<? extends T> internalFactory;
 
   static <T> ProviderToInternalFactoryAdapter<T> create(
-      InjectorImpl injector, InternalFactory<? extends T> internalFactory, Key<T> key) {
+      InjectorImpl injector, InternalFactory<? extends T> internalFactory) {
     if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
-      return InternalMethodHandles.makeScopedProvider(internalFactory, injector, key);
+      return InternalMethodHandles.makeScopedProvider(internalFactory, injector);
     }
 
     return new ProviderToInternalFactoryAdapter<>(injector, internalFactory);

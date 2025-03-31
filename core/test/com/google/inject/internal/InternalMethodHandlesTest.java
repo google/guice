@@ -52,7 +52,7 @@ public final class InternalMethodHandlesTest {
             factory, injector, Dependency.get(Key.get(String.class)));
 
     assertThat(provider.get()).isEqualTo("Hello World");
-    assertThat(provider).isInstanceOf(InternalMethodHandles.GeneratedProvider.class);
+    assertThat(provider).isInstanceOf(InternalMethodHandles.MethodHandleProvider.class);
   }
 
   @Test
@@ -136,7 +136,7 @@ public final class InternalMethodHandlesTest {
           }
         };
     Provider<String> provider =
-        InternalMethodHandles.makeScopedProvider(factory, injector, Key.get(String.class));
+        InternalMethodHandles.makeScopedProvider(factory, injector);
     assertThat(provider).isInstanceOf(ProviderToInternalFactoryAdapter.class);
 
     assertThat(provider.get()).isEqualTo("Hello world");
