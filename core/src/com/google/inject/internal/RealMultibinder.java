@@ -290,8 +290,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
       if (injectors == null) {
         return InternalMethodHandles.constantFactoryGetHandle(ImmutableSet.of());
       }
@@ -310,7 +309,8 @@ public final class RealMultibinder<T> implements Module {
       if (permitDuplicates || elementHandles.size() == 1) {
         // we just want to construct an ImmutableSet.Builder, and add everything to it.
         // This generates exactly the code a human would write.
-        return InternalMethodHandles.buildImmutableSetFactory(elementHandles);
+        return MethodHandles.dropArguments(
+            InternalMethodHandles.buildImmutableSetFactory(elementHandles), 1, Dependency.class);
       } else {
         // Duplicates are not permitted, so we need to check for duplicates by constructing all
         // elements and then checking the size of the set.
@@ -335,8 +335,8 @@ public final class RealMultibinder<T> implements Module {
         var collector = MAKE_IMMUTABLE_SET_AND_CHECK_DUPLICATES_HANDLE.bindTo(this);
         // (InternalContext ctx) -> ImmutableSet<T>
         collector = MethodHandles.filterArguments(collector, 0, populateArray);
-
-        return castReturnToObject(collector);
+        // (InternalContext, Dependency) -> Object
+        return MethodHandles.dropArguments(castReturnToObject(collector), 1, Dependency.class);
       }
     }
 
@@ -518,8 +518,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
       return InternalMethodHandles.constantFactoryGetHandle(providers);
     }
   }

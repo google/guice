@@ -236,24 +236,23 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       throws IllegalAccessException, InvocationTargetException;
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, boolean linked) {
     return context.makeHandle(
         this,
         () -> {
-          MethodHandle handle = super.getHandle(context, dependency, linked);
+          MethodHandle handle = super.getHandle(context, linked);
           // Handle circular proxies.
-          return InternalMethodHandles.tryStartConstruction(handle, dependency, circularFactoryId);
+          return InternalMethodHandles.tryStartConstruction(handle, circularFactoryId);
         });
   }
 
   /** Creates a method handle that constructs the object to be injected. */
   @Override
-  protected final MethodHandle doGetHandle(
-      LinkageContext context, Dependency<?> dependency, boolean linked) {
+  protected final MethodHandle doGetHandle(LinkageContext context, boolean linked) {
     MethodHandle handle =
         doProvisionHandle(SingleParameterInjector.getAllHandles(context, parameterInjectors));
     handle = castReturnToObject(handle);
-    handle = InternalMethodHandles.nullCheckResult(handle, getMethod(), dependency);
+    handle = InternalMethodHandles.nullCheckResult(handle, getMethod());
     // catch everything else and rethrow as an error in provider.
     handle = InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(handle, getSource());
     handle = InternalMethodHandles.finishConstruction(handle, circularFactoryId);

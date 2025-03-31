@@ -19,6 +19,8 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.internal.GuiceInternal.GUICE_INTERNAL;
+import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
+import static java.lang.invoke.MethodType.methodType;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -42,6 +44,7 @@ import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -237,7 +240,6 @@ final class InjectorShell {
 
       return injectorShells;
     }
-
   }
 
   /**
@@ -284,8 +286,7 @@ final class InjectorShell {
     }
 
     @Override
-    public MethodHandle getHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    public MethodHandle getHandle(LinkageContext context, boolean linked) {
       return InternalMethodHandles.constantFactoryGetHandle(injector);
     }
 
@@ -333,9 +334,27 @@ final class InjectorShell {
     }
 
     @Override
-    public MethodHandle getHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.constantFactoryGetHandle(makeLogger(dependency));
+    public MethodHandle getHandle(LinkageContext context, boolean linked) {
+      return MAKE_LOGGER_MH;
+    }
+
+    private static final MethodHandle MAKE_LOGGER_MH;
+
+    static {
+      try {
+        MAKE_LOGGER_MH =
+            castReturnToObject(
+                MethodHandles.dropArguments(
+                    MethodHandles.lookup()
+                        .findStatic(
+                            LoggerFactory.class,
+                            "makeLogger",
+                            methodType(Logger.class, Dependency.class)),
+                    0,
+                    InternalContext.class));
+      } catch (NoSuchMethodException | IllegalAccessException e) {
+        throw new LinkageError("Failed to find makeLogger function", e);
+      }
     }
 
     private static Logger makeLogger(Dependency<?> dependency) {

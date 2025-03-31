@@ -47,7 +47,7 @@ final class InitializableFactory<T> implements InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, boolean linked) {
     return InternalMethodHandles.initializableFactoryGetHandle(initializable);
   }
 

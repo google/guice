@@ -75,6 +75,7 @@ final class LinkageContext {
       checkState(previous == null, "Unexpected previous value: %s", previous);
     }
     MethodHandle handle = factory.get();
+    InternalMethodHandles.checkHasFactoryType(handle);
     previous = linkingFactories.remove(source);
     checkState(previous != null, "construction state was cleared already?");
     if (previous != CONSTRUCTING) {

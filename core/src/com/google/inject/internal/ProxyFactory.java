@@ -203,7 +203,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       // Merge all the internalcontext parameters into a single object factory.
       handle =
           MethodHandles.permuteArguments(
-              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
+              handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[parameterHandles.length]);
       return handle;
     }
 

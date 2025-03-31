@@ -53,14 +53,13 @@ interface InternalFactory<T> {
    * of the object to be injected as determined by the {@link Dependency}.
    *
    * @param context the linkage context
-   * @param dependency the dependency to be injected
    * @param linked true if getting as a result of a linked binding
    * @return the method handle for the object to be injected
    */
-  default MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  default MethodHandle getHandle(LinkageContext context, boolean linked) {
     // The default implementation simply delegates to the `get` method.
     MethodHandle handle = InternalMethodHandles.INTERNAL_FACTORY_GET_HANDLE.bindTo(this);
-    return MethodHandles.insertArguments(handle, 1, dependency, linked);
+    return MethodHandles.insertArguments(handle, 2, linked);
   }
 
   /**
