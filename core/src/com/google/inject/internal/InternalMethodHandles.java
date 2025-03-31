@@ -17,37 +17,19 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.invoke.MethodType.methodType;
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.Opcodes.V11;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.Keep;
-import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
-import com.google.inject.internal.aop.ClassDefining;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
-import java.lang.invoke.CallSite;
-import java.lang.invoke.ConstantCallSite;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
@@ -56,14 +38,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
 
 /** Utility methods for working with method handles and our internal guice protocols. */
 public final class InternalMethodHandles {
@@ -158,7 +134,7 @@ public final class InternalMethodHandles {
     // account for the `this` param if any
     int paramSize = Modifier.isStatic(method.getModifiers()) ? 1 : 0;
     for (var param : method.getParameterTypes()) {
-      paramSize += param.isPrimitive() ? Type.getType(param).getSize() : 1;
+      paramSize += getParamSize(param);
     }
     if (paramSize > MAX_BINDABLE_ARITY) {
       return null;
@@ -177,6 +153,14 @@ public final class InternalMethodHandles {
   }
 
   /**
+   * Returns how many 'slots' the param will consume. `long` and `douhble` take 2 and everything
+   * else takes 1.
+   */
+  private static int getParamSize(Class<?> param) {
+    return param == long.class || param == double.class ? 2 : 1;
+  }
+
+  /**
    * Returns a method handle for the given constructor, or null if it is not accessible.
    *
    * <p>Ideally we would change Guice APIs to accept MethodHandle.Lookup objects instead of trying
@@ -186,7 +170,7 @@ public final class InternalMethodHandles {
   static MethodHandle unreflectConstructor(Constructor<?> ctor) {
     int paramSize = 1; // constructors always have a `this` param
     for (var param : ctor.getParameterTypes()) {
-      paramSize += param.isPrimitive() ? Type.getType(param).getSize() : 1;
+      paramSize += getParamSize(param);
     }
     if (paramSize > MAX_BINDABLE_ARITY) {
       return null;
@@ -808,20 +792,7 @@ public final class InternalMethodHandles {
    */
   static <T> Provider<T> makeProvider(
       InternalFactory<T> factory, InjectorImpl injector, Dependency<?> dependency) {
-    // This is safe due to the implementation of InternalFactory.getHandle which we cannot enforce
-    // with generic type constraints.
-    @SuppressWarnings("unchecked")
-    Provider<T> typedProvider =
-        (Provider)
-            ProviderMaker.defineClass(
-                injector,
-                factory,
-                dependency,
-                () -> 
-                        factory
-                            .getHandle(new LinkageContext(), /* linked= */ false),
-                /* isScoped= */ false);
-    return typedProvider;
+    return new MethodHandleProvider<>(injector, factory, dependency);
   }
 
   /**
@@ -831,35 +802,63 @@ public final class InternalMethodHandles {
    * instances.
    */
   static <T> ProviderToInternalFactoryAdapter<T> makeScopedProvider(
-      InternalFactory<? extends T> factory, InjectorImpl injector, Key<T> forKey) {
-    var dependency = Dependency.get(forKey);
-    // This is safe due to the implementation of InternalFactory.getHandle which we cannot enforce
-    // with generic type constraints.
-    @SuppressWarnings("unchecked")
-    ProviderToInternalFactoryAdapter<T> typedProvider =
-        (ProviderToInternalFactoryAdapter)
-            ProviderMaker.defineClass(
-                injector,
-                factory,
-                dependency,
-                () ->factory
-                            .getHandle(new LinkageContext(), /* linked= */ true),
-                /* isScoped= */ true);
-    return typedProvider;
+      InternalFactory<? extends T> factory, InjectorImpl injector) {
+    return new MethodHandleProviderToInternalFactoryAdapter<T>(injector, factory);
+  }
+
+  /** A provider instance that delegates to a lazily constructed method handle. */
+  static final class MethodHandleProviderToInternalFactoryAdapter<T>
+      extends ProviderToInternalFactoryAdapter<T> {
+    // Protected via double checked locking
+    private volatile MethodHandle handle;
+
+    MethodHandleProviderToInternalFactoryAdapter(
+        InjectorImpl injector, InternalFactory<? extends T> factory) {
+      super(injector, factory);
+    }
+
+    @Override
+    protected T doGet(InternalContext context, Dependency<?> dependency) {
+      try {
+        @SuppressWarnings("unchecked") // safety is provided by the Factory implementation.
+        var typed = (T) (Object) getHandle().invokeExact(context, dependency);
+        return typed;
+      } catch (Throwable t) {
+        throw sneakyThrow(t); // This includes InternalProvisionException.
+      }
+    }
+
+    private MethodHandle getHandle() {
+      var local = this.handle;
+      if (local == null) {
+        // synchronize on the factory instead of `this` since users might be using the provider
+        // itself as a lock.
+        synchronized (internalFactory) {
+          local = this.handle;
+          if (local == null) {
+            local = internalFactory.getHandle(new LinkageContext(), /* linked= */ true);
+            this.handle = local;
+          }
+        }
+      }
+      return handle;
+    }
   }
 
   /**
-   * A base class for generated providers.
+   * A provider that delegates to a lazily constructed MethodHandle.
    *
    * <p>This class encapsulates the logic for entering and exiting the injector context, and
    * handling {@link InternalProvisionException}s.
    */
-  public abstract static class GeneratedProvider<T> implements Provider<T> {
+  static final class MethodHandleProvider<T> implements Provider<T> {
     private final InjectorImpl injector;
     private final InternalFactory<? extends T> factory;
     private final Dependency<?> dependency;
+    // Uses the double-checked-locking pattern.
+    private volatile MethodHandle handle;
 
-    protected GeneratedProvider(
+    MethodHandleProvider(
         InjectorImpl injector, InternalFactory<T> factory, Dependency<?> dependency) {
       this.injector = injector;
       this.factory = factory;
@@ -870,9 +869,13 @@ public final class InternalMethodHandles {
     public T get() {
       InternalContext currentContext = injector.enterContext();
       try {
-        return doGet(currentContext, dependency);
+        @SuppressWarnings("unchecked") // safety is provided by the Factory implementation.
+        var typed = (T) (Object) getHandle().invokeExact(currentContext);
+        return typed;
       } catch (InternalProvisionException e) {
         throw e.addSource(dependency).toProvisionException();
+      } catch (Throwable t) {
+        throw sneakyThrow(t);
       } finally {
         currentContext.close();
       }
@@ -883,196 +886,25 @@ public final class InternalMethodHandles {
       return factory.toString();
     }
 
-    @ForOverride
-    protected abstract T doGet(InternalContext context, Dependency<?> dependency) throws InternalProvisionException;
-  }
-
-  /**
-   * A class that can be used to generate a provider instance that delegates to a method handle.
-   *
-   * <p>Ideally we would just use the jdk internal mechanism for this that lambdas use, but they
-   * require 'direct' MethodHandles and our MethodHandles are typically built out of combinators.
-   */
-  static final class ProviderMaker {
-    private static final Type PROVIDER_TYPE = Type.getType(GeneratedProvider.class);
-    private static final Type SCOPED_PROVIDER_TYPE =
-        Type.getType(ProviderToInternalFactoryAdapter.class);
-    private static final MethodType CTOR_TYPE =
-        methodType(void.class, InjectorImpl.class, InternalFactory.class, Dependency.class);
-
-    private static final MethodType SCOPED_CTOR_TYPE =
-        methodType(void.class, InjectorImpl.class, InternalFactory.class);
-
-    private static final Handle BOOSTRAP_HANDLE =
-        new Handle(
-            H_INVOKESTATIC,
-            Type.getType(InternalMethodHandles.class).getInternalName(),
-            "bootstrapHandle",
-            methodType(CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class)
-                .toMethodDescriptorString(),
-            /* isInterface= */ false);
-
-    private static final ConcurrentHashMap<String, Integer> nameUses = new ConcurrentHashMap<>();
-
-    // These are character that are not allowed as part of an unqualified class name part.
-    private static final CharMatcher NAME_MANGLE_CHARS = CharMatcher.anyOf("[].;/<>");
-
-    /**
-     * Defines and constructs a stateless provider class that delegates to the given handleCreator.
-     *
-     * <p>The handleCreator is called at most once per generated provider instance.
-     */
-    static Provider<?> defineClass(
-        InjectorImpl injector,
-        InternalFactory<?> factory,
-        Dependency<?> dependency,
-        Supplier<MethodHandle> handleCreator,
-        boolean isScoped) {
-      // Even if we are using the anonymous classloading mechanisms we still need to pick a name,
-      // it just ends up being ignored.
-      var baseType = isScoped ? SCOPED_PROVIDER_TYPE : PROVIDER_TYPE;
-      var name = dependency.getKey().getTypeLiteral().getRawType().getSimpleName();
-      // We need to mangle this name to avoid `[]` characters, for now we just remove them.
-      name = NAME_MANGLE_CHARS.removeFrom(name);
-      String actualName =
-          baseType.getInternalName()
-              + "$"
-              + name
-              + "$"
-              + nameUses.compute(name, (key, value) -> value == null ? 0 : value + 1);
-
-      ClassWriter cw = new ClassWriter(0);
-      cw.visit(
-          V11, // need access to invokeDynamic and constant dynamic
-          ACC_PUBLIC | ACC_SUPER | ACC_FINAL,
-          actualName,
-          /* signature= */ null,
-          baseType.getInternalName(),
-          /* interfaces= */ null);
-      // Allocate a static field to store the handle creator or the resolved callsite.
-      cw.visitField(
-          ACC_PUBLIC | ACC_STATIC,
-          "definer",
-          "Ljava/lang/Object;",
-          /* signature= */ null,
-          /* value= */ null);
-      var ctorType = isScoped ? SCOPED_CTOR_TYPE : CTOR_TYPE;
-      {
-        // generate a default constructor
-        // This is just a default constructor that calls the super class constructor.
-        // basically `super(injector, factory, dependency?);`
-        int stackHeight = 0;
-        MethodVisitor mv =
-            cw.visitMethod(
-                ACC_PUBLIC,
-                "<init>",
-                ctorType.toMethodDescriptorString(),
-                /* signature= */ null,
-                /* exceptions= */ null);
-        mv.visitCode();
-        mv.visitVarInsn(ALOAD, stackHeight++); // this
-        mv.visitVarInsn(ALOAD, stackHeight++); // injector
-        mv.visitVarInsn(ALOAD, stackHeight++); // factory
-        if (!isScoped) {
-          mv.visitVarInsn(ALOAD, stackHeight++); // maybe dependency
-        }
-        mv.visitMethodInsn(
-            INVOKESPECIAL,
-            baseType.getInternalName(),
-            "<init>",
-            ctorType.toMethodDescriptorString(),
-            /* isInterface= */ false);
-        mv.visitInsn(RETURN);
-        mv.visitMaxs(
-            /* maxStack= */ stackHeight, // Just pushing the parameters
-            /* maxLocals= */ stackHeight // all the parameters
-            );
-        mv.visitEnd();
-      }
-      {
-        String descriptor = FACTORY_TYPE.toMethodDescriptorString();
-        // generate a doGet() method
-        MethodVisitor mv =
-            cw.visitMethod(
-                ACC_PROTECTED | ACC_FINAL,
-                "doGet",
-                descriptor,
-                /* signature= */ null,
-                /* exceptions= */ null);
-        mv.visitCode();
-        mv.visitVarInsn(ALOAD, 1); // ctx
-        mv.visitVarInsn(ALOAD, 2); // dependency
-        mv.visitInvokeDynamicInsn("get", descriptor, BOOSTRAP_HANDLE);
-        mv.visitInsn(ARETURN);
-        mv.visitMaxs(
-            /* maxStack= */ 2, // Just the 2 parameters
-            /* maxLocals= */ 3 // Just the 'this' and the two parameters
-            );
-        mv.visitEnd();
-      }
-      // We must define the class as collectable so that it can be garbage collected.  The static
-      // field will hold a reference to an InternalFactory which may hold references to the
-      // injector.
-      Class<?> clazz;
-      try {
-        clazz =
-            ClassDefining.defineCollectable(
-                /* lifetimeOwner= */ injector,
-                isScoped ? ProviderToInternalFactoryAdapter.class : GeneratedProvider.class,
-                cw.toByteArray());
-      } catch (Exception e) {
-        throw new LinkageError("failed to define class", e);
-      }
-      try {
-        clazz.getField("definer").set(null, handleCreator);
-      } catch (ReflectiveOperationException e) {
-        throw new LinkageError("missing or inaccessible field: definer", e);
-      }
-      try {
-        MethodHandle ctor = lookup.findConstructor(clazz, ctorType);
-        return (Provider<?>)
-            (isScoped
-                ? ctor.invoke(injector, factory)
-                : ctor.invoke(injector, factory, dependency));
-      } catch (Throwable e) {
-        throw new LinkageError("missing or inaccessible constructor", e);
-      }
-    }
-
-    private ProviderMaker() {}
-  }
-
-
-  /**
-   * Our bootstrap method that is called by the generated provider.
-   *
-   * <p>The JVM calls this the first time the invokeDynamic instruction is executed. See
-   * https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/package-summary.html for a high
-   * level description of how this works.
-   */
-  @Keep
-  public static CallSite bootstrapHandle(MethodHandles.Lookup lookup, String name, MethodType type)
-      throws NoSuchFieldException, IllegalAccessException {
-    VarHandle varHandle = lookup.findStaticVarHandle(lookup.lookupClass(), "definer", Object.class);
-
-    // Use double-checked locking to ensure we only invoke the supplier once.
-    // The JVM may call this method multiple times in parallel, though only one will ultimately
-    // succeed in bootstrapping the instruction so we synchronize on the class to ensure that
-    // we only create one handle.
-    Object handleCreator = varHandle.getVolatile();
-    if (handleCreator instanceof Supplier) {
-      synchronized (lookup.getClass()) {
-        handleCreator = varHandle.get();
-        if (handleCreator instanceof Supplier) {
-          MethodHandle handle = (MethodHandle) ((Supplier) handleCreator).get();
-          varHandle.setVolatile((Object) handle);
-          return new ConstantCallSite(handle);
+    private MethodHandle getHandle() {
+      var local = this.handle;
+      if (local == null) {
+        // synchronize on the factory instead of `this` since users might be using the provider
+        // itself as a lock.
+        synchronized (factory) {
+          local = this.handle;
+          if (local == null) {
+            // Since the Dependency is a constant for all calls to this handle, insert it so the jit
+            // can see it.
+            local =
+                MethodHandles.insertArguments(
+                    factory.getHandle(new LinkageContext(), /* linked= */ false), 1, dependency);
+            this.handle = local;
+          }
         }
       }
+      return handle;
     }
-    // This path means we are in some kind of race condition, produce a new identical callsite just in case
-    // we somehow end up winning.
-    return  new ConstantCallSite((MethodHandle) handleCreator);
   }
 
   // The `throws` clause tricks Java type inference into deciding that E must be some subtype of
