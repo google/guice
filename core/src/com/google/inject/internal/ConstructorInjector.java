@@ -92,18 +92,17 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
 
   /**
    * Returns a method handle for constructing the instance with the signature {@code
-   * (InternalContext) -> T}
+   * (InternalContext, Dependency<?>) -> T}
    */
   MethodHandle getConstructHandle(
       LinkageContext linkageContext,
-      Dependency<?> dependency,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
 
     var handle =
         constructionProxy.getConstructHandle(
             SingleParameterInjector.getAllHandles(linkageContext, parameterInjectors));
     checkState(
-        handle.type().equals(InternalMethodHandles.FACTORY_TYPE),
+        handle.type().equals(InternalMethodHandles.ELEMENT_FACTORY_TYPE),
         "expected %s but got %s",
         InternalMethodHandles.FACTORY_TYPE,
         handle.type());
@@ -136,10 +135,10 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
     }
 
     // Wrap the whole thing in a provision callback if needed.
-    handle =
-        InternalMethodHandles.invokeThroughProvisionCallback(handle, dependency, provisionCallback);
+    handle = MethodHandles.dropArguments(handle, 1, Dependency.class);
+    handle = InternalMethodHandles.invokeThroughProvisionCallback(handle, provisionCallback);
     // call tryStartConstruction
-    handle = InternalMethodHandles.tryStartConstruction(handle, dependency, circularFactoryId);
+    handle = InternalMethodHandles.tryStartConstruction(handle, circularFactoryId);
     // (InternalContext)->T
     return handle;
   }

@@ -13,7 +13,6 @@ import com.google.inject.RestrictedBindingSource;
 import com.google.inject.RestrictedBindingSource.RestrictionLevel;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.GuiceInternal;
-import java.util.regex.Pattern;
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -345,8 +345,12 @@ public final class BindingSourceRestriction {
           Stream.concat(
               annotations, Arrays.stream(clazz.getAnnotatedSuperclass().getAnnotations()));
     }
-    return annotations
-        .map(Annotation::annotationType)
-        .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
+    @SuppressWarnings("unchecked")  // force wildcard alignment, this works around a bug in ecj
+    Stream<Class<? extends Annotation>> permits =
+        (Stream)
+            annotations
+                .map(Annotation::annotationType)
+                .filter(a -> a.isAnnotationPresent(RestrictedBindingSource.Permit.class));
+    return permits;
   }
 }

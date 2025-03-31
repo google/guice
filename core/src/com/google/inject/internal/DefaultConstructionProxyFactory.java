@@ -144,7 +144,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
       // merge all the internalcontext parameters into a single object factory.
       handle =
           MethodHandles.permuteArguments(
-              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
+              handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[parameterHandles.length]);
       return handle;
     }
   }
@@ -175,7 +175,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
       handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
       // merge all the internalcontext parameters into a single object factory.
       return MethodHandles.permuteArguments(
-          handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
+          handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[parameterHandles.length]);
     }
   }
 
@@ -210,7 +210,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
       var handle = MethodHandles.filterArguments(target, 0, typedHandles);
       handle = castReturnToObject(handle); // satisfy the signature of the factory type.
       return MethodHandles.permuteArguments(
-          handle, InternalMethodHandles.FACTORY_TYPE, new int[typedHandles.length]);
+          handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[typedHandles.length]);
     }
   }
 }

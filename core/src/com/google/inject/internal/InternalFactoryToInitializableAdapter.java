@@ -49,12 +49,9 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, boolean linked) {
     return circularGetHandle(
-        InternalMethodHandles.initializableFactoryGetHandle(
-            initializable, jakarta.inject.Provider.class),
-        dependency,
-        provisionCallback);
+        InternalMethodHandles.initializableFactoryGetHandle(initializable), provisionCallback);
   }
 
   @Override

@@ -66,8 +66,8 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, boolean linked) {
     return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-        this.delegate.getHandle(context, dependency, linked), source);
+        this.delegate.getHandle(context, linked), source);
   }
 }

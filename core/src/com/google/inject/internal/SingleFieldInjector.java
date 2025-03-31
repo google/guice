@@ -76,7 +76,9 @@ final class SingleFieldInjector implements SingleMemberInjector {
     // Catch and rethrow exceptions from our dependency factory.
     var injectHandle =
         InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-            factory.getHandle(linkageContext, dependency, /* linked= */ false), dependency);
+            MethodHandles.insertArguments(
+                factory.getHandle(linkageContext, /* linked= */ false), 1, dependency),
+            dependency);
     // We might need a boxing conversion or some other type conversion here to satisfy a generic.
     injectHandle = castReturnTo(injectHandle, handle.type().parameterType(1));
     // Call the injectHandle and pass it to the field handle.

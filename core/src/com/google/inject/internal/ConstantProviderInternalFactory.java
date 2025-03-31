@@ -45,8 +45,8 @@ final class ConstantProviderInternalFactory<T> extends ProviderInternalFactory<T
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, boolean linked) {
     return circularGetHandleImmediate(
-        InternalMethodHandles.constantFactoryGetHandle(provider), dependency, provisionCallback);
+        InternalMethodHandles.constantFactoryGetHandle(provider), provisionCallback);
   }
 }

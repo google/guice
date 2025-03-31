@@ -42,12 +42,13 @@ public final class LinkageContextTest {
             context
                 .makeHandle(
                     FACTORY, () -> InternalMethodHandles.constantFactoryGetHandle("Hello World"))
-                .invokeExact((InternalContext) null);
+                .invokeExact((InternalContext) null, (Dependency<?>) null);
     assertThat(result).isEqualTo("Hello World");
   }
 
   @Keep
-  static String incrementAndReturn(InternalContext ignored, String s, int[] callCount) {
+  static String incrementAndReturn(
+      InternalContext ignored, Dependency<?> ignored2, String s, int[] callCount) {
     callCount[0]++;
     return s;
   }
@@ -56,7 +57,8 @@ public final class LinkageContextTest {
       InternalMethodHandles.findStaticOrDie(
           LinkageContextTest.class,
           "incrementAndReturn",
-          methodType(String.class, InternalContext.class, String.class, int[].class));
+          methodType(
+              String.class, InternalContext.class, Dependency.class, String.class, int[].class));
 
   // Demonstrate that a recursive call links ultimately to the same method handle of the initial
   // call.
@@ -77,21 +79,24 @@ public final class LinkageContextTest {
                       });
               return castReturnToObject(
                   MethodHandles.insertArguments(
-                      INCREMENT_AND_RETURN_HANDLE, 1, "Hello World", callCount));
+                      INCREMENT_AND_RETURN_HANDLE, 2, "Hello World", callCount));
             });
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(1);
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(2);
 
     // The recursive handle is linked to the same instance, just indirectly.
-    assertThat((Object) recursiveHandle[0].invokeExact((InternalContext) null))
+    assertThat(
+            (Object) recursiveHandle[0].invokeExact((InternalContext) null, (Dependency<?>) null))
         .isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(3);
   }
 
   @Keep
-  static String detectsCycle(InternalContext ctx, int[] callCount)
+  static String detectsCycle(InternalContext ctx, Dependency<?> ignored, int[] callCount)
       throws InternalProvisionException {
     callCount[0]++;
     var unused = ctx.tryStartConstruction(1, DEP);
@@ -102,7 +107,7 @@ public final class LinkageContextTest {
       InternalMethodHandles.findStaticOrDie(
           LinkageContextTest.class,
           "detectsCycle",
-          methodType(String.class, InternalContext.class, int[].class));
+          methodType(String.class, InternalContext.class, Dependency.class, int[].class));
 
   @Test
   public void testMakeHandle_isRecursive() throws Throwable {
@@ -124,7 +129,7 @@ public final class LinkageContextTest {
                   MethodHandles.foldArguments(
                       recursiveHandle,
                       InternalMethodHandles.dropReturn(
-                          MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 1, callCount))));
+                          MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 2, callCount))));
             });
     var ipe =
         assertThrows(
@@ -134,7 +139,8 @@ public final class LinkageContextTest {
                   (Object)
                       handle.invokeExact(
                           InternalContext.create(
-                              /* disableCircularProxies= */ true, new Object[] {null}));
+                              /* disableCircularProxies= */ true, new Object[] {null}),
+                          (Dependency<?>) null);
             });
     // It throws on the second call, so we should have called it twice.
     assertThat(callCount[0]).isEqualTo(2);

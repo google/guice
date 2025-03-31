@@ -77,22 +77,20 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  public MethodHandle getHandle(LinkageContext context, boolean linked) {
     return context.makeHandle(
         this,
         () ->
             InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
                 circularGetHandle(
-                    providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
-                    dependency,
-                    provisionCallback),
+                    providerFactory.getHandle(context, /* linked= */ true), provisionCallback),
                 providerKey));
   }
 
   @Override
-  protected MethodHandle provisionHandle(MethodHandle providerHandle, Dependency<?> dependency) {
+  protected MethodHandle provisionHandle(MethodHandle providerHandle) {
     // Do normal provisioning and then check that the result is the correct subtype.
-    MethodHandle invokeProvider = super.provisionHandle(providerHandle, dependency);
+    MethodHandle invokeProvider = super.provisionHandle(providerHandle);
     return MethodHandles.filterReturnValue(
         invokeProvider,
         MethodHandles.insertArguments(
