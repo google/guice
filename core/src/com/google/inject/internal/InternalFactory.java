@@ -55,7 +55,11 @@ abstract class InternalFactory<T> {
    * @param linked true if getting as a result of a linked binding
    * @return the method handle for the object to be injected
    */
-  abstract MethodHandle getHandle(LinkageContext context, boolean linked);
+  final MethodHandle getHandle(LinkageContext context, boolean linked) {
+    return context.makeHandle(this, linked);
+  }
+
+  abstract MethodHandle makeHandle(LinkageContext context, boolean linked);
 
   /**
    * Returns a provider for the object to be injected using the given factory.

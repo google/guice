@@ -309,7 +309,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     }
 
     @Override
-    public MethodHandle getHandle(LinkageContext context, boolean linked) {
+    MethodHandle makeHandle(LinkageContext context, boolean linked) {
       if (!linked && failIfNotLinked) {
         var throwHandle =
             MethodHandles.foldArguments(
@@ -317,8 +317,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
                 MethodHandles.insertArguments(JIT_DISABLED_HANDLE, 0, key));
         return MethodHandles.dropArguments(throwHandle, 0, InternalContext.class, Dependency.class);
       }
-      return context.makeHandle(
-          this, () -> constructorInjector.getConstructHandle(context, provisionCallback));
+      return constructorInjector.getConstructHandle(context, provisionCallback);
     }
 
     private static final MethodHandle JIT_DISABLED_HANDLE =

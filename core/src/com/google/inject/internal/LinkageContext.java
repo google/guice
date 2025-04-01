@@ -58,13 +58,13 @@ final class LinkageContext {
    * @return a method handle that will invoke the given factory, resolving cycles as needed, using
    *     the {@link InternalFactory#FACTORY_TYPE} signature.
    */
-  MethodHandle makeHandle(InternalFactory<?> source, Supplier<MethodHandle> factory) {
-    var previous = linkingFactories.putIfAbsent(source, CONSTRUCTING);
+  MethodHandle makeHandle(InternalFactory<?> factory, boolean linked) {
+    var previous = linkingFactories.putIfAbsent(factory, CONSTRUCTING);
     if (previous == CONSTRUCTING) {
       // We are the first to 're-enter' this factory, so we need to create a MutableCallSite that
       // will be used to resolve the cycle.
       previous = new MutableCallSite(InternalMethodHandles.FACTORY_TYPE);
-      linkingFactories.put(source, previous);
+      linkingFactories.put(factory, previous);
     }
     if (previous instanceof MutableCallSite) {
       // We are re-entering the same factory, so we can just return the dynamic invoker and rely on
@@ -74,9 +74,9 @@ final class LinkageContext {
     } else {
       checkState(previous == null, "Unexpected previous value: %s", previous);
     }
-    MethodHandle handle = factory.get();
+    MethodHandle handle = factory.makeHandle(this, linked);
     InternalMethodHandles.checkHasFactoryType(handle);
-    previous = linkingFactories.remove(source);
+    previous = linkingFactories.remove(factory);
     checkState(previous != null, "construction state was cleared already?");
     if (previous != CONSTRUCTING) {
       var callSite = (MutableCallSite) previous;

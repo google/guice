@@ -68,7 +68,7 @@ public final class InternalMethodHandlesTest {
           }
 
           @Override
-          public MethodHandle getHandle(LinkageContext context, boolean linked) {
+          MethodHandle makeHandle(LinkageContext context, boolean linked) {
 
             checkArgument(!linked);
             return MethodHandles.dropArguments(
@@ -116,7 +116,8 @@ public final class InternalMethodHandlesTest {
       public String get(InternalContext context, Dependency<?> dependency, boolean linked) {
         throw new AssertionError();
       }
-      @Override public MethodHandle getHandle(LinkageContext context, boolean linked) {
+      @Override 
+      MethodHandle makeHandle(LinkageContext context, boolean linked) {
         throw new AssertionError();
       }
     };
@@ -134,7 +135,7 @@ public final class InternalMethodHandlesTest {
           }
 
           @Override
-          public MethodHandle getHandle(LinkageContext context, boolean linked) {
+          MethodHandle makeHandle(LinkageContext context, boolean linked) {
             return InternalMethodHandles.constantFactoryGetHandle("Hello world");
           }
         };

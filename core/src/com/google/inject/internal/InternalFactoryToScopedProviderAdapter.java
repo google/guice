@@ -73,7 +73,7 @@ class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, boolean linked) {
+  MethodHandle makeHandle(LinkageContext context, boolean linked) {
     // Call Provider.get() on the constant provider
     // ()->Object
     var invokeProvider =
@@ -150,14 +150,14 @@ class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
     }
 
     @Override
-    public MethodHandle getHandle(LinkageContext context, boolean linked) {
+    MethodHandle makeHandle(LinkageContext context, boolean linked) {
       // If it is somehow already initialized, we can return a constant handle.
       Object value = this.value;
       if (value != UNINITIALIZED_VALUE) {
         return getHandleForConstant(source, value);
       }
       // Otherwise we bind to a callsite that will patch itself once it is initialized.
-      return new SingletonCallSite(super.getHandle(context, linked), source).dynamicInvoker();
+      return new SingletonCallSite(super.makeHandle(context, linked), source).dynamicInvoker();
     }
 
     private static MethodHandle getHandleForConstant(Object source, Object value) {

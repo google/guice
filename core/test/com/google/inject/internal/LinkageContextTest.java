@@ -25,6 +25,8 @@ import com.google.inject.Key;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -32,7 +34,21 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class LinkageContextTest {
   private static final Dependency<?> DEP = Dependency.get(Key.get(String.class));
-  private static final InternalFactory<?> FACTORY = ConstantFactory.create("Hello World", "source");
+  private static InternalFactory<String> makeFactory(Supplier<MethodHandle> handle) {
+    return new InternalFactory<String>() {
+
+      @Override
+      String get(InternalContext context, Dependency<?> dependency, boolean linked) throws InternalProvisionException {
+        throw new UnsupportedOperationException("Unimplemented method 'get'");
+      }
+
+      @Override
+      MethodHandle makeHandle(LinkageContext context, boolean linked) {
+        return handle.get();
+      }
+      
+    };
+  }
 
   @Test
   public void testMakeHandle_returnsHandle() throws Throwable {
@@ -41,7 +57,9 @@ public final class LinkageContextTest {
         (Object)
             context
                 .makeHandle(
-                    FACTORY, () -> InternalMethodHandles.constantFactoryGetHandle("Hello World"))
+                    makeFactory(
+                        () -> InternalMethodHandles.constantFactoryGetHandle("Hello World")),
+                    false)
                 .invokeExact((InternalContext) null, (Dependency<?>) null);
     assertThat(result).isEqualTo("Hello World");
   }
@@ -67,20 +85,20 @@ public final class LinkageContextTest {
     LinkageContext context = new LinkageContext();
     int[] callCount = new int[1];
     MethodHandle[] recursiveHandle = new MethodHandle[1];
-    MethodHandle handle =
-        context.makeHandle(
-            FACTORY,
+    AtomicReference<InternalFactory<String>> factoryReference = new AtomicReference<>();
+    var factory =
+        makeFactory(
             () -> {
-              recursiveHandle[0] =
-                  context.makeHandle(
-                      FACTORY,
-                      () -> {
-                        throw new AssertionError("Should not be called");
-                      });
+              if (recursiveHandle[0]!=null) {
+                throw new AssertionError();
+              }
+              recursiveHandle[0] = context.makeHandle(factoryReference.get(), false);
               return castReturnToObject(
                   MethodHandles.insertArguments(
                       INCREMENT_AND_RETURN_HANDLE, 2, "Hello World", callCount));
             });
+    factoryReference.set(factory);
+    MethodHandle handle = context.makeHandle(factory, false);
     assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
         .isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(1);
@@ -113,16 +131,11 @@ public final class LinkageContextTest {
   public void testMakeHandle_isRecursive() throws Throwable {
     LinkageContext context = new LinkageContext();
     int[] callCount = new int[1];
-    MethodHandle handle =
-        context.makeHandle(
-            FACTORY,
+    AtomicReference<InternalFactory<String>> factoryReference = new AtomicReference<>();
+    var factory =
+        makeFactory(
             () -> {
-              var recursiveHandle =
-                  context.makeHandle(
-                      FACTORY,
-                      () -> {
-                        throw new AssertionError("Should not be called");
-                      });
+              var recursiveHandle = context.makeHandle(factoryReference.get(), false);
 
               // This calls `detectsCycle` and then the recursive handle.
               return castReturnToObject(
@@ -131,6 +144,8 @@ public final class LinkageContextTest {
                       InternalMethodHandles.dropReturn(
                           MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 2, callCount))));
             });
+    factoryReference.set(factory);
+    MethodHandle handle = context.makeHandle(factory, false);
     var ipe =
         assertThrows(
             InternalProvisionException.class,

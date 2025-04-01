@@ -22,9 +22,9 @@ import com.google.errorprone.annotations.Keep;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+import jakarta.inject.Provider;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import jakarta.inject.Provider;
 
 /**
  * An {@link InternalFactory} for {@literal @}{@link ProvidedBy} bindings.
@@ -77,14 +77,11 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, boolean linked) {
-    return context.makeHandle(
-        this,
-        () ->
-            InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                circularGetHandle(
-                    providerFactory.getHandle(context, /* linked= */ true), provisionCallback),
-                providerKey));
+  MethodHandle makeHandle(LinkageContext context, boolean linked) {
+    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+        circularGetHandle(
+            providerFactory.getHandle(context, /* linked= */ true), provisionCallback),
+        providerKey);
   }
 
   @Override

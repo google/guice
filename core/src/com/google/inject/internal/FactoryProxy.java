@@ -64,7 +64,7 @@ final class FactoryProxy<T> extends InternalFactory<T> implements CreationListen
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, boolean linked) {
+  MethodHandle makeHandle(LinkageContext context, boolean linked) {
     return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
         targetFactory.getHandle(context, /* linked= */ true), targetKey);
   }
