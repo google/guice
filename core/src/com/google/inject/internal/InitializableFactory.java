@@ -25,7 +25,7 @@ import java.lang.invoke.MethodHandle;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-final class InitializableFactory<T> implements InternalFactory<T> {
+final class InitializableFactory<T> extends InternalFactory<T> {
 
   private final Initializable<T> initializable;
   // Cache the values here so we can optimize the behavior of Provider instances.

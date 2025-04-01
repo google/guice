@@ -24,7 +24,7 @@ import java.lang.invoke.MethodHandle;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-final class ConstantFactory<T> implements InternalFactory<T> {
+final class ConstantFactory<T> extends InternalFactory<T> {
 
   private static <T> InternalFactory<T> nullFactory(Object source) {
     return new InternalFactory<T>() {

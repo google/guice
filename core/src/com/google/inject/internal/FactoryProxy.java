@@ -26,7 +26,7 @@ import java.lang.invoke.MethodHandle;
  * A placeholder which enables us to swap in the real factory once the injector is created. Used for
  * a linked binding, so that getting the linked binding returns the link's factory.
  */
-final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
+final class FactoryProxy<T> extends InternalFactory<T> implements CreationListener {
 
   private final InjectorImpl injector;
   private final Key<T> key;

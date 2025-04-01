@@ -27,7 +27,7 @@ import java.lang.invoke.MethodHandle;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface InternalFactory<T> {
+abstract class InternalFactory<T> {
 
   /**
    * Creates an object to be injected.
@@ -37,11 +37,11 @@ interface InternalFactory<T> {
    * @throws com.google.inject.internal.InternalProvisionException if a value cannot be provided
    * @return instance that was created
    */
-  T get(InternalContext context, Dependency<?> dependency, boolean linked)
+  abstract T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException;
 
   /** Returns a provider for the object to be injected. */
-  default Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+  Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
     return makeDefaultProvider(this, injector, dependency);
   }
 

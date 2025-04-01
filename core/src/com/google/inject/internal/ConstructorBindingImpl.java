@@ -279,7 +279,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     return Objects.hashCode(getKey(), getScoping(), constructorInjectionPoint);
   }
 
-  private static class Factory<T> implements InternalFactory<T> {
+  private static class Factory<T> extends InternalFactory<T> {
     private final boolean failIfNotLinked;
     private final Key<?> key;
     private ConstructorInjector<T> constructorInjector;
