@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
  *
  * @author sameb@google.com (Sam Berlin)
  */
-abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
+abstract class ProviderInternalFactory<T> extends InternalFactory<T> {
   protected final Object source;
   private final int circularFactoryId;
 

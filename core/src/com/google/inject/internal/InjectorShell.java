@@ -263,7 +263,7 @@ final class InjectorShell {
                 ImmutableSet.<InjectionPoint>of()));
   }
 
-  private static class InjectorFactory implements InternalFactory<Injector>, Provider<Injector> {
+  private static class InjectorFactory extends InternalFactory<Injector> implements Provider<Injector> {
     private final Injector injector;
 
     private InjectorFactory(Injector injector) {
@@ -317,7 +317,7 @@ final class InjectorShell {
                 ImmutableSet.<InjectionPoint>of()));
   }
 
-  private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
+  private static class LoggerFactory extends InternalFactory<Logger> implements Provider<Logger> {
     @Override
     public Logger get(InternalContext context, Dependency<?> dependency, boolean linked) {
       return makeLogger(dependency);

@@ -72,11 +72,8 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
   }
 
   /** A base factory implementation. */
-  abstract static class Factory<T>
-      implements InternalFactory<T>,
-          Provider<T>,
-          HasDependencies,
-          ProvisionListenerStackCallback.ProvisionCallback<T> {
+  abstract static class Factory<T> extends InternalFactory<T>
+      implements Provider<T>, HasDependencies, ProvisionListenerStackCallback.ProvisionCallback<T> {
     private final InitializationTiming initializationTiming;
     private Object source;
     private InjectorImpl injector;

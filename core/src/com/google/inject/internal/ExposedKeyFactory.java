@@ -25,7 +25,7 @@ import java.lang.invoke.MethodHandle;
  * This factory exists in a parent injector. When invoked, it retrieves its value from a child
  * injector.
  */
-final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener {
+final class ExposedKeyFactory<T> extends InternalFactory<T> implements CreationListener {
   private final Key<T> key;
   private final Object source;
   private final PrivateElements privateElements;

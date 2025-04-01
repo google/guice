@@ -34,7 +34,7 @@ import java.lang.invoke.MutableCallSite;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
+class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
   /** Creates a factory around a scoped provider. */
   static <T> InternalFactoryToScopedProviderAdapter<T> create(
       Scope scopeInstance, Provider<? extends T> provider, Object source) {
