@@ -288,7 +288,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (target == null) {
         return InternalMethodHandles.constantFactoryGetHandle(java.util.Optional.empty());
       }
@@ -387,7 +387,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(value);
     }
 
@@ -433,7 +433,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
           targetFactory.getHandle(context, /* linked= */ true), targetKey);
     }
@@ -474,7 +474,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(value);
     }
 
@@ -540,7 +540,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (delegate == null) {
         return InternalMethodHandles.constantFactoryGetHandle(Optional.absent());
       }

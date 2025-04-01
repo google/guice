@@ -290,7 +290,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (injectors == null) {
         return InternalMethodHandles.constantFactoryGetHandle(ImmutableSet.of());
       }
@@ -518,7 +518,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(providers);
     }
   }

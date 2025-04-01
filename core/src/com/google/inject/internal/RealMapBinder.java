@@ -742,7 +742,7 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(mapOfProviders);
     }
   }
@@ -825,7 +825,7 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (injectors == null) {
         return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.of());
       }
@@ -1134,7 +1134,7 @@ public final class RealMapBinder<K, V> implements Module {
       }
 
       @Override
-      protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+      protected MethodHandle doGetHandle(LinkageContext context) {
         return InternalMethodHandles.constantFactoryGetHandle(multimapOfProviders);
       }
     }
@@ -1248,7 +1248,7 @@ public final class RealMapBinder<K, V> implements Module {
       }
 
       @Override
-      protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+      protected MethodHandle doGetHandle(LinkageContext context) {
         if (perKeyDatas.length == 0) {
           return InternalMethodHandles.constantFactoryGetHandle(ImmutableMap.of());
         }
@@ -1314,7 +1314,7 @@ public final class RealMapBinder<K, V> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(entry);
     }
 

@@ -77,11 +77,12 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
-    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-        circularGetHandle(
-            providerFactory.getHandle(context, /* linked= */ true), provisionCallback),
-        providerKey);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(
+        InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            circularGetHandle(
+                providerFactory.getHandle(context, /* linked= */ true), provisionCallback),
+            providerKey));
   }
 
   @Override

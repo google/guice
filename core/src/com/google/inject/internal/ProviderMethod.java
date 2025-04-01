@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
@@ -236,15 +237,16 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       throws IllegalAccessException, InvocationTargetException;
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
-    MethodHandle handle = super.makeHandle(context, linked);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    MethodHandleResult result = super.makeHandle(context, linked);
+    checkState(result.cachability == MethodHandleResult.Cachability.ALWAYS);
     // Handle circular proxies.
-    return InternalMethodHandles.tryStartConstruction(handle, circularFactoryId);
+    return makeCachable(InternalMethodHandles.tryStartConstruction(result.methodHandle, circularFactoryId));
   }
 
   /** Creates a method handle that constructs the object to be injected. */
   @Override
-  protected final MethodHandle doGetHandle(LinkageContext context, boolean linked) {
+  protected final MethodHandle doGetHandle(LinkageContext context) {
     MethodHandle handle =
         doProvisionHandle(SingleParameterInjector.getAllHandles(context, parameterInjectors));
     handle = castReturnToObject(handle);
