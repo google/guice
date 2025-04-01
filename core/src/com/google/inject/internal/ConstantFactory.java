@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
-import java.lang.invoke.MethodHandle;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -43,9 +42,9 @@ final class ConstantFactory<T> extends InternalFactory<T> {
       }
 
       @Override
-      MethodHandle makeHandle(LinkageContext context, boolean linked) {
+      MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
         var returnNull = InternalMethodHandles.constantFactoryGetHandle(null);
-        return InternalMethodHandles.nullCheckResult(returnNull, source);
+        return makeCachable(InternalMethodHandles.nullCheckResult(returnNull, source));
       }
     };
   }
@@ -74,8 +73,8 @@ final class ConstantFactory<T> extends InternalFactory<T> {
   }
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
-    return InternalMethodHandles.constantFactoryGetHandle(instance);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(InternalMethodHandles.constantFactoryGetHandle(instance));
   }
 
   @Override

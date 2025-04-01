@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.InternalMethodHandles.findVirtualOrDie;
 import static java.lang.invoke.MethodType.methodType;
 
@@ -73,7 +74,7 @@ class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
   }
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
     // Call Provider.get() on the constant provider
     // ()->Object
     var invokeProvider =
@@ -96,7 +97,7 @@ class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
     // delegate providers. See comment in `get` method for more details.
     invokeProvider =
         MethodHandles.foldArguments(invokeProvider, INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE);
-    return invokeProvider;
+    return makeCachable(invokeProvider);
   }
 
   private static final MethodHandle INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE =
@@ -150,14 +151,16 @@ class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
     }
 
     @Override
-    MethodHandle makeHandle(LinkageContext context, boolean linked) {
+    MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
       // If it is somehow already initialized, we can return a constant handle.
       Object value = this.value;
       if (value != UNINITIALIZED_VALUE) {
-        return getHandleForConstant(source, value);
+        return makeCachable(getHandleForConstant(source, value));
       }
       // Otherwise we bind to a callsite that will patch itself once it is initialized.
-      return new SingletonCallSite(super.makeHandle(context, linked), source).dynamicInvoker();
+      var result = super.makeHandle(context, linked);
+      checkState(result.cachability == MethodHandleResult.Cachability.ALWAYS);
+      return makeCachable(new SingletonCallSite(result.methodHandle, source).dynamicInvoker());
     }
 
     private static MethodHandle getHandleForConstant(Object source, Object value) {

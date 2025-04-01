@@ -20,7 +20,6 @@ import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
-import java.lang.invoke.MethodHandle;
 
 /**
  * A placeholder which enables us to swap in the real factory once the injector is created. Used for
@@ -64,9 +63,10 @@ final class FactoryProxy<T> extends InternalFactory<T> implements CreationListen
   }
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
-    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-        targetFactory.getHandle(context, /* linked= */ true), targetKey);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(
+        InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            targetFactory.getHandle(context, /* linked= */ true), targetKey));
   }
 
   @Override

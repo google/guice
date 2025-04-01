@@ -68,17 +68,17 @@ public final class InternalMethodHandlesTest {
           }
 
           @Override
-          MethodHandle makeHandle(LinkageContext context, boolean linked) {
+          MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
 
             checkArgument(!linked);
-            return MethodHandles.dropArguments(
+            return makeCachable(MethodHandles.dropArguments(
                 MethodHandles.insertArguments(
                     MethodHandles.throwException(Object.class, InternalProvisionException.class),
                     0,
                     InternalProvisionException.create(ErrorId.OPTIONAL_CONSTRUCTOR, "Hello World")),
                 0,
                 InternalContext.class,
-                Dependency.class);
+                Dependency.class));
           }
         };
     Provider<String> provider = InternalMethodHandles.makeProvider(factory, injector, dep);
@@ -117,7 +117,7 @@ public final class InternalMethodHandlesTest {
         throw new AssertionError();
       }
       @Override 
-      MethodHandle makeHandle(LinkageContext context, boolean linked) {
+      MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
         throw new AssertionError();
       }
     };
@@ -135,8 +135,8 @@ public final class InternalMethodHandlesTest {
           }
 
           @Override
-          MethodHandle makeHandle(LinkageContext context, boolean linked) {
-            return InternalMethodHandles.constantFactoryGetHandle("Hello world");
+          MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+            return makeCachable(InternalMethodHandles.constantFactoryGetHandle("Hello world"));
           }
         };
     Provider<String> provider =

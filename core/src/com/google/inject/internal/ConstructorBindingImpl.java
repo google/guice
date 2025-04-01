@@ -309,15 +309,19 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     }
 
     @Override
-    MethodHandle makeHandle(LinkageContext context, boolean linked) {
+    MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
       if (!linked && failIfNotLinked) {
         var throwHandle =
             MethodHandles.foldArguments(
                 MethodHandles.throwException(Object.class, InternalProvisionException.class),
                 MethodHandles.insertArguments(JIT_DISABLED_HANDLE, 0, key));
-        return MethodHandles.dropArguments(throwHandle, 0, InternalContext.class, Dependency.class);
+        return makeCachableOnLinkedSetting(MethodHandles.dropArguments(throwHandle, 0, InternalContext.class, Dependency.class));
       }
-      return constructorInjector.getConstructHandle(context, provisionCallback);
+      var handle = constructorInjector.getConstructHandle(context, provisionCallback);
+      if (failIfNotLinked) {
+        return makeCachableOnLinkedSetting(handle);
+      }
+      return makeCachable(handle);
     }
 
     private static final MethodHandle JIT_DISABLED_HANDLE =

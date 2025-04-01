@@ -42,7 +42,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
           }
 
           @Override
-          MethodHandle makeHandle(LinkageContext context, boolean linked) {
+          MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
             throw new AssertionError();
           }
         },

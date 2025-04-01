@@ -155,9 +155,10 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     }
 
     @Override
-    MethodHandle makeHandle(LinkageContext context, boolean linked) {
-      return InternalMethodHandles.invokeThroughProvisionCallback(
-          doGetHandle(context, linked), provisionCallback);
+    MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+      return makeCachable(
+          InternalMethodHandles.invokeThroughProvisionCallback(
+              doGetHandle(context), provisionCallback));
     }
 
     // Implements ProvisionCallback<T>
@@ -177,6 +178,6 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
         throws InternalProvisionException;
 
     /** Creates a method handle that constructs the object to be injected. */
-    protected abstract MethodHandle doGetHandle(LinkageContext context, boolean linked);
+    protected abstract MethodHandle doGetHandle(LinkageContext context);
   }
 }

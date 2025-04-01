@@ -20,7 +20,6 @@ import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
-import java.lang.invoke.MethodHandle;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -47,8 +46,8 @@ final class InitializableFactory<T> extends InternalFactory<T> {
   }
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
-    return InternalMethodHandles.initializableFactoryGetHandle(initializable);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(InternalMethodHandles.initializableFactoryGetHandle(initializable));
   }
 
   @Override

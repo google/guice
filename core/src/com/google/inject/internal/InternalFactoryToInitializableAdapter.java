@@ -19,7 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.spi.Dependency;
-import java.lang.invoke.MethodHandle;
+import com.google.inject.spi.ProviderInstanceBinding;
 
 /**
  * Adapts {@link ProviderInstanceBinding} providers, ensuring circular proxies fail (or proxy)
@@ -49,9 +49,10 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   }
 
   @Override
-  MethodHandle makeHandle(LinkageContext context, boolean linked) {
-    return circularGetHandle(
-        InternalMethodHandles.initializableFactoryGetHandle(initializable), provisionCallback);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(
+        circularGetHandle(
+            InternalMethodHandles.initializableFactoryGetHandle(initializable), provisionCallback));
   }
 
   @Override

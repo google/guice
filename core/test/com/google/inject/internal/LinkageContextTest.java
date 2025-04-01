@@ -43,8 +43,8 @@ public final class LinkageContextTest {
       }
 
       @Override
-      MethodHandle makeHandle(LinkageContext context, boolean linked) {
-        return handle.get();
+      MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+        return makeCachable(handle.get());
       }
       
     };
@@ -59,7 +59,7 @@ public final class LinkageContextTest {
                 .makeHandle(
                     makeFactory(
                         () -> InternalMethodHandles.constantFactoryGetHandle("Hello World")),
-                    false)
+                    false).methodHandle
                 .invokeExact((InternalContext) null, (Dependency<?>) null);
     assertThat(result).isEqualTo("Hello World");
   }
@@ -92,13 +92,13 @@ public final class LinkageContextTest {
               if (recursiveHandle[0]!=null) {
                 throw new AssertionError();
               }
-              recursiveHandle[0] = context.makeHandle(factoryReference.get(), false);
+              recursiveHandle[0] = context.makeHandle(factoryReference.get(), false).methodHandle;
               return castReturnToObject(
                   MethodHandles.insertArguments(
                       INCREMENT_AND_RETURN_HANDLE, 2, "Hello World", callCount));
             });
     factoryReference.set(factory);
-    MethodHandle handle = context.makeHandle(factory, false);
+    MethodHandle handle = context.makeHandle(factory, false).methodHandle;
     assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
         .isEqualTo("Hello World");
     assertThat(callCount[0]).isEqualTo(1);
@@ -135,7 +135,7 @@ public final class LinkageContextTest {
     var factory =
         makeFactory(
             () -> {
-              var recursiveHandle = context.makeHandle(factoryReference.get(), false);
+              var recursiveHandle = context.makeHandle(factoryReference.get(), false).methodHandle;
 
               // This calls `detectsCycle` and then the recursive handle.
               return castReturnToObject(
@@ -145,7 +145,7 @@ public final class LinkageContextTest {
                           MethodHandles.insertArguments(DETECTS_CYCLE_HANDLE, 2, callCount))));
             });
     factoryReference.set(factory);
-    MethodHandle handle = context.makeHandle(factory, false);
+    MethodHandle handle = context.makeHandle(factory, false).methodHandle;
     var ipe =
         assertThrows(
             InternalProvisionException.class,
