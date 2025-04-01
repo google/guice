@@ -155,7 +155,7 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     }
 
     @Override
-    public MethodHandle getHandle(LinkageContext context, boolean linked) {
+    MethodHandle makeHandle(LinkageContext context, boolean linked) {
       return InternalMethodHandles.invokeThroughProvisionCallback(
           doGetHandle(context, linked), provisionCallback);
     }

@@ -66,7 +66,7 @@ final class ExposedKeyFactory<T> extends InternalFactory<T> implements CreationL
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, boolean linked) {
+  MethodHandle makeHandle(LinkageContext context, boolean linked) {
     return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
         this.delegate.getHandle(context, linked), source);
   }

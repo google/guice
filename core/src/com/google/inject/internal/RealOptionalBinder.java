@@ -292,21 +292,16 @@ public final class RealOptionalBinder<T> implements Module {
       if (target == null) {
         return InternalMethodHandles.constantFactoryGetHandle(java.util.Optional.empty());
       }
-      return context.makeHandle(
-          this,
-          () -> {
-            var handle =
-                MethodHandles.insertArguments(
-                    target.getHandle(context, /* linked= */ false), 1, targetDependency);
-            handle =
-                InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                    handle, targetDependency);
-            return MethodHandles.dropArguments(
-                castReturnToObject(
-                    MethodHandles.filterReturnValue(handle, OPTIONAL_OF_NULLABLE_MH)),
-                1,
-                Dependency.class);
-          });
+      var handle =
+          MethodHandles.insertArguments(
+              target.getHandle(context, /* linked= */ false), 1, targetDependency);
+      handle =
+          InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+              handle, targetDependency);
+      return MethodHandles.dropArguments(
+          castReturnToObject(MethodHandles.filterReturnValue(handle, OPTIONAL_OF_NULLABLE_MH)),
+          1,
+          Dependency.class);
     }
 
     private static final MethodHandle OPTIONAL_OF_NULLABLE_MH =
@@ -439,11 +434,8 @@ public final class RealOptionalBinder<T> implements Module {
 
     @Override
     protected MethodHandle doGetHandle(LinkageContext context, boolean linked) {
-      return context.makeHandle(
-          this,
-          () ->
-              InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                  targetFactory.getHandle(context, /* linked= */ true), targetKey));
+      return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+          targetFactory.getHandle(context, /* linked= */ true), targetKey);
     }
 
     @Override
@@ -552,21 +544,17 @@ public final class RealOptionalBinder<T> implements Module {
       if (delegate == null) {
         return InternalMethodHandles.constantFactoryGetHandle(Optional.absent());
       }
-      return context.makeHandle(
-          this,
-          () -> {
-            var handle =
-                MethodHandles.insertArguments(
-                    delegate.getHandle(context, /* linked= */ false), 1, targetDependency);
-            handle =
-                InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                    handle, targetDependency);
-            return MethodHandles.dropArguments(
-                castReturnToObject(
-                    MethodHandles.filterReturnValue(handle, OPTIONAL_FROM_NULLABLE_MH)),
-                1,
-                Dependency.class);
-          });
+
+      var handle =
+          MethodHandles.insertArguments(
+              delegate.getHandle(context, /* linked= */ false), 1, targetDependency);
+      handle =
+          InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+              handle, targetDependency);
+      return MethodHandles.dropArguments(
+          castReturnToObject(MethodHandles.filterReturnValue(handle, OPTIONAL_FROM_NULLABLE_MH)),
+          1,
+          Dependency.class);
     }
 
     private static final MethodHandle OPTIONAL_FROM_NULLABLE_MH =

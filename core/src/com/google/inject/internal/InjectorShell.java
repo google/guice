@@ -286,7 +286,7 @@ final class InjectorShell {
     }
 
     @Override
-    public MethodHandle getHandle(LinkageContext context, boolean linked) {
+    MethodHandle makeHandle(LinkageContext context, boolean linked) {
       return InternalMethodHandles.constantFactoryGetHandle(injector);
     }
 
@@ -334,7 +334,7 @@ final class InjectorShell {
     }
 
     @Override
-    public MethodHandle getHandle(LinkageContext context, boolean linked) {
+    MethodHandle makeHandle(LinkageContext context, boolean linked) {
       return MAKE_LOGGER_MH;
     }
 

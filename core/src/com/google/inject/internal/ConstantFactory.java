@@ -43,7 +43,7 @@ final class ConstantFactory<T> extends InternalFactory<T> {
       }
 
       @Override
-      public MethodHandle getHandle(LinkageContext context, boolean linked) {
+      MethodHandle makeHandle(LinkageContext context, boolean linked) {
         var returnNull = InternalMethodHandles.constantFactoryGetHandle(null);
         return InternalMethodHandles.nullCheckResult(returnNull, source);
       }
@@ -74,7 +74,7 @@ final class ConstantFactory<T> extends InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, boolean linked) {
+  MethodHandle makeHandle(LinkageContext context, boolean linked) {
     return InternalMethodHandles.constantFactoryGetHandle(instance);
   }
 
