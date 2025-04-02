@@ -904,8 +904,93 @@ public final class InternalMethodHandles {
   // RuntimeException but because the cast is unchecked it doesn't check.  So the compiler cannot
   // tell that this might be a checked exception.
   @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals", "CheckedExceptionNotThrown"})
-  private static <E extends Throwable> E sneakyThrow(Throwable e) throws E {
+  static <E extends Throwable> E sneakyThrow(Throwable e) throws E {
     throw (E) e;
+  }
+
+  /**
+   * Builds and returns a `(InternalContext)->Object[]` handle from all the element handles.
+   *
+   * <p>This scales to any number of parameters.
+   */
+  static MethodHandle buildObjectArrayFactory(MethodHandle[] elementHandles) {
+    return buildObjectArrayFactory(ImmutableList.copyOf(elementHandles));
+  }
+
+  /**
+   * Builds and returns a `(InternalContext)->Object[]` handle from all the element handles.
+   *
+   * <p>This scales to any number of parameters.
+   */
+  static MethodHandle buildObjectArrayFactory(Iterable<MethodHandle> elementHandles) {
+    var elementHandlesList = ImmutableList.copyOf(elementHandles);
+    for (var handle : elementHandlesList) {
+      checkHasElementFactoryType(handle);
+    }
+    // Empty arrays are immutable and we don't care about identity.
+    if (elementHandlesList.isEmpty()) {
+      return EMPTY_OBJECT_ARRAY_HANDLE;
+    }
+    // (Object[]) -> Object[]
+    int length = elementHandlesList.size();
+    // We can use an asCollector() transform.
+    if (length < MAX_BINDABLE_ARITY) {
+      // (Object[]) -> Object[]
+      var handle = MethodHandles.identity(Object[].class);
+      // (Object,Object...Object) -> Object[]
+      handle = handle.asCollector(Object[].class, length);
+      // (InternalContext,InternalContext..InternalContext) -> Object[]
+      handle =
+          MethodHandles.filterArguments(handle, 0, elementHandlesList.toArray(new MethodHandle[0]));
+      // (InternalContext) -> Object[]
+      handle =
+          MethodHandles.permuteArguments(
+              handle, methodType(Object[].class, InternalContext.class), new int[length]);
+      return handle;
+    } else {
+      // (Object[], InternalContext) -> void
+      var populateArray = populateArray(0, elementHandlesList);
+      // (Object[], InternalContext) -> Object[]
+      populateArray =
+          MethodHandles.foldArguments(
+              MethodHandles.dropArguments(
+                  MethodHandles.identity(Object[].class), 1, InternalContext.class),
+              populateArray);
+      // ()->Object[]
+      var constructArray = MethodHandles.insertArguments(OBJECT_ARRAY_CONSTRUCTOR, 0, length);
+      // (InternalContext) -> Object[]
+      constructArray = MethodHandles.dropArguments(constructArray, 0, InternalContext.class);
+      return MethodHandles.foldArguments(populateArray, constructArray);
+    }
+  }
+
+  private static final MethodHandle EMPTY_OBJECT_ARRAY_HANDLE =
+      MethodHandles.dropArguments(MethodHandles.constant(Object[].class, new Object[0]), 0, InternalContext.class);
+  private static final MethodHandle OBJECT_ARRAY_CONSTRUCTOR = MethodHandles.arrayConstructor(Object[].class);
+  private static final MethodHandle OBJECT_ARRAY_ELEMENT_SETTER = MethodHandles.arrayElementSetter(Object[].class);
+
+  /**
+   * Recursive helper to populate an array.
+   *
+   * <p>Returns a handle of type (Object[], InternalContext) -> void
+   */
+  private static MethodHandle populateArray(int offset, List<MethodHandle> elementFactories) {
+    var size = elementFactories.size();
+    if (size == 0) {
+      return MethodHandles.empty(methodType(void.class, Object[].class, InternalContext.class));
+    }
+    if (size == 1) {
+      // (Object[], InternalContext) -> void
+      return MethodHandles.filterArguments(
+          MethodHandles.insertArguments(OBJECT_ARRAY_ELEMENT_SETTER, 1, offset),
+          1,
+          elementFactories.get(0));
+    }
+    var left = elementFactories.subList(0, size / 2);
+    var right = elementFactories.subList(size / 2, size);
+    var leftHandle = populateArray(offset, left);
+    var rightHandle = populateArray(offset + left.size(), right);
+    return MethodHandles.foldArguments(rightHandle, leftHandle);
   }
 
   /**
@@ -923,7 +1008,7 @@ public final class InternalMethodHandles {
    * }</pre>
    *
    * <p>Plus handling for some special cases.
-   * 
+   *
    * <p>Returns a handle with the signature `(InternalContext) -> Object`.
    */
   static MethodHandle buildImmutableSetFactory(Iterable<MethodHandle> elementHandles) {
