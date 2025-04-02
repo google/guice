@@ -16,7 +16,9 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
+import static java.lang.invoke.MethodType.methodType;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -34,8 +36,10 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -310,4 +314,42 @@ public final class InternalMethodHandlesTest {
     var e = assertThrows(IllegalArgumentException.class, () -> handle.invoke(null));
     assertThat(e).hasMessageThat().contains("Multiple entries with same key");
   }
+
+  @Test
+  public void buildObjectArrayFactory_empty() throws Throwable {
+    MethodHandle handle = InternalMethodHandles.buildObjectArrayFactory(ImmutableList.of());
+    assertThat(handle.type()).isEqualTo(methodType(Object[].class, InternalContext.class));
+    assertThat((Object[]) handle.invokeExact((InternalContext) null)).hasLength(0);
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .isSameInstanceAs((Object[]) handle.invokeExact((InternalContext) null));
+  }
+  @Test
+  public void buildObjectArrayFactory_small() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildObjectArrayFactory(
+            ImmutableList.of(
+                InternalMethodHandles.constantElementFactoryGetHandle("a"),
+                InternalMethodHandles.constantElementFactoryGetHandle("b")));
+    assertThat(handle.type()).isEqualTo(methodType(Object[].class, InternalContext.class));
+    assertThat(ImmutableList.copyOf((Object[]) handle.invokeExact((InternalContext) null)))
+        .containsExactly("a", "b")
+        .inOrder();
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .isNotSameInstanceAs((Object[]) handle.invokeExact((InternalContext) null));
+  }
+
+  @Test
+  public void buildObjectArrayFactory_large() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildObjectArrayFactory(
+            IntStream.range(0, 100_000)
+                .mapToObj(i -> InternalMethodHandles.constantElementFactoryGetHandle("i" + i))
+                .collect(toImmutableList()));
+    assertThat(handle.type()).isEqualTo(methodType(Object[].class, InternalContext.class));
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .hasLength(100_000);
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .isNotSameInstanceAs((Object[]) handle.invokeExact((InternalContext) null));
+  }
+
 }

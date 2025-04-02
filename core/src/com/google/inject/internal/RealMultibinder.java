@@ -314,64 +314,17 @@ public final class RealMultibinder<T> implements Module {
       } else {
         // Duplicates are not permitted, so we need to check for duplicates by constructing all
         // elements and then checking the size of the set.
-        // We need to construct an array anyway for the error cases so just do it here.
-        // NOTE: we cannot use `MethodHandle.asCollector` since that limits us to 255 elements.
-        // So instead we
         // ()-> Object[]
-        var arrayCtor =
-            MethodHandles.insertArguments(
-                MethodHandles.arrayConstructor(Object[].class), 0, elementHandles.size());
-        // (Object[] elements, InternalContext ctx)->void
-        var populateArray =
-            populateArray(MethodHandles.arrayElementSetter(Object[].class), 0, elementHandles);
-        // (Object[] elements, InternalContext ctx)->Object[]
-        populateArray =
-            MethodHandles.foldArguments(
-                MethodHandles.dropArguments(
-                    MethodHandles.identity(Object[].class), 1, InternalContext.class),
-                populateArray);
-        // (InternalContext ctx)->Object[]
-        populateArray = MethodHandles.foldArguments(populateArray, arrayCtor);
+        var elements = InternalMethodHandles.buildObjectArrayFactory(elementHandles);
+        // (Object[]) -> ImmutableSet<T>
         var collector = MAKE_IMMUTABLE_SET_AND_CHECK_DUPLICATES_HANDLE.bindTo(this);
         // (InternalContext ctx) -> ImmutableSet<T>
-        collector = MethodHandles.filterArguments(collector, 0, populateArray);
+        collector = MethodHandles.filterArguments(collector, 0, elements);
         // (InternalContext, Dependency) -> Object
         return MethodHandles.dropArguments(castReturnToObject(collector), 1, Dependency.class);
       }
     }
 
-    /**
-     * Recursive helper to populate an array.
-     *
-     * <p>REturns a handle of type (Object[], InternalContext) -> void
-     */
-    static MethodHandle populateArray(
-        MethodHandle arrayElementSetter, int offset, List<MethodHandle> elementFactories) {
-      var size = elementFactories.size();
-      checkState(size != 0);
-      if (size < 32) {
-        var setter =
-            MethodHandles.filterArguments(
-                MethodHandles.insertArguments(arrayElementSetter, 1, offset),
-                1,
-                elementFactories.get(0));
-        for (int i = 1; i < size; i++) {
-          setter =
-              MethodHandles.foldArguments(
-                  MethodHandles.filterArguments(
-                      MethodHandles.insertArguments(arrayElementSetter, 1, offset + i),
-                      1,
-                      elementFactories.get(i)),
-                  setter);
-        }
-        return setter;
-      }
-      var left = elementFactories.subList(0, size / 2);
-      var right = elementFactories.subList(size / 2, size);
-      var leftHandle = populateArray(arrayElementSetter, offset, left);
-      var rightHandle = populateArray(arrayElementSetter, offset + left.size(), right);
-      return MethodHandles.foldArguments(rightHandle, leftHandle);
-    }
 
     private static final MethodHandle MAKE_IMMUTABLE_SET_AND_CHECK_DUPLICATES_HANDLE =
         InternalMethodHandles.findVirtualOrDie(
