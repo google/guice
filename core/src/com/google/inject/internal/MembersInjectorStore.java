@@ -113,7 +113,7 @@ final class MembersInjectorStore {
     encounter.invalidate();
     errors.throwIfNewErrors(numErrorsBefore);
 
-    return new MembersInjectorImpl<T>(injector, type, encounter, injectors);
+    return MembersInjectorImpl.create(injector, type, encounter, injectors);
   }
 
   /** Returns the injectors for the specified injection points. */

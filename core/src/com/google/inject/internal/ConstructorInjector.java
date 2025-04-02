@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.MembersInjectorImpl.MethodHandleMembersInjectorImpl;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
@@ -111,7 +112,7 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
     if (membersInjector != null) {
       handle = InternalMethodHandles.finishConstructionAndSetReference(handle, circularFactoryId);
       // Members injectors have the signature `(Object, InternalContext)->void`
-      var membersHandle = membersInjector.getInjectMembersAndNotifyListenersHandle(linkageContext);
+      var membersHandle = ((MethodHandleMembersInjectorImpl<?>)membersInjector).getInjectMembersAndNotifyListenersHandle(linkageContext);
       // Compose it into a handle that just returns the first parameter.
       membersHandle =
           MethodHandles.foldArguments(
