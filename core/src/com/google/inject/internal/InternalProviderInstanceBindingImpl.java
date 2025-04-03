@@ -72,11 +72,8 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
   }
 
   /** A base factory implementation. */
-  abstract static class Factory<T>
-      implements InternalFactory<T>,
-          Provider<T>,
-          HasDependencies,
-          ProvisionListenerStackCallback.ProvisionCallback<T> {
+  abstract static class Factory<T> extends InternalFactory<T>
+      implements Provider<T>, HasDependencies, ProvisionListenerStackCallback.ProvisionCallback<T> {
     private final InitializationTiming initializationTiming;
     private Object source;
     private InjectorImpl injector;
@@ -158,10 +155,10 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
     }
 
     @Override
-    public MethodHandle getHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return InternalMethodHandles.invokeThroughProvisionCallback(
-          doGetHandle(context, dependency, linked), dependency, provisionCallback);
+    MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+      return makeCachable(
+          InternalMethodHandles.invokeThroughProvisionCallback(
+              doGetHandle(context), provisionCallback));
     }
 
     // Implements ProvisionCallback<T>
@@ -181,7 +178,6 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
         throws InternalProvisionException;
 
     /** Creates a method handle that constructs the object to be injected. */
-    protected abstract MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked);
+    protected abstract MethodHandle doGetHandle(LinkageContext context);
   }
 }

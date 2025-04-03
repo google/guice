@@ -22,9 +22,9 @@ import com.google.errorprone.annotations.Keep;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+import jakarta.inject.Provider;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import jakarta.inject.Provider;
 
 /**
  * An {@link InternalFactory} for {@literal @}{@link ProvidedBy} bindings.
@@ -77,22 +77,18 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    return context.makeHandle(
-        this,
-        () ->
-            InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                circularGetHandle(
-                    providerFactory.getHandle(context, PROVIDER_DEPENDENCY, /* linked= */ true),
-                    dependency,
-                    provisionCallback),
-                providerKey));
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(
+        InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            circularGetHandle(
+                providerFactory.getHandle(context, /* linked= */ true), provisionCallback),
+            providerKey));
   }
 
   @Override
-  protected MethodHandle provisionHandle(MethodHandle providerHandle, Dependency<?> dependency) {
+  protected MethodHandle provisionHandle(MethodHandle providerHandle) {
     // Do normal provisioning and then check that the result is the correct subtype.
-    MethodHandle invokeProvider = super.provisionHandle(providerHandle, dependency);
+    MethodHandle invokeProvider = super.provisionHandle(providerHandle);
     return MethodHandles.filterReturnValue(
         invokeProvider,
         MethodHandles.insertArguments(

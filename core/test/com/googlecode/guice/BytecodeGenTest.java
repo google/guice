@@ -35,11 +35,11 @@ import com.google.inject.Module;
 import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePrivate;
+import jakarta.inject.Inject;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
-import jakarta.inject.Inject;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Before;
@@ -363,8 +363,10 @@ public class BytecodeGenTest {
   // This tests for a situation where an osgi bundle contains a different version of guice.
   @Test
   public void testFastClassWithDifferentVersionsOfGuice() throws Throwable {
-    // Test relies on package access which CHILD loading doesn't have
-    if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
+    // Test relies on package access which CHILD loading doesn't have and the methodhandle path
+    // doesn't use fastclasses
+    if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD
+        || InternalFlags.getUseExperimentalMethodHandlesOption()) {
       return;
     }
     Injector injector = Guice.createInjector();

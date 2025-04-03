@@ -25,6 +25,7 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /** Sets an injectable field. */
 final class SingleFieldInjector implements SingleMemberInjector {
@@ -69,14 +70,16 @@ final class SingleFieldInjector implements SingleMemberInjector {
     // unreflect should always succeed due to the setAccessible call in the constructor.
     // (T, V)->void
     var handle = InternalMethodHandles.unreflectSetter(field);
-    // Add an ignored receiver if there are no parameters (aka it is a static field).
-    if (handle.type().parameterCount() == 0) {
+    // Add an ignored receiver if there is no reciever parameter (aka it is a static field).
+    if (Modifier.isStatic(field.getModifiers())) {
       handle = MethodHandles.dropArguments(handle, 0, Object.class);
     }
     // Catch and rethrow exceptions from our dependency factory.
     var injectHandle =
         InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-            factory.getHandle(linkageContext, dependency, /* linked= */ false), dependency);
+            MethodHandles.insertArguments(
+                factory.getHandle(linkageContext, /* linked= */ false), 1, dependency),
+            dependency);
     // We might need a boxing conversion or some other type conversion here to satisfy a generic.
     injectHandle = castReturnTo(injectHandle, handle.type().parameterType(1));
     // Call the injectHandle and pass it to the field handle.

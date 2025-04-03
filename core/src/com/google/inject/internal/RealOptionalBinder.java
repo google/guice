@@ -43,6 +43,7 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
+import jakarta.inject.Qualifier;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -51,7 +52,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
 import java.util.Set;
 import javax.annotation.Nullable;
-import jakarta.inject.Qualifier;
 
 /**
  * The actual OptionalBinder plays several roles. It implements Module to hide that fact from the
@@ -288,21 +288,20 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (target == null) {
         return InternalMethodHandles.constantFactoryGetHandle(java.util.Optional.empty());
       }
-      return context.makeHandle(
-          this,
-          () -> {
-            var handle = target.getHandle(context, this.targetDependency, /* linked= */ false);
-            handle =
-                InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                    handle, targetDependency);
-            return castReturnToObject(
-                MethodHandles.filterReturnValue(handle, OPTIONAL_OF_NULLABLE_MH));
-          });
+      var handle =
+          MethodHandles.insertArguments(
+              target.getHandle(context, /* linked= */ false), 1, targetDependency);
+      handle =
+          InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+              handle, targetDependency);
+      return MethodHandles.dropArguments(
+          castReturnToObject(MethodHandles.filterReturnValue(handle, OPTIONAL_OF_NULLABLE_MH)),
+          1,
+          Dependency.class);
     }
 
     private static final MethodHandle OPTIONAL_OF_NULLABLE_MH =
@@ -388,8 +387,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(value);
     }
 
@@ -435,20 +433,15 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
-      return context.makeHandle(
-          this,
-          () ->
-              InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                  targetFactory.getHandle(context, dependency, /* linked= */ true), targetKey));
+    protected MethodHandle doGetHandle(LinkageContext context) {
+      return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+          targetFactory.getHandle(context, /* linked= */ true), targetKey);
     }
 
     @Override
     public Set<Dependency<?>> getDependencies() {
       return bindingSelection.dependencies;
     }
-
   }
 
   /** Provides the binding for {@code Optional<Provider<T>>}. */
@@ -481,8 +474,7 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       return InternalMethodHandles.constantFactoryGetHandle(value);
     }
 
@@ -548,21 +540,21 @@ public final class RealOptionalBinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (delegate == null) {
         return InternalMethodHandles.constantFactoryGetHandle(Optional.absent());
       }
-      return context.makeHandle(
-          this,
-          () -> {
-            var handle = delegate.getHandle(context, targetDependency, /* linked= */ false);
-            handle =
-                InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-                    handle, targetDependency);
-            return castReturnToObject(
-                MethodHandles.filterReturnValue(handle, OPTIONAL_FROM_NULLABLE_MH));
-          });
+
+      var handle =
+          MethodHandles.insertArguments(
+              delegate.getHandle(context, /* linked= */ false), 1, targetDependency);
+      handle =
+          InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+              handle, targetDependency);
+      return MethodHandles.dropArguments(
+          castReturnToObject(MethodHandles.filterReturnValue(handle, OPTIONAL_FROM_NULLABLE_MH)),
+          1,
+          Dependency.class);
     }
 
     private static final MethodHandle OPTIONAL_FROM_NULLABLE_MH =

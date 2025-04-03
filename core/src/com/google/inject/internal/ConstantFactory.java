@@ -16,23 +16,14 @@
 
 package com.google.inject.internal;
 
-import static java.lang.invoke.MethodType.methodType;
-
 import com.google.common.base.MoreObjects;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-final class ConstantFactory<T> implements InternalFactory<T> {
-  private static final MethodHandle ON_NULL_INJECTED_INTO_NON_NULLABLE_DEPENDENCY_MH =
-      InternalMethodHandles.findStaticOrDie(
-          InternalProvisionException.class,
-          "onNullInjectedIntoNonNullableDependency",
-          methodType(void.class, Object.class, Dependency.class));
+final class ConstantFactory<T> extends InternalFactory<T> {
 
   private static <T> InternalFactory<T> nullFactory(Object source) {
     return new InternalFactory<T>() {
@@ -51,19 +42,9 @@ final class ConstantFactory<T> implements InternalFactory<T> {
       }
 
       @Override
-      public MethodHandle getHandle(
-          LinkageContext context, Dependency<?> dependency, boolean linked) {
+      MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
         var returnNull = InternalMethodHandles.constantFactoryGetHandle(null);
-        if (dependency.isNullable()) {
-          // Just return a constant null handle.
-          return returnNull;
-        }
-        // We need to call onNullInjectedIntoNonNullableDependency and then return null.  It is
-        // possible that the former will throw but that depends on some runtime conditions.
-        var onNull =
-            MethodHandles.insertArguments(
-                ON_NULL_INJECTED_INTO_NON_NULLABLE_DEPENDENCY_MH, 0, source, dependency);
-        return MethodHandles.foldArguments(returnNull, onNull);
+        return makeCachable(InternalMethodHandles.nullCheckResult(returnNull, source));
       }
     };
   }
@@ -92,8 +73,8 @@ final class ConstantFactory<T> implements InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    return InternalMethodHandles.constantFactoryGetHandle(instance);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(InternalMethodHandles.constantFactoryGetHandle(instance));
   }
 
   @Override

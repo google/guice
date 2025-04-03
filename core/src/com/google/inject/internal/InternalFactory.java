@@ -21,14 +21,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 
 /**
  * Creates objects which will be injected.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface InternalFactory<T> {
+abstract class InternalFactory<T> {
+
+  /**
+   * This will be a {@link MethodHandle} if the handle is always cachable, or a {@code
+   * MethodHandle[2]} if the handle is conditionally cachable based on the linked status. In which
+   * case index 0 is the handle for when not linked and index 1 is for when it is linked.
+   * 
+   */
+  private volatile Object handleCacheResult;
 
   /**
    * Creates an object to be injected.
@@ -38,11 +45,11 @@ interface InternalFactory<T> {
    * @throws com.google.inject.internal.InternalProvisionException if a value cannot be provided
    * @return instance that was created
    */
-  T get(InternalContext context, Dependency<?> dependency, boolean linked)
+  abstract T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException;
 
   /** Returns a provider for the object to be injected. */
-  default Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
+  Provider<T> makeProvider(InjectorImpl injector, Dependency<?> dependency) {
     return makeDefaultProvider(this, injector, dependency);
   }
 
@@ -53,14 +60,127 @@ interface InternalFactory<T> {
    * of the object to be injected as determined by the {@link Dependency}.
    *
    * @param context the linkage context
-   * @param dependency the dependency to be injected
    * @param linked true if getting as a result of a linked binding
    * @return the method handle for the object to be injected
    */
-  default MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    // The default implementation simply delegates to the `get` method.
-    MethodHandle handle = InternalMethodHandles.INTERNAL_FACTORY_GET_HANDLE.bindTo(this);
-    return MethodHandles.insertArguments(handle, 1, dependency, linked);
+  final MethodHandle getHandle(LinkageContext context, boolean linked) {
+    var local = readCache(linked);
+    if (local != null) {
+      return local;
+    }
+    // NOTE: we do not hold a lock while actually constructing the handle, instead the updateCache
+    // method will simply ensure that we only save one.  The reason for this is that the `getHandle`
+    // method can be invoked by multiple threads concurrently and can be re-entrant. For a single
+    // thread the re-entrancy is managed by the `LinkageContext` class but for multiple threads do
+    // not have a solution. So holding a lock while constructing handles could lead to a deadlock.
+    // Instead we just ensure that exactly one handle is actually stored and races instead just
+    // create garbage handles.
+    var result = context.makeHandle(this, linked);
+    return updateCache(linked, result);
+  }
+
+  /**
+   * Produce the method handle for the object to be injected.
+   *
+   * @param context should be propagated to delegate {@link #getHandle(LinkageContext, boolean)}
+   *     calls
+   * @param linked true if getting as a result of a linked binding
+   * @return a {@link MethodHandleResult} containing the method handle and its cachability settings
+   */
+  abstract MethodHandleResult makeHandle(LinkageContext context, boolean linked);
+
+  static MethodHandleResult makeCachable(MethodHandle methodHandle) {
+    return new MethodHandleResult(methodHandle, MethodHandleResult.Cachability.ALWAYS);
+  }
+  static MethodHandleResult makeCachableOnLinkedSetting(MethodHandle methodHandle) {
+    return new MethodHandleResult(methodHandle, MethodHandleResult.Cachability.ON_LINKED_SETTING);
+  }
+  static MethodHandleResult makeUncachable(MethodHandle methodHandle) {
+    return new MethodHandleResult(methodHandle, MethodHandleResult.Cachability.NEVER);
+  }
+  static final class MethodHandleResult {
+    static enum Cachability {
+      ALWAYS,
+      ON_LINKED_SETTING ,
+      NEVER,
+    }
+
+    
+    final MethodHandle methodHandle;
+    final Cachability cachability;
+
+    private MethodHandleResult(MethodHandle methodHandle, Cachability cachability) {
+      this.methodHandle = methodHandle;
+      this.cachability = cachability;
+    }
+  }
+
+
+  /** Racily read the cache. */
+  private MethodHandle readCache(boolean linked) {
+    var local = handleCacheResult;
+    if (local != null) {
+      if (local instanceof MethodHandle) {
+        return (MethodHandle) local;
+      }
+      var handleArray = (MethodHandle[]) local;
+      if (linked) {
+        return handleArray[1];
+      } else {
+        return handleArray[0];
+      }
+    }
+    return null;
+  }
+
+  /** Atomically update the cache and return the handle to use. */
+  private MethodHandle updateCache(boolean linked, MethodHandleResult result) {
+    switch (result.cachability) {
+      case NEVER:
+        return result.methodHandle;
+      case ALWAYS:
+        synchronized (this) {
+          var local = handleCacheResult;
+          if (local != null) {
+            if (local instanceof MethodHandle) {
+              // we lost a race
+              return (MethodHandle) local;
+            }
+            throw new AssertionError(
+                "Cannot update cache with an always cachable handle if it was already set with a"
+                    + " conditional cachable handle");
+          }
+          handleCacheResult = result.methodHandle;
+          return result.methodHandle;
+        }
+      case ON_LINKED_SETTING:
+        {
+          int index = linked ? 1 : 0;
+          synchronized (this) {
+            var local = handleCacheResult;
+            if (local != null) {
+              if (local instanceof MethodHandle[]) {
+                var array = (MethodHandle[]) local;
+                var handle = array[index];
+                if (handle != null) {
+                  // this implies we lost a race
+                  return handle;
+                }
+                array[index] = result.methodHandle;
+                return result.methodHandle;
+              }
+              throw new AssertionError(
+                  "Cannot update cache with an on linked setting cachable handle if it was already"
+                      + " set with an always cachable handle");
+            }
+            var array = new MethodHandle[2];
+            array[index] = result.methodHandle;
+            handleCacheResult = array;
+            return result.methodHandle;
+          }
+        }
+    }
+    throw new AssertionError("unreachable");
   }
 
   /**

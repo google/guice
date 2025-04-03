@@ -19,7 +19,6 @@ package com.google.inject.internal;
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
-import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
 
 import com.google.inject.spi.InjectionPoint;
@@ -60,6 +59,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
     if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
       MethodHandle methodHandle = InternalMethodHandles.unreflect(method);
       if (methodHandle != null) {
+        methodHandle = InternalMethodHandles.dropReturn(methodHandle);
         if ((method.getModifiers() & Modifier.STATIC) != 0) {
           // insert a fake ignored receiver
           methodHandle = MethodHandles.dropArguments(methodHandle, 0, Object.class);
@@ -115,19 +115,20 @@ final class SingleMethodInjector implements SingleMemberInjector {
     if (InternalFlags.isBytecodeGenEnabled()) {
       try {
         BiFunction<Object, Object[], Object> fastMethod = BytecodeGen.fastMethod(method);
-        // (Object o1, Object o2, ...Object oN, Object receiver) -> void
         if (fastMethod != null) {
-          MethodHandle fastMethodHandle =
-              InternalFlags.getUseExperimentalMethodHandlesOption()
-                  ? BIFUNCTION_APPLY_HANDLE
+          // (Object receiver, Object[]) -> void
+          MethodHandle fastMethodHandle;
+          if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+              var handle = BIFUNCTION_APPLY_HANDLE
                       .bindTo(fastMethod)
-                      .asType(methodType(Object.class, Object[].class, Object.class))
-                      // Have it collect N arguments into an array of type Object[]
-                      // This is safe because the number of parameters is the same as the number of
-                      // parameters to the method which should never exceed the maximum number of
-                      // method parameters.
-                      .asCollector(Object[].class, method.getParameterCount())
-                  : null;
+                      // Cast the first parameter to `Object[]`
+                      .asType(methodType(Object.class, Object[].class, Object.class));
+              handle = InternalMethodHandles.dropReturn(handle);
+              handle = MethodHandles.permuteArguments(handle, methodType(void.class, Object.class, InternalContext.class), new int[]{1,0});
+              fastMethodHandle = handle;
+          } else {
+            fastMethodHandle = null;
+          }
           return new MethodInvoker() {
             @Override
             public Object invoke(Object target, Object... parameters)
@@ -142,25 +143,14 @@ final class SingleMethodInjector implements SingleMemberInjector {
             @Override
             public MethodHandle getInjectHandle(
                 LinkageContext linkageContext, MethodHandle[] parameterHandles) {
-              // We are calling the fast class method which we have use `asCollector` adapter to
-              // turn into N object parameters, cast each parameterInjector to Object to account.
-              for (int i = 0; i < parameterHandles.length; i++) {
-                parameterHandles[i] = castReturnToObject(parameterHandles[i]);
-              }
               // Invoke the handle with the parameters.
               // The signature is now:
-              // (nternalContext,InternalContext,InternalContext...,Object receiver)-R
-              // With one internalContext per parameter.
-              var handle = MethodHandles.filterArguments(fastMethodHandle, 0, parameterHandles);
-              // Now permute to 1. move the receiver to the beginning and 2. merge all the internal
-              // context parameters
-              int[] permutations = new int[parameterHandles.length + 1];
-              permutations[parameterHandles.length] = 1;
-              handle =
-                  MethodHandles.permuteArguments(
-                      handle,
-                      methodType(void.class, InternalContext.class, Object.class),
-                      permutations);
+              // (InternalContext, Object reciever)-R
+              var handle =
+                  MethodHandles.filterArguments(
+                      fastMethodHandle,
+                      1,
+                      InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
               return handle;
             }
           };
@@ -187,20 +177,14 @@ final class SingleMethodInjector implements SingleMemberInjector {
           LinkageContext linkageContext, MethodHandle[] parameterHandles) {
         // See comments in ProviderMethod on why we use reflection here and how rarely this happens.
         // bind to the `Method` object
+        // (Object, Object[])->Object
         var handle = METHOD_INVOKE_HANDLE.bindTo(method);
-        // collect the parameters into an array of type Object[]
-        var arrayHandle =
-            MethodHandles.identity(Object[].class)
-                .asCollector(Object[].class, parameterHandles.length);
-        // supply all parameters
-        arrayHandle = MethodHandles.filterArguments(arrayHandle, 0, parameterHandles);
-        arrayHandle =
-            MethodHandles.permuteArguments(
-                arrayHandle,
-                methodType(Object[].class, InternalContext.class),
-                new int[parameterHandles.length]);
+        // (Object, InternalContext)->Object
+        handle =
+            MethodHandles.filterArguments(
+                handle, 1, InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
+        // (Object, InternalContext)->void
         handle = InternalMethodHandles.dropReturn(handle); // we never care about return values.
-        handle = MethodHandles.filterArguments(handle, 1, arrayHandle);
         return handle;
       }
     };
@@ -229,10 +213,8 @@ final class SingleMethodInjector implements SingleMemberInjector {
   public MethodHandle getInjectHandle(LinkageContext linkageContext) {
     MethodHandle[] parameterInjectors =
         SingleParameterInjector.getAllHandles(linkageContext, this.parameterInjectors);
-    var methodHandle =
-        methodInvoker
-            .getInjectHandle(linkageContext, parameterInjectors)
-            .asType(methodType(void.class, Object.class, InternalContext.class));
+        // ()
+    var methodHandle = methodInvoker.getInjectHandle(linkageContext, parameterInjectors);
     methodHandle =
         InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(methodHandle, injectionPoint);
     return methodHandle;

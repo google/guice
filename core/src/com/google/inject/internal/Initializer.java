@@ -262,8 +262,6 @@ final class Initializer {
           default:
             throw new IllegalStateException("Unknown state: " + state);
         }
-        // TODO(b/366058184): Investigate a MethodHandle approach for this.
-
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
         try {
