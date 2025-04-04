@@ -116,17 +116,6 @@ final class UnsafeClassDefiner implements ClassDefiner {
     return findClassDefiner(hostClass.getClassLoader()).define(hostClass, bytecode);
   }
 
-  @Override
-  public Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode)
-      throws Exception {
-    // We want to behave like `ALWAYS_DEFINE_ANOYNMOUSLY` was set
-    // if we define classes into an existing classloader they will be tied to the lifetime of
-    // that classloader, but using the UNSAFE_DEFINER ensures that we either delgate to
-    // MethodHandles.defineHiddenClass or Unsafe.defineAnonymousClass which both create classes
-    // that are independently collectable.
-    return UNSAFE_DEFINER.defineCollectable(lifetimeOwner, hostClass, bytecode);
-  }
-
   /** Finds the appropriate class definer for the given class loader. */
   private static ClassDefiner findClassDefiner(ClassLoader hostLoader) {
     if (hostLoader == null || ALWAYS_DEFINE_ANONYMOUSLY) {

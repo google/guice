@@ -46,20 +46,6 @@ final class ChildClassDefiner implements ClassDefiner {
             .build(CacheLoader.from(ChildClassDefiner::childLoader));
   }
 
-  // initialization-on-demand...
-  private static class LifetimeBoundChildLoaderCacheHolder {
-    static final LoadingCache<Object, LoadingCache<ClassLoader, ChildLoader>> CHILD_LOADER_CACHE =
-        CacheBuilder.newBuilder()
-            .weakKeys()
-            .build(
-                CacheLoader.from(
-                    ignored ->
-                        CacheBuilder.newBuilder()
-                            .weakKeys()
-                            .weakValues()
-                            .build(CacheLoader.from(ChildClassDefiner::childLoader))));
-  }
-
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
     ClassLoader hostLoader = hostClass.getClassLoader();
@@ -70,29 +56,6 @@ final class ChildClassDefiner implements ClassDefiner {
             : SystemChildLoaderHolder.SYSTEM_CHILD_LOADER;
 
     return childLoader.defineInChild(bytecode);
-  }
-
-  @Override
-  public Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode)
-      throws Exception {
-    ClassLoader hostLoader = hostClass.getClassLoader();
-    if (hostLoader == null) {
-      hostLoader = ClassLoader.getSystemClassLoader();
-    }
-    // We bind the child loader to the lifetime of the `lifetimeOwner` (which is an Injector, but
-    // not declared as such since we don't really care and this would create a cycle), so that if
-    // the lifetimeOwner is garbage collected the child loader can be as well.
-    //
-    // This is important since these child classes may pin the injector also, so this ensures that
-    // even if there are multiple concurrent injectors with the same `hostClass` then their defined
-    // classes can be independently collected (Remember that classes and classloaders depend on each
-    // other, so if sibling injectors shared a child classloader then all injectors would need to be
-    // collectable for any of them to be.)  See tests in `InternalMethodHandlesTest` for
-    // examples.
-    return LifetimeBoundChildLoaderCacheHolder.CHILD_LOADER_CACHE
-        .get(lifetimeOwner)
-        .get(hostLoader)
-        .defineInChild(bytecode);
   }
 
   /** Utility method to remove doPrivileged ambiguity */
