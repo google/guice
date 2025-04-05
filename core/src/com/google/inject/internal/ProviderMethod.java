@@ -254,7 +254,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     handle = MethodHandles.dropArguments(handle, 1, Dependency.class);
     handle = InternalMethodHandles.nullCheckResult(handle, getMethod());
     // catch everything else and rethrow as an error in provider.
-    handle = InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(handle, getSource());
+    handle = InternalMethodHandles.catchThrowableInProviderAndRethrowWithSource(handle, getSource());
     handle = InternalMethodHandles.finishConstruction(handle, circularFactoryId);
 
     return handle;

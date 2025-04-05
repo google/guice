@@ -503,34 +503,65 @@ public final class InternalMethodHandles {
    * <pre>{@code
    * try {
    *   return delegate(...);
-   * } catch (InternalProvisionException ipe) {
-   *   throw ipe.addSource(source);
-   * } catch (Throwable re) {
+   * } catch (RuntimeException re) {
    *   throw InternalProvisionException.errorInProvider(re).addSource(source);
    * }
    * }</pre>
    */
-  static MethodHandle catchErrorInProviderAndRethrowWithSource(
+  static MethodHandle catchRuntimeExceptionInProviderAndRethrowWithSource(
       MethodHandle delegate, Object source) {
     var rethrow =
         MethodHandles.insertArguments(
-            CATCH_ERROR_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+          CATCH_RUNTIME_EXCEPTION_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+
+    return MethodHandles.catchException(castReturnToObject(delegate), RuntimeException.class, rethrow)
+        .asType(delegate.type());
+  }
+
+  private static final MethodHandle CATCH_RUNTIME_EXCEPTION_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE =
+      findStaticOrDie(
+          InternalMethodHandles.class,
+          "doCatchRuntimeExceptionInProviderAndRethrowWithSource",
+          methodType(Object.class, RuntimeException.class, Object.class));
+
+  @Keep
+  private static Object doCatchRuntimeExceptionInProviderAndRethrowWithSource(RuntimeException re, Object source)
+      throws InternalProvisionException {
+    throw InternalProvisionException.errorInProvider(re).addSource(source);
+  }
+
+  /**
+   * Surrounds the delegate with a catch block that rethrows the exception with the given source.
+   *
+   * <pre>{@code
+   * try {
+   *   return delegate(...);
+   * } catch (InternalProvisionException ipe) {
+   *   throw ipe.addSource(source);
+   * } catch (Throwable t) {
+   *   throw InternalProvisionException.errorInProvider(t).addSource(source);
+   * }
+   * }</pre>
+   */
+  static MethodHandle catchThrowableInProviderAndRethrowWithSource(
+      MethodHandle delegate, Object source) {
+    var rethrow =
+        MethodHandles.insertArguments(
+            CATCH_THROWABLE_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
 
     return MethodHandles.catchException(castReturnToObject(delegate), Throwable.class, rethrow)
         .asType(delegate.type());
   }
 
-  private static final MethodHandle CATCH_ERROR_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE =
+  private static final MethodHandle CATCH_THROWABLE_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE =
       findStaticOrDie(
           InternalMethodHandles.class,
-          "doCatchErrorInProviderAndRethrowWithSource",
+          "doCatchThrowableInProviderAndRethrowWithSource",
           methodType(Object.class, Throwable.class, Object.class));
 
   @Keep
-  private static Object doCatchErrorInProviderAndRethrowWithSource(Throwable re, Object source)
+  private static Object doCatchThrowableInProviderAndRethrowWithSource(Throwable re, Object source)
       throws InternalProvisionException {
-    // MethodHandles don't support 'parallel catch clauses' so we need to do this manually with a
-    // single catch block that does both.
     if (re instanceof InternalProvisionException) {
       throw ((InternalProvisionException) re).addSource(source);
     }

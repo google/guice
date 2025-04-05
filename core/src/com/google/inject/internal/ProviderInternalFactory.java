@@ -141,7 +141,7 @@ abstract class ProviderInternalFactory<T> extends InternalFactory<T> {
   protected MethodHandle provisionHandle(MethodHandle providerHandle) {
     // Call Provider.get() and catch any RuntimeException as an InternalProvisionException.
     var invokeProvider =
-        InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(
+        InternalMethodHandles.catchRuntimeExceptionInProviderAndRethrowWithSource(
             InternalMethodHandles.getProvider(providerHandle), source);
     // Wrap in a try..finally.. that calls `finishConstruction` on the context.
     invokeProvider = InternalMethodHandles.finishConstruction(invokeProvider, circularFactoryId);

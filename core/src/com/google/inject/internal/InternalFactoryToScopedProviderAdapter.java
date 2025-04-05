@@ -91,7 +91,7 @@ class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
     // Catch any RuntimeException as an InternalProvisionException.
     // ()->Object
     invokeProvider =
-        InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(invokeProvider, source);
+        InternalMethodHandles.catchRuntimeExceptionInProviderAndRethrowWithSource(invokeProvider, source);
 
     // We need to call 'setDependency' so it is available to scope implementations and scope
     // delegate providers. See comment in `get` method for more details.
