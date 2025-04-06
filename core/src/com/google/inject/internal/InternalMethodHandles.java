@@ -36,8 +36,10 @@ import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 
@@ -72,11 +74,12 @@ public final class InternalMethodHandles {
 
   static void checkHasElementFactoryType(MethodHandle handle) {
     checkArgument(
-      handle.type().equals(ELEMENT_FACTORY_TYPE),
-      "Element handle must be an element factory type %s got %s",
-      ELEMENT_FACTORY_TYPE,
-      handle.type());
+        handle.type().equals(ELEMENT_FACTORY_TYPE),
+        "Element handle must be an element factory type %s got %s",
+        ELEMENT_FACTORY_TYPE,
+        handle.type());
   }
+
   /**
    * A handle for {@link BiFunction#apply}, useful for targeting fastclasses.
    *
@@ -253,8 +256,8 @@ public final class InternalMethodHandles {
   }
 
   /**
-   * Returns a method handle with the signature {@code (InternalContext, Dependency) -> Object} that returns the
-   * given instance.
+   * Returns a method handle with the signature {@code (InternalContext, Dependency) -> Object} that
+   * returns the given instance.
    */
   static MethodHandle constantFactoryGetHandle(Object instance) {
     return MethodHandles.dropArguments(
@@ -340,8 +343,7 @@ public final class InternalMethodHandles {
    *
    * <p>The returned handle has the same type as the delegate.
    */
-  static MethodHandle nullCheckResult(
-      MethodHandle delegate, Object source) {
+  static MethodHandle nullCheckResult(MethodHandle delegate, Object source) {
     var type = delegate.type();
     checkArgument(
         type.parameterCount() >= 2
@@ -350,11 +352,12 @@ public final class InternalMethodHandles {
         "Expected %s to have an initial InternalContext and Dependency parameter",
         delegate);
     // (Object, InternalContext, Dependency) -> Object
-    var nullCheckResult =
-        MethodHandles.insertArguments(NULL_CHECK_RESULT_MH, 1, source);
+    var nullCheckResult = MethodHandles.insertArguments(NULL_CHECK_RESULT_MH, 1, source);
     if (type.parameterCount() > 2) {
       // (InternalContext, Dependency) -> Object
-      nullCheckResult = MethodHandles.dropArguments(nullCheckResult, 3, type.parameterList().subList(2, type.parameterCount()));
+      nullCheckResult =
+          MethodHandles.dropArguments(
+              nullCheckResult, 3, type.parameterList().subList(2, type.parameterCount()));
     }
     return MethodHandles.foldArguments(nullCheckResult, delegate);
   }
@@ -363,10 +366,12 @@ public final class InternalMethodHandles {
       findStaticOrDie(
           InternalMethodHandles.class,
           "doNullCheckResult",
-          methodType(Object.class, Object.class, Object.class, InternalContext.class, Dependency.class));
+          methodType(
+              Object.class, Object.class, Object.class, InternalContext.class, Dependency.class));
 
   @Keep
-  private static Object doNullCheckResult(Object result, Object source, InternalContext ignored, Dependency<?> dependency)
+  private static Object doNullCheckResult(
+      Object result, Object source, InternalContext ignored, Dependency<?> dependency)
       throws InternalProvisionException {
     if (result == null && !dependency.isNullable()) {
       // This will either throw, warn or do nothing.
@@ -387,8 +392,7 @@ public final class InternalMethodHandles {
    * ProvisionListeners should be rare in performance-sensitive code anyway.
    */
   static final MethodHandle invokeThroughProvisionCallback(
-      MethodHandle delegate,
-      @Nullable ProvisionListenerStackCallback<?> listener) {
+      MethodHandle delegate, @Nullable ProvisionListenerStackCallback<?> listener) {
     var type = delegate.type();
     checkArgument(type.parameterType(0).equals(InternalContext.class));
     checkArgument(type.parameterType(1).equals(Dependency.class));
@@ -447,7 +451,8 @@ public final class InternalMethodHandles {
           "makeProvisionCallback",
           methodType(ProvisionCallback.class, MethodHandle.class, Object.class));
 
-  // A simple factory for the case where the delegate only has a single free parameter that we need to capture.
+  // A simple factory for the case where the delegate only has a single free parameter that we need
+  // to capture.
   @Keep
   private static final ProvisionCallback<Object> makeProvisionCallback(
       MethodHandle delegate, Object capture) {
@@ -512,21 +517,23 @@ public final class InternalMethodHandles {
       MethodHandle delegate, Object source) {
     var rethrow =
         MethodHandles.insertArguments(
-          CATCH_RUNTIME_EXCEPTION_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+            CATCH_RUNTIME_EXCEPTION_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
 
-    return MethodHandles.catchException(castReturnToObject(delegate), RuntimeException.class, rethrow)
+    return MethodHandles.catchException(
+            castReturnToObject(delegate), RuntimeException.class, rethrow)
         .asType(delegate.type());
   }
 
-  private static final MethodHandle CATCH_RUNTIME_EXCEPTION_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE =
-      findStaticOrDie(
-          InternalMethodHandles.class,
-          "doCatchRuntimeExceptionInProviderAndRethrowWithSource",
-          methodType(Object.class, RuntimeException.class, Object.class));
+  private static final MethodHandle
+      CATCH_RUNTIME_EXCEPTION_IN_PROVIDER_AND_RETHROW_WITH_SOURCE_HANDLE =
+          findStaticOrDie(
+              InternalMethodHandles.class,
+              "doCatchRuntimeExceptionInProviderAndRethrowWithSource",
+              methodType(Object.class, RuntimeException.class, Object.class));
 
   @Keep
-  private static Object doCatchRuntimeExceptionInProviderAndRethrowWithSource(RuntimeException re, Object source)
-      throws InternalProvisionException {
+  private static Object doCatchRuntimeExceptionInProviderAndRethrowWithSource(
+      RuntimeException re, Object source) throws InternalProvisionException {
     throw InternalProvisionException.errorInProvider(re).addSource(source);
   }
 
@@ -732,8 +739,7 @@ public final class InternalMethodHandles {
    * return delegate(...);
    * }</pre>
    */
-  static MethodHandle tryStartConstruction(
-      MethodHandle delegate, int circularFactoryId) {
+  static MethodHandle tryStartConstruction(MethodHandle delegate, int circularFactoryId) {
     // NOTE: we cannot optimize this further by assuming that the return value is always null when
     // circular proxies are disabled, because if parent and child injectors differ in that setting
     // then injectors with circularProxiesDisabled may still run in a context where they are enabled
@@ -741,8 +747,7 @@ public final class InternalMethodHandles {
 
     // (InternalContext, Dependency)->Object
     var tryStartConstruction =
-        MethodHandles.insertArguments(
-            TRY_START_CONSTRUCTION_HANDLE, 1, circularFactoryId);
+        MethodHandles.insertArguments(TRY_START_CONSTRUCTION_HANDLE, 1, circularFactoryId);
     // This takes the first Object parameter and casts it to the return type of the delegate.
     // It also ignores all the other parameters.
     var returnProxy =
@@ -962,53 +967,46 @@ public final class InternalMethodHandles {
     if (elementHandlesList.isEmpty()) {
       return EMPTY_OBJECT_ARRAY_HANDLE;
     }
+    // The approach to build an array is complex in the MethodHandle API.
+    // See
+    // https://stackoverflow.com/questions/79551257/efficiently-build-a-large-array-with-methodhandles/79558740#79558740
+    // For a discussion of the different approaches, we follow that advice and just use a
+    // straightforward recursive approach.
     // (Object[]) -> Object[]
-    int length = elementHandlesList.size();
-    // We can use an asCollector() transform.
-    if (length < MAX_BINDABLE_ARITY) {
-      // (Object[]) -> Object[]
-      var handle = MethodHandles.identity(Object[].class);
-      // (Object,Object...Object) -> Object[]
-      handle = handle.asCollector(Object[].class, length);
-      // (InternalContext,InternalContext..InternalContext) -> Object[]
-      handle =
-          MethodHandles.filterArguments(handle, 0, elementHandlesList.toArray(new MethodHandle[0]));
-      // (InternalContext) -> Object[]
-      handle =
-          MethodHandles.permuteArguments(
-              handle, methodType(Object[].class, InternalContext.class), new int[length]);
-      return handle;
-    } else {
-      // (Object[], InternalContext) -> void
-      var populateArray = populateArray(0, elementHandlesList);
-      // (Object[], InternalContext) -> Object[]
-      populateArray =
-          MethodHandles.foldArguments(
-              MethodHandles.dropArguments(
-                  MethodHandles.identity(Object[].class), 1, InternalContext.class),
-              populateArray);
-      // ()->Object[]
-      var constructArray = MethodHandles.insertArguments(OBJECT_ARRAY_CONSTRUCTOR, 0, length);
-      // (InternalContext) -> Object[]
-      constructArray = MethodHandles.dropArguments(constructArray, 0, InternalContext.class);
-      return MethodHandles.foldArguments(populateArray, constructArray);
-    }
+    // (Object[], InternalContext) -> void
+    var populateArray = populateArray(0, elementHandlesList);
+    // (Object[], InternalContext) -> Object[]
+    populateArray =
+        MethodHandles.foldArguments(
+            MethodHandles.dropArguments(
+                MethodHandles.identity(Object[].class), 1, InternalContext.class),
+            populateArray);
+    // ()->Object[]
+    var constructArray =
+        MethodHandles.insertArguments(OBJECT_ARRAY_CONSTRUCTOR, 0, elementHandlesList.size());
+    // (InternalContext) -> Object[]
+    constructArray = MethodHandles.dropArguments(constructArray, 0, InternalContext.class);
+    return MethodHandles.foldArguments(populateArray, constructArray);
   }
 
   private static final MethodHandle EMPTY_OBJECT_ARRAY_HANDLE =
-      MethodHandles.dropArguments(MethodHandles.constant(Object[].class, new Object[0]), 0, InternalContext.class);
-  private static final MethodHandle OBJECT_ARRAY_CONSTRUCTOR = MethodHandles.arrayConstructor(Object[].class);
-  private static final MethodHandle OBJECT_ARRAY_ELEMENT_SETTER = MethodHandles.arrayElementSetter(Object[].class);
+      MethodHandles.dropArguments(
+          MethodHandles.constant(Object[].class, new Object[0]), 0, InternalContext.class);
+  private static final MethodHandle OBJECT_ARRAY_CONSTRUCTOR =
+      MethodHandles.arrayConstructor(Object[].class);
+  private static final MethodHandle OBJECT_ARRAY_ELEMENT_SETTER =
+      MethodHandles.arrayElementSetter(Object[].class);
 
   /**
-   * Recursive helper to populate an array.
+   * Recursive helper to populate an array. Builds a balanced binary tree of handles that assign to
+   * array elements.
    *
    * <p>Returns a handle of type (Object[], InternalContext) -> void
    */
   private static MethodHandle populateArray(int offset, List<MethodHandle> elementFactories) {
     var size = elementFactories.size();
     if (size == 0) {
-      return MethodHandles.empty(methodType(void.class, Object[].class, InternalContext.class));
+      throw new IllegalArgumentException("Cannot populate an empty array");
     }
     if (size == 1) {
       // (Object[], InternalContext) -> void
@@ -1017,10 +1015,11 @@ public final class InternalMethodHandles {
           1,
           elementFactories.get(0));
     }
-    var left = elementFactories.subList(0, size / 2);
-    var right = elementFactories.subList(size / 2, size);
+    var half = size / 2;
+    var left = elementFactories.subList(0, half);
+    var right = elementFactories.subList(half, size);
     var leftHandle = populateArray(offset, left);
-    var rightHandle = populateArray(offset + left.size(), right);
+    var rightHandle = populateArray(offset + half, right);
     return MethodHandles.foldArguments(rightHandle, leftHandle);
   }
 
@@ -1048,19 +1047,26 @@ public final class InternalMethodHandles {
       checkHasElementFactoryType(handle);
     }
     MethodHandle setHandle;
-    if (elementHandlesList.isEmpty()) {
+    int size = elementHandlesList.size();
+    if (size == 0) {
       // ImmutableSet.of()
       return constantElementFactoryGetHandle(ImmutableSet.of());
     }
-    if (elementHandlesList.size() == 1) {
-      // ImmutableSet.of(<element>(ctx))
-      setHandle =
-          MethodHandles.filterReturnValue(elementHandlesList.get(0), IMMUTABLE_SET_OF_HANDLE);
+    // (Object, ...Object)->ImmutableSet
+    var immutableSetOf = immutableSetOf(size);
+    if (immutableSetOf != null) {
+      // (InternalContext,... InternalContext) -> ImmutableSet
+      immutableSetOf =
+          MethodHandles.filterArguments(
+              immutableSetOf, 0, elementHandlesList.toArray(new MethodHandle[0]));
+      // (InternalContext) -> ImmutableSet
+      immutableSetOf =
+          MethodHandles.permuteArguments(
+              immutableSetOf, methodType(ImmutableSet.class, InternalContext.class), new int[size]);
+      setHandle = immutableSetOf;
     } else {
       // ImmutableSet.builderWithExpectedSize(<size>)
-      var builder =
-          MethodHandles.insertArguments(
-              IMMUTABLE_SET_BUILDER_OF_SIZE_HANDLE, 0, elementHandlesList.size());
+      var builder = MethodHandles.insertArguments(IMMUTABLE_SET_BUILDER_OF_SIZE_HANDLE, 0, size);
 
       builder = MethodHandles.foldArguments(doAddToImmutableSet(elementHandlesList), builder);
       setHandle = MethodHandles.filterReturnValue(builder, IMMUTABLE_SET_BUILDER_BUILD_HANDLE);
@@ -1077,18 +1083,13 @@ public final class InternalMethodHandles {
   private static MethodHandle doAddToImmutableSet(ImmutableList<MethodHandle> elementHandlesList) {
     // We don't want to 'fold' too deep as it can lead to a stack overflow.  So we have a special
     // case for small lists.
-    if (elementHandlesList.size() < 32) {
-      var builder =
-          MethodHandles.dropArguments(
-              MethodHandles.identity(ImmutableSet.Builder.class), 1, InternalContext.class);
-      for (var handle : elementHandlesList) {
-        // builder = builder.add(<handle>(ctx))
-        builder =
-            MethodHandles.foldArguments(
-                MethodHandles.filterArguments(IMMUTABLE_SET_BUILDER_ADD_HANDLE, 1, handle),
-                dropReturn(builder));
-      }
-      return builder;
+    int size = elementHandlesList.size();
+    if (size == 0) {
+      throw new IllegalArgumentException("Cannot add to an empty set");
+    }
+    if (size == 1) {
+      return MethodHandles.filterArguments(
+          IMMUTABLE_SET_BUILDER_ADD_HANDLE, 1, elementHandlesList.get(0));
     } else {
       // Otherwise we split and recurse, this basically ensures that none of the lambda forms are
       // too big and the 'folds' are not too deep.
@@ -1102,20 +1103,53 @@ public final class InternalMethodHandles {
     }
   }
 
-  private static final MethodHandle IMMUTABLE_SET_OF_HANDLE =
-      InternalMethodHandles.findStaticOrDie(
-          ImmutableSet.class, "of", methodType(ImmutableSet.class, Object.class));
+  private static final ConcurrentHashMap<Integer, MethodHandle> immutableSetOfHandles =
+      new ConcurrentHashMap<>();
+
+  @Nullable
+  private static final MethodHandle immutableSetOf(int arity) {
+    if (arity > MAX_BINDABLE_ARITY) {
+      return null;
+    }
+    return immutableSetOfHandles.computeIfAbsent(
+        arity,
+        n -> {
+          if (n < 6) {
+            var type = methodType(ImmutableSet.class);
+            type = type.appendParameterTypes(Collections.nCopies(n, Object.class));
+            return findStaticOrDie(ImmutableSet.class, "of", type);
+          }
+          if (n == 6) {
+            return MethodHandles.insertArguments(
+                IMMUTABLE_SET_OF_VARARGS_HANDLE, 6, (Object) new Object[0]);
+          }
+          return IMMUTABLE_SET_OF_VARARGS_HANDLE.asCollector(6, Object[].class, n - 6);
+        });
+  }
+
+  private static final MethodHandle IMMUTABLE_SET_OF_VARARGS_HANDLE =
+      findStaticOrDie(
+          ImmutableSet.class,
+          "of",
+          methodType(
+              ImmutableSet.class,
+              Object.class,
+              Object.class,
+              Object.class,
+              Object.class,
+              Object.class,
+              Object.class,
+              Object[].class));
   private static final MethodHandle IMMUTABLE_SET_BUILDER_OF_SIZE_HANDLE =
-      InternalMethodHandles.findStaticOrDie(
+      findStaticOrDie(
           ImmutableSet.class,
           "builderWithExpectedSize",
           methodType(ImmutableSet.Builder.class, int.class));
   private static final MethodHandle IMMUTABLE_SET_BUILDER_ADD_HANDLE =
-      InternalMethodHandles.findVirtualOrDie(
+      findVirtualOrDie(
           ImmutableSet.Builder.class, "add", methodType(ImmutableSet.Builder.class, Object.class));
   private static final MethodHandle IMMUTABLE_SET_BUILDER_BUILD_HANDLE =
-      InternalMethodHandles.findVirtualOrDie(
-          ImmutableSet.Builder.class, "build", methodType(ImmutableSet.class));
+      findVirtualOrDie(ImmutableSet.Builder.class, "build", methodType(ImmutableSet.class));
 
   /**
    * Builds an ImmutableMap factory that delegates to the given entries.
@@ -1132,7 +1166,7 @@ public final class InternalMethodHandles {
    * }</pre>
    *
    * <p>Plus handling for some special cases.
-   * 
+   *
    * <p>Returns a handle with the signature `(InternalContext) -> Object`.
    */
   static <T> MethodHandle buildImmutableMapFactory(List<Map.Entry<T, MethodHandle>> entries) {
@@ -1140,15 +1174,30 @@ public final class InternalMethodHandles {
       checkHasElementFactoryType(entry.getValue());
     }
     if (entries.isEmpty()) {
-      return InternalMethodHandles.constantElementFactoryGetHandle(ImmutableMap.of());
+      return constantElementFactoryGetHandle(ImmutableMap.of());
     }
-    // ImmutableMap.Builder.of(K, V) has a special case for a single entry.
-    if (entries.size() == 1) {
-      var entry = entries.get(0);
-      return MethodHandles.filterReturnValue(
-              entry.getValue(),
-              MethodHandles.insertArguments(IMMUTABLE_MAP_OF_HANDLE, 0, entry.getKey()))
-          .asType(ELEMENT_FACTORY_TYPE);
+
+    // See if we can bind to ImmutableMap.of(...)
+    var immutableMapOf = immutableMapOf(entries.size());
+    if (immutableMapOf != null) {
+      // First bind all the keys
+      immutableMapOf =
+          MethodHandles.insertArguments(
+              immutableMapOf, 0, entries.stream().map(e -> e.getKey()).toArray());
+
+      // Then all the values
+      immutableMapOf =
+          MethodHandles.filterArguments(
+              immutableMapOf,
+              0,
+              entries.stream().map(e -> e.getValue()).toArray(MethodHandle[]::new));
+      // then merge the InternalContext params
+      immutableMapOf =
+          MethodHandles.permuteArguments(
+              immutableMapOf,
+              methodType(ImmutableMap.class, InternalContext.class),
+              new int[entries.size()]);
+      return castReturnToObject(immutableMapOf);
     }
     // Otherwise, we use the builder API by chaining a bunch of put() calls.
     // It might be slightly more efficient to bind to one of the ImmutableMap.of(...) overloads
@@ -1167,32 +1216,27 @@ public final class InternalMethodHandles {
   private static <T> MethodHandle doPutEntries(List<Map.Entry<T, MethodHandle>> entries) {
     int size = entries.size();
     checkArgument(size > 0, "entries must not be empty");
-    if (size < 32) {
-      MethodHandle builder = null;
-      for (Map.Entry<T, MethodHandle> entry : entries) {
-        // `put` has the signature `put(Builder, K, V)->Builder` (the first parameter is 'this').
-        // Insert the 'constant' key to get this signature:
-        // (Builder, V)->Builder
-        var put =
-            MethodHandles.insertArguments(IMMUTABLE_MAP_BUILDER_PUT_HANDLE, 1, entry.getKey());
-        // Construct the value, by calling the factory method handle to supply the first argument
-        // (the
-        // value).  Because the entry is a MethodHandle with signature `(InternalContext)->V` we
-        // need
-        // to cast the return type to `Object` to match the signature of `put`.
-        // (Builder, InternalContext)->Builder
-        put = MethodHandles.filterArguments(put, 1, entry.getValue());
-        // Fold works by invoking the 'builder' and then passing it to the first argument of the
-        // `put` method, and then passing the arguments to `builder` to put as well. Like this:
-        //  Builder fold(InternalContext ctx) {
-        //   bar builder = <builder-handle>(ctx);
-        //   return <put-handle>(builder, ctx);
-        // }
-        // (InternalContext)->Builder
-        // Now, that has the same signture as builder, so assign back and loop.
-        builder = builder == null ? put : MethodHandles.foldArguments(put, dropReturn(builder));
-      }
-      return builder;
+    if (size == 1) {
+      var entry = entries.get(0);
+      // `put` has the signature `put(Builder, K, V)->Builder` (the first parameter is 'this').
+      // Insert the 'constant' key to get this signature:
+      // (Builder, V)->Builder
+      var put = MethodHandles.insertArguments(IMMUTABLE_MAP_BUILDER_PUT_HANDLE, 1, entry.getKey());
+      // Construct the value, by calling the factory method handle to supply the first argument
+      // (the value).  Because the entry is a MethodHandle with signature `(InternalContext)->V` we
+      // need
+      // to cast the return type to `Object` to match the signature of `put`.
+      // (Builder, InternalContext)->Builder
+      put = MethodHandles.filterArguments(put, 1, entry.getValue());
+      // Fold works by invoking the 'builder' and then passing it to the first argument of the
+      // `put` method, and then passing the arguments to `builder` to put as well. Like this:
+      //  Builder fold(InternalContext ctx) {
+      //   bar builder = <builder-handle>(ctx);
+      //   return <put-handle>(builder, ctx);
+      // }
+      // (InternalContext)->Builder
+      // Now, that has the same signture as builder, so assign back and loop.
+      return put;
     } else {
       // Otherwise we split and recurse, this basically ensures that none of the lambda forms are
       // too big and the 'folds' are not too deep.
@@ -1203,22 +1247,51 @@ public final class InternalMethodHandles {
     }
   }
 
-  private static final MethodHandle IMMUTABLE_MAP_OF_HANDLE =
-      InternalMethodHandles.findStaticOrDie(
-          ImmutableMap.class, "of", methodType(ImmutableMap.class, Object.class, Object.class));
+  private static final ConcurrentHashMap<Integer, MethodHandle> immutableMapOfHandles =
+      new ConcurrentHashMap<>();
+
+  /**
+   * Returns a handle for calling ImmutableMap.of, but it reorders the parameters so that all the
+   * keys come first and all the values come last instead of alternating.
+   */
+  @Nullable
+  private static final MethodHandle immutableMapOf(int numEntries) {
+    if (numEntries > 10) {
+      // In theory we could support more by targeting the varargs method that takes Map.Entry objects
+      // but at that point it is better to have the builder API construct the entries for us.
+      return null;
+    }
+    return immutableMapOfHandles.computeIfAbsent(
+        numEntries,
+        n -> {
+          var type = methodType(ImmutableMap.class);
+          type = type.appendParameterTypes(Collections.nCopies(n * 2, Object.class));
+          var immutableMapOf = findStaticOrDie(ImmutableMap.class, "of", type);
+          // We want all the keys to come first and the values to come last
+          // So all the even numbers go to the front and the od numbers go to the end.
+          int[] reorder = new int[n * 2];
+          for (int i = 0; i < n; i++) {
+            // all the even indices are keys, send them to the initial params
+            reorder[2 * i] = i;
+            // odds are values send to the back
+            reorder[2 * i + 1] = i + n;
+          }
+          return MethodHandles.permuteArguments(immutableMapOf, type, reorder);
+        });
+  }
+
   private static final MethodHandle IMMUTABLE_MAP_BUILDER_WITH_EXPECTED_SIZE_HANDLE =
-      InternalMethodHandles.findStaticOrDie(
+      findStaticOrDie(
           ImmutableMap.class,
           "builderWithExpectedSize",
           methodType(ImmutableMap.Builder.class, int.class));
   private static final MethodHandle IMMUTABLE_MAP_BUILDER_PUT_HANDLE =
-      InternalMethodHandles.findVirtualOrDie(
+      findVirtualOrDie(
           ImmutableMap.Builder.class,
           "put",
           methodType(ImmutableMap.Builder.class, Object.class, Object.class));
   private static final MethodHandle IMMUTABLE_MAP_BUILDER_BUILD_OR_THROW_HANDLE =
-      InternalMethodHandles.findVirtualOrDie(
-          ImmutableMap.Builder.class, "buildOrThrow", methodType(ImmutableMap.class));
+      findVirtualOrDie(ImmutableMap.Builder.class, "buildOrThrow", methodType(ImmutableMap.class));
 
   private InternalMethodHandles() {}
 }

@@ -17,6 +17,7 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.invoke.MethodType.methodType;
 import static org.junit.Assert.assertThrows;
@@ -36,7 +37,6 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -262,16 +262,19 @@ public final class InternalMethodHandlesTest {
 
   @Test
   public void buildImmutableSetFactory_manyMaintainsOrder() throws Throwable {
-    MethodHandle handle =
-        InternalMethodHandles.buildImmutableSetFactory(
-            ImmutableList.of(
-                InternalMethodHandles.constantElementFactoryGetHandle("a"),
-                InternalMethodHandles.constantElementFactoryGetHandle("b"),
-                InternalMethodHandles.constantElementFactoryGetHandle("c")));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
-    assertThat((ImmutableSet) handle.invoke(null))
-        .containsExactlyElementsIn(ImmutableSet.of("a", "b", "c"))
-        .inOrder();
+    // check through the MAX_BINDABLE_ARITY
+    for (int size = 2; size < 256; size++) {
+      MethodHandle handle =
+          InternalMethodHandles.buildImmutableSetFactory(
+              IntStream.range(0, size)
+                  .mapToObj(i -> InternalMethodHandles.constantElementFactoryGetHandle("a" + i))
+                  .collect(toImmutableList()));
+      assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
+      assertThat((ImmutableSet) handle.invoke(null))
+          .containsExactlyElementsIn(
+              IntStream.range(0, size).mapToObj(i -> "a" + i).collect(toImmutableList()))
+          .inOrder();
+    }
   }
 
   @Test
@@ -293,14 +296,21 @@ public final class InternalMethodHandlesTest {
 
   @Test
   public void buildImmutableMap_manyMaintainsOrder() throws Throwable {
-    MethodHandle handle =
-        InternalMethodHandles.buildImmutableMapFactory(
-            ImmutableList.of(
-                Map.entry("a", InternalMethodHandles.constantElementFactoryGetHandle("a")),
-                Map.entry("b", InternalMethodHandles.constantElementFactoryGetHandle("b")),
-                Map.entry("c", InternalMethodHandles.constantElementFactoryGetHandle("c"))));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
-    assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of("a", "a", "b", "b", "c", "c"));
+    // check through the MAX_BINDABLE_ARITY
+    for (int size = 2; size < 256; size++) {
+      var entries =
+          IntStream.range(0, size)
+              .mapToObj(
+                  i ->
+                      Map.entry(
+                          "a" + i, InternalMethodHandles.constantElementFactoryGetHandle("a" + i)))
+              .collect(toImmutableList());
+      MethodHandle handle = InternalMethodHandles.buildImmutableMapFactory(entries);
+      assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
+      var expected =
+          IntStream.range(0, size).boxed().collect(toImmutableMap(i -> "a" + i, i -> "a" + i));
+      assertThat(handle.invoke(null)).isEqualTo(expected);
+    }
   }
 
   @Test
