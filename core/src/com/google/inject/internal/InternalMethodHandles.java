@@ -94,16 +94,47 @@ public final class InternalMethodHandles {
    * A handle for {@link Method#invoke}, useful when we can neither use a fastclass or direct method
    * handle.
    */
-  static final MethodHandle METHOD_INVOKE_HANDLE =
+  private static final MethodHandle METHOD_INVOKE_HANDLE =
       findVirtualOrDie(
           Method.class, "invoke", methodType(Object.class, Object.class, Object[].class));
+
+  /**
+   * Returns a handle that calls {@link Method#invoke(Object, Object...)} the given method with the
+   * signature {@code (Object, Object[])->Object}.
+   *
+   * <p>InvocationTargetExceptions are handled and rethrown as Throwable.
+   */
+  static MethodHandle invokeHandle(Method m) {
+    var rethrow =
+        MethodHandles.filterReturnValue(
+            INVOCATION_TARGET_EXCEPTION_GET_CAUSE,
+            MethodHandles.throwException(Object.class, Throwable.class));
+    return MethodHandles.catchException(
+        METHOD_INVOKE_HANDLE.bindTo(m), InvocationTargetException.class, rethrow);
+  }
+
+  private static final MethodHandle INVOCATION_TARGET_EXCEPTION_GET_CAUSE =
+      findVirtualOrDie(InvocationTargetException.class, "getCause", methodType(Throwable.class));
 
   /**
    * A handle for {@link Method#invoke}, useful when we can neither use a fastclass or direct method
    * handle.
    */
-  static final MethodHandle CONSTRUCTOR_NEWINSTANCE_HANDLE =
+  private static final MethodHandle CONSTRUCTOR_NEWINSTANCE_HANDLE =
       findVirtualOrDie(Constructor.class, "newInstance", methodType(Object.class, Object[].class));
+
+  /**
+   * Returns a handle that invokes the given method with the signature (Object[])->Object.
+   * 
+   * <p>InvocationTargetExceptions are handled and rethrown as Throwable.
+   */
+  static MethodHandle newInstanceHandle(Constructor<?> c) {
+    var rethrow =
+        MethodHandles.filterReturnValue(
+            INVOCATION_TARGET_EXCEPTION_GET_CAUSE,
+            MethodHandles.throwException(Object.class, Throwable.class));
+    return MethodHandles.catchException(CONSTRUCTOR_NEWINSTANCE_HANDLE.bindTo(c), InvocationTargetException.class, rethrow);
+  }
 
   /**
    * The maximum arity of a method handle that can be bound.
@@ -791,7 +822,7 @@ public final class InternalMethodHandles {
   }
 
   /** Catch InvocationTargetException and rethrow the cause. */
-  static MethodHandle catchInvocationTargetExceptionAndRethrowCause(MethodHandle handle) {
+  private static MethodHandle catchInvocationTargetExceptionAndRethrowCause(MethodHandle handle) {
     return MethodHandles.catchException(
         handle,
         InvocationTargetException.class,

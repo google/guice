@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.InternalMethodHandles.CONSTRUCTOR_NEWINSTANCE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -166,7 +165,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
       // See comments in ProviderMethod on how this rarely happens and why it happens
       // (Object[])->Object
-      var handle = CONSTRUCTOR_NEWINSTANCE_HANDLE.bindTo(constructor);
+      var handle = InternalMethodHandles.newInstanceHandle(constructor);
       // Catch here so we don't catch errors from our parameters
       handle = InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
 

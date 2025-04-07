@@ -17,11 +17,9 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
-import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static java.lang.invoke.MethodType.methodType;
 
-import com.google.inject.internal.UniqueAnnotations.Internal;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -186,8 +184,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
         // See comments in ProviderMethod on why we use reflection here and how rarely this happens.
         // bind to the `Method` object
         // (Object, Object[])->Object
-        var handle = METHOD_INVOKE_HANDLE.bindTo(method);
-        handle = InternalMethodHandles.catchInvocationTargetExceptionAndRethrowCause(handle);
+        var handle = InternalMethodHandles.invokeHandle(method);
         handle = InternalMethodHandles.dropReturn(handle); // we never care about return values.
         handle = InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(handle, injectionPoint);
         // (Object, InternalContext)->Object

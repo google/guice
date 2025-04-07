@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
-import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -394,7 +393,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       // goes through a JVM native method... le sigh...
       // bind to the `Method` object
       // (Object, Object[]) -> Object
-      var handle = METHOD_INVOKE_HANDLE.bindTo(method);
+      var handle = InternalMethodHandles.invokeHandle(method);
       // insert the instance
       // (Object[]) -> Object
       handle = MethodHandles.insertArguments(handle, 0, instance);
@@ -403,9 +402,6 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       handle =
           MethodHandles.filterArguments(
               handle, 0, InternalMethodHandles.buildObjectArrayFactory(parameters));
-      // MethodHandles expect the root Throwable to be thrown directly, unpack and rethrow the
-      // cause instead of complicating the normal flow.
-      handle = InternalMethodHandles.catchInvocationTargetExceptionAndRethrowCause(handle);
       return handle;
     }
   }
