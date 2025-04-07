@@ -136,6 +136,8 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
               .asType(methodType(Object.class, Object.class, Object[].class));
       // (Object[])->Object
       handle = MethodHandles.insertArguments(handle, 0, (Object) null); // no receiver type.
+      // catch here so we don't catch errors from our parameters
+      handle = InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
       // (InternalContext)->Object
       handle =
           MethodHandles.filterArguments(
@@ -165,6 +167,9 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
       // See comments in ProviderMethod on how this rarely happens and why it happens
       // (Object[])->Object
       var handle = CONSTRUCTOR_NEWINSTANCE_HANDLE.bindTo(constructor);
+      // Catch here so we don't catch errors from our parameters
+      handle = InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
+
       // (InternalContext)->Object
       handle =
           MethodHandles.filterArguments(
@@ -201,7 +206,9 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
           IntStream.range(0, parameterHandles.length)
               .mapToObj(i -> castReturnTo(parameterHandles[i], type.parameterType(i)))
               .toArray(MethodHandle[]::new);
-      var handle = MethodHandles.filterArguments(target, 0, typedHandles);
+      // catch errors from the constructor
+      var handle =  InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(target, injectionPoint);
+      handle = MethodHandles.filterArguments(handle, 0, typedHandles);
       handle = castReturnToObject(handle); // satisfy the signature of the factory type.
       return MethodHandles.permuteArguments(
           handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[typedHandles.length]);

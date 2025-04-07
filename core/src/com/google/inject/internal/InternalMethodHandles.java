@@ -582,11 +582,11 @@ public final class InternalMethodHandles {
    * try {
    *   delegate(...);
    * } catch (Throwable re) {
-   *   throw InternalProvisionException.errorInProvider(re).addSource(source);
+   *   throw InternalProvisionException.errorInjectingMethod(re).addSource(source);
    * }
    * }</pre>
    */
-  static MethodHandle catchErrorInMethodAndRethrowWithSource(MethodHandle delegate, Object source) {
+  static MethodHandle catchErrorInMethodAndRethrowWithSource(MethodHandle delegate, InjectionPoint source) {
     checkArgument(
         delegate.type().returnType().equals(void.class),
         "MethodHandle must return void: %s",
@@ -602,15 +602,11 @@ public final class InternalMethodHandles {
       findStaticOrDie(
           InternalMethodHandles.class,
           "doCatchErrorInMethodAndRethrowWithSource",
-          methodType(void.class, Throwable.class, Object.class));
+          methodType(void.class, Throwable.class, InjectionPoint.class));
 
   @Keep
-  private static void doCatchErrorInMethodAndRethrowWithSource(Throwable re, Object source)
+  private static void doCatchErrorInMethodAndRethrowWithSource(Throwable re, InjectionPoint source)
       throws InternalProvisionException {
-    if (re instanceof InternalProvisionException) {
-      // This error is from a dependency, just let it propagate
-      throw ((InternalProvisionException) re);
-    }
     throw InternalProvisionException.errorInjectingMethod(re).addSource(source);
   }
 
@@ -621,15 +617,18 @@ public final class InternalMethodHandles {
    * try {
    *   return delegate(...);
    * } catch (Throwable re) {
-   *   throw InternalProvisionException.errorInProvider(re).addSource(source);
+   *   throw InternalProvisionException.errorInjectingConstructor(re).addSource(source);
    * }
    * }</pre>
+   * 
+   * <p>This can accept any MethodHandle but the return type must be Object.
    */
   static MethodHandle catchErrorInConstructorAndRethrowWithSource(
       MethodHandle delegate, InjectionPoint source) {
     var rethrow =
         MethodHandles.insertArguments(
             CATCH_ERROR_IN_CONSTRUCTOR_AND_RETHROW_WITH_SOURCE_HANDLE, 1, source);
+    rethrow = castReturnTo(rethrow, delegate.type().returnType());
 
     return MethodHandles.catchException(delegate, Throwable.class, rethrow);
   }
@@ -643,10 +642,6 @@ public final class InternalMethodHandles {
   @Keep
   private static Object doCatchErrorInConstructorAndRethrowWithSource(
       Throwable re, InjectionPoint source) throws InternalProvisionException {
-    if (re instanceof InternalProvisionException) {
-      // This error is from a dependency, just let it propagate
-      throw ((InternalProvisionException) re);
-    }
     throw InternalProvisionException.errorInjectingConstructor(re).addSource(source);
   }
 
@@ -795,6 +790,7 @@ public final class InternalMethodHandles {
     return result == null;
   }
 
+  /** Catch InvocationTargetException and rethrow the cause. */
   static MethodHandle catchInvocationTargetExceptionAndRethrowCause(MethodHandle handle) {
     return MethodHandles.catchException(
         handle,

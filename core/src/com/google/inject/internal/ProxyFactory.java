@@ -195,6 +195,8 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
               .asType(methodType(Object.class, Object.class, Object[].class));
       // (Object[])->Object
       handle = MethodHandles.insertArguments(handle, 0, (Object) callbacks);
+      // catch here so we don't catch errors from our parameters
+      handle = InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
       // (InternalContext)->Object
       handle =
           MethodHandles.filterArguments(

@@ -127,9 +127,6 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
       handle = InternalMethodHandles.finishConstruction(handle, circularFactoryId);
     }
 
-    handle =
-        InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(
-            handle, constructionProxy.getInjectionPoint());
     if (membersInjector != null) {
       // If we called finishConstructionAndSetReference, we need to clear the reference here.
       handle = InternalMethodHandles.clearReference(handle, circularFactoryId);

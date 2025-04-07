@@ -21,6 +21,7 @@ import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HAN
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static java.lang.invoke.MethodType.methodType;
 
+import com.google.inject.internal.UniqueAnnotations.Internal;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -81,7 +82,9 @@ final class SingleMethodInjector implements SingleMemberInjector {
           @Override
           public MethodHandle getInjectHandle(
               LinkageContext linkageContext, MethodHandle[] parameterHandles) {
-            var methodType = finalMethodHandle.type();
+            // Catch and propagate exceptions from the method directly.
+            var handle = InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(finalMethodHandle, injectionPoint);
+            var methodType = handle.type();
             // Cast each parameterHandle to the type of the parameter it is bound to.
             // This addresses generics, unboxing, and other tiny type differences that Java usually
             // handles for us.
@@ -93,9 +96,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
             // The signature is now:
             // (Object, InternalContext,InternalContext,InternalContext,InternalContext)-R
             // With one internalContext per parameter.
-            var handle = MethodHandles.filterArguments(finalMethodHandle, 1, parameterHandles);
-            // We never care about return values from injected methods.
-            handle = InternalMethodHandles.dropReturn(handle);
+            handle = MethodHandles.filterArguments(handle, 1, parameterHandles);
             // Cast the receiver to Object.
             handle = handle.asType(handle.type().changeParameterType(0, Object.class));
             // Merge all the internalcontext parameters, since all the parameters should share it.
@@ -119,13 +120,19 @@ final class SingleMethodInjector implements SingleMemberInjector {
           // (Object receiver, Object[]) -> void
           MethodHandle fastMethodHandle;
           if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
-              var handle = BIFUNCTION_APPLY_HANDLE
-                      .bindTo(fastMethod)
-                      // Cast the first parameter to `Object[]`
-                      .asType(methodType(Object.class, Object[].class, Object.class));
-              handle = InternalMethodHandles.dropReturn(handle);
-              handle = MethodHandles.permuteArguments(handle, methodType(void.class, Object.class, InternalContext.class), new int[]{1,0});
-              fastMethodHandle = handle;
+            var handle =
+                BIFUNCTION_APPLY_HANDLE
+                    .bindTo(fastMethod)
+                    // Cast the first parameter to `Object[]`
+                    .asType(methodType(Object.class, Object[].class, Object.class));
+            handle = InternalMethodHandles.dropReturn(handle);
+            // Swap so the receiver is first
+            handle =
+                MethodHandles.permuteArguments(
+                    handle,
+                    methodType(void.class, Object.class, InternalContext.class),
+                    new int[] {1, 0});
+            fastMethodHandle = handle;
           } else {
             fastMethodHandle = null;
           }
@@ -147,10 +154,11 @@ final class SingleMethodInjector implements SingleMemberInjector {
               // The signature is now:
               // (InternalContext, Object reciever)-R
               var handle =
+                  InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(
+                      fastMethodHandle, injectionPoint);
+              handle =
                   MethodHandles.filterArguments(
-                      fastMethodHandle,
-                      1,
-                      InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
+                      handle, 1, InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
               return handle;
             }
           };
@@ -179,12 +187,14 @@ final class SingleMethodInjector implements SingleMemberInjector {
         // bind to the `Method` object
         // (Object, Object[])->Object
         var handle = METHOD_INVOKE_HANDLE.bindTo(method);
+        handle = InternalMethodHandles.catchInvocationTargetExceptionAndRethrowCause(handle);
+        handle = InternalMethodHandles.dropReturn(handle); // we never care about return values.
+        handle = InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(handle, injectionPoint);
         // (Object, InternalContext)->Object
         handle =
             MethodHandles.filterArguments(
                 handle, 1, InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
         // (Object, InternalContext)->void
-        handle = InternalMethodHandles.dropReturn(handle); // we never care about return values.
         return handle;
       }
     };
@@ -213,10 +223,6 @@ final class SingleMethodInjector implements SingleMemberInjector {
   public MethodHandle getInjectHandle(LinkageContext linkageContext) {
     MethodHandle[] parameterInjectors =
         SingleParameterInjector.getAllHandles(linkageContext, this.parameterInjectors);
-        // ()
-    var methodHandle = methodInvoker.getInjectHandle(linkageContext, parameterInjectors);
-    methodHandle =
-        InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(methodHandle, injectionPoint);
-    return methodHandle;
+    return methodInvoker.getInjectHandle(linkageContext, parameterInjectors);
   }
 }
