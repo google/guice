@@ -21,13 +21,4 @@ interface ClassDefiner {
 
   /** Defines a new class relative to the host. */
   Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception;
-
-  /**
-   * Defines a new class relative to the host. This class should be able to be independently
-   * collected and need not be accessible by name.
-   *
-   * @param lifetimeOwner The object to whose lifetime the new class should be tied.
-   */
-  Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode)
-      throws Exception;
 }

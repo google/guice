@@ -52,7 +52,6 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -404,9 +403,9 @@ final class InjectorImpl implements Injector, Lookups {
         }
 
         @Override
-        public MethodHandle getHandle(
-            LinkageContext context, Dependency<?> dependency, boolean linked) {
-          return InternalMethodHandles.constantFactoryGetHandle(providedBinding.getProvider());
+        MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+          return makeCachable(
+              InternalMethodHandles.constantFactoryGetHandle(providedBinding.getProvider()));
         }
       };
     }

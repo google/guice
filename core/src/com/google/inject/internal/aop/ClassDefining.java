@@ -44,18 +44,6 @@ public final class ClassDefining {
     return ClassDefinerHolder.INSTANCE.define(hostClass, bytecode);
   }
 
-  /**
-   * Defines a new class relative to the host.
-   *
-   * <p>This class should be able to be independently collected and need not be accessible by name.
-   *
-   * @param lifetimeOwner The object to whose lifetime the new class should be tied.
-   */
-  public static Class<?> defineCollectable(
-      Object lifetimeOwner, Class<?> hostClass, byte[] bytecode) throws Exception {
-    return ClassDefinerHolder.INSTANCE.defineCollectable(lifetimeOwner, hostClass, bytecode);
-  }
-
   /** Returns true if the current class definer allows access to package-private members. */
   public static boolean hasPackageAccess() {
     return ClassDefinerHolder.IS_UNSAFE;
@@ -83,21 +71,10 @@ public final class ClassDefining {
       return new ChildClassDefiner(); // second choice unless forbidden
     } else {
       logger.warning(CLASS_DEFINING_UNSUPPORTED);
-      return UnsupportedClassDefiner.INSTANCE;
-    }
-  }
-
-  private static final class UnsupportedClassDefiner implements ClassDefiner {
-    private static final UnsupportedClassDefiner INSTANCE = new UnsupportedClassDefiner();
-
-    @Override
-    public Class<?> define(Class<?> hostClass, byte[] bytecode) {
-      throw new UnsupportedOperationException("Cannot define class, " + CLASS_DEFINING_UNSUPPORTED);
-    }
-
-    @Override
-    public Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode) {
-      throw new UnsupportedOperationException("Cannot define class, " + CLASS_DEFINING_UNSUPPORTED);
+      return (host, bytes) -> {
+        throw new UnsupportedOperationException(
+            "Cannot define class, " + CLASS_DEFINING_UNSUPPORTED);
+      };
     }
   }
 }

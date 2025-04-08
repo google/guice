@@ -363,8 +363,10 @@ public class BytecodeGenTest {
   // This tests for a situation where an osgi bundle contains a different version of guice.
   @Test
   public void testFastClassWithDifferentVersionsOfGuice() throws Throwable {
-    // Test relies on package access which CHILD loading doesn't have
-    if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD) {
+    // Test relies on package access which CHILD loading doesn't have and the methodhandle path
+    // doesn't use fastclasses
+    if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD
+        || InternalFlags.getUseExperimentalMethodHandlesOption()) {
       return;
     }
     Injector injector = Guice.createInjector();

@@ -20,12 +20,11 @@ import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
-import java.lang.invoke.MethodHandle;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-final class InitializableFactory<T> implements InternalFactory<T> {
+final class InitializableFactory<T> extends InternalFactory<T> {
 
   private final Initializable<T> initializable;
   // Cache the values here so we can optimize the behavior of Provider instances.
@@ -47,8 +46,8 @@ final class InitializableFactory<T> implements InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    return InternalMethodHandles.initializableFactoryGetHandle(initializable);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachable(InternalMethodHandles.initializableFactoryGetHandle(initializable));
   }
 
   @Override

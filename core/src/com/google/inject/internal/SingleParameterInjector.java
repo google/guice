@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.inject.spi.Dependency;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 
 /** Resolves a single parameter, to be used in a constructor or method invocation. */
 final class SingleParameterInjector<T> {
@@ -27,14 +28,11 @@ final class SingleParameterInjector<T> {
 
   private final Dependency<T> dependency;
 
-  private final Object source;
-
   private final InternalFactory<? extends T> factory;
   @LazyInit private MethodHandle handle;
 
   SingleParameterInjector(Dependency<T> dependency, BindingImpl<? extends T> binding) {
     this.dependency = dependency;
-    this.source = binding.getSource();
     this.factory = binding.getInternalFactory();
   }
 
@@ -47,13 +45,19 @@ final class SingleParameterInjector<T> {
     }
   }
 
-  /** Returns a method handle for the injection. */
+  /**
+   * Returns a method handle for the injection.
+   *
+   * <p>The returned handle has the type `(InternalContext)->Object`
+   */
   MethodHandle getInjectHandle(LinkageContext context) {
     var handle = this.handle;
     if (handle == null) {
       handle =
           InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-              factory.getHandle(context, dependency, /* linked= */ false), dependency);
+              MethodHandles.insertArguments(
+                  factory.getHandle(context, /* linked= */ false), 1, dependency),
+              dependency);
       this.handle = handle;
     }
     return handle;

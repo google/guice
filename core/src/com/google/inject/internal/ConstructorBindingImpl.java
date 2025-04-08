@@ -279,7 +279,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     return Objects.hashCode(getKey(), getScoping(), constructorInjectionPoint);
   }
 
-  private static class Factory<T> implements InternalFactory<T> {
+  private static class Factory<T> extends InternalFactory<T> {
     private final boolean failIfNotLinked;
     private final Key<?> key;
     private ConstructorInjector<T> constructorInjector;
@@ -309,20 +309,20 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     }
 
     @Override
-    public MethodHandle getHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
       if (!linked && failIfNotLinked) {
         var throwHandle =
             MethodHandles.foldArguments(
-                MethodHandles.throwException(
-                    dependency.getKey().getTypeLiteral().getRawType(),
-                    InternalProvisionException.class),
+                MethodHandles.throwException(Object.class, InternalProvisionException.class),
                 MethodHandles.insertArguments(JIT_DISABLED_HANDLE, 0, key));
-        return MethodHandles.dropArguments(throwHandle, 0, InternalContext.class);
+        return makeCachableOnLinkedSetting(
+            MethodHandles.dropArguments(throwHandle, 0, InternalContext.class, Dependency.class));
       }
-      return context.makeHandle(
-          this,
-          () -> constructorInjector.getConstructHandle(context, dependency, provisionCallback));
+      var handle = constructorInjector.getConstructHandle(context, provisionCallback);
+      if (failIfNotLinked) {
+        return makeCachableOnLinkedSetting(handle);
+      }
+      return makeCachable(handle);
     }
 
     private static final MethodHandle JIT_DISABLED_HANDLE =

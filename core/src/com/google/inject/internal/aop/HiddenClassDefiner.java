@@ -88,13 +88,6 @@ final class HiddenClassDefiner implements ClassDefiner {
     return definedLookup.lookupClass();
   }
 
-  @Override
-  public Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode)
-      throws Exception {
-    // These are always collectable
-    return define(hostClass, bytecode);
-  }
-
   /** Creates {@link MethodHandles.Lookup.ClassOption} array with the named options. */
   @SuppressWarnings("unchecked")
   private static Object classOptions(String... options) throws ClassNotFoundException {

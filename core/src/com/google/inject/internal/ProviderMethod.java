@@ -16,8 +16,8 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.InternalMethodHandles.BIFUNCTION_APPLY_HANDLE;
-import static com.google.inject.internal.InternalMethodHandles.METHOD_INVOKE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -236,32 +236,36 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       throws IllegalAccessException, InvocationTargetException;
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    return context.makeHandle(
-        this,
-        () -> {
-          MethodHandle handle = super.getHandle(context, dependency, linked);
-          // Handle circular proxies.
-          return InternalMethodHandles.tryStartConstruction(handle, dependency, circularFactoryId);
-        });
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    MethodHandleResult result = super.makeHandle(context, linked);
+    checkState(result.cachability == MethodHandleResult.Cachability.ALWAYS);
+    // Handle circular proxies.
+    return makeCachable(
+        InternalMethodHandles.tryStartConstruction(result.methodHandle, circularFactoryId));
   }
 
   /** Creates a method handle that constructs the object to be injected. */
   @Override
-  protected final MethodHandle doGetHandle(
-      LinkageContext context, Dependency<?> dependency, boolean linked) {
+  protected final MethodHandle doGetHandle(LinkageContext context) {
     MethodHandle handle =
         doProvisionHandle(SingleParameterInjector.getAllHandles(context, parameterInjectors));
-    handle = castReturnToObject(handle);
-    handle = InternalMethodHandles.nullCheckResult(handle, getMethod(), dependency);
+    InternalMethodHandles.checkHasElementFactoryType(handle);
+    // add a dependency parameter so `nullCheckResult` can use it.
+    handle = MethodHandles.dropArguments(handle, 1, Dependency.class);
+    handle = InternalMethodHandles.nullCheckResult(handle, getMethod());
     // catch everything else and rethrow as an error in provider.
-    handle = InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(handle, getSource());
+    handle =
+        InternalMethodHandles.catchThrowableInProviderAndRethrowWithSource(handle, getSource());
     handle = InternalMethodHandles.finishConstruction(handle, circularFactoryId);
 
     return handle;
   }
 
-  /** Extension point for our subclasses to implement the provisioning strategy. */
+  /**
+   * Extension point for our subclasses to implement the provisioning strategy.
+   *
+   * <p>Should return a handle with the signature {@code (InternalContext) -> Object}
+   */
   abstract MethodHandle doProvisionHandle(MethodHandle[] parameters);
 
   @Override
@@ -345,24 +349,16 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
     MethodHandle doProvisionHandle(MethodHandle[] parameters) {
       // We can hit this case if the method is package private and we are using bytecode gen but
       // a security manager is installed that blocks access to `setAccessible`.
-      // (...Object) -> Object
+      // (Object[]) -> Object
       var apply =
           MethodHandles.insertArguments(BIFUNCTION_APPLY_HANDLE.bindTo(fastMethod), 0, instance)
               // Cast the parameter type to be an Object array
-              .asType(methodType(Object.class, Object[].class))
-              // Have it collect N arrguments into an array of type Object[]
-              // This is safe because the number of parameters is the same as the number of
-              // parameters to the method which should never exceed the maximum number of
-              // method parameters.
-              .asCollector(Object[].class, parameters.length);
+              .asType(methodType(Object.class, Object[].class));
 
-      // The signature is now (...InternaleContext)->Object, but we want to pass the same context
-      // to all the parameters.
-      apply = MethodHandles.filterArguments(apply, 0, parameters);
-      // Merge all the internalcontext parameters into a single object factory.
+      // (InternalContext) -> Object
       apply =
-          MethodHandles.permuteArguments(
-              apply, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
+          MethodHandles.filterArguments(
+              apply, 0, InternalMethodHandles.buildObjectArrayFactory(parameters));
       return apply;
     }
   }
@@ -400,19 +396,17 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       // maximum number of parameters but java reflection can? And yes it is true that java
       // reflection is based on MethodHandles, but it supports a fallback for exactly this case that
       // goes through a JVM native method... le sigh...
-
       // bind to the `Method` object
-      var handle = METHOD_INVOKE_HANDLE.bindTo(method);
+      // (Object, Object[]) -> Object
+      var handle = InternalMethodHandles.invokeHandle(method);
       // insert the instance
+      // (Object[]) -> Object
       handle = MethodHandles.insertArguments(handle, 0, instance);
-      // collect the parameters into an array of type Object[]
-      handle = handle.asCollector(Object[].class, parameters.length);
-      // supply all parameters
-      handle = MethodHandles.filterArguments(handle, 0, parameters);
-      // Merge all the parameters into a single object factory method.
+      // Pass the parameters
+      // (InternalContext)->Object
       handle =
-          MethodHandles.permuteArguments(
-              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
+          MethodHandles.filterArguments(
+              handle, 0, InternalMethodHandles.buildObjectArrayFactory(parameters));
       return handle;
     }
   }
@@ -457,10 +451,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       // the method.
       handle =
           MethodHandles.permuteArguments(
-              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameters.length]);
-      // MethodHandles expect the root Throwable to be thrown directly, unpack and rethrow the
-      // cause instead of complicating the normal flow.
-      handle = InternalMethodHandles.catchInvocationTargetExceptionAndRethrowCause(handle);
+              handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[parameters.length]);
       return handle;
     }
 

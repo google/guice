@@ -290,8 +290,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext context) {
       if (injectors == null) {
         return InternalMethodHandles.constantFactoryGetHandle(ImmutableSet.of());
       }
@@ -310,33 +309,19 @@ public final class RealMultibinder<T> implements Module {
       if (permitDuplicates || elementHandles.size() == 1) {
         // we just want to construct an ImmutableSet.Builder, and add everything to it.
         // This generates exactly the code a human would write.
-        return InternalMethodHandles.buildImmutableSetFactory(elementHandles);
+        return MethodHandles.dropArguments(
+            InternalMethodHandles.buildImmutableSetFactory(elementHandles), 1, Dependency.class);
       } else {
         // Duplicates are not permitted, so we need to check for duplicates by constructing all
         // elements and then checking the size of the set.
-        // We need to construct an array anyway for the error cases so just do it here.
-        // NOTE: we cannot use `MethodHandle.asCollector` since that limits us to 255 elements.
-        // So instead we
         // ()-> Object[]
-        var arrayCtor =
-            MethodHandles.insertArguments(
-                MethodHandles.arrayConstructor(Object[].class), 0, elementHandles.size());
-        // (Object[] elements, InternalContext ctx)->void
-        var populateArray =
-            populateArray(MethodHandles.arrayElementSetter(Object[].class), 0, elementHandles);
-        // (Object[] elements, InternalContext ctx)->Object[]
-        populateArray =
-            MethodHandles.foldArguments(
-                MethodHandles.dropArguments(
-                    MethodHandles.identity(Object[].class), 1, InternalContext.class),
-                populateArray);
-        // (InternalContext ctx)->Object[]
-        populateArray = MethodHandles.foldArguments(populateArray, arrayCtor);
+        var elements = InternalMethodHandles.buildObjectArrayFactory(elementHandles);
+        // (Object[]) -> ImmutableSet<T>
         var collector = MAKE_IMMUTABLE_SET_AND_CHECK_DUPLICATES_HANDLE.bindTo(this);
         // (InternalContext ctx) -> ImmutableSet<T>
-        collector = MethodHandles.filterArguments(collector, 0, populateArray);
-
-        return castReturnToObject(collector);
+        collector = MethodHandles.filterArguments(collector, 0, elements);
+        // (InternalContext, Dependency) -> Object
+        return MethodHandles.dropArguments(castReturnToObject(collector), 1, Dependency.class);
       }
     }
 
@@ -518,8 +503,7 @@ public final class RealMultibinder<T> implements Module {
     }
 
     @Override
-    protected MethodHandle doGetHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    protected MethodHandle doGetHandle(LinkageContext contex) {
       return InternalMethodHandles.constantFactoryGetHandle(providers);
     }
   }

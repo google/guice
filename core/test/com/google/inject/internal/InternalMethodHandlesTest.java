@@ -16,8 +16,10 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.inject.name.Names.named;
+import static java.lang.invoke.MethodType.methodType;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -37,9 +39,11 @@ import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
 
 @RunWith(JUnit4.class)
 public final class InternalMethodHandlesTest {
@@ -53,7 +57,7 @@ public final class InternalMethodHandlesTest {
             factory, injector, Dependency.get(Key.get(String.class)));
 
     assertThat(provider.get()).isEqualTo("Hello World");
-    assertThat(provider).isInstanceOf(InternalMethodHandles.GeneratedProvider.class);
+    assertThat(provider).isInstanceOf(InternalMethodHandles.MethodHandleProvider.class);
   }
 
   @Test
@@ -69,22 +73,20 @@ public final class InternalMethodHandlesTest {
           }
 
           @Override
-          @SuppressWarnings("ReferenceEquality")
-          public MethodHandle getHandle(
-              LinkageContext context, Dependency<?> dependency, boolean linked) {
+          MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
 
-            // Identity is intentional here.
-            checkArgument(dep == dependency);
             checkArgument(!linked);
-            return MethodHandles.dropArguments(
-                MethodHandles.insertArguments(
-                    MethodHandles.throwException(
-                        dependency.getKey().getTypeLiteral().getRawType(),
-                        InternalProvisionException.class),
+            return makeCachable(
+                MethodHandles.dropArguments(
+                    MethodHandles.insertArguments(
+                        MethodHandles.throwException(
+                            Object.class, InternalProvisionException.class),
+                        0,
+                        InternalProvisionException.create(
+                            ErrorId.OPTIONAL_CONSTRUCTOR, "Hello World")),
                     0,
-                    InternalProvisionException.create(ErrorId.OPTIONAL_CONSTRUCTOR, "Hello World")),
-                0,
-                InternalContext.class);
+                    InternalContext.class,
+                    Dependency.class));
           }
         };
     Provider<String> provider = InternalMethodHandles.makeProvider(factory, injector, dep);
@@ -122,6 +124,11 @@ public final class InternalMethodHandlesTest {
       public String get(InternalContext context, Dependency<?> dependency, boolean linked) {
         throw new AssertionError();
       }
+
+      @Override
+      MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+        throw new AssertionError();
+      }
     };
   }
 
@@ -137,37 +144,28 @@ public final class InternalMethodHandlesTest {
           }
 
           @Override
-          public MethodHandle getHandle(
-              LinkageContext context, Dependency<?> dependency, boolean linked) {
-            return InternalMethodHandles.constantFactoryGetHandle(dependency.toString());
+          MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+            return makeCachable(InternalMethodHandles.constantFactoryGetHandle("Hello world"));
           }
         };
-    Provider<String> provider =
-        InternalMethodHandles.makeScopedProvider(factory, injector, Key.get(String.class));
+    Provider<String> provider = InternalMethodHandles.makeScopedProvider(factory, injector);
+    assertThat(provider).isInstanceOf(ProviderToInternalFactoryAdapter.class);
 
-    // When no dependency is set, the implementation uses the key from its constructor.
-    assertThat(provider.get()).isEqualTo("Key[type=java.lang.String, annotation=[none]]");
-    try (InternalContext ctx = injector.enterContext()) {
-      var dep = Dependency.get(Key.get(String.class, named("a")));
-      ctx.setDependency(dep);
-      assertThat(provider.get()).isEqualTo(dep.toString());
-
-      dep = Dependency.get(Key.get(String.class, named("b")));
-      ctx.setDependency(dep);
-      assertThat(provider.get()).isEqualTo(dep.toString());
-    }
+    assertThat(provider.get()).isEqualTo("Hello world");
   }
 
   @Test
   public void testConstantFactoryGetHandle() throws Throwable {
     var handle = InternalMethodHandles.constantFactoryGetHandle("Hello World");
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
   }
 
   @Test
   public void testInitialiableFactoryGetHandle() throws Throwable {
     var handle = InternalMethodHandles.initializableFactoryGetHandle(ctx -> "Hello World");
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
   }
 
   @Test
@@ -179,10 +177,12 @@ public final class InternalMethodHandlesTest {
               callCount.incrementAndGet();
               return "Hello World";
             });
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
     assertThat(callCount.get()).isEqualTo(1);
 
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
     assertThat(callCount.get()).isEqualTo(1);
   }
 
@@ -201,19 +201,21 @@ public final class InternalMethodHandlesTest {
     assertThrows(
         InternalProvisionException.class,
         () -> {
-          var unused = (Object) handle.invokeExact((InternalContext) null);
+          var unused = (Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null);
         });
     assertThat(callCount.get()).isEqualTo(1);
 
     assertThrows(
         InternalProvisionException.class,
         () -> {
-          var unused = (Object) handle.invokeExact((InternalContext) null);
+          var unused = (Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null);
         });
     assertThat(callCount.get()).isEqualTo(2);
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
     assertThat(callCount.get()).isEqualTo(3);
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+    assertThat((Object) handle.invokeExact((InternalContext) null, (Dependency<?>) null))
+        .isEqualTo("Hello World");
     assertThat(callCount.get()).isEqualTo(3);
   }
 
@@ -231,25 +233,25 @@ public final class InternalMethodHandlesTest {
                 ImmutableSet.of(InjectionPoint.forConstructorOf(TestClass.class))));
     var handle =
         InternalMethodHandles.nullCheckResult(
-            InternalMethodHandles.constantFactoryGetHandle("Hello World"),
-            "source",
-            nonNullStringDep);
-    assertThat((Object) handle.invokeExact((InternalContext) null)).isEqualTo("Hello World");
+            InternalMethodHandles.constantFactoryGetHandle("Hello World"), "source");
+    assertThat((Object) handle.invokeExact((InternalContext) null, nonNullStringDep))
+        .isEqualTo("Hello World");
     var nullHandle =
         InternalMethodHandles.nullCheckResult(
-            InternalMethodHandles.constantFactoryGetHandle(null), "source", nonNullStringDep);
+            InternalMethodHandles.constantFactoryGetHandle(null), "source");
     var e =
         assertThrows(
             InternalProvisionException.class,
             () -> {
-              var unused = (Object) nullHandle.invokeExact((InternalContext) null);
+              var unused =
+                  (Object) nullHandle.invokeExact((InternalContext) null, nonNullStringDep);
             });
   }
 
   @Test
   public void buildImmutableSetFactory_empty() throws Throwable {
     MethodHandle handle = InternalMethodHandles.buildImmutableSetFactory(ImmutableList.of());
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
     assertThat(handle.invoke(null)).isEqualTo(ImmutableSet.of());
   }
 
@@ -257,29 +259,32 @@ public final class InternalMethodHandlesTest {
   public void buildImmutableSetFactory_singleton() throws Throwable {
     MethodHandle handle =
         InternalMethodHandles.buildImmutableSetFactory(
-            ImmutableList.of(InternalMethodHandles.constantFactoryGetHandle("a")));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
+            ImmutableList.of(InternalMethodHandles.constantElementFactoryGetHandle("a")));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
     assertThat(handle.invoke(null)).isEqualTo(ImmutableSet.of("a"));
   }
 
   @Test
   public void buildImmutableSetFactory_manyMaintainsOrder() throws Throwable {
-    MethodHandle handle =
-        InternalMethodHandles.buildImmutableSetFactory(
-            ImmutableList.of(
-                InternalMethodHandles.constantFactoryGetHandle("a"),
-                InternalMethodHandles.constantFactoryGetHandle("b"),
-                InternalMethodHandles.constantFactoryGetHandle("c")));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
-    assertThat((ImmutableSet) handle.invoke(null))
-        .containsExactlyElementsIn(ImmutableSet.of("a", "b", "c"))
-        .inOrder();
+    // check through the MAX_BINDABLE_ARITY
+    for (int size = 2; size < 256; size++) {
+      MethodHandle handle =
+          InternalMethodHandles.buildImmutableSetFactory(
+              IntStream.range(0, size)
+                  .mapToObj(i -> InternalMethodHandles.constantElementFactoryGetHandle("a" + i))
+                  .collect(toImmutableList()));
+      assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
+      assertThat((ImmutableSet) handle.invoke(null))
+          .containsExactlyElementsIn(
+              IntStream.range(0, size).mapToObj(i -> "a" + i).collect(toImmutableList()))
+          .inOrder();
+    }
   }
 
   @Test
   public void buildImmutableMap_empty() throws Throwable {
     MethodHandle handle = InternalMethodHandles.buildImmutableMapFactory(ImmutableList.of());
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
     assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of());
   }
 
@@ -287,21 +292,29 @@ public final class InternalMethodHandlesTest {
   public void buildImmutableMap_singleton() throws Throwable {
     MethodHandle handle =
         InternalMethodHandles.buildImmutableMapFactory(
-            ImmutableList.of(Map.entry("a", InternalMethodHandles.constantFactoryGetHandle("a"))));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
+            ImmutableList.of(
+                Map.entry("a", InternalMethodHandles.constantElementFactoryGetHandle("a"))));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
     assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of("a", "a"));
   }
 
   @Test
   public void buildImmutableMap_manyMaintainsOrder() throws Throwable {
-    MethodHandle handle =
-        InternalMethodHandles.buildImmutableMapFactory(
-            ImmutableList.of(
-                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle("a")),
-                Map.entry("b", InternalMethodHandles.constantFactoryGetHandle("b")),
-                Map.entry("c", InternalMethodHandles.constantFactoryGetHandle("c"))));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
-    assertThat(handle.invoke(null)).isEqualTo(ImmutableMap.of("a", "a", "b", "b", "c", "c"));
+    // check through the MAX_BINDABLE_ARITY
+    for (int size = 2; size < 256; size++) {
+      var entries =
+          IntStream.range(0, size)
+              .mapToObj(
+                  i ->
+                      Map.entry(
+                          "a" + i, InternalMethodHandles.constantElementFactoryGetHandle("a" + i)))
+              .collect(toImmutableList());
+      MethodHandle handle = InternalMethodHandles.buildImmutableMapFactory(entries);
+      assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
+      var expected =
+          IntStream.range(0, size).boxed().collect(toImmutableMap(i -> "a" + i, i -> "a" + i));
+      assertThat(handle.invoke(null)).isEqualTo(expected);
+    }
   }
 
   @Test
@@ -309,10 +322,47 @@ public final class InternalMethodHandlesTest {
     MethodHandle handle =
         InternalMethodHandles.buildImmutableMapFactory(
             ImmutableList.of(
-                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle("a")),
-                Map.entry("a", InternalMethodHandles.constantFactoryGetHandle("b"))));
-    assertThat(handle.type()).isEqualTo(InternalMethodHandles.FACTORY_TYPE);
+                Map.entry("a", InternalMethodHandles.constantElementFactoryGetHandle("a")),
+                Map.entry("a", InternalMethodHandles.constantElementFactoryGetHandle("b"))));
+    assertThat(handle.type()).isEqualTo(InternalMethodHandles.ELEMENT_FACTORY_TYPE);
     var e = assertThrows(IllegalArgumentException.class, () -> handle.invoke(null));
     assertThat(e).hasMessageThat().contains("Multiple entries with same key");
+  }
+
+  @Test
+  public void buildObjectArrayFactory_empty() throws Throwable {
+    MethodHandle handle = InternalMethodHandles.buildObjectArrayFactory(ImmutableList.of());
+    assertThat(handle.type()).isEqualTo(methodType(Object[].class, InternalContext.class));
+    assertThat((Object[]) handle.invokeExact((InternalContext) null)).hasLength(0);
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .isSameInstanceAs((Object[]) handle.invokeExact((InternalContext) null));
+  }
+
+  @Test
+  public void buildObjectArrayFactory_small() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildObjectArrayFactory(
+            ImmutableList.of(
+                InternalMethodHandles.constantElementFactoryGetHandle("a"),
+                InternalMethodHandles.constantElementFactoryGetHandle("b")));
+    assertThat(handle.type()).isEqualTo(methodType(Object[].class, InternalContext.class));
+    assertThat(ImmutableList.copyOf((Object[]) handle.invokeExact((InternalContext) null)))
+        .containsExactly("a", "b")
+        .inOrder();
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .isNotSameInstanceAs((Object[]) handle.invokeExact((InternalContext) null));
+  }
+
+  @Test
+  public void buildObjectArrayFactory_large() throws Throwable {
+    MethodHandle handle =
+        InternalMethodHandles.buildObjectArrayFactory(
+            IntStream.range(0, 100_000)
+                .mapToObj(i -> InternalMethodHandles.constantElementFactoryGetHandle("i" + i))
+                .collect(toImmutableList()));
+    assertThat(handle.type()).isEqualTo(methodType(Object[].class, InternalContext.class));
+    assertThat((Object[]) handle.invokeExact((InternalContext) null)).hasLength(100_000);
+    assertThat((Object[]) handle.invokeExact((InternalContext) null))
+        .isNotSameInstanceAs((Object[]) handle.invokeExact((InternalContext) null));
   }
 }

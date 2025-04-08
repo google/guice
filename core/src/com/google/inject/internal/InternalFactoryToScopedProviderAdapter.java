@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.InternalMethodHandles.findVirtualOrDie;
 import static java.lang.invoke.MethodType.methodType;
 
@@ -34,7 +35,7 @@ import java.lang.invoke.MutableCallSite;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
+class InternalFactoryToScopedProviderAdapter<T> extends InternalFactory<T> {
   /** Creates a factory around a scoped provider. */
   static <T> InternalFactoryToScopedProviderAdapter<T> create(
       Scope scopeInstance, Provider<? extends T> provider, Object source) {
@@ -73,30 +74,31 @@ class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
     // Call Provider.get() on the constant provider
     // ()->Object
     var invokeProvider =
         InternalMethodHandles.getProvider(
             MethodHandles.constant(jakarta.inject.Provider.class, provider));
 
+    // Satisfy the signature for the factory protocol.
+    // (InternalContext, Dependency) -> Object
+    invokeProvider =
+        MethodHandles.dropArguments(invokeProvider, 0, InternalContext.class, Dependency.class);
     // null check the result using the dependency.
     // ()->Object
-    invokeProvider = InternalMethodHandles.nullCheckResult(invokeProvider, source, dependency);
+    invokeProvider = InternalMethodHandles.nullCheckResult(invokeProvider, source);
     // Catch any RuntimeException as an InternalProvisionException.
     // ()->Object
     invokeProvider =
-        InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(invokeProvider, source);
-    // (InternalContext) -> Object
-    // Add an InternalContext argument to match the factory protocol.
-    invokeProvider = MethodHandles.dropArguments(invokeProvider, 0, InternalContext.class);
+        InternalMethodHandles.catchRuntimeExceptionInProviderAndRethrowWithSource(
+            invokeProvider, source);
+
     // We need to call 'setDependency' so it is available to scope implementations and scope
     // delegate providers. See comment in `get` method for more details.
     invokeProvider =
-        MethodHandles.foldArguments(
-            invokeProvider,
-            MethodHandles.insertArguments(INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE, 1, dependency));
-    return invokeProvider;
+        MethodHandles.foldArguments(invokeProvider, INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE);
+    return makeCachable(invokeProvider);
   }
 
   private static final MethodHandle INTERNAL_CONTEXT_SET_DEPENDENCY_HANDLE =
@@ -150,24 +152,23 @@ class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
     }
 
     @Override
-    public MethodHandle getHandle(
-        LinkageContext context, Dependency<?> dependency, boolean linked) {
+    MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
       // If it is somehow already initialized, we can return a constant handle.
       Object value = this.value;
       if (value != UNINITIALIZED_VALUE) {
-        return getHandleForConstant(dependency, source, value);
+        return makeCachable(getHandleForConstant(source, value));
       }
       // Otherwise we bind to a callsite that will patch itself once it is initialized.
-      return new SingletonCallSite(super.getHandle(context, dependency, linked), dependency, source)
-          .dynamicInvoker();
+      var result = super.makeHandle(context, linked);
+      checkState(result.cachability == MethodHandleResult.Cachability.ALWAYS);
+      return makeCachable(new SingletonCallSite(result.methodHandle, source).dynamicInvoker());
     }
 
-    private static MethodHandle getHandleForConstant(
-        Dependency<?> dependency, Object source, Object value) {
+    private static MethodHandle getHandleForConstant(Object source, Object value) {
       var handle = InternalMethodHandles.constantFactoryGetHandle(value);
       // Since this is a constant, we only need to null check if it is actually null.
       if (value == null) {
-        handle = InternalMethodHandles.nullCheckResult(handle, source, dependency);
+        handle = InternalMethodHandles.nullCheckResult(handle, source);
       }
       return handle;
     }
@@ -183,33 +184,26 @@ class InternalFactoryToScopedProviderAdapter<T> implements InternalFactory<T> {
           findVirtualOrDie(
               SingletonCallSite.class,
               "boostrapCallSite",
-              methodType(Object.class, InternalContext.class, Object.class));
+              methodType(Object.class, Object.class, InternalContext.class, Dependency.class));
 
-      private final Dependency<?> dependency;
       private final Object source;
 
-      SingletonCallSite(MethodHandle actualGetHandle, Dependency<?> dependency, Object source) {
+      SingletonCallSite(MethodHandle actualGetHandle, Object source) {
         super(actualGetHandle.type());
-        this.dependency = dependency;
         this.source = source;
         // Invoke the 'actual' handle and then pass the result to the `boostrapCallSite` method.
         // This will allow us to eventually 'fold' the result into the callsite.
         // (InternalContext, InternalContext) -> Object
         var invokeBootstrap =
-            MethodHandles.filterArguments(BOOTSTRAP_CALL_MH.bindTo(this), 1, actualGetHandle);
-        // Merge the two internalContext parameters into one.
-        // (InternalContext) -> Object
-        invokeBootstrap =
-            MethodHandles.permuteArguments(
-                invokeBootstrap, InternalMethodHandles.FACTORY_TYPE, new int[2]);
+            MethodHandles.foldArguments(BOOTSTRAP_CALL_MH.bindTo(this), actualGetHandle);
         setTarget(invokeBootstrap);
       }
 
       @Keep
-      Object boostrapCallSite(InternalContext context, Object result) {
-        // Don't cache circular proxies.
+      Object boostrapCallSite(Object result, InternalContext context, Dependency<?> dependency) {
+        // Don't cache circular, proxies.
         if (!context.areCircularProxiesEnabled() || !BytecodeGen.isCircularProxy(result)) {
-          setTarget(getHandleForConstant(dependency, source, result));
+          setTarget(getHandleForConstant(source, result));
           // This ensures that other threads will see the new target.  This isn't strictly necessary
           // since the underlying provider is both ThreadSafe and idempotent, but it should improve
           // performance by giving the JIT and easy optimization opportunity.

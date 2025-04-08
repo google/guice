@@ -193,17 +193,15 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
           InternalMethodHandles.BIFUNCTION_APPLY_HANDLE
               .bindTo(enhancedConstructor)
               .asType(methodType(Object.class, Object.class, Object[].class));
+      // (Object[])->Object
       handle = MethodHandles.insertArguments(handle, 0, (Object) callbacks);
-      // Turn the array parameter into a fixed set of parameters.
-      // This is safe because the number of parameters is the same as the number of parameters to
-      // the constructor which should never exceed the maximum number of method parameters.
-      handle = handle.asCollector(Object[].class, parameterHandles.length);
-      // Pass all the parameters to the constructor.
-      handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
-      // Merge all the internalcontext parameters into a single object factory.
+      // catch here so we don't catch errors from our parameters
       handle =
-          MethodHandles.permuteArguments(
-              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
+          InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
+      // (InternalContext)->Object
+      handle =
+          MethodHandles.filterArguments(
+              handle, 0, InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
       return handle;
     }
 

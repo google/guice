@@ -19,13 +19,12 @@ package com.google.inject.internal;
 import com.google.inject.Key;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.PrivateElements;
-import java.lang.invoke.MethodHandle;
 
 /**
  * This factory exists in a parent injector. When invoked, it retrieves its value from a child
  * injector.
  */
-final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener {
+final class ExposedKeyFactory<T> extends InternalFactory<T> implements CreationListener {
   private final Key<T> key;
   private final Object source;
   private final PrivateElements privateElements;
@@ -66,8 +65,9 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener
   }
 
   @Override
-  public MethodHandle getHandle(LinkageContext context, Dependency<?> dependency, boolean linked) {
-    return InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
-        this.delegate.getHandle(context, dependency, linked), source);
+  MethodHandleResult makeHandle(LinkageContext context, boolean linked) {
+    return makeCachableOnLinkedSetting(
+        InternalMethodHandles.catchInternalProvisionExceptionAndRethrowWithSource(
+            this.delegate.getHandle(context, linked), source));
   }
 }

@@ -35,9 +35,4 @@ final class GeneratedClassDefiner implements ClassDefiner {
   public Class<?> define(Class<?> hostClass, byte[] bytecode) {
     return defineAccess.apply(hostClass.getClassLoader(), bytecode);
   }
-
-  @Override
-  public Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode) {
-    throw new UnsupportedOperationException("Not implemented");
-  }
 }

@@ -20,21 +20,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static java.lang.invoke.MethodType.methodType;
 
-import com.google.inject.Key;
 import com.google.inject.spi.Dependency;
+import jakarta.inject.Provider;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import javax.annotation.Nullable;
-import jakarta.inject.Provider;
 
 /**
  * Base class for InternalFactories that are used by Providers, to handle circular dependencies.
  *
  * @author sameb@google.com (Sam Berlin)
  */
-abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
-  protected static final Dependency<?> PROVIDER_DEPENDENCY =
-      Dependency.get(new Key<jakarta.inject.Provider<?>>() {});
+abstract class ProviderInternalFactory<T> extends InternalFactory<T> {
   protected final Object source;
   private final int circularFactoryId;
 
@@ -74,19 +71,15 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    * callbacks or failure modes. This is the case for constant provider bindings at least.
    */
   protected MethodHandle circularGetHandleImmediate(
-      MethodHandle providerHandle,
-      Dependency<?> dependency,
-      @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
+      MethodHandle providerHandle, @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
 
-    var invokeProvider = provisionHandle(providerHandle, dependency);
+    var invokeProvider = provisionHandle(providerHandle);
 
     // Apply the provision callback if needed
     invokeProvider =
-        InternalMethodHandles.invokeThroughProvisionCallback(
-            invokeProvider, dependency, provisionCallback);
+        InternalMethodHandles.invokeThroughProvisionCallback(invokeProvider, provisionCallback);
     // Start construction and possibly return a proxy.
-    invokeProvider =
-        InternalMethodHandles.tryStartConstruction(invokeProvider, dependency, circularFactoryId);
+    invokeProvider = InternalMethodHandles.tryStartConstruction(invokeProvider, circularFactoryId);
     return invokeProvider;
   }
 
@@ -97,9 +90,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    * it, such that provision listeners get called in the correct order.
    */
   protected MethodHandle circularGetHandle(
-      MethodHandle providerHandle,
-      Dependency<?> dependency,
-      @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
+      MethodHandle providerHandle, @Nullable ProvisionListenerStackCallback<T> provisionCallback) {
     // The combinators below assume this type.
     providerHandle = castReturnTo(providerHandle, jakarta.inject.Provider.class);
     // TODO: lukes - This is annoying, but various tests assert that we invoke the provision
@@ -118,20 +109,20 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
     // and returns a Provider.
     var providerPlaceholder =
         MethodHandles.dropArguments(
-            MethodHandles.identity(jakarta.inject.Provider.class), 0, InternalContext.class);
+            MethodHandles.identity(jakarta.inject.Provider.class),
+            0,
+            InternalContext.class,
+            Dependency.class);
     // (InternalContext, Provider) ->T
-    var invokeProvider =
-        circularGetHandleImmediate(providerPlaceholder, dependency, provisionCallback);
+    var invokeProvider = circularGetHandleImmediate(providerPlaceholder, provisionCallback);
     // To call `fold` we need to permute the arguments so that the provider is the first argument.
     // (Provider, InternalContext) ->T
     invokeProvider =
         MethodHandles.permuteArguments(
             invokeProvider,
             methodType(
-                invokeProvider.type().returnType(),
-                jakarta.inject.Provider.class,
-                InternalContext.class),
-            new int[] {1, 0});
+                Object.class, jakarta.inject.Provider.class, InternalContext.class, Dependency.class),
+            new int[] {1, 2, 0});
     // Basically invoke the `providerHandle` and then pass the provider to `invokeProvider`
     return MethodHandles.foldArguments(invokeProvider, 0, providerHandle);
   }
@@ -141,17 +132,24 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
    * RuntimeException as an InternalProvisionException.
    *
    * <p>Subclasses should override this to add more validation checks.
+   *
+   * <p>Returns a handle with the signature {@code (InternalContext, Dependency) -> Object}
    */
-  protected MethodHandle provisionHandle(MethodHandle providerHandle, Dependency<?> dependency) {
+  protected MethodHandle provisionHandle(MethodHandle providerHandle) {
     // Call Provider.get() and catch any RuntimeException as an InternalProvisionException.
     var invokeProvider =
-        InternalMethodHandles.catchErrorInProviderAndRethrowWithSource(
+        InternalMethodHandles.catchRuntimeExceptionInProviderAndRethrowWithSource(
             InternalMethodHandles.getProvider(providerHandle), source);
     // Wrap in a try..finally.. that calls `finishConstruction` on the context.
     invokeProvider = InternalMethodHandles.finishConstruction(invokeProvider, circularFactoryId);
 
+    // Add a Dependency parameter if it isn't present
+    if (invokeProvider.type().parameterCount() == 1
+        || !invokeProvider.type().parameterType(1).equals(Dependency.class)) {
+      invokeProvider = MethodHandles.dropArguments(invokeProvider, 1, Dependency.class);
+    }
     // null check the result using the dependency.
-    invokeProvider = InternalMethodHandles.nullCheckResult(invokeProvider, source, dependency);
+    invokeProvider = InternalMethodHandles.nullCheckResult(invokeProvider, source);
     return invokeProvider;
   }
 

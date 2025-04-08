@@ -61,10 +61,4 @@ final class AnonymousClassDefiner implements ClassDefiner {
 
     return (Class<?>) ANONYMOUS_DEFINE_METHOD.invoke(THE_UNSAFE, hostClass, bytecode, null);
   }
-
-  @Override
-  public Class<?> defineCollectable(Object lifetimeOwner, Class<?> hostClass, byte[] bytecode)
-      throws Exception {
-    return define(hostClass, bytecode);
-  }
 }

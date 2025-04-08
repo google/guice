@@ -35,34 +35,64 @@ import javax.annotation.Nullable;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-final class MembersInjectorImpl<T> implements MembersInjector<T> {
-  private final TypeLiteral<T> typeLiteral;
-  private final InjectorImpl injector;
-  // a null list means empty. Since it is common for many of these lists to be empty we can save
-  // some memory lookups by representing empty as null.
-  @Nullable private final ImmutableList<SingleMemberInjector> memberInjectors;
-  @Nullable private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
-  @Nullable private final ImmutableList<InjectionListener<? super T>> injectionListeners;
-  @Nullable private final ImmutableList<MethodAspect> addedAspects;
+class MembersInjectorImpl<T> implements MembersInjector<T> {
 
-  MembersInjectorImpl(
+  static <T> MembersInjectorImpl<T> create(
       InjectorImpl injector,
       TypeLiteral<T> typeLiteral,
       EncounterImpl<T> encounter,
       ImmutableList<SingleMemberInjector> memberInjectors) {
-    this.injector = injector;
-    this.typeLiteral = typeLiteral;
-    this.memberInjectors = memberInjectors.isEmpty() ? null : memberInjectors;
-    this.userMembersInjectors =
+    memberInjectors = memberInjectors.isEmpty() ? null : memberInjectors;
+    var userMembersInjectors =
         encounter.getMembersInjectors().isEmpty() ? null : encounter.getMembersInjectors().asList();
-    this.injectionListeners =
+    var injectionListeners =
         encounter.getInjectionListeners().isEmpty()
             ? null
             : encounter.getInjectionListeners().asList();
-    this.addedAspects =
+    var addedAspects =
         (InternalFlags.isBytecodeGenEnabled() && !encounter.getAspects().isEmpty())
             ? encounter.getAspects()
             : null;
+    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+      return new MethodHandleMembersInjectorImpl<>(
+          injector,
+          typeLiteral,
+          memberInjectors,
+          userMembersInjectors,
+          injectionListeners,
+          addedAspects);
+    }
+    return new MembersInjectorImpl<>(
+        injector,
+        typeLiteral,
+        memberInjectors,
+        userMembersInjectors,
+        injectionListeners,
+        addedAspects);
+  }
+
+  protected final TypeLiteral<T> typeLiteral;
+  protected final InjectorImpl injector;
+  // a null list means empty. Since it is common for many of these lists to be empty we can save
+  // some memory lookups by representing empty as null.
+  @Nullable protected final ImmutableList<SingleMemberInjector> memberInjectors;
+  @Nullable protected final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
+  @Nullable protected final ImmutableList<InjectionListener<? super T>> injectionListeners;
+  @Nullable protected final ImmutableList<MethodAspect> addedAspects;
+
+  private MembersInjectorImpl(
+      InjectorImpl injector,
+      TypeLiteral<T> typeLiteral,
+      ImmutableList<SingleMemberInjector> memberInjectors,
+      ImmutableList<MembersInjector<? super T>> userMembersInjectors,
+      ImmutableList<InjectionListener<? super T>> injectionListeners,
+      ImmutableList<MethodAspect> addedAspects) {
+    this.injector = injector;
+    this.typeLiteral = typeLiteral;
+    this.memberInjectors = memberInjectors;
+    this.userMembersInjectors = userMembersInjectors;
+    this.injectionListeners = injectionListeners;
+    this.addedAspects = addedAspects;
   }
 
   public ImmutableList<SingleMemberInjector> getMemberInjectors() {
@@ -71,8 +101,6 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
   @Override
   public void injectMembers(T instance) {
-    // TODO(b/366058184): investigate a methodhandle version of this to support explicit members
-    // injection requests.
     if (instance == null) {
       return;
     }
@@ -122,7 +150,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     }
   }
 
-  private void notifyListeners(T instance) throws InternalProvisionException {
+  protected void notifyListeners(T instance) throws InternalProvisionException {
     ImmutableList<InjectionListener<? super T>> localInjectionListeners = injectionListeners;
     if (localInjectionListeners == null) {
       // no listeners
@@ -140,99 +168,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     }
   }
 
-  /**
-   * Returns a method handle that injects all members. The signature is {@code (T, InternalContext)
-   * -> void}
-   */
-  MethodHandle getInjectMembersAndNotifyListenersHandle(LinkageContext linkageContext) {
-    var handle = MethodHandles.empty(methodType(void.class, Object.class, InternalContext.class));
-    if (memberInjectors != null) {
-      for (SingleMemberInjector injector : memberInjectors) {
-        handle = MethodHandles.foldArguments(injector.getInjectHandle(linkageContext), handle);
-      }
-    }
-    if (userMembersInjectors != null) {
-      for (MembersInjector<? super T> injector : userMembersInjectors) {
-        var userHandle = INJECT_MEMBERS_HANDLE.bindTo(injector);
-        // Wrap it in a try..catch.
-        // Catch RuntimeException and rethrow as InternalProvisionException.errorInUserInjector
-        // (RuntimeException)->InternalProvisionException
-        var rethrow =
-            MethodHandles.insertArguments(ERROR_IN_USER_INJECTOR_HANDLE, 0, injector, typeLiteral);
-        // Throw that exception.
-        // (RuntimeException)->void
-        rethrow =
-            MethodHandles.filterArguments(
-                MethodHandles.throwException(void.class, InternalProvisionException.class),
-                0,
-                rethrow);
-        // Catch any exceptions and rethrow it.
-        userHandle = MethodHandles.catchException(userHandle, RuntimeException.class, rethrow);
-        // match the expected signature of the method.
-        userHandle = MethodHandles.dropArguments(userHandle, 1, InternalContext.class);
-        // Execute prior and then this listener.
-        handle = MethodHandles.foldArguments(userHandle, handle);
-      }
-    }
-
-    // Now notify listeners.
-    if (injectionListeners != null) {
-      for (InjectionListener<? super T> listener : injectionListeners) {
-        var listenerHandle = AFTER_INJECTION_HANDLE.bindTo(listener);
-        // Wrap it in a try..catch.
-        // Catch RuntimeException and rethrow as
-        // InternalProvisionException.errorNotifyingInjectionListener
-        // (RuntimeException)->InternalProvisionException
-        var rethrow =
-            MethodHandles.insertArguments(
-                ERROR_NOTIFYING_INJECTION_LISTENER_HANDLE, 0, listener, typeLiteral);
-        // (RuntimeException)->void
-        rethrow =
-            MethodHandles.filterArguments(
-                MethodHandles.throwException(void.class, InternalProvisionException.class),
-                0,
-                rethrow);
-
-        listenerHandle =
-            MethodHandles.catchException(listenerHandle, RuntimeException.class, rethrow);
-        // match the expected signature of the method.
-        listenerHandle = MethodHandles.dropArguments(listenerHandle, 1, InternalContext.class);
-        // Execute prior and then this listener.
-        handle = MethodHandles.foldArguments(listenerHandle, handle);
-      }
-    }
-
-    return handle;
-  }
-
-  private static final MethodHandle INJECT_MEMBERS_HANDLE =
-      findVirtualOrDie(
-          MembersInjector.class, "injectMembers", methodType(void.class, Object.class));
-
-  private static final MethodHandle AFTER_INJECTION_HANDLE =
-      findVirtualOrDie(
-          InjectionListener.class, "afterInjection", methodType(void.class, Object.class));
-
-  private static final MethodHandle ERROR_IN_USER_INJECTOR_HANDLE =
-      findStaticOrDie(
-          InternalProvisionException.class,
-          "errorInUserInjector",
-          methodType(
-              InternalProvisionException.class,
-              MembersInjector.class,
-              TypeLiteral.class,
-              RuntimeException.class));
-  private static final MethodHandle ERROR_NOTIFYING_INJECTION_LISTENER_HANDLE =
-      findStaticOrDie(
-          InternalProvisionException.class,
-          "errorNotifyingInjectionListener",
-          methodType(
-              InternalProvisionException.class,
-              InjectionListener.class,
-              TypeLiteral.class,
-              RuntimeException.class));
-
-  private void doInjectMembers(T t, InternalContext context, boolean toolableOnly)
+  protected void doInjectMembers(T t, InternalContext context, boolean toolableOnly)
       throws InternalProvisionException {
     ImmutableList<SingleMemberInjector> localMembersInjectors = memberInjectors;
     if (localMembersInjectors != null) {
@@ -290,5 +226,288 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
   public ImmutableList<MethodAspect> getAddedAspects() {
     return addedAspects == null ? ImmutableList.<MethodAspect>of() : addedAspects;
+  }
+
+  /** A specialized implementation that is implemented in terms of MethodHandles. */
+  static final class MethodHandleMembersInjectorImpl<T> extends MembersInjectorImpl<T> {
+
+    // Lazily allocated and initialized.
+    private volatile MethodHandle doInjectHandle;
+    private volatile MethodHandle notifyListenersHandle;
+    private volatile MethodHandle injectMembersAndNotifyListenersHandle;
+
+    private MethodHandleMembersInjectorImpl(
+        InjectorImpl injector,
+        TypeLiteral<T> typeLiteral,
+        ImmutableList<SingleMemberInjector> memberInjectors,
+        ImmutableList<MembersInjector<? super T>> userMembersInjectors,
+        ImmutableList<InjectionListener<? super T>> injectionListeners,
+        ImmutableList<MethodAspect> addedAspects) {
+      super(
+          injector,
+          typeLiteral,
+          memberInjectors,
+          userMembersInjectors,
+          injectionListeners,
+          addedAspects);
+    }
+
+    @Override
+    protected void injectMembers(T instance, InternalContext ctx)
+        throws InternalProvisionException {
+      try {
+        getInjectMembersAndNotifyListenersHandle(null).invokeExact(instance, ctx);
+      } catch (InternalProvisionException ipe) {
+        throw ipe;
+      } catch (Throwable t) {
+        throw InternalMethodHandles.sneakyThrow(t);
+      }
+    }
+
+    @Override
+    protected void notifyListeners(T instance) throws InternalProvisionException {
+      try {
+        getNotifyListenersHandle().invokeExact((Object) instance);
+      } catch (InternalProvisionException ipe) {
+        throw ipe;
+      } catch (Throwable t) {
+        throw InternalMethodHandles.sneakyThrow(t);
+      }
+    }
+
+    @Override
+    protected void doInjectMembers(T instance, InternalContext context, boolean toolableOnly)
+        throws InternalProvisionException {
+      try {
+        getDoInjectHandle(null).invokeExact((Object) instance, context, toolableOnly);
+      } catch (InternalProvisionException ipe) {
+        throw ipe;
+      } catch (Throwable t) {
+        throw InternalMethodHandles.sneakyThrow(t);
+      }
+    }
+
+    /**
+     * Returns a method handle that injects all members. The signature is {@code (T,
+     * InternalContext) -> void}
+     *
+     * <p>This produces a handle that is equivalent to calling `injectMembers(instance, context,
+     * false)`.
+     */
+    MethodHandle getInjectMembersAndNotifyListenersHandle(@Nullable LinkageContext linkageContext) {
+      var local = injectMembersAndNotifyListenersHandle;
+      if (local != null) {
+        return local;
+      }
+      // Set `toolableOnly` to false
+      // (Object, InternalContext)->void
+      var injectMembers =
+          MethodHandles.insertArguments(getDoInjectHandle(linkageContext), 2, false);
+
+      // (Object, InternalContext)->void
+      var notifyListeners =
+          MethodHandles.dropArguments(getNotifyListenersHandle(), 1, InternalContext.class);
+      ;
+
+      local = MethodHandles.foldArguments(notifyListeners, injectMembers);
+
+      synchronized (this) {
+        var race = injectMembersAndNotifyListenersHandle;
+        if (race == null) {
+          injectMembersAndNotifyListenersHandle = local;
+        } else {
+          local = race;
+        }
+      }
+      return local;
+    }
+
+    private static final MethodHandle DO_NOTHING_INJECT =
+        MethodHandles.empty(
+            methodType(void.class, Object.class, InternalContext.class, boolean.class));
+
+    private static final MethodHandle TEST_TOOLABLE_ONLY =
+        MethodHandles.dropArguments(
+            MethodHandles.identity(boolean.class), 0, Object.class, InternalContext.class);
+
+    /**
+     * Returns a handle with the siganture (Object, InternalContext, boolean)->void that injects all
+     * the members.
+     */
+    private MethodHandle getDoInjectHandle(@Nullable LinkageContext linkageContext) {
+      var local = doInjectHandle;
+      if (local != null) {
+        return local;
+      }
+
+      if (linkageContext == null) {
+        linkageContext = new LinkageContext();
+      }
+      if (this.memberInjectors != null) {
+        for (SingleMemberInjector injector : memberInjectors) {
+          var injectHandle = injector.getInjectHandle(linkageContext);
+          injectHandle = MethodHandles.dropArguments(injectHandle, 2, boolean.class);
+          // If it is toolable we can always inject it, but if not we need to skip it if
+          // toolableonly is set
+          if (!injector.getInjectionPoint().isToolable()) {
+            injectHandle =
+                MethodHandles.guardWithTest(TEST_TOOLABLE_ONLY, DO_NOTHING_INJECT, injectHandle);
+          }
+          if (local == null) {
+            local = injectHandle;
+          } else {
+            local = MethodHandles.foldArguments(injectHandle, local);
+          }
+        }
+      }
+      if (userMembersInjectors != null) {
+        // (Object)->void
+        MethodHandle userMembersInjectorsHandle = null;
+
+        for (MembersInjector<? super T> injector : userMembersInjectors) {
+          // (Object)->void
+          var userHandle = INJECT_MEMBERS_HANDLE.bindTo(injector);
+          // Wrap it in a try..catch.
+          // Catch RuntimeException and rethrow as InternalProvisionException.errorInUserInjector
+          // (RuntimeException)->InternalProvisionException
+          var rethrow =
+              MethodHandles.insertArguments(
+                  ERROR_IN_USER_INJECTOR_HANDLE, 0, injector, typeLiteral);
+          // Throw that exception.
+          // (RuntimeException)->void
+          rethrow =
+              MethodHandles.filterArguments(
+                  MethodHandles.throwException(void.class, InternalProvisionException.class),
+                  0,
+                  rethrow);
+          // Catch any exceptions and rethrow it.
+          userHandle = MethodHandles.catchException(userHandle, RuntimeException.class, rethrow);
+
+          // merge with the previous one if necessary
+          if (userMembersInjectorsHandle == null) {
+            userMembersInjectorsHandle = userHandle;
+          } else {
+            userMembersInjectorsHandle =
+                MethodHandles.foldArguments(userHandle, userMembersInjectorsHandle);
+          }
+        }
+        var test =
+            MethodHandles.dropArguments(
+                MethodHandles.identity(boolean.class), 0, Object.class, InternalContext.class);
+        var ifToolableOnly =
+            MethodHandles.empty(
+                methodType(void.class, Object.class, InternalContext.class, boolean.class));
+        var ifNotToolableOnly =
+            MethodHandles.dropArguments(
+                userMembersInjectorsHandle, 1, InternalContext.class, boolean.class);
+        userMembersInjectorsHandle =
+            MethodHandles.guardWithTest(test, ifToolableOnly, ifNotToolableOnly);
+
+        if (local == null) {
+          local = userMembersInjectorsHandle;
+        } else {
+          local = MethodHandles.foldArguments(userMembersInjectorsHandle, local);
+        }
+      }
+      // there must be no injectors at all
+      if (local == null) {
+        local = DO_NOTHING_INJECT;
+      }
+
+      // update the cache
+      synchronized (this) {
+        // See if we lost a race
+        var raceValue = doInjectHandle;
+        if (raceValue == null) {
+          doInjectHandle = local;
+        } else {
+          local = raceValue;
+        }
+      }
+      return local;
+    }
+
+    /**
+     * Returns a handle with the signature (Object instance)->void that invokes all the listeners.
+     *
+     * <p>Catches exceptions and rethrows them as InternalProvisionException.
+     */
+    private MethodHandle getNotifyListenersHandle() {
+      var local = notifyListenersHandle;
+      if (local != null) {
+        return local;
+      }
+      // Now notify listeners.
+      if (injectionListeners != null) {
+        for (InjectionListener<? super T> listener : injectionListeners) {
+          // (Object)->void
+          var listenerHandle = AFTER_INJECTION_HANDLE.bindTo(listener);
+          // Wrap it in a try..catch.
+          // Catch RuntimeException and rethrow as
+          // InternalProvisionException.errorNotifyingInjectionListener
+          // (RuntimeException)->InternalProvisionException
+          var rethrow =
+              MethodHandles.insertArguments(
+                  ERROR_NOTIFYING_INJECTION_LISTENER_HANDLE, 0, listener, typeLiteral);
+          // (RuntimeException)->void
+          rethrow =
+              MethodHandles.filterArguments(
+                  MethodHandles.throwException(void.class, InternalProvisionException.class),
+                  0,
+                  rethrow);
+
+          listenerHandle =
+              MethodHandles.catchException(listenerHandle, RuntimeException.class, rethrow);
+          // Execute prior and then this listener.
+          if (local == null) {
+            local = listenerHandle;
+          } else {
+            local = MethodHandles.foldArguments(listenerHandle, local);
+          }
+        }
+      } else {
+        local = MethodHandles.empty(methodType(void.class, Object.class));
+      }
+
+      // update the cache
+      synchronized (this) {
+        // See if we lost a race
+        var raceValue = notifyListenersHandle;
+        if (raceValue == null) {
+          notifyListenersHandle = local;
+        } else {
+          local = raceValue;
+        }
+      }
+
+      return local;
+    }
+
+    private static final MethodHandle INJECT_MEMBERS_HANDLE =
+        findVirtualOrDie(
+            MembersInjector.class, "injectMembers", methodType(void.class, Object.class));
+
+    private static final MethodHandle AFTER_INJECTION_HANDLE =
+        findVirtualOrDie(
+            InjectionListener.class, "afterInjection", methodType(void.class, Object.class));
+
+    private static final MethodHandle ERROR_IN_USER_INJECTOR_HANDLE =
+        findStaticOrDie(
+            InternalProvisionException.class,
+            "errorInUserInjector",
+            methodType(
+                InternalProvisionException.class,
+                MembersInjector.class,
+                TypeLiteral.class,
+                RuntimeException.class));
+    private static final MethodHandle ERROR_NOTIFYING_INJECTION_LISTENER_HANDLE =
+        findStaticOrDie(
+            InternalProvisionException.class,
+            "errorNotifyingInjectionListener",
+            methodType(
+                InternalProvisionException.class,
+                InjectionListener.class,
+                TypeLiteral.class,
+                RuntimeException.class));
   }
 }

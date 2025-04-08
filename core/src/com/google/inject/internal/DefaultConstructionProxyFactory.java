@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.InternalMethodHandles.CONSTRUCTOR_NEWINSTANCE_HANDLE;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static com.google.inject.internal.InternalMethodHandles.castReturnToObject;
 import static java.lang.invoke.MethodType.methodType;
@@ -43,7 +42,9 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
   private final InjectionPoint injectionPoint;
 
-  /** @param injectionPoint an injection point whose member is a constructor of {@code T}. */
+  /**
+   * @param injectionPoint an injection point whose member is a constructor of {@code T}.
+   */
   DefaultConstructionProxyFactory(InjectionPoint injectionPoint) {
     this.injectionPoint = injectionPoint;
   }
@@ -134,17 +135,15 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
           InternalMethodHandles.BIFUNCTION_APPLY_HANDLE
               .bindTo(fastConstructor)
               .asType(methodType(Object.class, Object.class, Object[].class));
+      // (Object[])->Object
       handle = MethodHandles.insertArguments(handle, 0, (Object) null); // no receiver type.
-      // NOTE: is is safe to use asCollector here because the number of parameters is the same
-      // as the number of parameters to the constructor which should never exceed the maxiumum
-      // number of method parameters.
-      handle = handle.asCollector(Object[].class, parameterHandles.length);
-      // Pass all the parameters to the constructor.
-      handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
-      // merge all the internalcontext parameters into a single object factory.
+      // catch here so we don't catch errors from our parameters
       handle =
-          MethodHandles.permuteArguments(
-              handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
+          InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
+      // (InternalContext)->Object
+      handle =
+          MethodHandles.filterArguments(
+              handle, 0, InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
       return handle;
     }
   }
@@ -168,14 +167,17 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @Override
     public MethodHandle getConstructHandle(MethodHandle[] parameterHandles) {
       // See comments in ProviderMethod on how this rarely happens and why it happens
-      var handle = CONSTRUCTOR_NEWINSTANCE_HANDLE.bindTo(constructor);
-      // collect the parameters into an array of type Object[]
-      handle = handle.asCollector(Object[].class, parameterHandles.length);
-      // apply all the parameters to the constructor.
-      handle = MethodHandles.filterArguments(handle, 0, parameterHandles);
-      // merge all the internalcontext parameters into a single object factory.
-      return MethodHandles.permuteArguments(
-          handle, InternalMethodHandles.FACTORY_TYPE, new int[parameterHandles.length]);
+      // (Object[])->Object
+      var handle = InternalMethodHandles.newInstanceHandle(constructor);
+      // Catch here so we don't catch errors from our parameters
+      handle =
+          InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(handle, injectionPoint);
+
+      // (InternalContext)->Object
+      handle =
+          MethodHandles.filterArguments(
+              handle, 0, InternalMethodHandles.buildObjectArrayFactory(parameterHandles));
+      return handle;
     }
   }
 
@@ -207,10 +209,13 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
           IntStream.range(0, parameterHandles.length)
               .mapToObj(i -> castReturnTo(parameterHandles[i], type.parameterType(i)))
               .toArray(MethodHandle[]::new);
-      var handle = MethodHandles.filterArguments(target, 0, typedHandles);
+      // catch errors from the constructor
+      var handle =
+          InternalMethodHandles.catchErrorInConstructorAndRethrowWithSource(target, injectionPoint);
+      handle = MethodHandles.filterArguments(handle, 0, typedHandles);
       handle = castReturnToObject(handle); // satisfy the signature of the factory type.
       return MethodHandles.permuteArguments(
-          handle, InternalMethodHandles.FACTORY_TYPE, new int[typedHandles.length]);
+          handle, InternalMethodHandles.ELEMENT_FACTORY_TYPE, new int[typedHandles.length]);
     }
   }
 }

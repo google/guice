@@ -16,8 +16,8 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.spi.Dependency;
 
 /**
  * A provider that wraps an internal factory in order to pass to Scope instances.
@@ -36,12 +36,12 @@ import com.google.inject.Provider;
 public class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   private final InjectorImpl injector;
-  private final InternalFactory<? extends T> internalFactory;
+  final InternalFactory<? extends T> internalFactory;
 
   static <T> ProviderToInternalFactoryAdapter<T> create(
-      InjectorImpl injector, InternalFactory<? extends T> internalFactory, Key<T> key) {
+      InjectorImpl injector, InternalFactory<? extends T> internalFactory) {
     if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
-      return InternalMethodHandles.makeScopedProvider(internalFactory, injector, key);
+      return InternalMethodHandles.makeScopedProvider(internalFactory, injector);
     }
 
     return new ProviderToInternalFactoryAdapter<>(injector, internalFactory);
@@ -57,7 +57,7 @@ public class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
   public T get() {
     InternalContext context = injector.enterContext();
     try {
-      return doGet(context);
+      return doGet(context, context.getDependency());
     } catch (InternalProvisionException e) {
       throw e.toProvisionException();
     } finally {
@@ -67,11 +67,12 @@ public class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   // Exposed so it can be overridden by the generated provider when method handles are enabled.
   // See InternalMethodHandles.makeScopedProvider.
-  protected T doGet(InternalContext context) throws InternalProvisionException {
+  protected T doGet(InternalContext context, Dependency<?> dependency)
+      throws InternalProvisionException {
     // Always pretend that we are a linked binding, to support
     // scoping implicit bindings.  If we are not actually a linked
     // binding, we'll fail properly elsewhere in the chain.
-    return internalFactory.get(context, context.getDependency(), true);
+    return internalFactory.get(context, dependency, true);
   }
 
   /** Exposed for SingletonScope. */
