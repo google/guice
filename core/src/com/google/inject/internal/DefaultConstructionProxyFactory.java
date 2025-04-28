@@ -54,7 +54,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       MethodHandle target = InternalMethodHandles.unreflectConstructor(constructor);
       // If construction fails fall through to the fastclass approach which can
       // access more constructors.  See comments in ProviderMethod on how to change

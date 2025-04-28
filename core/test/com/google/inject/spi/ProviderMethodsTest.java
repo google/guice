@@ -635,7 +635,7 @@ public class ProviderMethodsTest implements Module {
 
   @Test
   public void testShareFastClass() {
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       // This test is not relevant for method handles.
       return;
     }
@@ -673,7 +673,7 @@ public class ProviderMethodsTest implements Module {
 
   @Test
   public void testShareFastClassWithSuperClass() {
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       return;
     }
     // FastClass is only used when bytecode generation is enabled and this test relies on package

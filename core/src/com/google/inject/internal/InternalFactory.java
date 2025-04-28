@@ -127,7 +127,7 @@ abstract class InternalFactory<T> {
    */
   static <T> Provider<T> makeDefaultProvider(
       InternalFactory<T> factory, InjectorImpl injector, Dependency<?> dependency) {
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       return InternalMethodHandles.makeProvider(factory, injector, dependency);
     }
     return new DefaultProvider<>(factory, injector, dependency);

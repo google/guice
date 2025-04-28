@@ -145,7 +145,7 @@ final class InjectionRequestProcessor extends AbstractProcessor {
           // Run injections if we're not in tool stage (ie, PRODUCTION or DEV),
           // or if we are in tool stage and the injection point is toolable.
           if (!isStageTool || memberInjector.getInjectionPoint().isToolable()) {
-            if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+            if (InternalFlags.getUseMethodHandlesOption()) {
               try {
                 // In theory, constructing the handle to invoke it exactly once is expensive and
                 // wasteful, and it is true for

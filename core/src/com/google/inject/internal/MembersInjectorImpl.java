@@ -53,7 +53,7 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
         (InternalFlags.isBytecodeGenEnabled() && !encounter.getAspects().isEmpty())
             ? encounter.getAspects()
             : null;
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       return new MethodHandleMembersInjectorImpl<>(
           injector,
           typeLiteral,

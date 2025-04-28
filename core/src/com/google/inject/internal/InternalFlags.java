@@ -44,8 +44,8 @@ public final class InternalFlags {
   private static final ColorizeOption COLORIZE_OPTION =
       getSystemOption("guice_colorize_error_messages", ColorizeOption.OFF);
 
-  private static final UseMethodHandlesOption USE_EXPERIMENTAL_METHOD_HANDLES =
-      getSystemOption("guice_use_experimental_method_handles", UseMethodHandlesOption.NO);
+  private static final UseMethodHandlesOption USE_METHOD_HANDLES =
+      getSystemOption("guice_use_method_handles", UseMethodHandlesOption.NO);
 
   /** The options for using `MethodHandles`. */
   public enum UseMethodHandlesOption {
@@ -170,8 +170,8 @@ public final class InternalFlags {
     return COLORIZE_OPTION.enabled();
   }
 
-  public static boolean getUseExperimentalMethodHandlesOption() {
-    return USE_EXPERIMENTAL_METHOD_HANDLES
+  public static boolean getUseMethodHandlesOption() {
+    return USE_METHOD_HANDLES
             == UseMethodHandlesOption.YES
         && isBytecodeGenEnabled();
   }

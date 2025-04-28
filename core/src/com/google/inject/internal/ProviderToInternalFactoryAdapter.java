@@ -40,7 +40,7 @@ public class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   static <T> ProviderToInternalFactoryAdapter<T> create(
       InjectorImpl injector, InternalFactory<? extends T> internalFactory) {
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       return InternalMethodHandles.makeScopedProvider(internalFactory, injector);
     }
 

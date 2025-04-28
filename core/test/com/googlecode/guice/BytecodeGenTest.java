@@ -366,7 +366,7 @@ public class BytecodeGenTest {
     // Test relies on package access which CHILD loading doesn't have and the methodhandle path
     // doesn't use fastclasses
     if (InternalFlags.getCustomClassLoadingOption() == CustomClassLoadingOption.CHILD
-        || InternalFlags.getUseExperimentalMethodHandlesOption()) {
+        || InternalFlags.getUseMethodHandlesOption()) {
       return;
     }
     Injector injector = Guice.createInjector();

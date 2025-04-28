@@ -71,7 +71,7 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
       boolean skipFastClassGeneration,
       Annotation annotation) {
     int modifiers = method.getModifiers();
-    if (InternalFlags.getUseExperimentalMethodHandlesOption()) {
+    if (InternalFlags.getUseMethodHandlesOption()) {
       // `unreflect` fails if the method is not public and there is either a security manager
       // blocking access (very rare) or application has set up modules that are not open.
       // In that case we fall back to fast class generation.
