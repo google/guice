@@ -154,12 +154,13 @@ final class BindingProcessor extends AbstractBindingProcessor {
             ProvisionListenerStackCallback<T> listener =
                 injector.provisionListenerStore.get((Binding<T>) binding);
             int circularFactoryId = injector.circularFactoryIdFactory.next();
+            Class<? super T> rawType = key.getTypeLiteral().getRawType();
             InternalFactory<T> factory =
                 (initializable.isPresent()
                     ? new InternalFactoryToInitializableAdapter<T>(
-                        initializable.get(), source, listener, circularFactoryId)
+                        rawType, initializable.get(), source, listener, circularFactoryId)
                     : new ConstantProviderInternalFactory<T>(
-                        provider, source, listener, circularFactoryId));
+                        rawType, provider, source, listener, circularFactoryId));
 
             InternalFactory<? extends T> scopedFactory =
                 Scoping.scope(key, injector, factory, source, scoping);
@@ -178,6 +179,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
             @SuppressWarnings("unchecked")
             BoundProviderFactory<T> boundProviderFactory =
                 new BoundProviderFactory<T>(
+                    key.getTypeLiteral().getRawType(),
                     injector,
                     providerKey,
                     source,

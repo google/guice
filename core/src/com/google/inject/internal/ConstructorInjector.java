@@ -121,7 +121,7 @@ final class ConstructorInjector<T> implements ProvisionCallback<T> {
               MethodHandles.dropArguments(
                   MethodHandles.identity(Object.class), 1, InternalContext.class),
               membersHandle);
-      // Then execute thje membersHandle after constructing the object (and calling
+      // Then execute the membersHandle after constructing the object (and calling
       // finishConstructionAndSetReference)
       handle = MethodHandles.foldArguments(membersHandle, handle);
     } else {

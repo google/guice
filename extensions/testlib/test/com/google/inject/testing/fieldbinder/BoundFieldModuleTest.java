@@ -669,7 +669,7 @@ public class BoundFieldModuleTest extends TestCase {
   }
 
   @SuppressWarnings({"rawtypes", "JUnitIncompatibleType"}) // Testing rawtypes
-  public void testRawProviderCanBindToIncorrectType() {
+  public void testRawProviderCannotBindToIncorrectType() {
     final Integer testValue = 1024;
     Object instance =
         new Object() {
@@ -686,7 +686,12 @@ public class BoundFieldModuleTest extends TestCase {
     BoundFieldModule module = BoundFieldModule.of(instance);
     Injector injector = Guice.createInjector(module);
 
-    assertEquals(testValue, injector.getInstance(String.class));
+    try {
+      injector.getInstance(String.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertEquals(e.getCause().getClass(), ClassCastException.class);
+    }
   }
 
   public void testMultipleBindErrorsAreAggregated() {
@@ -1006,7 +1011,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     assertEquals(value, injector.getInstance(info.getBoundKey()));
   }
-  
+
   public void testGetBoundFields_getKey() throws Exception {
     Object instance =
         new Object() {

@@ -29,11 +29,12 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   private InternalFactory<? extends jakarta.inject.Provider<? extends T>> providerFactory;
 
   BoundProviderFactory(
+      Class<? super T> rawType,
       InjectorImpl injector,
       Key<? extends jakarta.inject.Provider<? extends T>> providerKey,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
-    super(source, injector.circularFactoryIdFactory.next());
+    super(rawType, source, injector.circularFactoryIdFactory.next());
     this.provisionCallback = provisionCallback;
     this.injector = injector;
     this.providerKey = providerKey;

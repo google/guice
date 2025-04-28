@@ -33,11 +33,12 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   private final Initializable<? extends jakarta.inject.Provider<? extends T>> initializable;
 
   public InternalFactoryToInitializableAdapter(
+      Class<? super T> rawType,
       Initializable<? extends jakarta.inject.Provider<? extends T>> initializable,
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback,
       int circularFactoryId) {
-    super(source, circularFactoryId);
+    super(rawType, source, circularFactoryId);
     this.provisionCallback = provisionCallback;
     this.initializable = checkNotNull(initializable, "provider");
   }

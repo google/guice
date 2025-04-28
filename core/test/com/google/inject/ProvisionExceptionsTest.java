@@ -326,6 +326,33 @@ public class ProvisionExceptionsTest {
             provideFailingValue); // the thing that failed.
   }
 
+  @Test
+  @SuppressWarnings({"rawtypes", "unchecked"}) // Test requires incorrect types
+  public void testConstructorBindingDependencyHasWrongType() {
+    var module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class)
+                .toProvider(
+                    new Provider() {
+                      @Override
+                      public Integer get() {
+                        return 1;
+                      }
+                    });
+          }
+        };
+    Injector injector = Guice.createInjector(module);
+    var pe = assertThrows(ProvisionException.class, () -> injector.getInstance(WantsString.class));
+    assertThat(pe).hasCauseThat().isInstanceOf(ClassCastException.class);
+  }
+
+  private static class WantsString {
+    @Inject
+    WantsString(String s) {}
+  }
+
   private static interface Exploder {}
 
   public static class Explosion implements Exploder {

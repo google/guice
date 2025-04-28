@@ -19,8 +19,8 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.spi.Dependency;
-import jakarta.inject.Provider;
 import javax.annotation.Nullable;
+import jakarta.inject.Provider;
 
 /** An InternalFactory that delegates to a constant provider. */
 final class ConstantProviderInternalFactory<T> extends ProviderInternalFactory<T> {
@@ -28,11 +28,12 @@ final class ConstantProviderInternalFactory<T> extends ProviderInternalFactory<T
   @Nullable private final ProvisionListenerStackCallback<T> provisionCallback;
 
   ConstantProviderInternalFactory(
+      Class<? super T> rawType,
       Provider<T> provider,
       Object source,
       @Nullable ProvisionListenerStackCallback<T> provisionCallback,
       int circularFactoryId) {
-    super(source, circularFactoryId);
+    super(rawType, source, circularFactoryId);
     this.provider = checkNotNull(provider);
     this.provisionCallback = provisionCallback;
   }

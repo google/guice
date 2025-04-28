@@ -20,11 +20,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static java.lang.invoke.MethodType.methodType;
 
+import com.google.errorprone.annotations.Keep;
 import com.google.inject.spi.Dependency;
-import jakarta.inject.Provider;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import javax.annotation.Nullable;
+import jakarta.inject.Provider;
 
 /**
  * Base class for InternalFactories that are used by Providers, to handle circular dependencies.
@@ -32,10 +33,12 @@ import javax.annotation.Nullable;
  * @author sameb@google.com (Sam Berlin)
  */
 abstract class ProviderInternalFactory<T> extends InternalFactory<T> {
+  protected final Class<?> providedRawType; // Technically this is "? super T", but this is easier.
   protected final Object source;
   private final int circularFactoryId;
 
-  ProviderInternalFactory(Object source, int circularFactoryId) {
+  ProviderInternalFactory(Class<?> providedRawType, Object source, int circularFactoryId) {
+    this.providedRawType = providedRawType;
     this.source = checkNotNull(source, "source");
     this.circularFactoryId = circularFactoryId;
   }
@@ -150,7 +153,34 @@ abstract class ProviderInternalFactory<T> extends InternalFactory<T> {
     }
     // null check the result using the dependency.
     invokeProvider = InternalMethodHandles.nullCheckResult(invokeProvider, source);
+    invokeProvider = validateReturnTypeHandle(invokeProvider);
     return invokeProvider;
+  }
+
+  protected MethodHandle validateReturnTypeHandle(MethodHandle resultHandle) {
+    return MethodHandles.filterReturnValue(
+        resultHandle,
+        MethodHandles.insertArguments(CHECK_SUBTYPE_NOT_PROVIDED_MH, 1, source, providedRawType));
+  }
+
+  private static final MethodHandle CHECK_SUBTYPE_NOT_PROVIDED_MH =
+      InternalMethodHandles.findStaticOrDie(
+          ProviderInternalFactory.class,
+          "doCheckSubtypeNotProvided",
+          methodType(Object.class, Object.class, Object.class, Class.class));
+
+  @Keep
+  static Object doCheckSubtypeNotProvided(Object result, Object source, Class<?> providedType)
+      throws InternalProvisionException {
+    if (result != null && !providedType.isInstance(result)) {
+      // Historically this was surfaced as a ProvisionException embedding a
+      // ClassCastException, so we keep that behavior. (Maybe one day we can
+      // shift it to an explicit error without the inner ClassCastException.)
+      throw InternalProvisionException.errorInProvider(
+              new ClassCastException("Cannot cast " + result.getClass() + " to " + providedType))
+          .addSource(source);
+    }
+    return result;
   }
 
   /**
@@ -171,6 +201,18 @@ abstract class ProviderInternalFactory<T> extends InternalFactory<T> {
     if (t == null && !dependency.isNullable()) {
       InternalProvisionException.onNullInjectedIntoNonNullableDependency(source, dependency);
     }
+    validateReturnType(t);
     return t;
+  }
+
+  protected void validateReturnType(T t) throws InternalProvisionException {
+    if (t != null && !providedRawType.isInstance(t)) {
+      // Historically this was surfaced as a ProvisionException embedding a
+      // ClassCastException, so we keep that behavior. (Maybe one day we can
+      // shift it to an explicit error without the inner ClassCastException.
+      throw InternalProvisionException.errorInProvider(
+              new ClassCastException("Cannot cast " + t.getClass() + " to " + providedRawType))
+          .addSource(source);
+    }
   }
 }

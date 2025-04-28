@@ -307,7 +307,6 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
       // (Object, InternalContext)->void
       var notifyListeners =
           MethodHandles.dropArguments(getNotifyListenersHandle(), 1, InternalContext.class);
-      ;
 
       local = MethodHandles.foldArguments(notifyListeners, injectMembers);
 

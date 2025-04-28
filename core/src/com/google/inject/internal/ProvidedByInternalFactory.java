@@ -22,9 +22,9 @@ import com.google.errorprone.annotations.Keep;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
-import jakarta.inject.Provider;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import jakarta.inject.Provider;
 
 /**
  * An {@link InternalFactory} for {@literal @}{@link ProvidedBy} bindings.
@@ -33,7 +33,6 @@ import java.lang.invoke.MethodHandles;
  */
 class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements DelayedInitialize {
 
-  private final Class<?> rawType;
   private final Class<? extends Provider<?>> providerType;
   private final Key<? extends Provider<T>> providerKey;
   private InternalFactory<? extends Provider<T>> providerFactory;
@@ -44,8 +43,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
       Class<? extends Provider<?>> providerType,
       Key<? extends Provider<T>> providerKey,
       int circularFactoryId) {
-    super(providerKey, circularFactoryId);
-    this.rawType = rawType;
+    super(rawType, providerKey, circularFactoryId);
     this.providerType = providerType;
     this.providerKey = providerKey;
   }
@@ -86,13 +84,11 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
   }
 
   @Override
-  protected MethodHandle provisionHandle(MethodHandle providerHandle) {
-    // Do normal provisioning and then check that the result is the correct subtype.
-    MethodHandle invokeProvider = super.provisionHandle(providerHandle);
+  protected MethodHandle validateReturnTypeHandle(MethodHandle providerHandle) {
     return MethodHandles.filterReturnValue(
-        invokeProvider,
+        providerHandle,
         MethodHandles.insertArguments(
-            CHECK_SUBTYPE_NOT_PROVIDED_MH, 1, source, providerType, rawType));
+            CHECK_SUBTYPE_NOT_PROVIDED_MH, 1, source, providerType, providedRawType));
   }
 
   private static final MethodHandle CHECK_SUBTYPE_NOT_PROVIDED_MH =
@@ -101,6 +97,8 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
           "doCheckSubtypeNotProvided",
           methodType(Object.class, Object.class, Object.class, Class.class, Class.class));
 
+  // Historically this had a different error check than other providers,
+  // so we preserve that behavior.
   @Keep
   static Object doCheckSubtypeNotProvided(
       Object result,
@@ -115,18 +113,13 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T> implements
     return result;
   }
 
+  // Historically this had a different error check than other providers,
+  // so we preserve that behavior.
   @Override
-  protected T provision(
-      jakarta.inject.Provider<? extends T> provider,
-      InternalContext context,
-      Dependency<?> dependency)
-      throws InternalProvisionException {
-    Object o = super.provision(provider, context, dependency);
-    if (o != null && !rawType.isInstance(o)) {
-      throw InternalProvisionException.subtypeNotProvided(providerType, rawType).addSource(source);
+  protected void validateReturnType(T t) throws InternalProvisionException {
+    if (t != null && !providedRawType.isInstance(t)) {
+      throw InternalProvisionException.subtypeNotProvided(providerType, providedRawType)
+          .addSource(source);
     }
-    @SuppressWarnings("unchecked") // protected by isInstance() check above
-    T t = (T) o;
-    return t;
   }
 }
