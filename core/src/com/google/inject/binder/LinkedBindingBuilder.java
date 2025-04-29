@@ -16,6 +16,7 @@
 
 package com.google.inject.binder;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
@@ -30,12 +31,15 @@ import org.jspecify.annotations.Nullable;
 public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  @CanIgnoreReturnValue
   ScopedBindingBuilder to(Class<? extends T> implementation);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  @CanIgnoreReturnValue
   ScopedBindingBuilder to(TypeLiteral<? extends T> implementation);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  @CanIgnoreReturnValue
   ScopedBindingBuilder to(Key<? extends T> targetKey);
 
   /**
@@ -50,6 +54,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    *
    * @see com.google.inject.Injector#injectMembers
    */
+  @CanIgnoreReturnValue
   ScopedBindingBuilder toProvider(Provider<? extends @Nullable T> provider);
 
   /**
@@ -58,23 +63,30 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    * @see com.google.inject.Injector#injectMembers
    * @since 4.0
    */
+  @CanIgnoreReturnValue
   ScopedBindingBuilder toProvider(jakarta.inject.Provider<? extends @Nullable T> provider);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
-  ScopedBindingBuilder toProvider(Class<? extends jakarta.inject.Provider<? extends @Nullable T>> providerType);
+  @CanIgnoreReturnValue
+  ScopedBindingBuilder toProvider(
+      Class<? extends jakarta.inject.Provider<? extends @Nullable T>> providerType);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
+  @CanIgnoreReturnValue
   ScopedBindingBuilder toProvider(
       TypeLiteral<? extends jakarta.inject.Provider<? extends @Nullable T>> providerType);
 
   /** See the EDSL examples at {@link com.google.inject.Binder}. */
-  ScopedBindingBuilder toProvider(Key<? extends jakarta.inject.Provider<? extends @Nullable T>> providerKey);
+  @CanIgnoreReturnValue
+  ScopedBindingBuilder toProvider(
+      Key<? extends jakarta.inject.Provider<? extends @Nullable T>> providerKey);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
    *
    * @since 3.0
    */
+  @CanIgnoreReturnValue
   <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor);
 
   /**
@@ -82,6 +94,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    *
    * @since 3.0
    */
+  @CanIgnoreReturnValue
   <S extends T> ScopedBindingBuilder toConstructor(
       Constructor<S> constructor, TypeLiteral<? extends S> type);
 }
