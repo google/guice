@@ -305,7 +305,7 @@ public class MethodInterceptionTest {
         StackTraceElement[] stackTraceElement = t.getStackTrace();
         int frame = 0;
         assertEquals("explode", stackTraceElement[frame++].getMethodName());
-        while (stackTraceElement[frame].getClassName().startsWith("java.lang.invoke.LambdaForm")) {
+        while (isLambdaFrame(stackTraceElement[frame])) {
           frame++; // ignore lambda frames when running tests with ShowHiddenFrames
         }
         assertEquals("invoke", stackTraceElement[frame++].getMethodName());
@@ -313,6 +313,12 @@ public class MethodInterceptionTest {
         assertEquals("testInterceptedMethodThrows", stackTraceElement[frame++].getMethodName());
       }
     }
+  }
+
+  private static boolean isLambdaFrame(StackTraceElement element) {
+    var name = element.getClassName();
+    return name.startsWith("java.lang.invoke.LambdaForm")
+        || name.startsWith("java.lang.invoke.DirectMethodHandle");
   }
 
   @Test
