@@ -1,6 +1,6 @@
 package com.google.inject.testing.throwingproviders;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.ExpectFailure.assertThat;
 import static com.google.inject.testing.throwingproviders.CheckedProviderSubject.assertThat;
 
 import com.google.common.truth.ExpectFailure;
@@ -81,20 +81,29 @@ public class CheckedProviderSubjectTest {
     Class<? extends Throwable> unexpected = UnsupportedOperationException.class;
     CheckedProvider<String> provider =
         CheckedProviders.throwing(StringCheckedProvider.class, unexpected);
-    String message =
-        String.format(
-            "value of            : checkedProvider.get()'s exception\n"
-                + "expected instance of: %s\n"
-                + "but was instance of : %s\n"
-                + "with value          : %s\n"
-                + "checkedProvider was : %s",
-            SummerException.class.getName(),
-            UnsupportedOperationException.class.getName(),
-            UnsupportedOperationException.class.getName(),
-            getThrowingProviderName(UnsupportedOperationException.class.getName()));
-
     expectWhenTesting().that(provider).thrownException().isInstanceOf(expected);
-    assertThat(expect.getFailure()).hasMessageThat().isEqualTo(message);
+    AssertionError e = expect.getFailure();
+    assertThat(e)
+        .factKeys()
+        .containsExactly(
+            "value of",
+            "expected instance of",
+            "but was instance of",
+            "with value",
+            "checkedProvider was");
+    assertThat(e).factValue("value of").isEqualTo("checkedProvider.get()'s exception");
+    assertThat(e)
+        .factValue("expected instance of")
+        .isAnyOf(SummerException.class.getName(), SummerException.class.getCanonicalName());
+    assertThat(e)
+        .factValue("but was instance of")
+        .isAnyOf(
+            UnsupportedOperationException.class.getName(),
+            UnsupportedOperationException.class.getSimpleName());
+    assertThat(e).factValue("with value").isEqualTo(UnsupportedOperationException.class.getName());
+    assertThat(e)
+        .factValue("checkedProvider was")
+        .isEqualTo(getThrowingProviderName(UnsupportedOperationException.class.getName()));
   }
 
   @Test
