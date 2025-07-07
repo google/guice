@@ -41,7 +41,7 @@ public abstract class AbstractBindingBuilder<T> {
   public static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
   public static final String BINDING_TO_NULL =
       "Binding to null instances is not allowed. "
-          + "Use toProvider(Providers.of(null)) if this is your intended behaviour.";
+          + "Use toProvider(() -> null) if this is your intended behaviour.";
   public static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more than once.";
   public static final String ANNOTATION_ALREADY_SPECIFIED =
       "More than one annotation is specified for this binding.";
