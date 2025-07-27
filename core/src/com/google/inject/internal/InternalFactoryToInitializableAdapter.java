@@ -31,6 +31,7 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
 
   private final ProvisionListenerStackCallback<T> provisionCallback;
   private final Initializable<? extends jakarta.inject.Provider<? extends T>> initializable;
+  private final Object mutex = new Object();
 
   public InternalFactoryToInitializableAdapter(
       Class<? super T> rawType,
@@ -46,7 +47,9 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   @Override
   public T get(InternalContext context, Dependency<?> dependency, boolean linked)
       throws InternalProvisionException {
-    return circularGet(initializable.get(context), context, dependency, provisionCallback);
+    synchronized (mutex) {
+      return circularGet(initializable.get(context), context, dependency, provisionCallback);
+    }
   }
 
   @Override
