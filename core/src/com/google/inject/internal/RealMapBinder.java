@@ -1178,7 +1178,7 @@ public final class RealMapBinder<K, V> implements Module {
       protected void doInitialize(InjectorImpl injector, Errors errors) throws ErrorsException {
         @SuppressWarnings({"unchecked", "rawtypes"})
         PerKeyData<K, V>[] typedPerKeyData =
-            new PerKeyData[bindingSelection.getMapBindings().size()];
+            new PerKeyData[bindingSelection.getMultimapBindings().size()];
         perKeyDatas = typedPerKeyData;
         ImmutableSet.Builder<Dependency<?>> dependenciesBuilder = ImmutableSet.builder();
         List<Dependency<?>> dependenciesForKey = Lists.newArrayList();
