@@ -65,6 +65,12 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     try {
       result = methodInvocation.proceed();
 
+      if (txn.getRollbackOnly()) {
+        txn.rollback();
+      } else {
+        txn.commit();
+      }
+      return result;
     } catch (Exception e) {
       // commit transaction only if rollback didnt occur
       if (rollbackIfNecessary(transactional, e, txn)) {
@@ -74,33 +80,12 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       // propagate whatever exception is thrown anyway
       throw e;
     } finally {
-      // Close the em if necessary (guarded so this code doesn't run unless catch fired).
-      if (null != didWeStartWork.get() && !txn.isActive()) {
-        didWeStartWork.remove();
-        unitOfWork.end();
-      }
-    }
-
-    // everything was normal so commit the txn (do not move into try block above as it
-    //  interferes with the advised method's throwing semantics)
-    try {
-      if (txn.isActive()) {
-        if (txn.getRollbackOnly()) {
-          txn.rollback();
-        } else {
-          txn.commit();
-        }
-      }
-    } finally {
-      // close the em if necessary
+      // Close the em if necessary
       if (null != didWeStartWork.get()) {
         didWeStartWork.remove();
         unitOfWork.end();
       }
     }
-
-    // or return result
-    return result;
   }
 
   // TODO(user): Cache this method's results.
