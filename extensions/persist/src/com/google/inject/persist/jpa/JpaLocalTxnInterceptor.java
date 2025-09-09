@@ -65,10 +65,8 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     try {
       result = methodInvocation.proceed();
 
-      if (txn.getRollbackOnly()) {
-        txn.rollback();
-      } else {
-        txn.commit();
+      if (txn.isActive()) {
+        commitOrRollback(txn);
       }
       return result;
     } catch (Exception e) {
@@ -85,6 +83,14 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
         didWeStartWork.remove();
         unitOfWork.end();
       }
+    }
+  }
+
+  private void commitOrRollback(EntityTransaction txn) {
+    if (txn.getRollbackOnly()) {
+      txn.rollback();
+    } else {
+      txn.commit();
     }
   }
 
