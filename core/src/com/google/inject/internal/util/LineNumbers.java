@@ -66,7 +66,7 @@ final class LineNumbers {
       InputStream in = null;
       try {
         in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
-      } catch (IllegalStateException ignored) {
+      } catch (IllegalStateException | NullPointerException ignored) {
         // Some classloaders throw IllegalStateException when they can't load a resource.
       }
       if (in != null) {
