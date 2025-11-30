@@ -1091,11 +1091,7 @@ final class InjectorImpl implements Injector, Lookups {
     SingleParameterInjector<?>[] result = new SingleParameterInjector<?>[parameters.size()];
     int i = 0;
     for (Dependency<?> parameter : parameters) {
-      try {
-        result[i++] = createParameterInjector(parameter, errors.withSource(parameter));
-      } catch (ErrorsException rethrownBelow) {
-        // rethrown below
-      }
+      result[i++] = createParameterInjector(parameter, errors.withSource(parameter));
     }
 
     errors.throwIfNewErrors(numErrorsBefore);
