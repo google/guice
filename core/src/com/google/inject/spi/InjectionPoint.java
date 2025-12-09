@@ -23,10 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
-import com.google.inject.ConfigurationException;
-import com.google.inject.Inject;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.DeclaredMembers;
 import com.google.inject.internal.Errors;
@@ -34,6 +31,8 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.KotlinSupport;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.util.Classes;
+import jakarta.annotation.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
@@ -42,14 +41,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,13 +69,13 @@ public final class InjectionPoint {
     this.declaringType = declaringType;
     this.optional = optional;
     this.dependencies =
-        forMember(
-            new Errors(method),
-            method,
-            declaringType,
-            method.getAnnotatedParameterTypes(),
-            method.getParameterAnnotations(),
-            KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(method));
+            forMember(
+                    new Errors(method),
+                    method,
+                    declaringType,
+                    method.getAnnotatedParameterTypes(),
+                    method.getParameterAnnotations(),
+                    KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(method));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Constructor<?> constructor) {
@@ -94,13 +86,13 @@ public final class InjectionPoint {
     KotlinSupport.getInstance().checkConstructorParameterAnnotations(constructor, errors);
 
     this.dependencies =
-        forMember(
-            errors,
-            constructor,
-            declaringType,
-            constructor.getAnnotatedParameterTypes(),
-            constructor.getParameterAnnotations(),
-            KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(constructor));
+            forMember(
+                    errors,
+                    constructor,
+                    declaringType,
+                    constructor.getAnnotatedParameterTypes(),
+                    constructor.getParameterAnnotations(),
+                    KotlinSupport.getInstance().getIsParameterKotlinNullablePredicate(constructor));
   }
 
   InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
@@ -122,19 +114,19 @@ public final class InjectionPoint {
     errors.throwConfigurationExceptionIfErrorsExist();
 
     boolean allowsNull =
-        Nullability.hasNullableAnnotation(annotations)
-            || Nullability.hasNullableAnnotation(typeUseAnnotations)
-            || KotlinSupport.getInstance().isNullable(field);
+            Nullability.hasNullableAnnotation(annotations)
+                    || Nullability.hasNullableAnnotation(typeUseAnnotations)
+                    || KotlinSupport.getInstance().isNullable(field);
     this.dependencies = ImmutableList.<Dependency<?>>of(newDependency(key, allowsNull, -1));
   }
 
   private ImmutableList<Dependency<?>> forMember(
-      Errors errors,
-      Member member,
-      TypeLiteral<?> type,
-      AnnotatedType[] annotatedTypes,
-      Annotation[][] parameterAnnotationsPerParameter,
-      Predicate<Integer> isParameterKotlinNullable) {
+          Errors errors,
+          Member member,
+          TypeLiteral<?> type,
+          AnnotatedType[] annotatedTypes,
+          Annotation[][] parameterAnnotationsPerParameter,
+          Predicate<Integer> isParameterKotlinNullable) {
     List<Dependency<?>> dependencies = Lists.newArrayList();
     int index = 0;
 
@@ -144,9 +136,9 @@ public final class InjectionPoint {
         Annotation[] parameterAnnotations = parameterAnnotationsPerParameter[index];
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         boolean isNullable =
-            Nullability.hasNullableAnnotation(parameterAnnotations)
-                || Nullability.hasNullableAnnotation(typeAnnotations)
-                || isParameterKotlinNullable.test(index);
+                Nullability.hasNullableAnnotation(parameterAnnotations)
+                        || Nullability.hasNullableAnnotation(typeAnnotations)
+                        || isParameterKotlinNullable.test(index);
         dependencies.add(newDependency(key, isNullable, index));
         index++;
       } catch (ConfigurationException e) {
@@ -215,8 +207,8 @@ public final class InjectionPoint {
   @Override
   public boolean equals(Object o) {
     return o instanceof InjectionPoint
-        && member.equals(((InjectionPoint) o).member)
-        && declaringType.equals(((InjectionPoint) o).declaringType);
+            && member.equals(((InjectionPoint) o).member)
+            && declaringType.equals(((InjectionPoint) o).declaringType);
   }
 
   @Override
@@ -249,11 +241,11 @@ public final class InjectionPoint {
    * @since 3.0
    */
   public static <T> InjectionPoint forConstructor(
-      Constructor<T> constructor, TypeLiteral<? extends T> type) {
+          Constructor<T> constructor, TypeLiteral<? extends T> type) {
     if (type.getRawType() != constructor.getDeclaringClass()) {
       new Errors(type)
-          .constructorNotDefinedByType(constructor, type)
-          .throwConfigurationExceptionIfErrorsExist();
+              .constructorNotDefinedByType(constructor, type)
+              .throwConfigurationExceptionIfErrorsExist();
     }
 
     return new InjectionPoint(type, constructor);
@@ -296,15 +288,15 @@ public final class InjectionPoint {
     Errors errors = new Errors(rawType);
 
     List<Constructor<?>> atInjectConstructors =
-        Arrays.stream(rawType.getDeclaredConstructors())
-            .filter(InjectionPoint::isInjectableConstructor)
-            .collect(Collectors.toList());
+            Arrays.stream(rawType.getDeclaredConstructors())
+                  .filter(InjectionPoint::isInjectableConstructor)
+                  .collect(Collectors.toList());
 
     Constructor<?> injectableConstructor = null;
     atInjectConstructors.stream()
-        .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
-        .filter(constructor -> constructor.getAnnotation(Inject.class).optional())
-        .forEach(errors::optionalConstructor);
+                        .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                        .filter(constructor -> constructor.getAnnotation(Inject.class).optional())
+                        .forEach(errors::optionalConstructor);
 
     if (atInjectConstructors.size() > 1) {
       errors.tooManyConstructors(rawType);
@@ -329,7 +321,7 @@ public final class InjectionPoint {
 
       // Disallow private constructors on non-private classes (unless they have @Inject)
       if (Modifier.isPrivate(noArgConstructor.getModifiers())
-          && !Modifier.isPrivate(rawType.getModifiers())) {
+              && !Modifier.isPrivate(rawType.getModifiers())) {
         errors.missingConstructor(type);
         throw new ConfigurationException(errors.getMessages());
       }
@@ -344,7 +336,7 @@ public final class InjectionPoint {
 
   private static boolean isInjectableConstructor(Constructor<?> constructor) {
     return constructor.isAnnotationPresent(Inject.class)
-        || constructor.isAnnotationPresent(jakarta.inject.Inject.class);
+            || constructor.isAnnotationPresent(jakarta.inject.Inject.class);
   }
 
   /**
@@ -454,8 +446,8 @@ public final class InjectionPoint {
   /** Returns true if the binding annotation is in the wrong place. */
   private static boolean checkForMisplacedBindingAnnotations(Member member, Errors errors) {
     Annotation misplacedBindingAnnotation =
-        Annotations.findBindingAnnotation(
-            errors, member, ((AnnotatedElement) member).getAnnotations());
+            Annotations.findBindingAnnotation(
+                    errors, member, ((AnnotatedElement) member).getAnnotations());
     if (misplacedBindingAnnotation == null) {
       return false;
     }
@@ -538,7 +530,35 @@ public final class InjectionPoint {
 
   static Annotation getAtInject(AnnotatedElement member) {
     Annotation a = member.getAnnotation(jakarta.inject.Inject.class);
-    return a == null ? member.getAnnotation(Inject.class) : a;
+    a = a == null ? member.getAnnotation(Inject.class) : a;
+    //#GedMarc update to allow alternative injection pointers
+    if(a == null) {
+      List<Class<? extends Annotation>> annotations = new ArrayList<>();
+      ServiceLoader<InjectionPointProvider> load = ServiceLoader.load(InjectionPointProvider.class);
+      load.forEach(iPoint -> {
+        annotations.add(iPoint.injectionPoint(member));
+      });
+      for (Class<? extends Annotation> annotation : annotations) {
+        //noinspection ConstantValue
+        if (a == null) {
+          a= member.getAnnotation(annotation);
+          if (a != null) {
+            a = new Inject(){
+              @Override
+              public Class<? extends Annotation> annotationType() {
+                return annotation;
+              }
+              @Override
+              public boolean optional() {
+                return member.isAnnotationPresent(Nullable.class);
+              }
+            };
+            break;
+          }
+        }
+      }
+    }
+    return a;
   }
 
   /** Linked list of injectable members. */
@@ -613,7 +633,7 @@ public final class InjectionPoint {
      *     InjectableMethod#overrodeGuiceInject} is set to true
      */
     boolean removeIfOverriddenBy(
-        Method method, boolean alwaysRemove, InjectableMethod injectableMethod) {
+            Method method, boolean alwaysRemove, InjectableMethod injectableMethod) {
       if (position == Position.TOP) {
         // If we're at the top of the hierarchy, there's nothing to override.
         return false;
@@ -624,8 +644,8 @@ public final class InjectionPoint {
         // methods in the parent class.
         bySignature = new HashMap<>();
         for (InjectableMember member = injectableMembers.head;
-            member != null;
-            member = member.next) {
+             member != null;
+             member = member.next) {
           if (!(member instanceof InjectableMethod)) {
             continue;
           }
@@ -648,7 +668,7 @@ public final class InjectionPoint {
           InjectableMethod possiblyOverridden = iterator.next();
           if (overrides(method, possiblyOverridden.method)) {
             boolean wasGuiceInject =
-                !possiblyOverridden.specInject || possiblyOverridden.overrodeGuiceInject;
+                    !possiblyOverridden.specInject || possiblyOverridden.overrodeGuiceInject;
             if (injectableMethod != null) {
               injectableMethod.overrodeGuiceInject = wasGuiceInject;
             }
@@ -680,9 +700,9 @@ public final class InjectionPoint {
         // Try to reuse the signature we created during removal
         @SuppressWarnings("ReferenceEquality")
         Signature signature =
-            injectableMethod.method == lastMethod
-                ? lastSignature
-                : new Signature(injectableMethod.method);
+                injectableMethod.method == lastMethod
+                        ? lastSignature
+                        : new Signature(injectableMethod.method);
         bySignature.computeIfAbsent(signature, k -> new ArrayList<>()).add(injectableMethod);
       }
     }
@@ -698,7 +718,7 @@ public final class InjectionPoint {
    * @param errors used to record errors
    */
   private static Set<InjectionPoint> getInjectionPoints(
-      final TypeLiteral<?> type, boolean statics, Errors errors) {
+          final TypeLiteral<?> type, boolean statics, Errors errors) {
     InjectableMembers injectableMembers = new InjectableMembers();
     OverrideIndex overrideIndex = null;
 
@@ -735,19 +755,19 @@ public final class InjectionPoint {
           if (atInject != null) {
             InjectableMethod injectableMethod = new InjectableMethod(current, method, atInject);
             if (checkForMisplacedBindingAnnotations(method, errors)
-                || !isValidMethod(injectableMethod, errors)) {
+                    || !isValidMethod(injectableMethod, errors)) {
               if (overrideIndex != null) {
                 boolean removed =
-                    overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
+                        overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
                 if (removed) {
                   logger.log(
-                      Level.WARNING,
-                      "Method: {0} is not a valid injectable method ("
-                          + "because it either has misplaced binding annotations "
-                          + "or specifies type parameters) but is overriding a method that is "
-                          + "valid. Because it is not valid, the method will not be injected. "
-                          + "To fix this, make the method a valid injectable method.",
-                      method);
+                          Level.WARNING,
+                          "Method: {0} is not a valid injectable method ("
+                                  + "because it either has misplaced binding annotations "
+                                  + "or specifies type parameters) but is overriding a method that is "
+                                  + "valid. Because it is not valid, the method will not be injected. "
+                                  + "To fix this, make the method a valid injectable method.",
+                          method);
                 }
               }
               continue;
@@ -775,12 +795,12 @@ public final class InjectionPoint {
               boolean removed = overrideIndex.removeIfOverriddenBy(method, false, null);
               if (removed) {
                 logger.log(
-                    Level.WARNING,
-                    "Method: {0} is not annotated with @Inject but "
-                        + "is overriding a method that is annotated with @jakarta.inject.Inject."
-                        + "Because it is not annotated with @Inject, the method will not be "
-                        + "injected. To fix this, annotate the method with @Inject.",
-                    method);
+                        Level.WARNING,
+                        "Method: {0} is not annotated with @Inject but "
+                                + "is overriding a method that is annotated with @jakarta.inject.Inject."
+                                + "Because it is not annotated with @Inject, the method will not be "
+                                + "injected. To fix this, annotate the method with @Inject.",
+                        method);
               }
             }
           }
@@ -833,8 +853,8 @@ public final class InjectionPoint {
    */
   private static boolean isEligibleForInjection(Method method, boolean statics) {
     return Modifier.isStatic(method.getModifiers()) == statics
-        && !method.isBridge()
-        && !method.isSynthetic();
+            && !method.isBridge()
+            && !method.isSynthetic();
   }
 
   private static boolean isValidMethod(InjectableMethod injectableMethod, Errors errors) {
