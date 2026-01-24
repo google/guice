@@ -40,6 +40,7 @@ import com.google.inject.multibindings.OptionalBinderBinding;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
@@ -59,8 +60,18 @@ import jakarta.inject.Qualifier;
  */
 public final class RealOptionalBinder<T> implements Module {
   public static <T> RealOptionalBinder<T> newRealOptionalBinder(Binder binder, Key<T> type) {
+    return newRealOptionalBinder(binder, type, true);
+  }
+
+  /**
+   * Returns a new OptionalBinder.
+   *
+   * @param bindOptional if true, the Optional<T> and java.util.Optional<T> keys will be bound.
+   */
+  public static <T> RealOptionalBinder<T> newRealOptionalBinder(
+      Binder binder, Key<T> type, boolean bindOptional) {
     binder = binder.skipSources(RealOptionalBinder.class);
-    RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<>(binder, type);
+    RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<>(binder, type, bindOptional);
     binder.install(optionalBinder);
     return optionalBinder;
   }
@@ -140,10 +151,13 @@ public final class RealOptionalBinder<T> implements Module {
 
   private final BindingSelection<T> bindingSelection;
   private final Binder binder;
+  private final boolean bindOptional;
+  private boolean permitSpanInjectors;
 
-  private RealOptionalBinder(Binder binder, Key<T> typeKey) {
+  private RealOptionalBinder(Binder binder, Key<T> typeKey, boolean bindOptional) {
     this.bindingSelection = new BindingSelection<>(typeKey);
     this.binder = binder;
+    this.bindOptional = bindOptional;
   }
 
   /**
@@ -164,12 +178,19 @@ public final class RealOptionalBinder<T> implements Module {
    */
   Key<T> getKeyForDefaultBinding() {
     bindingSelection.checkNotInitialized();
-    addDirectTypeBinding(binder);
+    if (bindOptional) {
+      addDirectTypeBinding(binder);
+    }
     return bindingSelection.getKeyForDefaultBinding();
   }
 
   public LinkedBindingBuilder<T> setDefault() {
-    return binder.bind(getKeyForDefaultBinding());
+    Key<T> key = getKeyForDefaultBinding();
+    LinkedBindingBuilder<T> builder = binder.bind(key);
+    if (permitSpanInjectors && binder instanceof com.google.inject.PrivateBinder) {
+      ((com.google.inject.PrivateBinder) binder).expose(key);
+    }
+    return builder;
   }
 
   /**
@@ -180,56 +201,69 @@ public final class RealOptionalBinder<T> implements Module {
    */
   Key<T> getKeyForActualBinding() {
     bindingSelection.checkNotInitialized();
-    addDirectTypeBinding(binder);
+    if (bindOptional) {
+      addDirectTypeBinding(binder);
+    }
     return bindingSelection.getKeyForActualBinding();
   }
 
   public LinkedBindingBuilder<T> setBinding() {
-    return binder.bind(getKeyForActualBinding());
+    Key<T> key = getKeyForActualBinding();
+    LinkedBindingBuilder<T> builder = binder.bind(key);
+    if (permitSpanInjectors && binder instanceof com.google.inject.PrivateBinder) {
+      ((com.google.inject.PrivateBinder) binder).expose(key);
+    }
+    return builder;
+  }
+
+  public void permitSpanInjectors() {
+    this.permitSpanInjectors = true;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings together.
   @Override
   public void configure(Binder binder) {
     bindingSelection.checkNotInitialized();
-    Key<T> key = bindingSelection.getDirectKey();
-    TypeLiteral<T> typeLiteral = key.getTypeLiteral();
-    // Every OptionalBinder gets the following types bound
-    // * {cgcb,ju}.Optional<Provider<T>>
-    // * {cgcb,ju}.Optional<jakarta.inject.Provider<T>>
-    // * {cgcb,ju}.Optional<T>
-    // If setDefault() or setBinding() is called then also
-    // * T is bound
+    if (bindOptional) {
+      Key<T> key = bindingSelection.getDirectKey();
+      TypeLiteral<T> typeLiteral = key.getTypeLiteral();
+      // Every OptionalBinder gets the following types bound
+      // * {cgcb,ju}.Optional<Provider<T>>
+      // * {cgcb,ju}.Optional<jakarta.inject.Provider<T>>
+      // * {cgcb,ju}.Optional<T>
+      // If setDefault() or setBinding() is called then also
+      // * T is bound
 
-    // cgcb.Optional<c.g.i.Provider<T>>
-    Key<Optional<Provider<T>>> guavaOptProviderKey = key.ofType(optionalOfProvider(typeLiteral));
-    binder
-        .bind(guavaOptProviderKey)
-        .toProvider(new RealOptionalProviderProvider<>(bindingSelection));
-    // ju.Optional<c.g.i.Provider<T>>
-    Key<java.util.Optional<Provider<T>>> javaOptProviderKey =
-        key.ofType(javaOptionalOfProvider(typeLiteral));
-    binder
-        .bind(javaOptProviderKey)
-        .toProvider(new JavaOptionalProviderProvider<>(bindingSelection));
+      // cgcb.Optional<c.g.i.Provider<T>>
+      Key<Optional<Provider<T>>> guavaOptProviderKey = key.ofType(optionalOfProvider(typeLiteral));
+      binder
+          .bind(guavaOptProviderKey)
+          .toProvider(new RealOptionalProviderProvider<>(bindingSelection));
+      // ju.Optional<c.g.i.Provider<T>>
+      Key<java.util.Optional<Provider<T>>> javaOptProviderKey =
+          key.ofType(javaOptionalOfProvider(typeLiteral));
+      binder
+          .bind(javaOptProviderKey)
+          .toProvider(new JavaOptionalProviderProvider<>(bindingSelection));
 
-    // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
-    // cannot be modified so we can use some rawtypes hackery to share the same implementation.
-    // cgcb.Optional<jakarta.inject.Provider<T>>
-    binder.bind(key.ofType(optionalOfJakartaProvider(typeLiteral))).to((Key) guavaOptProviderKey);
-    // ju.Optional<jakarta.inject.Provider<T>>
-    binder
-        .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
-        .to((Key) javaOptProviderKey);
+      // Provider is assignable to jakarta.inject.Provider and the provider that the factory contains
+      // cannot be modified so we can use some rawtypes hackery to share the same implementation.
+      // cgcb.Optional<jakarta.inject.Provider<T>>
+      binder.bind(key.ofType(optionalOfJakartaProvider(typeLiteral))).to((Key) guavaOptProviderKey);
+      // ju.Optional<jakarta.inject.Provider<T>>
+      binder
+          .bind(key.ofType(javaOptionalOfJakartaProvider(typeLiteral)))
+          .to((Key) javaOptProviderKey);
 
-    // cgcb.Optional<T>
-    Key<Optional<T>> guavaOptKey = key.ofType(optionalOf(typeLiteral));
-    binder
-        .bind(guavaOptKey)
-        .toProvider(new RealOptionalKeyProvider<>(bindingSelection, guavaOptKey));
-    // ju.Optional<T>
-    Key<java.util.Optional<T>> javaOptKey = key.ofType(javaOptionalOf(typeLiteral));
-    binder.bind(javaOptKey).toProvider(new JavaOptionalProvider<>(bindingSelection, javaOptKey));
+      // cgcb.Optional<T>
+      Key<Optional<T>> guavaOptKey = key.ofType(optionalOf(typeLiteral));
+      binder
+          .bind(guavaOptKey)
+          .toProvider(new RealOptionalKeyProvider<>(bindingSelection, guavaOptKey));
+      // ju.Optional<T>
+      Key<java.util.Optional<T>> javaOptKey = key.ofType(javaOptionalOf(typeLiteral));
+      binder.bind(javaOptKey).toProvider(new JavaOptionalProvider<>(bindingSelection, javaOptKey));
+    }
   }
 
   /** Provides the binding for {@code java.util.Optional<T>}. */
@@ -662,7 +696,18 @@ public final class RealOptionalBinder<T> implements Module {
       }
       state = InitializationState.INITIALIZING;
       actualBinding = injector.getExistingBinding(getKeyForActualBinding());
+      if (actualBinding instanceof ExposedBinding) {
+        ExposedBinding<T> exposed = (ExposedBinding) actualBinding;
+        actualBinding =
+            (BindingImpl<T>) exposed.getPrivateElements().getInjector().getBinding(actualBinding.getKey());
+      }
       defaultBinding = injector.getExistingBinding(getKeyForDefaultBinding());
+      if (defaultBinding instanceof ExposedBinding) {
+        ExposedBinding<T> exposed = (ExposedBinding) defaultBinding;
+        defaultBinding =
+            (BindingImpl<T>)
+                exposed.getPrivateElements().getInjector().getBinding(defaultBinding.getKey());
+      }
       // We should never create Jit bindings, but we can use them if some other binding created it.
       BindingImpl<T> userBinding = injector.getExistingBinding(key);
       if (actualBinding != null) {
