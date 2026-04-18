@@ -1,0 +1,63 @@
+/*
+ * Copyright (C) 2020 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.inject.internal.aop;
+
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * {@link ClassDefiner} that defines classes using {@code java.lang.invoke.MethodHandles.Lookup}.
+ *
+ * @author mcculls@gmail.com (Stuart McCulloch)
+ */
+final class LookupClassDefiner implements ClassDefiner {
+
+  private static final Logger logger = Logger.getLogger(LookupClassDefiner.class.getName());
+
+  private static final ClassDefiner HIDDEN_DEFINER;
+
+  static {
+      HIDDEN_DEFINER = tryPrivileged(HiddenClassDefiner::new, "Cannot bind MethodHandles.Lookup.defineHiddenClass");
+  }
+
+  public static boolean isAccessible() {
+    return HIDDEN_DEFINER != null;
+  }
+
+  public static boolean canLoadProxyByName(Class<?> hostClass) {
+    return false; // hidden/anonymous classes are not reliably loadable by name
+  }
+
+  @Override
+  public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
+    if (HIDDEN_DEFINER == null) {
+      throw new IllegalStateException("No class definer available");
+    }
+    return HIDDEN_DEFINER.define(hostClass, bytecode);
+  }
+
+  static <T> T tryPrivileged(PrivilegedExceptionAction<T> action, String errorMessage) {
+    try {
+      return AccessController.doPrivileged(action);
+    } catch (Throwable e) {
+      logger.log(Level.FINE, errorMessage, e);
+      return null;
+    }
+  }
+}
