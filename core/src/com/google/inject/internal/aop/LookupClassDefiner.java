@@ -33,7 +33,7 @@ final class LookupClassDefiner implements ClassDefiner {
   private static final ClassDefiner HIDDEN_DEFINER;
 
   static {
-      HIDDEN_DEFINER = tryPrivileged(HiddenClassDefiner::new, "Cannot bind MethodHandles.Lookup.defineHiddenClass");
+      HIDDEN_DEFINER = tryPrivileged(HiddenClassDefiner::new, "Cannot bind HiddenClassDefiner");
   }
 
   public static boolean isAccessible() {
@@ -41,7 +41,7 @@ final class LookupClassDefiner implements ClassDefiner {
   }
 
   public static boolean canLoadProxyByName(Class<?> hostClass) {
-    return false; // hidden/anonymous classes are not reliably loadable by name
+      return HIDDEN_DEFINER != null; // lookup-defined classes are normal named classes
   }
 
   @Override
