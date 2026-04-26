@@ -18,6 +18,7 @@ package com.google.inject.internal.aop;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Method;
 /**
  * {@link ClassDefiner} that defines classes using {@code MethodHandles.Lookup#defineHiddenClass}.
  *
@@ -27,7 +28,64 @@ final class HiddenClassDefiner implements ClassDefiner {
 
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
-    Lookup hostLookup = MethodHandles.privateLookupIn(hostClass, MethodHandles.lookup());
-    return hostLookup.defineClass(bytecode);
+    Module guiceModule = HiddenClassDefiner.class.getModule();
+    Module hostModule = hostClass.getModule();
+    if (guiceModule.isNamed() && hostModule.isNamed()) {
+      if (!guiceModule.canRead(hostModule)) {
+        guiceModule.addReads(hostModule);
+      }
+      if (!hostModule.isOpen(hostClass.getPackageName(), guiceModule)) {
+        hostModule.addOpens(hostClass.getPackageName(), guiceModule);
+      }
     }
+
+    Lookup initialLookup;
+    try {
+      // Hidden classes with NESTMATE need a full-privilege lookup.
+      initialLookup = MethodHandles.privateLookupIn(hostClass, MethodHandles.lookup());
+    } catch (IllegalAccessException e) {
+      initialLookup = MethodHandles.lookup().in(hostClass);
+    }
+    return defineClass(initialLookup, bytecode, hostClass);
+  }
+
+  private Class<?> defineClass(Lookup lookup, byte[] bytecode, Class<?> hostClass) throws Exception {
+    try {
+      return lookup.defineClass(bytecode);
+    } catch (IllegalAccessException e) {
+      // 1) Try hostClass.getModuleLookup() if the host exposes one.
+      try {
+        Method getModuleLookup = hostClass.getDeclaredMethod("getModuleLookup");
+        getModuleLookup.setAccessible(true);
+        Lookup nextLookup = (Lookup) getModuleLookup.invoke(null);
+        if (nextLookup != null && !nextLookup.equals(lookup)) {
+          return nextLookup.defineClass(bytecode);
+        }
+      } catch (Throwable ignored) {
+        // Ignore and continue with other lookup strategies.
+      }
+
+      // 2) Retry with a private lookup.
+      try {
+        Lookup nextLookup = MethodHandles.privateLookupIn(hostClass, MethodHandles.lookup());
+        if (nextLookup != null && !nextLookup.equals(lookup)) {
+          return nextLookup.defineClass(bytecode);
+        }
+      } catch (IllegalAccessException ignored) {
+        // Ignore and continue with other lookup strategies.
+      }
+
+      // 3) Last attempt with lookup().in(hostClass).
+      Lookup fallbackLookup = MethodHandles.lookup().in(hostClass);
+      if (!fallbackLookup.equals(lookup)) {
+        try {
+          return fallbackLookup.defineClass(bytecode);
+        } catch (IllegalAccessException ignored) {
+          // Fall through to rethrow the original access error.
+        }
+      }
+
+      throw e;
+    }
+  }
 }
