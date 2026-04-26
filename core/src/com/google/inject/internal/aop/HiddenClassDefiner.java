@@ -41,7 +41,6 @@ final class HiddenClassDefiner implements ClassDefiner {
 
     Lookup initialLookup;
     try {
-      // Hidden classes with NESTMATE need a full-privilege lookup.
       initialLookup = MethodHandles.privateLookupIn(hostClass, MethodHandles.lookup());
     } catch (IllegalAccessException e) {
       initialLookup = MethodHandles.lookup().in(hostClass);
