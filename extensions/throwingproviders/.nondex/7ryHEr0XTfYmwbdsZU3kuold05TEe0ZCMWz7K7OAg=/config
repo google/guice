@@ -1,0 +1,11 @@
+nondexFilter=.*
+nondexMode=FULL
+nondexSeed=12703274
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/.nondex
+nondexJarDir=/Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/.nondex
+nondexExecid=7ryHEr0XTfYmwbdsZU3kuold05TEe0ZCMWz7K7OAg=
+nondexLogging=CONFIG
+test=

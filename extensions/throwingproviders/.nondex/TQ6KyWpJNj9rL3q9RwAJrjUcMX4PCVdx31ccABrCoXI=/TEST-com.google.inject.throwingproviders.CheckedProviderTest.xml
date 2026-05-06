@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.google.inject.throwingproviders.CheckedProviderTest" time="0.097" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="java.vm.version" value="17.0.19+0"/>
+    <property name="sun.boot.library.path" value="/opt/homebrew/Cellar/openjdk@17/17.0.19/libexec/openjdk.jdk/Contents/Home/lib"/>
+    <property name="maven.multiModuleProjectDirectory" value="/Users/promachowdhury/flaky_fix/guice"/>
+    <property name="java.vm.vendor" value="Homebrew"/>
+    <property name="java.vendor.url" value="https://github.com/Homebrew/homebrew-core/issues"/>
+    <property name="path.separator" value=":"/>
+    <property name="guice.disable.misplaced.annotation.check" value="true"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="user.country" value="BD"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="test" value="CheckedProviderTest#testBindingToInterfaceWithExtraMethod_Provides"/>
+    <property name="user.dir" value="/Users/promachowdhury/flaky_fix/guice"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="java.runtime.version" value="17.0.19+0"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="nondexRuns" value="1000"/>
+    <property name="java.io.tmpdir" value="/var/folders/ym/q5m4l2l139lb0l3_v1tnr_k00000gn/T/"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="classworlds.conf" value="/opt/homebrew/Cellar/maven/3.9.11/libexec/bin/m2.conf"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/promachowdhury/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="maven.conf" value="/opt/homebrew/Cellar/maven/3.9.11/libexec/conf"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="java.class.version" value="61.0"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="os.version" value="14.2.1"/>
+    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="library.jansi.path" value="/opt/homebrew/Cellar/maven/3.9.11/libexec/lib/jansi-native"/>
+    <property name="user.home" value="/Users/promachowdhury"/>
+    <property name="user.timezone" value="Asia/Dhaka"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.specification.version" value="17"/>
+    <property name="user.name" value="promachowdhury"/>
+    <property name="java.class.path" value="/opt/homebrew/Cellar/maven/3.9.11/libexec/boot/plexus-classworlds-2.9.0.jar"/>
+    <property name="java.vm.specification.version" value="17"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher -pl extensions/throwingproviders edu.illinois:nondex-maven-plugin:2.1.7:nondex -Dtest=CheckedProviderTest#testBindingToInterfaceWithExtraMethod_Provides -DnondexRuns=1000"/>
+    <property name="java.home" value="/opt/homebrew/Cellar/openjdk@17/17.0.19/libexec/openjdk.jdk/Contents/Home"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="java.version" value="17.0.19"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Homebrew"/>
+    <property name="sun.stderr.encoding" value="UTF-8"/>
+    <property name="maven.home" value="/opt/homebrew/Cellar/maven/3.9.11/libexec"/>
+    <property name="java.specification.maintenance.version" value="1"/>
+    <property name="file.separator" value="/"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.vendor.url.bug" value="https://github.com/Homebrew/homebrew-core/issues"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="java.vendor.version" value="Homebrew"/>
+    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+  </properties>
+  <testcase name="testBindingToInterfaceWithExtraMethod_Provides" classname="com.google.inject.throwingproviders.CheckedProviderTest" time="0.096"/>
+</testsuite>

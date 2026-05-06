@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Comparator;
 
 /** Helper methods to verify the correctness of CheckedProvider interfaces. */
 final class ProviderChecker {
@@ -100,7 +101,9 @@ final class ProviderChecker {
           declaredMethods.isEmpty(),
           "%s may not declare any new methods, but declared %s",
           interfaceType,
-          Arrays.asList(interfaceType.getDeclaredMethods()));
+          Arrays.stream(interfaceType.getDeclaredMethods())
+      .sorted(Comparator.comparing(Method::toGenericString))
+      .collect(toImmutableList()));
     }
   }
 

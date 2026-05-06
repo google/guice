@@ -1,0 +1,60 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------< com.google.inject.extensions:guice-throwingproviders >--------
+[INFO] Building Google Guice - Extensions - ThrowingProviders 7.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- remote-resources:1.5:process (default) @ guice-throwingproviders ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ guice-throwingproviders ---
+[INFO] Copying 1 resource from src to target/classes
+[INFO] Copying 3 resources from target/maven-shared-archive-resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ guice-throwingproviders ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 12 source files with javac [debug release 11] to target/classes
+[INFO] /Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/src/com/google/inject/throwingproviders/ProviderChecker.java: /Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/src/com/google/inject/throwingproviders/ProviderChecker.java uses or overrides a deprecated API.
+[INFO] /Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/src/com/google/inject/throwingproviders/ProviderChecker.java: Recompile with -Xlint:deprecation for details.
+[INFO] /Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/src/com/google/inject/throwingproviders/CheckedProviders.java: /Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/src/com/google/inject/throwingproviders/CheckedProviders.java uses unchecked or unsafe operations.
+[INFO] /Users/promachowdhury/flaky_fix/guice/extensions/throwingproviders/src/com/google/inject/throwingproviders/CheckedProviders.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ guice-throwingproviders ---
+[INFO] Copying 1 resource from test to target/test-classes
+[INFO] Copying 3 resources from target/maven-shared-archive-resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ guice-throwingproviders ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 5 source files with javac [debug release 11] to target/test-classes
+[INFO] 
+[INFO] --- surefire:2.19.1:test (default-test) @ guice-throwingproviders ---
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.google.inject.throwingproviders.CheckedProviderTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 sec - in com.google.inject.throwingproviders.CheckedProviderTest
+
+Results :
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- surefire:2.19.1:test (stack-traces-off) @ guice-throwingproviders ---
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.google.inject.throwingproviders.CheckedProviderTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.124 sec - in com.google.inject.throwingproviders.CheckedProviderTest
+
+Results :
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.743 s
+[INFO] Finished at: 2026-05-06T11:52:47+06:00
+[INFO] ------------------------------------------------------------------------
