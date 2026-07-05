@@ -36,7 +36,7 @@ public final class ClassDefining {
   // initialization-on-demand...
   private static class ClassDefinerHolder {
     static final ClassDefiner INSTANCE = bindClassDefiner();
-    static final boolean IS_UNSAFE = INSTANCE instanceof UnsafeClassDefiner;
+    static final boolean IS_UNSAFE = INSTANCE instanceof LookupClassDefiner;
   }
 
   /** Defines a new class relative to the host. */
@@ -51,12 +51,7 @@ public final class ClassDefining {
 
   /** Returns true if it's possible to load by name proxies defined from the given host. */
   public static boolean canLoadProxyByName(Class<?> hostClass) {
-    return !ClassDefinerHolder.IS_UNSAFE || UnsafeClassDefiner.canLoadProxyByName(hostClass);
-  }
-
-  /** Returns true if it's possible to downcast to proxies defined from the given host. */
-  public static boolean canDowncastToProxy(Class<?> hostClass) {
-    return !ClassDefinerHolder.IS_UNSAFE || UnsafeClassDefiner.canDowncastToProxy(hostClass);
+    return !ClassDefinerHolder.IS_UNSAFE || LookupClassDefiner.canLoadProxyByName(hostClass);
   }
 
   /** Binds the preferred {@link ClassDefiner} instance. */
@@ -65,8 +60,8 @@ public final class ClassDefining {
     CustomClassLoadingOption loadingOption = InternalFlags.getCustomClassLoadingOption();
     if (loadingOption == CustomClassLoadingOption.CHILD) {
       return new ChildClassDefiner(); // override default choice
-    } else if (UnsafeClassDefiner.isAccessible()) {
-      return new UnsafeClassDefiner(); // default choice if available
+    } else if (LookupClassDefiner.isAccessible()) {
+      return new LookupClassDefiner(); // default choice if available
     } else if (loadingOption != CustomClassLoadingOption.OFF) {
       return new ChildClassDefiner(); // second choice unless forbidden
     } else {
