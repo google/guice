@@ -178,13 +178,10 @@ class InjectorBindingData {
   }
 
   public ImmutableList<InterceptorBinding> getInterceptorBindings() {
-    if (parent.isPresent()) {
-      return new ImmutableList.Builder<InterceptorBinding>()
-          .addAll(parent.get().getInterceptorBindings())
-          .addAll(interceptorBindings)
-          .build();
-    }
-    return ImmutableList.copyOf(interceptorBindings);
+      return parent.map(injectorBindingData -> new ImmutableList.Builder<InterceptorBinding>()
+              .addAll(injectorBindingData.getInterceptorBindings())
+              .addAll(interceptorBindings)
+              .build()).orElseGet(() -> ImmutableList.copyOf(interceptorBindings));
   }
 
   public ImmutableList<InterceptorBinding> getInterceptorBindingsThisLevel() {
@@ -196,13 +193,10 @@ class InjectorBindingData {
   }
 
   public ImmutableList<TypeListenerBinding> getTypeListenerBindings() {
-    if (parent.isPresent()) {
-      return new ImmutableList.Builder<TypeListenerBinding>()
-          .addAll(parent.get().getTypeListenerBindings())
-          .addAll(typeListenerBindings)
-          .build();
-    }
-    return ImmutableList.copyOf(typeListenerBindings);
+      return parent.map(injectorBindingData -> new ImmutableList.Builder<TypeListenerBinding>()
+              .addAll(injectorBindingData.getTypeListenerBindings())
+              .addAll(typeListenerBindings)
+              .build()).orElseGet(() -> ImmutableList.copyOf(typeListenerBindings));
   }
 
   public ImmutableList<TypeListenerBinding> getTypeListenerBindingsThisLevel() {
@@ -214,13 +208,10 @@ class InjectorBindingData {
   }
 
   public ImmutableList<ProvisionListenerBinding> getProvisionListenerBindings() {
-    if (parent.isPresent()) {
-      return new ImmutableList.Builder<ProvisionListenerBinding>()
-          .addAll(parent.get().getProvisionListenerBindings())
-          .addAll(provisionListenerBindings)
-          .build();
-    }
-    return ImmutableList.copyOf(provisionListenerBindings);
+      return parent.map(injectorBindingData -> new ImmutableList.Builder<ProvisionListenerBinding>()
+              .addAll(injectorBindingData.getProvisionListenerBindings())
+              .addAll(provisionListenerBindings)
+              .build()).orElseGet(() -> ImmutableList.copyOf(provisionListenerBindings));
   }
 
   public ImmutableList<ProvisionListenerBinding> getProvisionListenerBindingsThisLevel() {
@@ -232,13 +223,10 @@ class InjectorBindingData {
   }
 
   public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
-    if (parent.isPresent()) {
-      return new ImmutableList.Builder<ModuleAnnotatedMethodScannerBinding>()
-          .addAll(parent.get().getScannerBindings())
-          .addAll(scannerBindings)
-          .build();
-    }
-    return ImmutableList.copyOf(scannerBindings);
+      return parent.map(injectorBindingData -> new ImmutableList.Builder<ModuleAnnotatedMethodScannerBinding>()
+              .addAll(injectorBindingData.getScannerBindings())
+              .addAll(scannerBindings)
+              .build()).orElseGet(() -> ImmutableList.copyOf(scannerBindings));
   }
 
   public ImmutableList<ModuleAnnotatedMethodScannerBinding> getScannerBindingsThisLevel() {
