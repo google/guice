@@ -195,7 +195,7 @@ public final class CheckedProviders {
   private static void checkThrowable(
       Class<? extends CheckedProvider<?>> providerType, Class<? extends Throwable> thrownType) {
     try {
-      thrownType.getDeclaredConstructor();
+      var unused = thrownType.getDeclaredConstructor();
     } catch (NoSuchMethodException e) {
       throw new IllegalArgumentException(
           String.format(

@@ -1,0 +1,52 @@
+module(name = "guice")
+
+bazel_dep(name = "rules_java", version = "9.7.0")
+bazel_dep(name = "rules_jvm_external", version = "7.0")
+bazel_dep(name = "google_bazel_common")
+
+git_override(
+    module_name = "google_bazel_common",
+    commit = "03804d4c0d98a46c3965b748533b5a23b395d925",
+    remote = "https://github.com/google/bazel-common",
+)
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        "aopalliance:aopalliance:1.0",
+        "biz.aQute:bnd:0.0.384",
+        "biz.aQute.bnd:bndlib:2.4.0",
+        "com.google.auto.value:auto-value:1.6.3",
+        "com.google.code.findbugs:jsr305:3.0.1",
+        "com.google.dagger:dagger:2.22.1",
+        "com.google.dagger:dagger-producers:2.22.1",
+        "com.google.errorprone:error_prone_annotations:2.18.0",
+        "com.google.guava:guava:33.0.0-jre",
+        "com.google.guava:guava-testlib:33.0.0-jre",
+        "com.google.truth.extensions:truth-java8-extension:1.4.0",
+        "com.google.truth:truth:1.4.0",
+        "commons-logging:commons-logging:1.2",
+        "info.picocli:picocli:4.6.3",
+        "jakarta.inject:jakarta.inject-api:2.0.1",
+        "jakarta.inject:jakarta.inject-tck:2.0.1",
+        "jakarta.persistence:jakarta.persistence-api:3.0.0",
+        "jakarta.servlet:jakarta.servlet-api:5.0.0",
+        "junit:junit:4.13.2",
+        "org.apache.felix:org.apache.felix.framework:3.0.5",
+        "org.apache.struts.xwork:xwork-core:2.3.37",
+        "org.apache.struts:struts2-core:2.5.31",
+        "org.easymock:easymock:3.1",
+        "org.hamcrest:hamcrest:2.2",
+        "org.hibernate:hibernate-core-jakarta:5.6.15.Final",
+        "org.hsqldb:hsqldb-j5:2.0.0",
+        "org.jspecify:jspecify:1.0.0",
+        "org.mockito:mockito-core:4.2.0",
+        "org.ow2.asm:asm:9.5",
+        "org.springframework:spring-beans:5.3.18",
+        "org.springframework:spring-core:5.3.18",
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(maven, "maven")
