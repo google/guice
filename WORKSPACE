@@ -21,10 +21,6 @@ http_archive(
     urls = ["https://github.com/google/bazel-common/archive/d59d067c04e973f3c4aa34f6628bed97d6664c3c.zip"],
 )
 
-load("@google_bazel_common//:workspace_defs.bzl", "google_common_workspace_rules")
-
-google_common_workspace_rules()
-
 maven_install(
     artifacts = [
         "aopalliance:aopalliance:1.0",
