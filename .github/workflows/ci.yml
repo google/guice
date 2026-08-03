@@ -18,10 +18,10 @@ on:
       - master
 
 concurrency:
-  # On main branch, we don't want any jobs cancelled so the sha is used to name the group
-  # On PR branches, we cancel the job if new commits are pushed
-  # More info: https://stackoverflow.com/a/68422069/253468
-  group: ${{ (github.ref == 'refs/heads/master') && format('ci-main-{0}', github.sha) || format('ci-main-{0}', github.ref) }}
+  # For a PR, cancel a job if a new commit is pushed.
+  # For other pushes to branches, don't cancel jobs.
+  # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#example-using-a-fallback-value
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
