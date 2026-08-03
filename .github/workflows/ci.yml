@@ -6,6 +6,9 @@ env:
   USE_JAVA_DISTRIBUTION: 'zulu'
   USE_JAVA_VERSION: '11'
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -40,6 +43,8 @@ jobs:
     name: Test using Maven with JDK ${{ matrix.java }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/maven-test
 
   # Note: We can't fold this into the matrix because it changes the `steps`,
@@ -62,6 +67,8 @@ jobs:
     name: Test using Bazel with JDK ${{ matrix.java }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/bazel-test
 
   bazel-build:
@@ -69,6 +76,8 @@ jobs:
     name: Bazel Build
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/bazel-build
 
   local-artifact-tests:
@@ -77,6 +86,8 @@ jobs:
     name: Local Artifact Tests
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/local-artifact-tests
 
   publish:
@@ -87,6 +98,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/publish-snapshot
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
