@@ -167,8 +167,8 @@ final class Enhancer extends AbstractGlueGenerator {
     super(hostClass, ENHANCER_BY_GUICE_MARKER);
     this.bridgeDelegates = bridgeDelegates;
 
-    // with defineAnonymousClass we can't downcast to the proxy and must use host instead
-    this.checkcastToProxy = ClassDefining.canDowncastToProxy(hostClass) ? proxyName : hostName;
+    // Generated code can downcast to the generated proxy type.
+    this.checkcastToProxy = proxyName;
   }
 
   @Override
