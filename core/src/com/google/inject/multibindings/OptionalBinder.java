@@ -148,13 +148,69 @@ public class OptionalBinder<T> {
   }
 
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Key<T> type) {
-    return new OptionalBinder<T>(newRealOptionalBinder(binder, type));
+    return newOptionalBinder(binder, type, true);
+  }
+
+  /**
+   * Internal constructor for RealOptionalBinder to use.
+   */
+  private static <T> OptionalBinder<T> newOptionalBinder(
+      Binder binder, Key<T> type, boolean bindOptional) {
+    return new OptionalBinder<T>(newRealOptionalBinder(binder, type, bindOptional));
+  }
+
+  /**
+   * Returns a new OptionalBinder that contributes to an existing OptionalBinder binding (typically
+   * in a parent injector) without creating a new OptionalBinder binding itself. This is necessary
+   * when contributing to an OptionalBinder from a PrivateModule where the parent injector already
+   * has the OptionalBinder.
+   *
+   * @since 7.0
+   */
+  public static <T> OptionalBinder<T> newOptionalContributor(Binder binder, Class<T> type) {
+    return newOptionalContributor(binder, Key.get(type));
+  }
+
+  /**
+   * Returns a new OptionalBinder that contributes to an existing OptionalBinder binding (typically
+   * in a parent injector) without creating a new OptionalBinder binding itself. This is necessary
+   * when contributing to an OptionalBinder from a PrivateModule where the parent injector already
+   * has the OptionalBinder.
+   *
+   * @since 7.0
+   */
+  public static <T> OptionalBinder<T> newOptionalContributor(Binder binder, TypeLiteral<T> type) {
+    return newOptionalContributor(binder, Key.get(type));
+  }
+
+  /**
+   * Returns a new OptionalBinder that contributes to an existing OptionalBinder binding (typically
+   * in a parent injector) without creating a new OptionalBinder binding itself. This is necessary
+   * when contributing to an OptionalBinder from a PrivateModule where the parent injector already
+   * has the OptionalBinder.
+   *
+   * @since 7.0
+   */
+  public static <T> OptionalBinder<T> newOptionalContributor(Binder binder, Key<T> type) {
+    return newOptionalBinder(binder, type, false);
   }
 
   private final RealOptionalBinder<T> delegate;
 
   private OptionalBinder(RealOptionalBinder<T> delegate) {
     this.delegate = delegate;
+  }
+
+  /**
+   * Configures the OptionalBinder to automatically expose the binding for each added entry. This is
+   * useful when contributing to a parent injector's OptionalBinder from a PrivateModule.
+   *
+   * @return this optional binder
+   * @since 7.0
+   */
+  public OptionalBinder<T> permitSpanInjectors() {
+    delegate.permitSpanInjectors();
+    return this;
   }
 
   /**
