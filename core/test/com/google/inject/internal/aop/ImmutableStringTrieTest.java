@@ -17,10 +17,9 @@
 package com.google.inject.internal.aop;
 
 import static java.util.Arrays.stream;
-import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -48,9 +47,7 @@ public class ImmutableStringTrieTest extends TestCase {
 
   public void testMethodStrings() {
     List<String> table =
-        stream(Binder.class.getDeclaredMethods()).map(Method::toString).collect(toList());
-
-    sort(table);
+        stream(Binder.class.getDeclaredMethods()).map(Method::toString).sorted().collect(toList());
 
     ToIntFunction<String> trie = ImmutableStringTrie.buildTrie(table);
 

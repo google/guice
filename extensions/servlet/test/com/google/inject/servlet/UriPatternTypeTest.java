@@ -16,8 +16,6 @@
 
 package com.google.inject.servlet;
 
-import static junit.framework.Assert.fail;
-
 import junit.framework.TestCase;
 
 public class UriPatternTypeTest extends TestCase {
