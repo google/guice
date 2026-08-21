@@ -36,4 +36,10 @@ public interface KotlinSupportInterface {
 
   /** Returns whether the {@code clazz} is a Kotlin class. */
   boolean isKotlinClass(Class<?> clazz);
+
+  /**
+   * Returns a demangled StackTraceElement if it corresponds to an inlined Kotlin function,
+   * otherwise returns the original StackTraceElement.
+   */
+  StackTraceElement maybeDemangleSTE(StackTraceElement element, Class<?> clazz);
 }

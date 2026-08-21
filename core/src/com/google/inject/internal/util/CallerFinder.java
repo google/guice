@@ -7,5 +7,19 @@ import java.util.function.Predicate;
  * for implementing it.
  */
 interface CallerFinder {
-  StackTraceElement findCaller(Predicate<String> shouldBeSkipped);
+  /**
+   * A Tuple to hold the stack element alongside the class it originated from if StackWalker
+   * captured it.
+   */
+  final class Caller {
+    final StackTraceElement element;
+    final Class<?> clazz;
+
+    Caller(StackTraceElement element, Class<?> clazz) {
+      this.element = element;
+      this.clazz = clazz;
+    }
+  }
+
+  Caller findCaller(Predicate<String> shouldBeSkipped);
 }
