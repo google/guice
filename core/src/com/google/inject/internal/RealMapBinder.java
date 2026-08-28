@@ -38,6 +38,7 @@ import com.google.inject.multibindings.MultibindingsTargetVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.util.Types;
@@ -117,6 +118,62 @@ public final class RealMapBinder<K, V> implements Module {
         Key.get(mapOf(keyType, valueType), annotationType),
         RealMultibinder.newRealSetBinder(
             binder, Key.get(entryOfProviderOf(keyType, valueType), annotationType)));
+  }
+
+  /**
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a {@link
+   * Map} that is itself bound with {@code annotationType}.
+   */
+  public static <K, V> RealMapBinder<K, V> newRealMapBinder(
+      Binder binder,
+      TypeLiteral<K> keyType,
+      TypeLiteral<V> valueType,
+      Class<? extends Annotation> annotationType,
+      boolean bindMap) {
+    return newRealMapBinder(
+        binder,
+        keyType,
+        valueType,
+        Key.get(mapOf(keyType, valueType), annotationType),
+        RealMultibinder.newRealSetBinder(
+            binder, Key.get(entryOfProviderOf(keyType, valueType), annotationType), bindMap),
+        bindMap);
+  }
+
+  /**
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a {@link
+   * Map} that is itself bound with {@code annotation}.
+   */
+  public static <K, V> RealMapBinder<K, V> newRealMapBinder(
+      Binder binder,
+      TypeLiteral<K> keyType,
+      TypeLiteral<V> valueType,
+      Annotation annotation,
+      boolean bindMap) {
+    return newRealMapBinder(
+        binder,
+        keyType,
+        valueType,
+        Key.get(mapOf(keyType, valueType), annotation),
+        RealMultibinder.newRealSetBinder(
+            binder, Key.get(entryOfProviderOf(keyType, valueType), annotation), bindMap),
+        bindMap);
+  }
+
+  /**
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a {@link
+   * Map} that is itself bound with no binding annotation.
+   */
+  public static <K, V> RealMapBinder<K, V> newRealMapBinder(
+      Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType, boolean bindMap) {
+    return newRealMapBinder(
+        binder,
+        keyType,
+        valueType,
+        Key.get(mapOf(keyType, valueType)),
+        RealMultibinder.newRealSetBinder(
+            binder, Key.get(entryOfProviderOf(keyType, valueType)), bindMap),
+        bindMap);
   }
 
   @SuppressWarnings("unchecked") // a map of <K, V> is safely a Map<K, V>
@@ -240,8 +297,18 @@ public final class RealMapBinder<K, V> implements Module {
       TypeLiteral<V> valueType,
       Key<Map<K, V>> mapKey,
       RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
+    return newRealMapBinder(binder, keyType, valueType, mapKey, entrySetBinder, true);
+  }
+
+  private static <K, V> RealMapBinder<K, V> newRealMapBinder(
+      Binder binder,
+      TypeLiteral<K> keyType,
+      TypeLiteral<V> valueType,
+      Key<Map<K, V>> mapKey,
+      RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder,
+      boolean bindMap) {
     RealMapBinder<K, V> mapBinder =
-        new RealMapBinder<>(binder, keyType, valueType, mapKey, entrySetBinder);
+        new RealMapBinder<>(binder, keyType, valueType, mapKey, entrySetBinder, bindMap);
     binder.install(mapBinder);
     return mapBinder;
   }
@@ -253,6 +320,8 @@ public final class RealMapBinder<K, V> implements Module {
 
   private final BindingSelection<K, V> bindingSelection;
   private final Binder binder;
+  private final boolean bindMap;
+  private boolean permitSpanInjectors;
 
   private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
 
@@ -261,16 +330,23 @@ public final class RealMapBinder<K, V> implements Module {
       TypeLiteral<K> keyType,
       TypeLiteral<V> valueType,
       Key<Map<K, V>> mapKey,
-      RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
+      RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder,
+      boolean bindMap) {
     this.bindingSelection = new BindingSelection<>(keyType, valueType, mapKey, entrySetBinder);
     this.binder = binder;
     this.entrySetBinder = entrySetBinder;
+    this.bindMap = bindMap;
   }
 
   public void permitDuplicates() {
     checkConfiguration(!bindingSelection.isInitialized(), "MapBinder was already initialized");
     entrySetBinder.permitDuplicates();
     binder.install(new MultimapBinder<K, V>(bindingSelection));
+  }
+
+  public void permitSpanInjectors() {
+    this.permitSpanInjectors = true;
+    entrySetBinder.permitSpanInjectors();
   }
 
   /** Adds a binding to the map for the given key. */
@@ -294,7 +370,12 @@ public final class RealMapBinder<K, V> implements Module {
    * V}.
    */
   public LinkedBindingBuilder<V> addBinding(K key) {
-    return binder.bind(getKeyForNewValue(key));
+    Key<V> valueKey = getKeyForNewValue(key);
+    LinkedBindingBuilder<V> builder = binder.bind(valueKey);
+    if (permitSpanInjectors && binder instanceof com.google.inject.PrivateBinder) {
+      ((com.google.inject.PrivateBinder) binder).expose(valueKey);
+    }
+    return builder;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings.
@@ -302,32 +383,34 @@ public final class RealMapBinder<K, V> implements Module {
   public void configure(Binder binder) {
     checkConfiguration(!bindingSelection.isInitialized(), "MapBinder was already initialized");
 
-    // Binds a Map<K, Provider<V>>
-    binder
-        .bind(bindingSelection.getProviderMapKey())
-        .toProvider(new RealProviderMapProvider<>(bindingSelection));
+    if (bindMap) {
+      // Binds a Map<K, Provider<V>>
+      binder
+          .bind(bindingSelection.getProviderMapKey())
+          .toProvider(new RealProviderMapProvider<>(bindingSelection));
 
-    // The map this exposes is internally an ImmutableMap, so it's OK to massage
-    // the guice Provider to jakarta Provider in the value (since Guice provider
-    // implements jakarta Provider).
-    binder
-        .bind(bindingSelection.getJakartaProviderMapKey())
-        .to((Key) bindingSelection.getProviderMapKey());
+      // The map this exposes is internally an ImmutableMap, so it's OK to massage
+      // the guice Provider to jakarta Provider in the value (since Guice provider
+      // implements jakarta Provider).
+      binder
+          .bind(bindingSelection.getJakartaProviderMapKey())
+          .to((Key) bindingSelection.getProviderMapKey());
 
-    // Bind Map<K, V> to the provider w/ extension support.
-    binder
-        .bind(bindingSelection.getMapKey())
-        .toProvider(new ExtensionRealMapProvider<>(bindingSelection));
-    // Bind Map<K, ? extends V> to the provider w/o the extension support.
-    binder
-        .bind(bindingSelection.getMapOfKeyExtendsValueKey())
-        .to((Key) bindingSelection.getMapKey());
+      // Bind Map<K, V> to the provider w/ extension support.
+      binder
+          .bind(bindingSelection.getMapKey())
+          .toProvider(new ExtensionRealMapProvider<>(bindingSelection));
+      // Bind Map<K, ? extends V> to the provider w/o the extension support.
+      binder
+          .bind(bindingSelection.getMapOfKeyExtendsValueKey())
+          .to((Key) bindingSelection.getMapKey());
 
-    // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
-    // safe to massage the return type like this
-    binder
-        .bind(bindingSelection.getEntrySetJakartaProviderKey())
-        .to((Key) bindingSelection.getEntrySetBinder().getSetKey());
+      // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
+      // safe to massage the return type like this
+      binder
+          .bind(bindingSelection.getEntrySetJakartaProviderKey())
+          .to((Key) bindingSelection.getEntrySetBinder().getSetKey());
+    }
   }
 
   @Override
@@ -442,6 +525,11 @@ public final class RealMapBinder<K, V> implements Module {
       for (Binding<Map.Entry<K, Provider<V>>> binding :
           injector.findBindingsByType(entrySetBinder.getElementTypeLiteral())) {
         if (entrySetBinder.containsElement(binding)) {
+
+          if (binding instanceof ExposedBinding) {
+            ExposedBinding<Map.Entry<K, Provider<V>>> exposed = (ExposedBinding) binding;
+            binding = exposed.getPrivateElements().getInjector().getBinding(binding.getKey());
+          }
 
           // Protected by findBindingByType() and the fact that all providers are added by us
           // in addBinding(). It would theoretically be possible for someone to directly

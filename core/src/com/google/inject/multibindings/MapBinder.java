@@ -154,6 +154,86 @@ public class MapBinder<K, V> {
         binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotationType);
   }
 
+  /**
+   * Returns a new mapbinder that contributes to an existing map binding (typically in a parent
+   * injector) without creating a new map binding itself. This is necessary when contributing to a
+   * MapBinder from a PrivateModule where the parent injector already has the MapBinder.
+   *
+   * @since 7.0
+   */
+  public static <K, V> MapBinder<K, V> newMapContributor(
+      Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return new MapBinder<K, V>(newRealMapBinder(binder, keyType, valueType, false));
+  }
+
+  /**
+   * Returns a new mapbinder that contributes to an existing map binding (typically in a parent
+   * injector) without creating a new map binding itself. This is necessary when contributing to a
+   * MapBinder from a PrivateModule where the parent injector already has the MapBinder.
+   *
+   * @since 7.0
+   */
+  public static <K, V> MapBinder<K, V> newMapContributor(
+      Binder binder, Class<K> keyType, Class<V> valueType) {
+    return newMapContributor(binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType));
+  }
+
+  /**
+   * Returns a new mapbinder that contributes to an existing map binding (typically in a parent
+   * injector) without creating a new map binding itself. This is necessary when contributing to a
+   * MapBinder from a PrivateModule where the parent injector already has the MapBinder.
+   *
+   * @since 7.0
+   */
+  public static <K, V> MapBinder<K, V> newMapContributor(
+      Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType, Annotation annotation) {
+    return new MapBinder<K, V>(newRealMapBinder(binder, keyType, valueType, annotation, false));
+  }
+
+  /**
+   * Returns a new mapbinder that contributes to an existing map binding (typically in a parent
+   * injector) without creating a new map binding itself. This is necessary when contributing to a
+   * MapBinder from a PrivateModule where the parent injector already has the MapBinder.
+   *
+   * @since 7.0
+   */
+  public static <K, V> MapBinder<K, V> newMapContributor(
+      Binder binder, Class<K> keyType, Class<V> valueType, Annotation annotation) {
+    return newMapContributor(
+        binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotation);
+  }
+
+  /**
+   * Returns a new mapbinder that contributes to an existing map binding (typically in a parent
+   * injector) without creating a new map binding itself. This is necessary when contributing to a
+   * MapBinder from a PrivateModule where the parent injector already has the MapBinder.
+   *
+   * @since 7.0
+   */
+  public static <K, V> MapBinder<K, V> newMapContributor(
+      Binder binder,
+      TypeLiteral<K> keyType,
+      TypeLiteral<V> valueType,
+      Class<? extends Annotation> annotationType) {
+    return new MapBinder<K, V>(newRealMapBinder(binder, keyType, valueType, annotationType, false));
+  }
+
+  /**
+   * Returns a new mapbinder that contributes to an existing map binding (typically in a parent
+   * injector) without creating a new map binding itself. This is necessary when contributing to a
+   * MapBinder from a PrivateModule where the parent injector already has the MapBinder.
+   *
+   * @since 7.0
+   */
+  public static <K, V> MapBinder<K, V> newMapContributor(
+      Binder binder,
+      Class<K> keyType,
+      Class<V> valueType,
+      Class<? extends Annotation> annotationType) {
+    return newMapContributor(
+        binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotationType);
+  }
+
   private final RealMapBinder<K, V> delegate;
 
   private MapBinder(RealMapBinder<K, V> delegate) {
@@ -177,6 +257,18 @@ public class MapBinder<K, V> {
    */
   public MapBinder<K, V> permitDuplicates() {
     delegate.permitDuplicates();
+    return this;
+  }
+
+  /**
+   * Configures the mapbinder to automatically expose the binding for each added entry. This is useful
+   * when contributing to a parent injector's MapBinder from a PrivateModule.
+   *
+   * @return this map binder
+   * @since 7.0
+   */
+  public MapBinder<K, V> permitSpanInjectors() {
+    delegate.permitSpanInjectors();
     return this;
   }
 
