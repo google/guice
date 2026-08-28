@@ -16,87 +16,75 @@
 
 package com.google.inject.internal.aop;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 /**
  * {@link ClassDefiner} that defines classes using {@code MethodHandles.Lookup#defineHiddenClass}.
  *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
-@SuppressWarnings("SunApi")
 final class HiddenClassDefiner implements ClassDefiner {
-
-  private static final sun.misc.Unsafe THE_UNSAFE;
-  private static final Object TRUSTED_LOOKUP_BASE;
-  private static final long TRUSTED_LOOKUP_OFFSET;
-  private static final Object HIDDEN_CLASS_OPTIONS;
-  private static final Method HIDDEN_DEFINE_METHOD;
-
-  /** True if this class err'd during initialization and should not be used. */
-  static final boolean HAS_ERROR;
-
-  static {
-    sun.misc.Unsafe theUnsafe;
-    Object trustedLookupBase;
-    long trustedLookupOffset;
-    Object hiddenClassOptions;
-    Method hiddenDefineMethod;
-    try {
-      theUnsafe = UnsafeGetter.getUnsafe();
-      Field trustedLookupField = Lookup.class.getDeclaredField("IMPL_LOOKUP");
-      trustedLookupBase = theUnsafe.staticFieldBase(trustedLookupField);
-      trustedLookupOffset = theUnsafe.staticFieldOffset(trustedLookupField);
-      hiddenClassOptions = classOptions("NESTMATE");
-      hiddenDefineMethod =
-          Lookup.class.getMethod(
-              "defineHiddenClass", byte[].class, boolean.class, hiddenClassOptions.getClass());
-    } catch (Throwable e) {
-      // Allow the static initialization to complete without
-      // throwing an exception.
-      theUnsafe = null;
-      trustedLookupBase = null;
-      trustedLookupOffset = 0;
-      hiddenClassOptions = null;
-      hiddenDefineMethod = null;
-    }
-
-    THE_UNSAFE = theUnsafe;
-    TRUSTED_LOOKUP_BASE = trustedLookupBase;
-    TRUSTED_LOOKUP_OFFSET = trustedLookupOffset;
-    HIDDEN_CLASS_OPTIONS = hiddenClassOptions;
-    HIDDEN_DEFINE_METHOD = hiddenDefineMethod;
-    HAS_ERROR = theUnsafe == null;
-  }
 
   @Override
   public Class<?> define(Class<?> hostClass, byte[] bytecode) throws Exception {
-    if (HAS_ERROR) {
-      throw new IllegalStateException(
-          "Should not be called. An earlier error occurred during HiddenClassDefiner static"
-              + " initialization.");
+    Module guiceModule = HiddenClassDefiner.class.getModule();
+    Module hostModule = hostClass.getModule();
+    if (guiceModule.isNamed() && hostModule.isNamed()) {
+      if (!guiceModule.canRead(hostModule)) {
+        guiceModule.addReads(hostModule);
+      }
+      if (!hostModule.isOpen(hostClass.getPackageName(), guiceModule)) {
+        hostModule.addOpens(hostClass.getPackageName(), guiceModule);
+      }
     }
 
-    Lookup trustedLookup =
-        (Lookup) THE_UNSAFE.getObject(TRUSTED_LOOKUP_BASE, TRUSTED_LOOKUP_OFFSET);
-    Lookup definedLookup =
-        (Lookup)
-            HIDDEN_DEFINE_METHOD.invoke(
-                trustedLookup.in(hostClass), bytecode, false, HIDDEN_CLASS_OPTIONS);
-    return definedLookup.lookupClass();
+    Lookup initialLookup;
+    try {
+      initialLookup = MethodHandles.privateLookupIn(hostClass, MethodHandles.lookup());
+    } catch (IllegalAccessException e) {
+      initialLookup = MethodHandles.lookup().in(hostClass);
+    }
+    return defineClass(initialLookup, bytecode, hostClass);
   }
 
-  /** Creates {@link MethodHandles.Lookup.ClassOption} array with the named options. */
-  @SuppressWarnings("unchecked")
-  private static Object classOptions(String... options) throws ClassNotFoundException {
-    @SuppressWarnings("rawtypes") // Unavoidable, only way to use Enum.valueOf
-    Class optionClass = Class.forName(Lookup.class.getName() + "$ClassOption");
-    Object classOptions = Array.newInstance(optionClass, options.length);
-    for (int i = 0; i < options.length; i++) {
-      Array.set(classOptions, i, Enum.valueOf(optionClass, options[i]));
+  private Class<?> defineClass(Lookup lookup, byte[] bytecode, Class<?> hostClass) throws Exception {
+    try {
+      return lookup.defineClass(bytecode);
+    } catch (IllegalAccessException e) {
+      // 1) Try hostClass.getModuleLookup() if the host exposes one.
+      try {
+        Method getModuleLookup = hostClass.getDeclaredMethod("getModuleLookup");
+        getModuleLookup.setAccessible(true);
+        Lookup nextLookup = (Lookup) getModuleLookup.invoke(null);
+        if (nextLookup != null && !nextLookup.equals(lookup)) {
+          return nextLookup.defineClass(bytecode);
+        }
+      } catch (Throwable ignored) {
+        // Ignore and continue with other lookup strategies.
+      }
+
+      // 2) Retry with a private lookup.
+      try {
+        Lookup nextLookup = MethodHandles.privateLookupIn(hostClass, MethodHandles.lookup());
+        if (nextLookup != null && !nextLookup.equals(lookup)) {
+          return nextLookup.defineClass(bytecode);
+        }
+      } catch (IllegalAccessException ignored) {
+        // Ignore and continue with other lookup strategies.
+      }
+
+      // 3) Last attempt with lookup().in(hostClass).
+      Lookup fallbackLookup = MethodHandles.lookup().in(hostClass);
+      if (!fallbackLookup.equals(lookup)) {
+        try {
+          return fallbackLookup.defineClass(bytecode);
+        } catch (IllegalAccessException ignored) {
+          // Fall through to rethrow the original access error.
+        }
+      }
+
+      throw e;
     }
-    return classOptions;
   }
 }
