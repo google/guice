@@ -106,6 +106,7 @@ java_library(
         "//third_party/java/jakarta_inject",
         "//third_party/java/jspecify_annotations",
         "//third_party/java/jsr305_annotations",
+        "//tools/jdk/internal:jdk.unsupported/sun.misc",
     ],
 )
 
