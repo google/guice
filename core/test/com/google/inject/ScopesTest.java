@@ -60,6 +60,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -494,6 +495,98 @@ public class ScopesTest {
   }
 
   @Test
+  public void testSingletonScopeOnConstructorParameter() {
+    AtomicInteger nextInstanceId = new AtomicInteger();
+    Key<ConstructorScopedDependency> dependencyKey =
+        Key.get(ConstructorScopedDependency.class, named("constructor"));
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(dependencyKey)
+                    .toProvider(
+                        () -> new ConstructorScopedDependency(nextInstanceId.getAndIncrement()));
+              }
+            });
+
+    SingletonParameterConsumer first = injector.getInstance(SingletonParameterConsumer.class);
+    SingletonParameterConsumer second = injector.getInstance(SingletonParameterConsumer.class);
+    OtherSingletonParameterConsumer other =
+        injector.getInstance(OtherSingletonParameterConsumer.class);
+    ConstructorScopedDependency direct = injector.getInstance(dependencyKey);
+
+    assertSame(first.first, first.second);
+    assertSame(first.first, second.first);
+    assertNotSame(first.first, other.dependency);
+    assertNotSame(first.first, direct);
+    assertEquals(3, nextInstanceId.get());
+  }
+
+  @Test
+  public void testCustomScopeOnConstructorParameter() {
+    AtomicInteger nextInstanceId = new AtomicInteger();
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindScope(ConstructorScoped.class, Scopes.SINGLETON);
+                bind(ConstructorScopedDependency.class)
+                    .toProvider(
+                        () -> new ConstructorScopedDependency(nextInstanceId.getAndIncrement()));
+              }
+            });
+
+    CustomScopeParameterConsumer first =
+        injector.getInstance(CustomScopeParameterConsumer.class);
+    CustomScopeParameterConsumer second =
+        injector.getInstance(CustomScopeParameterConsumer.class);
+
+    assertSame(first.dependency, second.dependency);
+    assertEquals(1, nextInstanceId.get());
+  }
+
+  @Test
+  public void testConstructorParameterScopeUsedButNotBound() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () ->
+                Guice.createInjector(
+                    new AbstractModule() {
+                      @Override
+                      protected void configure() {
+                        bind(UnboundScopeParameterConsumer.class);
+                      }
+                    }));
+
+    assertContains(
+        exception.getMessage(), "No scope is bound to ScopesTest$UnboundConstructorScoped.");
+  }
+
+  @Test
+  public void testDuplicateScopesOnConstructorParameter() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () ->
+                Guice.createInjector(
+                    new AbstractModule() {
+                      @Override
+                      protected void configure() {
+                        bindScope(ConstructorScoped.class, Scopes.SINGLETON);
+                        bind(DuplicateScopeParameterConsumer.class);
+                      }
+                    }));
+
+    assertContains(
+        exception.getMessage(),
+        "More than one scope annotation was found: Singleton and"
+            + " ScopesTest$ConstructorScoped.");
+  }
+
+  @Test
   public void testNullScopedAsASingleton() {
     Injector injector =
         Guice.createInjector(
@@ -544,6 +637,77 @@ public class ScopesTest {
   @Retention(RUNTIME)
   @ScopeAnnotation
   public @interface CustomScoped {}
+
+  @Target(ElementType.PARAMETER)
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface ConstructorScoped {}
+
+  @Target(ElementType.PARAMETER)
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface UnboundConstructorScoped {}
+
+  static final class ConstructorScopedDependency {
+    final int instanceId;
+
+    ConstructorScopedDependency(int instanceId) {
+      this.instanceId = instanceId;
+    }
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class SingletonParameterConsumer {
+    final ConstructorScopedDependency first;
+    final ConstructorScopedDependency second;
+
+    @Inject
+    SingletonParameterConsumer(
+        @Named("constructor") @Singleton ConstructorScopedDependency first,
+        @Named("constructor") @Singleton ConstructorScopedDependency second) {
+      this.first = first;
+      this.second = second;
+    }
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class OtherSingletonParameterConsumer {
+    final ConstructorScopedDependency dependency;
+
+    @Inject
+    OtherSingletonParameterConsumer(
+        @Named("constructor") @Singleton ConstructorScopedDependency dependency) {
+      this.dependency = dependency;
+    }
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class CustomScopeParameterConsumer {
+    final ConstructorScopedDependency dependency;
+
+    @Inject
+    CustomScopeParameterConsumer(@ConstructorScoped ConstructorScopedDependency dependency) {
+      this.dependency = dependency;
+    }
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class UnboundScopeParameterConsumer {
+    @Inject
+    UnboundScopeParameterConsumer(
+        @UnboundConstructorScoped ConstructorScopedDependency dependency) {}
+  }
+
+  @SuppressWarnings({
+    "MisplacedScopeAnnotations",
+    "MoreThanOneScopeAnnotationOnClass",
+    "multiple-scope"
+  })
+  static final class DuplicateScopeParameterConsumer {
+    @Inject
+    DuplicateScopeParameterConsumer(
+        @Singleton @ConstructorScoped ConstructorScopedDependency dependency) {}
+  }
 
   static final Scope CUSTOM_SCOPE =
       new Scope() {
