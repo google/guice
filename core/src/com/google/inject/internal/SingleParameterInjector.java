@@ -32,8 +32,13 @@ final class SingleParameterInjector<T> {
   @LazyInit private MethodHandle handle;
 
   SingleParameterInjector(Dependency<T> dependency, BindingImpl<? extends T> binding) {
+    this(dependency, binding.getInternalFactory());
+  }
+
+  SingleParameterInjector(
+      Dependency<T> dependency, InternalFactory<? extends T> factory) {
     this.dependency = dependency;
-    this.factory = binding.getInternalFactory();
+    this.factory = factory;
   }
 
   T inject(InternalContext context) throws InternalProvisionException {
