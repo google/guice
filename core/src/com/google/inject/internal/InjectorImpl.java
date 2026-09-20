@@ -1141,11 +1141,27 @@ final class InjectorImpl implements Injector, Lookups {
       return createParameterInjector(dependency, errors);
     }
 
+    return new SingleParameterInjector<>(
+        dependency, getScopedFactory(dependency, scopeAnnotation, scopedFactories, errors));
+  }
+
+  /**
+   * Returns a factory for {@code dependency} that's scoped by {@code scopeAnnotation}, reusing an
+   * existing scoped factory from {@code scopedFactories} if one was already created for the same
+   * scope annotation and key (e.g. for another parameter or field sharing the same declaring
+   * element).
+   */
+  <T> InternalFactory<? extends T> getScopedFactory(
+      Dependency<T> dependency,
+      Class<? extends Annotation> scopeAnnotation,
+      Map<Class<? extends Annotation>, Map<Key<?>, InternalFactory<?>>> scopedFactories,
+      Errors errors)
+      throws ErrorsException {
     Map<Key<?>, InternalFactory<?>> factoriesForScope =
         scopedFactories.computeIfAbsent(scopeAnnotation, unused -> new HashMap<>());
     InternalFactory<?> scopedFactory = factoriesForScope.get(dependency.getKey());
     if (scopedFactory == null) {
-      numErrorsBefore = errors.size();
+      int numErrorsBefore = errors.size();
       Scoping scoping =
           Scoping.makeInjectable(Scoping.forAnnotation(scopeAnnotation), this, errors);
       errors.throwIfNewErrors(numErrorsBefore);
@@ -1164,7 +1180,7 @@ final class InjectorImpl implements Injector, Lookups {
     @SuppressWarnings("unchecked") // The factory was created for this dependency key.
     InternalFactory<? extends T> typedScopedFactory =
         (InternalFactory<? extends T>) scopedFactory;
-    return new SingleParameterInjector<>(dependency, typedScopedFactory);
+    return typedScopedFactory;
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(
@@ -1172,6 +1188,28 @@ final class InjectorImpl implements Injector, Lookups {
     BindingImpl<? extends T> binding =
         getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT);
     return new SingleParameterInjector<T>(dependency, binding);
+  }
+
+  /**
+   * Returns the factory for an injectable field, honoring any scope annotation on the field. The
+   * {@code scopedFactories} map is shared across the fields (and methods) of a single declaring
+   * type, so that multiple fields scoped by the same annotation and requesting the same key reuse
+   * one scoped instance, mirroring the behavior for scoped constructor parameters.
+   */
+  <T> InternalFactory<? extends T> getFieldFactory(
+      Dependency<T> dependency,
+      Annotation[] fieldAnnotations,
+      Map<Class<? extends Annotation>, Map<Key<?>, InternalFactory<?>>> scopedFactories,
+      Errors errors)
+      throws ErrorsException {
+    int numErrorsBefore = errors.size();
+    Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, fieldAnnotations);
+    errors.throwIfNewErrors(numErrorsBefore);
+    if (scopeAnnotation == null) {
+      return getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT)
+          .getInternalFactory();
+    }
+    return getScopedFactory(dependency, scopeAnnotation, scopedFactories, errors);
   }
 
   /** Cached constructor injectors for each type */

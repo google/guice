@@ -587,6 +587,93 @@ public class ScopesTest {
   }
 
   @Test
+  public void testSingletonScopeOnInjectedField() {
+    AtomicInteger nextInstanceId = new AtomicInteger();
+    Key<ConstructorScopedDependency> dependencyKey =
+        Key.get(ConstructorScopedDependency.class, named("field"));
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(dependencyKey)
+                    .toProvider(
+                        () -> new ConstructorScopedDependency(nextInstanceId.getAndIncrement()));
+              }
+            });
+
+    SingletonFieldConsumer first = injector.getInstance(SingletonFieldConsumer.class);
+    SingletonFieldConsumer second = injector.getInstance(SingletonFieldConsumer.class);
+    OtherSingletonFieldConsumer other = injector.getInstance(OtherSingletonFieldConsumer.class);
+    ConstructorScopedDependency direct = injector.getInstance(dependencyKey);
+
+    assertSame(first.first, first.second);
+    assertSame(first.first, second.first);
+    assertNotSame(first.first, other.dependency);
+    assertNotSame(first.first, direct);
+    assertEquals(3, nextInstanceId.get());
+  }
+
+  @Test
+  public void testCustomScopeOnInjectedField() {
+    AtomicInteger nextInstanceId = new AtomicInteger();
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bindScope(FieldScoped.class, Scopes.SINGLETON);
+                bind(ConstructorScopedDependency.class)
+                    .toProvider(
+                        () -> new ConstructorScopedDependency(nextInstanceId.getAndIncrement()));
+              }
+            });
+
+    CustomScopeFieldConsumer first = injector.getInstance(CustomScopeFieldConsumer.class);
+    CustomScopeFieldConsumer second = injector.getInstance(CustomScopeFieldConsumer.class);
+
+    assertSame(first.dependency, second.dependency);
+    assertEquals(1, nextInstanceId.get());
+  }
+
+  @Test
+  public void testFieldScopeUsedButNotBound() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () ->
+                Guice.createInjector(
+                    new AbstractModule() {
+                      @Override
+                      protected void configure() {
+                        bind(UnboundScopeFieldConsumer.class);
+                      }
+                    }));
+
+    assertContains(exception.getMessage(), "No scope is bound to ScopesTest$UnboundFieldScoped.");
+  }
+
+  @Test
+  public void testDuplicateScopesOnInjectedField() {
+    CreationException exception =
+        assertThrows(
+            CreationException.class,
+            () ->
+                Guice.createInjector(
+                    new AbstractModule() {
+                      @Override
+                      protected void configure() {
+                        bindScope(FieldScoped.class, Scopes.SINGLETON);
+                        bind(DuplicateScopeFieldConsumer.class);
+                      }
+                    }));
+
+    assertContains(
+        exception.getMessage(),
+        "More than one scope annotation was found: Singleton and ScopesTest$FieldScoped.");
+  }
+
+  @Test
   public void testNullScopedAsASingleton() {
     Injector injector =
         Guice.createInjector(
@@ -707,6 +794,56 @@ public class ScopesTest {
     @Inject
     DuplicateScopeParameterConsumer(
         @Singleton @ConstructorScoped ConstructorScopedDependency dependency) {}
+  }
+
+  @Target(ElementType.FIELD)
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface FieldScoped {}
+
+  @Target(ElementType.FIELD)
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface UnboundFieldScoped {}
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class SingletonFieldConsumer {
+    @Inject
+    @Named("field")
+    @Singleton
+    ConstructorScopedDependency first;
+
+    @Inject
+    @Named("field")
+    @Singleton
+    ConstructorScopedDependency second;
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class OtherSingletonFieldConsumer {
+    @Inject
+    @Named("field")
+    @Singleton
+    ConstructorScopedDependency dependency;
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class CustomScopeFieldConsumer {
+    @Inject @FieldScoped ConstructorScopedDependency dependency;
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  static final class UnboundScopeFieldConsumer {
+    @Inject @UnboundFieldScoped ConstructorScopedDependency dependency;
+  }
+
+  @SuppressWarnings({
+    "MisplacedScopeAnnotations",
+    "MoreThanOneScopeAnnotationOnClass",
+    "multiple-scope"
+  })
+  static final class DuplicateScopeFieldConsumer {
+    @Inject @Singleton @FieldScoped ConstructorScopedDependency dependency;
   }
 
   static final Scope CUSTOM_SCOPE =

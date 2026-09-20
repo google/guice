@@ -24,13 +24,14 @@ import java.lang.annotation.Target;
 
 /**
  * Annotates annotations which are used for scoping. Only one such annotation may apply to a single
- * implementation class or injectable constructor parameter. You must also annotate scope
- * annotations with {@code @Retention(RUNTIME)}. To permit constructor-parameter-local scoping, the
- * scope annotation must target {@code PARAMETER}. For example:
+ * implementation class, injectable constructor parameter, or injectable field. You must also
+ * annotate scope annotations with {@code @Retention(RUNTIME)}. To permit constructor-parameter- or
+ * field-local scoping, the scope annotation must target {@code PARAMETER} or {@code FIELD}
+ * respectively. For example:
  *
  * <pre>
  *   {@code @}Retention(RUNTIME)
- *   {@code @}Target({TYPE, METHOD, PARAMETER})
+ *   {@code @}Target({TYPE, METHOD, PARAMETER, FIELD})
  *   {@code @}ScopeAnnotation
  *   public {@code @}interface CustomScoped {}
  * </pre>
