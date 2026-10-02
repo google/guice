@@ -75,6 +75,7 @@ java_library(
     name = "add_opens_tests",
     srcs = ADD_OPENS_SRCS,
     javacopts = TEST_JAVAC_OPTS,
+    visibility = ["//visibility:private"],
     deps = [
         "//core/src/com/google/inject",
         "//third_party/java/guava/base",
