@@ -70,7 +70,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
     // unreflect should always succeed due to the setAccessible call in the constructor.
     // (T, V)->void
     var handle = InternalMethodHandles.unreflectSetter(field);
-    // Add an ignored receiver if there is no reciever parameter (aka it is a static field).
+    // Add an ignored receiver if there is no receiver parameter (aka it is a static field).
     if (Modifier.isStatic(field.getModifiers())) {
       handle = MethodHandles.dropArguments(handle, 0, Object.class);
     }
