@@ -24,11 +24,13 @@ import java.lang.annotation.Target;
 
 /**
  * Apply this to implementation classes when you want only one instance (per {@link Injector}) to be
- * reused for all injections for that binding.
+ * reused for all injections for that binding. Apply this to an injectable constructor parameter or
+ * field to reuse one instance for that dependency across all objects created by that constructor,
+ * or across all fields of that instance sharing the same key, respectively.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RUNTIME)
 @ScopeAnnotation
 public @interface Singleton {}

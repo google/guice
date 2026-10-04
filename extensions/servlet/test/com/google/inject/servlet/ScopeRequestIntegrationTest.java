@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import jakarta.servlet.ServletException;
 import junit.framework.TestCase;
 
@@ -144,6 +145,84 @@ public class ScopeRequestIntegrationTest extends TestCase {
     map.put(Key.get(SomeObject.class), null);
     callable = ServletScopes.scopeRequest(injector.getInstance(Caller.class), map);
     assertNull(callable.call());
+  }
+
+  public final void testRequestScopeOnConstructorParameter() throws Exception {
+    AtomicInteger nextInstanceId = new AtomicInteger();
+    Injector injector =
+        Guice.createInjector(
+            new ServletModule() {
+              @Override
+              protected void configureServlets() {
+                bind(ConstructorScopedDependency.class)
+                    .toProvider(
+                        () -> new ConstructorScopedDependency(nextInstanceId.getAndIncrement()));
+              }
+            });
+
+    ConstructorScopedDependency[] firstRequest =
+        ServletScopes.scopeRequest(
+                () -> {
+                  RequestParameterConsumer first =
+                      injector.getInstance(RequestParameterConsumer.class);
+                  RequestParameterConsumer second =
+                      injector.getInstance(RequestParameterConsumer.class);
+                  OtherRequestParameterConsumer other =
+                      injector.getInstance(OtherRequestParameterConsumer.class);
+                  ConstructorScopedDependency direct =
+                      injector.getInstance(ConstructorScopedDependency.class);
+                  return new ConstructorScopedDependency[] {
+                    first.first, first.second, second.first, other.dependency, direct
+                  };
+                },
+                ImmutableMap.of())
+            .call();
+
+    assertSame(firstRequest[0], firstRequest[1]);
+    assertSame(firstRequest[0], firstRequest[2]);
+    assertNotSame(firstRequest[0], firstRequest[3]);
+    assertNotSame(firstRequest[0], firstRequest[4]);
+
+    ConstructorScopedDependency secondRequest =
+        ServletScopes.scopeRequest(
+                () -> injector.getInstance(RequestParameterConsumer.class).first,
+                ImmutableMap.of())
+            .call();
+
+    assertNotSame(firstRequest[0], secondRequest);
+    assertEquals(4, nextInstanceId.get());
+  }
+
+  private static final class ConstructorScopedDependency {
+    final int instanceId;
+
+    ConstructorScopedDependency(int instanceId) {
+      this.instanceId = instanceId;
+    }
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  private static final class RequestParameterConsumer {
+    final ConstructorScopedDependency first;
+    final ConstructorScopedDependency second;
+
+    @Inject
+    RequestParameterConsumer(
+        @RequestScoped ConstructorScopedDependency first,
+        @RequestScoped ConstructorScopedDependency second) {
+      this.first = first;
+      this.second = second;
+    }
+  }
+
+  @SuppressWarnings("MisplacedScopeAnnotations")
+  private static final class OtherRequestParameterConsumer {
+    final ConstructorScopedDependency dependency;
+
+    @Inject
+    OtherRequestParameterConsumer(@RequestScoped ConstructorScopedDependency dependency) {
+      this.dependency = dependency;
+    }
   }
 
   @RequestScoped

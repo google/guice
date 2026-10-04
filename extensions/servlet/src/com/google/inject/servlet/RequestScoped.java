@@ -23,11 +23,14 @@ import java.lang.annotation.Target;
 import jakarta.inject.Scope;
 
 /**
- * Apply this to implementation classes when you want one instance per request.
+ * Apply this to implementation classes when you want one instance per request. Apply this to an
+ * injectable constructor parameter or field to reuse one instance per request for that dependency
+ * across all objects created by that constructor, or across all fields of that instance sharing
+ * the same key, respectively.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Scope
 public @interface RequestScoped {}
