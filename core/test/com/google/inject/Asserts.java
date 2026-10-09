@@ -20,10 +20,10 @@ import static com.google.common.base.StandardSystemProperty.JAVA_CLASS_PATH;
 import static com.google.common.base.StandardSystemProperty.PATH_SEPARATOR;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertSame;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -43,7 +43,7 @@ import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
 public class Asserts {
@@ -88,7 +88,7 @@ public class Asserts {
   public static void assertEqualsBothWays(Object expected, Object actual) {
     assertNotNull(expected);
     assertNotNull(actual);
-    assertEquals("expected.equals(actual)", actual, expected);
+    assertEquals("expected.equals(actual)", expected, actual);
     assertEquals("actual.equals(expected)", expected, actual);
     assertEquals("hashCode", expected.hashCode(), actual.hashCode());
   }

@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static junit.framework.Assert.assertSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
@@ -545,13 +545,7 @@ public class ScopesTest {
   @ScopeAnnotation
   public @interface CustomScoped {}
 
-  static final Scope CUSTOM_SCOPE =
-      new Scope() {
-        @Override
-        public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-          return Scopes.SINGLETON.scope(key, unscoped);
-        }
-      };
+  static final Scope CUSTOM_SCOPE = Scopes.SINGLETON;
 
   @SuppressWarnings("InjectScopeOrQualifierAnnotationRetention") // to check failure mode
   @Target({ElementType.TYPE, ElementType.METHOD})

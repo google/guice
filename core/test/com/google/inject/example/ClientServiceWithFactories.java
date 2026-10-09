@@ -16,7 +16,7 @@
 
 package com.google.inject.example;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 /** @author crazybob@google.com (Bob Lee) */
 public class ClientServiceWithFactories {
