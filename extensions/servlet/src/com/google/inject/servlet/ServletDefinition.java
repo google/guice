@@ -215,7 +215,11 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
               String contextPath = getContextPath();
               // https://github.com/google/guice/issues/1655, contextPath is occasionally null
               int contextPathLength = contextPath != null ? contextPath.length() : 0;
-              pathInfo = requestUri.substring(contextPathLength).replaceAll("[/]{2,}", "/");
+              // Derive the path info from the same normalized path that is used for matching
+              // (see service()), so dot segments the matcher collapsed cannot reach the servlet.
+              pathInfo =
+                  ServletUtils.normalizePath(requestUri.substring(contextPathLength))
+                      .replaceAll("[/]{2,}", "/");
               // See: https://github.com/google/guice/issues/372
               if (pathInfo.startsWith(servletPath)) {
                 pathInfo = pathInfo.substring(servletPathLength);
@@ -225,7 +229,8 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
                   pathInfo = null;
                 } else {
                   try {
-                    pathInfo = new URI(pathInfo).getPath();
+                    // Decoding can reintroduce dot segments (e.g. "..%2f"), so strip them again.
+                    pathInfo = ServletUtils.removeDotSegments(new URI(pathInfo).getPath());
                   } catch (URISyntaxException e) {
                     // ugh, just leave it alone then
                   }
