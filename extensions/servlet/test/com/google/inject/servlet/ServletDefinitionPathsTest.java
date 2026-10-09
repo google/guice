@@ -141,6 +141,21 @@ public class ServletDefinitionPathsTest extends TestCase {
     pathInfoWithServletStyleMatching("/index.html", null, "/*", "/index.html", "");
   }
 
+  // Data-driven test.
+  public final void testPathInfoWithDotSegments() throws IOException, ServletException {
+    // Dot segments are removed from the path used for servlet matching; they must not
+    // reappear in the path info handed to the servlet.
+    pathInfoWithServletStyleMatching(
+        "/path/thing/../thing/stuff", "/path", "/thing/*", "/stuff", "/thing");
+    pathInfoWithServletStyleMatching(
+        "/path/thing/%2e%2e/thing/stuff", "/path", "/thing/*", "/stuff", "/thing");
+    // Decoding %2f can reintroduce dot segments; those must be stripped as well.
+    pathInfoWithServletStyleMatching(
+        "/path/thing/..%2fthing/stuff", "/path", "/thing/*", "/thing/stuff", "/thing");
+    pathInfoWithServletStyleMatching(
+        "/path/thing/%2e%2e%2fthing/stuff", "/path", "/thing/*", "/thing/stuff", "/thing");
+  }
+
   private void pathInfoWithServletStyleMatching(
       final String requestUri,
       final String contextPath,
