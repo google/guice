@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
-import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.Module;
