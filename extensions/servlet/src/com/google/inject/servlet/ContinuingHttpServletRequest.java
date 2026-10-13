@@ -19,6 +19,9 @@ package com.google.inject.servlet;
 import com.google.common.collect.Maps;
 import com.google.inject.OutOfScopeException;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
@@ -36,9 +39,24 @@ class ContinuingHttpServletRequest extends HttpServletRequestWrapper {
   // We clear out the attributes as they are mutable and not thread-safe.
   private final Map<String, Object> attributes = Maps.newHashMap();
   private final Cookie[] cookies;
+  // Parameters are read on the continued thread after the original request may have been recycled
+  // by the container, so snapshot them here too.
+  private final Map<String, String[]> parameters;
 
   public ContinuingHttpServletRequest(HttpServletRequest request) {
     super(request);
+
+    Map<String, String[]> originalParameters = request.getParameterMap();
+    if (originalParameters != null) {
+      Map<String, String[]> snapshot = new LinkedHashMap<>(originalParameters.size());
+      for (Map.Entry<String, String[]> entry : originalParameters.entrySet()) {
+        String[] values = entry.getValue();
+        snapshot.put(entry.getKey(), values == null ? null : values.clone());
+      }
+      parameters = Collections.unmodifiableMap(snapshot);
+    } else {
+      parameters = Collections.emptyMap();
+    }
 
     Cookie[] originalCookies = request.getCookies();
     if (originalCookies != null) {
@@ -88,6 +106,28 @@ class ContinuingHttpServletRequest extends HttpServletRequestWrapper {
   @Override
   public Object getAttribute(String name) {
     return attributes.get(name);
+  }
+
+  @Override
+  public String getParameter(String name) {
+    String[] values = parameters.get(name);
+    return (values != null && values.length > 0) ? values[0] : null;
+  }
+
+  @Override
+  public String[] getParameterValues(String name) {
+    String[] values = parameters.get(name);
+    return (values != null) ? values.clone() : null;
+  }
+
+  @Override
+  public Enumeration<String> getParameterNames() {
+    return Collections.enumeration(parameters.keySet());
+  }
+
+  @Override
+  public Map<String, String[]> getParameterMap() {
+    return parameters;
   }
 
   @Override

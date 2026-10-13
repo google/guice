@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
@@ -69,6 +71,28 @@ public class ContinuingHttpServletRequestTest extends TestCase {
 
     // The cookies should be fixed.
     assertCookieArraysEqual(continuingRequest.getCookies(), furtherContinuingRequest.getCookies());
+  }
+
+  public void testSnapshotsParameters() {
+    Map<String, String[]> originalParameters = new HashMap<>();
+    originalParameters.put("param", new String[] {TEST_VALUE_1});
+    HttpServletRequest delegate = mock(HttpServletRequest.class);
+    when(delegate.getParameterMap()).thenReturn(originalParameters);
+
+    ContinuingHttpServletRequest continuingRequest = new ContinuingHttpServletRequest(delegate);
+
+    assertEquals(TEST_VALUE_1, continuingRequest.getParameter("param"));
+    assertEquals(TEST_VALUE_1, continuingRequest.getParameterValues("param")[0]);
+    assertEquals(TEST_VALUE_1, continuingRequest.getParameterMap().get("param")[0]);
+
+    // Mutating the original request after the snapshot must not be visible on the continued request.
+    originalParameters.put("param", new String[] {"INVALID"});
+    originalParameters.put("added", new String[] {"INVALID"});
+
+    assertEquals(TEST_VALUE_1, continuingRequest.getParameter("param"));
+    assertEquals(TEST_VALUE_1, continuingRequest.getParameterMap().get("param")[0]);
+    assertNull(continuingRequest.getParameter("added"));
+    assertFalse(continuingRequest.getParameterMap().containsKey("added"));
   }
 
   private static void assertCookieArraysEqual(Cookie[] one, Cookie[] two) {
