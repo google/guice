@@ -64,6 +64,8 @@ public final class JpaPersistModule extends PersistModule {
   protected void configurePersistence() {
     bindConstant().annotatedWith(Jpa.class).to(jpaUnit);
     bind(JpaPersistOptions.class).annotatedWith(Jpa.class).toInstance(options);
+    bind(JpaFinderProxy.class).in(Singleton.class);
+    bind(JpaPersistService.EntityManagerFactoryProvider.class).in(Singleton.class);
 
     bind(JpaPersistService.class).in(Singleton.class);
 
