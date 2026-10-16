@@ -64,6 +64,15 @@ public final class RealMultibinder<T> implements Module {
     return result;
   }
 
+  /**
+   * Implementation of newSetBinder that avoids binding the set itself.
+   */
+  public static <T> RealMultibinder<T> newRealSetBinder(Binder binder, Key<T> key, boolean bindSet) {
+    RealMultibinder<T> result = new RealMultibinder<>(binder, key, bindSet);
+    binder.install(result);
+    return result;
+  }
+
   @SuppressWarnings("unchecked") // wrapping a T in a Set safely returns a Set<T>
   static <T> TypeLiteral<Set<T>> setOf(TypeLiteral<T> elementType) {
     Type type = Types.setOf(elementType.getType());
@@ -96,10 +105,17 @@ public final class RealMultibinder<T> implements Module {
 
   private final BindingSelection<T> bindingSelection;
   private final Binder binder;
+  private final boolean bindSet;
+  private boolean permitSpanInjectors;
 
   RealMultibinder(Binder binder, Key<T> key) {
+    this(binder, key, true);
+  }
+
+  RealMultibinder(Binder binder, Key<T> key, boolean bindSet) {
     this.binder = checkNotNull(binder, "binder");
     this.bindingSelection = new BindingSelection<>(key);
+    this.bindSet = bindSet;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"}) // we use raw Key to link bindings together.
@@ -107,26 +123,32 @@ public final class RealMultibinder<T> implements Module {
   public void configure(Binder binder) {
     checkConfiguration(!bindingSelection.isInitialized(), "Multibinder was already initialized");
 
-    // Bind the setKey to the provider wrapped w/ extension support.
-    binder
-        .bind(bindingSelection.getSetKey())
-        .toProvider(new RealMultibinderProvider<>(bindingSelection));
-    binder.bind(bindingSelection.getSetOfExtendsKey()).to(bindingSelection.getSetKey());
+    if (bindSet) {
+      // Bind the setKey to the provider wrapped w/ extension support.
+      binder
+          .bind(bindingSelection.getSetKey())
+          .toProvider(new RealMultibinderProvider<>(bindingSelection));
+      binder.bind(bindingSelection.getSetOfExtendsKey()).to(bindingSelection.getSetKey());
 
-    binder
-        .bind(bindingSelection.getCollectionOfProvidersKey())
-        .toProvider(new RealMultibinderCollectionOfProvidersProvider<T>(bindingSelection));
+      binder
+          .bind(bindingSelection.getCollectionOfProvidersKey())
+          .toProvider(new RealMultibinderCollectionOfProvidersProvider<T>(bindingSelection));
 
-    // The collection this exposes is internally an ImmutableList, so it's OK to massage
-    // the guice Provider to jakarta Provider in the value (since the guice Provider implements
-    // jakarta Provider).
-    binder
-        .bind(bindingSelection.getCollectionOfJakartaProvidersKey())
-        .to((Key) bindingSelection.getCollectionOfProvidersKey());
+      // The collection this exposes is internally an ImmutableList, so it's OK to massage
+      // the guice Provider to jakarta Provider in the value (since the guice Provider implements
+      // jakarta Provider).
+      binder
+          .bind(bindingSelection.getCollectionOfJakartaProvidersKey())
+          .to((Key) bindingSelection.getCollectionOfProvidersKey());
+    }
   }
 
   public void permitDuplicates() {
     binder.install(new PermitDuplicatesModule(bindingSelection.getPermitDuplicatesKey()));
+  }
+
+  public void permitSpanInjectors() {
+    this.permitSpanInjectors = true;
   }
 
   /** Adds a new entry to the set and returns the key for it. */
@@ -138,7 +160,12 @@ public final class RealMultibinder<T> implements Module {
   }
 
   public LinkedBindingBuilder<T> addBinding() {
-    return binder.bind(getKeyForNewItem());
+    Key<T> key = getKeyForNewItem();
+    LinkedBindingBuilder<T> builder = binder.bind(key);
+    if (permitSpanInjectors && binder instanceof com.google.inject.PrivateBinder) {
+      ((com.google.inject.PrivateBinder) binder).expose(key);
+    }
+    return builder;
   }
 
   // These methods are used by RealMapBinder
