@@ -102,7 +102,11 @@ public enum UriPatternType {
       if (patternKind == Kind.PREFIX) {
         return uri.endsWith(literal);
       } else if (patternKind == Kind.SUFFIX) {
-        return uri.startsWith(literal);
+        // Per the servlet spec, a path mapping such as "/foo/*" also matches "/foo" itself.
+        return uri.startsWith(literal)
+            || (literal.endsWith("/")
+                && uri.length() == literal.length() - 1
+                && literal.startsWith(uri));
       }
 
       //else we need a complete match
