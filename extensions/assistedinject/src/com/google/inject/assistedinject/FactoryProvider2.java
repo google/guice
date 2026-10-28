@@ -271,9 +271,9 @@ final class FactoryProvider2<F>
           continue;
         }
 
-        // Skip default methods that java8 may have created.
-        if (isDefault(method) && (method.isBridge() || method.isSynthetic())) {
-          // Even synthetic default methods need the return type validation...
+        // Skip default methods that java8 may have created (or the user specifies to skip).
+        if (isSkippableDefaultMethod(factoryRawType, method)) {
+          // Even default methods need the return type validation...
           // unavoidable consequence of javac8. :-(
           validateFactoryReturnType(errors, method.getReturnType(), factoryRawType);
           defaultMethods.put(method.getName(), method);
@@ -388,7 +388,7 @@ final class FactoryProvider2<F>
           warnedAboutUserLookups = true;
           logger.log(
               Level.WARNING,
-              "AssistedInject factory {0} is non-public and has javac-generated default methods. "
+              "AssistedInject factory {0} is non-public and has default methods."
                   + " Please pass a `MethodHandles.lookup()` with"
                   + " FactoryModuleBuilder.withLookups when using this factory so that Guice can"
                   + " properly call the default methods. Guice will try to workaround this, but "
@@ -436,6 +436,10 @@ final class FactoryProvider2<F>
                     + " public.";
         if (handle != null) {
           methodHandleBuilder.put(defaultMethod, handle);
+        } else if (isUserSpecifiedDefaultMethod(factoryRawType, defaultMethod)) {
+          // Don't try to find matching signature for user-specified default methods
+          errors.addMessage(failureMsg.get());
+          throw new IllegalStateException("Can't find method compatible with: " + defaultMethod);
         } else if (!allowMethodHandleWorkaround) {
           errors.addMessage(failureMsg.get());
         } else {
@@ -452,8 +456,7 @@ final class FactoryProvider2<F>
             }
           }
           // We always expect to find at least one match, because we only deal with javac-generated
-          // default methods. If we ever allow user-specified default methods, this will need to
-          // change.
+          // default methods here.
           if (!foundMatch) {
             throw new IllegalStateException("Can't find method compatible with: " + defaultMethod);
           }
@@ -471,6 +474,19 @@ final class FactoryProvider2<F>
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
+  }
+
+  private static boolean isSkippableDefaultMethod(Class<?> factoryRawType, Method method) {
+    final boolean synthetic = method.isBridge() || method.isSynthetic();
+    final boolean annotated = method.isAnnotationPresent(PassthroughDefaultMethods.class)
+        || factoryRawType.isAnnotationPresent(PassthroughDefaultMethods.class);
+    return isDefault(method) && (synthetic || annotated);
+  }
+
+  private static boolean isUserSpecifiedDefaultMethod(Class<?> factoryRawType, Method defaultMethod) {
+    return defaultMethod.isAnnotationPresent(PassthroughDefaultMethods.class)
+        || (factoryRawType.isAnnotationPresent(PassthroughDefaultMethods.class)
+        && !defaultMethod.isBridge() && !defaultMethod.isSynthetic());
   }
 
   static boolean isDefault(Method method) {
