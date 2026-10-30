@@ -1,12 +1,12 @@
 module(name = "guice")
 
-bazel_dep(name = "rules_java", version = "9.7.0")
-bazel_dep(name = "rules_jvm_external", version = "7.0")
+bazel_dep(name = "rules_java", version = "9.9.0")
+bazel_dep(name = "rules_jvm_external", version = "7.2")
 bazel_dep(name = "google_bazel_common")
 
 git_override(
     module_name = "google_bazel_common",
-    commit = "03804d4c0d98a46c3965b748533b5a23b395d925",
+    commit = "da4cd172c844869809c608b4aae18500773bffa8",
     remote = "https://github.com/google/bazel-common",
 )
 

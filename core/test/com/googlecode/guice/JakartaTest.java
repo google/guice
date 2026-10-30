@@ -500,20 +500,20 @@ public class JakartaTest extends TestCase {
   }
 
   static class L {
-    @SuppressWarnings("InjectJakartaInjectOnFinalField")
+    @SuppressWarnings("JavaxInjectOnFinalField")
     @Inject
     final B b = null;
   }
 
   abstract static class AbstractM {
-    @SuppressWarnings("JakartaInjectOnAbstractMethod")
+    @SuppressWarnings("JavaxInjectOnAbstractMethod")
     @Inject
     abstract void setB(B b);
   }
 
   static class M extends AbstractM {
     @Override
-    @SuppressWarnings("OverridesJakartaInjectableMethod")
+    @SuppressWarnings("OverridesJavaxInjectableMethod")
     void setB(B b) {}
   }
 

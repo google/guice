@@ -1,0 +1,12 @@
+build --java_language_version=11 --tool_java_language_version=25
+build --java_runtime_version=25 --tool_java_runtime_version=25
+build --@rules_java//toolchains:incompatible_language_version_bootclasspath
+build --javacopt="-Xlint:-options"
+
+build --experimental_one_version_enforcement=error
+# TODO(cpovirk): Remove after upgrading to a version of rules_java without an
+# error_prone_annotations dep (after cl/998596263) and resolving the hamcrest
+# conflict with Runner_deploy.jar.
+build --noone_version_enforcement_on_java_tests
+
+test --test_env=TZ=UTC

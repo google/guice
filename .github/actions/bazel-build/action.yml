@@ -14,13 +14,12 @@ runs:
     - name: 'Cache Bazel files'
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
       with:
-        path: ~/.cache/bazel
-        key: ${{ runner.os }}-bazel-build-${{ hashFiles('**/WORKSPACE') }}
+        path: ~/.cache/bazel/*/cache
+        key: ${{ runner.os }}-bazel-build-${{ hashFiles('MODULE.bazel') }}
         restore-keys: |
           ${{ runner.os }}-bazel-build-
     - name: 'Bazel build'
-      # Cross compile for Java 11, see http://openjdk.java.net/jeps/247
-      run: bazel build --javacopt="--release 11" //...
+      run: bazel build --lockfile_mode=error //...
       shell: bash
     - name: 'Install local snapshot'
       run: ./util/install-local-snapshot.sh

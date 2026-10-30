@@ -12,10 +12,10 @@ runs:
     - name: 'Cache bazel files'
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
       with:
-        path: ~/.cache/bazel
-        key: ${{ runner.os }}-java-${{matrix.java}}-bazel-test-${{ hashFiles('**/WORKSPACE') }}
+        path: ~/.cache/bazel/*/cache
+        key: ${{ runner.os }}-java-${{matrix.java}}-bazel-test-${{ hashFiles('MODULE.bazel') }}
         restore-keys: |
           ${{ runner.os }}-java-${{matrix.java}}-bazel-test-
     - name: Bazel test
-      run: bazel test --javacopt="--release 11" //... --test_output=errors
+      run: bazel test --java_runtime_version=${{ matrix.java }} --lockfile_mode=error --test_output=errors //...
       shell: bash
