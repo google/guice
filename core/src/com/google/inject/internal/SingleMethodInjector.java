@@ -152,7 +152,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
                 LinkageContext linkageContext, MethodHandle[] parameterHandles) {
               // Invoke the handle with the parameters.
               // The signature is now:
-              // (InternalContext, Object reciever)-R
+              // (InternalContext, Object receiver)-R
               var handle =
                   InternalMethodHandles.catchErrorInMethodAndRethrowWithSource(
                       fastMethodHandle, injectionPoint);
