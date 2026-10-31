@@ -32,7 +32,7 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 /** @author jessewilson@google.com (Jesse Wilson) */
