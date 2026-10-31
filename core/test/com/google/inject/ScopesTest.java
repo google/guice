@@ -333,6 +333,30 @@ public class ScopesTest {
     Asserts.assertNotSerializable(Scopes.SINGLETON);
   }
 
+  /**
+   * Scoped providers must not be non-static inner classes of {@link Scopes#SINGLETON}'s
+   * implementation. An implicit outer reference can pin the scope if a provider is retained from a
+   * long-lived thread-local (see github.com/google/guice/issues/1929).
+   */
+  @Test
+  public void testSingletonScopedProviderDoesNotRetainOuterScope() {
+    Provider<Object> unscoped = Providers.of(new Object());
+    Provider<Object> scoped = Scopes.SINGLETON.scope(Key.get(Object.class), unscoped);
+
+    assertSame(scoped.get(), scoped.get());
+
+    Class<?> scopedClass = scoped.getClass();
+    assertTrue(
+        "Singleton scoped provider should be a static nested class (no outer this)",
+        java.lang.reflect.Modifier.isStatic(scopedClass.getModifiers())
+            || scopedClass.getEnclosingClass() == null);
+    for (java.lang.reflect.Field field : scopedClass.getDeclaredFields()) {
+      assertFalse(
+          "Singleton scoped provider must not capture outer this: " + field.getName(),
+          field.getName().startsWith("this$"));
+    }
+  }
+
   @Test
   public void testNoScopeIsNotSerializable() throws IOException {
     Asserts.assertNotSerializable(Scopes.NO_SCOPE);
