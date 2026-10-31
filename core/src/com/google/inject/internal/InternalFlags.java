@@ -69,13 +69,6 @@ public final class InternalFlags {
      */
     OFF,
 
-    /**
-     * Define fast/enhanced types anonymously as hidden nest-mates, never creates class loaders.
-     * This is faster than regular class loading and the resulting classes are easier to unload.
-     *
-     * <p>Note: with this option you cannot look up fast/enhanced types by name or mock/spy them.
-     */
-    ANONYMOUS,
 
     /**
      * Attempt to define fast/enhanced types in the same class loader as their original type.
