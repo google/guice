@@ -19,13 +19,15 @@ package com.google.inject.internal;
 import static com.google.inject.internal.InternalMethodHandles.castReturnTo;
 import static java.lang.invoke.MethodType.methodType;
 
-import com.google.inject.internal.InjectorImpl.JitLimitation;
+import com.google.inject.Key;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 /** Sets an injectable field. */
 final class SingleFieldInjector implements SingleMemberInjector {
@@ -34,7 +36,11 @@ final class SingleFieldInjector implements SingleMemberInjector {
   final Dependency<?> dependency;
   final InternalFactory<?> factory;
 
-  public SingleFieldInjector(InjectorImpl injector, InjectionPoint injectionPoint, Errors errors)
+  public SingleFieldInjector(
+      InjectorImpl injector,
+      InjectionPoint injectionPoint,
+      Map<Class<? extends Annotation>, Map<Key<?>, InternalFactory<?>>> scopedFactories,
+      Errors errors)
       throws ErrorsException {
     this.injectionPoint = injectionPoint;
     this.field = (Field) injectionPoint.getMember();
@@ -43,9 +49,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
     // Ewwwww...
     field.setAccessible(true);
     factory =
-        injector
-            .getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT)
-            .getInternalFactory();
+        injector.getFieldFactory(dependency, field.getAnnotations(), scopedFactories, errors);
   }
 
   @Override

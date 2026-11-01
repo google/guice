@@ -23,12 +23,16 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.ConfigurationException;
+import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeListener;
 import com.google.inject.spi.TypeListenerBinding;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -120,6 +124,10 @@ final class MembersInjectorStore {
   ImmutableList<SingleMemberInjector> getInjectors(
       Set<InjectionPoint> injectionPoints, Errors errors) {
     List<SingleMemberInjector> injectors = Lists.newArrayList();
+    // Shared across all fields of the type being processed, so that multiple scoped fields
+    // requesting the same key and scope annotation reuse a single scoped instance.
+    Map<Class<? extends Annotation>, Map<Key<?>, InternalFactory<?>>> scopedFieldFactories =
+        new HashMap<>();
     for (InjectionPoint injectionPoint : injectionPoints) {
       try {
         Errors errorsForMember =
@@ -128,7 +136,8 @@ final class MembersInjectorStore {
                 : errors.withSource(injectionPoint);
         SingleMemberInjector injector =
             injectionPoint.getMember() instanceof Field
-                ? new SingleFieldInjector(this.injector, injectionPoint, errorsForMember)
+                ? new SingleFieldInjector(
+                    this.injector, injectionPoint, scopedFieldFactories, errorsForMember)
                 : new SingleMethodInjector(this.injector, injectionPoint, errorsForMember);
         injectors.add(injector);
       } catch (ErrorsException ignoredForNow) {

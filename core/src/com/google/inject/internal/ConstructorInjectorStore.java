@@ -71,7 +71,7 @@ final class ConstructorInjectorStore {
     int numErrorsBefore = errors.size();
 
     SingleParameterInjector<?>[] constructorParameterInjectors =
-        injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
+        injector.getConstructorParameterInjectors(injectionPoint, errors);
 
     @SuppressWarnings("unchecked") // the injector type agrees with the injection point type
     MembersInjectorImpl<T> membersInjector =
