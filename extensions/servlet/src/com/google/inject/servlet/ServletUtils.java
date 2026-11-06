@@ -64,7 +64,10 @@ final class ServletUtils {
     return null;
   }
 
-  /** Normalizes a path by unescaping all safe, percent encoded characters. */
+  /**
+   * Normalizes a path by unescaping all safe, percent encoded characters, resolving dot-segments
+   * and removing path parameters (e.g. {@code ;jsessionid=...}) from each path segment.
+   */
   static String normalizePath(String path) {
     StringBuilder sb = new StringBuilder(path.length());
     int queryStart = path.indexOf('?');
@@ -77,12 +80,23 @@ final class ServletUtils {
     // 1. decode and normalize safe percent escaped characters.  e.g. %70 -> 'p'
     // 2. decode and interpret dangerous character sequences. e.g. /%2E/ -> '/./' -> '/'
     // 3. preserve dangerous encoded characters. e.g. '/%2F/' -> '///' -> '/%2F'
+    // 4. strip path parameters. e.g. '/foo;a=b/bar' -> '/foo/bar'
     List<String> segments = new ArrayList<>();
     for (String segment : SLASH_SPLITTER.split(path)) {
       // This decodes all non-special characters from the path segment.  so if someone passes
       // /%2E/foo we will normalize it to /./foo and then /foo
-      String normalized =
-          UrlEscapers.urlPathSegmentEscaper().escape(lenientDecode(segment, UTF_8, false));
+      String decoded = lenientDecode(segment, UTF_8, false);
+      // Strip path parameters (";param=value"). Per the Servlet spec (section 3.5) these are not
+      // part of the path used for request mapping, and servlet containers remove them before
+      // mapping. If we kept them, a filter bound to "/foo/*" would not match "/foo;a=b/bar", but
+      // the container would still serve "/foo/bar", bypassing the filter. This is done after
+      // decoding so that the encoded form ("%3B") is stripped as well, and before dot-segment
+      // handling so that "..;a=b" is treated as "..", matching container behavior.
+      int paramStart = decoded.indexOf(';');
+      if (paramStart != -1) {
+        decoded = decoded.substring(0, paramStart);
+      }
+      String normalized = UrlEscapers.urlPathSegmentEscaper().escape(decoded);
       if (".".equals(normalized)) {
         // skip
       } else if ("..".equals(normalized)) {
