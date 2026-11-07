@@ -100,6 +100,26 @@ final class ServletUtils {
     return sb.toString();
   }
 
+  /**
+   * Removes "." and ".." segments from an already percent-decoded path, using the same dot segment
+   * handling as {@link #normalizePath}.
+   */
+  static String removeDotSegments(String path) {
+    List<String> segments = new ArrayList<>();
+    for (String segment : SLASH_SPLITTER.split(path)) {
+      if (".".equals(segment)) {
+        // skip
+      } else if ("..".equals(segment)) {
+        if (segments.size() > 1) {
+          segments.remove(segments.size() - 1);
+        }
+      } else {
+        segments.add(segment);
+      }
+    }
+    return SLASH_JOINER.join(segments);
+  }
+
 
   /**
    * Percent-decodes a US-ASCII string into a Unicode string. The specified encoding is used to
