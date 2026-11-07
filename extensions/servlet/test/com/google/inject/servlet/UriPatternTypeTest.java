@@ -30,6 +30,15 @@ public class UriPatternTypeTest extends TestCase {
     assertFalse(pattern.matches("/path/file.bar?val=1"));
     assertFalse(pattern.matches("/asdf"));
     assertFalse(pattern.matches("/asdf?val=1"));
+    assertTrue(pattern.matches("/foo"));
+    assertTrue(pattern.matches("/foo?val=1"));
+    assertFalse(pattern.matches("/foobar"));
+    assertFalse(pattern.matches("/fo"));
+
+    pattern = UriPatternType.get(UriPatternType.SERVLET, "/foo*");
+    assertTrue(pattern.matches("/foo"));
+    assertTrue(pattern.matches("/foobar"));
+    assertFalse(pattern.matches("/fo"));
 
     pattern = UriPatternType.get(UriPatternType.SERVLET, "*.bar");
     assertFalse(pattern.matches("/foo/asdf"));
