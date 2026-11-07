@@ -16,6 +16,10 @@ java_library(
     name = "request-scoped-annotation",
     srcs = ["RequestScoped.java"],
     javacopts = JAVAC_OPTS,
+    visibility = [
+        "//:src",
+        "//java/com/google/wireless/android/gantry/corp/operations/monitoring:__pkg__",
+    ],
     deps = [
         "//third_party/java/jakarta_inject",
     ],
