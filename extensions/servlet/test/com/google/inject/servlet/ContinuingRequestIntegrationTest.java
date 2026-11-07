@@ -135,7 +135,8 @@ public class ContinuingRequestIntegrationTest extends TestCase {
     when(request.getCookies()).thenReturn(new Cookie[0]);
 
     FilterChain filterChain = mock(FilterChain.class);
-    when(request.getParameter(PARAM_NAME)).thenReturn(PARAM_VALUE);
+    when(request.getParameterMap())
+        .thenReturn(ImmutableMap.of(PARAM_NAME, new String[] {PARAM_VALUE}));
 
     guiceFilter.init(filterConfig);
     guiceFilter.doFilter(request, response, filterChain);
