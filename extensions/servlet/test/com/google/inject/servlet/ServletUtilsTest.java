@@ -30,6 +30,14 @@ public class ServletUtilsTest extends TestCase {
     assertEquals("/foo.html", getContextRelativePath("", "/%66oo.html"));
   }
 
+  public void testGetContextRelativePath_stripsPathParameters() {
+    assertEquals("/admin/secret", getContextRelativePath("", "/admin;x/secret"));
+    assertEquals("/admin/secret", getContextRelativePath("", "/admin/secret;jsessionid=abc"));
+    assertEquals("/admin/secret", getContextRelativePath("", "/public/..;/admin/secret"));
+    assertEquals("/admin/secret", getContextRelativePath("", "/public/%2E%2E;x/admin/secret"));
+    assertEquals("/foo?a=b;c", getContextRelativePath("", "/foo;p?a=b;c"));
+  }
+
   public void testGetContextRelativePath_preserveQuery() {
     assertEquals("/foo?q=f", getContextRelativePath("", "/foo?q=f"));
     assertEquals("/foo?q=%20+%20", getContextRelativePath("", "/foo?q=%20+%20"));

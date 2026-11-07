@@ -79,6 +79,12 @@ final class ServletUtils {
     // 3. preserve dangerous encoded characters. e.g. '/%2F/' -> '///' -> '/%2F'
     List<String> segments = new ArrayList<>();
     for (String segment : SLASH_SPLITTER.split(path)) {
+      // Drop path parameters (e.g. /admin;x/ or /..;/) the same way servlet containers do before
+      // mapping, otherwise the path we match on differs from the one the container dispatches.
+      int paramStart = segment.indexOf(';');
+      if (paramStart != -1) {
+        segment = segment.substring(0, paramStart);
+      }
       // This decodes all non-special characters from the path segment.  so if someone passes
       // /%2E/foo we will normalize it to /./foo and then /foo
       String normalized =
