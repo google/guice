@@ -138,6 +138,87 @@ public class Multibinder<T> {
   }
 
   /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(Binder binder, TypeLiteral<T> type) {
+    return newSetContributor(binder, Key.get(type));
+  }
+
+  /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(Binder binder, Class<T> type) {
+    return newSetContributor(binder, Key.get(type));
+  }
+
+  /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(
+      Binder binder, TypeLiteral<T> type, Annotation annotation) {
+    return newSetContributor(binder, Key.get(type, annotation));
+  }
+
+  /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(
+      Binder binder, Class<T> type, Annotation annotation) {
+    return newSetContributor(binder, Key.get(type, annotation));
+  }
+
+  /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(
+      Binder binder, TypeLiteral<T> type, Class<? extends Annotation> annotationType) {
+    return newSetContributor(binder, Key.get(type, annotationType));
+  }
+
+  /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(
+      Binder binder, Class<T> type, Class<? extends Annotation> annotationType) {
+    return newSetContributor(binder, Key.get(type, annotationType));
+  }
+
+  /**
+   * Returns a new multibinder that contributes to an existing set binding (typically in a parent
+   * injector) without creating a new set binding itself. This is necessary when contributing to a
+   * Multibinder from a PrivateModule where the parent injector already has the Multibinder.
+   *
+   * @since 7.0
+   */
+  public static <T> Multibinder<T> newSetContributor(Binder binder, Key<T> key) {
+    return new Multibinder<T>(newRealSetBinder(binder, key, false));
+  }
+
+  /**
    * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
    * itself bound with {@code annotationType}.
    */
@@ -162,6 +243,18 @@ public class Multibinder<T> {
    */
   public Multibinder<T> permitDuplicates() {
     delegate.permitDuplicates();
+    return this;
+  }
+
+  /**
+   * Configures the multibinder to automatically expose the binding for each added element. This is
+   * useful when contributing to a parent injector's Multibinder from a PrivateModule.
+   *
+   * @return this multibinder
+   * @since 7.0
+   */
+  public Multibinder<T> permitSpanInjectors() {
+    delegate.permitSpanInjectors();
     return this;
   }
 
