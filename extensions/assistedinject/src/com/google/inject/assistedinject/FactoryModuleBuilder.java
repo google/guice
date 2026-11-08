@@ -305,8 +305,9 @@ public final class FactoryModuleBuilder {
    * Typically called via {@code withLookups(MethodHandles.lookup())}. Sets the MethodHandles.Lookup
    * that the factory implementation will use to call default methods on the factory interface.
    * While this is not always required, it is always OK to set it. It is required if the factory
-   * passed to {@link #build} is non-public and javac generated default methods while compiling it
-   * (which javac can sometimes do if the factory uses generic types).
+   * passed to {@link #build} is non-public and has default methods, either javac generated default
+   * methods (which javac can sometimes emit if the factory uses generic types), or user-specified
+   * default methods marked by {@link PassthroughDefaultMethods}.
    *
    * <p>Guice will try to work properly even if this method is not called (or called with a lookups
    * that doesn't have access to the factory), but doing so requires reflection into the JDK, which
