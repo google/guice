@@ -139,6 +139,20 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     // see https://github.com/google/guice/issues/1655
     pathInfoWithServletStyleMatching("/index.html", null, "/*", "/index.html", "");
+
+    // Encoded slashes must not produce traversal sequences once decoded.
+    pathInfoWithServletStyleMatching(
+        "/path/static/..%2F..%2Fsecret.txt", "/path", "/static/*", "/secret.txt", "/static");
+    pathInfoWithServletStyleMatching(
+        "/path/static/a/..%2F..%2F..%2Fsecret.txt", "/path", "/static/*", "/secret.txt", "/static");
+    pathInfoWithServletStyleMatching(
+        "/path/static/a%2F..%2Fb.txt", "/path", "/static/*", "/b.txt", "/static");
+    pathInfoWithServletStyleMatching(
+        "/path/static/%2E%2E%2Fsecret.txt", "/path", "/static/*", "/secret.txt", "/static");
+    pathInfoWithServletStyleMatching(
+        "/path/static/a%2F%2Fb.txt", "/path", "/static/*", "/a/b.txt", "/static");
+    pathInfoWithServletStyleMatching(
+        "/path/..%2F..%2Fsecret.txt", "/path", "/*", "/secret.txt", "");
   }
 
   private void pathInfoWithServletStyleMatching(
@@ -246,6 +260,11 @@ public class ServletDefinitionPathsTest extends TestCase {
         "/path", "/(.)*", "/a file with spaces in name.html", "");
     pathInfoWithRegexMatching(
         "/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/(.)*", "/Tamás nem más.html", "");
+
+    // Encoded slashes must not produce traversal sequences once decoded.
+    pathInfoWithRegexMatching(
+        "/path/static/..%2F..%2Fsecret.txt", "/path", "/static/(.)*", "/secret.txt", "/static");
+    pathInfoWithRegexMatching("/path/..%2F..%2Fsecret.txt", "/path", "/(.)*", "/secret.txt", "");
   }
 
   public final void pathInfoWithRegexMatching(
