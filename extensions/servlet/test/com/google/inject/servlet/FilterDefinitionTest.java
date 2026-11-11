@@ -256,6 +256,43 @@ public class FilterDefinitionTest extends TestCase {
     assertNull(filter);
   }
 
+  public void testGetFilterIfMatching_pathParameters() throws ServletException {
+    Injector injector = mock(Injector.class);
+    Binding<Filter> binding = mock(Binding.class);
+    MockFilter mockFilter = new MockFilter();
+    when(injector.getBinding(Key.get(Filter.class))).thenReturn(binding);
+    when(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) any())).thenReturn(true);
+    when(injector.getInstance(Key.get(Filter.class))).thenReturn(mockFilter);
+
+    FilterDefinition filterDef =
+        new FilterDefinition(
+            Key.get(Filter.class),
+            UriPatternType.get(UriPatternType.SERVLET, "/admin/*"),
+            new HashMap<String, String>(),
+            null);
+    filterDef.init(mock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
+
+    // Servlet containers strip path parameters before mapping, so the filter must match too.
+    for (String uri :
+        new String[] {
+          "/admin/secret",
+          "/admin;x=y/secret",
+          "/admin;/secret",
+          "/admin%3Bx=y/secret",
+          "/foo/..;x=y/admin/secret",
+        }) {
+      HttpServletRequest request = mock(HttpServletRequest.class);
+      when(request.getContextPath()).thenReturn("");
+      when(request.getRequestURI()).thenReturn(uri);
+      assertSame(uri, mockFilter, filterDef.getFilterIfMatching(request));
+    }
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getContextPath()).thenReturn("");
+    when(request.getRequestURI()).thenReturn("/adminx;x=y/secret");
+    assertNull(filterDef.getFilterIfMatching(request));
+  }
+
   private static class MockFilter implements Filter {
     private boolean init;
     private boolean destroy;
