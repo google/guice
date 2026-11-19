@@ -13,6 +13,6 @@ genrule(
     outs = ["jpa-manifest.jar"],
     cmd = "$(JAVABASE)/bin/jar cvf $@ -C " +
           "extensions/persist/test/com/google/inject/persist/config META-INF",
-    toolchains = ["@bazel_tools//tools/jdk:current_java_runtime"],
-    tools = ["@bazel_tools//tools/jdk:current_java_runtime"],
+    toolchains = ["@bazel_tools//tools/jdk:current_host_java_runtime"],
+    tools = ["@bazel_tools//tools/jdk:current_host_java_runtime"],
 )
