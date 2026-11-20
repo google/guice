@@ -229,6 +229,10 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
                   } catch (URISyntaxException e) {
                     // ugh, just leave it alone then
                   }
+                  // Decoding may have turned encoded separators into real ones (e.g. "..%2F" into
+                  // "../"), which routing did not resolve, so resolve them here. Otherwise the
+                  // servlet could receive a path info that escapes the matched path.
+                  pathInfo = ServletUtils.removeDotSegments(pathInfo);
                 }
               } else {
                 pathInfo = null; // we know nothing additional about the URI.

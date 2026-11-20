@@ -64,7 +64,10 @@ final class ServletUtils {
     return null;
   }
 
-  /** Normalizes a path by unescaping all safe, percent encoded characters. */
+  /**
+   * Normalizes a path by unescaping all safe, percent encoded characters, resolving dot-segments
+   * and removing path parameters (e.g. {@code ;jsessionid=...}) from each path segment.
+   */
   static String normalizePath(String path) {
     StringBuilder sb = new StringBuilder(path.length());
     int queryStart = path.indexOf('?');
@@ -77,12 +80,23 @@ final class ServletUtils {
     // 1. decode and normalize safe percent escaped characters.  e.g. %70 -> 'p'
     // 2. decode and interpret dangerous character sequences. e.g. /%2E/ -> '/./' -> '/'
     // 3. preserve dangerous encoded characters. e.g. '/%2F/' -> '///' -> '/%2F'
+    // 4. strip path parameters. e.g. '/foo;a=b/bar' -> '/foo/bar'
     List<String> segments = new ArrayList<>();
     for (String segment : SLASH_SPLITTER.split(path)) {
       // This decodes all non-special characters from the path segment.  so if someone passes
       // /%2E/foo we will normalize it to /./foo and then /foo
-      String normalized =
-          UrlEscapers.urlPathSegmentEscaper().escape(lenientDecode(segment, UTF_8, false));
+      String decoded = lenientDecode(segment, UTF_8, false);
+      // Strip path parameters (";param=value"). Per the Servlet spec (section 3.5) these are not
+      // part of the path used for request mapping, and servlet containers remove them before
+      // mapping. If we kept them, a filter bound to "/foo/*" would not match "/foo;a=b/bar", but
+      // the container would still serve "/foo/bar", bypassing the filter. This is done after
+      // decoding so that the encoded form ("%3B") is stripped as well, and before dot-segment
+      // handling so that "..;a=b" is treated as "..", matching container behavior.
+      int paramStart = decoded.indexOf(';');
+      if (paramStart != -1) {
+        decoded = decoded.substring(0, paramStart);
+      }
+      String normalized = UrlEscapers.urlPathSegmentEscaper().escape(decoded);
       if (".".equals(normalized)) {
         // skip
       } else if ("..".equals(normalized)) {
@@ -96,6 +110,52 @@ final class ServletUtils {
     SLASH_JOINER.appendTo(sb, segments);
     if (query != null) {
       sb.append(query);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Removes {@code "."} and {@code ".."} segments from an already percent-decoded path, and
+   * collapses repeated {@code '/'} separators. {@code ".."} segments that would climb above the
+   * start of the path are dropped.
+   *
+   * <p>Percent-decoding a path can turn encoded separators into real ones (e.g. {@code "..%2F"}
+   * becomes {@code "../"}), producing traversal sequences that were not resolved when the request
+   * was routed by {@link #normalizePath}, which deliberately preserves {@code %2F}. This must be
+   * applied to any decoded path that is handed to user code.
+   */
+  static String removeDotSegments(String path) {
+    if (path == null || path.isEmpty()) {
+      return path;
+    }
+    List<String> segments = new ArrayList<>();
+    // Whether the result should end with '/', e.g. for "/foo/", "/foo/." or "/foo/bar/..". A
+    // trailing "." or ".." names a directory, so (as in RFC 3986 section 5.2.4) the result keeps a
+    // trailing '/': "/foo/." -> "/foo/" and "/foo/bar/.." -> "/foo/".
+    boolean trailingSlash = false;
+    for (String segment : SLASH_SPLITTER.split(path)) {
+      if (segment.isEmpty() || ".".equals(segment)) {
+        trailingSlash = true;
+      } else if ("..".equals(segment)) {
+        // A ".." with nothing left to remove is dropped rather than rejected, as in RFC 3986
+        // section 5.2.4 and normalizePath(). The request has already been routed at this point, and
+        // throwing from getPathInfo() would surface as an unexpected error in servlet code.
+        if (!segments.isEmpty()) {
+          segments.remove(segments.size() - 1);
+        }
+        trailingSlash = true;
+      } else {
+        segments.add(segment);
+        trailingSlash = false;
+      }
+    }
+    StringBuilder sb = new StringBuilder(path.length());
+    if (path.charAt(0) == '/') {
+      sb.append('/');
+    }
+    SLASH_JOINER.appendTo(sb, segments);
+    if (trailingSlash && !segments.isEmpty()) {
+      sb.append('/');
     }
     return sb.toString();
   }
